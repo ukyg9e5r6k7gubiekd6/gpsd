@@ -326,6 +326,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     gps_clear_fix(&session->newdata);
     gps_clear_fix(&session->oldfix);
     session->gpsdata.set = 0;
+    gps_clear_att(&session->gpsdata.attitude);
     gps_clear_dop(&session->gpsdata.dop);
     session->gpsdata.epe = NAN;
     session->mag_var = NAN;
@@ -420,6 +421,8 @@ void gpsd_clear(struct gps_device_t *session)
     lexer_init(&session->lexer);
     session->lexer.errout = session->context->errout;
     // session->gpsdata.online = 0;
+    gps_clear_att(&session->gpsdata.attitude);
+    gps_clear_dop(&session->gpsdata.dop);
     gps_clear_fix(&session->gpsdata.fix);
     session->gpsdata.status = STATUS_NO_FIX;
     session->gpsdata.separation = NAN;
@@ -1442,8 +1445,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 #endif /* NOFLOATS_ENABLE */
 
 	/* copy/merge device data into staging buffers */
-	if ((session->gpsdata.set & CLEAR_IS) != 0)
+	if ((session->gpsdata.set & CLEAR_IS) != 0) {
 	    gps_clear_fix(&session->gpsdata.fix);
+            gps_clear_att(&session->gpsdata.attitude);
+        }
 	/* don't downgrade mode if holding previous fix */
 	if (session->gpsdata.fix.mode > session->newdata.mode)
 	    session->gpsdata.set &= ~MODE_SET;

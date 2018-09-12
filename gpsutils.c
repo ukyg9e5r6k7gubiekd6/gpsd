@@ -265,6 +265,28 @@ void gps_clear_fix(struct gps_fix_t *fixp)
     fixp->ecef.vAcc = NAN;
 }
 
+void gps_clear_att(struct attitude_t *attp)
+/* stuff an attitude structure with recognizable out-of-band values */
+{
+    memset(attp, 0, sizeof(struct attitude_t));
+    attp->pitch = NAN;
+    attp->roll = NAN;
+    attp->yaw = NAN;
+    attp->dip = NAN;
+    attp->mag_len = NAN;
+    attp->mag_x = NAN;
+    attp->mag_y = NAN;
+    attp->mag_z = NAN;
+    attp->acc_len = NAN;
+    attp->acc_x = NAN;
+    attp->acc_y = NAN;
+    attp->acc_z = NAN;
+    attp->gyro_x = NAN;
+    attp->gyro_y = NAN;
+    attp->temp = NAN;
+    attp->depth = NAN;
+}
+
 void gps_clear_dop( struct dop_t *dop)
 {
     dop->xdop = dop->ydop = dop->vdop = dop->tdop = dop->hdop = dop->pdop =

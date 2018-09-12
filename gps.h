@@ -2113,8 +2113,9 @@ int json_oscillator_read(const char *buf, struct gps_data_t *,
 
 extern void libgps_trace(int errlevel, const char *, ...);
 
-extern void gps_clear_fix(struct gps_fix_t *);
+extern void gps_clear_att(struct attitude_t *);
 extern void gps_clear_dop( struct dop_t *);
+extern void gps_clear_fix(struct gps_fix_t *);
 extern void gps_merge_fix(struct gps_fix_t *, gps_mask_t, struct gps_fix_t *);
 extern void gps_enable_debug(int, FILE *);
 extern const char *gps_maskdump(gps_mask_t);

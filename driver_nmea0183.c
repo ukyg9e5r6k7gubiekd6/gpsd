@@ -1125,26 +1125,6 @@ static gps_mask_t processHDT(int c UNUSED, char *field[],
     /* good data */
     session->gpsdata.attitude.heading = heading;
 
-    session->gpsdata.attitude.mag_st = '\0';
-    session->gpsdata.attitude.pitch = NAN;
-    session->gpsdata.attitude.pitch_st = '\0';
-    session->gpsdata.attitude.roll = NAN;
-    session->gpsdata.attitude.roll_st = '\0';
-    session->gpsdata.attitude.yaw = NAN;
-    session->gpsdata.attitude.yaw_st = '\0';
-    session->gpsdata.attitude.dip = NAN;
-    session->gpsdata.attitude.mag_len = NAN;
-    session->gpsdata.attitude.mag_x = NAN;
-    session->gpsdata.attitude.mag_y = NAN;
-    session->gpsdata.attitude.mag_z = NAN;
-    session->gpsdata.attitude.acc_len = NAN;
-    session->gpsdata.attitude.acc_x = NAN;
-    session->gpsdata.attitude.acc_y = NAN;
-    session->gpsdata.attitude.acc_z = NAN;
-    session->gpsdata.attitude.gyro_x = NAN;
-    session->gpsdata.attitude.gyro_y = NAN;
-    session->gpsdata.attitude.temp = NAN;
-    session->gpsdata.attitude.depth = NAN;
     mask |= (ATTITUDE_SET);
 
     gpsd_log(&session->context->errout, LOG_RAW,
@@ -1304,21 +1284,8 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[],
     session->gpsdata.attitude.pitch_st = *field[4];
     session->gpsdata.attitude.roll = safe_atof(field[5]);
     session->gpsdata.attitude.roll_st = *field[6];
-    session->gpsdata.attitude.yaw = NAN;
-    session->gpsdata.attitude.yaw_st = '\0';
     session->gpsdata.attitude.dip = safe_atof(field[7]);
-    session->gpsdata.attitude.mag_len = NAN;
     session->gpsdata.attitude.mag_x = safe_atof(field[8]);
-    session->gpsdata.attitude.mag_y = NAN;
-    session->gpsdata.attitude.mag_z = NAN;
-    session->gpsdata.attitude.acc_len = NAN;
-    session->gpsdata.attitude.acc_x = NAN;
-    session->gpsdata.attitude.acc_y = NAN;
-    session->gpsdata.attitude.acc_z = NAN;
-    session->gpsdata.attitude.gyro_x = NAN;
-    session->gpsdata.attitude.gyro_y = NAN;
-    session->gpsdata.attitude.temp = NAN;
-    session->gpsdata.attitude.depth = NAN;
     mask |= (ATTITUDE_SET);
 
     gpsd_log(&session->context->errout, LOG_RAW,
@@ -1415,14 +1382,8 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[],
     mask = ONLINE_SET;
 
     session->gpsdata.attitude.heading = safe_atof(field[1]);
-    session->gpsdata.attitude.mag_st = '\0';
     session->gpsdata.attitude.pitch = safe_atof(field[2]);
-    session->gpsdata.attitude.pitch_st = '\0';
     session->gpsdata.attitude.roll = safe_atof(field[3]);
-    session->gpsdata.attitude.roll_st = '\0';
-    session->gpsdata.attitude.yaw = NAN;
-    session->gpsdata.attitude.yaw_st = '\0';
-    session->gpsdata.attitude.dip = NAN;
     session->gpsdata.attitude.temp = safe_atof(field[4]);
     session->gpsdata.attitude.depth = safe_atof(field[5]) / METERS_TO_FEET;
     session->gpsdata.attitude.mag_len = safe_atof(field[6]);

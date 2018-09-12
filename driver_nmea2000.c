@@ -1057,26 +1057,6 @@ static gps_mask_t hnd_127250(unsigned char *bu, int len, PGN *pgn, struct gps_de
         session->gpsdata.attitude.heading += aux * RAD_2_DEG * 0.0001;
     }
 //  printf("ATT 2:%8.3f %6x\n",session->gpsdata.attitude.heading, aux);
-    session->gpsdata.attitude.mag_st = '\0';
-    session->gpsdata.attitude.pitch = NAN;
-    session->gpsdata.attitude.pitch_st = '\0';
-    session->gpsdata.attitude.roll = NAN;
-    session->gpsdata.attitude.roll_st = '\0';
-    session->gpsdata.attitude.yaw = NAN;
-    session->gpsdata.attitude.yaw_st = '\0';
-    session->gpsdata.attitude.dip = NAN;
-    session->gpsdata.attitude.mag_len = NAN;
-    session->gpsdata.attitude.mag_x = NAN;
-    session->gpsdata.attitude.mag_y = NAN;
-    session->gpsdata.attitude.mag_z = NAN;
-    session->gpsdata.attitude.acc_len = NAN;
-    session->gpsdata.attitude.acc_x = NAN;
-    session->gpsdata.attitude.acc_y = NAN;
-    session->gpsdata.attitude.acc_z = NAN;
-    session->gpsdata.attitude.gyro_x = NAN;
-    session->gpsdata.attitude.gyro_y = NAN;
-    session->gpsdata.attitude.temp = NAN;
-    session->gpsdata.attitude.depth = NAN;
 
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
@@ -1103,25 +1083,6 @@ static gps_mask_t hnd_128267(unsigned char *bu, int len, PGN *pgn, struct gps_de
 {
     print_data(session->context, bu, len, pgn);
 
-    session->gpsdata.attitude.heading = NAN;
-    session->gpsdata.attitude.pitch = NAN;
-    session->gpsdata.attitude.pitch_st = '\0';
-    session->gpsdata.attitude.roll = NAN;
-    session->gpsdata.attitude.roll_st = '\0';
-    session->gpsdata.attitude.yaw = NAN;
-    session->gpsdata.attitude.yaw_st = '\0';
-    session->gpsdata.attitude.dip = NAN;
-    session->gpsdata.attitude.mag_len = NAN;
-    session->gpsdata.attitude.mag_x = NAN;
-    session->gpsdata.attitude.mag_y = NAN;
-    session->gpsdata.attitude.mag_z = NAN;
-    session->gpsdata.attitude.acc_len = NAN;
-    session->gpsdata.attitude.acc_x = NAN;
-    session->gpsdata.attitude.acc_y = NAN;
-    session->gpsdata.attitude.acc_z = NAN;
-    session->gpsdata.attitude.gyro_x = NAN;
-    session->gpsdata.attitude.gyro_y = NAN;
-    session->gpsdata.attitude.temp = NAN;
     session->gpsdata.attitude.depth = getleu32(bu, 1) *.01;
 
     gpsd_log(&session->context->errout, LOG_DATA,
