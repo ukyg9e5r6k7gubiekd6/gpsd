@@ -75,7 +75,8 @@ static DBusHandlerResult handle_gps_fix(DBusMessage * message)
  *
  */
 static DBusHandlerResult signal_handler(DBusConnection * connection UNUSED,
-					DBusMessage * message)
+					DBusMessage * message,
+                                        void *user_data UNUSED)
 {
     if (dbus_message_is_signal(message, "org.gpsd", "fix"))
 	return handle_gps_fix(message);
