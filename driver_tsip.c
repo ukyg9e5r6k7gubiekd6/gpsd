@@ -210,7 +210,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		buf2[i] = '\0';
 
 		(void)snprintf(session->subtype, sizeof(session->subtype),
-			       "sw %u %u %u %02u.%02u.%04u %s",
+			       "sw %u %u %u %02u.%02u.%04u %.62s",
 			       u2, u3, u4, u6, u5, s1, buf2);
 		gpsd_log(&session->context->errout, LOG_INF,
 			 "Software version: %s\n",
@@ -233,7 +233,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		buf2[i] = '\0';
 
 		(void)snprintf(session->subtype, sizeof(session->subtype),
-			       "hw %u %02u.%02u.%04u %02u %u %s",
+			       "hw %u %02u.%02u.%04u %02u %u %.48s",
 			       ul1, u2, u3, s1, u4, s2, buf2);
 		gpsd_log(&session->context->errout, LOG_INF,
 			 "Hardware version: %s\n",
