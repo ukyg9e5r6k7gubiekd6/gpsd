@@ -505,7 +505,7 @@ struct gps_device_t {
     struct gps_lexer_t lexer;
     int badcount;
     int subframe_count;
-    char subtype[64];			/* firmware version or subtype ID */
+    char subtype[96];			/* firmware version or subtype ID */
     time_t opentime;
     time_t releasetime;
     bool zerokill;

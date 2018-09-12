@@ -38,6 +38,7 @@ extern "C" {
  * 6.1 - Add navdata_t for more (nmea2000) info.
  * 7.0 - add gps_fix_t.ecef (February 2018)
  *       changed prototype of gps_read() to add buffer parameters
+ *       increased length of devconfig_t.subtype
  */
 #define GPSD_API_MAJOR_VERSION	7	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -1907,7 +1908,7 @@ struct devconfig_t {
 #define SEEN_RTCM3	0x04
 #define SEEN_AIS 	0x08
     char driver[64];
-    char subtype[64];
+    char subtype[96];
     /* a buffer to hold data to output to GPS */
     char hexdata[HEXDATA_MAX];
     double activated;
