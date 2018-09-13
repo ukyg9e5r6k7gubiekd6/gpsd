@@ -330,7 +330,7 @@ yet, only the "class" field will reliably be present.</para>
 <row>
 	<entry>time</entry>
 	<entry>No</entry>
-	<entry>numeric</entry>
+	<entry>string</entry>
         <entry>Time/date stamp in ISO8601 format, UTC. May have a
 	fractional part of up to .001sec precision.</entry>
 </row>
@@ -519,9 +519,9 @@ will assert the SATELLITE_SET bit in the top-level set member.</para>
 <row>
 	<entry>time</entry>
 	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Seconds since the Unix epoch, UTC. May have a
-fractional part of up to .001sec precision.</entry>
+	<entry>string</entry>
+        <entry>Time/date stamp in ISO8601 format, UTC. May have a
+	fractional part of up to .001sec precision.</entry>
 </row>
 
 <row>
@@ -629,8 +629,8 @@ may be reported or not depending on the specific device type.</para>
 <row>
 	<entry>time</entry>
 	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Seconds since the Unix epoch, UTC. May have a
+	<entry>string</entry>
+        <entry>Time/date stamp in ISO8601 format, UTC. May have a
 	fractional part of up to .001sec precision.</entry>
 </row>
 <row>
