@@ -1,0 +1,12 @@
+# gpsd configuration for pylintrc
+
+# Disable warnings that are silly
+disable=bad-continuation,
+        invalid-name,
+        misplaced-comparison-constant,
+        no-self-use,
+        too-many-branches,
+        too-many-lines,
+        too-many-locals,
+        too-many-nested-blocks
+
