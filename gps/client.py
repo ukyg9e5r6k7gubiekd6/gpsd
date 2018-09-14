@@ -66,6 +66,8 @@ class gpscommon(object):
                     print('connected to tcp://{}:{}'.format(host, port))
                 break
             except ConnectionRefusedError as cre:
+                # Python 2.7 doc does have this exception
+                # Python 3 says is is same as errno ECONNREFUSED
                 if self.verbose > 1:
                     msg = str(cre) + ' (to {}:{})'.format(host, port)
                     sys.stderr.write("error: {}\n".format(msg.strip()))
