@@ -968,6 +968,16 @@ PYTHON_CONFIG_QUOTED = ["'%s'" % s for s in PYTHON_CONFIG_NAMES]
 PYTHON_CONFIG_CALL = ('sysconfig.get_config_vars(%s)'
                       % ', '.join(PYTHON_CONFIG_QUOTED))
 
+
+# ugly hack from http://www.catb.org/esr/faqs/practical-python-porting/
+# handle python2/3 strings
+def polystr(o):
+    if isinstance(o, str):
+        return o
+    if isinstance(o, bytes):
+        return str(o, encoding='latin-1')
+    raise ValueError
+
 if helping:
 
     # If helping just get usable config info from the local Python
@@ -1002,23 +1012,17 @@ else:
                                                   brief=cleaning)
             # follow FHS, put in /usr/local/libXX, not /usr/libXX
             # may be lib, lib32 or lib64
-            python_libdir = python_libdir.replace(b"/usr/lib",
-                                                  b"/usr/local/lib")
+            print(type(python_libdir))
+            python_libdir = polystr(python_libdir)
+            print(type(python_libdir))
+            print(type("/usr/lib"))
+            python_libdir = python_libdir.replace("/usr/lib",
+                                                  "/usr/local/lib")
 
         py_config_text = config.GetPythonValue('config vars',
                                                PYTHON_SYSCONFIG_IMPORT,
                                                PYTHON_CONFIG_CALL,
                                                brief=True)
-
-
-# ugly hack from http://www.catb.org/esr/faqs/practical-python-porting/
-# handle python2/3 strings
-def polystr(o):
-    if isinstance(o, str):
-        return o
-    if isinstance(o, bytes):
-        return str(o, encoding='latin-1')
-    raise ValueError
 
 
 if env['python']:  # May have been turned off by error
