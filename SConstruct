@@ -1002,7 +1002,8 @@ else:
                                                   brief=cleaning)
             # follow FHS, put in /usr/local/libXX, not /usr/libXX
             # may be lib, lib32 or lib64
-            python_libdir = python_libdir.replace("/usr/lib", "/usr/local/lib")
+            python_libdir = python_libdir.replace(b"/usr/lib",
+                                                  b"/usr/local/lib")
 
         py_config_text = config.GetPythonValue('config vars',
                                                PYTHON_SYSCONFIG_IMPORT,
