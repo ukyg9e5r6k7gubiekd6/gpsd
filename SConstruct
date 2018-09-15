@@ -1012,10 +1012,7 @@ else:
                                                   brief=cleaning)
             # follow FHS, put in /usr/local/libXX, not /usr/libXX
             # may be lib, lib32 or lib64
-            print(type(python_libdir))
             python_libdir = polystr(python_libdir)
-            print(type(python_libdir))
-            print(type("/usr/lib"))
             python_libdir = python_libdir.replace("/usr/lib",
                                                   "/usr/local/lib")
 
