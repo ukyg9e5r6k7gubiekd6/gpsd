@@ -153,8 +153,9 @@ class gpscommon(object):
 
     def send(self, commands):
         "Ship commands to the daemon."
-        if not commands.endswith("\n"):
-            commands += "\n"
+        lineend = polybytes("\n")
+        if not commands.endswith(lineend):
+            commands += lineend
 
         if self.sock is None:
             self.stream_command = commands
