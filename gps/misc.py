@@ -53,6 +53,8 @@ else:  # Otherwise we do something real
             return o
         if isinstance(o, bytes):
             return str(o, encoding=BINARY_ENCODING)
+        if isinstance(o, bytearray):
+            return str(o, encoding=BINARY_ENCODING)
         raise ValueError
 
     def polybytes(o):
