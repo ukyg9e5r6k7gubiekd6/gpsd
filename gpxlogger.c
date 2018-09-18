@@ -233,7 +233,7 @@ int main(int argc, char **argv)
                 char   *fname = NULL;
                 time_t  t;
                 size_t  s = 0;
-                size_t fnamesize = strlen(optarg);
+                size_t fnamesize = strlen(optarg) + 1;
 
                 t = time(NULL);
                 while (s == 0) {
@@ -242,10 +242,14 @@ int main(int argc, char **argv)
 			syslog(LOG_ERR, "realloc failed.");
 			goto bailout;
 		    } else {
-			fnamesize += 1024;
 			fname = newfname;
 		    }
 		    s = strftime(fname, fnamesize-1, optarg, localtime(&t));
+		    if (!s) {
+                        /* expanded filename did not fit in string, try 
+                         * a bigger string */
+			fnamesize += 1024;
+                    }
                 }
                 fname[s] = '\0';;
                 logfile = fopen(fname, "w");
