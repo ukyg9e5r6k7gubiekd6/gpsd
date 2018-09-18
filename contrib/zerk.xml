@@ -1,0 +1,469 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+This file is Copyright (c) 2018 by the GPSD project
+BSD terms apply: see the file COPYING in the distribution root for details.
+-->
+<!DOCTYPE refentry PUBLIC
+   "-//OASIS//DTD DocBook XML V4.1.2//EN"
+   "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id='zerk.1'>
+ <refentryinfo>
+  <date>18 Sep 2018</date>
+ </refentryinfo>
+ <refmeta>
+  <refentrytitle>zerk</refentrytitle>
+  <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">The GPSD Project</refmiscinfo>
+  <refmiscinfo class="manual">GPSD Documentation</refmiscinfo>
+ </refmeta>
+ <refnamediv id='name'>
+  <refname>zerk</refname>
+  <refpurpose>All purpose GREIS fitting</refpurpose>
+ </refnamediv>
+ <refsynopsisdiv id='synopsis'>
+  <cmdsynopsis>
+   <command>zerk</command>
+   <arg choice='opt'>-? </arg>
+   <arg choice='opt'>-c <replaceable>command</replaceable>
+   </arg>
+   <arg choice='opt'>-d <replaceable>disable</replaceable>
+   </arg>
+   <arg choice='opt'>-e <replaceable>enable</replaceable>
+   </arg>
+   <arg choice='opt'>-f <replaceable>file/device</replaceable>
+   </arg>
+   <arg choice='opt'>-h </arg>
+   <arg choice='opt'>-O <replaceable>oaf</replaceable>
+   </arg>
+   <arg choice='opt'>-p <replaceable>preset</replaceable>
+   </arg>
+   <arg choice='opt'>-r </arg>
+   <arg choice='opt'>-R <replaceable>rawfile</replaceable>
+   </arg>
+   <arg choice='opt'>-S <replaceable>setspeed</replaceable>
+   </arg>
+   <arg choice='opt'>-s <replaceable>speed</replaceable>
+   </arg>
+   <arg choice='opt'>-V </arg>
+   <arg choice='opt'>-v <replaceable>verbosity</replaceable>
+   </arg>
+   <arg choice='opt'>-W </arg>
+   <arg choice='opt'>-w <replaceable>wait</replaceable>
+   </arg>
+   <arg choice='opt'>[server[:port[:device]]]</arg>
+  </cmdsynopsis>
+ </refsynopsisdiv>
+ <refsect1 id='description'>
+  <title>DESCRIPTION</title>
+  <para>
+   <application>zerk</application> is an all purpose GREIS fitting.
+If you do not have a Javad GPS that speaks the GREIS protocol then you
+can stop reading now.</para>
+  <para>This tool operates with your Javad GPS at a very low level.
+To understand <application>zerk</application> you must first be familiar
+with your Javad GPS and the documentation for the GREIS protocol.
+<ulink url="http://www.javad.com/downloads/javadgnss/manuals/GREIS/GREIS_Reference_Guide.pdf">GREIS (GNSS Receiver External Interface Specification) Guide</ulink>.
+</para>
+  <para>
+   <application>zerk</application> can decode common GREIS messages,
+poll the GPS status, enable and disable GPS features, and send user
+generated commands to the GPS.  It can GREIS read messages from a file.  It
+can read and write directly through a serial device, or through a
+running gpsd instance.</para>
+ </refsect1>
+ <refsect1 id='options'>
+  <title>OPTIONS</title>
+  <para>The program accepts the following options:</para>
+  <variablelist remap='TP'>
+   <varlistentry>
+    <term>-?</term>
+    <listitem>
+     <para>Makes <application>zerk</application> print
+a usage message and exit.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-c COMMAND</term>
+    <listitem>
+     <para>Send a text string to the GPS.  Accepts one parameter, COMMAND,
+the command string to send to the GPS.  The string is sent verbatim, except
+a newline is appended.
+</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-d OPTION</term>
+    <listitem>
+     <para>Disable an option in the GPS.  Accepts one parameter, OPTION,
+the option to disable.  <application>zerk</application> will exit after
+the GPS acknowledges the command, unless the -W is given.
+</para>
+     <variablelist>
+      <varlistentry>
+       <term>4HZ</term>
+       <listitem>
+        <para>Disable basic GREIS messages at 4Hz.  The messages are:
+[RT], [UO], [GT], [PV], [SG], [DP], [SI], [EL], [AZ], [EC], [SS], and
+[ET]</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>COMPASS</term>
+       <listitem>
+        <para>Disable use of the COMPASS (BeiDou) constellation.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>CONS</term>
+       <listitem>
+        <para>Disable use of all constellations.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>DEFMSG</term>
+       <listitem>
+        <para>Disable the default message set (/dev/msg) at 1Hz.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>GALILEO</term>
+       <listitem>
+        <para>Disable use of the GALILEO constellation.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>GLONASS</term>
+       <listitem>
+        <para>Disable use of the GLONASS constellation.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>GPS</term>
+       <listitem>
+        <para>Disable use of the GPS constellation.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>IPR</term>
+       <listitem>
+        <para>Disable all Integer Pseudo Range messages.  These are
+        [rx], [rc], [r1], [r2], [r3], [r5], [rl].</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>IRNSS</term>
+       <listitem>
+        <para>Disable use of the IRNSS constellation.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>NMEA</term>
+       <listitem>
+        <para>Disable basic NMEA 4.1e messages at 4Hz.  The messages are
+GBS, GGA, GSA, GST, GSV, RMC, VTG, and ZDA.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>QZSS</term>
+       <listitem>
+        <para>Disable use of the QZSS constellation.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>SBAS</term>
+       <listitem>
+        <para>Disable use of the SBAS constellation.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>SNR</term>
+       <listitem>
+        <para>Disable all SNR messages, except [EC].  The messages
+disabled are: [E1], [E2], [E3], [E5], [El].</para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-e OPTION</term>
+    <listitem>
+     <para>Enable an option in the GPS.  Accepts one parameter, OPTION,
+the option to enable.  <application>zerk</application> will exit after
+the GPS acknowledges the command, unless the -W is given.  -e accepts the
+same OPTIONs as -d, except the action is to enable the option.
+</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-f FILE</term>
+    <listitem>
+     <para>Connect to a file or device.  Accepts one parameter, FILE,
+the file or device to open.   Files are opened read-only.  Character
+devices are opened red/write, unless the -r parameter is given.
+</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-h</term>
+    <listitem>
+     <para>Makes <application>zerk</application> print
+a usage message and exit.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-O OAF</term>
+    <listitem>
+     <para>Load an Option Authorization File (OAF) into the GPS.  Accepts
+one parameter, OAF, command file to read.  The OAF is just a special case
+of a .jpo (GREIS command file).  -O will send any valid .jpo file to
+the GPS.
+</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-p PRESET</term>
+    <listitem>
+     <para>Send a preset command the GPS.  Accepts one parameter, PRESET,
+the name of the command to send.  <application>zerk</application> will exit after
+the GPS acknowledges the command, unless the -W is given.
+</para>
+     <variablelist>
+      <varlistentry>
+       <term>COLDBOOT</term>
+       <listitem>
+        <para>Coldboot the GPS.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>CONS</term>
+       <listitem>
+        <para>Poll the enabled constellations.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>DM</term>
+       <listitem>
+        <para>Disable all periodic GREIS messages..</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>ID</term>
+       <listitem>
+        <para>Poll the receiver ID.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>IPR</term>
+       <listitem>
+        <para>Poll all Integer Pseudo Range messages.  These are
+        [rx], [rc], [r1], [r2], [r3], [r5], [rl].</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>OAF</term>
+       <listitem>
+        <para>Poll all OAF options.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>RESET</term>
+       <listitem>
+        <para>Reset (reboot) the GPS.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>SERIAL</term>
+       <listitem>
+        <para>Poll receiver serial number.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>SNR</term>
+       <listitem>
+        <para>Poll all Signal to Noise Ratio (SNR) messages.
+[EC], [E1], [E2], [E3], [E5], [El].</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>VENDOR</term>
+       <listitem>
+        <para>Poll GPS vendor.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>VER</term>
+       <listitem>
+        <para>Poll GPS version.</para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-r</term>
+    <listitem>
+     <para>Read only.  Do not send anything to the GPS.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-R RAW</term>
+    <listitem>
+     <para>Save all raw data from the GPS into the file RAW.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-S SPEED</term>
+    <listitem>
+     <para>Configure the GPS serial speed to SPEED bps.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-s SPEED</term>
+    <listitem>
+     <para>Set local serial port speed to SPEED bps. Default 115,200 bps.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-V</term>
+    <listitem>
+     <para>Print <application>zerk</application> and exit.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-v VERBOSITY</term>
+    <listitem>
+     <para>Set verbosity level to VERBOSITY.  Verbosity can be from 0
+     (very quiet), to 4 (very noisy).  Default 2.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-v VERBOSITY</term>
+    <listitem>
+     <para>Set verbosity level to VERBOSITY.  Verbosity can be from 0
+     (very quiet), 2 (decode messages), to 4 (very noisy).  Default 1.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-W</term>
+    <listitem>
+     <para>Force waiting the entire wait time.  No early exit for completion
+of -d, -e or -p command.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-w WAIT</term>
+    <listitem>
+     <para>Wait for WAIT seconds before exiting.  Will exit early on command
+completion of -d, -e or -p command, unless -W is given.  Default 2.0 second.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>[server[:port[:device]]]</term>
+    <listitem>
+     <para>
+       By default, <application>zerk</application> collects data from all compatible devices on
+       localhost, using the default GPSD port 2947. An optional argument
+       may specify a server to get data from. A
+       colon-separated suffix is taken as a port number. If there is a
+       second colon-separated suffix, that is taken as a specific device
+       name to be watched. Further details on the
+<citerefentry>
+       <refentrytitle>gps</refentrytitle>
+       <manvolnum>1</manvolnum>
+      </citerefentry> man page.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+ <refsect1 id='environment'>
+  <title>ENVIRONMENT</title>
+  <para>Options can be placed in the ZERKOPTS environment variable.
+ZERKOPTS is processed before the CLI options.</para>
+ </refsect1>
+ <refsect1 id='examples'>
+  <title>EXAMPLES</title>
+  <para>
+Print current Javad serial portC of GPS connected to local running gpsd::
+<programlisting>
+ zerk -c "print,/cur/term"
+</programlisting>
+  </para>
+  <para>
+Decode raw log file:
+<programlisting>
+zerk -r -f greis-binary.log -v 2
+</programlisting>
+  </para>
+  <para>
+Change GPS port speed of device on /dev/ttyAMA0 to 230,400 bps::
+<programlisting>
+zerk -S 230400 -f /dev/ttyAMA0
+</programlisting>
+  </para>
+  <para>
+Watch entire GPS reset cycle:
+<programlisting>
+zerk -p RESET -v 2 -w 20 -W
+</programlisting>
+  </para>
+  <para>
+Poll SVs Status:
+<programlisting>
+zerk -W -w 2 -v 2 -c "out,,jps/{CS,ES,GS,Is,WS,QS}"
+</programlisting>
+Dump gpsd data from remote server:
+<programlisting>
+zerk -v 2 -w 5 server
+</programlisting>
+  </para>
+ </refsect1>
+ <refsect1 id='see_also'>
+  <title>SEE ALSO</title>
+  <para>
+   <application>zerk</application> is written to conform to the official
+Javad documentation for the GREIS protocol.
+<ulink url="http://www.javad.com/downloads/javadgnss/manuals/GREIS/GREIS_Reference_Guide.pdf">GREIS (GNSS Receiver External Interface Specification) Guide</ulink>.
+</para>
+  <para>
+   <citerefentry>
+    <refentrytitle>gpsd</refentrytitle>
+    <manvolnum>8</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>gps</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>cgps</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>xgps</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>gpsfake</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>gpsctl</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>gpscat</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>gnuplot</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>.
+</para>
+ </refsect1>
+ <refsect1 id='maintainer'>
+  <title>AUTHOR</title>
+  <para>Gary E. Miller<email>gem@rellim.com</email>
+  </para>
+ </refsect1>
+</refentry>
