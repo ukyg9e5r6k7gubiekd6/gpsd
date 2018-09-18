@@ -3,6 +3,7 @@
 3.18: not released yet
   Add ECEF support to U-blox driver.
   Add GREIS (Javad) driver from Virgin Orbit.
+  Add CLI tools zerk and ubxtool to manage JAVAD and u-blox GPS.
 
 3.17: 2017-09-07 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Repair support for non-NMEA devices requring active probing
