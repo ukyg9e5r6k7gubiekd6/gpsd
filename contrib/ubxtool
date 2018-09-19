@@ -2233,7 +2233,7 @@ try:
     io_handle = gps_io(serial)
 
     sys.stdout.flush()
-    io_handle.ser.close()
+
     if opts['disable'] is not None:
         if VERB_QUIET < opts['verbosity']:
             sys.stderr.write('%s: disable %s\n' % (PROG_NAME, opts['disable']))
