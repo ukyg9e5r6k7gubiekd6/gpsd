@@ -548,7 +548,17 @@ class ubx(object):
             i += 1
         return s
 
-    mon_ids = {0x4: {'str': 'VER', 'dec': mon_ver, 'name': 'UBX-MON-VER'},
+    mon_ids = {2: {'str': 'IO', 'name': 'UBX-MON-IO'},
+               4: {'str': 'VER', 'dec': mon_ver, 'name': 'UBX-MON-VER'},
+               6: {'str': 'MSGPP', 'name': 'UBX-MON-MSGPP'},
+               7: {'str': 'RXBUF', 'name': 'UBX-MON-RXBUF'},
+               9: {'str': 'TXBUF', 'name': 'UBX-MON-TXBUF'},
+               9: {'str': 'HW', 'name': 'UBX-MON-HW'},
+               0x0b: {'str': 'HW2', 'name': 'UBX-MON-HW2'},
+               0x21: {'str': 'RXR', 'name': 'UBX-MON-RXR'},
+               0x27: {'str': 'PATCH', 'name': 'UBX-MON-PATCH'},
+               0x28: {'str': 'GNSS', 'name': 'UBX-MON-GNSS'},
+               0x2e: {'str': 'SMGR', 'name': 'UBX-MON-SMGR'},
                }
 
     def nav_clock(self, buf):
