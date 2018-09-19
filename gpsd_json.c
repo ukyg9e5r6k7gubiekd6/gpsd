@@ -331,12 +331,19 @@ void json_sky_dump(const struct gps_data_t *datap,
 	for (i = 0; i < reported; i++) {
 	    if (datap->skyview[i].PRN) {
 		str_appendf(reply, replylen,
-			       "{\"PRN\":%d,\"el\":%d,\"az\":%d,\"ss\":%.0f,\"used\":%s},",
-			       datap->skyview[i].PRN,
-			       datap->skyview[i].elevation,
-			       datap->skyview[i].azimuth,
-			       datap->skyview[i].ss,
-			       datap->skyview[i].used ? "true" : "false");
+                   "{\"PRN\":%d,\"el\":%d,\"az\":%d,\"ss\":%.0f,\"used\":%s",
+                   datap->skyview[i].PRN,
+                   datap->skyview[i].elevation,
+                   datap->skyview[i].azimuth,
+                   datap->skyview[i].ss,
+                   datap->skyview[i].used ? "true" : "false");
+                if (0 != datap->skyview[i].svid) {
+                    str_appendf(reply, replylen,
+                       ",\"gnssid\":%d,\"svid\":%d",
+                       datap->skyview[i].gnssid,
+                       datap->skyview[i].svid);
+                }
+                (void)strlcat(reply, "},", replylen);
 	    }
 	}
 	str_rstrip_char(reply, ',');
