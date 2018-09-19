@@ -536,7 +536,7 @@ class ubx(object):
         s = ' swVersion: %s\n' % (substr)
         substr = buf[30:39]
         substr = substr.split('\0')[0]
-        s += ' hwVersion: %s\n' % (substr[30:39])
+        s += ' hwVersion: %s' % (substr[30:39])
         # extensions??
         num_ext = int((m_len - 40) / 30)
         i = 0
@@ -544,9 +544,8 @@ class ubx(object):
             loc = 40 + (i * 30)
             substr = buf[loc:]
             substr = substr.split('\0')[0]
-            s += ' extension: %s\n' % (substr)
+            s += '\n extension: %s' % (substr)
             i += 1
-        # FIXME, remove trailing \n
         return s
 
     mon_ids = {0x4: {'str': 'VER', 'dec': mon_ver, 'name': 'UBX-MON-VER'},
