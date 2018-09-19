@@ -498,17 +498,57 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
     nsv = 0;
     for (i = st = 0; i < nchan; i++) {
 	unsigned int off = 8 + 12 * i;
+        short PRN = (short)getub(buf, off + 1);
+        unsigned char snr = getub(buf, off + 4);
 	bool used = (bool)(getub(buf, off + 2) & 0x01);
-	if ((int)getub(buf, off + 4) == 0)
-	    continue;		/* LEA-5H seems to have a bug reporting sats it does not see or hear */
-	session->gpsdata.skyview[st].PRN = (short)getub(buf, off + 1);
-	session->gpsdata.skyview[st].ss = (float)getub(buf, off + 4);
+
+	if (0 == snr)
+	    continue;		/* skip zero SNR */
+
+        /* fit into gnssid:svid */
+	if (0 == PRN) {
+            /* skip 0 PRN */
+	    continue;
+        } else if ((1 <= PRN) && (32 >= PRN)) {
+            /* GPS */
+            session->gpsdata.skyview[st].gnssid = 0;
+            session->gpsdata.skyview[st].svid = PRN;
+        } else if ((33 <= PRN) && (64 >= PRN)) {
+            /* BeiDou */
+            session->gpsdata.skyview[st].gnssid = 3;
+            session->gpsdata.skyview[st].svid = PRN - 158;
+        } else if ((65 <= PRN) && (96 >= PRN)) {
+            /* GLONASS */
+            session->gpsdata.skyview[st].gnssid = 6;
+            session->gpsdata.skyview[st].svid = PRN - 64;
+        } else if ((159 <= PRN) && (163 >= PRN)) {
+            /* BeiDou, again */
+            session->gpsdata.skyview[st].gnssid = 3;
+            session->gpsdata.skyview[st].svid = PRN - 126;
+        } else if ((173 <= PRN) && (182 >= PRN)) {
+            /* IMES */
+            session->gpsdata.skyview[st].gnssid = 4;
+            session->gpsdata.skyview[st].svid = PRN - 172;
+        } else if ((193 <= PRN) && (197 >= PRN)) {
+            /* QZSS */
+            session->gpsdata.skyview[st].gnssid = 5;
+            session->gpsdata.skyview[st].svid = PRN - 192;
+        } else if ((211 <= PRN) && (246 >= PRN)) {
+            /* Galileo */
+            session->gpsdata.skyview[st].gnssid = 2;
+            session->gpsdata.skyview[st].svid = PRN - 210;
+        } else if (255 == PRN) {
+            /* GLONASS, again */
+            session->gpsdata.skyview[st].gnssid = 6;
+            session->gpsdata.skyview[st].svid = 255;
+        }
+	session->gpsdata.skyview[st].PRN = PRN;
+
+	session->gpsdata.skyview[st].ss = (float)snr;
 	session->gpsdata.skyview[st].elevation = (short)getsb(buf, off + 5);
 	session->gpsdata.skyview[st].azimuth = (short)getles16(buf, off + 6);
 	session->gpsdata.skyview[st].used = used;
-	if (session->gpsdata.skyview[st].PRN == 0)
-	    continue;
-	if (used || session->gpsdata.skyview[st].PRN == (short)session->driver.ubx.sbas_in_use) {
+	if (used || PRN == (short)session->driver.ubx.sbas_in_use) {
 	    nsv++;
 	    session->gpsdata.skyview[st].used = true;
 	}
