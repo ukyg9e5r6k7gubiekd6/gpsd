@@ -1158,10 +1158,10 @@ class ubx(object):
             s += "RAIM ??"
         return s
 
-    tim_ids = {0x1: {'str': 'TP', 'dec': tim_tp, 'name': 'UBX-TIM-TP'},
-               0x3: {'str': 'TM2', 'name': 'UBX-TIM-TM2'},
-               0x4: {'str': 'SVIN', 'dec': tim_svin, 'name': 'UBX-TIM-SVIN'},
-               0x6: {'str': 'VRFY', 'name': 'UBX-TIM-VRFY'},
+    tim_ids = {1: {'str': 'TP', 'dec': tim_tp, 'name': 'UBX-TIM-TP'},
+               3: {'str': 'TM2', 'name': 'UBX-TIM-TM2'},
+               4: {'str': 'SVIN', 'dec': tim_svin, 'name': 'UBX-TIM-SVIN'},
+               6: {'str': 'VRFY', 'name': 'UBX-TIM-VRFY'},
                0x11: {'str': 'DOSC', 'name': 'UBX-TIM-DOSC'},
                0x12: {'str': 'TOS', 'name': 'UBX-TIM-TOS'},
                0x13: {'str': 'SMEAS', 'name': 'UBX-TIM-SMEAS'},
