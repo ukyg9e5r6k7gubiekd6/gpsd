@@ -1837,7 +1837,7 @@ class ubx(object):
                 "HOTBOOT": {"command": send_cfg_rst,
                             "help": "UBX-CFG-RST hotboot the GPS",
                             "opt": 0},
-                # UBX-CFG-NAV5 set Dynamic Platfform Model
+                # UBX-CFG-NAV5 set Dynamic Platform Model
                 "MODEL": {"command": send_cfg_nav5_model,
                           "help": "UBX-CFG-NAV5 set Dynamic Platform Model"},
                 # UBX-CFG-NAV5, poll Nav Engine Settings
