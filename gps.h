@@ -1820,9 +1820,25 @@ struct ais_t
 struct satellite_t {
     double ss;		/* signal-to-noise ratio, 0 to 254 dB, -1 for n/a */
     bool used;		/* this satellite used in solution */
-    short PRN;		/* PRN of this satellite, 1 to 437, 0 for n/a */
+    /* PRN of this satellite, 1 to 437, 0 for n/a
+     * sadly there is no standard, but many different implementations of
+     * how to code PRN
+     */
+    short PRN;
     short elevation;	/* elevation of satellite, -90 to 90 deg, -91 for n/a */
     short azimuth;	/* azimuth, 0 to 359 deg, -1 for n/a */
+    /* gnssid:svid, as defined by u-blox 8:
+     *  gnssid        svid (native PRN)
+     *  0 = GPS       1-32
+     *  1 = SBAS      120-158
+     *  2 = Galileo   1-36
+     *  3 - BeiDou    1-37
+     *  4 = IMES      1-10
+     *  5 = QZSS      1-5
+     *  6 = GLONASS   1-32, 22255
+     */
+    unsigned char gnssid;
+    unsigned char svid;
 };
 
 struct attitude_t {
