@@ -29,9 +29,9 @@ import cairo
 import gi
 try:
     gi.require_version('Gtk', '3.0')
-except:
+except ValueError:
     # Gtk2 may be installed, has no equire_version()
-    sys.stderr.write("Unsupported Gtk version\n")
+    sys.stderr.write("xgps: ERROR Unsupported Gtk version\n")
     exit(1)
 
 from gi.repository import GObject  # pylint: disable=wrong-import-position
@@ -58,6 +58,7 @@ SKY_VIEW_SORT_FIELDS = ('-used', 'PRN')
 # all mushed into the PRN.  Different GPS mush differently.  gpsd should
 # have unstangled and put in gnssid:svid
 
+
 def gnssid_str(gnssid, svid):
     "convert gnssid:svid to string"
     if 0 == svid:
@@ -78,6 +79,7 @@ def gnssid_str(gnssid, svid):
         return 'GL'
 
     return '  '
+
 
 class unit_adjustments(object):
     "Encapsulate adjustments for unit systems."
@@ -193,13 +195,19 @@ class SkyView(Gtk.DrawingArea):
 
         self.cr.stroke()
 
-    def draw_square(self, x, y, radius, filled=False):
+    def draw_square(self, x, y, radius, filled, flip):
         "Draw a square centered on the specified midpoint."
         lw = self.cr.get_line_width()
-        x1, y1 = fit_to_grid(x - radius, y - radius, lw)
-        x2, y2 = fit_to_grid(x + radius, y + radius, lw)
-
-        self.cr.rectangle(x1, y1, x2 - x1, y2 - y1)
+        if 0 == flip:
+            x1, y1 = fit_to_grid(x - radius, y - radius, lw)
+            x2, y2 = fit_to_grid(x + radius, y + radius, lw)
+            self.cr.rectangle(x1, y1, x2 - x1, y2 - y1)
+        else:
+            self.cr.move_to(x, y + radius)
+            self.cr.line_to(x + radius, y)
+            self.cr.line_to(x, y - radius)
+            self.cr.line_to(x - radius, y)
+            self.cr.close_path()
 
         if filled:
             self.cr.fill()
@@ -348,13 +356,15 @@ class SkyView(Gtk.DrawingArea):
             if constellation == 'GP':
                 self.draw_circle(x, y, SkyView.SAT_RADIUS, sat.used)
             elif constellation == 'SB':
-                self.draw_square(x, y, SkyView.SAT_RADIUS, sat.used)
+                self.draw_square(x, y, SkyView.SAT_RADIUS, sat.used, 0)
             elif constellation == 'GA':
                 self.draw_triangle(x, y, SkyView.SAT_RADIUS, sat.used, 0)
             elif constellation == 'BD':
                 self.draw_triangle(x, y, SkyView.SAT_RADIUS, sat.used, 1)
+            elif constellation == 'GL':
+                self.draw_square(x, y, SkyView.SAT_RADIUS, sat.used, 1)
             else:
-                # QZSS, GLONASS, IMES, unknown or other
+                # QZSS, IMES, unknown or other
                 self.draw_triangle(x, y, SkyView.SAT_RADIUS, sat.used, 2)
 
             self.cr.set_source_rgb(1, 1, 1)
@@ -703,7 +713,8 @@ class Base(object):
         self.satlist = Gtk.ListStore(str, str, str, str, str, str)
         view = Gtk.TreeView(model=self.satlist)
 
-        for (i, label) in enumerate(('', 'PRN', 'Elev', 'Azim', 'SNR', 'Used')):
+        for (i, label) in enumerate(('', 'PRN', 'Elev', 'Azim', 'SNR',
+                                     'Used')):
             column = Gtk.TreeViewColumn(label)
             renderer = Gtk.CellRendererText(xalign=1.0)
             column.pack_start(renderer, expand=True)
@@ -1064,6 +1075,7 @@ class Base(object):
 
     def main(self):
         Gtk.main()
+
 
 if __name__ == "__main__":
     try:
