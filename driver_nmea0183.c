@@ -570,8 +570,9 @@ static gps_mask_t processGST(int count, char *field[],
     return GST_SET | ONLINE_SET;
 }
 
-static int nmeaid_to_prn(char *talker, int satnum)
-/* deal with range-mapping attempts to to use IDs 1-32 by Beidou, etc. */
+static int nmeaid_to_prn(char *talker, int satnum, unsigned char *gnssid,
+                         unsigned char *svid)
+/* deal with range-mapping attempts to use IDs 1-32 by Beidou, etc. */
 {
     /*
      * According to https://github.com/mvglasow/satstat/wiki/NMEA-IDs
@@ -601,23 +602,62 @@ static int nmeaid_to_prn(char *talker, int satnum)
      * effect, they're recorded by the order in which they occur
      * rather than by PRN.
      */
+    *gnssid = 0;   /* default to gnssid is GPS */
+    *svid = 0;     /* default to unnknown svid */
     // NMEA-ID (33..64) to SBAS PRN 120-151.
-    if (satnum >= 33 && satnum <= 64)
+    if ( 33 <= satnum && 64 >= satnum) {
+        /* SBAS */
 	satnum += 87;
-    if (satnum != 0 && satnum < 32) {
-	/* map Beidou IDs */
-	if (talker[0] == 'B' && talker[1] == 'D')
+        *gnssid = 1;
+        *svid = satnum;
+    } else if (0 != satnum && 32 >= satnum) {
+        *svid = satnum;
+	if (talker[0] == 'B' && talker[1] == 'D') {
+            /* map Beidou IDs */
 	    satnum += 200;
-	else if (talker[0] == 'G' && talker[1] == 'B')
+            *gnssid = 3;
+	} else if (talker[0] == 'G' && talker[1] == 'B') {
+            /* map Beidou IDs */
+            *gnssid = 3;
 	    satnum += 200;
-	/* GLONASS GL doesn't seem to do this, but better safe than sorry */
-	if (talker[0] == 'G' && talker[1] == 'L')
+	} else if (talker[0] == 'G' && talker[1] == 'L') {
+	    /* GLONASS GL doesn't seem to do this, better safe than sorry */
 	    satnum += 37;
-	/* QZSS */
-	if (talker[0] == 'Q' && talker[1] == 'Z')
+            *gnssid = 6;
+	} else if (talker[0] == 'Q' && talker[1] == 'Z') {
+            /* QZSS */
 	    satnum += 193;
-	if (talker[0] == 'G' && talker[1] == 'A')
+            *gnssid = 5;
+	} else if (talker[0] == 'G' && talker[1] == 'A') {
+            /* Galileo */
 	    satnum += 300; /* Used by u-blox at least */
+            *gnssid = 2;
+        }
+        /* what about $GN? */
+    } else if (65 <= satnum && 96 >= satnum) {
+        /* GLONASS */
+        *gnssid = 6;
+        *svid = satnum - 65;
+    } else if (120 <= satnum && 158 >= satnum) {
+        /* SBAS */
+        *gnssid = 1;
+        *svid = satnum;
+    } else if (173 <= satnum && 182 >= satnum) {
+        /* IMES */
+        *gnssid = 4;
+        *svid = satnum - 172;
+    } else if (193 <= satnum && 197 >= satnum) {
+        /* QZSS */
+        *gnssid = 5;
+        *svid = satnum - 192;
+    } else if (301 <= satnum && 356 >= satnum) {
+        /* QZSS */
+        *gnssid = 2;
+        *svid = satnum - 300;
+    } else if (401 <= satnum && 437 >= satnum) {
+        /* BeiDou */
+        *gnssid = 3;
+        *svid = satnum - 400;
     }
 
     return satnum;
@@ -724,11 +764,14 @@ static gps_mask_t processGSA(int count, char *field[],
 	/* the magic 6 here counts the tag, two mode fields, and DOP fields */
 	for (i = 0; i < count - 6; i++) {
 	    int prn;
+            unsigned char gnssid;   /* UNUSED */
+            unsigned char svid;     /* UNUSED */
+
 	    /* skip empty fields, otherwise empty becomes prn=200 */
 	    if ( '\0' == field[i + 3][0] ) {
 		continue;
 	    }
-	    prn = nmeaid_to_prn(field[0], atoi(field[i + 3]));
+	    prn = nmeaid_to_prn(field[0], atoi(field[i + 3]), &gnssid, &svid);
 	    if (prn > 0) {
 		/* check first BEFORE over-writing memory */
 		if ( MAXCHANNELS <= session->gpsdata.satellites_used ) {
@@ -750,8 +793,8 @@ static gps_mask_t processGSA(int count, char *field[],
     }
     /* assumes GLGSA or BDGSA, if present, is emitted  directly
      * after the GPGSA*/
-    if ((session->nmea.seen_glgsa || session->nmea.seen_bdgsa || session->nmea.seen_gagsa)
-       && GSA_TALKER == 'P')
+    if ((session->nmea.seen_glgsa || session->nmea.seen_bdgsa ||
+         session->nmea.seen_gagsa) && GSA_TALKER == 'P')
 	return ONLINE_SET;
 
     /* first of two GNGSA */
@@ -865,6 +908,8 @@ static gps_mask_t processGSV(int count, char *field[],
 
     for (fldnum = 4; fldnum < count / 4 * 4;) {
 	struct satellite_t *sp;
+        int svid;
+
 	if (session->gpsdata.satellites_visible >= MAXCHANNELS) {
 	    gpsd_log(&session->context->errout, LOG_ERROR,
 		     "internal error - too many satellites [%d]!\n",
@@ -873,7 +918,8 @@ static gps_mask_t processGSV(int count, char *field[],
 	    break;
 	}
 	sp = &session->gpsdata.skyview[session->gpsdata.satellites_visible];
-	sp->PRN = (short)nmeaid_to_prn(field[0], atoi(field[fldnum++]));
+	svid = atoi(field[fldnum++]);
+	sp->PRN = (short)nmeaid_to_prn(field[0], svid, &sp->gnssid, &sp->svid);
 	sp->elevation = (short)atoi(field[fldnum++]);
 	sp->azimuth = (short)atoi(field[fldnum++]);
 	sp->ss = (float)atoi(field[fldnum++]);
