@@ -137,11 +137,13 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 {
     const struct json_attr_t json_attrs_satellites[] = {
 	/* *INDENT-OFF* */
-	{"PRN",	   t_short, STRUCTOBJECT(struct satellite_t, PRN)},
-	{"el",	   t_short, STRUCTOBJECT(struct satellite_t, elevation)},
-	{"az",	   t_short, STRUCTOBJECT(struct satellite_t, azimuth)},
+	{"PRN",	   t_short,   STRUCTOBJECT(struct satellite_t, PRN)},
+	{"el",	   t_short,   STRUCTOBJECT(struct satellite_t, elevation)},
+	{"az",	   t_short,   STRUCTOBJECT(struct satellite_t, azimuth)},
 	{"ss",	   t_real,    STRUCTOBJECT(struct satellite_t, ss)},
 	{"used",   t_boolean, STRUCTOBJECT(struct satellite_t, used)},
+	{"gnssid", t_ushort,   STRUCTOBJECT(struct satellite_t, gnssid)},
+	{"svid",   t_ushort,   STRUCTOBJECT(struct satellite_t, svid)},
 	/* *INDENT-ON* */
 	{NULL},
     };
@@ -177,10 +179,7 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
     };
     int status, i;
 
-    for (i = 0; i < MAXCHANNELS; i++) {
-	gpsdata->skyview[i].PRN = 0;
-	gpsdata->skyview[i].used = false;
-    }
+    memset(&gpsdata->skyview, 0, sizeof(gpsdata->skyview));
 
     status = json_read_object(buf, json_attrs_2, endptr);
     if (status != 0)
@@ -295,7 +294,7 @@ static int json_devicelist_read(const char *buf, struct gps_data_t *gpsdata,
     };
     int status;
 
-    memset(&gpsdata->devices, '\0', sizeof(gpsdata->devices));
+    memset(&gpsdata->devices, 0, sizeof(gpsdata->devices));
     status = json_read_object(buf, json_attrs_devices, endptr);
     if (status != 0) {
 	return status;
@@ -324,7 +323,7 @@ static int json_version_read(const char *buf, struct gps_data_t *gpsdata,
     };
     int status;
 
-    memset(&gpsdata->version, '\0', sizeof(gpsdata->version));
+    memset(&gpsdata->version, 0, sizeof(gpsdata->version));
     status = json_read_object(buf, json_attrs_version, endptr);
 
     return status;
@@ -343,7 +342,7 @@ static int json_error_read(const char *buf, struct gps_data_t *gpsdata,
     };
     int status;
 
-    memset(&gpsdata->error, '\0', sizeof(gpsdata->error));
+    memset(&gpsdata->error, 0, sizeof(gpsdata->error));
     status = json_read_object(buf, json_attrs_error, endptr);
     if (status != 0)
 	return status;
@@ -373,7 +372,7 @@ int json_toff_read(const char *buf, struct gps_data_t *gpsdata,
     };
     int status;
 
-    memset(&gpsdata->toff, '\0', sizeof(gpsdata->toff));
+    memset(&gpsdata->toff, 0, sizeof(gpsdata->toff));
     status = json_read_object(buf, json_attrs_toff, endptr);
     gpsdata->toff.real.tv_sec = (time_t)real_sec;
     gpsdata->toff.real.tv_nsec = (long)real_nsec;
@@ -409,7 +408,7 @@ int json_pps_read(const char *buf, struct gps_data_t *gpsdata,
     };
     int status;
 
-    memset(&gpsdata->pps, '\0', sizeof(gpsdata->pps));
+    memset(&gpsdata->pps, 0, sizeof(gpsdata->pps));
     status = json_read_object(buf, json_attrs_pps, endptr);
 
     /* This is good until GPS are more than nanosec accurate */
@@ -448,7 +447,7 @@ int json_oscillator_read(const char *buf, struct gps_data_t *gpsdata,
     };
     int status;
 
-    memset(&gpsdata->osc, '\0', sizeof(gpsdata->osc));
+    memset(&gpsdata->osc, 0, sizeof(gpsdata->osc));
     status = json_read_object(buf, json_attrs_osc, endptr);
 
     gpsdata->osc.running = running;
