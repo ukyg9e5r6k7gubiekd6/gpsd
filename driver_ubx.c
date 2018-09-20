@@ -521,6 +521,10 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
             /* GLONASS */
             session->gpsdata.skyview[st].gnssid = 6;
             session->gpsdata.skyview[st].svid = PRN - 64;
+        } else if ((120 <= PRN) && (158 >= PRN)) {
+            /* SBAS */
+            session->gpsdata.skyview[st].gnssid = 1;
+            session->gpsdata.skyview[st].svid = PRN;
         } else if ((159 <= PRN) && (163 >= PRN)) {
             /* BeiDou, again */
             session->gpsdata.skyview[st].gnssid = 3;
