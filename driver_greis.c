@@ -349,6 +349,7 @@ static gps_mask_t greis_msg_SI(struct gps_device_t *session,
 			       unsigned char *buf, size_t len)
 {
     int i;
+    unsigned short PRN;
 
     if (len < 1) {
 	gpsd_log(&session->context->errout, LOG_WARN,
@@ -360,8 +361,43 @@ static gps_mask_t greis_msg_SI(struct gps_device_t *session,
     /* FIXME: check against MAXCHANNELS? */
     session->gpsdata.satellites_visible = len - 1;
     for (i = 0; i < session->gpsdata.satellites_visible; i++) {
-	/* This isn't really PRN, this is USI.  Do we need to convert? */
-	session->gpsdata.skyview[i].PRN = getub(buf, i);
+	/* This isn't really PRN, this is USI.  Convert it. */
+	PRN = getub(buf, i);
+	session->gpsdata.skyview[i].PRN = PRN;
+
+        /* fit into gnssid:svid */
+	if (0 == PRN) {
+            /* skip 0 PRN */
+	    continue;
+        } else if ((1 <= PRN) && (37 >= PRN)) {
+            /* GPS */
+            session->gpsdata.skyview[i].gnssid = 0;
+            session->gpsdata.skyview[i].svid = PRN;
+        } else if ((38 <= PRN) && (69 >= PRN)) {
+            /* GLONASS */
+            session->gpsdata.skyview[i].gnssid = 6;
+            session->gpsdata.skyview[i].svid = PRN - 37;
+        } else if (70 == PRN) {
+            /* GLONASS, again */
+            session->gpsdata.skyview[i].gnssid = 6;
+            session->gpsdata.skyview[i].svid = 255;
+        } else if ((71 <= PRN) && (119 >= PRN)) {
+            /* Galileo */
+            session->gpsdata.skyview[i].gnssid = 2;
+            session->gpsdata.skyview[i].svid = PRN - 70;
+        } else if ((120 <= PRN) && (142 >= PRN)) {
+            /* SBAS */
+            session->gpsdata.skyview[i].gnssid = 1;
+            session->gpsdata.skyview[i].svid = PRN - 119;
+        } else if ((193 <= PRN) && (197 >= PRN)) {
+            /* QZSS */
+            session->gpsdata.skyview[i].gnssid = 5;
+            session->gpsdata.skyview[i].svid = PRN - 192;
+        } else if ((211 <= PRN) && (247 >= PRN)) {
+            /* BeiDou */
+            session->gpsdata.skyview[i].gnssid = 3;
+            session->gpsdata.skyview[i].svid = PRN - 210;
+        }
     }
 
     session->driver.greis.seen_si = true;
