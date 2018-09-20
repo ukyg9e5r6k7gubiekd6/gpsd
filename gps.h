@@ -112,15 +112,6 @@ struct gps_fix_t {
 };
 
 /*
- * Satellite ID classes.
- * According to IS-GPS-200 Revision H paragraph 6.3.6, and earlier revisions
- * at least back to E, the upper bound of U.S. GPS PRNs is actually 64. However,
- * NMEA0183 only allocates 1-32 for U.S. GPS IDs; it uses 33-64 for IDs ub the
- * SBAS range.
- */
-#define SBAS_PRN(n)	((n) >= 120 && ((n) <= 158))	/* Satellite Based Augmentation System (eg GAGAN)*/
-
-/*
  * Other GNSS birds reuse GPS PRNs.
  * It is an NMEA0183 convention to map them to pseudo-PRNs 65..437.
  * Very dependent on NMEA version.

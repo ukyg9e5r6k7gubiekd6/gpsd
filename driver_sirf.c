@@ -606,7 +606,7 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
     /* mark SBAS sats in use if SBAS was in use as of the last MID 27 */
     for (i = 0; i < st; i++) {
 	int prn = session->gpsdata.skyview[i].PRN;
-	if (SBAS_PRN(prn) \
+	if ( (prn >= 120 && prn <= 158) \
 		&& session->gpsdata.status == STATUS_DGPS_FIX \
 		&& session->driver.sirf.dgps_source == SIRF_DGPS_SOURCE_SBAS)
 	    session->gpsdata.skyview[i].used = true;

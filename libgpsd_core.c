@@ -731,8 +731,8 @@ static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
              /* skip unused sats */
              continue;
         }
-        if (1 > gpsdata->skyview[k].PRN || SBAS_PRN(gpsdata->skyview[k].PRN)) {
-             /* skip bad PRN, skip SBAS sats */
+        if (1 > gpsdata->skyview[k].PRN) {
+             /* skip bad PRN */
              continue;
         }
         if (0 > gpsdata->skyview[k].azimuth ||
