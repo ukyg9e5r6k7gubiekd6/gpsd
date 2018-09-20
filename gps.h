@@ -39,6 +39,7 @@ extern "C" {
  * 7.0 - add gps_fix_t.ecef (February 2018)
  *       changed prototype of gps_read() to add buffer parameters
  *       increased length of devconfig_t.subtype
+ *       add gnssid:svid to satellite_t
  */
 #define GPSD_API_MAJOR_VERSION	7	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
