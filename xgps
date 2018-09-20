@@ -116,9 +116,9 @@ def fit_to_grid(x, y, line_width):
     if line_width % 2 == 0:
         # Round to a pixel corner.
         return round(x), round(y)
-    else:
-        # Round to a pixel center.
-        return int(x) + 0.5, int(y) + 0.5
+
+    # Round to a pixel center.
+    return int(x) + 0.5, int(y) + 0.5
 
 
 def fit_circle_to_grid(x, y, radius, line_width):
@@ -277,6 +277,7 @@ class SkyView(Gtk.DrawingArea):
         return (xout, yout)
 
     def on_draw(self, widget, _unused):
+        "Draw the skyview"
         self.cr = widget.get_window().cairo_create()
 
         self.cr.set_line_width(1)
@@ -328,13 +329,13 @@ class SkyView(Gtk.DrawingArea):
         # The satellites
         self.cr.set_line_width(2)
         for sat in self.satellites:
-            if not (1 <= sat.PRN <= 437):
+            if not 1 <= sat.PRN <= 437:
                 # Bad PRN, skip.  NMEA uses up to 437
                 continue
-            if not (0 <= sat.az <= 359):
+            if not 0 <= sat.az <= 359:
                 # Bad azimuth, skip.
                 continue
-            if not (-10 <= sat.el <= 90):
+            if not -10 <= sat.el <= 90:
                 # Bad elevation, skip.  Allow just below horizon
                 continue
 
@@ -938,6 +939,8 @@ class Base(object):
             return "n/a"
 
     def update_status(self, data):
+        "Update the status window"
+
         if data.mode == gps.MODE_2D:
             status = "2D FIX"
         elif data.mode == gps.MODE_3D:
@@ -963,9 +966,9 @@ class Base(object):
 
     def _int_to_str(self, val, min, max):
         "test val in range min to max, or return"
-        if not (min <= val <= max):
-            return 'n/a'
-        return '%3d' % val
+        if min <= val <= max:
+            return '%3d' % val
+        return 'n/a'
 
     def update_skyview(self, data):
         "Update the satellite list and skyview."
@@ -1074,6 +1077,7 @@ class Base(object):
         return True
 
     def main(self):
+        "The main routine"
         Gtk.main()
 
 
