@@ -50,57 +50,34 @@ By Eric S. Raymond for the GPSD project, December 2009
 MAXCHANNELS = 28
 
 # how to sort the Satellite List
-# some of ("USI","el","az","ss","used") with optional '-' to reverse sort
-# by default, used at the top, then sort USI
-# module gps still uses PRN
+# some of ("PRN","el","az","ss","used") with optional '-' to reverse sort
+# by default, used at the top, then sort PRN
 SKY_VIEW_SORT_FIELDS = ('-used', 'PRN')
 
 # Each GNSS constellation reuses the same PRNs.  To differentiate they are
-# all mushed into the PRN by Universal Satellite Index (USI)
+# all mushed into the PRN.  Different GPS mush differently.  gpsd should
+# have unstangled and put in gnssid:svid
 
-# here is the mapping GREIS GPS uses.  NMEA and u-blox are different.
-# USI           constellation
-# ----------- | --------------
-# 0             Unused. Ignore satellites with this USI
-# [1...37]      GPS PRNs [1...37]
-# [38...69]     GLONASS FCNs [-7...24]
-# 70            GLONASS satellite with unknown FCN
-# [71...119]    GALILEO PRNs [1...49]
-# [120...142]   SBAS PRNs [120...142]
-# [143...192]   Reserved
-# [193...197]   QZSS PRNs [193...197]
-# [198...210]   Reserved
-# [211...247]   BeiDou (COMPASS) PRNs [1...37]
-# [248...254]   Reserved
-# 255           Unused.  Ignore satellites with this USI
+def gnssid_str(gnssid, svid):
+    "convert gnssid:svid to string"
+    if 0 == svid:
+        return '  '
+    if 0 == gnssid:
+        return 'GP'
+    if 1 == gnssid:
+        return 'SB'
+    if 2 == gnssid:
+        return 'GA'
+    if 3 == gnssid:
+        return 'BD'
+    if 4 == gnssid:
+        return 'IM'
+    if 5 == gnssid:
+        return 'QZ'
+    if 6 == gnssid:
+        return 'GL'
 
-
-def gps_type(prn):
-    # FIXME: should be in gps.py, will move when tested
-    # return a string of the GPS constellation this PRN is in
-    if prn == 0:
-        return 'Unused'
-    if prn < 38:
-        return 'GPS'
-    if prn < 71:
-        return 'GLONASS'
-    if prn < 120:
-        return 'GALILEO'
-    if prn < 143:
-        return 'SBAS'
-    if prn < 193:
-        return 'Reserved'
-    if prn < 198:
-        return 'QZSS'
-    if prn < 211:
-        return 'Reserved'
-    if prn < 248:
-        return 'BeiDou'
-    if prn < 255:
-        return 'Reserved'
-    # else
-    return 'Unused'
-
+    return '  '
 
 class unit_adjustments(object):
     "Encapsulate adjustments for unit systems."
@@ -246,19 +223,29 @@ class SkyView(Gtk.DrawingArea):
         self.cr.show_text(text)
         self.cr.new_path()
 
-    def draw_triangle(self, x, y, radius, filled=False, flip=False):
+    def draw_triangle(self, x, y, radius, filled, flip):
         "Draw a triangle centered on the specified midpoint."
         lw = self.cr.get_line_width()
-        if flip:
+        if 0 == flip or 1 == flip:
+            if 0 == flip:
+                # down
+                ytop = y + radius
+                ybot = y - radius
+            elif 1 == flip:
+                # up
+                ytop = y - radius
+                ybot = y + radius
+
+            x1, y1 = fit_to_grid(x, ytop, lw)
+            x2, y2 = fit_to_grid(x + radius, ybot, lw)
+            x3, y3 = fit_to_grid(x - radius, ybot, lw)
+        else:
+            # right
             ytop = y + radius
             ybot = y - radius
-        else:
-            ytop = y - radius
-            ybot = y + radius
-
-        x1, y1 = fit_to_grid(x, ytop, lw)
-        x2, y2 = fit_to_grid(x + radius, ybot, lw)
-        x3, y3 = fit_to_grid(x - radius, ybot, lw)
+            x1, y1 = fit_to_grid(x - radius, ytop, lw)
+            x2, y2 = fit_to_grid(x - radius, ybot, lw)
+            x3, y3 = fit_to_grid(x + radius, y, lw)
 
         self.cr.move_to(x1, y1)
         self.cr.line_to(x2, y2)
@@ -357,16 +344,18 @@ class SkyView(Gtk.DrawingArea):
                 self.set_color("Green1")
 
             # shape by constellation
-            constellation = gps_type(sat.PRN)
-            if constellation == 'GPS':
+            constellation = gnssid_str(sat.gnssid, sat.svid)
+            if constellation == 'GP':
                 self.draw_circle(x, y, SkyView.SAT_RADIUS, sat.used)
-            elif constellation == 'SBAS':
+            elif constellation == 'SB':
                 self.draw_square(x, y, SkyView.SAT_RADIUS, sat.used)
-            elif constellation == 'GALILEO':
-                self.draw_triangle(x, y, SkyView.SAT_RADIUS, sat.used, False)
+            elif constellation == 'GA':
+                self.draw_triangle(x, y, SkyView.SAT_RADIUS, sat.used, 0)
+            elif constellation == 'BD':
+                self.draw_triangle(x, y, SkyView.SAT_RADIUS, sat.used, 1)
             else:
-                # QZSS, GLONASS, BeiDou, Reserved or Unused
-                self.draw_triangle(x, y, SkyView.SAT_RADIUS, sat.used, True)
+                # QZSS, GLONASS, IMES, unknown or other
+                self.draw_triangle(x, y, SkyView.SAT_RADIUS, sat.used, 2)
 
             self.cr.set_source_rgb(1, 1, 1)
             self.draw_string(x + SkyView.SAT_RADIUS,
@@ -711,10 +700,10 @@ class Base(object):
         skyframe = Gtk.Frame(label="Satellite List")
         self.satbox.add(skyframe)
 
-        self.satlist = Gtk.ListStore(str, str, str, str, str)
+        self.satlist = Gtk.ListStore(str, str, str, str, str, str)
         view = Gtk.TreeView(model=self.satlist)
 
-        for (i, label) in enumerate(('USI', 'Elev', 'Azim', 'SNR', 'Used')):
+        for (i, label) in enumerate(('', 'PRN', 'Elev', 'Azim', 'SNR', 'Used')):
             column = Gtk.TreeViewColumn(label)
             renderer = Gtk.CellRendererText(xalign=1.0)
             column.pack_start(renderer, expand=True)
@@ -723,7 +712,7 @@ class Base(object):
 
         self.row_iters = []
         for i in range(MAXCHANNELS):
-            self.satlist.append(["", "", "", "", ""])
+            self.satlist.append(["", "", "", "", "", ""])
             self.row_iters.append(self.satlist.get_iter(i))
 
         skyframe.add(view)
@@ -982,21 +971,23 @@ class Base(object):
                     key=lambda x: x[fld], reverse=rev)
 
             for (i, satellite) in enumerate(satellites):
-                # Bad PRN, skip.  NMEA uses up to 437
-                self.set_satlist_field(i, 0,
+                self.set_satlist_field(i, 0, gnssid_str(satellite.gnssid,
+                                                        satellite.svid))
+                # NMEA uses PRN up to 437
+                self.set_satlist_field(i, 1,
                                        self._int_to_str(satellite.PRN, 1, 437))
                 # allow satellites 10 degree below horizon
-                self.set_satlist_field(i, 1,
-                                       self._int_to_str(satellite.el, -10, 90))
                 self.set_satlist_field(i, 2,
+                                       self._int_to_str(satellite.el, -10, 90))
+                self.set_satlist_field(i, 3,
                                        self._int_to_str(satellite.az, 0, 359))
-                self.set_satlist_field(i, 3, "%3d" % satellite.ss)
+                self.set_satlist_field(i, 4, "%3d" % satellite.ss)
                 yesno = 'N'
                 data.satellites_seen += 1
                 if satellite.used:
                     yesno = 'Y'
                     data.satellites_used += 1
-                self.set_satlist_field(i, 4, yesno)
+                self.set_satlist_field(i, 5, yesno)
             for i in range(len(satellites), MAXCHANNELS):
                 for j in range(0, 5):
                     self.set_satlist_field(i, j, "")
