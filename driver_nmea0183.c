@@ -575,18 +575,19 @@ static int nmeaid_to_prn(char *talker, int satnum)
 {
     /*
      * According to https://github.com/mvglasow/satstat/wiki/NMEA-IDs
+     * and u-blox documentation.
      * NMEA IDs can be roughly divided into the following ranges:
      *
      *   1..32:  GPS
-     *   33..54: Various SBAS systems (EGNOS, WAAS, SDCM, GAGAN, MSAS)
-     *           ... some IDs still unused
-     *   55..64: not used (might be assigned to further SBAS systems)
-     *   65..88: GLONASS
-     *   89..96: GLONASS (future extensions?)
-     *   97..192: not used (SBAS PRNs 120-151 fall in here)
-     *   193..195: QZSS
-     *   196..200: QZSS (future extensions?)
-     *   201..235: Beidou
+     *   33..64: Various SBAS systems (EGNOS, WAAS, SDCM, GAGAN, MSAS)
+     *   65..96: GLONASS
+     *   152..158: Various SBAS systems (EGNOS, WAAS, SDCM, GAGAN, MSAS)
+     *   173..182: IMES
+     *   193..197: QZSS
+     *   201..235: Beidou (not NMEA, not u-blox?)
+     *   301..336: Galileo
+     *   401..437: Beidou
+     *   null: GLONASS unused
      *
      * The issue is what to do when GPSes from these different systems
      * fight for IDs in the  1-32 range, as in this pair of Beidou sentences
