@@ -19,9 +19,6 @@ import socket
 import sys
 import time
 
-import gps
-import gps.clienthelpers
-
 import cairo
 
 # Gtk3 imports.  Gtk3 requires the require_version(), which then causes
@@ -38,6 +35,10 @@ from gi.repository import GObject  # pylint: disable=wrong-import-position
 from gi.repository import Gtk  # pylint: disable=wrong-import-position
 from gi.repository import Gdk  # pylint: disable=wrong-import-position
 from gi.repository import Pango  # pylint: disable=wrong-import-position
+
+# pylint wants local modules last
+import gps
+import gps.clienthelpers
 
 gui_about = '''\
 This is xgps, a test client for the gpsd daemon.
@@ -834,8 +835,8 @@ class Base(object):
         if hasattr(data, "time"):
             # str() just in case we get an old-style float.
             return str(data.time)
-        else:
-            return "n/a"
+
+        return "n/a"
 
     def update_latitude(self, data):
         if data.mode >= gps.MODE_2D and hasattr(data, "lat"):
@@ -845,8 +846,8 @@ class Base(object):
             else:
                 ns = 'N'
             return "%14s %s" % (lat, ns)
-        else:
-            return "n/a"
+
+        return "n/a"
 
     def update_longitude(self, data):
         if data.mode >= gps.MODE_2D and hasattr(data, "lon"):
@@ -856,39 +857,39 @@ class Base(object):
             else:
                 ew = 'E'
             return "%14s %s" % (lon, ew)
-        else:
-            return "n/a"
+
+        return "n/a"
 
     def update_altitude(self, data):
         if data.mode >= gps.MODE_3D and hasattr(data, "alt"):
             return "%9.3f %s" % (
                 data.alt * self.conversions.altfactor,
                 self.conversions.altunits)
-        else:
-            return "n/a"
+
+        return "n/a"
 
     def update_speed(self, data):
         if hasattr(data, "speed"):
             return "%9.3f %s" % (
                 data.speed * self.conversions.speedfactor,
                 self.conversions.speedunits)
-        else:
-            return "n/a"
+
+        return "n/a"
 
     def update_climb(self, data):
         if hasattr(data, "climb"):
             return "%9.3f %s" % (
                 data.climb * self.conversions.speedfactor,
                 self.conversions.speedunits)
-        else:
-            return "n/a"
+
+        return "n/a"
 
     def update_track(self, data):
         if hasattr(data, "track"):
             return "%14s °" % (
                 gps.clienthelpers.deg_to_str(self.deg_type, abs(data.track)))
-        else:
-            return "n/a"
+
+        return "n/a"
 
     def update_seen(self, data):
         # update sats seen/used in the GPS Data window
@@ -896,15 +897,15 @@ class Base(object):
             return ("Seen %d, Used %d" % (
                     getattr(data, 'satellites_seen'),
                     getattr(data, 'satellites_used')))
-        else:
-            return "n/a"
+
+        return "n/a"
 
     def update_dop(self, data, doptype):
         # update a DOP in the GPS Data window
         if hasattr(data, doptype):
             return "%5.2f" % getattr(data, doptype)
-        else:
-            return "n/a"
+
+        return "n/a"
 
     def update_ecef(self, data, eceftype, speedunit=''):
         # update a ECEF in the GPS Data window
@@ -913,30 +914,30 @@ class Base(object):
             return ("% 14.3f %s%s" %
                     (val * self.conversions.altfactor,
                      self.conversions.altunits, speedunit))
-        else:
-            return "n/a"
+
+        return "n/a"
 
     def update_err(self, data, errtype):
         if hasattr(data, errtype):
             return "%8.3f %s" % (
                 getattr(data, errtype) * self.conversions.altfactor,
                 self.conversions.altunits)
-        else:
-            return "n/a"
+
+        return "n/a"
 
     def update_err_speed(self, data, errtype):
         if hasattr(data, errtype):
             return "%8.3f %s" % (
                 getattr(data, errtype) * self.conversions.speedfactor,
                 self.conversions.speedunits)
-        else:
-            return "n/a"
+
+        return "n/a"
 
     def update_err_degrees(self, data, errtype):
         if hasattr(data, errtype):
             return "%8.3f °" % (getattr(data, errtype))
-        else:
-            return "n/a"
+
+        return "n/a"
 
     def update_status(self, data):
         "Update the status window"
@@ -1114,7 +1115,7 @@ if __name__ == "__main__":
                      's': gps.clienthelpers.deg_ddmmss}[degreefmt]
 
         (host, port, device) = ("localhost", gps.GPSD_PORT, None)
-        if len(arguments):
+        if arguments:
             args = arguments[0].split(":")
             if len(args) >= 1 and args[0]:
                 host = args[0]
