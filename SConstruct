@@ -1446,6 +1446,9 @@ else:
             )
         python_compiled_libs[ext] = python_env.SharedLibrary(
             ext, python_objects[ext])
+    # Make PEP 241 Metadata 1.0.
+    # Why not PEP 314 (V1.1) or PEP 345 (V1.2)?
+    # V1.2 and V1.2 require a Download-URL to an installable binary
     python_egg_info_source = """Metadata-Version: 1.0
 Name: gps
 Version: %s
@@ -1454,6 +1457,7 @@ Home-page: %s
 Author: the GPSD project
 Author-email: %s
 License: BSD
+Keywords: GPS
 Description: The gpsd service daemon can monitor one or more GPS devices \
 connected to a host computer, making all data on the location and movements \
 of the sensors available to be queried on TCP port 2947.
