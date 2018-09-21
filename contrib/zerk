@@ -1745,7 +1745,7 @@ for (opt, val) in options:
         opts['input_forced_wait'] = True
     elif opt == '-V':
         # version
-        print('3.18-dev 18Sep18\n')
+        sys.stderr.write('zerk: Version %s\n' % gps_version)
         sys.exit(0)
 
 if opts['input_file_name'] is None:
