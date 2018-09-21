@@ -118,9 +118,37 @@ def fakehook(linenumber, fakegps):
     return True
 
 if __name__ == '__main__':
+    def usage():
+        "Print usage and exit"
+        sys.stderr.write("""usage: gpsfake [OPTIONS] logfile...
+    [-1]
+    [-b]
+    [-c cycle]
+    [-D debug]
+    [-g]
+    [-h]
+    [-i]
+    [-l]
+    [-m monitor]
+    [-n]
+    [-o options]
+    [-p]
+    [-P port]
+    [-q]
+    [-r initcmd]
+    [-S]
+    [-s speed]
+    [-t]
+    [-T]
+    [-v]
+    [-V]
+    [-x]
+""")
+        raise SystemExit(0)
+
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "1bc:D:ghilm:no:pP:qr:s:StTuvx")
+                                             "1bc:D:ghilm:no:pP:qr:s:StTuvxV")
     except getopt.GetoptError as msg:
         print("gpsfake: " + str(msg))
         raise SystemExit(1)
@@ -153,6 +181,8 @@ if __name__ == '__main__':
             doptions += " -D " + val
         elif switch == '-g':
             monitor = "xterm -e gdb -tui --args "
+        elif switch == '-h':
+            usage()
         elif switch == '-i':
             linedump = promptme = True
         elif switch == '-l':
@@ -161,8 +191,6 @@ if __name__ == '__main__':
             monitor = val + " "
         elif switch == '-n':
             doptions += " -n"
-        elif switch == '-x':
-            predump = True
         elif switch == '-o':
             doptions = val
         elif switch == '-p':
@@ -188,13 +216,11 @@ if __name__ == '__main__':
             udp = True
         elif switch == '-v':
             verbose += 1
-        elif switch == '-h':
-            sys.stderr.write("usage: gpsfake"
-                             " [-1] [-h] [-i] [-l] [-g] [-q] [-m monitor]"
-                             " [-D debug] [-n] [-o options] [-p]\n"
-                             "\t[-P port] [-r initcmd] [-t] [-T] [-v] [-x]"
-                             " [-s speed] [-S] [-c cycle] [-b] logfile...\n")
-            raise SystemExit(0)
+        elif switch == '-V':
+            sys.stderr.write("gpsfake: Version %s\n" % gps_version)
+            sys.exit(0)
+        elif switch == '-x':
+            predump = True
 
     try:
         pty.openpty()
