@@ -22,8 +22,6 @@ from __future__ import absolute_import, print_function, division
 from .client import *
 from .watch_options import *
 
-# module version, would be nice to automate the version
-__version__ = "3.18-dev"
 
 NaN = float('nan')
 
@@ -174,6 +172,9 @@ class gpsdata(object):
 
 class gps(gpscommon, gpsdata, gpsjson):
     "Client interface to a running gpsd instance."
+
+    # module version, would be nice to automate the version
+    __version__ = "3.18-dev"
 
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0, mode=0,
                  reconnect=False):
