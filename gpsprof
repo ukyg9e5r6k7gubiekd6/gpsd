@@ -1041,6 +1041,7 @@ usage: gpsprof [OPTION]... [server[:port[:device]]]
     [-S subtitle]
     [-T terminal]
     [-t title]
+    [-V]
 
 ''' % ("|".join([x.name for x in formatters])))
     sys.exit(0)
@@ -1048,7 +1049,7 @@ usage: gpsprof [OPTION]... [server[:port[:device]]]
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "d:f:hl:m:n:rs:S:t:T:D:")
+                                             "d:f:hl:m:n:rs:t:D:S:T:V")
 
         plotmode = "space"
         raw = False
@@ -1092,6 +1093,9 @@ if __name__ == '__main__':
                 subtitle = val
             elif switch == '-T':
                 terminal = val
+            elif switch == '-V':
+                sys.stderr.write("gpsprof: Version %s\n" % gps_version)
+                sys.exit(0)
 
         (host, port, device) = ("localhost", "2947", None)
         if len(arguments):
