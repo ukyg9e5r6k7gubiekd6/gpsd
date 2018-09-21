@@ -95,17 +95,27 @@ def kmlize(tpv):
 
 
 if __name__ == "__main__":
+    def usage():
+        "Print usage and exit"
+        sys.stderr.write("usage: gegps: [-d] [-h] [-i] [-V]\n")
+        sys.exit(0)
+
     session = gps.gps()
     session.stream(gps.WATCH_ENABLE)
 
     kmldir = "."
     initialize = False
-    (options, arguments) = getopt.getopt(sys.argv[1:], "d:i")
+    (options, arguments) = getopt.getopt(sys.argv[1:], "d:hiV")
     for (opt, arg) in options:
         if opt == '-d':
             kmldir = arg
+        elif opt == '-h':
+            usage()
         elif opt == '-i':
             initialize = True
+        elif opt == '-V':
+            sys.stderr.write("gegps: Version %s\n" % gps_version)
+            sys.exit(0)
 
     if initialize:
         f = open(os.path.join(kmldir, 'Open_in_Google_Earth_RT_GPS.kml'), 'w')
