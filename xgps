@@ -86,6 +86,7 @@ class unit_adjustments(object):
     "Encapsulate adjustments for unit systems."
 
     def __init__(self, units=None):
+        "Initialize class unit_adjustments"
         self.altfactor = gps.METERS_TO_FEET
         self.altunits = "ft"
         self.speedfactor = gps.MPS_TO_MPH
@@ -140,6 +141,7 @@ class SkyView(Gtk.DrawingArea):
     SAT_RADIUS = 5      # Diameter of satellite circle
 
     def __init__(self, rotate=0.0):
+        "Initialize class SkyView"
         Gtk.DrawingArea.__init__(self)
         # GObject.GObject.__init__(self)
         self.set_size_request(400, 400)
@@ -152,6 +154,7 @@ class SkyView(Gtk.DrawingArea):
         self.rotate = rotate
 
     def on_size_allocate(self, _unused, allocation):
+        "Adjust SkyView on size change"
         width = allocation.width
         height = allocation.height
         x = width // 2
@@ -400,6 +403,7 @@ class NoiseView(object):
     )
 
     def __init__(self):
+        "Initialize class NoiseView"
         self.widget = Gtk.Table(NoiseView.COLUMNS, NoiseView.ROWS, False)
         self.noisewidgets = []
         for i in range(len(NoiseView.noisefields)):
@@ -433,10 +437,12 @@ class MaidenheadView(object):
     "Encapsulate view object for watching Maidenhead grid location."
 
     def __init__(self):
+        "Initialize class MaidenheadView"
         self.widget = Gtk.Entry()
         self.widget.set_editable(False)
 
     def update(self, tpv):
+        "Update class MaidenheadView"
         if ((tpv.mode >= gps.MODE_2D and
              hasattr(tpv, "lat") and
              hasattr(tpv, "lon"))):
@@ -570,6 +576,7 @@ class AISView(object):
 
 
 class Base(object):
+    "Base class for all the output"
     COLUMNS = 3
     ROWS = 7
     gpsfields = (
@@ -608,6 +615,7 @@ class Base(object):
     )
 
     def __init__(self, deg_type, rotate=0.0, target=""):
+        "Initialize class Base"
         self.deg_type = deg_type
         self.rotate = rotate
         self.conversions = unit_adjustments()
@@ -806,6 +814,7 @@ class Base(object):
                           in zip(Base.gpsfields, gpswidgets)]
 
     def view_toggle(self, action):
+        "Toggle widget view"
         # print("View toggle:", action.get_active(), action.get_name())
         if hasattr(self, 'view_name_to_widget'):
             if action.get_active():
@@ -826,12 +835,14 @@ class Base(object):
                              % (row, MAXCHANNELS))
 
     def delete_event(self, _widget, _event, _data=None):
+        "Say goodbye nicely"
         Gtk.main_quit()
         return False
 
     # State updates
 
     def update_time(self, data):
+        "Update time"
         if hasattr(data, "time"):
             # str() just in case we get an old-style float.
             return str(data.time)
@@ -839,6 +850,7 @@ class Base(object):
         return "n/a"
 
     def update_latitude(self, data):
+        "Update latitude"
         if data.mode >= gps.MODE_2D and hasattr(data, "lat"):
             lat = gps.clienthelpers.deg_to_str(self.deg_type, abs(data.lat))
             if data.lat < 0:
@@ -850,6 +862,7 @@ class Base(object):
         return "n/a"
 
     def update_longitude(self, data):
+        "Update longitude"
         if data.mode >= gps.MODE_2D and hasattr(data, "lon"):
             lon = gps.clienthelpers.deg_to_str(self.deg_type, abs(data.lon))
             if data.lon < 0:
@@ -861,6 +874,7 @@ class Base(object):
         return "n/a"
 
     def update_altitude(self, data):
+        "Update altitude"
         if data.mode >= gps.MODE_3D and hasattr(data, "alt"):
             return "%9.3f %s" % (
                 data.alt * self.conversions.altfactor,
@@ -869,6 +883,7 @@ class Base(object):
         return "n/a"
 
     def update_speed(self, data):
+        "Update speed"
         if hasattr(data, "speed"):
             return "%9.3f %s" % (
                 data.speed * self.conversions.speedfactor,
@@ -877,6 +892,7 @@ class Base(object):
         return "n/a"
 
     def update_climb(self, data):
+        "Update climb"
         if hasattr(data, "climb"):
             return "%9.3f %s" % (
                 data.climb * self.conversions.speedfactor,
@@ -885,6 +901,7 @@ class Base(object):
         return "n/a"
 
     def update_track(self, data):
+        "Update track"
         if hasattr(data, "track"):
             return "%14s °" % (
                 gps.clienthelpers.deg_to_str(self.deg_type, abs(data.track)))
@@ -892,6 +909,7 @@ class Base(object):
         return "n/a"
 
     def update_seen(self, data):
+        "Update sats seen"
         # update sats seen/used in the GPS Data window
         if hasattr(data, 'satellites_seen'):
             return ("Seen %d, Used %d" % (
@@ -901,14 +919,14 @@ class Base(object):
         return "n/a"
 
     def update_dop(self, data, doptype):
-        # update a DOP in the GPS Data window
+        "update a DOP in the GPS Data window"
         if hasattr(data, doptype):
             return "%5.2f" % getattr(data, doptype)
 
         return "n/a"
 
     def update_ecef(self, data, eceftype, speedunit=''):
-        # update a ECEF in the GPS Data window
+        "update a ECEF in the GPS Data window"
         if hasattr(data, eceftype):
             val = getattr(data, eceftype)
             return ("% 14.3f %s%s" %
@@ -918,6 +936,7 @@ class Base(object):
         return "n/a"
 
     def update_err(self, data, errtype):
+        "update a error estimate in the GPS Data window"
         if hasattr(data, errtype):
             return "%8.3f %s" % (
                 getattr(data, errtype) * self.conversions.altfactor,
@@ -926,6 +945,7 @@ class Base(object):
         return "n/a"
 
     def update_err_speed(self, data, errtype):
+        "update speed error estimate in the GPS Data window"
         if hasattr(data, errtype):
             return "%8.3f %s" % (
                 getattr(data, errtype) * self.conversions.speedfactor,
@@ -934,6 +954,7 @@ class Base(object):
         return "n/a"
 
     def update_err_degrees(self, data, errtype):
+        "update heading error estimate in the GPS Data window"
         if hasattr(data, errtype):
             return "%8.3f °" % (getattr(data, errtype))
 
