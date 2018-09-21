@@ -2019,6 +2019,7 @@ if not env["aivdm"]:
     announce("AIVDM regression tests suppressed because aivdm is off.")
     aivdm_regress = None
 else:
+    # FIXME! Does not return a proper fail code
     aivdm_regress = Utility('aivdm-regress', [gpsdecode], [
         '@echo "Testing AIVDM decoding w/ CSV format..."',
         '@for f in $SRCDIR/test/*.aivdm; do '
