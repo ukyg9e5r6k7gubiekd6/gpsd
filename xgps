@@ -1143,7 +1143,7 @@ if __name__ == "__main__":
             elif opt in ('-?', '-h', '--help'):
                 print(__doc__)
                 sys.exit(0)
-            elif opt == 'V':
+            elif opt == '-V':
                 sys.stderr.write("xgps 1.0\n")
                 sys.exit(0)
 
