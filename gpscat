@@ -19,7 +19,15 @@ import termios
 
 import curses.ascii
 
+import gps
 import gps.packet as sniffer
+
+gps_version = '3.18-dev'
+if gps.__version__ != gps_version:
+    sys.stderr.write("gpscat: ERROR: need gps module version %s, got %s\n" %
+                     (gps_version, gps.__version__))
+    sys.exit(1)
+
 
 # The spec says 82, but some receivers (TN-200, GSW 2.3.2) output 86 characters
 # the Skyrtaq S2525F8 emits 100 chars
@@ -49,8 +57,8 @@ def reporter(errlevel, msg):
 
 
 def printusage():
-    sys.stderr.write("usage: gpscat [-s speed] [-p] [-t] [-D debuglevel] "
-                     "serial-port\n")
+    sys.stderr.write("usage: gpscat [-D debuglevel] [-h] [-p] [-s speed] [-t] "
+                     "[-V] serial-port\n")
 
 if __name__ == '__main__':
     try:
@@ -66,7 +74,12 @@ if __name__ == '__main__':
         rawmode = True
         typeflag = False
         for (switch, val) in options:
-            if switch == '-p':
+            if switch == '-D':
+                debuglevel = BASELEVEL + int(val)
+            elif switch == '-h':
+                printusage()
+                raise SystemExit(0)
+            elif switch == '-p':
                 rawmode = False
             elif switch == '-s':
                 if val[-2] in ('N', 'E', 'O'):
@@ -77,11 +90,10 @@ if __name__ == '__main__':
             elif switch == '-t':
                 typeflag = True
                 rawmode = False
-            elif switch == '-D':
-                debuglevel = BASELEVEL + int(val)
-            elif switch == '-h':
-                printusage()
-                raise SystemExit(0)
+            elif switch == '-V':
+                sys.stderr.write("gpscat: Version %s\n" % gps_version)
+                sys.exit(0)
+
 
         if len(arguments) != 1:
             printusage()
