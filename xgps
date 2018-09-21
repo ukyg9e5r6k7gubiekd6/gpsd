@@ -140,7 +140,7 @@ class SkyView(Gtk.DrawingArea):
     HORIZON_PAD = 40    # How much whitespace to leave around horizon
     SAT_RADIUS = 5      # Diameter of satellite circle
 
-    def __init__(self, rotate=0.0):
+    def __init__(self, rotation=0.0):
         "Initialize class SkyView"
         Gtk.DrawingArea.__init__(self)
         # GObject.GObject.__init__(self)
@@ -151,7 +151,7 @@ class SkyView(Gtk.DrawingArea):
         self.connect('draw', self.on_draw)
         self.satellites = []
         self.center_x = self.center_y = self.radius = None
-        self.rotate = rotate
+        self.rotate = rotation
 
     def on_size_allocate(self, _unused, allocation):
         "Adjust SkyView on size change"
@@ -449,7 +449,7 @@ class MaidenheadView(object):
             self.widget.set_text(gps.clienthelpers.maidenhead(tpv.lat,
                                                               tpv.lon))
         else:
-            return self.widget.set_text("n/a")
+            self.widget.set_text("n/a")
 
 
 class AISView(object):
@@ -483,25 +483,25 @@ class AISView(object):
         "Add a named object (ship or station) to the store."
         if ais.mmsi in self.named:
             return False
-        else:
-            ais.entry_time = time.time()
-            self.named[ais.mmsi] = ais
-            self.name_to_mmsi[name] = ais.mmsi
-            # Garbage-collect old entries
-            try:
-                for i in range(len(self.store)):
-                    here = self.store.get_iter(i)
-                    name = self.store.get_value(here, 1)
-                    mmsi = self.name_to_mmsi[name]
-                    if ((self.named[mmsi].entry_time <
-                         time.time() - AISView.DWELLTIME)):
-                        del self.named[mmsi]
-                        if name in self.name_to_mmsi:
-                            del self.name_to_mmsi[name]
-                        self.store.remove(here)
-            except (ValueError, KeyError):  # Invalid TreeIters throw these
-                pass
-            return True
+
+        ais.entry_time = time.time()
+        self.named[ais.mmsi] = ais
+        self.name_to_mmsi[name] = ais.mmsi
+        # Garbage-collect old entries
+        try:
+            for i in range(len(self.store)):
+                here = self.store.get_iter(i)
+                name = self.store.get_value(here, 1)
+                mmsi = self.name_to_mmsi[name]
+                if ((self.named[mmsi].entry_time <
+                     time.time() - AISView.DWELLTIME)):
+                    del self.named[mmsi]
+                    if name in self.name_to_mmsi:
+                        del self.name_to_mmsi[name]
+                    self.store.remove(here)
+        except (ValueError, KeyError):  # Invalid TreeIters throw these
+            pass
+        return True
 
     def latlon(self, lat, lon):
         "Latitude/longitude display in nice format."
@@ -614,10 +614,10 @@ class Base(object):
         ("GDOP", lambda s, r: s.update_dop(r, "gdop")),
     )
 
-    def __init__(self, deg_type, rotate=0.0, target=""):
+    def __init__(self, deg_type, rotation=0.0, title=""):
         "Initialize class Base"
         self.deg_type = deg_type
-        self.rotate = rotate
+        self.rotate = rotation
         self.conversions = unit_adjustments()
         self.saved_mode = -1
         self.ais_latch = False
@@ -626,9 +626,9 @@ class Base(object):
         self.window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
         if not self.window.get_display():
             raise Exception("Can't open display")
-        if len(target):
-            target = " " + target
-        self.window.set_title("xgps" + target)
+        if title:
+            title = " " + title
+        self.window.set_title("xgps" + title)
         self.window.connect("delete-event", self.delete_event)
         self.window.set_resizable(False)
 
@@ -928,9 +928,9 @@ class Base(object):
     def update_ecef(self, data, eceftype, speedunit=''):
         "update a ECEF in the GPS Data window"
         if hasattr(data, eceftype):
-            val = getattr(data, eceftype)
+            value = getattr(data, eceftype)
             return ("% 14.3f %s%s" %
-                    (val * self.conversions.altfactor,
+                    (value * self.conversions.altfactor,
                      self.conversions.altunits, speedunit))
 
         return "n/a"
@@ -986,10 +986,10 @@ class Base(object):
                 widget.set_text(hook(self, tpv))
         self.gsview.update(tpv)
 
-    def _int_to_str(self, val, min, max):
+    def _int_to_str(self, value, min_val, max_val):
         "test val in range min to max, or return"
-        if min <= val <= max:
-            return '%3d' % val
+        if min_val <= value <= max_val:
+            return '%3d' % value
         return 'n/a'
 
     def update_skyview(self, data):
@@ -1088,13 +1088,13 @@ class Base(object):
 
     def handle_hangup(self, _source, _condition):
         "Handle hangup condition from the daemon."
-        w = Gtk.MessageDialog(parent=self.window,
-                              type=Gtk.MessageType.ERROR,
-                              flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
-                              buttons=Gtk.ButtonsType.CANCEL)
-        w.connect("destroy", lambda _unused: Gtk.main_quit())
-        w.set_markup("gpsd has stopped sending data.")
-        w.run()
+        win = Gtk.MessageDialog(parent=self.window,
+                                type=Gtk.MessageType.ERROR,
+                                flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                                buttons=Gtk.ButtonsType.CANCEL)
+        win.connect("destroy", lambda _unused: Gtk.main_quit())
+        win.set_markup("gpsd has stopped sending data.")
+        win.run()
         Gtk.main_quit()
         return True
 
@@ -1148,7 +1148,7 @@ if __name__ == "__main__":
         else:
             target = ""
 
-        base = Base(deg_type=degreefmt, rotate=rotate, target=target)
+        base = Base(deg_type=degreefmt, rotation=rotate, title=target)
         base.set_units(unit_system)
         try:
             daemon = gps.gps(host=host,
