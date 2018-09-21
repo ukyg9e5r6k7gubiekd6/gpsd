@@ -22,6 +22,9 @@ from __future__ import absolute_import, print_function, division
 from .client import *
 from .watch_options import *
 
+# module version, would be nice to automate the version
+__version__ = "3.18-dev"
+
 NaN = float('nan')
 
 
