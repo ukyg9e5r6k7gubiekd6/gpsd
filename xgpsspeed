@@ -778,7 +778,17 @@ if __name__ == '__main__':
         help='The unit of speed. Possible units are: mph, kmh, knots. '
              '[Default mph]'
     )
+    parser.add_option(
+        '-V', '--version',
+        action='store_true',
+        default=False,
+        help='Output version to stderr, then exit'
+    )
     (options, args) = parser.parse_args()
+    if options.version:
+        sys.stderr.write("xgpspeed: Version %s\n" % gps_version)
+        sys.exit(0)
+
     if args:
         arg = args[0].split(':')
         len_arg = len(arg)
