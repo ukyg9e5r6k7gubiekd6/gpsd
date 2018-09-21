@@ -622,6 +622,9 @@ class Base(object):
         self.saved_mode = -1
         self.ais_latch = False
         self.noise_latch = False
+        self.last_transition = 0.0
+        self.daemon = None
+        self.device = None
 
         self.window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
         if not self.window.get_display():
@@ -1047,10 +1050,10 @@ class Base(object):
 
     # I/O monitoring and gtk housekeeping
 
-    def watch(self, daemon, device):
+    def watch(self, daem, dev):
         "Set up monitoring of a daemon instance."
-        self.daemon = daemon
-        self.device = device
+        self.daemon = daem
+        self.device = dev
         GObject.io_add_watch(daemon.sock, GObject.IO_IN, self.handle_response)
         GObject.io_add_watch(daemon.sock, GObject.IO_ERR, self.handle_hangup)
         GObject.io_add_watch(daemon.sock, GObject.IO_HUP, self.handle_hangup)
