@@ -24,6 +24,12 @@ import time
 import gps
 import gps.fake as gpsfake   # The "as" pacifies pychecker
 
+gps_version = '3.18-dev'
+if gps.__version__ != gps_version:
+    sys.stderr.write("gpsfake: ERROR: need gps module version %s, got %s\n" %
+                     (gps_version, gps.__version__))
+    sys.exit(1)
+
 try:
     my_input = raw_input
 except NameError:

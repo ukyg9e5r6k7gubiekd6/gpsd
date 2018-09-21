@@ -20,6 +20,12 @@ from socket import error as SocketError
 
 import gps
 
+gps_version = '3.18-dev'
+if gps.__version__ != gps_version:
+    sys.stderr.write("xgpspeed: ERROR: need gps module version %s, got %s\n" %
+                     (gps_version, gps.__version__))
+    sys.exit(1)
+
 import cairo
 
 # Gtk3 imports.  Gtk3 requires the require_version(), which then causes

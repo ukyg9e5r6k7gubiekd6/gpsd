@@ -29,6 +29,12 @@ import time
 
 import gps
 
+gps_version = '3.18-dev'
+if gps.__version__ != gps_version:
+    sys.stderr.write("gpsprof: ERROR: need gps module version %s, got %s\n" %
+                     (gps_version, gps.__version__))
+    sys.exit(1)
+
 debug = False
 
 

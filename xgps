@@ -40,6 +40,19 @@ from gi.repository import Pango  # pylint: disable=wrong-import-position
 import gps
 import gps.clienthelpers
 
+gps_version = '3.18-dev'
+if gps.__version__ != gps_version:
+    sys.stderr.write("xgps: ERROR: need gps module version %s, got %s\n" %
+                     (gps_version, gps.__version__))
+    sys.exit(1)
+
+
+gps_version = '3.18-dev'
+if gps.__version__ != gps_version:
+    sys.stderr.write("xgps: ERROR: need gps module version %s, got %s\n" %
+                     (gps_version, gps.__version__))
+    sys.exit(1)
+
 gui_about = '''\
 This is xgps, a test client for the gpsd daemon.
 
