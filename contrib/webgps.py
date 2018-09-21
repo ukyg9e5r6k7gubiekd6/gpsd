@@ -47,6 +47,13 @@ import time
 
 from gps import *
 
+gps_version = '3.18-dev'
+if gps.__version__ != gps_version:
+    sys.stderr.write("webgps.py: ERROR: need gps module version %s, got %s\n" %
+                     (gps_version, gps.__version__))
+    sys.exit(1)
+
+
 TRACKMAX = 1024
 STALECOUNT = 10
 
@@ -160,23 +167,22 @@ class SatTracks(gps):
         row('Climb', self.fix.mode == MODE_3D and isfinite(self.fix.climb) and
             "%f m/s" % self.fix.climb or 'N/A')
 
+        state = "INIT"
         if not (self.valid & ONLINE_SET):
             newstate = 0
             state = "OFFLINE"
         else:
             newstate = self.fix.mode
             if newstate == MODE_2D:
-                state = self.status == (STATUS_DGPS_FIX and
-                                        "2D DIFF FIX" or "2D FIX")
+                state = "2D FIX"
             elif newstate == MODE_3D:
-                state = self.status == (STATUS_DGPS_FIX and
-                                        "3D DIFF FIX" or "3D FIX")
+                state = "3D FIX"
             else:
                 state = "NO FIX"
         if newstate != self.state:
             self.statetimer = time.time()
             self.state = newstate
-        row('State', state + " (%d secs)" % (time.time() - self.statetimer))
+        row('State', "%s (%d secs)" % (state, time.time() - self.statetimer))
 
         fh.write("""\t\t\t\t</table>
 \t\t\t</td>
