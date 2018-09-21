@@ -718,16 +718,12 @@ if __name__ == '__main__':
 
     parser = OptionParser(usage=usage, epilog=epilog)
     parser.add_option(
-        '--host',
-        dest='host',
-        default=None,
-        help='The host to connect. [Default localhost]'
-    )
-    parser.add_option(
-        '--port',
-        dest='port',
-        default=None,
-        help='The port to connect. [Default %s]' % gps.GPSD_PORT
+        '--debug',
+        dest='debug',
+        default=0,
+        action='store',
+        type='int',
+        help='Set level of debug. Must be integer. [Default 0]'
     )
     parser.add_option(
         '--device',
@@ -736,11 +732,17 @@ if __name__ == '__main__':
         help='The device to connect. [Default None]'
     )
     parser.add_option(
-        '--speedunits',
-        dest='speedunits',
-        default='mph',
-        help='The unit of speed. Possible units are: mph, kmh, knots. '
-             '[Default mph]'
+        '--host',
+        dest='host',
+        default=None,
+        help='The host to connect. [Default localhost]'
+    )
+    parser.add_option(
+        '--landspeed',
+        dest='nautical',
+        default=True,
+        action='store_false',
+        help='Enable dashboard-style speedometer.'
     )
     parser.add_option(
         '--maxspeed',
@@ -756,19 +758,10 @@ if __name__ == '__main__':
         help='Enable nautical-style speed and track display.'
     )
     parser.add_option(
-        '--landspeed',
-        dest='nautical',
-        default=True,
-        action='store_false',
-        help='Enable dashboard-style speedometer.'
-    )
-    parser.add_option(
-        '--debug',
-        dest='debug',
-        default=0,
-        action='store',
-        type='int',
-        help='Set level of debug. Must be integer. [Default 0]'
+        '--port',
+        dest='port',
+        default=None,
+        help='The port to connect. [Default %s]' % gps.GPSD_PORT
     )
     parser.add_option(
         '--rotate',
@@ -777,6 +770,13 @@ if __name__ == '__main__':
         action='store',
         type='float',
         help='Rotation of skyview ("up" direction) in degrees. [Default 0]'
+    )
+    parser.add_option(
+        '--speedunits',
+        dest='speedunits',
+        default='mph',
+        help='The unit of speed. Possible units are: mph, kmh, knots. '
+             '[Default mph]'
     )
     (options, args) = parser.parse_args()
     if args:
