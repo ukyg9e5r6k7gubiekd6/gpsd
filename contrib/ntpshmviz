@@ -21,6 +21,7 @@ except:
           sys.exc_info()[0])
     sys.exit(1)
 
+gps_version = '3.18-dev'
 
 class ntpOffset:
     def __init__(self, stream):
@@ -101,14 +102,14 @@ class ntpOffset:
         stream.close()
 
 if __name__ == "__main__":
-    if (len(sys.argv) == 2):
+    if (len(sys.argv) >= 2):
         if (sys.argv[1] == "-V" or sys.argv[1] == "--version"):
-            print ("Version 2.0")
-            sys.exit()
+            sys.stderr.write("ntpshmviz: Version %s\n" % gps_version)
+            sys.exit(0)
 
         if (sys.argv[1] == "-h" or sys.argv[1] == "--help"):
             print ("""
-Usage: <input stream> | ntpshmviz
+Usage: <input stream> | ntpshmviz [-h|--help] [-V|--version]
 
 Example: ntpshmmon -n 100 | ntpshmviz
 
