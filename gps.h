@@ -40,6 +40,7 @@ extern "C" {
  *       changed prototype of gps_read() to add buffer parameters
  *       increased length of devconfig_t.subtype
  *       add gnssid:svid:sigid to satellite_t
+ *       add mtime to attitude_t
  */
 #define GPSD_API_MAJOR_VERSION	7	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -1848,23 +1849,24 @@ struct satellite_t {
 };
 
 struct attitude_t {
-    double heading;
-    double pitch;
-    double roll;
-    double yaw;
-    double dip;
-    double mag_len; /* unitvector sqrt(x^2 + y^2 +z^2) */
-    double mag_x;
-    double mag_y;
-    double mag_z;
+    struct timespec	mtime;  /* time of measurement */
     double acc_len; /* unitvector sqrt(x^2 + y^2 +z^2) */
     double acc_x;
     double acc_y;
     double acc_z;
+    double depth;
+    double dip;
     double gyro_x;
     double gyro_y;
+    double heading;
+    double mag_len; /* unitvector sqrt(x^2 + y^2 +z^2) */
+    double mag_x;
+    double mag_y;
+    double mag_z;
+    double pitch;
+    double roll;
     double temp;
-    double depth;
+    double yaw;
     /* compass status -- TrueNorth (and any similar) devices only */
     char mag_st;
     char pitch_st;
