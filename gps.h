@@ -1846,6 +1846,7 @@ struct satellite_t {
      * GLONASS:  1 = L1 OF, 3 = L2 OF
      */
     unsigned char sigid;
+    unsigned char freqid;       /* The GLONASS (Only) frequency, 0 - 13 */
 };
 
 struct attitude_t {
