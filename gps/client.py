@@ -153,7 +153,9 @@ class gpscommon(object):
 
     def send(self, commands):
         "Ship commands to the daemon."
-        lineend = polybytes("\n")
+        lineend = "\n"
+        if isinstance(commands, bytes):
+            lineend = polybytes("\n")
         if not commands.endswith(lineend):
             commands += lineend
 
