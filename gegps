@@ -26,6 +26,7 @@ from __future__ import absolute_import, print_function, division
 
 import getopt
 import os
+import socket     # for socket.error
 import sys
 
 import gps
@@ -114,7 +115,12 @@ if __name__ == "__main__":
             sys.stderr.write("gegps: Version %s\n" % gps_version)
             sys.exit(0)
 
-    session = gps.gps()
+    try:
+        session = gps.gps()
+    except socket.error:
+        sys.stderr.write("gegps: Could not connect to gpsd daemon\n")
+        sys.exit(1)
+    
     session.stream(gps.WATCH_ENABLE)
 
     if initialize:
