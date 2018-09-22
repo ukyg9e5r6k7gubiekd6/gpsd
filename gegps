@@ -1,24 +1,25 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-#
-# usage: gegps [-i] [-d kmldir]
-#
-# Feed location data from a running GPSD to a Google Earth instance.
-# The -d argument is the location of the Google Earth installation
-# directory.  If not specified, it defaults to the current directory.
-#
-# If you have the free (non-subscription) version, start by running with
-# the -i option to drop a clue in the Google Earth installation directory,
-# as 'Open_in_Google_Earth_RT_GPS.kml', then open that file in Places
-# (File > Open...),
-#
-# The basic recipe is here:
-# http://tjworld.net/wiki/Linux/Ubuntu/GoogleEarthPlusRealTimeGPS
-#
-# This code originally by Jaroslaw Zachwieja and a guy referring
-# to himself/herself as TJ(http://tjworld.net)
-# Modified by Chen Wei <weichen302@aol.com> for use with gpsd
-# Cleaned up and adapted for the GPSD project by Eric S. Raymond.
+'''
+usage: gegps [-i] [-d kmldir]
+
+Feed location data from a running GPSD to a Google Earth instance.
+The -d argument is the location of the Google Earth installation
+directory.  If not specified, it defaults to the current directory.
+
+If you have the free (non-subscription) version, start by running with
+the -i option to drop a clue in the Google Earth installation directory,
+as 'Open_in_Google_Earth_RT_GPS.kml', then open that file in Places
+(File > Open...),
+
+The basic recipe is here:
+http://tjworld.net/wiki/Linux/Ubuntu/GoogleEarthPlusRealTimeGPS
+
+This code originally by Jaroslaw Zachwieja and a guy referring
+to himself/herself as TJ(http://tjworld.net)
+Modified by Chen Wei <weichen302@aol.com> for use with gpsd
+Cleaned up and adapted for the GPSD project by Eric S. Raymond.
+'''
 
 # This code runs compatibly under Python 2 and 3.x for x >= 2.
 # Preserve this property!
@@ -120,7 +121,7 @@ if __name__ == "__main__":
     except socket.error:
         sys.stderr.write("gegps: Could not connect to gpsd daemon\n")
         sys.exit(1)
-    
+
     session.stream(gps.WATCH_ENABLE)
 
     if initialize:
