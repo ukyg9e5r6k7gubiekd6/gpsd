@@ -537,8 +537,9 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
      * xgps.c.  Note that the satellite list may be truncated based on
      * available screen size, or may only show satellites used for the
      * fix.  */
-    (void)mvwprintw(satellites, 0, 27, "Seen %2d", gpsdata->satellites_visible);
-    (void)mvwprintw(satellites, 1, 32, "%2d", gpsdata->satellites_used);
+    (void)mvwprintw(satellites, 0, 19, "Seen %2d/Used %2d",
+                    gpsdata->satellites_visible,
+                    gpsdata->satellites_used);
 
     if (gpsdata->satellites_visible != 0) {
 	int sat_no;
