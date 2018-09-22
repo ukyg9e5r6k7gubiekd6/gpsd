@@ -18,6 +18,15 @@ from math import sqrt
 from math import radians
 from socket import error as SocketError
 
+import cairo
+
+# Gtk3 imports.  Gtk3 requires the require_version(), which then causes
+# pylint to complain about the subsequent "non-top" imports.
+import gi
+from gi.repository import Gtk  # pylint: disable=wrong-import-position
+from gi.repository import Gdk  # pylint: disable=wrong-import-position
+from gi.repository import GObject  # pylint: disable=wrong-import-position
+
 import gps
 
 gps_version = '3.18-dev'
@@ -26,15 +35,7 @@ if gps.__version__ != gps_version:
                      (gps_version, gps.__version__))
     sys.exit(1)
 
-import cairo
-
-# Gtk3 imports.  Gtk3 requires the require_version(), which then causes
-# pylint to complain about the subsequent "non-top" imports.
-import gi
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk  # pylint: disable=wrong-import-position
-from gi.repository import Gdk  # pylint: disable=wrong-import-position
-from gi.repository import GObject  # pylint: disable=wrong-import-position
 
 
 class Speedometer(Gtk.DrawingArea):
@@ -120,10 +121,10 @@ class LandSpeedometer(Speedometer):
                 y + (radius - long_inset) * sin(i * pi / 6.0)
             )
             self.cr.line_to(
-                (x + (radius + (self.cr.get_line_width() / 2))
-                 * cos(i * pi / 6.0)),
-                (y + (radius + (self.cr.get_line_width() / 2))
-                 * sin(i * pi / 6.0))
+                (x + (radius + (self.cr.get_line_width() / 2)) *
+                 cos(i * pi / 6.0)),
+                (y + (radius + (self.cr.get_line_width() / 2)) *
+                 sin(i * pi / 6.0))
             )
             self.cr.select_font_face(
                 'Georgia',
@@ -143,17 +144,17 @@ class LandSpeedometer(Speedometer):
 
             if i in (-8, -7, -6, -5, -4):
                 self.cr.move_to(
-                    (x + (radius - long_inset - (t_width / 2))
-                     * cos(i * pi / 6.0)),
-                    (y + (radius - long_inset - (t_height * 2))
-                     * sin(i * pi / 6.0))
+                    (x + (radius - long_inset - (t_width / 2)) *
+                     cos(i * pi / 6.0)),
+                    (y + (radius - long_inset - (t_height * 2)) *
+                     sin(i * pi / 6.0))
                 )
             elif i in (-2, -1, 0, 2, 1):
                 self.cr.move_to(
-                    (x + (radius - long_inset - (t_width * 1.5))
-                     * cos(i * pi / 6.0)),
-                    (y + (radius - long_inset - (t_height * 2))
-                     * sin(i * pi / 6.0))
+                    (x + (radius - long_inset - (t_width * 1.5)) *
+                     cos(i * pi / 6.0)),
+                    (y + (radius - long_inset - (t_height * 2)) *
+                     sin(i * pi / 6.0))
                 )
             elif i in (-3,):
                 self.cr.move_to(
@@ -704,6 +705,7 @@ class Main(object):
             w.destroy()
         except KeyboardInterrupt:
             self.window.emit('delete_event', Gdk.Event(Gdk.NOTHING))
+
 
 if __name__ == '__main__':
     import sys
