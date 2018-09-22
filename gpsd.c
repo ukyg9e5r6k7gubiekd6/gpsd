@@ -995,6 +995,7 @@ static bool awaken(struct gps_device_t *device)
 }
 
 #ifdef RECONFIGURE_ENABLE
+#if __UNUSED_RECONFIGURE__
 static bool privileged_user(struct gps_device_t *device)
 /* is this channel privileged to change a device's behavior? */
 {
@@ -1013,6 +1014,7 @@ static bool privileged_user(struct gps_device_t *device)
      */
     return subcount <= 1;
 }
+#endif __UNUSED_RECONFIGURE__
 
 static void set_serial(struct gps_device_t *device,
 		       speed_t speed, char *modestring)
@@ -1247,11 +1249,7 @@ static void handle_request(struct subscriber_t *sub,
 		    }
 		    /* we should have exactly one device now */
 		}
-		if (!privileged_user(device))
-		    str_appendf(reply, replylen,
-				   "{\"class\":\"ERROR\",\"message\":\"Multiple subscribers, cannot change control bits on %s.\"}\r\n",
-				   device->gpsdata.dev.path);
-		else if (device->device_type == NULL)
+		if (device->device_type == NULL)
 		    str_appendf(reply, replylen,
 				   "{\"class\":\"ERROR\",\"message\":\"Type of %s is unknown.\"}\r\n",
 				   device->gpsdata.dev.path);
