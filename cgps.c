@@ -30,7 +30,7 @@
 /* This defines how much overhead is contained in the 'satellites'
    window (eg, box around the window takes two lines, plus the column
    headers take another line). */
-#define SATWIN_OVERHEAD 3
+#define SATWIN_OVERHEAD 2
 
 /* This is how many display fields are output in the 'datawin' window
    when in GPS mode.  Change this value if you add or remove fields
@@ -551,7 +551,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 	qsort( gpsdata->skyview, gpsdata->satellites_visible,
 		sizeof( struct satellite_t), sat_cmp);
 	/* displayed all sats that fit, maybe all of them */
-	for (sat_no = 0; sat_no <= loop_end; sat_no++) {
+	for (sat_no = 0; sat_no < loop_end; sat_no++) {
 	    int column = 1;     /* column to write to */
             char *gnssid;
 
