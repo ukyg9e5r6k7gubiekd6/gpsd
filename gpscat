@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 #
+"Display GPS output.  Hexify it if necessary."
+
 # This file is Copyright (c) 2010 by the GPSD project
 # SPDX-License-Identifier: BSD-2-clause
-#
-# Display GPS output.  Hexify it if necessary.
-#
 
 # This code runs compatibly under Python 2 and 3.x for x >= 2.
 # Preserve this property!
@@ -40,6 +39,7 @@ highhalf_latch = True
 
 
 def hexdump(st):
+    "Convert string to hex string"
     dmp = ""
     for ch in bytearray(st):  # bytearray gets array of ints in Python 2 and 3
         if curses.ascii.isprint(ch) or curses.ascii.isspace(ch):
@@ -52,12 +52,14 @@ def hexdump(st):
 debuglevel = 0
 
 
-def reporter(errlevel, msg):
+def reporter(errlevel, mesg):
+    "Report errors, depending on log level"
     if errlevel <= debuglevel:
-        sys.stdout.write(msg)
+        sys.stdout.write(mesg)
 
 
 def printusage():
+    "Print usage"
     sys.stderr.write("usage: gpscat [-D debuglevel] [-h] [-p] [-s speed] [-t] "
                      "[-V] serial-port\n")
 
