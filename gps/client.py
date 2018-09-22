@@ -206,7 +206,7 @@ class gpsjson(object):
                                  " {}\n".format(self.stream_command))
             self.send(self.stream_command)
         else:
-            raise TypeError("Invalid streaming command!! : "+str(flags))
+            raise TypeError("Invalid streaming command!! : " + str(flags))
 
     def generate_stream_command(self, flags=0, devpath=None):
         if flags & WATCH_OLDSTYLE:
