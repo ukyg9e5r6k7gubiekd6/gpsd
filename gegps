@@ -100,9 +100,6 @@ if __name__ == "__main__":
         sys.stderr.write("usage: gegps: [-d] [-h] [-i] [-V]\n")
         sys.exit(0)
 
-    session = gps.gps()
-    session.stream(gps.WATCH_ENABLE)
-
     kmldir = "."
     initialize = False
     (options, arguments) = getopt.getopt(sys.argv[1:], "d:hiV")
@@ -116,6 +113,9 @@ if __name__ == "__main__":
         elif opt == '-V':
             sys.stderr.write("gegps: Version %s\n" % gps_version)
             sys.exit(0)
+
+    session = gps.gps()
+    session.stream(gps.WATCH_ENABLE)
 
     if initialize:
         f = open(os.path.join(kmldir, 'Open_in_Google_Earth_RT_GPS.kml'), 'w')
