@@ -958,7 +958,8 @@ class greis(object):
 
                     (decode, length) = self.messages[self.s_id]
                     if m_len < length:
-                        print("DECODE: %s Bad Length %s\n" % (self.s_id, m_len))
+                        print("DECODE: %s Bad Length %s\n" %
+                              (self.s_id, m_len))
                     else:
                         s = self.s_id + decode(self, m_payload)
                         if VERB_DECODE <= opts['verbosity']:
@@ -1584,7 +1585,8 @@ class gps_io(object):
             # or if USB device unplugged
             sys.stderr.write('%s: failed to read %s\n'
                              '%s: Is gpsd already holding the port?\n'
-                             % (PROG_NAME, PROG_NAME, read_opts['input_file_name']))
+                             % (PROG_NAME, PROG_NAME,
+                                read_opts['input_file_name']))
             return 1
 
         if 0 < ret_code:
