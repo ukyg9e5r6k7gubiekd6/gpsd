@@ -266,6 +266,8 @@ static void windowsetup(void)
     (void)initscr();
     (void)noecho();
     getmaxyx(stdscr, ysize, xsize);
+    /* turn off cursor */
+    curs_set(0);
 
 #ifdef TRUENORTH
     if (compass_flag) {
@@ -543,13 +545,11 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 
     if (gpsdata->satellites_visible != 0) {
 	int sat_no;
-	int loop_end = (display_sats < gpsdata->satellites_visible) ? \
-		display_sats : gpsdata->satellites_visible;
 
 	qsort( gpsdata->skyview, gpsdata->satellites_visible,
 		sizeof( struct satellite_t), sat_cmp);
 	/* displayed all sats that fit, maybe all of them */
-	for (sat_no = 0; sat_no < loop_end; sat_no++) {
+	for (sat_no = 0; sat_no <= display_sats; sat_no++) {
 	    int column = 1;     /* column to write to */
             char *gnssid;
 
@@ -609,18 +609,21 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 			    gpsdata->skyview[sat_no].used ? 'Y' : 'N');
 	}
 
-        /* last line is either blank, or More... */
+        /* Display More... ? */
         if (sat_no < gpsdata->satellites_visible) {
 	    /* Too many sats to show them all, tell the user. */
-	    (void)mvwprintw(satellites, sat_no + 2, 1, "%-*s",
-			    SATELLITES_WIDTH - 3, "More...");
+	    (void)mvwprintw(satellites, sat_no + 2, 1, "%s", "More...");
 	} else {
 	    /* Clear old data from the unused lines at bottom. */
 	    for ( ; sat_no <= display_sats; sat_no++) {
 		(void)mvwprintw(satellites, sat_no + 2, 1, "%-*s",
 				SATELLITES_WIDTH - 3, "");
 	    }
+            /* remove More... */
+	    (void)mvwprintw(satellites, sat_no + 2, 1, "%s", "       ");
 	}
+        /* turn off cursor */
+	curs_set(0);
     }
 
     /* Print time/date. */
