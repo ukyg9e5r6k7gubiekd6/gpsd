@@ -117,6 +117,7 @@ def fakehook(linenumber, fakegps):
         baton.twirl()
     return True
 
+
 if __name__ == '__main__':
     def usage():
         "Print usage and exit"

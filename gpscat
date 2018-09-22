@@ -48,6 +48,7 @@ def hexdump(st):
             dmp += "\\x%02x" % ch
     return dmp
 
+
 debuglevel = 0
 
 
@@ -59,6 +60,7 @@ def reporter(errlevel, msg):
 def printusage():
     sys.stderr.write("usage: gpscat [-D debuglevel] [-h] [-p] [-s speed] [-t] "
                      "[-V] serial-port\n")
+
 
 if __name__ == '__main__':
     try:
@@ -93,7 +95,6 @@ if __name__ == '__main__':
             elif switch == '-V':
                 sys.stderr.write("gpscat: Version %s\n" % gps_version)
                 sys.exit(0)
-
 
         if len(arguments) != 1:
             printusage()
@@ -151,9 +152,9 @@ if __name__ == '__main__':
                     if length == 0:
                         break
                     if typeflag:
-                        sys.stdout.write(repr(ptype) + " (" + repr(length)
-                                         + "@" + repr(counter - length) + "): "
-                                         + hexdump(packet))
+                        sys.stdout.write(repr(ptype) + " (" + repr(length) +
+                                         "@" + repr(counter - length) + "): " +
+                                         hexdump(packet))
                         sys.stdout.write("\n")
                     else:
                         sys.stdout.write(hexdump(packet) + "\n")

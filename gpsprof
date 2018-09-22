@@ -185,7 +185,7 @@ class stats(object):
         else:
             # must be float
             sum_squares = [(x - self.mean) ** 2 for x in fixes]
-            sigma = math.sqrt(sum(sum_squares) /( len(fixes) -1))
+            sigma = math.sqrt(sum(sum_squares) / (len(fixes) - 1))
             for fix in fixes:
                 m3 += pow(fix - sigma, 3)
                 m4 += pow(fix - sigma, 4)
@@ -1045,6 +1045,7 @@ usage: gpsprof [OPTION]... [server[:port[:device]]]
 
 ''' % ("|".join([x.name for x in formatters])))
     sys.exit(0)
+
 
 if __name__ == '__main__':
     try:
