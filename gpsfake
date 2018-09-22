@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 #
-# gpsfake -- test harness for gpsd
-#
-# Simulates one or more GPSes, playing back logfiles.
-# Most of the logic for this now lives in gps.fake,
-# factored out so we can write other test programs with it.
+'''
+gpsfake -- test harness for gpsd
+
+Simulates one or more GPSes, playing back logfiles.
+Most of the logic for this now lives in gps.fake,
+factored out so we can write other test programs with it.
+'''
 #
 # This file is Copyright (c) 2010 by the GPSD project
 # SPDX-License-Identifier: BSD-2-clause
@@ -59,6 +61,7 @@ class Baton(object):
         return
 
     def twirl(self, ch=None):
+        "Twirl the baton"
         if self.stream is None:
             return
         if os.isatty(self.stream.fileno()):
@@ -72,16 +75,18 @@ class Baton(object):
         self.count = self.count + 1
         return
 
-    def end(self, msg=None):
-        if msg is None:
-            msg = self.endmsg
+    def end(self, mesg=None):
+        "Write end message"
+        if mesg is None:
+            mesg = self.endmsg
         if self.stream:
             self.stream.write("...(%2.2f sec) %s.\n"
-                              % (time.time() - self.time, msg))
+                              % (time.time() - self.time, mesg))
         return
 
 
 def hexdump(s):
+    "Convert string to hex"
     rep = ""
     for c in s:
         rep += "%02x" % ord(c)
@@ -89,7 +94,8 @@ def hexdump(s):
 
 
 def fakehook(linenumber, fakegps):
-    if len(fakegps.testload.sentences) == 0:
+    "Do the real work"
+    if not fakegps.testload.sentences:
         sys.stderr.write("fakegps: no sentences in test load.\n")
         raise SystemExit(1)
     if linenumber % len(fakegps.testload.sentences) == 0:
