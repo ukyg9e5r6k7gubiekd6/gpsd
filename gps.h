@@ -45,7 +45,7 @@ extern "C" {
 #define GPSD_API_MAJOR_VERSION	7	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
 
-#define MAXCHANNELS	72	/* must be > 12 GPS + 12 GLONASS + 2 WAAS */
+#define MAXCHANNELS	120	/* u-blox 9 tracks 140 signals */
 #define MAXUSERDEVS	4	/* max devices per user */
 #define GPS_PATH_MAX	128	/* for names like /dev/serial/by-id/... */
 
