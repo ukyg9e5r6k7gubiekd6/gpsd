@@ -1862,7 +1862,7 @@ if len(python_progs) > 0:
          '''gps/*.py *.py ''' + " ".join(checkable)])
 
 # Additional Python readability style checks
-if len(python_progs) > 0:
+if python_progs:
     pep8 = Utility("pep8",
                    ["jsongen.py", "maskaudit.py", python_built_extensions],
                    ['pycodestyle --ignore=W602,E122,E241 {0} SConstruct '
@@ -1872,6 +1872,16 @@ if len(python_progs) > 0:
                      ["jsongen.py", "maskaudit.py", python_built_extensions],
                      ['flake8 --ignore=E501,W602,E122,E241,E401 {0} '
                       'gps/[a-zA-Z]*.py *.py'.format(" ".join(python_progs))])
+
+    # get version from each python prog
+    #  this ensures they can run and gps_versions match
+    vchk = ''
+    for prog in python_progs:
+        vchk += '$SRCDIR/%s -V\n' % prog
+    python_versions = Utility('python-versions', [python_progs], vchk)
+
+else:
+    python_versions = None
 
 
 # Check the documentation for bogons, too
@@ -2171,6 +2181,7 @@ test_nondaemon = [
     method_regress,
     packet_regress,
     python_compilation_regress,
+    python_versions,
     rtcm_regress,
     time_regress,
     timespec_regress,
