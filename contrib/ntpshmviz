@@ -23,6 +23,7 @@ except:
 
 gps_version = '3.18-dev'
 
+
 class ntpOffset:
     def __init__(self, stream):
         # get the data
@@ -100,6 +101,7 @@ class ntpOffset:
                     self.ntp_data[record[1]].append(offset)
                     self.line_counts[record[1]] += 1
         stream.close()
+
 
 if __name__ == "__main__":
     if (len(sys.argv) >= 2):
