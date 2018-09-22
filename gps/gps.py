@@ -1,18 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+'''gps.py -- Python interface to GPSD.
+
+This interface has a lot of historical cruft in it related to old
+protocol, and was modeled on the C interface. It won't be thrown
+away, but it's likely to be deprecated in favor of something more
+Pythonic.
+
+The JSON parts of this (which will be reused by any new interface)
+now live in a different module.
+'''
+
 #
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
-#
-# gps.py -- Python interface to GPSD.
-#
-# This interface has a lot of historical cruft in it related to old
-# protocol, and was modeled on the C interface. It won't be thrown
-# away, but it's likely to be deprecated in favor of something more
-# Pythonic.
-#
-# The JSON parts of this (which will be reused by any new interface)
-# now live in a different module.
 #
 
 # This code runs compatibly under Python 2 and 3.x for x >= 2.
