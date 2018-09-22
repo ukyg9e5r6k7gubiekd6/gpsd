@@ -545,11 +545,13 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 
     if (gpsdata->satellites_visible != 0) {
 	int sat_no;
+        int loop_end = (display_sats < gpsdata->satellites_visible) ? \
+                display_sats : gpsdata->satellites_visible;
 
 	qsort( gpsdata->skyview, gpsdata->satellites_visible,
 		sizeof( struct satellite_t), sat_cmp);
 	/* displayed all sats that fit, maybe all of them */
-	for (sat_no = 0; sat_no <= display_sats; sat_no++) {
+	for (sat_no = 0; sat_no < loop_end; sat_no++) {
 	    int column = 1;     /* column to write to */
             char *gnssid;
 
