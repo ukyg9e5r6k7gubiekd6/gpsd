@@ -34,6 +34,7 @@ from __future__ import print_function
 import ast
 import copy
 import glob
+import imp         # for imp.find_module('gps'), imp deprecated in 3.4
 import operator
 import os
 import platform
@@ -1364,6 +1365,16 @@ if not env['python']:
     python_progs = []
 else:
     python_progs = ["gegps", "gpscat", "gpsfake", "gpsprof"]
+
+    # check for pycairo
+    try:
+        imp.find_module('cairo')
+    except ImportError:
+        # no pycairo, can't build xgps, xgpsspeed
+        announce("Python module pycairo not found, "
+                 "xgps and xgpsspeed will not be installed")
+        env['xgps'] = False
+
     if env['xgps']:
         python_progs.extend(["xgps", "xgpsspeed"])
     python_modules = Glob('gps/*.py')
