@@ -1144,7 +1144,7 @@ if __name__ == "__main__":
                 print(__doc__)
                 sys.exit(0)
             elif opt == '-V':
-                sys.stderr.write("xgps 1.0\n")
+                sys.stderr.write("xgps: Version %s\n" % gps_version)
                 sys.exit(0)
 
         degreefmt = {'d': gps.clienthelpers.deg_dd,
