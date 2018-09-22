@@ -1805,7 +1805,8 @@ struct ais_t
     };
 };
 
-/* basic data, per PRN, from GPGSA and GPGSV */
+/* basic data, per PRN, from GPGSA and GPGSV, or GPS binary messages */
+/* FIXME: u-blox 9 no longer uses PRN */
 struct satellite_t {
     double ss;		/* signal-to-noise ratio, 0 to 254 dB, -1 for n/a */
     bool used;		/* this satellite used in solution */
