@@ -1014,7 +1014,7 @@ static bool privileged_user(struct gps_device_t *device)
      */
     return subcount <= 1;
 }
-#endif __UNUSED_RECONFIGURE__
+#endif /* __UNUSED_RECONFIGURE__ */
 
 static void set_serial(struct gps_device_t *device,
 		       speed_t speed, char *modestring)
