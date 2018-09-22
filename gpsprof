@@ -1,18 +1,19 @@
 #!/usr/bin/env python
 #
+'''
+Collect and plot latency-profiling data from a running gpsd.
+Requires gnuplot, but gnuplot can be on another host.
+'''
+
 # This file is Copyright (c) 2010 by the GPSD project
 # SPDX-License-Identifier: BSD-2-clause
-#
-# Collect and plot latency-profiling data from a running gpsd.
-# Requires gnuplot.
 #
 # Updated to conform with RCC-219-00, RCC/IRIG Standard 261-00
 # "STANDARD REPORT FORMAT FOR GLOBAL POSITIONING SYSTEM (GPS) RECEIVERS AND
 #  SYSTEMS ACCURACY TESTS AND EVALUATIONS"
 #
-# TODO:
-#     put date from data on plot, not time of replot.
-#     add lat/lon to polar plots
+# TODO: put date from data on plot, not time of replot.
+# TODO: add lat/lon to polar plots
 #
 # This code runs compatibly under Python 2 and 3.x for x >= 2.
 # Preserve this property!
@@ -39,14 +40,15 @@ debug = False
 
 
 def dist_2d(a, b):
-    # calculate distance between a[x,y] and b[x,y]
+    "calculate distance between a[x,y] and b[x,y]"
+
     # x and y are orthogonal, probably lat/lon in meters
     # ignore altitude change.
     return math.sqrt((a[0] - b[0]) ** 2 + (a[1] - b[1]) ** 2)
 
 
 def dist_3d(a, b):
-    # calculate distance between a[x,y,z] and b[x,y,z]
+    "calculate distance between a[x,y,z] and b[x,y,z]"
     # x, y, and z are othogonal, probably ECEF, probably in meters
     return math.sqrt((a[0] - b[0]) ** 2 +
                      (a[1] - b[1]) ** 2 +
@@ -95,6 +97,7 @@ class Baton(object):
         return
 
     def twirl(self, ch=None):
+        "Twirl the baton"
         if self.stream is None:
             return
         if ch:
@@ -107,6 +110,7 @@ class Baton(object):
         return
 
     def end(self, msg=None):
+        "Write the end message"
         if msg is None:
             msg = self.endmsg
         if self.stream:
@@ -137,12 +141,11 @@ class stats(object):
     def min_max_mean(self, fixes, index):
         "Find min, max, and mean of fixes[index]"
 
-        if 0 == len(fixes):
+        if not fixes:
             return
 
-        total = 0.0
         # might be fast to go through list once?
-        if type(fixes[0]) == tuple:
+        if isinstance(fixes[0], tuple):
             self.mean = (sum([x[index] for x in fixes]) / len(fixes))
             self.min = min([x[index] for x in fixes])
             self.max = max([x[index] for x in fixes])
@@ -162,21 +165,21 @@ class stats(object):
         # moment coefficient of skewness.  Wikipedia describes it
         # best: "The qualitative interpretation of the skew is complicated
         # and unintuitive."  A normal distribution has a skewness of zero.
-        skewness = float('nan')
+        self.skewness = float('nan')
 
         # The kurtosis of a random variable X is the fourth standardized
         # moment and is a dimension-less ratio.  Here we use the Pearson's
         # moment coefficient of kurtosis.  A normal distribution has a
         # kurtosis of three.  NIST describes a kurtosis over three as
         # "heavy tailed" and one under three as "light tailed".
-        kurtosis = float('nan')
+        self.kurtosis = float('nan')
 
-        if 0 == len(fixes):
+        if not fixes:
             return
 
         m3 = 0.0
         m4 = 0.0
-        if type(fixes[0]) == tuple:
+        if isinstance(fixes[0], tuple):
             sum_squares = [(x[index] - self.mean) ** 2 for x in fixes]
             sigma = math.sqrt(sum(sum_squares) / (len(fixes) - 1))
             for fix in fixes:
@@ -202,8 +205,10 @@ class plotter(object):
     "Generic class for gathering and plotting sensor statistics."
 
     def __init__(self):
+        self.device = None
         self.fixes = []
         self.in_replot = False
+        self.session = None
         self.start_time = int(time.time())
         self.watch = set(['TPV'])
 
@@ -223,10 +228,11 @@ class plotter(object):
 
         return desc
 
-    def collect(self, verbose, logfp=None):
+    def collect(self, verb, log_fp=None):
         "Collect data from the GPS."
+
         try:
-            self.session = gps.gps(host=host, port=port, verbose=verbose)
+            self.session = gps.gps(host=host, port=port, verbose=verb)
         except socket.error:
             sys.stderr.write("gpsprof: gpsd unreachable.\n")
             sys.exit(1)
@@ -245,12 +251,12 @@ class plotter(object):
             signal.signal(signal.SIGUSR1,
                           lambda empty, unused: sys.stderr.write(
                               "%d of %d (%d%%)..."
-                              % (await - countdown, await,
-                                 ((await - countdown) * 100.0 / await))))
+                              % (wait - countdown, wait,
+                                 ((wait - countdown) * 100.0 / wait))))
             signal.siginterrupt(signal.SIGUSR1, False)
             self.session.stream(flags, device)
             baton = Baton("gpsprof: %d looking for fix" % os.getpid(), "done")
-            countdown = await
+            countdown = wait
             basetime = time.time()
             while countdown > 0:
                 if self.session.read() == -1:
@@ -278,8 +284,8 @@ class plotter(object):
                         sys.stderr.write("timing is not enabled.\n")
                         sys.exit(1)
                 # Log before filtering - might be good for post-analysis.
-                if logfp:
-                    logfp.write(self.session.response)
+                if log_fp:
+                    log_fp.write(self.session.response)
                 # Ignore everything but what we're told to
                 if self.session.data["class"] not in self.watch:
                     continue
@@ -292,10 +298,10 @@ class plotter(object):
                 if self.session.fix.mode <= gps.MODE_NO_FIX:
                     continue
                 if self.sample():
-                    if countdown == await:
+                    if countdown == wait:
                         sys.stderr.write("first fix in %.2fsec, gathering %d "
                                          "samples..."
-                                         % (time.time() - basetime, await))
+                                         % (time.time() - basetime, wait))
                     countdown -= 1
             baton.end()
         finally:
@@ -328,10 +334,16 @@ class spaceplot(plotter):
     requires_time = False
 
     def __init__(self):
+        "Initialize class spaceplot"
+
         plotter.__init__(self)
+        self.centroid = None
+        self.centroid_ecef = None
         self.recentered = []
 
     def sample(self):
+        "Grab samples"
+
         # Watch out for the NaN value from gps.py.
         if (((self.in_replot or self.session.valid) and
              self.session.data["class"] == "TPV")):
@@ -350,13 +362,15 @@ class spaceplot(plotter):
         return True
 
     def header(self):
+        "Return header"
         return "\n# Position uncertainty, %s\n" % self.whatami()
 
     def postprocess(self):
+        "Postprocess the sample data"
         pass
 
     def data(self):
-        # dump of data
+        "Format data for dump"
         res = ""
         for i in range(len(self.recentered)):
             (lat, lon) = self.recentered[i][:2]
@@ -366,6 +380,7 @@ class spaceplot(plotter):
         return res
 
     def plot(self):
+        "Plot the data"
         stat_lat = stats()
         stat_lon = stats()
         stat_alt = stats()
@@ -442,7 +457,6 @@ class spaceplot(plotter):
         alt_ep = gps.NaN
         alt_ep95 = gps.NaN
         alt_ep99 = gps.NaN
-        fmt_lan11 = ''
         dist_3d_max = 0.0
         alt_fixes = []
         latlon_data = ""
@@ -461,7 +475,7 @@ class spaceplot(plotter):
                 # micro meters should be good enough
                 alt_data += "%.6f\n" % (alt)
 
-        if 0 < len(alt_fixes):
+        if alt_fixes:
             # got altitude data
 
             # find min, max and mean of altitude
@@ -731,6 +745,7 @@ class polarplot(plotter):
         self.watch = set(['SKY'])
 
     def sample(self):
+        "Grab samples"
         if self.session.data["class"] == "SKY":
             sats = self.session.data['satellites']
             seen = 0
@@ -751,18 +766,22 @@ class polarplot(plotter):
         return True
 
     def header(self):
+        "Return header"
         return "# Polar plot of signal strengths, %s\n" % self.whatami()
 
     def postprocess(self):
+        "Postprocess the sample data"
         pass
 
     def data(self):
+        "Format data for dump"
         res = ""
         for (prn, ss, az, el, used) in self.fixes:
             res += "%d\t%d\t%d\t%d\t%s\n" % (prn, ss, az, el, used)
         return res
 
     def plot(self):
+        "Format data for dump"
 
         # calc SNR: mean, min, max, sigma
         stat_ss = stats()
@@ -893,6 +912,7 @@ class timeplot(plotter):
         self.watch = set(['PPS'])
 
     def sample(self):
+        "Grab samples"
         if self.session.data["class"] == "PPS":
             self.fixes.append((self.session.data['real_sec'],
                                self.session.data['real_nsec'],
@@ -901,12 +921,15 @@ class timeplot(plotter):
         return True
 
     def header(self):
+        "Return header"
         return "# Time drift against PPS, %s\n" % self.whatami()
 
     def postprocess(self):
+        "Postprocess the sample data"
         pass
 
     def data(self):
+        "Format data for dump"
         res = ""
         for (real_sec, real_nsec, clock_sec, clock_nsec) in self.fixes:
             res += "%d\t%d\t%d\t%d\n" % (real_sec, real_nsec, clock_sec,
@@ -914,6 +937,7 @@ class timeplot(plotter):
         return res
 
     def plot(self):
+        "Format data for dump"
         fmt = '''\
 set autoscale
 set key below
@@ -933,26 +957,32 @@ class uninstrumented(plotter):
         plotter.__init__(self)
 
     def sample(self):
+        "Grab samples"
         if self.session.fix.time:
             seconds = time.time() - gps.misc.isotime(self.session.data.time)
             self.fixes.append(seconds)
             return True
-        else:
-            return False
+
+        return False
 
     def header(self):
+        "Return header"
         return "# Uninstrumented total latency, " + self.whatami() + "\n"
 
     def postprocess(self):
+        "Postprocess the sample data"
         pass
 
     def data(self):
+        "Format data for dump"
         res = ""
         for seconds in self.fixes:
             res += "%2.6lf\n" % seconds
         return res
 
     def plot(self):
+        "Plot the data"
+
         fmt = '''\
 set autoscale
 set key below
@@ -968,9 +998,13 @@ class instrumented(plotter):
     requires_time = True
 
     def __init__(self):
+        "Initialize class instrumented()"
+
         plotter.__init__(self)
 
     def sample(self):
+        "Grab the samples"
+
         if 'rtime' in self.session.data:
             self.fixes.append((gps.misc.isotime(self.session.data['time']),
                                self.session.data["chars"],
@@ -979,19 +1013,22 @@ class instrumented(plotter):
                                self.session.data['rtime'],
                                time.time()))
             return True
-        else:
-            return False
+
+        return False
 
     def header(self):
+        "Return the header"
         res = "# Analyzed latency, " + self.whatami() + "\n"
         res += "#-- Fix time --  - Chars -  --   Latency  - RS232-  " \
                "Analysis  - Recv -\n"
         return res
 
     def postprocess(self):
+        "Postprocess the sample data"
         pass
 
     def data(self):
+        "Format data for dump"
         res = ""
         for (fix_time, chars, sats, start, xmit, recv) in self.fixes:
             rs232_time = (chars * 10.0) / self.device['bps']
@@ -1002,6 +1039,7 @@ class instrumented(plotter):
         return res
 
     def plot(self):
+        "Do the plot"
         legends = (
             "Reception delta",
             "Analysis time",
@@ -1057,7 +1095,7 @@ if __name__ == '__main__':
         title = None
         subtitle = None
         threshold = 0
-        await = 100
+        wait = 100
         verbose = 0
         terminal = None
         dumpfile = None
@@ -1081,9 +1119,9 @@ if __name__ == '__main__':
                 threshold = int(val)
             elif switch == '-n':
                 if val[-1] == 'h':
-                    await = int(val[:-1]) * 360
+                    wait = int(val[:-1]) * 360
                 else:
-                    await = int(val)
+                    wait = int(val)
             elif switch == '-r':
                 redo = True
             elif switch == '-t':
@@ -1099,7 +1137,7 @@ if __name__ == '__main__':
                 sys.exit(0)
 
         (host, port, device) = ("localhost", "2947", None)
-        if len(arguments):
+        if arguments:
             args = arguments[0].split(":")
             if len(args) >= 1:
                 host = args[0]
