@@ -28,6 +28,7 @@ NaN = float('nan')
 
 
 def isfinite(f):
+    "Check if f is finite"
     # Python 2 does not think +Inf or -Inf are NaN
     # Python 2 has no easier way to test for Inf
     return float('-inf') < float(f) < float('inf')
@@ -81,27 +82,33 @@ SIGNAL_STRENGTH_UNKNOWN = NaN
 
 
 class gpsfix(object):
+    "Class to hold one GPS fix"
+
     def __init__(self):
-        self.mode = MODE_NO_FIX
-        self.time = NaN
-        self.ept = NaN
-        self.latitude = self.longitude = 0.0
-        self.epx = NaN
-        self.epy = NaN
+        "Init class gpsfix"
+
         self.altitude = NaN         # Meters
-        self.epv = NaN
-        self.track = NaN            # Degrees from true north
-        self.speed = NaN            # Knots
         self.climb = NaN            # Meters per second
+        self.epc = NaN
         self.epd = NaN
         self.eps = NaN
-        self.epc = NaN
+        self.ept = NaN
+        self.epv = NaN
+        self.epx = NaN
+        self.epy = NaN
+        self.latitude = self.longitude = 0.0
+        self.mode = MODE_NO_FIX
+        self.speed = NaN            # Knots
+        self.status = STATUS_NO_FIX
+        self.time = NaN
+        self.track = NaN            # Degrees from true north
 
 
 class gpsdata(object):
     "Position, track, velocity and status information returned by a GPS."
 
-    class satellite:
+    class satellite(object):
+        "Class to hold satellite data"
         def __init__(self, PRN, elevation, azimuth, ss, used=None):
             self.PRN = PRN
             self.elevation = elevation
@@ -179,6 +186,14 @@ class gps(gpscommon, gpsdata, gpsjson):
 
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0, mode=0,
                  reconnect=False):
+        self.activated = None
+        self.clock_sec = NaN
+        self.clock_nsec = NaN
+        self.path = ''
+        self.precision = 0
+        self.real_sec = NaN
+        self.real_nsec = NaN
+        self.serialmode = "8N1"
         gpscommon.__init__(self, host, port, verbose, reconnect)
         gpsdata.__init__(self)
         gpsjson.__init__(self)
@@ -188,11 +203,13 @@ class gps(gpscommon, gpsdata, gpsjson):
     def __oldstyle_shim(self):
         # The rest is backwards compatibility for the old interface
         def default(k, dflt, vbit=0):
+            "Return default for key"
             if k not in self.data.keys():
                 return dflt
-            else:
-                self.valid |= vbit
-                return self.data[k]
+
+            self.valid |= vbit
+            return self.data[k]
+
         if self.data.get("class") == "VERSION":
             self.version = self.data
         elif self.data.get("class") == "DEVICE":
@@ -276,8 +293,8 @@ class gps(gpscommon, gpsdata, gpsjson):
             raise StopIteration
         if hasattr(self, "data"):
             return self.data
-        else:
-            return self.response
+
+        return self.response
 
     def next(self):
         "Python 2 backward compatibility."
@@ -308,9 +325,9 @@ if __name__ == '__main__':
         sys.exit(1)
 
     opts = {"verbose": verbose}
-    if len(arguments) > 0:
+    if arguments:
         opts["host"] = arguments[0]
-    if len(arguments) > 1:
+    if arguments:
         opts["port"] = arguments[1]
 
     session = gps(**opts)
