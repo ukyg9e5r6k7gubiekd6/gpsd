@@ -26,11 +26,15 @@ class gpscommon(object):
 
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0,
                  should_reconnect=False):
-        self.sock = None        # in case we blow up in connect
+        self.stream_command = b''
         self.linebuffer = b''
         self.received = time.time()
-        self.verbose = verbose
         self.reconnect = should_reconnect
+        self.verbose = verbose
+        self.sock = None        # in case we blow up in connect
+        # Provide the response in both 'str' and 'bytes' form
+        self.bresponse = b''
+        self.response = polystr(self.bresponse)
 
         if host is not None:
             self.host = host
@@ -76,11 +80,13 @@ class gpscommon(object):
                 raise  # propogate error to caller
 
     def close(self):
+        "Close the gpsd socket"
         if self.sock:
             self.sock.close()
         self.sock = None
 
     def __del__(self):
+        "Close the gpsd socket"
         self.close()
 
     def waiting(self, timeout=0):
@@ -167,6 +173,8 @@ class gpscommon(object):
 
 
 class json_error(BaseException):
+    "Class for JSON errors"
+
     def __init__(self, data, explanation):
         BaseException.__init__(self)
         self.data = data
@@ -177,14 +185,16 @@ class gpsjson(object):
     "Basic JSON decoding."
 
     def __init__(self):
-        self.stream_command = None
         self.data = None
+        self.stream_command = None
         self.verbose = -1
 
     def __iter__(self):
+        "Broken __iter__"
         return self
 
     def unpack(self, buf):
+        "Unpack a JSON string"
         try:
             self.data = dictwrapper(json.loads(buf.strip(), encoding="ascii"))
         except ValueError as e:
@@ -201,7 +211,7 @@ class gpsjson(object):
         if 0 < flags:
             self.stream_command = self.generate_stream_command(flags, devpath)
         else:
-            self.steam_command = self.enqueued
+            self.stream_command = self.enqueued
 
         if self.stream_command:
             if self.verbose > 1:
@@ -212,13 +222,15 @@ class gpsjson(object):
             raise TypeError("Invalid streaming command!! : " + str(flags))
 
     def generate_stream_command(self, flags=0, devpath=None):
+        "Generate stream command"
         if flags & WATCH_OLDSTYLE:
             return self.generate_stream_command_old_style(flags)
-        else:
-            return self.generate_stream_command_new_style(flags, devpath)
+
+        return self.generate_stream_command_new_style(flags, devpath)
 
     @staticmethod
     def generate_stream_command_old_style(flags=0):
+        "Generate stream command, old style"
         if flags & WATCH_DISABLE:
             arg = "w-"
             if flags & WATCH_NMEA:
@@ -233,6 +245,7 @@ class gpsjson(object):
 
     @staticmethod
     def generate_stream_command_new_style(flags=0, devpath=None):
+        "Generate stream command, new style"
 
         if (flags & (WATCH_JSON | WATCH_OLDSTYLE | WATCH_NMEA |
                      WATCH_RAW)) == 0:
@@ -284,12 +297,15 @@ class dictwrapper(object):
     "Wrapper that yields both class and dictionary behavior,"
 
     def __init__(self, ddict):
+        "Init class dictwrapper"
         self.__dict__ = ddict
 
     def get(self, k, d=None):
+        "Get dictwrapper"
         return self.__dict__.get(k, d)
 
     def keys(self):
+        "Keys dictwrapper"
         return self.__dict__.keys()
 
     def __getitem__(self, key):
@@ -297,6 +313,7 @@ class dictwrapper(object):
         return self.__dict__[key]
 
     def __iter__(self):
+        "Iterate dictwrapper"
         return self.__dict__.__iter__()
 
     def __setitem__(self, key, val):
@@ -304,13 +321,16 @@ class dictwrapper(object):
         self.__dict__[key] = val
 
     def __contains__(self, key):
+        "Find key in dictwrapper"
         return key in self.__dict__
 
     def __str__(self):
+        "dictwrapper to string"
         return "<dictwrapper: " + str(self.__dict__) + ">"
     __repr__ = __str__
 
     def __len__(self):
+        "length of dictwrapper"
         return len(self.__dict__)
 
 #
