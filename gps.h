@@ -39,7 +39,7 @@ extern "C" {
  * 7.0 - add gps_fix_t.ecef (February 2018)
  *       changed prototype of gps_read() to add buffer parameters
  *       increased length of devconfig_t.subtype
- *       add gnssid:svid to satellite_t
+ *       add gnssid:svid:sigid to satellite_t
  */
 #define GPSD_API_MAJOR_VERSION	7	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -1817,7 +1817,7 @@ struct satellite_t {
     short PRN;
     short elevation;	/* elevation of satellite, -90 to 90 deg, -91 for n/a */
     short azimuth;	/* azimuth, 0 to 359 deg, -1 for n/a */
-    /* gnssid:svid, as defined by u-blox 8:
+    /* gnssid:svid:sigid, as defined by u-blox 8/9:
      *  gnssid        svid (native PRN)
      *  0 = GPS       1-32
      *  1 = SBAS      120-158
@@ -1828,7 +1828,23 @@ struct satellite_t {
      *  6 = GLONASS   1-32, 22255
      */
     unsigned char gnssid;
+    /* ignore gnssid and sigid if svid is zero */
     unsigned char svid;
+    /* sigid as defined by u-blox 9
+     * GPS:      0 = L1C/A, 3 = L2 CL, 4 = L2 CM
+     * Galileo:  0 = E1 C,  1 = E1 B,  5 = E5 bl, 6 = E5 bQ
+     * BeiDou:   0 = B1|D1, 1 = B1|D2, 2 = B2|D1, 3 = B2|D2
+     * QZSS:     0 = L1C/A
+     * GLONASS:  0 = L1 OF, 2 = L2 OF
+     *
+     * sigid as defined by NMEA 4.1
+     * GPS:      1 = L1C/A, 6 = L2 CL, 5 = L2 CM
+     * Galileo:  7 = E1 C,  7 = E1 B,  2 = E5 bl, 2 = E5 bQ
+     * BeiDou:   1 = B1|D1, 1 = B1|D2, 3 = B2|D1, 3 = B2|D2
+     * QZSS:     not defined
+     * GLONASS:  1 = L1 OF, 3 = L2 OF
+     */
+    unsigned char sigid;
 };
 
 struct attitude_t {
