@@ -617,7 +617,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 	    (void)mvwprintw(satellites, sat_no + 2, 1, "%s", "More...");
 	} else {
 	    /* Clear old data from the unused lines at bottom. */
-	    for ( ; sat_no <= display_sats; sat_no++) {
+	    for ( ; sat_no < display_sats; sat_no++) {
 		(void)mvwprintw(satellites, sat_no + 2, 1, "%-*s",
 				SATELLITES_WIDTH - 3, "");
 	    }
