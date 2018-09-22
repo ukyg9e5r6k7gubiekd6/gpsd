@@ -622,7 +622,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 				SATELLITES_WIDTH - 3, "");
 	    }
             /* remove More... */
-	    (void)mvwprintw(satellites, sat_no + 2, 1, "%s", "       ");
+	    (void)mvwhline(satellites, sat_no + 2, 1, 0, 5);
 	}
         /* turn off cursor */
 	curs_set(0);
