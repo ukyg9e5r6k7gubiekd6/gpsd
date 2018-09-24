@@ -2175,23 +2175,23 @@ def usage():
           '                     default: %s\n'
           '       -h            print help\n'
           '       -m M          optional mode to -p P\n'
-          '       -r            open file/device read only\n'
           '       -p P          send a prepackaged query P to GPS\n'
+          '       -R R          save raw data from GPS in file R\n'
+          '                     default: %s\n'
+          '       -r            open file/device read only\n'
+          '       -S S          set GPS speed to S\n'
           '       -s S          set port speed to S\n'
           '                     default: %s bps\n'
           '       -w            wait time\n'
           '                     default: %s seconds\n'
+          '       -V            print version\n'
           '       -v V          Set verbosity level to V, 0 to 4\n'
           '                     default: %s\n'
           '       -?            print help\n'
-          '       -R R          save raw data from GPS in file R\n'
-          '                     default: %s\n'
-          '       -S S          set GPS speed to S\n'
-          '       -V            print version\n'
           '\n'
           'D and E can be one of:' %
-          (PROG_NAME, opts['input_file_name'], opts['input_speed'],
-           opts['input_wait'], opts['verbosity'], opts['raw_file'])
+          (PROG_NAME, opts['input_file_name'], opts['raw_file'],
+           opts['input_speed'], opts['input_wait'], opts['verbosity'])
           )
 
     for item in sorted(gps_model.able_commands.keys()):
