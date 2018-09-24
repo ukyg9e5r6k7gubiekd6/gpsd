@@ -1679,6 +1679,8 @@ base_manpages = {
     "libgpsmm.3": "libgpsmm.xml",
     "libQgpsmm.3": "libgpsmm.xml",
     "srec.5": "srec.xml",
+    "ubxtool.1": "ubxtool.xml",
+    "zerk.1": "zerk.xml",
 }
 
 if env['pps'] and (env["timeservice"] or env["gpsdclients"]):

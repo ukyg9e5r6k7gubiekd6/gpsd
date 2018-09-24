@@ -33,17 +33,15 @@ BSD terms apply: see the file COPYING in the distribution root for details.
    <arg choice='opt'>-f <replaceable>file/device</replaceable>
    </arg>
    <arg choice='opt'>-h </arg>
-   <arg choice='opt'>-m <replaceable>mode</replaceable>
+   <arg choice='opt'>-m <replaceable>mode</replaceable></arg>
    <arg choice='opt'>-p <replaceable>preset</replaceable></arg>
    <arg choice='opt'>-R <replaceable>rawfile</replaceable></arg>
    <arg choice='opt'>-r </arg>
-   <arg choice='opt'>-S <replaceable>setspeed</replaceable></arg></arg>
-   <arg choice='opt'>-s <replaceable>speed</replaceable>
+   <arg choice='opt'>-S <replaceable>setspeed</replaceable></arg>
+   <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
    <arg choice='opt'>-V </arg>
-   <arg choice='opt'>-v <replaceable>verbosity</replaceable>
-   </arg>
-   <arg choice='opt'>-w <replaceable>wait</replaceable>
-   </arg>
+   <arg choice='opt'>-v <replaceable>verbosity</replaceable></arg>
+   <arg choice='opt'>-w <replaceable>wait</replaceable></arg>
    <arg choice='opt'>[server[:port[:device]]]</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
@@ -401,7 +399,7 @@ ubxtool -w 5 server
   <para>
    <application>ubxtool</application> is written to conform to the official
 u-blox documentation for the u-blox binary protocol.
-<ulink url="https://www.u-blox.com/en/product-resources"./para>
+<ulink url="https://www.u-blox.com/en/product-resources"></ulink></para>
   <para>
    <citerefentry>
     <refentrytitle>gpsd</refentrytitle>
