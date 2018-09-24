@@ -1,0 +1,445 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--
+This file is Copyright (c) 2018 by the GPSD project
+BSD terms apply: see the file COPYING in the distribution root for details.
+-->
+<!DOCTYPE refentry PUBLIC
+   "-//OASIS//DTD DocBook XML V4.1.2//EN"
+   "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<refentry id='ubxtool.1'>
+ <refentryinfo>
+  <date>24 Sep 2018</date>
+ </refentryinfo>
+ <refmeta>
+  <refentrytitle>ubxtool</refentrytitle>
+  <manvolnum>1</manvolnum>
+  <refmiscinfo class="source">The GPSD Project</refmiscinfo>
+  <refmiscinfo class="manual">GPSD Documentation</refmiscinfo>
+ </refmeta>
+ <refnamediv id='name'>
+  <refname>ubxtool</refname>
+  <refpurpose>u-blox tool</refpurpose>
+ </refnamediv>
+ <refsynopsisdiv id='synopsis'>
+  <cmdsynopsis>
+   <command>ubxtool</command>
+   <arg choice='opt'>-? </arg>
+   <arg choice='opt'>-c <replaceable>command</replaceable>
+   </arg>
+   <arg choice='opt'>-d <replaceable>disable</replaceable>
+   </arg>
+   <arg choice='opt'>-e <replaceable>enable</replaceable>
+   </arg>
+   <arg choice='opt'>-f <replaceable>file/device</replaceable>
+   </arg>
+   <arg choice='opt'>-h </arg>
+   <arg choice='opt'>-m <replaceable>mode</replaceable>
+   <arg choice='opt'>-p <replaceable>preset</replaceable></arg>
+   <arg choice='opt'>-R <replaceable>rawfile</replaceable></arg>
+   <arg choice='opt'>-r </arg>
+   <arg choice='opt'>-S <replaceable>setspeed</replaceable></arg></arg>
+   <arg choice='opt'>-s <replaceable>speed</replaceable>
+   <arg choice='opt'>-V </arg>
+   <arg choice='opt'>-v <replaceable>verbosity</replaceable>
+   </arg>
+   <arg choice='opt'>-w <replaceable>wait</replaceable>
+   </arg>
+   <arg choice='opt'>[server[:port[:device]]]</arg>
+  </cmdsynopsis>
+ </refsynopsisdiv>
+ <refsect1 id='description'>
+  <title>DESCRIPTION</title>
+  <para>
+   <application>ubxtool</application> is a tool for u-blox GPS.
+If you do not have a u-blox GPS then can stop reading now.</para>
+  <para>This tool operates with your u-blox GPS at a very low level.
+To understand <application>ubxtool</application> you must first be familiar
+with your u-blox GPS and the documentation for the u-blox binary protocol.
+The u-blox protocol varies greatly depending o GPS model and firmware
+revision.
+</para>
+  <para>
+   <application>ubxtool</application> can decode common u-blox binary
+ messages, poll the GPS status, enable and disable GPS features, and send user
+generated commands to the GPS.  It can read binary messages from a file.  It
+can read and write directly through a serial device, or through a
+running gpsd instance.</para>
+ </refsect1>
+ <refsect1 id='options'>
+  <title>OPTIONS</title>
+  <para>The program accepts the following options:</para>
+  <variablelist remap='TP'>
+   <varlistentry>
+    <term>-c COMMAND</term>
+    <listitem>
+     <para>Send a text string to the GPS.  Accepts one parameter, COMMAND,
+the command string to send to the GPS.  The string is sent verbatim, except
+a newline is appended.
+</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-d OPTION</term>
+    <listitem>
+     <para>Disable an option in the GPS.  Accepts one parameter, OPTION,
+the option to disable.
+</para>
+     <variablelist>
+      <varlistentry>
+       <term>BEIDOU</term>
+       <listitem>
+        <para>Disable use of the BeiDou (COMPASS) constellation.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>BINARY</term>
+       <listitem>
+        <para>Disable sending of the basic binary messages.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>ECEF</term>
+       <listitem>
+        <para>Disable sending of ECEF binary messages.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>GALILEO</term>
+       <listitem>
+        <para>Disable use of the GALILEO constellation.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>GLONASS</term>
+       <listitem>
+        <para>Disable use of the GLONASS constellation.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>GPS</term>
+       <listitem>
+        <para>Disable use of the GPS and QZSS constellations.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>NMEA</term>
+       <listitem>
+        <para>Disable sending basic NMEA messages.  The messages are
+GBS, GGA, GSA, GGL, GST, GSV, RMC, VTG, and ZDA.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>RAWX</term>
+       <listitem>
+        <para>Disable sending of the UBX-RXM-RAWX messages.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>SBAS</term>
+       <listitem>
+        <para>Disable use of the SBAS constellation.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>TMODE2</term>
+       <listitem>
+        <para>Disable sending TMODE2.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>TP</term>
+       <listitem>
+        <para>Disable sending UBX-TIM-TP.</para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-e OPTION</term>
+    <listitem>
+     <para>Enable an option in the GPS.  Accepts one parameter, OPTION,
+the option to enable.  -e accepts the same OPTIONs as -d, except the action
+is to enable the option.
+</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-f FILE</term>
+    <listitem>
+     <para>Connect to a file or device.  Accepts one parameter, FILE,
+the file or device to open.   Files are opened read-only.  Character
+devices are opened red/write, unless the -r parameter is given.
+</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-h</term>
+    <listitem>
+     <para>Makes <application>ubxtool</application> print
+a usage message and exit.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-m mode</term>
+    <listitem>
+     <para>Sets optional mode parameter to a -p PRESET command.
+</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-p PRESET</term>
+    <listitem>
+     <para>Send a preset command the GPS.  Accepts one parameter, PRESET,
+the name of the command to send.  <application>ubxtool</application> will exit
+after the GPS acknowledges the command, unless the -W is given.
+</para>
+     <variablelist>
+      <varlistentry>
+       <term>ANT</term>
+       <listitem>
+        <para>Poll the antenna configuration (UBX-CFG-ANT).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>COLDBOOT</term>
+       <listitem>
+        <para>Coldboot the GPS (UBX-CFG-RST).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>GNSS</term>
+       <listitem>
+        <para>Poll the enabled constellations (UBX-CFG-GNSS).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>HOTBOOT</term>
+       <listitem>
+        <para>Hotboot the GPS (UBX-CFG-RST).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>MODEL</term>
+       <listitem>
+        <para>Configure the Dynamic Platform Model. (UBX-CFG-NAV5).
+</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>NAV5</term>
+       <listitem>
+        <para>Poll the Nav Engines settings (UBX-CFG-NAV6.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>RESET</term>
+       <listitem>
+        <para>Reset configuration to defaults (UBX-CFG-CFG).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>SAVE</term>
+       <listitem>
+        <para>Save current configuration (UBX-CFG-CFG).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>SVIN</term>
+       <listitem>
+        <para>Poll survey in data (UBX-CFG-SVIN).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>TMODE2</term>
+       <listitem>
+        <para>Poll Time Mode 2 configuration (UBX-CFG-TMODE2).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>TP</term>
+       <listitem>
+        <para>Poll time pulse timedata (UBX-TIM-TP).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>TP5</term>
+       <listitem>
+        <para>Get Time Pulse decodes (UBX-TIM-TP5).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>VER</term>
+       <listitem>
+        <para>Poll GPS version.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>WARMBOOT</term>
+       <listitem>
+        <para>Warmboot the GPS (UBX-CFG-RST).</para>
+       </listitem>
+      </varlistentry>
+     </variablelist>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-R RAW</term>
+    <listitem>
+     <para>Save all raw data from the GPS into the file RAW.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-r</term>
+    <listitem>
+     <para>Read only.  Do not send anything to the GPS.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-S SPEED</term>
+    <listitem>
+     <para>Set the GPS serial port speed to SPEED bps.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-s SPEED</term>
+    <listitem>
+     <para>Set local serial port speed to SPEED bps. Default 115,200 bps.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-V</term>
+    <listitem>
+     <para>Print <application>ubxtool</application> version and exit.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-v VERBOSITY</term>
+    <listitem>
+     <para>Set verbosity level to VERBOSITY.  Verbosity can be from 0
+     (very quiet), to 4 (very noisy).  Default 2.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-v VERBOSITY</term>
+    <listitem>
+     <para>Set verbosity level to VERBOSITY.  Verbosity can be from 0
+     (very quiet), 2 (decode messages), to 4 (very noisy).  Default 1.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-w WAIT</term>
+    <listitem>
+     <para>Wait for WAIT seconds before exiting.  Will exit early on command
+completion of -d, -e or -p command, unless -W is given.  Default 2.0 second.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-?</term>
+    <listitem>
+     <para>Makes <application>ubxtool</application> print
+a usage message and exit.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>[server[:port[:device]]]</term>
+    <listitem>
+     <para>
+       By default, <application>ubxtool</application> collects data
+       from all compatible devices on localhost, using the default GPSD
+       port 2947. An optional argument may specify a server to get data
+       from. A colon-separated suffix is taken as a port number. If
+       there is a second colon-separated suffix, that is taken as a
+       specific device name to be watched. Further details on the
+<citerefentry>
+       <refentrytitle>gps</refentrytitle>
+       <manvolnum>1</manvolnum>
+      </citerefentry> man page.
+     </para>
+    </listitem>
+   </varlistentry>
+  </variablelist>
+ </refsect1>
+ <refsect1 id='environment'>
+  <title>ENVIRONMENT</title>
+  <para>Options can be placed in the UBXOPTS environment variable.
+UBXOPTS is processed before the CLI options.</para>
+ </refsect1>
+ <refsect1 id='examples'>
+  <title>EXAMPLES</title>
+  <para>
+Decode raw log file:
+<programlisting>
+ubxtool -r -f ublox-neo-m8n.log
+</programlisting>
+  </para>
+  <para>
+Change GPS port speed of device on /dev/ttyAMA0 to 230,400 bps::
+<programlisting>
+ubxtool -S 230400 -f /dev/ttyAMA0
+</programlisting>
+  </para>
+  <para>
+Watch entire GPS reset cycle:
+<programlisting>
+ubxtool -p COLDBOOT -w 20
+</programlisting>
+  </para>
+  <para>
+Poll Enabled Constellations:
+<programlisting>
+ubxtool -p GNSS
+</programlisting>
+Dump gpsd data from remote server:
+<programlisting>
+ubxtool -w 5 server
+</programlisting>
+  </para>
+ </refsect1>
+ <refsect1 id='see_also'>
+  <title>SEE ALSO</title>
+  <para>
+   <application>ubxtool</application> is written to conform to the official
+u-blox documentation for the u-blox binary protocol.
+<ulink url="https://www.u-blox.com/en/product-resources"./para>
+  <para>
+   <citerefentry>
+    <refentrytitle>gpsd</refentrytitle>
+    <manvolnum>8</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>gps</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>cgps</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>xgps</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>gpsfake</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>gpsctl</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>gpscat</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+<citerefentry>
+    <refentrytitle>gnuplot</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>.
+</para>
+ </refsect1>
+ <refsect1 id='maintainer'>
+  <title>AUTHOR</title>
+  <para>Gary E. Miller<email>gem@rellim.com</email>
+  </para>
+ </refsect1>
+</refentry>
