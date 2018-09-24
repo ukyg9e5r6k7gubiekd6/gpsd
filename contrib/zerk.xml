@@ -35,11 +35,10 @@ BSD terms apply: see the file COPYING in the distribution root for details.
    <arg choice='opt'>-h </arg>
    <arg choice='opt'>-O <replaceable>oaf</replaceable>
    </arg>
-   <arg choice='opt'>-p <replaceable>preset</replaceable>
-   </arg>
-   <arg choice='opt'>-r </arg>
+   <arg choice='opt'>-p <replaceable>preset</replaceable></arg>
    <arg choice='opt'>-R <replaceable>rawfile</replaceable>
    </arg>
+   <arg choice='opt'>-r </arg>
    <arg choice='opt'>-S <replaceable>setspeed</replaceable>
    </arg>
    <arg choice='opt'>-s <replaceable>speed</replaceable>
@@ -67,7 +66,7 @@ with your Javad GPS and the documentation for the GREIS protocol.
   <para>
    <application>zerk</application> can decode common GREIS messages,
 poll the GPS status, enable and disable GPS features, and send user
-generated commands to the GPS.  It can GREIS read messages from a file.  It
+generated commands to the GPS.  It can read GREIS messages from a file.  It
 can read and write directly through a serial device, or through a
 running gpsd instance.</para>
  </refsect1>
@@ -75,13 +74,6 @@ running gpsd instance.</para>
   <title>OPTIONS</title>
   <para>The program accepts the following options:</para>
   <variablelist remap='TP'>
-   <varlistentry>
-    <term>-?</term>
-    <listitem>
-     <para>Makes <application>zerk</application> print
-a usage message and exit.</para>
-    </listitem>
-   </varlistentry>
    <varlistentry>
     <term>-c COMMAND</term>
     <listitem>
@@ -327,7 +319,7 @@ the GPS acknowledges the command, unless the -W is given.
    <varlistentry>
     <term>-V</term>
     <listitem>
-     <para>Print <application>zerk</application> and exit.</para>
+     <para>Print <application>zerk</application> version and exit.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -373,6 +365,13 @@ completion of -d, -e or -p command, unless -W is given.  Default 2.0 second.</pa
        <manvolnum>1</manvolnum>
       </citerefentry> man page.
      </para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-?</term>
+    <listitem>
+     <para>Makes <application>zerk</application> print
+a usage message and exit.</para>
     </listitem>
    </varlistentry>
   </variablelist>
