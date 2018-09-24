@@ -1364,7 +1364,7 @@ if not env['python']:
     python_targets = []
     python_progs = []
 else:
-    python_progs = ["gegps", "gpscat", "gpsfake", "gpsprof"]
+    python_progs = ["gegps", "gpscat", "gpsfake", "gpsprof", "ubxtool", "zerk"]
 
     if env['xgps']:
         # check for pycairo
