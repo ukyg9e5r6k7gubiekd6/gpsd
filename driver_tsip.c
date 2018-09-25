@@ -202,7 +202,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		u4 = getub(buf, 4); /* Build number */
 		u5 = getub(buf, 5); /* Month */
 		u6 = getub(buf, 6); /* Day */
-		s1 = (int16_t)getbeu16(buf, 7); /* Year */
+		ul1 = getbeu16(buf, 7); /* Year */
 		u7 = getub(buf, 9); /* Length of first module name */
 		for (i=0; i < (int)u7; i++) {
 		    buf2[i] = (char)getub(buf, 10+i); /* Product name in ASCII */
@@ -211,7 +211,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
 		(void)snprintf(session->subtype, sizeof(session->subtype),
 			       "sw %u %u %u %02u.%02u.%04u %.62s",
-			       u2, u3, u4, u6, u5, s1, buf2);
+			       u2, u3, u4, u6, u5, ul1, buf2);
 		gpsd_log(&session->context->errout, LOG_INF,
 			 "Software version: %s\n",
 			 session->subtype);
@@ -222,9 +222,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		ul1 = getbeu32(buf, 1); /* Serial number */
 		u2 = getub(buf, 5); /* Build day */
 		u3 = getub(buf, 6); /* Build month */
-		s1 = (int16_t)getbeu16(buf, 7); /* Build year */
+		ul1 = getbeu16(buf, 7); /* Build year */
 		u4 = getub(buf, 6); /* Build hour */
-		s2 = (int16_t)getbeu16(buf, 10); /* Hardware Code */
+		ul2 = getbeu16(buf, 10); /* Hardware Code */
 		u5 = getub(buf, 12); /* Length of Hardware ID */
 		/* coverity_submit[tainted_data] */
 		for (i=0; i < (int)u5; i++) {
@@ -234,7 +234,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
 		(void)snprintf(session->subtype, sizeof(session->subtype),
 			       "hw %u %02u.%02u.%04u %02u %u %.48s",
-			       ul1, u2, u3, s1, u4, s2, buf2);
+			       ul1, u2, u3, ul1, u4, ul2, buf2);
 		gpsd_log(&session->context->errout, LOG_INF,
 			 "Hardware version: %s\n",
 			 session->subtype);
