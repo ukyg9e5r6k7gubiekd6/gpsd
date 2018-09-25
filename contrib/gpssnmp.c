@@ -39,7 +39,6 @@ static void usage() {
 }
 
 int main (int argc, char **argv) {
-  int status, used, visible;
   struct gps_data_t gpsdata;
 
   #define OID_VISIBLE ".1.3.6.1.2.1.25.1.31"
@@ -50,6 +49,7 @@ int main (int argc, char **argv) {
     int i;
     double snr_total=0;
     double snr_avg = 0.0;
+    int status, used, visible;
 
     status = gps_open (GPSD_SHARED_MEMORY, DEFAULT_GPSD_PORT, &gpsdata);
     status = gps_read (&gpsdata);
