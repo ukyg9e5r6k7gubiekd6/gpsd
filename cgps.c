@@ -163,12 +163,12 @@ static char *dop_to_str(double dop)
 /* format an EP into a string, handle NAN, INFINITE */
 static char *ep_to_str(double ep, double factor, char *units)
 {
-    static char buf[128];
+    static char buf[20];
 
     if (isfinite(ep) == 0) {
         return " n/a  ";
     }
-    (void)snprintf(buf, sizeof(buf), "+/-%4.1f %.10s", ep * factor, units);
+    (void)snprintf(buf, sizeof(buf), "+/-%5.1f %.8s", ep * factor, units);
     return buf;
 }
 
@@ -824,7 +824,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         /* Fill in the estimated speed error, EPS. */
         ep_str = ep_to_str(gpsdata->fix.eps, speedfactor, speedunits);
         (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET + 8,
-                        "       %-*s", 11,
+                        "       %-*s", 12,
                         ep_str);
 
         /* Fill in the estimated track error, EPD. */
