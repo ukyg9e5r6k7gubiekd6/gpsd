@@ -572,8 +572,17 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 	int cn;
 	int off = 8 + 15 * i;
 	bool good;
+	short prn = (short)getub(buf, off);
 	unsigned short stat = (unsigned short)getbeu16(buf, off + 3);
-	session->gpsdata.skyview[st].PRN = (short)getub(buf, off);
+	session->gpsdata.skyview[st].PRN = prn;
+	session->gpsdata.skyview[st].svid = prn;
+	if (120 <= prn && 158 >= prn) {
+            /* SBAS */
+            session->gpsdata.skyview[st].gnssid = 1;
+        } else {
+            /* GPS */
+            session->gpsdata.skyview[st].gnssid = 0;
+        }
 	session->gpsdata.skyview[st].azimuth =
 	    (short)(((unsigned)getub(buf, off + 1) * 3) / 2.0);
 	session->gpsdata.skyview[st].elevation =
@@ -606,10 +615,13 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
     /* mark SBAS sats in use if SBAS was in use as of the last MID 27 */
     for (i = 0; i < st; i++) {
 	int prn = session->gpsdata.skyview[i].PRN;
-	if ( (prn >= 120 && prn <= 158) \
-		&& session->gpsdata.status == STATUS_DGPS_FIX \
-		&& session->driver.sirf.dgps_source == SIRF_DGPS_SOURCE_SBAS)
+	if ((120 <= prn && 158 >= prn) &&
+	    session->gpsdata.status == STATUS_DGPS_FIX &&
+	    session->driver.sirf.dgps_source == SIRF_DGPS_SOURCE_SBAS) {
+            /* used does not seem right, DGPS means got the correction
+             * data, not that the geometry was improved... */
 	    session->gpsdata.skyview[i].used = true;
+        }
     }
 #ifdef TIMEHINT_ENABLE
     if (st < 3) {
