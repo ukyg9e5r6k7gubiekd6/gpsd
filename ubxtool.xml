@@ -378,9 +378,9 @@ ubxtool -S 230400 -f /dev/ttyAMA0
 </programlisting>
   </para>
   <para>
-Watch entire GPS reset cycle:
+Watch entire GPS reset cycle, include $GPTXT messages:
 <programlisting>
-ubxtool -p COLDBOOT -w 20
+ubxtool -p COLDBOOT -w 20 -v 2
 </programlisting>
   </para>
   <para>
