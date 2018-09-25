@@ -531,7 +531,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 /* This gets called once for each new GPS sentence. */
 {
     int newstate;
-    char scr[128], *s;
+    char scr[60];
 
     /* This is for the satellite status display.  Originally lifted from
      * xgps.c.  Note that the satellite list may be truncated based on
@@ -730,8 +730,9 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 
     if (window_ysize >= (MIN_GPS_DATAWIN_YSIZE + 5)) {
         int row = 9;
-        char *ep_str = NULL;
-        char *dop_str = NULL;
+        char *ep_str;
+        char *dop_str;
+        char *str;
 
         /* Fill in the estimated latitude position error, XDOP. */
         ep_str = ep_to_str(gpsdata->fix.epx, altfactor, altunits);
@@ -757,7 +758,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
             double sep = NAN;  /* 3D EP */
 
             /* Calculate estimated 2D circular position error, CEP */
-            if (isfinite(gpsdata->fix.epy) != 0
+            if (isfinite(gpsdata->fix.epx) != 0
                 && isfinite(gpsdata->fix.epy) != 0) {
                 /* http://gauss.gge.unb.ca/papers.pdf/gpsworld.may99.pdf */
                 /* CEP is just the hypotenuse of the triangle of epx and epy */
@@ -843,11 +844,11 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         /* Fill in the grid square (esr thought *this* one was interesting). */
         if ((isfinite(gpsdata->fix.longitude) != 0 &&
              isfinite(gpsdata->fix.latitude) != 0))
-            s = maidenhead(gpsdata->fix.latitude,gpsdata->fix.longitude);
+            str = maidenhead(gpsdata->fix.latitude,gpsdata->fix.longitude);
         else
-            s = "n/a";
+            str = "n/a";
         (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET + 9, "%-*s",
-                        18, s);
+                        18, str);
 
     }
 
