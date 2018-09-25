@@ -229,20 +229,20 @@ static void update_lcd(struct gps_data_t *gpsdata)
 static void usage( char *prog)
 {
   (void)fprintf(stderr,
-                "Usage: %s [-h] [-v] [-V] [-s] [-l {d|m|s}] [-u {i|m|n}] [server[:port:[device]]]\n\n"
-                "  -h          Show this help, then exit\n"
-                "  -V          Show version, then exit\n"
-                "  -s          Sleep for 10 seconds before starting\n"
-                "  -j          Turn on anti-jitter buffering\n"
-                "  -l {d|m|s}  Select lat/lon format\n"
-                "                d = DD.dddddd (default)\n"
-                "                m = DD MM.mmmm'\n"
-                "                s = DD MM' SS.sss\"\n"
-                "  -u {i|m|n}  Select Units\n"
-                "                i = Imperial (default)\n"
-                "                m = Metric'\n"
-                "                n = Nautical\"\n"
-                , prog);
+        "Usage: %s [OPTIONS] [server[:port:[device]]]\n\n"
+        "  -h          Show this help, then exit\n"
+        "  -j          Turn on anti-jitter buffering\n"
+        "  -l {d|m|s}  Select lat/lon format\n"
+        "                d = DD.dddddd (default)\n"
+        "                m = DD MM.mmmm'\n"
+        "                s = DD MM' SS.sss\"\n"
+        "  -s          Sleep for 10 seconds before starting\n"
+        "  -u {i|m|n}  Select Units\n"
+        "                i = Imperial (default)\n"
+        "                m = Metric'\n"
+        "                n = Nautical\"\n"
+        "  -V          Show version, then exit\n"
+        , prog);
 
   exit(EXIT_FAILURE);
 }
@@ -282,11 +282,8 @@ int main(int argc, char *argv[])
     }
 
     /* Process the options.  Print help if requested. */
-    while ((option = getopt(argc, argv, "Vhl:su:")) != -1) {
+    while ((option = getopt(argc, argv, "hl:su:V")) != -1) {
 	switch (option) {
-	case 'V':
-	    (void)fprintf(stderr, "lcdgs revision " REVISION "\n");
-	    exit(EXIT_SUCCESS);
 	case 'h':
 	default:
 	    usage(argv[0]);
@@ -332,6 +329,9 @@ int main(int argc, char *argv[])
 	    default:
 		(void)fprintf(stderr, "Unknown -u argument: %s\n", optarg);
 	    }
+	case 'V':
+	    (void)fprintf(stderr, "lcdgs revision " REVISION "\n");
+	    exit(EXIT_SUCCESS);
 	}
     }
 
