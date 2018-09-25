@@ -614,9 +614,8 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
     int32_t Omegadot = getles3224_be(buf, 78);
     /* Question: What is the proper way of shifting a signed int 2 bits to
      * the right, preserving sign? Answer: integer division by 4. */
-    int16_t idot =
-	(int16_t) (((getles16_be(buf, 82) & 0xfffc) /
-		    4) | (getub(buf, 82) & 80 ? 0xc000 : 0x0000));
+    int16_t idot = (int16_t) (((getles16_be(buf, 82) & 0xfffc) / 4) |
+                              ((getub(buf, 82) & 80) ? 0xc000 : 0x0000));
     session->context->gps_week = (unsigned short)wn;
     session->context->gps_tow = (double)(toc * SF_TOC);
     /* leap second? */
