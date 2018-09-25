@@ -99,7 +99,11 @@ def kmlize(tpv):
 if __name__ == "__main__":
     def usage():
         "Print usage and exit"
-        sys.stderr.write("usage: gegps: [-d] [-h] [-i] [-V]\n")
+        sys.stderr.write("usage: gegps: [-d] [-h] [-i] [-V]\n\n"
+                         "    -d directory  Location of Google Earth\n"
+                         "    -h            Print this help and exit\n"
+                         "    -i\n"
+                         "    -V            Print version and exit\n")
         sys.exit(0)
 
     kmldir = "."
