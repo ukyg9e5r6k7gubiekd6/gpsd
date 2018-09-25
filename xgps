@@ -3,8 +3,19 @@
 '''
 xgps -- test client for gpsd
 
-usage: xgps [-D level] [-hV?] [-l degmfmt] [-u units] [-r rotation]
+usage: xgps [-?] [-D level] [-h] [-l degmfmt] [-r rotation] [-u units] [-V]
             [server[:port[:device]]]
+
+    -?            Print help and exit.
+    -D lvl        Set debug level to lvl
+    -h            Print help and exit.
+    -l {d|m|s}    Select lat/lon format
+                      d = DD.dddddd (default)
+                      m = DD MM.mmmm'
+                      s = DD MM' SS.sss"
+    -r rotation   Set rotation
+    -u units      Set units
+    -V            Print version and exit.
 '''
 
 # This file is Copyright (c) 2010 by the GPSD project
