@@ -349,7 +349,6 @@ static gps_mask_t greis_msg_SI(struct gps_device_t *session,
 			       unsigned char *buf, size_t len)
 {
     int i;
-    unsigned short PRN;
 
     if (len < 1) {
 	gpsd_log(&session->context->errout, LOG_WARN,
@@ -362,7 +361,7 @@ static gps_mask_t greis_msg_SI(struct gps_device_t *session,
     session->gpsdata.satellites_visible = len - 1;
     for (i = 0; i < session->gpsdata.satellites_visible; i++) {
 	/* This isn't really PRN, this is USI.  Convert it. */
-	PRN = getub(buf, i);
+        unsigned short PRN = getub(buf, i);
 	session->gpsdata.skyview[i].PRN = PRN;
 
         /* fit into gnssid:svid */
