@@ -711,9 +711,7 @@ if __name__ == '__main__':
     from os.path import basename
     from optparse import OptionParser
     prog = basename(sys.argv[0])
-    usage = ('%s [-V|--version] [-h|--help] [--debug] [--host] ' +
-             '[--port] [--device] [--speedunits {[mph] [kmh] [knots]}] ' +
-             '[host [:port [:device]]]') % (prog)
+    usage = ('%s [OPTIONS] [host [:port [:device]]]') % (prog)
     epilog = 'BSD terms apply: see the file COPYING in the distribution root' \
              ' for details.'
 
