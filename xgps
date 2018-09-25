@@ -81,7 +81,7 @@ SKY_VIEW_SORT_FIELDS = ('-used', 'PRN')
 
 # Each GNSS constellation reuses the same PRNs.  To differentiate they are
 # all mushed into the PRN.  Different GPS mush differently.  gpsd should
-# have unstangled and put in gnssid:svid
+# have untangled and put in gnssid:svid
 
 
 def gnssid_str(gnssid, svid):
