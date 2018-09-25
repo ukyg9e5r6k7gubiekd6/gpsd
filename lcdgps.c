@@ -327,8 +327,10 @@ int main(int argc, char *argv[])
 		speedunits = "kph";
 		continue;
 	    default:
-		(void)fprintf(stderr, "Unknown -u argument: %s\n", optarg);
+                break;
 	    }
+            (void)fprintf(stderr, "Unknown -u argument: %s\n", optarg);
+            break;
 	case 'V':
 	    (void)fprintf(stderr, "lcdgs revision " REVISION "\n");
 	    exit(EXIT_SUCCESS);
