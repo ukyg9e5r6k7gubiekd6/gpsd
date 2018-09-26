@@ -370,21 +370,27 @@ static int ex_subtract_float( void )
 	/* test strings */
 	if ( strcmp( buf_r, buf_c) ) {
 	    fail_ts = "FAIL";
+            fail_count++;
 	}
 	if ( strcmp( buf_l, buf_c) ) {
 	    fail_l = "FAIL";
+            fail_count++;
 	}
 	if ( strcmp( buf_l32, buf_c) ) {
 	    fail_l32 = "FAIL";
+            fail_count++;
 	}
 	if ( strcmp( buf_l64, buf_c) ) {
 	    fail_l64 = "FAIL";
+            fail_count++;
 	}
 	if ( strcmp( buf_f, buf_c) ) {
 	    fail_f = "FAIL";
+            fail_count++;
 	}
 	if ( strcmp( buf_d, buf_c) ) {
 	    fail_d = "FAIL";
+            fail_count++;
 	}
 	printf("ts:  %21s - %21s = %21s %s\n"
 	       "l;   %21s - %21s = %21lld %s\n"
@@ -408,9 +414,9 @@ static int ex_subtract_float( void )
     };
 
     if ( fail_count ) {
-	// printf("subtract test failed %d tests\n", fail_count );
+	printf("subtract test failed %d tests\n", fail_count );
     } else {
-	// puts("subtract test succeeded\n");
+	puts("subtract test succeeded\n");
     }
     return fail_count;
 }
