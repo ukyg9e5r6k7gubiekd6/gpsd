@@ -1467,8 +1467,9 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
     case TSIP_PAYLOAD:
 	if (c == DLE)
 	    lexer->state = TSIP_DLE;
-	if ( 0 >= --lexer->length ) {
+	if ( 0 == --lexer->length ) {
 	    /* uh, oh, packet too long, probably was never TSIP */
+            /* note lexer->length is unsigned */
 	    lexer->state = GROUND_STATE;
 	}
 	break;
