@@ -14,6 +14,12 @@
 #include "gpsd.h"
 #include "gps_json.h"
 
+/* GPSD is built with JSON_MINIMAL.  Any !JSON_MINIMAL tests,
+ * like 18, 19 and 20 will thus fail.
+ * So this define removes them, they never execute.
+ */
+#define JSON_MINIMAL
+
 static int debug = 0;
 
 static void assert_case(int num, int status)
@@ -258,6 +264,7 @@ static const struct json_attr_t json_short_string[] = {
 static char json_strOver2[7 * JSON_VAL_MAX];  /* dynamically built */
 
 
+#ifndef JSON_MINIMAL
 /* Case 17: Read array of integers */
 
 static const char *json_strInt = "[23,-17,5]";
@@ -295,6 +302,7 @@ static const struct json_array_t json_array_Real = {
     .count = &realcount,
     .maxlen = sizeof(realstore)/sizeof(realstore[0]),
 };
+#endif /* JSON_MINIMAL */
 
 /* *INDENT-ON* */
 
@@ -488,6 +496,29 @@ static void jsontest(int i)
 	break;
 
     case 17:
+        /* check for a different string overrun caught */
+        json_strOver2[0] = '\0';
+        /* build a LONG test string */
+	strlcat(json_strOver2, "{\"name\":\"", sizeof(json_strOver2));
+        for (n = 0; n < (2 * JSON_VAL_MAX); n++) {
+	    strlcat(json_strOver2, "\\A", sizeof(json_strOver2));
+        }
+	strlcat(json_strOver2, "\"}", sizeof(json_strOver2));
+
+	if (2 < debug) {
+	    (void)fprintf(stderr, "test string: %s.\n", json_strOver);
+	}
+	json_short_string_cnt = 7;
+	status = json_read_object(json_strOver2, json_short_string, NULL);
+	assert_case(i, JSON_ERR_STRLONG != status);
+	assert_string("name", json_short_string_dst, "");
+	assert_integer("count", json_short_string_cnt, 0);
+	break;
+
+#ifdef JSON_MINIMAL
+#define MAXTEST 17
+#else
+    case 18:
 	status = json_read_array(json_strInt, &json_array_Int, NULL);
 	assert_integer("count", intcount, 3);
 	assert_integer("intstore[0]", intstore[0], 23);
@@ -496,7 +527,7 @@ static void jsontest(int i)
 	assert_integer("intstore[3]", intstore[3], 0);
 	break;
 
-    case 18:
+    case 19:
 	status = json_read_array(json_strBool, &json_array_Bool, NULL);
 	assert_integer("count", boolcount, 3);
 	assert_boolean("boolstore[0]", boolstore[0], true);
@@ -505,7 +536,7 @@ static void jsontest(int i)
 	assert_boolean("boolstore[3]", boolstore[3], false);
 	break;
 
-    case 19:
+    case 20:
 	status = json_read_array(json_strReal, &json_array_Real, NULL);
 	assert_integer("count", realcount, 3);
 	assert_real("realstore[0]", realstore[0], 23.1);
@@ -514,7 +545,8 @@ static void jsontest(int i)
 	assert_real("realstore[3]", realstore[3], 0);
 	break;
 
-#define MAXTEST 19
+#define MAXTEST 20
+#endif /* JSON_MINIMAL */
 
     default:
 	(void)fputs("Unknown test number\n", stderr);
