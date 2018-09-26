@@ -169,7 +169,6 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     uint8_t flags;
     uint8_t navmode;
     struct tm unpacked_date;
-    double subseconds;
     double hacc, vacc, sacc;
     int *status = &session->gpsdata.status;
     int *mode = &session->newdata.mode;
@@ -246,6 +245,7 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     }
 
     if ((valid & UBX_NAV_PVT_VALID_DATE_TIME) == UBX_NAV_PVT_VALID_DATE_TIME) {
+        double subseconds;
 	unpacked_date.tm_year = (uint16_t)getleu16(buf, 4) - 1900;
 	unpacked_date.tm_mon = (uint8_t)getub(buf, 6) - 1;
 	unpacked_date.tm_mday = (uint8_t)getub(buf, 7);
