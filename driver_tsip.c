@@ -134,7 +134,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     uint8_t u1, u2, u3, u4, u5, u6, u7, u8, u9, u10;
     int16_t s1, s2, s3, s4;
     int32_t sl1, sl2, sl3;
-    uint32_t ul1, ul2;
+    uint32_t ul1, ul2, ul3;
     float f1, f2, f3, f4, f5;
     double d1, d2, d3, d4, d5;
     time_t now;
@@ -222,9 +222,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		ul1 = getbeu32(buf, 1); /* Serial number */
 		u2 = getub(buf, 5); /* Build day */
 		u3 = getub(buf, 6); /* Build month */
-		ul1 = getbeu16(buf, 7); /* Build year */
+		ul2 = getbeu16(buf, 7); /* Build year */
 		u4 = getub(buf, 6); /* Build hour */
-		ul2 = getbeu16(buf, 10); /* Hardware Code */
+		ul3 = getbeu16(buf, 10); /* Hardware Code */
 		u5 = getub(buf, 12); /* Length of Hardware ID */
 		/* coverity_submit[tainted_data] */
 		for (i=0; i < (int)u5; i++) {
@@ -234,7 +234,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
 		(void)snprintf(session->subtype, sizeof(session->subtype),
 			       "hw %u %02u.%02u.%04u %02u %u %.48s",
-			       ul1, u2, u3, ul1, u4, ul2, buf2);
+			       ul1, u2, u3, ul2, u4, ul3, buf2);
 		gpsd_log(&session->context->errout, LOG_INF,
 			 "Hardware version: %s\n",
 			 session->subtype);
