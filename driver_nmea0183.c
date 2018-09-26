@@ -604,13 +604,7 @@ static int nmeaid_to_prn(char *talker, int satnum, unsigned char *gnssid,
      */
     *gnssid = 0;   /* default to gnssid is GPS */
     *svid = 0;     /* default to unnknown svid */
-    // NMEA-ID (33..64) to SBAS PRN 120-151.
-    if ( 33 <= satnum && 64 >= satnum) {
-        /* SBAS */
-	satnum += 87;
-        *gnssid = 1;
-        *svid = satnum;
-    } else if (0 != satnum && 32 >= satnum) {
+    if (0 != satnum && 32 >= satnum) {
         *svid = satnum;
 	if (talker[0] == 'B' && talker[1] == 'D') {
             /* map Beidou IDs */
@@ -634,6 +628,12 @@ static int nmeaid_to_prn(char *talker, int satnum, unsigned char *gnssid,
             *gnssid = 2;
         }
         /* what about $GN? */
+    } else if ( 33 <= satnum && 64 >= satnum) {
+        // NMEA-ID (33..64) to SBAS PRN 120-151.
+        /* SBAS */
+	satnum += 87;
+        *gnssid = 1;
+        *svid = satnum;
     } else if (65 <= satnum && 96 >= satnum) {
         /* GLONASS */
         *gnssid = 6;
