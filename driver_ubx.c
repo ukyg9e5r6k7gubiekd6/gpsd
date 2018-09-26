@@ -437,33 +437,41 @@ ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf,
 }
 
 /**
- * GPS Leap Seconds
+ * GPS Leap Seconds - UBX-NAV-TIMEGPS
  */
 static gps_mask_t
 ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
 		    size_t data_len)
 {
-    unsigned int gw, iTOW, flags;
+    uint8_t valid;         /* Validity Flags */
     gps_mask_t mask = 0;
 
     if (data_len != 16)
 	return 0;
 
-    flags = (unsigned int)getub(buf, 11);
-    // Valid leap seconds
-    if ((flags & UBX_TIMEGPS_VALID_LEAP_SECOND) == UBX_TIMEGPS_VALID_LEAP_SECOND)
+    valid = getub(buf, 11);
+    // Valid leap seconds ?
+    if ((valid & UBX_TIMEGPS_VALID_LEAP_SECOND) ==
+        UBX_TIMEGPS_VALID_LEAP_SECOND) {
 	session->context->leap_seconds = (int)getub(buf, 10);
+    }
     // Valid GPS time of week and week number
 #define VALID_TIME (UBX_TIMEGPS_VALID_TIME | UBX_TIMEGPS_VALID_WEEK)
-    if ((flags & VALID_TIME) == VALID_TIME)
+    if ((valid & VALID_TIME) == VALID_TIME) {
 #undef VALID_TIME
-    {
-	iTOW = (unsigned int)getleu32(buf, 0);
-	gw = (unsigned int)getles16(buf, 8);
-	session->newdata.time =
-	  gpsd_gpstime_resolve(session,
-			       (unsigned short int)gw,
-			       ((double)iTOW * 1e-3));
+        uint16_t week;
+        double iTOW;      /* integer part of TOW in ms */
+        double fTOW;      /* fractional part of TOW in ns */
+        double TOW;       /* complete TOW in seconds */
+        double tAcc;      /* Time Accuracy Estimate in ns */
+
+	iTOW = (double)getleu32(buf, 0);      /* GPS TOW in ms */
+	fTOW = (double)getles32(buf, 4);      /* Fractional part of TOW */
+	week = getles16(buf, 8);
+	tAcc = (double)getleu32(buf, 12);     /* tAcc in ms */
+        TOW = (iTOW * 1e-3) + (fTOW * 1e-9);
+	session->newdata.time = gpsd_gpstime_resolve(session, week, TOW);
+	session->newdata.ept = tAcc * 1e-9;
 	mask |= (TIME_SET | NTPTIME_IS);
     }
 
