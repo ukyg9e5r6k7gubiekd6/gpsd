@@ -453,13 +453,14 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     hdop = getub(buf, 43);
     vdop = getub(buf, 44);
     tdop = getub(buf, 45);
-    tfom = getub(buf, 46);
+    tfom = getub(buf, 46);    /* tfom == 10 * TDOP */
 
     /* Get two-sigma horizontal circular error estimate */
     eph = fom / 100.0 * 1.96;
     /* approximate epx and epy errors from it */
     session->newdata.epx = session->newdata.epy = eph / sqrt(2);
-    session->newdata.ept = tfom * 1.96 /*Two sigma */ ;
+    /* this next does not seem a correct way to get to seconds */
+    session->newdata.ept = tfom * 1.96; /* Two sigma */
 
     if (gdop != DOP_UNDEFINED)
 	session->gpsdata.dop.gdop = gdop / 10.0;
