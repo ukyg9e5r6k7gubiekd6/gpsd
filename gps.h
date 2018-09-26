@@ -88,7 +88,7 @@ struct gps_fix_t {
 #define MODE_NO_FIX	1	/* none */
 #define MODE_2D  	2	/* good for latitude/longitude */
 #define MODE_3D  	3	/* good for altitude/climb too */
-    double ept;		/* Expected time uncertainty */
+    double ept;		/* Expected time uncertainty, seconds */
     double latitude;	/* Latitude in degrees (valid if mode >= 2) */
     double epy;  	/* Latitude position uncertainty, meters */
     double longitude;	/* Longitude in degrees (valid if mode >= 2) */
