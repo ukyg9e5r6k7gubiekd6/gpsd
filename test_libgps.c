@@ -59,8 +59,9 @@ int main(int argc, char *argv[])
 	    break;
 	case 's':
 	    (void)
-		printf
-		("Sizes: fix=%zd gpsdata=%zd rtcm2=%zd rtcm3=%zd ais=%zd compass=%zd raw=%zd devices=%zd policy=%zd version=%zd, noise=%zd\n",
+		printf("Sizes: fix=%zd gpsdata=%zd rtcm2=%zd rtcm3=%zd "
+                       "ais=%zd compass=%zd raw=%zd devices=%zd policy=%zd "
+                       "version=%zd, noise=%zd\n",
 		 sizeof(struct gps_fix_t),
 		 sizeof(struct gps_data_t), sizeof(struct rtcm2_t),
 		 sizeof(struct rtcm3_t), sizeof(struct ais_t),
