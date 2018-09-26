@@ -209,7 +209,6 @@ class SkyView(Gtk.DrawingArea):
 
         self.cr.arc(x, y, r, 0, math.pi * 2.0)
         self.cr.close_path()
-        self.set_tooltip_text('hello')
 
         if filled:
             self.cr.fill()
@@ -355,8 +354,9 @@ class SkyView(Gtk.DrawingArea):
         self.draw_string(x, y, "S")
         (x, y) = self.pol2cart(270, -5)
         self.draw_string(x, y, "W")
+        # place an invisible space above to allow sats below horizon
         (x, y) = self.pol2cart(0, -10)
-        self.draw_string(x, y, "X")
+        self.draw_string(x, y, "")
 
         # The satellites
         self.cr.set_line_width(2)
