@@ -70,9 +70,12 @@ This is xgps, a test client for the gpsd daemon.
 By Eric S. Raymond for the GPSD project, December 2009
 '''
 
-# Use our own MAXCHANNELS value, due to the tradeoff between max sats and
+# MAXCHANNELS, from gps.h, currently 120
+MAXCHANNELS = 120
+# MAXCHANDISP, max channels to display
+# Use our own MAXCHANDISP value, due to the tradeoff between max sats and
 # the window size.  Ideally, this should be dynamic.
-MAXCHANNELS = 28
+MAXCHANDISP = 28
 
 # how to sort the Satellite List
 # some of ("PRN","el","az","ss","used") with optional '-' to reverse sort
@@ -206,6 +209,7 @@ class SkyView(Gtk.DrawingArea):
 
         self.cr.arc(x, y, r, 0, math.pi * 2.0)
         self.cr.close_path()
+        self.set_tooltip_text('hello')
 
         if filled:
             self.cr.fill()
@@ -759,7 +763,7 @@ class Base(object):
             view.append_column(column)
 
         self.row_iters = []
-        for i in range(MAXCHANNELS):
+        for i in range(MAXCHANDISP):
             self.satlist.append(["", "", "", "", "", ""])
             self.row_iters.append(self.satlist.get_iter(i))
 
@@ -858,8 +862,8 @@ class Base(object):
         try:
             self.satlist.set_value(self.row_iters[row], column, str(value))
         except IndexError:
-            sys.stderr.write("xgps: channel = %d, MAXCHANNELS = %d\n"
-                             % (row, MAXCHANNELS))
+            sys.stderr.write("xgps: channel = %d, MAXCHANDISP = %d\n"
+                             % (row, MAXCHANDISP))
 
     def delete_event(self, _widget, _event, _data=None):
         "Say goodbye nicely"
@@ -1034,6 +1038,16 @@ class Base(object):
                     key=lambda x: x[fld], reverse=rev)
 
             for (i, satellite) in enumerate(satellites):
+                yesno = 'N'
+                data.satellites_seen += 1
+                if satellite.used:
+                    yesno = 'Y'
+                    data.satellites_used += 1
+
+                if i >= MAXCHANDISP:
+                    # more than can be displaced
+                    continue;
+
                 self.set_satlist_field(i, 0, gnssid_str(satellite.gnssid,
                                                         satellite.svid))
                 # NMEA uses PRN up to 437
@@ -1045,13 +1059,8 @@ class Base(object):
                 self.set_satlist_field(i, 3,
                                        self._int_to_str(satellite.az, 0, 359))
                 self.set_satlist_field(i, 4, "%3d" % satellite.ss)
-                yesno = 'N'
-                data.satellites_seen += 1
-                if satellite.used:
-                    yesno = 'Y'
-                    data.satellites_used += 1
                 self.set_satlist_field(i, 5, yesno)
-            for i in range(len(satellites), MAXCHANNELS):
+            for i in range(len(satellites), MAXCHANDISP):
                 for j in range(0, 5):
                     self.set_satlist_field(i, j, "")
             self.skyview.redraw(satellites)
