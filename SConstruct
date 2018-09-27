@@ -2223,6 +2223,7 @@ test_nondaemon = [
     python_compilation_regress,
     python_versions,
     rtcm_regress,
+    test_xgps_deps,
     time_regress,
     timespec_regress,
     unpack_regress,
