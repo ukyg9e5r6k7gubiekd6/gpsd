@@ -2179,6 +2179,16 @@ method_regress = UtilityWithHerald(
     'method-regress', [test_packet], [
         '$SRCDIR/test_packet -c >/dev/null', ])
 
+# Test the xgps/xgpsspeed dependencies
+if not env['python'] or not env['xgps']:
+    test_xgps_deps = None
+else:
+    test_xgps_deps = UtilityWithHerald(
+        'Testing xgps/xgpsspeed dependencies (since xgps=yes)...',
+        'test-xgps-deps', [], [
+            '$PYTHON $SRCDIR/test_xgps_deps.py',
+    ])
+
 # Run a valgrind audit on the daemon  - not in normal tests
 valgrind_audit = Utility('valgrind-audit', [
     '$SRCDIR/valgrind-audit.py', python_built_extensions, gpsd],
