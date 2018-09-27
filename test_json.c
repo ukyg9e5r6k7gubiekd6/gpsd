@@ -13,6 +13,7 @@
 
 #include "gpsd.h"
 #include "gps_json.h"
+#include "revision.h"
 
 /* GPSD is built with JSON_MINIMAL.  Any !JSON_MINIMAL tests,
  * like 18, 19 and 20 will thus fail.
@@ -559,7 +560,7 @@ int main(int argc UNUSED, char *argv[]UNUSED)
     int option;
     int individual = 0;
 
-    while ((option = getopt(argc, argv, "hn:D:?")) != -1) {
+    while ((option = getopt(argc, argv, "D:hn:V?")) != -1) {
 	switch (option) {
 #ifdef CLIENTDEBUG_ENABLE
 	case 'D':
@@ -573,11 +574,17 @@ int main(int argc UNUSED, char *argv[]UNUSED)
 	case '?':
 	case 'h':
 	default:
-	    (void)fputs("usage: test_json [-D lvl] [-n tst]\n"
+	    (void)fprintf(stderr,
+                        "usage: %s [-D lvl] [-n tst] [-V]\n"
                         "       -D lvl      set debug level\n"
-                        "       -n tst      run only test tst\n",
-                        stderr);
+                        "       -n tst      run only test tst\n"
+                        "       -V          Print version and exit\n",
+                        argv[0]);
 	    exit(EXIT_FAILURE);
+        case 'V':
+            (void)fprintf(stderr, "%s: %s (revision %s)\n",
+                          argv[0], VERSION, REVISION);
+            exit(EXIT_SUCCESS);
 	}
     }
 
