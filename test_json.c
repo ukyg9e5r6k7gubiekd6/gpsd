@@ -503,7 +503,7 @@ static void jsontest(int i)
 	strlcat(json_strOver2, "\"}", sizeof(json_strOver2));
 
 	if (2 < debug) {
-	    (void)fprintf(stderr, "test string: %s.\n", json_strOver);
+	    (void)fprintf(stderr, "test string: %s.\n", json_strOver2);
 	}
 	json_short_string_cnt = 7;
 	status = json_read_object(json_strOver2, json_short_string, NULL);
@@ -523,7 +523,7 @@ static void jsontest(int i)
 	strlcat(json_strOver2, "\"}", sizeof(json_strOver2));
 
 	if (2 < debug) {
-	    (void)fprintf(stderr, "test string: %s.\n", json_strOver);
+	    (void)fprintf(stderr, "test string: %s.\n", json_strOver2);
 	}
 	json_short_string_cnt = 7;
 	status = json_read_object(json_strOver2, json_short_string, NULL);
