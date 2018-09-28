@@ -1899,15 +1899,9 @@ if python_progs:
 
     # get version from each python prog
     #  this ensures they can run and gps_versions match
-    # However, xgps[speed] -V requires (possibly launching) a usable X11 server,
-    # and takes significant time time to connect to it, so we skip checking
-    # those until that's fixed.
     vchk = ''
     for prog in python_progs:
-        if prog not in ['xgps', 'xgpsspeed']:
-            vchk += '$SRCDIR/%s -V\n' % prog
-        else:
-            vchk += '# %s -V not checked due to X11 dependency\n' % prog
+        vchk += '$SRCDIR/%s -V\n' % prog
     python_versions = Utility('python-versions', [python_progs], vchk)
 
 else:
