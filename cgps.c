@@ -164,11 +164,17 @@ static char *dop_to_str(double dop)
 static char *ep_to_str(double ep, double factor, char *units)
 {
     static char buf[20];
+    double val;
 
     if (isfinite(ep) == 0) {
         return " n/a  ";
     }
-    (void)snprintf(buf, sizeof(buf), "+/-%5.1f %.8s", ep * factor, units);
+    val = ep * factor;
+    if ( 100 <= val ) {
+        (void)snprintf(buf, sizeof(buf), "+/-%5d %.3s", (int)val, units);
+    } else {
+        (void)snprintf(buf, sizeof(buf), "+/-%5.1f %.3s", val, units);
+    }
     return buf;
 }
 
@@ -920,7 +926,7 @@ int main(int argc, char *argv[])
         altfactor = METERS_TO_FEET;
         altunits = "ft";
         speedfactor = MPS_TO_KNOTS;
-        speedunits = "knots";
+        speedunits = "kts";
         break;
     case metric:
         altfactor = 1;
