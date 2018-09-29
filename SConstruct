@@ -1832,17 +1832,17 @@ AlwaysBuild(Alias(".", [], error_action))
 # Utility productions
 
 
-def Utility(target, source, action):
-    target = env.Command(target=target, source=source, action=action)
+def Utility(target, source, action, **kwargs):
+    target = env.Command(target=target, source=source, action=action, **kwargs)
     env.AlwaysBuild(target)
     env.Precious(target)
     return target
 
 
-def UtilityWithHerald(herald, target, source, action):
+def UtilityWithHerald(herald, target, source, action, **kwargs):
     if not env.GetOption('silent'):
         action = ['@echo "%s"' % herald] + action
-    return Utility(target=target, source=source, action=action)
+    return Utility(target=target, source=source, action=action, **kwargs)
 
 
 # Putting in all these -U flags speeds up cppcheck and allows it to look
@@ -1900,9 +1900,12 @@ if python_progs:
     # get version from each python prog
     #  this ensures they can run and gps_versions match
     vchk = ''
+    verenv = env['ENV'].copy()
+    verenv['DISPLAY'] = ''  # Avoid launching X11 in X11 progs
     for prog in python_progs:
         vchk += '$SRCDIR/%s -V\n' % prog
-    python_versions = Utility('python-versions', [python_progs], vchk)
+    python_versions = Utility('python-versions', [python_progs], vchk,
+                              ENV=verenv)
 
 else:
     python_versions = None
