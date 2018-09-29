@@ -1061,7 +1061,7 @@ class Base(object):
                 self.set_satlist_field(i, 4, "%3d" % satellite.ss)
                 self.set_satlist_field(i, 5, yesno)
             for i in range(len(satellites), MAXCHANDISP):
-                for j in range(0, 5):
+                for j in range(0, 6):
                     self.set_satlist_field(i, j, "")
             self.skyview.redraw(satellites)
 
