@@ -58,12 +58,6 @@ if gps.__version__ != gps_version:
     sys.exit(1)
 
 
-gps_version = '3.18-dev'
-if gps.__version__ != gps_version:
-    sys.stderr.write("xgps: ERROR: need gps module version %s, got %s\n" %
-                     (gps_version, gps.__version__))
-    sys.exit(1)
-
 gui_about = '''\
 This is xgps, a test client for the gpsd daemon.
 
@@ -164,7 +158,7 @@ def fit_circle_to_grid(x, y, radius, line_width):
 class SkyView(Gtk.DrawingArea):
     "Satellite skyview, encapsulates pygtk's draw-on-expose behavior."
     # See <http://faq.pygtk.org/index.py?req=show&file=faq18.008.htp>
-    HORIZON_PAD = 40    # How much whitespace to leave around horizon
+    HORIZON_PAD = 50    # How much whitespace to leave around horizon
     SAT_RADIUS = 5      # Diameter of satellite circle
 
     def __init__(self, rotation=0.0):
@@ -177,8 +171,55 @@ class SkyView(Gtk.DrawingArea):
         self.connect('size-allocate', self.on_size_allocate)
         self.connect('draw', self.on_draw)
         self.satellites = []
+        self.sat_xy = []
         self.center_x = self.center_y = self.radius = None
         self.rotate = rotation
+        self.connect('motion_notify_event', self.popup)
+        self.popover = None
+
+    def popdown(self):
+        "See if need to popdown the sat details"
+        if self.popover:
+            self.popover.popdown()
+            self.popover = None
+
+    def popup(self, skyview, event):
+        "See if need to popup the sat details"
+        for (x, y, sat) in self.sat_xy:
+            if ((SkyView.SAT_RADIUS >= abs(x - event.x) and
+                 SkyView.SAT_RADIUS >= abs(y - event.y))):
+                # print((x, y))
+                # mouse is over a satellite, do popup
+                self.popover = Gtk.Popover()
+                constellation = gnssid_str(sat.gnssid, sat.svid)
+                s = ("PRN %d\n"
+                     "%s:%d\n"
+                     "Elevation %3d\n"
+                     "Azimuth  %3d\n"
+                     "SNR       %3d\n"
+                     "Used %8s" %
+                     (sat.PRN, constellation, sat.svid,
+                      sat.el, sat.az, sat.ss, 'Yes' if sat.used else 'No'))
+                label = Gtk.Label(s)
+                rectangle = Gdk.Rectangle()
+                rectangle.x = x - 25
+                rectangle.y = y - 25
+                rectangle.width = 50
+                rectangle.height = 50
+                self.popover.set_relative_to(self)
+                self.popover.set_position(Gtk.PositionType.TOP)
+                self.popover.set_pointing_to(rectangle)
+                self.popover.add(label)
+                self.popover.popup()
+                self.popover.show_all()
+                # remove popup after 5 seconds
+                GObject.timeout_add(5000, self.popdown)
+                return
+
+        if self.popover:
+            # remove any old, no longer current popup
+            # this never happens?
+            self.popdown()
 
     def on_size_allocate(self, _unused, allocation):
         "Adjust SkyView on size change"
@@ -360,6 +401,7 @@ class SkyView(Gtk.DrawingArea):
 
         # The satellites
         self.cr.set_line_width(2)
+        self.sat_xy = []
         for sat in self.satellites:
             if not 1 <= sat.PRN <= 437:
                 # Bad PRN, skip.  NMEA uses up to 437
@@ -400,6 +442,7 @@ class SkyView(Gtk.DrawingArea):
                 # QZSS, IMES, unknown or other
                 self.draw_triangle(x, y, SkyView.SAT_RADIUS, sat.used, 2)
 
+            self.sat_xy.append((x, y, sat))
             self.cr.set_source_rgb(1, 1, 1)
             self.draw_string(x + SkyView.SAT_RADIUS,
                              y + (SkyView.SAT_RADIUS * 2), str(sat.PRN),
@@ -772,6 +815,7 @@ class Base(object):
         viewframe = Gtk.Frame(label="Skyview")
         self.satbox.add(viewframe)
         self.skyview = SkyView(self.rotate)
+        self.skyview.set_property('events', Gdk.EventMask.POINTER_MOTION_MASK)
         viewframe.add(self.skyview)
 
         self.rawdisplay = Gtk.Entry()
@@ -1046,7 +1090,7 @@ class Base(object):
 
                 if i >= MAXCHANDISP:
                     # more than can be displaced
-                    continue;
+                    continue
 
                 self.set_satlist_field(i, 0, gnssid_str(satellite.gnssid,
                                                         satellite.svid))
@@ -1060,7 +1104,9 @@ class Base(object):
                                        self._int_to_str(satellite.az, 0, 359))
                 self.set_satlist_field(i, 4, "%3d" % satellite.ss)
                 self.set_satlist_field(i, 5, yesno)
-            for i in range(len(satellites), MAXCHANDISP):
+
+            # clear rest of the list
+            for i in range(data.satellites_seen, MAXCHANDISP):
                 for j in range(0, 6):
                     self.set_satlist_field(i, j, "")
             self.skyview.redraw(satellites)
