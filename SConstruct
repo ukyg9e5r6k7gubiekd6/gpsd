@@ -2135,8 +2135,7 @@ else:
     maidenhead_locator_regress = UtilityWithHerald(
         'Testing the Maidenhead Locator conversion...',
         'maidenhead-locator-regress', [python_built_extensions], [
-            '$PYTHON $PYTHON_COVERAGE $SRCDIR/test_maidenhead.py >/dev/null',
-])
+            '$PYTHON $PYTHON_COVERAGE $SRCDIR/test_maidenhead.py >/dev/null'])
 
 # Regression-test the calendar functions
 time_regress = Utility('time-regress', [test_mktime], [
@@ -2183,8 +2182,7 @@ else:
     test_xgps_deps = UtilityWithHerald(
         'Testing xgps/xgpsspeed dependencies (since xgps=yes)...',
         'test-xgps-deps', [], [
-            '$PYTHON $SRCDIR/test_xgps_deps.py',
-    ])
+            '$PYTHON $SRCDIR/test_xgps_deps.py'])
 
 # Run a valgrind audit on the daemon  - not in normal tests
 valgrind_audit = Utility('valgrind-audit', [
