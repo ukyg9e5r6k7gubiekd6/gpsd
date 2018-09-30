@@ -176,20 +176,35 @@ class SkyView(Gtk.DrawingArea):
         self.rotate = rotation
         self.connect('motion_notify_event', self.popup)
         self.popover = None
+        self.pop_xy = (None, None)
 
     def popdown(self):
         "See if need to popdown the sat details"
         if self.popover:
             self.popover.popdown()
             self.popover = None
+            self.pop_xy = (None, None)
 
     def popup(self, skyview, event):
         "See if need to popup the sat details"
         for (x, y, sat) in self.sat_xy:
             if ((SkyView.SAT_RADIUS >= abs(x - event.x) and
                  SkyView.SAT_RADIUS >= abs(y - event.y))):
+                # got a sat match under the mouse
                 # print((x, y))
+                if ((self.pop_xy[0] and self.pop_xy[1] and
+                    self.pop_xy == (int(x), int(y)))):
+                    # popup already up here, ignore event
+                    # print("(%d, %d)" % (x, y))
+                    return
+
+                if self.popover:
+                    # remove any old, no longer current popup
+                    # this never happens?
+                    self.popdown()
+
                 # mouse is over a satellite, do popup
+                self.pop_xy = (int(x), int(y))
                 self.popover = Gtk.Popover()
                 constellation = gnssid_str(sat.gnssid, sat.svid)
                 s = ("PRN %d\n"
@@ -206,6 +221,7 @@ class SkyView(Gtk.DrawingArea):
                 rectangle.y = y - 25
                 rectangle.width = 50
                 rectangle.height = 50
+                self.popover.set_modal(False)
                 self.popover.set_relative_to(self)
                 self.popover.set_position(Gtk.PositionType.TOP)
                 self.popover.set_pointing_to(rectangle)
