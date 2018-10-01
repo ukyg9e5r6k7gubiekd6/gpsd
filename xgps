@@ -81,23 +81,29 @@ SKY_VIEW_SORT_FIELDS = ('-used', 'PRN')
 # have untangled and put in gnssid:svid
 
 
-def gnssid_str(gnssid, svid):
+def gnssid_str(sat):
     "convert gnssid:svid to string"
-    if 0 == svid:
+
+    # gnssid:svid appeared in gpsd 3.18
+    # allow for old servers
+    if 'gnssid' not in sat or 'svid' not in sat:
         return '  '
-    if 0 == gnssid:
+
+    if 0 >= sat.svid:
+        return '  '
+    if 0 == sat.gnssid:
         return 'GP'
-    if 1 == gnssid:
+    if 1 == sat.gnssid:
         return 'SB'
-    if 2 == gnssid:
+    if 2 == sat.gnssid:
         return 'GA'
-    if 3 == gnssid:
+    if 3 == sat.gnssid:
         return 'BD'
-    if 4 == gnssid:
+    if 4 == sat.gnssid:
         return 'IM'
-    if 5 == gnssid:
+    if 5 == sat.gnssid:
         return 'QZ'
-    if 6 == gnssid:
+    if 6 == sat.gnssid:
         return 'GL'
 
     return '  '
@@ -206,14 +212,20 @@ class SkyView(Gtk.DrawingArea):
                 # mouse is over a satellite, do popup
                 self.pop_xy = (int(x), int(y))
                 self.popover = Gtk.Popover()
-                constellation = gnssid_str(sat.gnssid, sat.svid)
+                if "gnssid" in sat and "svid" in sat:
+                    # gnssid:svid in gpsd 3.18 and up
+                    constellation = gnssid_str(sat)
+                    gnss_str = "%s:%d\n" % (constellation, sat.svid)
+                else:
+                    gnss_str = ''
+
                 s = ("PRN %d\n"
-                     "%s:%d\n"
+                     "%s"
                      "Elevation %3d\n"
                      "Azimuth  %3d\n"
                      "SNR       %3d\n"
                      "Used %8s" %
-                     (sat.PRN, constellation, sat.svid,
+                     (sat.PRN, gnss_str,
                       sat.el, sat.az, sat.ss, 'Yes' if sat.used else 'No'))
                 label = Gtk.Label(s)
                 rectangle = Gdk.Rectangle()
@@ -443,8 +455,8 @@ class SkyView(Gtk.DrawingArea):
                 self.set_color("Green1")
 
             # shape by constellation
-            constellation = gnssid_str(sat.gnssid, sat.svid)
-            if constellation == 'GP':
+            constellation = gnssid_str(sat)
+            if constellation in ('GP', '  '):
                 self.draw_circle(x, y, SkyView.SAT_RADIUS, sat.used)
             elif constellation == 'SB':
                 self.draw_square(x, y, SkyView.SAT_RADIUS, sat.used, 0)
@@ -1108,8 +1120,7 @@ class Base(object):
                     # more than can be displaced
                     continue
 
-                self.set_satlist_field(i, 0, gnssid_str(satellite.gnssid,
-                                                        satellite.svid))
+                self.set_satlist_field(i, 0, gnssid_str(satellite))
                 # NMEA uses PRN up to 437
                 self.set_satlist_field(i, 1,
                                        self._int_to_str(satellite.PRN, 1, 437))
