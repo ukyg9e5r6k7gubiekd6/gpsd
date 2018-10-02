@@ -616,11 +616,11 @@ static int nmeaid_to_prn(char *talker, int satnum, unsigned char *gnssid,
 	    satnum += 200;
 	} else if (talker[0] == 'G' && talker[1] == 'L') {
 	    /* GLONASS GL doesn't seem to do this, better safe than sorry */
-	    satnum += 37;
+	    satnum += 64;
             *gnssid = 6;
 	} else if (talker[0] == 'Q' && talker[1] == 'Z') {
             /* QZSS */
-	    satnum += 193;
+	    satnum += 192;
             *gnssid = 5;
 	} else if (talker[0] == 'G' && talker[1] == 'A') {
             /* Galileo */
