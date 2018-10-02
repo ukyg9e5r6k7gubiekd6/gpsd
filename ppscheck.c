@@ -29,6 +29,7 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 #include <time.h>
+#include "revision.h"
 
 struct assoc {
     int mask;
@@ -83,7 +84,7 @@ int main(int argc, char *argv[])
 		usage();
 		exit(0);
 	    case 'V':
-		(void)printf("%s: %s\n", argv[0], "3.17");
+		(void)printf("%s: %s\n", argv[0], REVISION);
 		exit(EXIT_SUCCESS);
 	    }
     }
