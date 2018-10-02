@@ -51,7 +51,7 @@ from gi.repository import Pango  # pylint: disable=wrong-import-position
 import gps
 import gps.clienthelpers
 
-gps_version = '3.18-dev'
+gps_version = '3.18~dev'
 if gps.__version__ != gps_version:
     sys.stderr.write("xgps: ERROR: need gps module version %s, got %s\n" %
                      (gps_version, gps.__version__))
@@ -1089,6 +1089,14 @@ class Base(object):
                 widget.set_text(hook(self, tpv))
         self.gsview.update(tpv)
 
+    def update_version(self, ver):
+        "Update the Version"
+
+        if ver.release != gps_version:
+            sys.stderr.write("%s: WARNING gpsd version %s different than "
+                             "expected %s\n" %
+                             (sys.argv[0], ver.release, gps_version))
+
     def _int_to_str(self, value, min_val, max_val):
         "test val in range min to max, or return"
         if min_val <= value <= max_val:
@@ -1174,7 +1182,9 @@ class Base(object):
                  self.device != self.daemon.data["device"])):
                 return True
             self.rawdisplay.set_text(self.daemon.response.strip())
-            if self.daemon.data["class"] == "SKY":
+            if self.daemon.data["class"] == "VERSION":
+                self.update_version(self.daemon.version)
+            elif self.daemon.data["class"] == "SKY":
                 self.update_skyview(self.daemon.data)
             elif self.daemon.data["class"] == "TPV":
                 self.update_gpsdata(self.daemon.data)
