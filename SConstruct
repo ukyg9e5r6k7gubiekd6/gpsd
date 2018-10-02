@@ -1566,7 +1566,9 @@ if 'dev' in gpsd_version:
             rev = gpsd_version  # Paranoia
 else:
     rev = gpsd_version
-revision = '#define REVISION "%s"\n' % (rev.strip(),)
+revision = '''/* Automatically generated file, do not edit */
+#define REVISION "%s"
+'''  % (polystr(rev.strip()),)
 env.Textfile(target="revision.h", source=[revision])
 
 # leapseconds.cache is a local cache for information on leapseconds issued
