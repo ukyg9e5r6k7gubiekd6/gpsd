@@ -10,9 +10,12 @@ from __future__ import absolute_import  # Ensure Python2 behaves like Python 3
 from .gps import *
 from .misc import *
 
-api_major_version = 5   # bumped on incompatible changes
-api_minor_version = 0   # bumped on compatible changes
+# Keep in sync with GPSD_PROTO_MAJOR_VERSION and GPSD_PROTO_MINOR_VERSION in
+# gpsd.h
+api_major_version = 3   # bumped on incompatible changes
+api_minor_version = 13  # bumped on compatible changes
 
+# keep in sync with gpsd_version in SConstruct
 __version__ = '3.18~dev'
 
 # The 'client' module exposes some C utility functions for Python clients.

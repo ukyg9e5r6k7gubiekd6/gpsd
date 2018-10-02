@@ -51,6 +51,7 @@ import SCons
 from leapsecond import conditional_leapsecond_fetch
 
 # Release identification begins here
+# Keep in sync with gps/__init__.py
 gpsd_version = "3.18~dev"
 
 # client library version

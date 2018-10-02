@@ -53,8 +53,9 @@ extern "C" {
  * 3.13 gnssid:svid added to SAT
  *      time added to ATT
  */
-#define GPSD_PROTO_MAJOR_VERSION	3	/* bump on incompatible changes */
-#define GPSD_PROTO_MINOR_VERSION	13	/* bump on compatible changes */
+/* Keep in sync with api_major_version and api_minor gps/__init__.py */
+#define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
+#define GPSD_PROTO_MINOR_VERSION	13  /* bump on compatible changes */
 
 #define JSON_DATE_MAX	24	/* ISO8601 timestamp with 2 decimal places */
 
