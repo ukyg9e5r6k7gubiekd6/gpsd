@@ -199,7 +199,7 @@ class SkyView(Gtk.DrawingArea):
                 # got a sat match under the mouse
                 # print((x, y))
                 if ((self.pop_xy[0] and self.pop_xy[1] and
-                    self.pop_xy == (int(x), int(y)))):
+                     self.pop_xy == (int(x), int(y)))):
                     # popup already up here, ignore event
                     # print("(%d, %d)" % (x, y))
                     return
@@ -1103,7 +1103,6 @@ class Base(object):
                              "expected %s.%s\n" %
                              (sys.argv[0], ver.proto_major, ver.proto_minor,
                               gps.api_major_version, gps.api_minor_version))
-
 
     def _int_to_str(self, value, min_val, max_val):
         "test val in range min to max, or return"
