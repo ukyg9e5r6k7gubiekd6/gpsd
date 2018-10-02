@@ -547,6 +547,20 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
                     gpsdata->satellites_visible,
                     gpsdata->satellites_used);
 
+    if (0 != (VERSION_SET &gpsdata->set)) {
+        /* got version, check it */
+        /* FIXME: expected API version not available ? */
+        if (0 != strcmp(gpsdata->version.release, VERSION)) {
+	    (void)fprintf(stderr, "cgps: WARNING gpsd release %s, API: %d.%d, "
+                                  "expected %s ",
+			  gpsdata->version.release,
+			  gpsdata->version.proto_major,
+			  gpsdata->version.proto_minor,
+			  VERSION);
+	    sleep(2);
+        }
+    }
+
     if (gpsdata->satellites_visible != 0) {
         int sat_no;
         int loop_end = (display_sats < gpsdata->satellites_visible) ? \
