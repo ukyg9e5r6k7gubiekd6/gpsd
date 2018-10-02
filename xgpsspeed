@@ -38,7 +38,10 @@ if gps.__version__ != gps_version:
 
 
 class Speedometer(Gtk.DrawingArea):
+    "Speedometer class"
+
     def __init__(self, speed_unit=None):
+        "Init Speedometer class"
         Gtk.DrawingArea.__init__(self)
         self.MPH_UNIT_LABEL = 'mph'
         self.KPH_UNIT_LABEL = 'kmh'
@@ -57,7 +60,10 @@ class Speedometer(Gtk.DrawingArea):
 
 
 class LandSpeedometer(Speedometer):
+    "LandSpeedometer class"
+
     def __init__(self, speed_unit=None):
+        "Init LandSpeedometer class"
         Speedometer.__init__(self, speed_unit)
         self.connect('size-allocate', self.on_size_allocate)
         self.width = self.height = 0
@@ -245,6 +251,7 @@ class LandSpeedometer(Speedometer):
 
 
 class NauticalSpeedometer(Speedometer):
+    "NauticalSpeedometer class"
     HEADING_SAT_GAP = 0.8
     SAT_SIZE = 10  # radius of the satellite circle in skyview
 
@@ -540,6 +547,8 @@ class NauticalSpeedometer(Speedometer):
 
 
 class Main(object):
+    "Main"
+
     def __init__(self, host='localhost', port=gps.GPSD_PORT, device=None,
                  debug=0, speed_unit=None, maxspeed=0, nautical=False,
                  rotate=0.0, target=""):
