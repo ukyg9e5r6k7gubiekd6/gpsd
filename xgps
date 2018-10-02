@@ -1097,6 +1097,14 @@ class Base(object):
                              "expected %s\n" %
                              (sys.argv[0], ver.release, gps_version))
 
+        if ((ver.proto_major != gps.api_major_version or
+             ver.proto_minor != gps.api_minor_version)):
+            sys.stderr.write("%s: WARNING API version %s.%s different than "
+                             "expected %s.%s\n" %
+                             (sys.argv[0], ver.proto_major, ver.proto_minor,
+                              gps.api_major_version, gps.api_minor_version))
+
+
     def _int_to_str(self, value, min_val, max_val):
         "test val in range min to max, or return"
         if min_val <= value <= max_val:
