@@ -1,10 +1,22 @@
 			GPSD project news
 
-3.18: not released yet
-  Add ECEF support to U-blox driver.
+3.18: 2018-10-02 (Gary E. Miller <gem@rellim.com>)
+  Add ECEF support to ievermore, italk,Skytraq, SiRF, U-blox drivers.
+  Add ECEF support to JSON, cgps and xgps.
   Add GREIS (Javad) driver from Virgin Orbit.
   Add CLI tools zerk and ubxtool to manage JAVAD and u-blox GPS.
-  Add gnssid:svid to satellite_t, cgps and xgps.
+  Add gnssid:svid to satellite_t, cgps and xgps.  PRN will die.
+  Add gnssid:svid to JSON, cgps and xgps.
+  Add stricter version checking (more to todo).
+  More and better regression tests.
+  Better Python dependency checking, at build time and runtime.
+  Fix several buffer issues.
+  New polar plots, and improved statistice, in gpsprof.
+  gpsd master/slave mode works, first time ever.
+  All isnan() changed to !isfinite(), fixing many bugs.
+  Client-side Python libraries may automatically reconnect
+  Too many other bug fixes and improvements to mention.
+  Over 1,000 commits from 46 different commiters.
 
 3.17: 2017-09-07 (Eric S. Raymond <esr@snark.thyrsus.com>)
   Repair support for non-NMEA devices requring active probing
