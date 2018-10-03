@@ -1448,7 +1448,9 @@ class ubx(object):
                                 s_payload += ':\n'
                                 s_payload += dec(self, m_payload)
                             else:
-                                s_payload = x_payload
+                                s_payload = ("%s, len %#x, raw %s" %
+                                             (self.class_id_s(m_class, m_id),
+                                              m_len, x_payload))
 
                 if VERB_INFO < opts['verbosity']:
                     print("%s, len: %#x" %
@@ -1548,6 +1550,10 @@ class ubx(object):
 
         # UBX-NAV-SVINFO
         m_data = bytearray([0x01, 0x30, 10])
+        gps_model.gps_send(6, 1, m_data)
+
+        # UBX-NAV-EOE, end of epoch.
+        m_data = bytearray([0x01, 0x61, rate])
         gps_model.gps_send(6, 1, m_data)
 
     def send_able_ecef(self, able):
