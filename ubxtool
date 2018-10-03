@@ -1472,8 +1472,10 @@ class ubx(object):
         m_data = bytearray([0x01, 0x06, rate])
         gps_model.gps_send(6, 1, m_data)
 
-        # UBX-NAV-TIMEGPS
-        m_data = bytearray([0x01, 0x20, rate])
+        # UBX-NAV-TIMEUTC
+        # Note: UTC may, or may not be UBX-NAV-TIMEGPS.
+        #       depending on UBX-CFG-NAV5 utcStandard
+        m_data = bytearray([0x01, 0x21, rate])
         gps_model.gps_send(6, 1, m_data)
 
         # UBX-NAV-SBAS
