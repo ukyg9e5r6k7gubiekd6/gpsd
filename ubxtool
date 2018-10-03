@@ -643,6 +643,15 @@ class ubx(object):
               u[4] / 100.0, u[5] / 100.0, u[6] / 100.0, u[7] / 100.0))
         return s
 
+    def nav_eoe(self, buf):
+        "UBX-NAV-EOE decode, End Of Epoch"
+        m_len = len(buf)
+        if 4 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<L', buf, 0)
+        return ' iTOW:%d ms' % u
+
     def nav_posecef(self, buf):
         "UBX-NAV-POSECEF decode"
         m_len = len(buf)
@@ -1064,7 +1073,7 @@ class ubx(object):
                0x3B: {'str': 'SVIN', 'dec': nav_svin, 'name': 'UBX-NAV-SVIN'},
                0x3C: {'str': 'RELPOSNED', 'name': 'UBX-NAV-RELPOSNED'},
                0x60: {'str': 'AOPSTATUS', 'name': 'UBX-NAV-AOPSTATUS'},
-               0x61: {'str': 'EOF', 'name': 'UBX-NAV-EOF'},
+               0x61: {'str': 'EOE', 'dec': nav_eoe, 'name': 'UBX-NAV-EOE'},
                }
 
     def rxm_raw(self, buf):
