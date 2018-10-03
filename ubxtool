@@ -925,9 +925,36 @@ class ubx(object):
         if 20 > m_len:
             return " Bad Length %s" % m_len
 
-        u = struct.unpack_from('<LLlHbbbbbb', buf, 0)
-        return (' iTOW:%d ms, tAcc:%d ns nano:%d ns Time: %d/%d/%d %d:%d:%d\n'
-                ' valid:%#x' % u)
+        u = struct.unpack_from('<LLlHbbbbbB', buf, 0)
+        s = (' iTOW:%d ms, tAcc:%d ns nano:%d ns Time: %d/%d/%d %d:%d:%d\n'
+             ' valid:%#x (' % u)
+        if 0xf7 & u[9]:
+            if 1 & u[9]:
+                s += 'validTOW '
+            if 2 & u[9]:
+                s += 'validWKN '
+            if 4 & u[9]:
+                s += 'validUTC '
+            utcStandard = u[9] >> 4
+            s += "utcStandard: "
+            if 1 == utcStandard:
+                s += 'CRL'
+            elif 2 == utcStandard:
+                s += 'NIST'
+            elif 3 == utcStandard:
+                s += 'USNO'
+            elif 4 == utcStandard:
+                s += 'BIPM'
+            elif 5 == utcStandard:
+                s += 'tbd'
+            elif 6 == utcStandard:
+                s += 'SU'
+            elif 7 == utcStandard:
+                s += 'NTSC'
+            else:
+                s += 'n/a'
+        s += ')'
+        return s
 
     def nav_velecef(self, buf):
         "UBX-NAV-VELECEF decode"
