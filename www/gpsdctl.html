@@ -1,0 +1,25 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"><title>gpsdctl</title><meta name="generator" content="DocBook XSL Stylesheets V1.79.1"></head><body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF"><div class="refentry"><a name="gpsdctl.8"></a><div class="titlepage"></div><div class="refnamediv"><a name="name"></a><h2>Name</h2><p>gpsdctl &#8212; tool for sending commands to gpsd over its control socket</p></div><div class="refsynopsisdiv"><a name="synopsis"></a><h2>Synopsis</h2><div class="cmdsynopsis"><p><code class="command">gpdsctl</code>   <em class="replaceable"><code>action</code></em>   <em class="replaceable"><code>device</code></em> </p></div></div><div class="refsect1"><a name="description"></a><h2>DESCRIPTION</h2><p>This is a tool for sending an instance of
+<span class="application">gpsd</span> commands over its control socket to
+add or remove devices from the daemon's device list. It is not
+intended to be called by users, but rather by the Linux hotplug
+system and similar facilities.</p><p>The action argument may be "add" or "remove". If no daemon
+instance is running when an add is requested, this program will launch
+one.</p><p>The "device" argument should be the pathname of a device. A
+device on the list will be opened to read sensor data whenever a
+client requests a watch.</p><p>Two environment variables are
+interpreted. <code class="envar">GPSD_SOCKET</code> sets the location of the
+control socket.  It defaults to
+<code class="filename">/var/run/gpsd.sock</code> if the effective user ID of
+this program is root, <code class="filename">/tmp/gpsd.sock</code>
+otherwise.</p><p><code class="envar">GPSD_OPTIONS</code>
+may be a list of options to be passed to <span class="application">gpsd</span>
+when this tool launches it.  It defaults to an empty string.</p></div><div class="refsect1"><a name="exit_status"></a><h2>RETURN VALUES</h2><p>1 if the action was unknown or the write to the control socket
+failed, 0 otherwise</p></div><div class="refsect1"><a name="see_also"></a><h2>SEE ALSO</h2><p>
+<span class="citerefentry"><span class="refentrytitle">gpsd</span>(8)</span>,
+<span class="citerefentry"><span class="refentrytitle">gpsctl</span>(1)</span>,
+<span class="citerefentry"><span class="refentrytitle">gps</span>(1)</span>,
+<span class="citerefentry"><span class="refentrytitle">libgps</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">libgpsmm</span>(3)</span>,
+<span class="citerefentry"><span class="refentrytitle">gpsprof</span>(1)</span>,
+<span class="citerefentry"><span class="refentrytitle">gpsfake</span>(1)</span>.
+</p></div><div class="refsect1"><a name="maintainer"></a><h2>AUTHOR</h2><p>Eric S. Raymond <code class="email">&lt;<a class="email" href="mailto:esr@thyrsus.com">esr@thyrsus.com</a>&gt;</code>.</p></div></div></body></html>

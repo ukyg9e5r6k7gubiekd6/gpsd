@@ -78,7 +78,7 @@ gitrepo = "git://git.savannah.nongnu.org/gpsd.git"
 ircchan = "irc://chat.freenode.net/#gpsd"
 mailman = "https://lists.nongnu.org/mailman/listinfo/"
 mainpage = "https://savannah.nongnu.org/projects/gpsd/"
-scpupload = "dl.sv.nongnu.org:/releases/gpsd/"
+scpupload = "garyemiller@dl.sv.nongnu.org:/releases/gpsd/"
 sitename = "Savannah"
 sitesearch = "catb.org"
 tiplink = "<a href='https://www.patreon.com/esr'>" \
