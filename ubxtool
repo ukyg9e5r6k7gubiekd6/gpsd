@@ -890,9 +890,18 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlhbBL', buf, 0)
-        return (' iTOW:%d ms, galTOW:%.9f galWno:%d leapS:%d Valid:%#x\n'
-                ' tAcc:%d ns' %
-                (u[0], u[1] + (u[2] * 10e-9), u[3], u[4], u[5], u[6]))
+        s = (' iTOW %d ms,, galTOW %d s, fGalTow %d ns, galWno %dm leapS %d, '
+             'Valid:%#x\n'
+             'tAcc:%d ns' % u)
+        if 0x07 & u[6]:
+            s += '\n   valid: '
+            if 1 & u[6]:
+                s += 'towValid '
+            if 2 & u[6]:
+                s += 'weekValid '
+            if 4 & u[6]:
+                s += 'leapValid '
+        return s
 
     def nav_timegps(self, buf):
         "UBX-NAV-TIMEGPS decode"
