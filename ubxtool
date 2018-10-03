@@ -538,19 +538,19 @@ class ubx(object):
         if 40 > m_len:
             return " Bad Length %s" % m_len
 
-        substr = buf.split('\0')[0]
-        s = ' swVersion: %s\n' % (substr)
+        substr = buf.split(gps.polybytes('\0'))[0]
+        s = ' swVersion: %s\n' % gps.polystr(substr)
         substr = buf[30:39]
-        substr = substr.split('\0')[0]
-        s += ' hwVersion: %s' % (substr[30:39])
+        substr = substr.split(gps.polybytes('\0'))[0]
+        s += ' hwVersion: %s' % gps.polystr(substr[30:39])
         # extensions??
         num_ext = int((m_len - 40) / 30)
         i = 0
         while i < num_ext:
             loc = 40 + (i * 30)
             substr = buf[loc:]
-            substr = substr.split('\0')[0]
-            s += '\n extension: %s' % (substr)
+            substr = substr.split(gps.polybytes('\0'))[0]
+            s += '\n extension: %s' % gps.polystr(substr)
             i += 1
         return s
 
