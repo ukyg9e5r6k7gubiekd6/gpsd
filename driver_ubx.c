@@ -708,6 +708,31 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     data_len = (size_t) getles16(buf, 4);
 
     switch (msgid) {
+    case UBX_ACK_ACK:
+	gpsd_log(&session->context->errout, LOG_DATA,
+		 "UBX_ACK_ACK, class: %02x, id: %02x\n",
+		 buf[UBX_CLASS_OFFSET],
+		 buf[UBX_TYPE_OFFSET]);
+	break;
+    case UBX_ACK_NAK:
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "UBX_ACK_NAK, class: %02x, id: %02x\n",
+		 buf[UBX_CLASS_OFFSET],
+		 buf[UBX_TYPE_OFFSET]);
+	break;
+
+    case UBX_INF_DEBUG:
+	/* FALLTHROUGH */
+    case UBX_INF_ERROR:
+	/* FALLTHROUGH */
+    case UBX_INF_NOTICE:
+	/* FALLTHROUGH */
+    case UBX_INF_TEST:
+	/* FALLTHROUGH */
+    case UBX_INF_WARNING:
+	ubx_msg_inf(session, buf, data_len);
+	break;
+
     case UBX_NAV_POSECEF:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_POSECEF\n");
 	mask = ubx_msg_nav_posecef(session, &buf[UBX_PREFIX_LEN], data_len);
@@ -830,18 +855,6 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_USB\n");
 	break;
 
-    case UBX_INF_DEBUG:
-	/* FALLTHROUGH */
-    case UBX_INF_TEST:
-	/* FALLTHROUGH */
-    case UBX_INF_NOTICE:
-	/* FALLTHROUGH */
-    case UBX_INF_WARNING:
-	/* FALLTHROUGH */
-    case UBX_INF_ERROR:
-	ubx_msg_inf(session, buf, data_len);
-	break;
-
     case UBX_CFG_PRT:
         if ( session->driver.ubx.port_id != (unsigned char)buf[UBX_MESSAGE_DATA_OFFSET + 0] ) {
 	    session->driver.ubx.port_id = (unsigned char)buf[UBX_MESSAGE_DATA_OFFSET + 0];
@@ -870,19 +883,6 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_TIM_SVIN:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_SVIN\n");
-	break;
-
-    case UBX_ACK_NAK:
-	gpsd_log(&session->context->errout, LOG_WARN,
-		 "UBX_ACK_NAK, class: %02x, id: %02x\n",
-		 buf[UBX_CLASS_OFFSET],
-		 buf[UBX_TYPE_OFFSET]);
-	break;
-    case UBX_ACK_ACK:
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "UBX_ACK_ACK, class: %02x, id: %02x\n",
-		 buf[UBX_CLASS_OFFSET],
-		 buf[UBX_TYPE_OFFSET]);
 	break;
 
     default:
