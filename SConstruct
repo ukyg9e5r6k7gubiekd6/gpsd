@@ -1367,23 +1367,31 @@ if not env['python']:
 else:
     python_progs = ["gegps", "gpscat", "gpsfake", "gpsprof", "ubxtool", "zerk"]
 
+    # check for pyserial
+    try:
+        imp.find_module('serial')
+    except ImportError:
+        # no pyserial, reduced functionality in ubxtool and zerk
+        announce("WARNING: Python module serial (pyserial) not found.\n"
+                 "    The functionality of ubxtool and zerk will be limited")
+
     if env['xgps']:
         # check for pycairo
         try:
             imp.find_module('cairo')
         except ImportError:
-            # no pycairo, can't build xgps, xgpsspeed
-            announce("Python module pycairo not found, "
-                     "xgps and xgpsspeed will not be installed")
+            # no pycairo, don't build xgps, xgpsspeed
+            announce("WARNING: Python module pycairo not found.\n"
+                     "    xgps and xgpsspeed will not be installed")
             env['xgps'] = False
 
         # check for pygobject
         try:
             imp.find_module('gi')
         except ImportError:
-            # no pycairo, can't build xgps, xgpsspeed
-            announce("Python module pygobject not found, "
-                     "xgps and xgpsspeed will not be installed")
+            # no pycairo, don't build xgps, xgpsspeed
+            announce("WARNING: Python module pygobject not found.\n"
+                     "    xgps and xgpsspeed will not be installed")
             env['xgps'] = False
 
     if env['xgps']:
