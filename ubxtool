@@ -296,6 +296,28 @@ class ubx(object):
              ' cnoThresh %u res %u staticHoldMacDist %u utcStandard %u' % u)
         return s
 
+    def cfg_navx5(self, buf):
+        "UBX-CFG-NAVX5 decode"
+
+        # length == 20 case seems broken?
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 20 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<HHLHBBBBBHBH', buf, 0)
+        s = (' version %u mask1 %#x mask2 %#x minSVs %d maxSVs %d minCNO %u\n'
+             ' iniFix3D %u ackAiding %u wknRollover %u' %
+             (u[0], u[1], u[2], u[4], u[5], u[6], u[8], u[10], u[11]))
+
+        if 40 <= m_len:
+            u = struct.unpack_from('<BBHHLHBB', buf, 20)
+            s = ('\n usePPP %d aopCfg %d aopOrbMaxErr %u useAdr %u' %
+                 (u[0], u[1], u[3], u[7]))
+        return s
+
     def cfg_msg(self, buf):
         "UBX-CFG-MSG decode "
         m_len = len(buf)
@@ -473,7 +495,8 @@ class ubx(object):
                0x17: {'str': 'NMEA', 'name': 'UBX-CFG-NMEA'},
                0x1b: {'str': 'USB', 'dec': cfg_usb, 'name': 'UBX-CFG-USB'},
                0x1e: {'str': 'ODO', 'name': 'UBX-CFG-ODO'},
-               0x23: {'str': 'NAVX5', 'name': 'UBX-CFG-NAVX5'},
+               0x23: {'str': 'NAVX5', 'dec': cfg_navx5,
+                      'name': 'UBX-CFG-NAVX5'},
                0x24: {'str': 'NAV5', 'dec': cfg_nav5, 'name': 'UBX-CFG-NAV5'},
                0x31: {'str': 'TP5', 'dec': cfg_tp5, 'name': 'UBX-CFG-TP5'},
                0x34: {'str': 'RINV', 'name': 'UBX-CFG-RINV'},
@@ -618,28 +641,6 @@ class ubx(object):
              ' hDOP:%.2f nDOP:%.2f eDOP:%.2f' %
              (u[0], u[1] / 100.0, u[2] / 100.0, u[3] / 100.0,
               u[4] / 100.0, u[5] / 100.0, u[6] / 100.0, u[7] / 100.0))
-        return s
-
-    def nav_navx5(self, buf):
-        "UBX-CFG-NAVX5 decode"
-
-        # length == 20 case seems broken?
-        m_len = len(buf)
-        if 0 == m_len:
-            return " Poll request"
-
-        if 20 > m_len:
-            return " Bad Length %s" % m_len
-
-        u = struct.unpack_from('<HHLHBBBBBHBH', buf, 0)
-        s = (' version %u mask1 %#x mask2 %#x minSVs %d maxSVs %d minCNO %u\n'
-             ' iniFix3D %u ackAiding %u wknRollover %u' %
-             (u[0], u[1], u[2], u[4], u[5], u[6], u[8], u[10], u[11]))
-
-        if 40 <= m_len:
-            u = struct.unpack_from('<BBHHLHBB', buf, 20)
-            s = ('\n usePPP %d aopCfg %d aopOrbMaxErr %u useAdr %u' %
-                 (u[0], u[1], u[3], u[7]))
         return s
 
     def nav_posecef(self, buf):
@@ -899,7 +900,7 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlhbBL', buf, 0)
-        s = (' iTOW %d ms, galTOW %d s, fGalTow %d ns, galWno %dm leapS %d\n'
+        s = (' iTOW %d ms, galTOW %d s, fGalTow %d ns, galWno %d, leapS %d\n'
              ' Valid:%#x, tAcc:%d ns' % u)
         if 0x07 & u[6]:
             s += '\n   valid: '
@@ -909,6 +910,26 @@ class ubx(object):
                 s += 'weekValid '
             if 4 & u[6]:
                 s += 'leapValid '
+        return s
+
+    def nav_timeglo(self, buf):
+        "UBX-NAV-TIMEGLO decode"
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 20 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LLlhbBL', buf, 0)
+        s = (' iTOW %d ms, TOD %d s, fTOD %d ns, Nt %d days, N4 %d\n'
+             ' Valid:%#x, tAcc:%d ns' % u)
+        if 0x03 & u[5]:
+            s += '\n   valid: '
+            if 1 & u[5]:
+                s += 'todValid '
+            if 2 & u[5]:
+                s += 'dateValid '
         return s
 
     def nav_timegps(self, buf):
@@ -1027,13 +1048,12 @@ class ubx(object):
                       'name': 'UBX-NAV-TIMEUTC'},
                0x22: {'str': 'CLOCK', 'dec': nav_clock,
                       'name': 'UBX-NAV-CLOCK'},
-               0x23: {'str': 'NAVX5', 'dec': nav_navx5,
-                      'name': 'UBX-NAV-NAVX5'},
+               0x23: {'str': 'TIMEGLO', 'dec': nav_timeglo,
+                      'name': 'UBX-NAV-TIMEGLO'},
                0x24: {'str': 'TIMEBDS', 'dec': nav_timebds,
                       'name': 'UBX-NAV-TIMEBDS'},
                0x25: {'str': 'TIMEGAL', 'dec': nav_timegal,
                       'name': 'UBX-NAV-TIMEGAL'},
-               0x26: {'str': 'TIMEGLO', 'name': 'UBX-NAV-TIMEGLO'},
                0x30: {'str': 'SVINFO', 'dec': nav_svinfo,
                       'name': 'UBX-NAV-SVINFO'},
                0x31: {'str': 'DGPS', 'dec': nav_dgps, 'name': 'UBX-NAV-DGPS'},
