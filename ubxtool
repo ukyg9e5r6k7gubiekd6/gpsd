@@ -877,8 +877,17 @@ class ubx(object):
             return ".Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlhbBL', buf, 0)
-        return (' iTOW:%d ms, SOW:%d fSOW:%d week %d leapS:%d Valid:%#x\n'
-                'tAcc:%d ns' % u)
+        s = (' iTOW:%d ms, SOW:%d s, fSOW:%d ns, week %d leapS:%d s\n'
+             ' Valid:%#x tAcc:%d ns' % u)
+        if 0x07 & u[5]:
+            s += '\n   valid: '
+            if 1 & u[5]:
+                s += 'towValid '
+            if 2 & u[5]:
+                s += 'weekValid '
+            if 4 & u[5]:
+                s += 'leapValid '
+        return s
 
     def nav_timegal(self, buf):
         "UBX-NAV-TIMEGAL decode"
