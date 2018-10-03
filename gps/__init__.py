@@ -16,7 +16,7 @@ api_major_version = 3   # bumped on incompatible changes
 api_minor_version = 13  # bumped on compatible changes
 
 # keep in sync with gpsd_version in SConstruct
-__version__ = '3.18'
+__version__ = '3.19~dev'
 
 # The 'client' module exposes some C utility functions for Python clients.
 # The 'packet' module exposes the packet getter via a Python interface.

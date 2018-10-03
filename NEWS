@@ -1,5 +1,7 @@
 			GPSD project news
 
+3.19: not released yet
+
 3.18: 2018-10-02 (Gary E. Miller <gem@rellim.com>)
   Add ECEF support to ievermore, italk,Skytraq, SiRF, U-blox drivers.
   Add ECEF support to JSON, cgps and xgps.
