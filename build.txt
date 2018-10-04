@@ -120,6 +120,12 @@ The xgps and xgpsspeed test clients require the following Python extensions:
 |python-gi-cairo    | Python bindings for Cairo toolkit under GI
 |===========================================================================
 
+The ubxtool and zerk clients require the following Python extension:
+
+|============================================================================
+|pyserial           | Python Serial Port extensio
+|===========================================================================
+
 === Scons ===
 
 You will need scons version 2.3.0 (from 2013-03-02) or later to build the code.
