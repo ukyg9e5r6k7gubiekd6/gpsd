@@ -565,7 +565,7 @@ class ubx(object):
         s = ' swVersion: %s\n' % gps.polystr(substr)
         substr = buf[30:39]
         substr = substr.split(gps.polybytes('\0'))[0]
-        s += ' hwVersion: %s' % gps.polystr(substr[30:39])
+        s += ' hwVersion: %s' % gps.polystr(substr)
         # extensions??
         num_ext = int((m_len - 40) / 30)
         i = 0
