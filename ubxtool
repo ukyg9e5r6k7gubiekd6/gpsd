@@ -1570,8 +1570,9 @@ class ubx(object):
         gps_model.gps_send(6, 1, m_data)
 
         # UBX-NAV-EOE, end of epoch.
-        m_data = bytearray([0x01, 0x61, rate])
-        gps_model.gps_send(6, 1, m_data)
+        # do not bother with EOE until gpsd works with it.
+        # m_data = bytearray([0x01, 0x61, rate])
+        # gps_model.gps_send(6, 1, m_data)
 
     def send_able_ecef(self, able):
         "Enable ECEF messages"
