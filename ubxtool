@@ -1554,12 +1554,19 @@ class ubx(object):
         m_data = bytearray([0x01, 0x20, rate])
         gps_model.gps_send(6, 1, m_data)
 
+        # no point doing UBX-NAV-SBAS and UBX-NAV-SVINFO
+        # faster than every 10 seconds
+        if rate:
+            rate_s = 10
+        else:
+            rate_s = 0
+
         # UBX-NAV-SBAS
-        m_data = bytearray([0x01, 0x32, 10])
+        m_data = bytearray([0x01, 0x32, rate_s])
         gps_model.gps_send(6, 1, m_data)
 
         # UBX-NAV-SVINFO
-        m_data = bytearray([0x01, 0x30, 10])
+        m_data = bytearray([0x01, 0x30, rate_s])
         gps_model.gps_send(6, 1, m_data)
 
         # UBX-NAV-EOE, end of epoch.
