@@ -452,9 +452,12 @@ ubx_msg_nav_eoe(struct gps_device_t *session, unsigned char *buf,
 
     iTOW = getles32(buf, 0);
     gpsd_log(&session->context->errout, LOG_DATA, "EOE: iTOW=%ld\n", iTOW);
-    /* nothing really to see, but report data to date
+    /* nothing really to new, but report data collected so far
      * and clear for next data set */
-    return CLEAR_IS | REPORT_IS;
+    // return CLEAR_IS | REPORT_IS;
+    // return REPORT_IS | STATUS_SET;
+    /* strangely any mask return here makes things worse... */
+    return 0;
 }
 
 /**
