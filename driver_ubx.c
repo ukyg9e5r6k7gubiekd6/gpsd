@@ -59,6 +59,8 @@
 
 static gps_mask_t ubx_parse(struct gps_device_t *session, unsigned char *buf,
 			    size_t len);
+static gps_mask_t ubx_msg_nav_eoe(struct gps_device_t *session,
+				  unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_dop(struct gps_device_t *session,
 				  unsigned char *buf, size_t data_len);
 static void ubx_msg_inf(struct gps_device_t *session, unsigned char *buf, size_t data_len);
@@ -437,6 +439,25 @@ ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf,
 }
 
 /**
+ * End of Epoch
+ */
+static gps_mask_t
+ubx_msg_nav_eoe(struct gps_device_t *session, unsigned char *buf,
+		size_t data_len)
+{
+    long int iTOW;
+
+    if ( 4 > data_len)
+	return 0;
+
+    iTOW = getles32(buf, 0);
+    gpsd_log(&session->context->errout, LOG_DATA, "EOE: iTOW=%ld\n", iTOW);
+    /* nothing really to see, but report data to date
+     * and clear for next data set */
+    return CLEAR_IS | REPORT_IS;
+}
+
+/**
  * GPS Leap Seconds - UBX-NAV-TIMEGPS
  */
 static gps_mask_t
@@ -749,6 +770,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_NAV_EOE:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_EOE\n");
+	mask = ubx_msg_nav_eoe(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_POSECEF:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_POSECEF\n");
