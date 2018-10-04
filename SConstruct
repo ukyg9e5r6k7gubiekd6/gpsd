@@ -1362,18 +1362,30 @@ if env["libgpsmm"]:
 # Python programs
 if not env['python']:
     python_built_extensions = []
-    python_targets = []
+    python_manpages = []
     python_progs = []
+    python_targets = []
 else:
-    python_progs = ["gegps", "gpscat", "gpsfake", "gpsprof", "ubxtool", "zerk"]
+    python_progs = ["gegps", "gpscat", "gpsfake", "gpsprof"]
+    python_manpages = {
+        "gegps.1": "gps.xml",
+        "gpscat.1": "gpscat.xml",
+        "gpsfake.1": "gpsfake.xml",
+        "gpsprof.1": "gpsprof.xml",
+    }
 
     # check for pyserial
     try:
         imp.find_module('serial')
+        python_progs.extend(["ubxtool", "zerk"])
+        python_manpages.update({
+            "ubxtool.1": "ubxtool.xml",
+            "zerk.1": "zerk.xml",
+        })
     except ImportError:
         # no pyserial, reduced functionality in ubxtool and zerk
         announce("WARNING: Python module serial (pyserial) not found.\n"
-                 "    The functionality of ubxtool and zerk will be limited")
+                 "    ubxtool and zerk will not be installed")
 
     if env['xgps']:
         # check for pycairo
@@ -1396,6 +1408,10 @@ else:
 
     if env['xgps']:
         python_progs.extend(["xgps", "xgpsspeed"])
+        python_manpages.update({
+            "xgps.1": "gps.xml",
+            "xgpsspeed.1": "gps.xml",
+        })
     python_modules = Glob('gps/*.py')
 
     # Build Python binding
@@ -1690,8 +1706,6 @@ base_manpages = {
     "libgpsmm.3": "libgpsmm.xml",
     "libQgpsmm.3": "libgpsmm.xml",
     "srec.5": "srec.xml",
-    "ubxtool.1": "ubxtool.xml",
-    "zerk.1": "zerk.xml",
 }
 
 if env['pps'] and (env["timeservice"] or env["gpsdclients"]):
@@ -1704,17 +1718,6 @@ if tiocmiwait:
         "ppscheck.8": "ppscheck.xml",
     })
 
-python_manpages = {
-    "gegps.1": "gps.xml",
-    "gpscat.1": "gpscat.xml",
-    "gpsfake.1": "gpsfake.xml",
-    "gpsprof.1": "gpsprof.xml",
-}
-if env['xgps']:
-    python_manpages.update({
-        "xgps.1": "gps.xml",
-        "xgpsspeed.1": "gps.xml",
-    })
 all_manpages = list(base_manpages.keys()) + list(python_manpages.keys())
 
 man_env = env.Clone()
