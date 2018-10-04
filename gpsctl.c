@@ -436,6 +436,12 @@ int main(int argc, char **argv)
 	    }
 
 	    while (devcount > 0) {
+		/* Wait for input data */
+		if (!gps_waiting(&gpsdata, timeout * 1000000)) {
+			gpsd_log(&context.errout, LOG_ERROR, "timed out waiting for device\n");
+			(void)gps_close(&gpsdata);
+			exit(EXIT_FAILURE);
+		}
 		errno = 0;
 		if (gps_read(&gpsdata, NULL, 0) == -1) {
 		    gpsd_log(&context.errout, LOG_ERROR, "data read failed.\n");
