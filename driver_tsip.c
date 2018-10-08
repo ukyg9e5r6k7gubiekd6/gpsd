@@ -242,7 +242,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		mask |= DEVICEID_SET;
 
 		/* Detecting device by Hardware Code */
-		if (s2 == 3001) {
+		if (3001 == ul3) {
 			gpsd_log(&session->context->errout, LOG_INF,
 				 "This device is Accutime Gold\n");
 			session->driver.tsip.subtype = TSIP_ACCUTIME_GOLD;
