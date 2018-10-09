@@ -984,10 +984,10 @@ class greis(object):
         # some packets from the GPS use CRC16, some i8-bit checksum, some none
         # only 8-bit checksum done here for now
         calc_checksum = self.checksum(raw_msg, len(raw_msg) - 1)
-        rcode = raw_msg[len(raw_msg)-1] == calc_checksum
+        rcode = raw_msg[len(raw_msg) - 1] == calc_checksum
         if VERB_RAW <= opts['verbosity']:
             print("Checksum was %#x, calculated %#x" %
-                  (raw_msg[len(raw_msg)-1], calc_checksum))
+                  (raw_msg[len(raw_msg) - 1], calc_checksum))
         return rcode
 
     def _rol(self, value):
@@ -1126,7 +1126,7 @@ class greis(object):
         b"WAAS",
         b"WIFI",
         b"_WPT",
-        )
+    )
 
     def send_able_4hz(self, able):
         "enable basic GREIS messages at 4Hz"
@@ -1287,7 +1287,7 @@ class greis(object):
         # en/disable QZSS
         "QZSS": {"command": send_able_qzss,
                  "help": "QZSS"},
-       }
+    }
 
     def send_coldboot(self):
         "Delete NVRAM (almanac, ephemeris, location) and restart"
@@ -1382,7 +1382,7 @@ class greis(object):
                    "help": "poll GPS vendor"},
         "VER": {"command": send_get_ver,
                 "help": "poll GPS version"},
-        }
+    }
 
 
 class gps_io(object):
