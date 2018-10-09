@@ -99,6 +99,7 @@ PYTHON_SYSCONFIG_IMPORT = 'from distutils import sysconfig'
 
 # Utility productions
 
+
 def Utility(target, source, action, **kwargs):
     target = env.Command(target=target, source=source, action=action, **kwargs)
     env.AlwaysBuild(target)
