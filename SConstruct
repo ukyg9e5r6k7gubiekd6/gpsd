@@ -97,6 +97,20 @@ EnsureSConsVersion(2, 6, 0)
 
 PYTHON_SYSCONFIG_IMPORT = 'from distutils import sysconfig'
 
+# Utility productions
+
+def Utility(target, source, action, **kwargs):
+    target = env.Command(target=target, source=source, action=action, **kwargs)
+    env.AlwaysBuild(target)
+    env.Precious(target)
+    return target
+
+
+def UtilityWithHerald(herald, target, source, action, **kwargs):
+    if not env.GetOption('silent'):
+        action = ['@echo "%s"' % herald] + action
+    return Utility(target=target, source=source, action=action, **kwargs)
+
 
 def _getstatusoutput(cmd, input=None, shell=True, cwd=None, env=None):
     pipe = subprocess.Popen(cmd, shell=shell, cwd=cwd, env=env,
@@ -1517,6 +1531,7 @@ Platform: UNKNOWN
     python_built_extensions = list(python_compiled_libs.values())
     python_targets = python_built_extensions + [python_egg_info]
 
+
 env.Command(target="packet_names.h", source="packet_states.h", action="""
     rm -f $TARGET &&\
     sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   \"\\1\",/' <$SOURCE >$TARGET &&\
@@ -1773,9 +1788,7 @@ if ((not env['debug'] and not env['profiling'] and not env['nostrip'] and
      not sys.platform.startswith('darwin'))):
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
-if not env['python']:
-    python_install = []
-else:
+if env['python']:
     python_module_dir = str(python_libdir) + os.sep + 'gps'
     python_extensions_install = python_env.Install(DESTDIR + python_module_dir,
                                                    python_built_extensions)
@@ -1798,6 +1811,74 @@ else:
                       # We don't need the directory explicitly for the
                       # install, but we do need it for the uninstall
                       Dir(DESTDIR + python_module_dir)]
+
+    # Check that all Python modules compile properly
+    def check_compile(target, source, env):
+        for pyfile in source:
+            'cp %s tmp.py' % (pyfile)
+            '%s -tt -m py_compile tmp.py' % (sys.executable, )
+            'rm -f tmp.py tmp.pyc'
+    python_compilation_regress = Utility('python-compilation-regress',
+                                         Glob('*.py') + python_modules +
+                                         python_progs + ['SConstruct'],
+                                         check_compile)
+
+    # Regression-test the Maidenhead Locator
+    maidenhead_locator_regress = UtilityWithHerald(
+        'Testing the Maidenhead Locator conversion...',
+        'maidenhead-locator-regress', [python_built_extensions], [
+            '$PYTHON $PYTHON_COVERAGE $SRCDIR/test_maidenhead.py >/dev/null'])
+
+    # Sanity-check Python code.
+    # Bletch.  We don't really want to suppress W0231 E0602 E0611 E1123,
+    # but Python 3 syntax confuses a pylint running under Python 2.
+    checkable = python_progs[:]
+    # Theres's an internal error in astroid that requires we disable some
+    # auditing. This is irritating as hell but there's no help for it short
+    # of an upstream fix.
+    if env['xgps']:
+        checkable.remove("xgps")
+        checkable.remove("xgpsspeed")
+    pylint = Utility(
+        "pylint", ["jsongen.py", "maskaudit.py", python_built_extensions],
+        ['''pylint --rcfile=/dev/null --dummy-variables-rgx='^_' '''
+         '''--msg-template='''
+         '''"{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" '''
+         '''--reports=n --disable=F0001,C0103,C0111,C1001,C0301,C0122,C0302,'''
+         '''C0322,C0324,C0323,C0321,C0330,C0411,C0413,E1136,R0201,R0204,'''
+         '''R0801,'''
+         '''R0902,R0903,R0904,R0911,R0912,R0913,R0914,R0915,W0110,W0201,'''
+         '''W0121,W0123,W0231,W0232,W0234,W0401,W0403,W0141,W0142,W0603,'''
+         '''W0614,W0640,W0621,W1504,E0602,E0611,E1101,E1102,E1103,E1123,'''
+         '''F0401,I0011 '''
+         '''gps/*.py *.py ''' + " ".join(checkable)])
+
+    # Additional Python readability style checks
+    pep8 = Utility("pep8",
+                   ["jsongen.py", "maskaudit.py", python_built_extensions],
+                   ['pycodestyle --ignore=W602,E122,E241 {0} SConstruct '
+                    'gps/[a-zA-Z]*.py *.py'''.format(" ".join(python_progs))])
+
+    flake8 = Utility("flake8",
+                     ["jsongen.py", "maskaudit.py", python_built_extensions],
+                     ['flake8 --ignore=E501,W602,E122,E241,E401 {0} '
+                      'gps/[a-zA-Z]*.py *.py'.format(" ".join(python_progs))])
+
+    # get version from each python prog
+    # this ensures they can run and gps_versions match
+    vchk = ''
+    verenv = env['ENV'].copy()
+    verenv['DISPLAY'] = ''  # Avoid launching X11 in X11 progs
+    pp = []
+    for p in python_progs:
+        pp.append("$SRCDIR/%s -V" % p)
+    python_versions = Utility('python-versions', python_progs, pp, ENV=verenv)
+
+else:
+    python_install = []
+    python_compilation_regress = None
+    maidenhead_locator_regress = None
+    python_versions = None
 
 pc_install = [env.Install(installdir('pkgconfig'), 'libgps.pc')]
 if qt_env:
@@ -1842,21 +1923,6 @@ def error_action(target, source, env):
 
 AlwaysBuild(Alias(".", [], error_action))
 
-# Utility productions
-
-
-def Utility(target, source, action, **kwargs):
-    target = env.Command(target=target, source=source, action=action, **kwargs)
-    env.AlwaysBuild(target)
-    env.Precious(target)
-    return target
-
-
-def UtilityWithHerald(herald, target, source, action, **kwargs):
-    if not env.GetOption('silent'):
-        action = ['@echo "%s"' % herald] + action
-    return Utility(target=target, source=source, action=action, **kwargs)
-
 
 # Putting in all these -U flags speeds up cppcheck and allows it to look
 # at configurations we actually care about.
@@ -1872,56 +1938,6 @@ Utility("cppcheck", ["gpsd.h", "packet_names.h"],
 # Check with clang analyzer
 Utility("scan-build", ["gpsd.h", "packet_names.h"],
         "scan-build scons")
-
-# Sanity-check Python code.
-# Bletch.  We don't really want to suppress W0231 E0602 E0611 E1123,
-# but Python 3 syntax confuses a pylint running under Python 2.
-if len(python_progs) > 0:
-    checkable = python_progs[:]
-    # Theres's an internal error in astroid that requires we disable some
-    # auditing. This is irritating as hell but there's no help for it short
-    # of an upstream fix.
-    if env['xgps']:
-        checkable.remove("xgps")
-        checkable.remove("xgpsspeed")
-    pylint = Utility(
-        "pylint", ["jsongen.py", "maskaudit.py", python_built_extensions],
-        ['''pylint --rcfile=/dev/null --dummy-variables-rgx='^_' '''
-         '''--msg-template='''
-         '''"{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" '''
-         '''--reports=n --disable=F0001,C0103,C0111,C1001,C0301,C0122,C0302,'''
-         '''C0322,C0324,C0323,C0321,C0330,C0411,C0413,E1136,R0201,R0204,'''
-         '''R0801,'''
-         '''R0902,R0903,R0904,R0911,R0912,R0913,R0914,R0915,W0110,W0201,'''
-         '''W0121,W0123,W0231,W0232,W0234,W0401,W0403,W0141,W0142,W0603,'''
-         '''W0614,W0640,W0621,W1504,E0602,E0611,E1101,E1102,E1103,E1123,'''
-         '''F0401,I0011 '''
-         '''gps/*.py *.py ''' + " ".join(checkable)])
-
-# Additional Python readability style checks
-if python_progs:
-    pep8 = Utility("pep8",
-                   ["jsongen.py", "maskaudit.py", python_built_extensions],
-                   ['pycodestyle --ignore=W602,E122,E241 {0} SConstruct '
-                    'gps/[a-zA-Z]*.py *.py'''.format(" ".join(python_progs))])
-
-    flake8 = Utility("flake8",
-                     ["jsongen.py", "maskaudit.py", python_built_extensions],
-                     ['flake8 --ignore=E501,W602,E122,E241,E401 {0} '
-                      'gps/[a-zA-Z]*.py *.py'.format(" ".join(python_progs))])
-
-    # get version from each python prog
-    #  this ensures they can run and gps_versions match
-    vchk = ''
-    verenv = env['ENV'].copy()
-    verenv['DISPLAY'] = ''  # Avoid launching X11 in X11 progs
-    pp = []
-    for p in python_progs:
-        pp.append("$SRCDIR/%s -V" % p)
-    python_versions = Utility('python-versions', python_progs, pp, ENV=verenv)
-
-else:
-    python_versions = None
 
 
 # Check the documentation for bogons, too
@@ -1960,20 +1976,6 @@ bits_regress = Utility('bits-regress', [test_bits], [
 matrix_regress = Utility('matrix-regress', [test_matrix], [
     '$SRCDIR/test_matrix --quiet'
 ])
-
-# Check that all Python modules compile properly
-if env['python']:
-    def check_compile(target, source, env):
-        for pyfile in source:
-            'cp %s tmp.py' % (pyfile)
-            '%s -tt -m py_compile tmp.py' % (sys.executable, )
-            'rm -f tmp.py tmp.pyc'
-    python_compilation_regress = Utility('python-compilation-regress',
-                                         Glob('*.py') + python_modules +
-                                         python_progs + ['SConstruct'],
-                                         check_compile)
-else:
-    python_compilation_regress = None
 
 # using regress-drivers requires socket_export being enabled.
 if not env['socket_export'] or not env['python']:
@@ -2140,15 +2142,6 @@ geoid_regress = UtilityWithHerald(
     'geoid-regress', [test_geoid], [
         '$SRCDIR/test_geoid 37.371192 122.014965'
         ' | diff -u $SRCDIR/test/geoid.test.chk -', ])
-
-# Regression-test the Maidenhead Locator
-if not env['python']:
-    maidenhead_locator_regress = None
-else:
-    maidenhead_locator_regress = UtilityWithHerald(
-        'Testing the Maidenhead Locator conversion...',
-        'maidenhead-locator-regress', [python_built_extensions], [
-            '$PYTHON $PYTHON_COVERAGE $SRCDIR/test_maidenhead.py >/dev/null'])
 
 # Regression-test the calendar functions
 time_regress = Utility('time-regress', [test_mktime], [
