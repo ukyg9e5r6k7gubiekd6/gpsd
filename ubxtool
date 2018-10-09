@@ -240,7 +240,7 @@ class ubx(object):
         num_blocks = u[3]
         i = 0
         while i < num_blocks:
-            u = struct.unpack_from('<BBBBBBBB', buf, 4 + (i*8))
+            u = struct.unpack_from('<BBBBBBBB', buf, 4 + (i * 8))
             sat = u[0]
             if u[0] in self.gnss_id:
                 s_sat = self.gnss_id[u[0]]
@@ -1509,7 +1509,7 @@ class ubx(object):
         struct.pack_into('<BB', m_chk, 0, chk[0], chk[1])
 
         header = b"\xb5\x62"
-        return header + msg[:m_len+4] + m_chk
+        return header + msg[:m_len + 4] + m_chk
 
     def gps_send(self, m_class, m_id, m_data):
         "Build, and send, a message to GPS"
@@ -1916,98 +1916,98 @@ class ubx(object):
         gps_model.gps_send(0x0d, 0x01, m_data)
 
     able_commands = {
-                # en/dis able BeiDou
-                "BEIDOU": {"command": send_able_beidou,
-                           "help": "BeiDou"},
-                # en/dis able basic binary messages
-                "BINARY": {"command": send_able_binary,
-                           "help": "basic binary messages"},
-                # en/dis able ECEF
-                "ECEF": {"command": send_able_ecef,
-                         "help": "ECEF"},
-                # en/dis able GPS
-                "GPS": {"command": send_able_gps,
-                        "help": "GPS and QZSS"},
-                # en/dis able GALILEO
-                "GALILEO": {"command": send_able_galileo,
-                            "help": "GALILEO"},
-                # en/dis able GLONASS
-                "GLONASS": {"command": send_able_glonass,
-                            "help": "GLONASS"},
-                # en/dis able basic NMEA messages
-                "NMEA": {"command": send_able_nmea,
-                         "help": "basic NMEA messages"},
-                # en/dis able RAWX
-                "RAWX": {"command": send_able_rawx,
-                         "help": "RAWX measurements"},
-                # en/dis able SBAS
-                "SBAS": {"command": send_able_sbas,
-                         "help": "SBAS"},
-                # en/dis able TP time pulse message
-                "TP": {"command": send_able_tp,
-                       "help": "TP Time Pulse message"},
-                # en/dis able TMODE2 Survey-in
-                "TMODE2": {"command": send_able_tmode2,
-                           "help": "TMODE2"},
-               }
+        # en/dis able BeiDou
+        "BEIDOU": {"command": send_able_beidou,
+                   "help": "BeiDou"},
+        # en/dis able basic binary messages
+        "BINARY": {"command": send_able_binary,
+                   "help": "basic binary messages"},
+        # en/dis able ECEF
+        "ECEF": {"command": send_able_ecef,
+                 "help": "ECEF"},
+        # en/dis able GPS
+        "GPS": {"command": send_able_gps,
+                "help": "GPS and QZSS"},
+        # en/dis able GALILEO
+        "GALILEO": {"command": send_able_galileo,
+                    "help": "GALILEO"},
+        # en/dis able GLONASS
+        "GLONASS": {"command": send_able_glonass,
+                    "help": "GLONASS"},
+        # en/dis able basic NMEA messages
+        "NMEA": {"command": send_able_nmea,
+                 "help": "basic NMEA messages"},
+        # en/dis able RAWX
+        "RAWX": {"command": send_able_rawx,
+                 "help": "RAWX measurements"},
+        # en/dis able SBAS
+        "SBAS": {"command": send_able_sbas,
+                 "help": "SBAS"},
+        # en/dis able TP time pulse message
+        "TP": {"command": send_able_tp,
+               "help": "TP Time Pulse message"},
+        # en/dis able TMODE2 Survey-in
+        "TMODE2": {"command": send_able_tmode2,
+                   "help": "TMODE2"},
+    }
     commands = {
-                # UBX-CFG-ANT, poll antenna config decode
-                "ANT": {"command": send_cfg_ant,
-                        "help": "UBX-CFG-ANT poll antenna config"},
-                # UBX-CFG-RST cold boot
-                "COLDBOOT": {"command": send_cfg_rst,
-                             "help": "UBS-CFG-RST coldboot the GPS",
-                             "opt": 0xfff},
-                # UBX-CFG-GNSS poll gnss config
-                "GNSS": {"command": send_cfg_gnss,
-                         "help": "UBX-CFG-GNSS poll GNSS config"},
-                # UBX-CFG-RST hot boot
-                "HOTBOOT": {"command": send_cfg_rst,
-                            "help": "UBX-CFG-RST hotboot the GPS",
-                            "opt": 0},
-                # UBX-CFG-NAV5 set Dynamic Platform Model
-                "MODEL": {"command": send_cfg_nav5_model,
-                          "help": "UBX-CFG-NAV5 set Dynamic Platform Model"},
-                # UBX-CFG-NAV5, poll Nav Engine Settings
-                "NAV5": {"command": send_cfg_nav5,
-                         "help": "UBX-CFG-NAV5 poll Nav Engines settings"},
-                # UBX-CFG-PMS, poll power management settings
-                "PMS": {"command": send_cfg_pms,
-                        "help": "UBX-CFG-PMS poll power management settings"},
-                # UBX-CFG-PRT, poll I/O port number
-                "PRT": {"command": send_cfg_prt,
-                        "help": "UBX-CFG-PRT poll I/O port settings"},
-                # UBX-CFG-CFG reset config
-                "RESET": {"command": send_cfg_cfg,
-                          "help": "UBX-CFG-CFG reset config to defaults",
-                          "opt": 1},
-                # UBX-CFG-CFG save config
-                "SAVE": {"command": send_cfg_cfg,
-                         "help": "UBX-CFG-CFG save current config",
-                         "opt": 0},
-                # UBX-TIM-SVIN, get survey in data
-                "SVIN": {"command": send_tim_svin,
-                         "help": "UBX-TIM-SVIN get survey in data"},
-                # UBX-CFG-TMODE2, get time mode 2 config
-                "TMODE2": {"command": send_cfg_tmode2,
-                           "help": "UBX-CFG-TMODE2 get time mode 2 config"},
-                # UBX-TIM-TP, get time pulse timedata
-                "TP": {"command": send_tim_tp,
-                       "help": "UBX-TIM-TP get time pulse timedata"},
-                # UBX-CFG-TP5, get time0 decodes
-                "TP5": {"command": send_cfg_tp5,
-                        "help": "UBX-TIM-TP5 get time pulse decodes"},
-                # UBX-CFG-RST warm boot
-                "WARMBOOT": {"command": send_cfg_rst,
-                             "help": "UBX-CFG-RST warmboot the GPS",
-                             "opt": 1},
-                # poll UBX-CFG-USB
-                "USB": {"command": send_cfg_usb,
-                        "help": "UBX-CFG-USB get USB config"},
-                # poll UBX-MON-VER
-                "VER": {"command": send_mon_ver,
-                        "help": "UBX-MON-VER get GPS version"},
-               }
+        # UBX-CFG-ANT, poll antenna config decode
+        "ANT": {"command": send_cfg_ant,
+                "help": "UBX-CFG-ANT poll antenna config"},
+        # UBX-CFG-RST cold boot
+        "COLDBOOT": {"command": send_cfg_rst,
+                     "help": "UBS-CFG-RST coldboot the GPS",
+                     "opt": 0xfff},
+        # UBX-CFG-GNSS poll gnss config
+        "GNSS": {"command": send_cfg_gnss,
+                 "help": "UBX-CFG-GNSS poll GNSS config"},
+        # UBX-CFG-RST hot boot
+        "HOTBOOT": {"command": send_cfg_rst,
+                    "help": "UBX-CFG-RST hotboot the GPS",
+                    "opt": 0},
+        # UBX-CFG-NAV5 set Dynamic Platform Model
+        "MODEL": {"command": send_cfg_nav5_model,
+                  "help": "UBX-CFG-NAV5 set Dynamic Platform Model"},
+        # UBX-CFG-NAV5, poll Nav Engine Settings
+        "NAV5": {"command": send_cfg_nav5,
+                 "help": "UBX-CFG-NAV5 poll Nav Engines settings"},
+        # UBX-CFG-PMS, poll power management settings
+        "PMS": {"command": send_cfg_pms,
+                "help": "UBX-CFG-PMS poll power management settings"},
+        # UBX-CFG-PRT, poll I/O port number
+        "PRT": {"command": send_cfg_prt,
+                "help": "UBX-CFG-PRT poll I/O port settings"},
+        # UBX-CFG-CFG reset config
+        "RESET": {"command": send_cfg_cfg,
+                  "help": "UBX-CFG-CFG reset config to defaults",
+                  "opt": 1},
+        # UBX-CFG-CFG save config
+        "SAVE": {"command": send_cfg_cfg,
+                 "help": "UBX-CFG-CFG save current config",
+                 "opt": 0},
+        # UBX-TIM-SVIN, get survey in data
+        "SVIN": {"command": send_tim_svin,
+                 "help": "UBX-TIM-SVIN get survey in data"},
+        # UBX-CFG-TMODE2, get time mode 2 config
+        "TMODE2": {"command": send_cfg_tmode2,
+                   "help": "UBX-CFG-TMODE2 get time mode 2 config"},
+        # UBX-TIM-TP, get time pulse timedata
+        "TP": {"command": send_tim_tp,
+               "help": "UBX-TIM-TP get time pulse timedata"},
+        # UBX-CFG-TP5, get time0 decodes
+        "TP5": {"command": send_cfg_tp5,
+                "help": "UBX-TIM-TP5 get time pulse decodes"},
+        # UBX-CFG-RST warm boot
+        "WARMBOOT": {"command": send_cfg_rst,
+                     "help": "UBX-CFG-RST warmboot the GPS",
+                     "opt": 1},
+        # poll UBX-CFG-USB
+        "USB": {"command": send_cfg_usb,
+                "help": "UBX-CFG-USB get USB config"},
+        # poll UBX-MON-VER
+        "VER": {"command": send_mon_ver,
+                "help": "UBX-MON-VER get GPS version"},
+    }
     # end class ubx
 
 
