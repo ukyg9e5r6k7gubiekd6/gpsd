@@ -797,7 +797,6 @@ static ssize_t greis_control_send(struct gps_device_t *session,
 }
 #endif /* CONTROLSEND_ENABLE */
 
-#ifdef RECONFIGURE_ENABLE
 static void greis_event_hook(struct gps_device_t *session, event_t event)
 {
     if (session->context->readonly)
@@ -870,6 +869,7 @@ static gps_mask_t greis_parse_input(struct gps_device_t *session)
 	return 0;
 }
 
+#ifdef RECONFIGURE_ENABLE
 /**
  * Set port operating mode, speed, parity, stopbits etc. here.
  * Note: parity is passed as 'N'/'E'/'O', but you should program
