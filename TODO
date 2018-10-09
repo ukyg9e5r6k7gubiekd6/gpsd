@@ -20,13 +20,39 @@ the calibration process less annoying?
 
 ** Things to do when we can break compatibility **
 
-In gps_data_t make device subtype longer. 128 chars long sounds good.
+In gps_data_t add more string like subtype for HW version, SW version, etc.
 
 In gps_data_t, save PPS precision; this will require creating a pps struct.
+Where would PPS precision come from?
 
-In gps_fix_t, maybe change time away from float to timespec?
+Convert all the time_t (double) and timeval (usec) to timespec (nsec).
+That could be done one small step at a time.
 
 Add MMSI sequence number fields to AIS type 7.
+
+Make the Python JSON client as smart as the C JSON client.  Gonna be
+a big job.  The C client checks all the JSON classes for completeness
+and correctness.  For example, a missing JSON field will be replaced
+with a default value.  Also out of bounds values are fixed.  The Python
+client does no checks. it just mushes a JSON sentance into a big Python
+variable.  No validity checking, no missing fields fixed, etc.  The C
+client uses a generic validator function, fed with templates for each
+JSON message.  Initially harder than a simple procedural parser, Once
+running it is very robust and easy to tweak.
+
+Handle mutifrequency GNSS (B1, E1, L1, L2, B3, L3, L5, L2C, E5, E6,
+etc.)
+
+Handle raw measurements, like UBX-RXM-RAW.  With an uploader for
+postprocessing.
+
+add u-blox IMU (UBX-ESF-RAW) and qErr (UBX-TIM-TP) support.
+
+Adding a sample Go client (gpspipe -> pytogo -> Go ?).
+
+Add RTCM3, RINEX, and/or RAW message forwarders.
+
+Move  webgps.py out of contrib.  It needs a man page and light cleanup.
 
 ** Bugs in gpsd and its clients:
 
