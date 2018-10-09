@@ -91,7 +91,8 @@ website = "http://catb.org/gpsd"
 webupload = "login.ibiblio.org:/public/html/catb/gpsd"
 # Hosting information ends here
 
-EnsureSConsVersion(2, 3, 0)
+# gpsd needs at least Pyton version 2.6.  Any Python 3 should work.
+EnsureSConsVersion(2, 6, 0)
 
 
 PYTHON_SYSCONFIG_IMPORT = 'from distutils import sysconfig'
