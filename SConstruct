@@ -383,7 +383,8 @@ for key, value in os.environ.items():
 
 # Placeholder so we can kluge together something like VPATH builds.
 # $SRCDIR replaces occurrences for $(srcdir) in the autotools build.
-env['SRCDIR'] = '.'
+# scons can get confused if this is not a full path
+env['SRCDIR'] = os.getcwd()
 
 # We may need to force slow regression tests to get around race
 # conditions in the pty layer, especially on a loaded machine.
@@ -1590,7 +1591,7 @@ else:
     rev = gpsd_version
 revision = '''/* Automatically generated file, do not edit */
 #define REVISION "%s"
-'''  % (polystr(rev.strip()),)
+''' % (polystr(rev.strip()),)
 env.Textfile(target="revision.h", source=[revision])
 
 # leapseconds.cache is a local cache for information on leapseconds issued
@@ -1913,10 +1914,10 @@ if python_progs:
     vchk = ''
     verenv = env['ENV'].copy()
     verenv['DISPLAY'] = ''  # Avoid launching X11 in X11 progs
-    for prog in python_progs:
-        vchk += '$SRCDIR/%s -V\n' % prog
-    python_versions = Utility('python-versions', [python_progs], vchk,
-                              ENV=verenv)
+    pp = []
+    for p in python_progs:
+        pp.append("$SRCDIR/%s -V" % p)
+    python_versions = Utility('python-versions', python_progs, pp, ENV=verenv)
 
 else:
     python_versions = None
