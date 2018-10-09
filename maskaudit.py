@@ -59,8 +59,8 @@ class SourceExtractor(object):
     def relevant(self, flag):
         if self.clientside:
             return self.in_library(flag)
-        else:
-            return self.in_daemon(flag)
+
+        return self.in_daemon(flag)
 
 
 if __name__ == '__main__':
