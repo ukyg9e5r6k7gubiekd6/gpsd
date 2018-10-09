@@ -843,7 +843,16 @@ class Base(object):
         viewframe = Gtk.Frame(label="Skyview")
         self.satbox.add(viewframe)
         self.skyview = SkyView(self.rotate)
-        self.skyview.set_property('events', Gdk.EventMask.POINTER_MOTION_MASK)
+        try:
+            # mouseovers fail with remoge DISPLAY
+            self.skyview.set_property('events',
+                                      Gdk.EventMask.POINTER_MOTION_MASK)
+        except NotImplementedError:
+            # keep going anyway, w/o popups
+            sys.stderr.write("xgps: WARNING: failed to grab mouse events, "
+                             "popups disabled\n")
+            pass
+
         viewframe.add(self.skyview)
 
         self.rawdisplay = Gtk.Entry()
