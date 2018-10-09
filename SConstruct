@@ -1377,10 +1377,26 @@ if env["libgpsmm"]:
 if not env['python']:
     python_built_extensions = []
     python_manpages = []
+    python_misc = []
     python_progs = []
     python_targets = []
 else:
+    # installed python programs
     python_progs = ["gegps", "gpscat", "gpsfake", "gpsprof"]
+
+    # python misc helpers and stuff
+    python_misc = [
+        "gpscap.py",
+        "gpssim.py",
+        "jsongen.py",
+        "leapsecond.py",
+        "maskaudit.py",
+        "test_maidenhead.py",
+        "test_misc.py",
+        "test_xgps_deps.py",
+        "valgrind-audit.py"
+    ]
+
     python_manpages = {
         "gegps.1": "gps.xml",
         "gpscat.1": "gpscat.xml",
@@ -1813,16 +1829,17 @@ if env['python']:
                       # install, but we do need it for the uninstall
                       Dir(DESTDIR + python_module_dir)]
 
-    # Check that all Python modules compile properly
-    def check_compile(target, source, env):
-        for pyfile in source:
-            'cp %s tmp.py' % (pyfile)
-            '%s -tt -m py_compile tmp.py' % (sys.executable, )
-            'rm -f tmp.py tmp.pyc'
+    # Check that Python modules compile properly
+    python_all = python_misc + python_modules + python_progs + ['SConstruct']
+    check_compile = []
+    for p in python_all:
+        # split in two lines for readability
+        check_compile.append('cp %s tmp.py; %s -tt -m py_compile tmp.py;' %
+                             (p, sys.executable))
+        check_compile.append('rm tmp.py*')
+
     python_compilation_regress = Utility('python-compilation-regress',
-                                         Glob('*.py') + python_modules +
-                                         python_progs + ['SConstruct'],
-                                         check_compile)
+                                         python_all, check_compile)
 
     # Regression-test the Maidenhead Locator
     maidenhead_locator_regress = UtilityWithHerald(
