@@ -202,8 +202,8 @@ def last_insertion_time():
     now = time.time()
     if now > jul:
         return jul
-    else:
-        return jan
+
+    return jan
 
 
 def save_leapseconds(outfile):
@@ -294,25 +294,26 @@ def conditional_leapsecond_fetch(outfile, timeout):
         stale = last_insertion_time() > os.path.getmtime(outfile)
     if not stale:
         return True
-    else:
-        def handler(_signum, _frame):
-            raise IOError
-        try:
-            signal.signal(signal.SIGALRM, handler)
-        except ValueError:
-            # Parallel builds trigger this - signal only works in main thread
-            sys.stdout.write("Signal set failed; ")
-            return False
-        signal.alarm(timeout)
-        sys.stdout.write("Attempting leap-second fetch...")
-        try:
-            save_leapseconds(outfile)
-            sys.stdout.write("succeeded.\n")
-        except IOError:
-            sys.stdout.write("failed; ")
-            return False
-        signal.alarm(0)
-        return True
+
+    def handler(_signum, _frame):
+        raise IOError
+
+    try:
+        signal.signal(signal.SIGALRM, handler)
+    except ValueError:
+        # Parallel builds trigger this - signal only works in main thread
+        sys.stdout.write("Signal set failed; ")
+        return False
+    signal.alarm(timeout)
+    sys.stdout.write("Attempting leap-second fetch...")
+    try:
+        save_leapseconds(outfile)
+        sys.stdout.write("succeeded.\n")
+    except IOError:
+        sys.stdout.write("failed; ")
+        return False
+    signal.alarm(0)
+    return True
 
 
 def leastsquares(tuples):
