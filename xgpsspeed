@@ -32,7 +32,7 @@ import gps
 
 gps_version = '3.19~dev'
 if gps.__version__ != gps_version:
-    sys.stderr.write("xgpspeed: ERROR: need gps module version %s, got %s\n" %
+    sys.stderr.write("xgpsspeed: ERROR: need gps module version %s, got %s\n" %
                      (gps_version, gps.__version__))
     sys.exit(1)
 
@@ -811,7 +811,7 @@ if __name__ == '__main__':
     )
     (options, args) = parser.parse_args()
     if options.version:
-        sys.stderr.write("xgpspeed: Version %s\n" % gps_version)
+        sys.stderr.write("xgpsspeed: Version %s\n" % gps_version)
         sys.exit(0)
 
     if args:
