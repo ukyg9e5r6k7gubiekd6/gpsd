@@ -113,17 +113,19 @@ extensions.  Usually these are called "python" and "python-dev". You
 will know you are missing the latter if your compilation fails
 because of a missing Python.h.
 
-The xgps and xgpsspeed test clients require the following Python extensions:
+The xgps and xgpsspeed clients will only be installed if these Python
+extensions are installed:
 
 |============================================================================
 |python-gi          | Python bindings for gobject-introspection libraries
 |python-gi-cairo    | Python bindings for Cairo toolkit under GI
 |===========================================================================
 
-The ubxtool and zerk clients require the following Python extension:
+The ubxtool and zerk clients will only be installed if this Python
+extensions is installed:
 
 |============================================================================
-|pyserial           | Python Serial Port extensio
+|pyserial           | Python Serial Port extension
 |===========================================================================
 
 === Scons ===
