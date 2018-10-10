@@ -96,7 +96,7 @@ various additional features have additional prerequisites:
 |Qt + qmake                   | libQgpsmm depends on this
 |python2.x(x>=6) or 3.y(y>=2) | required for various clients and utilities
 |python-GI bindings           | the test clients xgps and xgpsspeed, need this
-|pyserial                     | ubxtool and ubxtool need this
+|pyserial                     | ubxtool and zerk need this
 |===============================================================================
 
 Some ncurses packages contain the terminfo library; some break it out
