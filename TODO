@@ -8,6 +8,13 @@ the "Hacking Guide" on the project website.
 The list of bugs exposed by gpsd in other software has moved to
 the "Upstream Bugs" page on the project website.
 
+** Installation **
+
+Improve the uninstall target.  Remove library syminks.
+
+Make libdir conform to new Gentoo layout: 32bit in lib/ and 64bit in
+lib64/.  Doing that also makes the uninstall more complex.
+
 ** Documentation **
 
 We now have two different calibration procedures in the Time Service
