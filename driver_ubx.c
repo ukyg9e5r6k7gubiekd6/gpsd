@@ -983,6 +983,15 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_RXM_SVSI\n");
 	break;
 
+    case UBX_TIM_DOSC:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_DOSC\n");
+	break;
+    case UBX_TIM_FCHG:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_FCHG\n");
+	break;
+    case UBX_TIM_SMEAS:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_SMEAS\n");
+	break;
     case UBX_TIM_SVIN:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_SVIN\n");
 	break;
@@ -994,6 +1003,15 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_TIM_TP:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_TP\n");
+	break;
+    case UBX_TIM_TOS:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_TOS\n");
+	break;
+    case UBX_TIM_VCOCAL:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_VCOCAL\n");
+	break;
+    case UBX_TIM_VRFY:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_VRFY\n");
 	break;
 
     default:
