@@ -753,6 +753,8 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	/* FALLTHROUGH */
     case UBX_INF_TEST:
 	/* FALLTHROUGH */
+    case UBX_INF_USER:
+	/* FALLTHROUGH */
     case UBX_INF_WARNING:
 	ubx_msg_inf(session, buf, data_len);
 	break;
