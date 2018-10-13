@@ -69,6 +69,8 @@ static gps_mask_t ubx_msg_nav_posecef(struct gps_device_t *session,
 static gps_mask_t ubx_msg_nav_pvt(struct gps_device_t *session,
 				  unsigned char *buf, size_t data_len);
 static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf);
+static gps_mask_t ubx_msg_nav_sat(struct gps_device_t *session,
+				  unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_sol(struct gps_device_t *session,
 				  unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_svinfo(struct gps_device_t *session,
@@ -506,7 +508,149 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
 }
 
 /**
- * GPS Satellite Info
+ * GPS Satellite Info -- new style UBX-NAV-SAT
+ */
+static gps_mask_t
+ubx_msg_nav_sat(struct gps_device_t *session, unsigned char *buf,
+                size_t data_len)
+{
+    unsigned int i, nchan, nsv, st, ver;
+
+    if (data_len < 8) {
+	gpsd_log(&session->context->errout, LOG_PROG,
+		 "runt NAV-SAT (datalen=%zd)\n", data_len);
+	return 0;
+    }
+    ver = (unsigned int)getub(buf, 4);
+    if (1 != ver) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "NAV-SAT message unknown version %d", ver);
+	return 0;
+    }
+    nchan = (unsigned int)getub(buf, 5);
+    if (nchan > MAXCHANNELS) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "Invalid NAV-SAT message, >%d reported visible",
+		 MAXCHANNELS);
+	return 0;
+    }
+    /* two "unused" bytes at buf[6:7] */
+
+    gpsd_zero_satellites(&session->gpsdata);
+    nsv = 0;
+    for (i = st = 0; i < nchan; i++) {
+	unsigned int off = 8 + 12 * i;
+        short PRN = 0;
+        unsigned char gnssId = getub(buf, off + 0);
+        short svId = (short)getub(buf, off + 1);
+        unsigned char cno = getub(buf, off + 2);
+	uint32_t flags = getbeu32(buf, off + 8);
+	bool used = (bool)(flags  & 0x08);
+
+	if (0 == svId) {
+            /* skip 0 svId */
+	    continue;
+        }
+
+        /* make up a PRN based on gnssId:svId, using Appendix A from
+         * u-blox 8 / u-blox M8 Receiver Description - Manual */
+        switch (gnssId) {
+        case 0:
+            /* GPS, 1-32 maps to 1-32 */
+	    if (32 < svId) {
+		/* skip bad svId */
+		continue;
+	    }
+            PRN = svId;
+            break;
+        case 1:
+            /* SBAS, 120-158 mapes to 120-158 */
+	    if (120 > svId || 158 < svId) {
+		/* skip bad svId */
+		continue;
+	    }
+            PRN = svId;
+            break;
+        case 2:
+            /* Galileo, 1-36 maps to 211-246 */
+	    if (36 < svId) {
+		/* skip bad svId */
+		continue;
+	    }
+            PRN = svId + 210;
+            break;
+        case 3:
+            /* BeiDou, 1-37 maps to 159-163,33-64 */
+	    if (6 > svId) {
+                /* 1-5 maps to 159-163 */
+		PRN = svId + 158;
+	    } else if (37 < svId) {
+		/* skip bad svId */
+		continue;
+	    } else {
+		/* 6-37 maps to 33-64 */
+		PRN = svId + 27;
+            }
+            break;
+        case 4:
+            /* IMES, 1-10 maps to 173-182 */
+	    if (10 < svId) {
+		/* skip bad svId */
+		continue;
+	    }
+            PRN = svId + 172;
+            break;
+        case 5:
+            /* QZSS, 1-5 maps to 193-197 */
+	    if (5 < svId) {
+		/* skip bad svId */
+		continue;
+	    }
+            PRN = svId + 192;
+            break;
+        case 6:
+            /* GLONASS, 1-32 maps to 65-96 */
+	    if (32 < svId) {
+		/* skip bad svId */
+                /* 255 == tracked, but unidentified, skip */
+		continue;
+	    }
+            PRN = svId + 64;
+            break;
+        default:
+            /* Huh? */
+            continue;
+        }
+	session->gpsdata.skyview[st].gnssid = gnssId;
+	session->gpsdata.skyview[st].svid = svId;
+	session->gpsdata.skyview[st].PRN = PRN;
+
+	session->gpsdata.skyview[st].ss = (float)cno;
+	session->gpsdata.skyview[st].elevation = (short)getsb(buf, off + 3);
+	session->gpsdata.skyview[st].azimuth = (short)getles16(buf, off + 4);
+	session->gpsdata.skyview[st].used = used;
+	if (used || PRN == (short)session->driver.ubx.sbas_in_use) {
+	    nsv++;
+	    session->gpsdata.skyview[st].used = true;
+	}
+	st++;
+    }
+
+    /* UBX does not give us these, so recompute */
+    session->gpsdata.dop.xdop = NAN;
+    session->gpsdata.dop.ydop = NAN;
+    session->gpsdata.skyview_time = NAN;
+    session->gpsdata.satellites_visible = (int)st;
+    session->gpsdata.satellites_used = (int)nsv;
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "SAT: visible=%d used=%d mask={SATELLITE|USED}\n",
+	     session->gpsdata.satellites_visible,
+	     session->gpsdata.satellites_used);
+    return SATELLITE_SET | USED_IS;
+}
+
+/**
+ * GPS Satellite Info -- deprecated - UBX-NAV-SVINFO
  */
 static gps_mask_t
 ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
@@ -885,6 +1029,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_NAV_SAT:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_SAT\n");
+	mask = ubx_msg_nav_sat(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_SBAS:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_SBAS\n");
@@ -903,6 +1048,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_SVIN\n");
 	break;
     case UBX_NAV_SVINFO:
+        /* UBX-NAV-SVINFO deprecated, use UBX-NAV-SAT instead */
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_SVINFO\n");
 	mask = ubx_msg_nav_svinfo(session, &buf[UBX_PREFIX_LEN], data_len);
 
@@ -988,6 +1134,9 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_TIM_FCHG:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_FCHG\n");
+	break;
+    case UBX_TIM_HOC:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_HOC\n");
 	break;
     case UBX_TIM_SMEAS:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_SMEAS\n");
