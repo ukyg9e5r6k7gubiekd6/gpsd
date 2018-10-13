@@ -883,14 +883,35 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     case UBX_RXM_EPH:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_EPH\n");
 	break;
+    case UBX_RXM_IMES:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_IMES\n");
+	break;
+    case UBX_RXM_MEASX:
+	gpsd_log(&session->context->errout, LOG_PROG, "UBX_RXM_MEASX\n");
+	break;
+    case UBX_RXM_PMREQ:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_PMREQ\n");
+	break;
     case UBX_RXM_POSREQ:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_POSREQ\n");
 	break;
     case UBX_RXM_RAW:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_RAW\n");
 	break;
+    case UBX_RXM_RAWX:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_RAWX\n");
+	break;
+    case UBX_RXM_RLM:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_RLM\n");
+	break;
+    case UBX_RXM_RTCM:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_RTCM\n");
+	break;
     case UBX_RXM_SFRB:
 	mask = ubx_msg_sfrb(session, &buf[UBX_PREFIX_LEN]);
+	break;
+    case UBX_RXM_SFRBX:
+	gpsd_log(&session->context->errout, LOG_PROG, "UBX_RXM_SFRBX\n");
 	break;
     case UBX_RXM_SVSI:
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_RXM_SVSI\n");
