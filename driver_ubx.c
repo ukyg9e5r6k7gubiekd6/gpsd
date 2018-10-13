@@ -877,15 +877,6 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_VELNED\n");
 	break;
 
-    case UBX_RXM_RAW:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_RAW\n");
-	break;
-    case UBX_RXM_SFRB:
-	mask = ubx_msg_sfrb(session, &buf[UBX_PREFIX_LEN]);
-	break;
-    case UBX_RXM_SVSI:
-	gpsd_log(&session->context->errout, LOG_PROG, "UBX_RXM_SVSI\n");
-	break;
     case UBX_RXM_ALM:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_ALM\n");
 	break;
@@ -894,6 +885,15 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_RXM_POSREQ:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_POSREQ\n");
+	break;
+    case UBX_RXM_RAW:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_RAW\n");
+	break;
+    case UBX_RXM_SFRB:
+	mask = ubx_msg_sfrb(session, &buf[UBX_PREFIX_LEN]);
+	break;
+    case UBX_RXM_SVSI:
+	gpsd_log(&session->context->errout, LOG_PROG, "UBX_RXM_SVSI\n");
 	break;
 
     case UBX_MON_SCHED:
