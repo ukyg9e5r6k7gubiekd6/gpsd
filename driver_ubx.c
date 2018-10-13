@@ -745,6 +745,23 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 		 buf[UBX_TYPE_OFFSET]);
 	break;
 
+    case UBX_CFG_PRT:
+        if ( session->driver.ubx.port_id != (unsigned char)buf[UBX_MESSAGE_DATA_OFFSET + 0] ) {
+	    session->driver.ubx.port_id = (unsigned char)buf[UBX_MESSAGE_DATA_OFFSET + 0];
+	    gpsd_log(&session->context->errout, LOG_INF,
+		     "UBX_CFG_PRT: port %d\n", session->driver.ubx.port_id);
+
+#ifdef RECONFIGURE_ENABLE
+	    /* Need to reinitialize since port changed */
+	    if (session->mode == O_OPTIMIZE) {
+		ubx_mode(session, MODE_BINARY);
+	    } else {
+		ubx_mode(session, MODE_NMEA);
+	    }
+#endif /* RECONFIGURE_ENABLE */
+	}
+	break;
+
     case UBX_INF_DEBUG:
 	/* FALLTHROUGH */
     case UBX_INF_ERROR:
@@ -757,6 +774,53 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	/* FALLTHROUGH */
     case UBX_INF_WARNING:
 	ubx_msg_inf(session, buf, data_len);
+	break;
+
+    case UBX_MON_EXCEPT:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_EXCEPT\n");
+	break;
+    case UBX_MON_GNSS:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_GNSS\n");
+	break;
+    case UBX_MON_HW:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_HW\n");
+	break;
+    case UBX_MON_HW2:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_HW2\n");
+	break;
+    case UBX_MON_IO:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_IO\n");
+	break;
+    case UBX_MON_IPC:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_IPC\n");
+	break;
+    case UBX_MON_MSGPP:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_MSGPP\n");
+	break;
+    case UBX_MON_PATCH:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_PATCH\n");
+	break;
+    case UBX_MON_RXBUF:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_RXBUF\n");
+	break;
+    case UBX_MON_RXR:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_RXR\n");
+	break;
+    case UBX_MON_SCHED:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_SCHED\n");
+	break;
+    case UBX_MON_SMGR:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_SMGR\n");
+	break;
+    case UBX_MON_TXBUF:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_TXBUF\n");
+	break;
+    case UBX_MON_USB:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_USB\n");
+	break;
+    case UBX_MON_VER:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_VER\n");
+	ubx_msg_mon_ver(session, buf, data_len);
 	break;
 
     case UBX_NAV_AOPSTATUS:
@@ -919,72 +983,8 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_RXM_SVSI\n");
 	break;
 
-    case UBX_MON_EXCEPT:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_EXCEPT\n");
-	break;
-    case UBX_MON_GNSS:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_GNSS\n");
-	break;
-    case UBX_MON_HW:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_HW\n");
-	break;
-    case UBX_MON_HW2:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_HW2\n");
-	break;
-    case UBX_MON_IO:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_IO\n");
-	break;
-    case UBX_MON_IPC:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_IPC\n");
-	break;
-    case UBX_MON_MSGPP:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_MSGPP\n");
-	break;
-    case UBX_MON_PATCH:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_PATCH\n");
-	break;
-    case UBX_MON_RXBUF:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_RXBUF\n");
-	break;
-    case UBX_MON_RXR:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_RXR\n");
-	break;
-    case UBX_MON_SCHED:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_SCHED\n");
-	break;
-    case UBX_MON_SMGR:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_SMGR\n");
-	break;
-    case UBX_MON_TXBUF:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_TXBUF\n");
-	break;
-    case UBX_MON_USB:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_USB\n");
-	break;
-    case UBX_MON_VER:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_VER\n");
-	ubx_msg_mon_ver(session, buf, data_len);
-	break;
-
-    case UBX_CFG_PRT:
-        if ( session->driver.ubx.port_id != (unsigned char)buf[UBX_MESSAGE_DATA_OFFSET + 0] ) {
-	    session->driver.ubx.port_id = (unsigned char)buf[UBX_MESSAGE_DATA_OFFSET + 0];
-	    gpsd_log(&session->context->errout, LOG_INF,
-		     "UBX_CFG_PRT: port %d\n", session->driver.ubx.port_id);
-
-#ifdef RECONFIGURE_ENABLE
-	    /* Need to reinitialize since port changed */
-	    if (session->mode == O_OPTIMIZE) {
-		ubx_mode(session, MODE_BINARY);
-	    } else {
-		ubx_mode(session, MODE_NMEA);
-	    }
-#endif /* RECONFIGURE_ENABLE */
-	}
-	break;
-
-    case UBX_TIM_TP:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_TP\n");
+    case UBX_TIM_SVIN:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_SVIN\n");
 	break;
     case UBX_TIM_TM:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_TM\n");
@@ -992,8 +992,8 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     case UBX_TIM_TM2:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_TM2\n");
 	break;
-    case UBX_TIM_SVIN:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_SVIN\n");
+    case UBX_TIM_TP:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_TP\n");
 	break;
 
     default:
