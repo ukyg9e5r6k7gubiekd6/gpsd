@@ -919,8 +919,17 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_RXM_SVSI\n");
 	break;
 
-    case UBX_MON_SCHED:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_SCHED\n");
+    case UBX_MON_EXCEPT:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_EXCEPT\n");
+	break;
+    case UBX_MON_GNSS:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_GNSS\n");
+	break;
+    case UBX_MON_HW:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_HW\n");
+	break;
+    case UBX_MON_HW2:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_HW2\n");
 	break;
     case UBX_MON_IO:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_IO\n");
@@ -928,27 +937,33 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     case UBX_MON_IPC:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_IPC\n");
 	break;
-    case UBX_MON_VER:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_VER\n");
-	ubx_msg_mon_ver(session, buf, data_len);
-	break;
-    case UBX_MON_EXCEPT:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_EXCEPT\n");
-	break;
     case UBX_MON_MSGPP:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_MSGPP\n");
+	break;
+    case UBX_MON_PATCH:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_PATCH\n");
 	break;
     case UBX_MON_RXBUF:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_RXBUF\n");
 	break;
+    case UBX_MON_RXR:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_RXR\n");
+	break;
+    case UBX_MON_SCHED:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_SCHED\n");
+	break;
+    case UBX_MON_SMGR:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_SMGR\n");
+	break;
     case UBX_MON_TXBUF:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_TXBUF\n");
 	break;
-    case UBX_MON_HW:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_HW\n");
-	break;
     case UBX_MON_USB:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_USB\n");
+	break;
+    case UBX_MON_VER:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_MON_VER\n");
+	ubx_msg_mon_ver(session, buf, data_len);
 	break;
 
     case UBX_CFG_PRT:
