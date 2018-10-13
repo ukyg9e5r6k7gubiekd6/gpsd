@@ -757,6 +757,12 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	ubx_msg_inf(session, buf, data_len);
 	break;
 
+    case UBX_NAV_AOPSTATUS:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_AOPSTATUS\n");
+	break;
+    case UBX_NAV_ATT:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_ATT\n");
+	break;
     case UBX_NAV_CLOCK:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_CLOCK\n");
 	break;
@@ -775,6 +781,21 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_EOE\n");
 	mask = ubx_msg_nav_eoe(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
+    case UBX_NAV_GEOFENCE:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_GEOFENCE\n");
+	break;
+    case UBX_NAV_HPPOSECEF:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_HPPOSECEF\n");
+	break;
+    case UBX_NAV_HPPOSLLH:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_HPPOSLLH\n");
+	break;
+    case UBX_NAV_ODO:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_ODO\n");
+	break;
+    case UBX_NAV_ORB:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_ORB\n");
+	break;
     case UBX_NAV_POSECEF:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_POSECEF\n");
 	mask = ubx_msg_nav_posecef(session, &buf[UBX_PREFIX_LEN], data_len);
@@ -790,6 +811,15 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_PVT\n");
 	mask = ubx_msg_nav_pvt(session, &buf[UBX_PREFIX_LEN], data_len);
         break;
+    case UBX_NAV_RELPOSNED:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_RELPOSNED\n");
+	break;
+    case UBX_NAV_RESETODO:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_RESETODO\n");
+	break;
+    case UBX_NAV_SAT:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_SAT\n");
+	break;
     case UBX_NAV_SBAS:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_SBAS\n");
 	ubx_msg_sbas(session, &buf[6]);
@@ -802,6 +832,9 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_NAV_STATUS:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_STATUS\n");
+	break;
+    case UBX_NAV_SVIN:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_SVIN\n");
 	break;
     case UBX_NAV_SVINFO:
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_SVINFO\n");
@@ -829,6 +862,9 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     case UBX_NAV_TIMEGPS:
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_TIMEGPS\n");
 	mask = ubx_msg_nav_timegps(session, &buf[UBX_PREFIX_LEN], data_len);
+	break;
+    case UBX_NAV_TIMELS:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_TIMELS\n");
 	break;
     case UBX_NAV_TIMEUTC:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_TIMEUTC\n");
