@@ -746,8 +746,8 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
 
     case UBX_CFG_PRT:
-        if ( session->driver.ubx.port_id != (unsigned char)buf[UBX_MESSAGE_DATA_OFFSET + 0] ) {
-	    session->driver.ubx.port_id = (unsigned char)buf[UBX_MESSAGE_DATA_OFFSET + 0];
+        if (session->driver.ubx.port_id != buf[UBX_MESSAGE_DATA_OFFSET + 0] ) {
+	    session->driver.ubx.port_id = buf[UBX_MESSAGE_DATA_OFFSET + 0];
 	    gpsd_log(&session->context->errout, LOG_INF,
 		     "UBX_CFG_PRT: port %d\n", session->driver.ubx.port_id);
 
