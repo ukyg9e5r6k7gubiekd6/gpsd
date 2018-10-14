@@ -1578,14 +1578,18 @@ class ubx(object):
             # UBX-NAV-SVINFO - deprecated in protocol 15, gone in 27
             m_data = bytearray([0x01, 0x30, rate_s])
             gps_model.gps_send(6, 1, m_data)
+
+            # UBX-NAV-SAT turn it off, if we can
+            m_data = bytearray([0x01, 0x35, 0])
+            gps_model.gps_send(6, 1, m_data)
         else:
             # use UBX-NAV-SAT for protocol 15 and up
             m_data = bytearray([0x01, 0x35, rate_s])
             gps_model.gps_send(6, 1, m_data)
-            if 27 > opts['protocol']:
-                # UBX-NAV-SVINFO turn it off, if we can
-                m_data = bytearray([0x01, 0x30, 0])
-                gps_model.gps_send(6, 1, m_data)
+
+            # UBX-NAV-SVINFO turn it off, if we can
+            m_data = bytearray([0x01, 0x30, 0])
+            gps_model.gps_send(6, 1, m_data)
 
         # UBX-NAV-EOE, end of epoch.
         # do not bother with EOE until gpsd works with it.
