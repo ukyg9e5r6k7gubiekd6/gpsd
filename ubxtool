@@ -1531,7 +1531,7 @@ class ubx(object):
             if VERB_QUIET < opts['verbosity']:
                 sys.stdout.write("sent:\n")
                 if VERB_INFO < opts['verbosity']:
-                    sys.stdout.write(binascii.hexlify(m_all))
+                    sys.stdout.write(gps.polystr(binascii.hexlify(m_all)))
                     sys.stdout.write("\n")
                 self.decode_msg(m_all)
                 sys.stdout.flush()
