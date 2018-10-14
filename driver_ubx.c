@@ -805,9 +805,9 @@ static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf)
 }
 
 /*
- * Raw Subframes
+ * Raw Subframes - UBX-RXM-SFRB
  */
-static gps_mask_t ubx_msg_sfrb(struct gps_device_t *session, unsigned char *buf)
+static gps_mask_t ubx_rxm_sfrb(struct gps_device_t *session, unsigned char *buf)
 {
     unsigned int i, chan, svid;
     uint32_t words[10];
@@ -1120,7 +1120,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_RTCM\n");
 	break;
     case UBX_RXM_SFRB:
-	mask = ubx_msg_sfrb(session, &buf[UBX_PREFIX_LEN]);
+	mask = ubx_rxm_sfrb(session, &buf[UBX_PREFIX_LEN]);
 	break;
     case UBX_RXM_SFRBX:
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_RXM_SFRBX\n");
