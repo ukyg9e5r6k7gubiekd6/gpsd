@@ -1085,8 +1085,8 @@ class ubx(object):
         if 8 > m_len:
             return " Bad Length %s" % m_len
 
-        u = struct.unpack_from('<LlhhBBBB', buf, 0)
-        s = ' iTOW:%d ms weeks:%d numSV:%d' % u
+        u = struct.unpack_from('<lhBB', buf, 0)
+        s = ' iTOW:%d ms weeks:%d numSV:%u res1 %u' % u
 
         m_len -= 8
         i = 0
