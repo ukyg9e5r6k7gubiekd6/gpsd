@@ -90,6 +90,14 @@ opts = {
     'oaf_name': None,
     # poll command -p
     'poll': None,
+    # protocol version for sent commands
+    # u-blox 5, firmware 4 to 6 is protocol 10 to 12
+    # u-blox 6, firmware 6 to 7 is protocol 12 to 13
+    # u-blox 6, firmware 1 is protocol 14
+    # u-blox 7, firmware 1 is protocol 14
+    # u-blox 8, is protocol 15 to 23
+    # u-blox 9, firmware 1 is protocol 27
+    'protocol': 10,
     # raw log file name
     'raw_file': None,
     # open port read only -r
@@ -1565,10 +1573,19 @@ class ubx(object):
         m_data = bytearray([0x01, 0x32, rate_s])
         gps_model.gps_send(6, 1, m_data)
 
-        # UBX-NAV-SVINFO - deprecated
-        # use UBX-NAV-SAT for protocol 15 and up
-        m_data = bytearray([0x01, 0x30, rate_s])
-        gps_model.gps_send(6, 1, m_data)
+        # get Satellite Information
+        if 15 > opts['protocol']:
+            # UBX-NAV-SVINFO - deprecated in protocol 15, gone in 27
+            m_data = bytearray([0x01, 0x30, rate_s])
+            gps_model.gps_send(6, 1, m_data)
+        else:
+            # use UBX-NAV-SAT for protocol 15 and up
+            m_data = bytearray([0x01, 0x35, rate_s])
+            gps_model.gps_send(6, 1, m_data)
+            if 27 > opts['protocol']:
+                # UBX-NAV-SVINFO turn it off, if we can
+                m_data = bytearray([0x01, 0x30, 0])
+                gps_model.gps_send(6, 1, m_data)
 
         # UBX-NAV-EOE, end of epoch.
         # do not bother with EOE until gpsd works with it.
@@ -2266,6 +2283,8 @@ def usage():
           '                     default: %s\n'
           '       -h            print help\n'
           '       -m M          optional mode to -p P\n'
+          '       -P P          Protocol version for sending commands\n'
+          '                     default: %s\n'
           '       -p P          send a prepackaged query P to GPS\n'
           '       -R R          save raw data from GPS in file R\n'
           '                     default: %s\n'
@@ -2282,7 +2301,8 @@ def usage():
           '\n'
           'D and E can be one of:' %
           (PROG_NAME, opts['input_file_name'], opts['raw_file'],
-           opts['input_speed'], opts['input_wait'], opts['verbosity'])
+           opts['protocol'], opts['input_speed'], opts['input_wait'],
+           opts['verbosity'])
           )
 
     for item in sorted(gps_model.able_commands.keys()):
@@ -2305,7 +2325,8 @@ else:
 
 
 try:
-    (options, arguments) = getopt.getopt(options, "?c:d:e:f:hm:rp:s:w:v:R:S:V")
+    (options, arguments) = getopt.getopt(options,
+                                         "?c:d:e:f:hm:rP:p:s:w:v:R:S:V")
 except getopt.GetoptError as err:
     sys.stderr.write("%s: %s\n"
                      "Try '%s -h' for more information.\n" %
@@ -2325,6 +2346,12 @@ for (opt, val) in options:
         usage()
     elif opt == '-m':
         opts['mode'] = int(val)
+    elif opt == '-P':
+        opts['protocol'] = int(val)
+        if 10 > opts['protocol']:
+            opts['protocol'] = 10
+        if 27 < opts['protocol']:
+            opts['protocol'] = 27
     elif opt == '-p':
         opts['poll'] = val
     elif opt == '-r':
