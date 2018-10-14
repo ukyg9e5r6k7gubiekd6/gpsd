@@ -1565,7 +1565,8 @@ class ubx(object):
         m_data = bytearray([0x01, 0x32, rate_s])
         gps_model.gps_send(6, 1, m_data)
 
-        # UBX-NAV-SVINFO
+        # UBX-NAV-SVINFO - deprecated
+        # use UBX-NAV-SAT for protocol 15 and up
         m_data = bytearray([0x01, 0x30, rate_s])
         gps_model.gps_send(6, 1, m_data)
 
