@@ -544,7 +544,7 @@ ubx_msg_nav_sat(struct gps_device_t *session, unsigned char *buf,
         unsigned char gnssId = getub(buf, off + 0);
         short svId = (short)getub(buf, off + 1);
         unsigned char cno = getub(buf, off + 2);
-	uint32_t flags = getbeu32(buf, off + 8);
+	uint32_t flags = getleu32(buf, off + 8);
 	bool used = (bool)(flags  & 0x08);
 
 	if (0 == svId) {
