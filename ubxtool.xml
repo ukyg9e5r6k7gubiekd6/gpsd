@@ -34,7 +34,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
    </arg>
    <arg choice='opt'>-h </arg>
    <arg choice='opt'>-m <replaceable>mode</replaceable></arg>
-   <arg choice='opt'>-P <replaceable>protocol</replaceable></arg>
+   <arg choice='opt'>-P <replaceable>protver</replaceable></arg>
    <arg choice='opt'>-p <replaceable>preset</replaceable></arg>
    <arg choice='opt'>-R <replaceable>rawfile</replaceable></arg>
    <arg choice='opt'>-r </arg>
@@ -187,7 +187,7 @@ a usage message and exit.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term>-P protocol</term>
+    <term>-P protver</term>
     <listitem>
      <para>Sets the protocol version to use for sending commands.  Minimum
 10 (ublox 5).  Maximum 27 (u-blox 9)

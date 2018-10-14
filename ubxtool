@@ -91,13 +91,13 @@ opts = {
     # poll command -p
     'poll': None,
     # protocol version for sent commands
-    # u-blox 5, firmware 4 to 6 is protocol 10 to 12
-    # u-blox 6, firmware 6 to 7 is protocol 12 to 13
-    # u-blox 6, firmware 1 is protocol 14
-    # u-blox 7, firmware 1 is protocol 14
-    # u-blox 8, is protocol 15 to 23
-    # u-blox 9, firmware 1 is protocol 27
-    'protocol': 10,
+    # u-blox 5, firmware 4 to 6 is protver 10 to 12
+    # u-blox 6, firmware 6 to 7 is protver 12 to 13
+    # u-blox 6, firmware 1 is protver 14
+    # u-blox 7, firmware 1 is protver 14
+    # u-blox 8, is protver 15 to 23
+    # u-blox 9, firmware 1 is protver 27
+    'protver': 10,
     # raw log file name
     'raw_file': None,
     # open port read only -r
@@ -1113,9 +1113,10 @@ class ubx(object):
         if 16 > m_len:
             return " Bad Length %s" % m_len
 
-        u = struct.unpack_from('<dHbBBB', buf, 0)
+        # version not here before protver 18, I hope it is zero.
+        u = struct.unpack_from('<dHbBBBBB', buf, 0)
         s = (' rcvTow %.3f week %u leapS %d numMeas %u recStat %#x'
-             ' version %u' % u)
+             ' version %u reserved1[2] %u %u' % u)
 
         m_len -= 16
         i = 0
@@ -1574,8 +1575,8 @@ class ubx(object):
         gps_model.gps_send(6, 1, m_data)
 
         # get Satellite Information
-        if 15 > opts['protocol']:
-            # UBX-NAV-SVINFO - deprecated in protocol 15, gone in 27
+        if 15 > opts['protver']:
+            # UBX-NAV-SVINFO - deprecated in protver 15, gone in 27
             m_data = bytearray([0x01, 0x30, rate_s])
             gps_model.gps_send(6, 1, m_data)
 
@@ -1583,7 +1584,7 @@ class ubx(object):
             m_data = bytearray([0x01, 0x35, 0])
             gps_model.gps_send(6, 1, m_data)
         else:
-            # use UBX-NAV-SAT for protocol 15 and up
+            # use UBX-NAV-SAT for protver 15 and up
             m_data = bytearray([0x01, 0x35, rate_s])
             gps_model.gps_send(6, 1, m_data)
 
@@ -2305,7 +2306,7 @@ def usage():
           '\n'
           'D and E can be one of:' %
           (PROG_NAME, opts['input_file_name'], opts['raw_file'],
-           opts['protocol'], opts['input_speed'], opts['input_wait'],
+           opts['protver'], opts['input_speed'], opts['input_wait'],
            opts['verbosity'])
           )
 
@@ -2351,11 +2352,11 @@ for (opt, val) in options:
     elif opt == '-m':
         opts['mode'] = int(val)
     elif opt == '-P':
-        opts['protocol'] = int(val)
-        if 10 > opts['protocol']:
-            opts['protocol'] = 10
-        if 27 < opts['protocol']:
-            opts['protocol'] = 27
+        opts['protver'] = int(val)
+        if 10 > opts['protver']:
+            opts['protver'] = 10
+        if 27 < opts['protver']:
+            opts['protver'] = 27
     elif opt == '-p':
         opts['poll'] = val
     elif opt == '-r':
