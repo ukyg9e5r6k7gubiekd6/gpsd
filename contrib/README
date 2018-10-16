@@ -2,6 +2,9 @@ The following tools are not production-ready. They are included only as
 conveniences, examples or rudimetary starting points for other development
 efforts.
 
+skyview2svg reads the skyview from gpspipe, and creates an svg image
+of the skyview.
+
 gpssnmp a tool to return some SNMP values from the running local gpsd.
  
 clock_test is used to test the latency of the system call clock_getttime().

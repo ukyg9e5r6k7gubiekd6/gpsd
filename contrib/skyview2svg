@@ -1,0 +1,307 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+skyview2svg -- Create an SVG image of GPS satellites sky view.
+
+Read from file or stdin the JSON data produced by gpsd,
+example usage:
+
+    gpspipe -w | skyview2svg > skyview.svg
+
+For GPSD JSON format see: http://www.catb.org/gpsd/gpsd_json.html
+"""
+# This code runs compatibly under Python 2 and 3.x for x >= 2.
+# Preserve this property!
+from __future__ import absolute_import, print_function, division
+
+import datetime
+import json
+import math
+import sys
+
+__author__ = "Niccolo Rigacci"
+__copyright__ = "Copyright 2018 Niccolo Rigacci <niccolo@rigacci.org>"
+__license__ = "BSD-2-clause"
+__email__ = "niccolo@rigacci.org"
+__version__ = "0.2.1"
+
+
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+def polar2cart(azimuth, elevation, r_max):
+    """Convert polar coordinates in cartesian ones."""
+    radius = r_max * (1 - elevation / 90.0)
+    theta = math.radians(float(azimuth - 90))
+    return (
+        int(radius * math.cos(theta) + 0.5),
+        int(radius * math.sin(theta) + 0.5)
+    )
+
+
+# ------------------------------------------------------------------------
+# ------------------------------------------------------------------------
+def cutoff_err(err, err_min, err_max):
+    """Cut-off Estimated Error between min and max."""
+    if err is None or err >= err_max:
+        return err_max, '&gt;'
+    if err <= err_min:
+        return err_min, '&lt;'
+    else:
+        return err, ''
+
+
+# ------------------------------------------------------------------------
+# Read JSON data from file or stdin, search a {'class': 'SKY'} line.
+# ------------------------------------------------------------------------
+EXIT_CODE = 0
+SKY = None
+TPV = None
+try:
+    if len(sys.argv) > 1:
+        with open(sys.argv[1]) as f:
+            while True:
+                SENTENCE = json.loads(f.readline())
+                if 'class' in SENTENCE and SENTENCE['class'] == 'SKY':
+                    SKY = SENTENCE
+                if 'class' in SENTENCE and SENTENCE['class'] == 'TPV':
+                    TPV = SENTENCE
+                if SKY is not None and TPV is not None:
+                    break
+    else:
+        while True:
+            SENTENCE = json.loads(sys.stdin.readline())
+            if 'class' in SENTENCE and SENTENCE['class'] == 'SKY':
+                SKY = SENTENCE
+            if 'class' in SENTENCE and SENTENCE['class'] == 'TPV':
+                TPV = SENTENCE
+            if SKY is not None and TPV is not None:
+                sys.stdin.close()
+                break
+except (IOError, ValueError):
+    # Assume empty data and write msg to stderr.
+    EXIT_CODE = 100
+    sys.stderr.write("Error reading JSON data from file or stdin."
+                     " Creating an empty or partial skyview image.\n")
+
+if SKY is None:
+    SKY = {}
+if TPV is None:
+    TPV = {}
+
+# ------------------------------------------------------------------------
+# Colors for the SVG styles.
+# ------------------------------------------------------------------------
+# Background and label colors.
+BACKGROUND_COLOR = '#323232'
+LBL_FONT_COLOR = 'white'
+FONT_FAMILY = 'Verdana,Arial,Helvetica,sans-serif'
+# Compass dial.
+COMPASS_STROKE_COLOR = '#9d9d9d'
+DIAL_POINT_COLOR = COMPASS_STROKE_COLOR
+# Satellites constellation.
+SAT_USED_FILL_COLOR = '#00ff00'
+SAT_UNUSED_FILL_COLOR = '#d0d0d0'
+SAT_USED_STROKE_COLOR = '#0b400b'
+SAT_UNUSED_STROKE_COLOR = '#101010'
+SAT_USED_TEXT_COLOR = '#000000'
+SAT_UNUSED_TEXT_COLOR = '#000000'
+# Sat signal/noise ratio box and bars.
+BARS_AREA_FILL_COLOR = '#646464'
+BARS_AREA_STROKE_COLOR = COMPASS_STROKE_COLOR
+BAR_USED_FILL_COLOR = '#00ff00'
+BAR_UNUSED_FILL_COLOR = '#ffffff'
+BAR_USED_STROKE_COLOR = '#324832'
+BAR_UNUSED_STROKE_COLOR = BACKGROUND_COLOR
+
+# ------------------------------------------------------------------------
+# Size and position of elements.
+# ------------------------------------------------------------------------
+IMG_WIDTH = 528
+IMG_HEIGHT = 800
+STROKE_WIDTH = int(IMG_WIDTH * 0.007)
+
+# Scale graph bars to accomodate at least MIN_SAT values.
+MIN_SAT = 12
+NUM_SAT = MIN_SAT
+
+# Auto-scale: reasonable values for Signal/Noise Ratio and Error.
+SNR_MAX = 30.0  # Do not autoscale below this value.
+# Auto-scale horizontal and vertical error, in meters.
+ERR_MIN = 5.0
+ERR_MAX = 75.0
+
+# Create an empty list, if satellites list is missing.
+if 'satellites' not in SKY.keys():
+    SKY['satellites'] = []
+
+if len(SKY['satellites']) < MIN_SAT:
+    NUM_SAT = MIN_SAT
+else:
+    NUM_SAT = len(SKY['satellites'])
+
+# Make a sortable array and autoscale SNR.
+SATELLITES = {}
+for sat in SKY['satellites']:
+    SATELLITES[sat['PRN']] = sat
+    if float(sat['ss']) > SNR_MAX:
+        SNR_MAX = float(sat['ss'])
+
+# Compass dial and satellites placeholders.
+CIRCLE_X = int(IMG_WIDTH * 0.50)
+CIRCLE_Y = int(IMG_WIDTH * 0.49)
+CIRCLE_R = int(IMG_HEIGHT * 0.22)
+SAT_WIDTH = int(CIRCLE_R * 0.24)
+SAT_HEIGHT = int(CIRCLE_R * 0.14)
+
+# GPS position.
+POS_LBL_X = int(IMG_WIDTH * 0.50)
+POS_LBL_Y = int(IMG_HEIGHT * 0.62)
+
+# Sat signal/noise ratio box and bars.
+BARS_BOX_WIDTH = int(IMG_WIDTH * 0.82)
+BARS_BOX_HEIGHT = int(IMG_HEIGHT * 0.14)
+BARS_BOX_X = int((IMG_WIDTH - BARS_BOX_WIDTH) * 0.5)
+BARS_BOX_Y = int(IMG_HEIGHT * 0.78)
+BAR_HEIGHT_MAX = int(BARS_BOX_HEIGHT * 0.72)
+BAR_SPACE = int((BARS_BOX_WIDTH - STROKE_WIDTH) / NUM_SAT)
+BAR_WIDTH = int(BAR_SPACE * 0.70)
+BAR_RADIUS = int(BAR_WIDTH * 0.20)
+
+# Error box and bars.
+ERR_BOX_X = int(IMG_WIDTH * 0.65)
+ERR_BOX_Y = int(IMG_HEIGHT * 0.94)
+ERR_BOX_WIDTH = int((BARS_BOX_X + BARS_BOX_WIDTH) - ERR_BOX_X)
+ERR_BOX_HEIGHT = BAR_SPACE * 2
+ERR_BAR_HEIGHT_MAX = int(ERR_BOX_WIDTH - STROKE_WIDTH*2)
+
+# Timestamp
+TIMESTAMP_X = int(IMG_WIDTH * 0.50)
+TIMESTAMP_Y = int(IMG_HEIGHT * 0.98)
+
+# Text labels.
+LBL_FONT_SIZE = int(IMG_WIDTH * 0.036)
+LBL_COMPASS_POINTS_SIZE = int(CIRCLE_R * 0.12)
+LBL_SAT_SIZE = int(SAT_HEIGHT * 0.75)
+LBL_SAT_BAR_SIZE = int(BAR_WIDTH * 0.90)
+
+# Get timestamp from GPS or system.
+if 'time' in SKY:
+    UTC = datetime.datetime.strptime(SKY['time'], '%Y-%m-%dT%H:%M:%S.%fZ')
+elif 'time' in TPV:
+    UTC = datetime.datetime.strptime(TPV['time'], '%Y-%m-%dT%H:%M:%S.%fZ')
+else:
+    UTC = datetime.datetime.utcnow()
+TIME_STR = UTC.strftime('%Y-%m-%d %H:%M:%S UTC')
+
+# ------------------------------------------------------------------------
+# Output the SGV image.
+# ------------------------------------------------------------------------
+print('''<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+          "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg
+   xmlns="http://www.w3.org/2000/svg"
+   width="%d"
+   height="%d">''' % (IMG_WIDTH, IMG_HEIGHT))
+
+# NOTICE: librsvg v.2.40 has a bug with "chain" multiple class selectors:
+# it does not handle a selector like text.label.title and a tag class="label title".
+print('<style type="text/css">')
+# Labels.
+print('    text              { font-family: Verdana,Arial,Helvetica,sans-serif; font-weight: bold;}')
+print('    text.label        { fill: %s; font-size: %dpx; }' % (LBL_FONT_COLOR, LBL_FONT_SIZE))
+print('    text.label-title  { font-size: %dpx; text-anchor: middle; }' % (int(LBL_FONT_SIZE * 1.4),))
+print('    text.label-prn    { font-size: %dpx; text-anchor: end; }' % (LBL_SAT_BAR_SIZE,))
+print('    text.label-center { text-anchor: middle; }')
+print('    text.label-snr    { text-anchor: start; }')
+print('    text.label-err    { text-anchor: end; }')
+# Compass dial.
+print('    circle.compass    { stroke: %s; stroke-width: %d; fill-opacity: 0; }' % (COMPASS_STROKE_COLOR, STROKE_WIDTH,))
+print('    line.compass      { stroke: %s; stroke-width: %d; }' % (COMPASS_STROKE_COLOR, STROKE_WIDTH))
+print('    text.compass      { fill: %s; font-size: %dpx; text-anchor: middle; }' % (DIAL_POINT_COLOR, LBL_COMPASS_POINTS_SIZE))
+# Satellites constellation.
+print('    rect.sats         { stroke-width: %d; fill-opacity: 1.0; }' % (STROKE_WIDTH,))
+print('    rect.sats-used    { stroke: %s; fill: %s; }' % (SAT_USED_STROKE_COLOR, SAT_USED_FILL_COLOR))
+print('    rect.sats-unused  { stroke: %s; fill: %s; }' % (SAT_UNUSED_STROKE_COLOR, SAT_UNUSED_FILL_COLOR))
+print('    text.sats         { font-size: %dpx; text-anchor: middle; }' % (LBL_SAT_SIZE,))
+print('    text.sats-used    { fill: %s; }' % (SAT_USED_TEXT_COLOR,))
+print('    text.sats-unused  { fill: %s; }' % (SAT_UNUSED_TEXT_COLOR,))
+# Box containing bars graph.
+print('    rect.box          { fill: %s; stroke: %s; stroke-width: %d; }' % (BARS_AREA_FILL_COLOR, BARS_AREA_STROKE_COLOR, STROKE_WIDTH))
+# Graph bars.
+print('    rect.bars         { stroke-width: %d; opacity: 1.0; }' % (STROKE_WIDTH,))
+print('    rect.bars-used    { stroke: %s; fill: %s; }' % (BAR_USED_STROKE_COLOR, BAR_USED_FILL_COLOR))
+print('    rect.bars-unused  { stroke: %s; fill: %s; }' % (BAR_UNUSED_STROKE_COLOR, BAR_UNUSED_FILL_COLOR))
+print('</style>')
+# Background and title.
+print('<rect width="100%%" height="100%%" fill="%s" />' % (BACKGROUND_COLOR,))
+print('<text class="label label-title" x="%d" y="%d">Sky View of GPS Satellites</text>' % (int(IMG_WIDTH * 0.5), int(LBL_FONT_SIZE * 1.5)))
+# Sky circle with cardinal points.
+print('<circle class="compass" cx="%d" cy="%d" r="%d" />' % (CIRCLE_X, CIRCLE_Y, CIRCLE_R))
+print('<circle class="compass" cx="%d" cy="%d" r="%d" />' % (CIRCLE_X, CIRCLE_Y, int(CIRCLE_R / 2)))
+print('<line class="compass" x1="%d" y1="%d" x2="%d" y2="%d" />' % (CIRCLE_X, CIRCLE_Y - CIRCLE_R, CIRCLE_X, CIRCLE_Y + CIRCLE_R))
+print('<line class="compass" x1="%d" y1="%d" x2="%d" y2="%d" />' % (CIRCLE_X - CIRCLE_R, CIRCLE_Y, CIRCLE_X + CIRCLE_R, CIRCLE_Y))
+print('<text x="%d" y="%d" class="compass">%s</text>' % (CIRCLE_X, CIRCLE_Y - CIRCLE_R - LBL_COMPASS_POINTS_SIZE, 'N'))
+print('<text x="%d" y="%d" class="compass">%s</text>' % (CIRCLE_X, CIRCLE_Y + CIRCLE_R + LBL_COMPASS_POINTS_SIZE, 'S'))
+print('<text x="%d" y="%d" class="compass">%s</text>' % (CIRCLE_X - CIRCLE_R - LBL_COMPASS_POINTS_SIZE, CIRCLE_Y + int(LBL_COMPASS_POINTS_SIZE*0.4), 'W'))
+print('<text x="%d" y="%d" class="compass">%s</text>' % (CIRCLE_X + CIRCLE_R + LBL_COMPASS_POINTS_SIZE, CIRCLE_Y + int(LBL_COMPASS_POINTS_SIZE*0.4), 'E'))
+# Lat/lon.
+POS_LAT = "%.5f" % (float(TPV['lat']),) if 'lat' in TPV else 'Unknown'
+POS_LON = "%.5f" % (float(TPV['lon']),) if 'lon' in TPV else 'Unknown'
+print('<text class="label label-center" x="%d" y="%d">Lat/Lon: %s %s</text>' % (POS_LBL_X, POS_LBL_Y, POS_LAT, POS_LON))
+# Satellites signal/noise ratio box.
+print('<rect class="box" x="%d" y="%d" rx="%d" ry="%d" width="%d" height="%d" />' % (BARS_BOX_X, BARS_BOX_Y - BARS_BOX_HEIGHT, BAR_RADIUS, BAR_RADIUS, BARS_BOX_WIDTH, BARS_BOX_HEIGHT))
+SS_LBL_X = int(BARS_BOX_X + STROKE_WIDTH * 1.5)
+SS_LBL_Y = int(BARS_BOX_Y - BARS_BOX_HEIGHT + LBL_FONT_SIZE + STROKE_WIDTH * 1.5)
+print('<text class="label label-snr" x="%d" y="%d">Satellites Signal/Noise Ratio</text>' % (SS_LBL_X, SS_LBL_Y))
+# Box for horizontal and vertical estimated error.
+if 'epx' in TPV and 'epy' in TPV:
+    EPX = float(TPV['epx'])
+    EPY = float(TPV['epy'])
+    EPH = math.sqrt(EPX**2 + EPY**2)
+elif 'eph' in TPV:
+    EPH = float(TPV['eph'])
+else:
+    EPH = ERR_MAX
+EPV = float(TPV['epv']) if 'epv' in TPV else ERR_MAX
+ERR_H, SIGN_H = cutoff_err(EPH, ERR_MIN, ERR_MAX)
+ERR_V, SIGN_V = cutoff_err(EPV, ERR_MIN, ERR_MAX)
+ERR_LBL_X = int(ERR_BOX_X - STROKE_WIDTH * 2.0)
+ERR_LBL_Y_OFFSET = STROKE_WIDTH + BAR_WIDTH * 0.6
+print('<rect class="box" x="%d" y="%d" rx="%d" ry="%d" width="%d" height="%d" />' % (ERR_BOX_X, ERR_BOX_Y - ERR_BOX_HEIGHT, BAR_RADIUS, BAR_RADIUS, ERR_BOX_WIDTH, ERR_BOX_HEIGHT))
+# Horizontal error.
+POS_X = ERR_BOX_X + STROKE_WIDTH
+POS_Y = ERR_BOX_Y - ERR_BOX_HEIGHT + int((BAR_SPACE - BAR_WIDTH) * 0.5)
+ERR_H_BAR_HEIGHT = int(ERR_H / ERR_MAX * ERR_BAR_HEIGHT_MAX)
+print('<text class="label label-err" x="%d" y="%d">Horizontal error %s%.1f m</text>' % (ERR_LBL_X, ERR_LBL_Y_OFFSET + POS_Y, SIGN_H, ERR_H))
+print('<rect class="bars bars-used" x="%d" y="%d" rx="%d" ry="%d" width="%d" height="%d" />' % (POS_X, POS_Y, BAR_RADIUS, BAR_RADIUS, ERR_H_BAR_HEIGHT, BAR_WIDTH))
+# Vertical error.
+POS_Y = POS_Y + BAR_SPACE
+ERR_V_BAR_HEIGHT = int(ERR_V / ERR_MAX * ERR_BAR_HEIGHT_MAX)
+print('<text class="label label-err" x="%d" y="%d">Vertical error %s%.1f m</text>' % (ERR_LBL_X, ERR_LBL_Y_OFFSET + POS_Y, SIGN_V, ERR_V))
+print('<rect class="bars bars-used" x="%d" y="%d" rx="%d" ry="%d" width="%d" height="%d" />' % (POS_X, POS_Y, BAR_RADIUS, BAR_RADIUS, ERR_V_BAR_HEIGHT, BAR_WIDTH))
+# Satellites and Signal/Noise bars.
+i = 0
+for prn in sorted(SATELLITES):
+    sat = SATELLITES[prn]
+    BAR_HEIGHT = int(BAR_HEIGHT_MAX * (float(sat['ss']) / SNR_MAX))
+    (sat_x, sat_y) = polar2cart(float(sat['az']), float(sat['el']), CIRCLE_R)
+    sat_x = int(CIRCLE_X + sat_x)
+    sat_y = int(CIRCLE_Y + sat_y)
+    rect_radius = int(SAT_HEIGHT * 0.25)
+    sat_rect_x = int(sat_x - (SAT_WIDTH) / 2)
+    sat_rect_y = int(sat_y - (SAT_HEIGHT) / 2)
+    sat_class = 'used' if sat['used'] else 'unused'
+    print('<rect class="sats sats-%s" x="%d" y="%d" width="%d" height="%d" rx="%d" ry="%d" />' % (sat_class, sat_rect_x, sat_rect_y, SAT_WIDTH, SAT_HEIGHT, rect_radius, rect_radius))
+    print('<text class="sats %s" x="%d" y="%d">%s</text>' % (sat_class, sat_x, sat_y + int(LBL_SAT_SIZE*0.4), sat['PRN']))
+    pos_x = int(BARS_BOX_X + (STROKE_WIDTH * 0.5) + (BAR_SPACE - BAR_WIDTH) * 0.5 + BAR_SPACE * i)
+    pos_y = int(BARS_BOX_Y - BAR_HEIGHT - (STROKE_WIDTH * 1.5))
+    print('<rect class="bars bars-%s" x="%d" y="%d" rx="%d" ry="%d" width="%d" height="%d" />' % (sat_class, pos_x, pos_y, BAR_RADIUS, BAR_RADIUS, BAR_WIDTH, BAR_HEIGHT))
+    x = int(pos_x + BAR_WIDTH * 0.5)
+    y = int(BARS_BOX_Y + (STROKE_WIDTH * 1.5))
+    print('<text class="label label-prn" x="%d" y="%d" transform="rotate(270, %d, %d)">%s</text>' % (x, y, x, y, sat['PRN']))
+    i = i + 1
+print('<text class="label label-center" x="%d" y="%d">%s</text>' % (TIMESTAMP_X, TIMESTAMP_Y, TIME_STR))
+print('</svg>')
+
+sys.exit(EXIT_CODE)
