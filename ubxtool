@@ -1108,15 +1108,24 @@ class ubx(object):
         return s
 
     def rxm_rawx(self, buf):
-        "UBX-RXM-RAWX decode"
+        """UBX-RXM-RAWX decode"""
         m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
         if 16 > m_len:
             return " Bad Length %s" % m_len
 
         # version not here before protver 18, I hope it is zero.
         u = struct.unpack_from('<dHbBBBBB', buf, 0)
         s = (' rcvTow %.3f week %u leapS %d numMeas %u recStat %#x'
-             ' version %u reserved1[2] %u %u' % u)
+             ' version %u\n'
+             ' reserved1[2] %#x %#x\n recStat: ' % u)
+        if 0x3 & u[4]:
+            if 1 & u[4]:
+                s += 'leapSec '
+            if 2 & u[4]:
+                s += 'clkReset '
 
         m_len -= 16
         i = 0
@@ -1519,6 +1528,11 @@ class ubx(object):
 
         header = b"\xb5\x62"
         return header + msg[:m_len + 4] + m_chk
+
+    def poll_rxm_rawx(self):
+        """Poll UBX-RXM-RAWX message"""
+        m_data = bytearray(0)
+        gps_model.gps_send(2, 0x15, m_data)
 
     def gps_send(self, m_class, m_id, m_data):
         "Build, and send, a message to GPS"
@@ -2000,6 +2014,9 @@ class ubx(object):
         # UBX-CFG-PRT, poll I/O port number
         "PRT": {"command": send_cfg_prt,
                 "help": "UBX-CFG-PRT poll I/O port settings"},
+        # UBX-CFG-PRT, poll I/O port number
+        "RXM-RAWX": {"command": poll_rxm_rawx,
+                "help": "UBX-RXM-RAWX poll raw measurement data"},
         # UBX-CFG-CFG reset config
         "RESET": {"command": send_cfg_cfg,
                   "help": "UBX-CFG-CFG reset config to defaults",

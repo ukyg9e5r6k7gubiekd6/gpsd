@@ -240,6 +240,12 @@ after the GPS acknowledges the command, unless the -W is given.
        </listitem>
       </varlistentry>
       <varlistentry>
+       <term>RXM-RAWX</term>
+       <listitem>
+        <para>Poll UBX-RXM-RAWX message.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
        <term>RESET</term>
        <listitem>
         <para>Reset configuration to defaults (UBX-CFG-CFG).</para>
