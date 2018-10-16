@@ -205,55 +205,92 @@ print('''<?xml version="1.0" encoding="UTF-8" ?>
    height="%d">''' % (IMG_WIDTH, IMG_HEIGHT))
 
 # NOTICE: librsvg v.2.40 has a bug with "chain" multiple class selectors:
-# it does not handle a selector like text.label.title and a tag class="label title".
+# it does not handle a selector like text.label.title and a
+# tag class="label title".
 print('<style type="text/css">')
 # Labels.
-print('    text              { font-family: Verdana,Arial,Helvetica,sans-serif; font-weight: bold;}')
-print('    text.label        { fill: %s; font-size: %dpx; }' % (LBL_FONT_COLOR, LBL_FONT_SIZE))
-print('    text.label-title  { font-size: %dpx; text-anchor: middle; }' % (int(LBL_FONT_SIZE * 1.4),))
-print('    text.label-prn    { font-size: %dpx; text-anchor: end; }' % (LBL_SAT_BAR_SIZE,))
+print('    text              '
+      '{ font-family: Verdana,Arial,Helvetica,sans-serif; font-weight: bold;}')
+print('    text.label        { fill: %s; font-size: %dpx; }' %
+      (LBL_FONT_COLOR, LBL_FONT_SIZE))
+print('    text.label-title  { font-size: %dpx; text-anchor: middle; }' %
+      (int(LBL_FONT_SIZE * 1.4),))
+print('    text.label-prn    { font-size: %dpx; text-anchor: end; }' %
+      (LBL_SAT_BAR_SIZE,))
 print('    text.label-center { text-anchor: middle; }')
 print('    text.label-snr    { text-anchor: start; }')
 print('    text.label-err    { text-anchor: end; }')
 # Compass dial.
-print('    circle.compass    { stroke: %s; stroke-width: %d; fill-opacity: 0; }' % (COMPASS_STROKE_COLOR, STROKE_WIDTH,))
-print('    line.compass      { stroke: %s; stroke-width: %d; }' % (COMPASS_STROKE_COLOR, STROKE_WIDTH))
-print('    text.compass      { fill: %s; font-size: %dpx; text-anchor: middle; }' % (DIAL_POINT_COLOR, LBL_COMPASS_POINTS_SIZE))
+print('    circle.compass    '
+      '{ stroke: %s; stroke-width: %d; fill-opacity: 0; }' %
+      (COMPASS_STROKE_COLOR, STROKE_WIDTH,))
+print('    line.compass      { stroke: %s; stroke-width: %d; }' %
+      (COMPASS_STROKE_COLOR, STROKE_WIDTH))
+print('    text.compass      '
+      '{ fill: %s; font-size: %dpx; text-anchor: middle; }' %
+      (DIAL_POINT_COLOR, LBL_COMPASS_POINTS_SIZE))
 # Satellites constellation.
-print('    rect.sats         { stroke-width: %d; fill-opacity: 1.0; }' % (STROKE_WIDTH,))
-print('    rect.sats-used    { stroke: %s; fill: %s; }' % (SAT_USED_STROKE_COLOR, SAT_USED_FILL_COLOR))
-print('    rect.sats-unused  { stroke: %s; fill: %s; }' % (SAT_UNUSED_STROKE_COLOR, SAT_UNUSED_FILL_COLOR))
-print('    text.sats         { font-size: %dpx; text-anchor: middle; }' % (LBL_SAT_SIZE,))
+print('    rect.sats         { stroke-width: %d; fill-opacity: 1.0; }' %
+      (STROKE_WIDTH,))
+print('    rect.sats-used    { stroke: %s; fill: %s; }' %
+      (SAT_USED_STROKE_COLOR, SAT_USED_FILL_COLOR))
+print('    rect.sats-unused  { stroke: %s; fill: %s; }' %
+      (SAT_UNUSED_STROKE_COLOR, SAT_UNUSED_FILL_COLOR))
+print('    text.sats         { font-size: %dpx; text-anchor: middle; }' %
+      (LBL_SAT_SIZE,))
 print('    text.sats-used    { fill: %s; }' % (SAT_USED_TEXT_COLOR,))
 print('    text.sats-unused  { fill: %s; }' % (SAT_UNUSED_TEXT_COLOR,))
 # Box containing bars graph.
-print('    rect.box          { fill: %s; stroke: %s; stroke-width: %d; }' % (BARS_AREA_FILL_COLOR, BARS_AREA_STROKE_COLOR, STROKE_WIDTH))
+print('    rect.box          { fill: %s; stroke: %s; stroke-width: %d; }' %
+      (BARS_AREA_FILL_COLOR, BARS_AREA_STROKE_COLOR, STROKE_WIDTH))
 # Graph bars.
-print('    rect.bars         { stroke-width: %d; opacity: 1.0; }' % (STROKE_WIDTH,))
-print('    rect.bars-used    { stroke: %s; fill: %s; }' % (BAR_USED_STROKE_COLOR, BAR_USED_FILL_COLOR))
-print('    rect.bars-unused  { stroke: %s; fill: %s; }' % (BAR_UNUSED_STROKE_COLOR, BAR_UNUSED_FILL_COLOR))
+print('    rect.bars         { stroke-width: %d; opacity: 1.0; }' %
+      (STROKE_WIDTH,))
+print('    rect.bars-used    { stroke: %s; fill: %s; }' %
+      (BAR_USED_STROKE_COLOR, BAR_USED_FILL_COLOR))
+print('    rect.bars-unused  { stroke: %s; fill: %s; }' %
+      (BAR_UNUSED_STROKE_COLOR, BAR_UNUSED_FILL_COLOR))
 print('</style>')
 # Background and title.
-print('<rect width="100%%" height="100%%" fill="%s" />' % (BACKGROUND_COLOR,))
-print('<text class="label label-title" x="%d" y="%d">Sky View of GPS Satellites</text>' % (int(IMG_WIDTH * 0.5), int(LBL_FONT_SIZE * 1.5)))
+print('<rect width="100%%" height="100%%" fill="%s" />' %
+      (BACKGROUND_COLOR,))
+print('<text class="label label-title" x="%d" y="%d">'
+      'Sky View of GPS Satellites</text>' %
+      (int(IMG_WIDTH * 0.5), int(LBL_FONT_SIZE * 1.5)))
 # Sky circle with cardinal points.
-print('<circle class="compass" cx="%d" cy="%d" r="%d" />' % (CIRCLE_X, CIRCLE_Y, CIRCLE_R))
-print('<circle class="compass" cx="%d" cy="%d" r="%d" />' % (CIRCLE_X, CIRCLE_Y, int(CIRCLE_R / 2)))
-print('<line class="compass" x1="%d" y1="%d" x2="%d" y2="%d" />' % (CIRCLE_X, CIRCLE_Y - CIRCLE_R, CIRCLE_X, CIRCLE_Y + CIRCLE_R))
-print('<line class="compass" x1="%d" y1="%d" x2="%d" y2="%d" />' % (CIRCLE_X - CIRCLE_R, CIRCLE_Y, CIRCLE_X + CIRCLE_R, CIRCLE_Y))
-print('<text x="%d" y="%d" class="compass">%s</text>' % (CIRCLE_X, CIRCLE_Y - CIRCLE_R - LBL_COMPASS_POINTS_SIZE, 'N'))
-print('<text x="%d" y="%d" class="compass">%s</text>' % (CIRCLE_X, CIRCLE_Y + CIRCLE_R + LBL_COMPASS_POINTS_SIZE, 'S'))
-print('<text x="%d" y="%d" class="compass">%s</text>' % (CIRCLE_X - CIRCLE_R - LBL_COMPASS_POINTS_SIZE, CIRCLE_Y + int(LBL_COMPASS_POINTS_SIZE*0.4), 'W'))
-print('<text x="%d" y="%d" class="compass">%s</text>' % (CIRCLE_X + CIRCLE_R + LBL_COMPASS_POINTS_SIZE, CIRCLE_Y + int(LBL_COMPASS_POINTS_SIZE*0.4), 'E'))
+print('<circle class="compass" cx="%d" cy="%d" r="%d" />' %
+      (CIRCLE_X, CIRCLE_Y, CIRCLE_R))
+print('<circle class="compass" cx="%d" cy="%d" r="%d" />' %
+      (CIRCLE_X, CIRCLE_Y, int(CIRCLE_R / 2)))
+print('<line class="compass" x1="%d" y1="%d" x2="%d" y2="%d" />' %
+      (CIRCLE_X, CIRCLE_Y - CIRCLE_R, CIRCLE_X, CIRCLE_Y + CIRCLE_R))
+print('<line class="compass" x1="%d" y1="%d" x2="%d" y2="%d" />' %
+      (CIRCLE_X - CIRCLE_R, CIRCLE_Y, CIRCLE_X + CIRCLE_R, CIRCLE_Y))
+print('<text x="%d" y="%d" class="compass">%s</text>' %
+      (CIRCLE_X, CIRCLE_Y - CIRCLE_R - LBL_COMPASS_POINTS_SIZE, 'N'))
+print('<text x="%d" y="%d" class="compass">%s</text>' %
+      (CIRCLE_X, CIRCLE_Y + CIRCLE_R + LBL_COMPASS_POINTS_SIZE, 'S'))
+print('<text x="%d" y="%d" class="compass">%s</text>' %
+      (CIRCLE_X - CIRCLE_R - LBL_COMPASS_POINTS_SIZE,
+       CIRCLE_Y + int(LBL_COMPASS_POINTS_SIZE*0.4), 'W'))
+print('<text x="%d" y="%d" class="compass">%s</text>' %
+      (CIRCLE_X + CIRCLE_R + LBL_COMPASS_POINTS_SIZE,
+       CIRCLE_Y + int(LBL_COMPASS_POINTS_SIZE*0.4), 'E'))
 # Lat/lon.
 POS_LAT = "%.5f" % (float(TPV['lat']),) if 'lat' in TPV else 'Unknown'
 POS_LON = "%.5f" % (float(TPV['lon']),) if 'lon' in TPV else 'Unknown'
-print('<text class="label label-center" x="%d" y="%d">Lat/Lon: %s %s</text>' % (POS_LBL_X, POS_LBL_Y, POS_LAT, POS_LON))
+print('<text class="label label-center" x="%d" y="%d">Lat/Lon: %s %s</text>' %
+      (POS_LBL_X, POS_LBL_Y, POS_LAT, POS_LON))
 # Satellites signal/noise ratio box.
-print('<rect class="box" x="%d" y="%d" rx="%d" ry="%d" width="%d" height="%d" />' % (BARS_BOX_X, BARS_BOX_Y - BARS_BOX_HEIGHT, BAR_RADIUS, BAR_RADIUS, BARS_BOX_WIDTH, BARS_BOX_HEIGHT))
+print('<rect class="box" x="%d" y="%d" rx="%d" ry="%d" '
+      'width="%d" height="%d" />' %
+      (BARS_BOX_X, BARS_BOX_Y - BARS_BOX_HEIGHT, BAR_RADIUS,
+       BAR_RADIUS, BARS_BOX_WIDTH, BARS_BOX_HEIGHT))
 SS_LBL_X = int(BARS_BOX_X + STROKE_WIDTH * 1.5)
-SS_LBL_Y = int(BARS_BOX_Y - BARS_BOX_HEIGHT + LBL_FONT_SIZE + STROKE_WIDTH * 1.5)
-print('<text class="label label-snr" x="%d" y="%d">Satellites Signal/Noise Ratio</text>' % (SS_LBL_X, SS_LBL_Y))
+SS_LBL_Y = int(BARS_BOX_Y - BARS_BOX_HEIGHT + LBL_FONT_SIZE +
+               STROKE_WIDTH * 1.5)
+print('<text class="label label-snr" x="%d" y="%d">'
+      'Satellites Signal/Noise Ratio</text>' % (SS_LBL_X, SS_LBL_Y))
 # Box for horizontal and vertical estimated error.
 if 'epx' in TPV and 'epy' in TPV:
     EPX = float(TPV['epx'])
@@ -268,18 +305,29 @@ ERR_H, SIGN_H = cutoff_err(EPH, ERR_MIN, ERR_MAX)
 ERR_V, SIGN_V = cutoff_err(EPV, ERR_MIN, ERR_MAX)
 ERR_LBL_X = int(ERR_BOX_X - STROKE_WIDTH * 2.0)
 ERR_LBL_Y_OFFSET = STROKE_WIDTH + BAR_WIDTH * 0.6
-print('<rect class="box" x="%d" y="%d" rx="%d" ry="%d" width="%d" height="%d" />' % (ERR_BOX_X, ERR_BOX_Y - ERR_BOX_HEIGHT, BAR_RADIUS, BAR_RADIUS, ERR_BOX_WIDTH, ERR_BOX_HEIGHT))
+print('<rect class="box" x="%d" y="%d" rx="%d" ry="%d" '
+      'width="%d" height="%d" />' %
+      (ERR_BOX_X, ERR_BOX_Y - ERR_BOX_HEIGHT, BAR_RADIUS,
+       BAR_RADIUS, ERR_BOX_WIDTH, ERR_BOX_HEIGHT))
 # Horizontal error.
 POS_X = ERR_BOX_X + STROKE_WIDTH
 POS_Y = ERR_BOX_Y - ERR_BOX_HEIGHT + int((BAR_SPACE - BAR_WIDTH) * 0.5)
 ERR_H_BAR_HEIGHT = int(ERR_H / ERR_MAX * ERR_BAR_HEIGHT_MAX)
-print('<text class="label label-err" x="%d" y="%d">Horizontal error %s%.1f m</text>' % (ERR_LBL_X, ERR_LBL_Y_OFFSET + POS_Y, SIGN_H, ERR_H))
-print('<rect class="bars bars-used" x="%d" y="%d" rx="%d" ry="%d" width="%d" height="%d" />' % (POS_X, POS_Y, BAR_RADIUS, BAR_RADIUS, ERR_H_BAR_HEIGHT, BAR_WIDTH))
+print('<text class="label label-err" x="%d" y="%d">'
+      'Horizontal error %s%.1f m</text>' %
+      (ERR_LBL_X, ERR_LBL_Y_OFFSET + POS_Y, SIGN_H, ERR_H))
+print('<rect class="bars bars-used" x="%d" y="%d" rx="%d" '
+      ' ry="%d" width="%d" height="%d" />' %
+      (POS_X, POS_Y, BAR_RADIUS, BAR_RADIUS, ERR_H_BAR_HEIGHT, BAR_WIDTH))
 # Vertical error.
 POS_Y = POS_Y + BAR_SPACE
 ERR_V_BAR_HEIGHT = int(ERR_V / ERR_MAX * ERR_BAR_HEIGHT_MAX)
-print('<text class="label label-err" x="%d" y="%d">Vertical error %s%.1f m</text>' % (ERR_LBL_X, ERR_LBL_Y_OFFSET + POS_Y, SIGN_V, ERR_V))
-print('<rect class="bars bars-used" x="%d" y="%d" rx="%d" ry="%d" width="%d" height="%d" />' % (POS_X, POS_Y, BAR_RADIUS, BAR_RADIUS, ERR_V_BAR_HEIGHT, BAR_WIDTH))
+print('<text class="label label-err" x="%d" y="%d">'
+      'Vertical error %s%.1f m</text>' %
+      (ERR_LBL_X, ERR_LBL_Y_OFFSET + POS_Y, SIGN_V, ERR_V))
+print('<rect class="bars bars-used" x="%d" y="%d" rx="%d" '
+      ' ry="%d" width="%d" height="%d" />' %
+      (POS_X, POS_Y, BAR_RADIUS, BAR_RADIUS, ERR_V_BAR_HEIGHT, BAR_WIDTH))
 # Satellites and Signal/Noise bars.
 i = 0
 for prn in sorted(SATELLITES):
@@ -292,16 +340,27 @@ for prn in sorted(SATELLITES):
     sat_rect_x = int(sat_x - (SAT_WIDTH) / 2)
     sat_rect_y = int(sat_y - (SAT_HEIGHT) / 2)
     sat_class = 'used' if sat['used'] else 'unused'
-    print('<rect class="sats sats-%s" x="%d" y="%d" width="%d" height="%d" rx="%d" ry="%d" />' % (sat_class, sat_rect_x, sat_rect_y, SAT_WIDTH, SAT_HEIGHT, rect_radius, rect_radius))
-    print('<text class="sats %s" x="%d" y="%d">%s</text>' % (sat_class, sat_x, sat_y + int(LBL_SAT_SIZE*0.4), sat['PRN']))
-    pos_x = int(BARS_BOX_X + (STROKE_WIDTH * 0.5) + (BAR_SPACE - BAR_WIDTH) * 0.5 + BAR_SPACE * i)
+    print('<rect class="sats sats-%s" x="%d" y="%d" width="%d" '
+          ' height="%d" rx="%d" ry="%d" />' %
+          (sat_class, sat_rect_x, sat_rect_y, SAT_WIDTH, SAT_HEIGHT,
+           rect_radius, rect_radius))
+    print('<text class="sats %s" x="%d" y="%d">%s</text>' %
+          (sat_class, sat_x, sat_y + int(LBL_SAT_SIZE*0.4), sat['PRN']))
+    pos_x = (int(BARS_BOX_X + (STROKE_WIDTH * 0.5) +
+             (BAR_SPACE - BAR_WIDTH) * 0.5 + BAR_SPACE * i))
     pos_y = int(BARS_BOX_Y - BAR_HEIGHT - (STROKE_WIDTH * 1.5))
-    print('<rect class="bars bars-%s" x="%d" y="%d" rx="%d" ry="%d" width="%d" height="%d" />' % (sat_class, pos_x, pos_y, BAR_RADIUS, BAR_RADIUS, BAR_WIDTH, BAR_HEIGHT))
+    print('<rect class="bars bars-%s" x="%d" y="%d" rx="%d" ry="%d" '
+          'width="%d" height="%d" />' %
+          (sat_class, pos_x, pos_y, BAR_RADIUS, BAR_RADIUS,
+           BAR_WIDTH, BAR_HEIGHT))
     x = int(pos_x + BAR_WIDTH * 0.5)
     y = int(BARS_BOX_Y + (STROKE_WIDTH * 1.5))
-    print('<text class="label label-prn" x="%d" y="%d" transform="rotate(270, %d, %d)">%s</text>' % (x, y, x, y, sat['PRN']))
+    print('<text class="label label-prn" x="%d" y="%d" '
+          'transform="rotate(270, %d, %d)">%s</text>' %
+          (x, y, x, y, sat['PRN']))
     i = i + 1
-print('<text class="label label-center" x="%d" y="%d">%s</text>' % (TIMESTAMP_X, TIMESTAMP_Y, TIME_STR))
+print('<text class="label label-center" x="%d" y="%d">%s</text>' %
+      (TIMESTAMP_X, TIMESTAMP_Y, TIME_STR))
 print('</svg>')
 
 sys.exit(EXIT_CODE)
