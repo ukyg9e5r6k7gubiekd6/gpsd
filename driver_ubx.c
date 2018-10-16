@@ -805,6 +805,60 @@ static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf)
 }
 
 /*
+ * Multi-GNSS Raw measurement Data -- UBX-RXM-RAWX
+ */
+static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
+                               const unsigned char *buf,
+                               size_t data_len)
+{
+    double rcvTow;
+    uint16_t week;
+    int8_t leapS;
+    uint8_t numMeas;
+    uint8_t recStat;
+
+    if (16 > data_len) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "Invalid RXM-RAWX message, payload len %zd", data_len);
+	return 0;
+    }
+
+    rcvTow = getled64((const char *)buf, 0);
+    week = getleu16(buf, 8);
+    leapS = getsb(buf, 10);
+    numMeas = getub(buf, 11);
+    recStat = getub(buf, 12);
+
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "UBX_RXM_RAWX: rcvTow %f week %u leapS %d numMeas %u recStat %d\n",
+	     rcvTow, week, leapS, numMeas, recStat);
+
+    for (int i = 0; i < numMeas; i++) {
+        int off = 32 * i;
+        double prMes = getled64((const char *)buf, off + 16);
+        double cpMes = getled64((const char *)buf, off + 24);
+        double doMes = getlef32((const char *)buf, off + 32);
+        uint8_t gnssId = getub(buf, off + 36);
+        uint8_t svId = getub(buf, off + 37);
+        uint8_t freqId = getub(buf, off + 39);
+        uint16_t locktime = getleu16(buf, off + 40);
+        uint8_t cno = getub(buf, off + 42);
+        uint8_t prStdev = getub(buf, off + 43);
+        uint8_t cpStdev = getub(buf, off + 44);
+        uint8_t doStdev = getub(buf, off + 45);
+        uint8_t trkStat = getub(buf, off + 46);
+	gpsd_log(&session->context->errout, LOG_DATA,
+		 "%u:%u:%u prMes %f cpMes %f doMes %f locktime %u\n"
+		 "cno %u prStdev %u cpStdev %u doStdev %u rtkStat %u\n",
+		 gnssId, svId, freqId, prMes, cpMes, doMes, locktime,
+		 cno, prStdev, cpStdev, doStdev, trkStat);
+    }
+
+    /* TODO: no place to put this data, yet */
+    return 0;
+}
+
+/*
  * Raw Subframes - UBX-RXM-SFRB
  */
 static gps_mask_t ubx_rxm_sfrb(struct gps_device_t *session, unsigned char *buf)
@@ -825,7 +879,8 @@ static gps_mask_t ubx_rxm_sfrb(struct gps_device_t *session, unsigned char *buf)
     return gpsd_interpret_subframe(session, svid, words);
 }
 
-static void ubx_msg_inf(struct gps_device_t *session, unsigned char *buf, size_t data_len)
+static void ubx_msg_inf(struct gps_device_t *session, unsigned char *buf,
+                        size_t data_len)
 {
     unsigned short msgid;
     static char txtbuf[MAX_PACKET_LENGTH];
@@ -1111,7 +1166,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_RAW\n");
 	break;
     case UBX_RXM_RAWX:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_RAWX\n");
+	mask = ubx_rxm_rawx(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_RXM_RLM:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_RXM_RLM\n");
