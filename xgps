@@ -263,6 +263,8 @@ class SkyView(Gtk.DrawingArea):
 
     def set_color(self, spec):
         "Set foreground color for drawing."
+
+        # Gdk.color_parse() deprecated in GDK 3.14
         gdkcolor = Gdk.color_parse(spec)
         r = gdkcolor.red / 65535.0
         g = gdkcolor.green / 65535.0
@@ -443,13 +445,16 @@ class SkyView(Gtk.DrawingArea):
 
             (x, y) = self.pol2cart(sat.az, sat.el)
             # colorize by signal to noise ratio
-            if sat.ss < 10:
+            # RINEX 3 uses 9 steps: 1 to 9.  Corresponding to
+            # <12, 12-17, 18-23, 24-29, 30-35, 36-41, 42-47, 48-53, >= 54
+            if sat.ss < 12:
                 self.set_color("Gray")
             elif sat.ss < 30:
                 self.set_color("Red")
-            elif sat.ss < 35:
+            elif sat.ss < 36:
+                # RINEX 3 says 30 is "threshold for good tracking"
                 self.set_color("Yellow")
-            elif sat.ss < 40:
+            elif sat.ss < 42:
                 self.set_color("Green3")
             else:
                 self.set_color("Green1")
