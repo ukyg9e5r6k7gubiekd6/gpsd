@@ -261,14 +261,14 @@ class SkyView(Gtk.DrawingArea):
         self.center_y = y
         self.radius = r
 
-    def set_color(self, spec):
-        "Set foreground color for drawing."
+    def set_color(self, r, g, b):
+        """Set foreground color for drawing. rgb: 0 to 255"""
 
         # Gdk.color_parse() deprecated in GDK 3.14
-        gdkcolor = Gdk.color_parse(spec)
-        r = gdkcolor.red / 65535.0
-        g = gdkcolor.green / 65535.0
-        b = gdkcolor.blue / 65535.0
+        # gdkcolor = Gdk.color_parse(spec)
+        r = r / 255.0
+        g = g / 255.0
+        b = b / 255.0
         self.cr.set_source_rgb(r, g, b)
 
     def draw_circle(self, x, y, radius, filled=False):
@@ -448,16 +448,16 @@ class SkyView(Gtk.DrawingArea):
             # RINEX 3 uses 9 steps: 1 to 9.  Corresponding to
             # <12, 12-17, 18-23, 24-29, 30-35, 36-41, 42-47, 48-53, >= 54
             if sat.ss < 12:
-                self.set_color("Gray")
+                self.set_color(190, 190, 190)      # gray
             elif sat.ss < 30:
-                self.set_color("Red")
+                self.set_color(255, 0, 0)          # red
             elif sat.ss < 36:
                 # RINEX 3 says 30 is "threshold for good tracking"
-                self.set_color("Yellow")
+                self.set_color(255, 255, 0)        # yellow
             elif sat.ss < 42:
-                self.set_color("Green3")
+                self.set_color(0, 180, 0)          # green
             else:
-                self.set_color("Green1")
+                self.set_color(0, 255, 0)          # green1
 
             # shape by constellation
             constellation = gnssid_str(sat)
