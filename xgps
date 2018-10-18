@@ -455,9 +455,9 @@ class SkyView(Gtk.DrawingArea):
                 # RINEX 3 says 30 is "threshold for good tracking"
                 self.set_color(255, 255, 0)        # yellow
             elif sat.ss < 42:
-                self.set_color(0, 180, 0)          # green
+                self.set_color(0, 205, 0)          # green3
             else:
-                self.set_color(0, 255, 0)          # green1
+                self.set_color(0, 255, 180)        # green and some blue
 
             # shape by constellation
             constellation = gnssid_str(sat)
