@@ -678,9 +678,6 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
         unsigned char snr = getub(buf, off + 4);
 	bool used = (bool)(getub(buf, off + 2) & 0x01);
 
-	if (0 == snr)
-	    continue;		/* skip zero SNR */
-
         /* fit into gnssid:svid */
 	if (0 == PRN) {
             /* skip 0 PRN */
