@@ -849,7 +849,7 @@ class Base(object):
         self.satbox.add(viewframe)
         self.skyview = SkyView(self.rotate)
         try:
-            # mouseovers fail with remoge DISPLAY
+            # mouseovers fail with remote DISPLAY
             self.skyview.set_property('events',
                                       Gdk.EventMask.POINTER_MOTION_MASK)
         except NotImplementedError:
