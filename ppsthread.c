@@ -841,7 +841,7 @@ static void *gpsd_ppsmonitor(void *arg)
             /* direction of next to last edge 1 = assert, 0 = clear */
             int prev_edge = 0;
 
-	    /* get last and previsou edges, in order
+	    /* get last and previous edges, in order
              * optionally wait for goood data
              */
 	    ret = get_edge_rfc2783(&inner_context,
