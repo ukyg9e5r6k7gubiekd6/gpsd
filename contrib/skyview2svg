@@ -10,6 +10,7 @@ example usage:
 
 For GPSD JSON format see: http://www.catb.org/gpsd/gpsd_json.html
 """
+# SPDX-License-Identifier: BSD-2-clause
 # This code runs compatibly under Python 2 and 3.x for x >= 2.
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
@@ -23,7 +24,7 @@ __author__ = "Niccolo Rigacci"
 __copyright__ = "Copyright 2018 Niccolo Rigacci <niccolo@rigacci.org>"
 __license__ = "BSD-2-clause"
 __email__ = "niccolo@rigacci.org"
-__version__ = "0.2.1"
+__version__ = "3.18.1"
 
 
 # ------------------------------------------------------------------------
