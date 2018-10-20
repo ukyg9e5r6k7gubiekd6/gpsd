@@ -54,7 +54,7 @@ except ImportError:
                      PROG_NAME)
     sys.exit(2)
 
-gps_version = '3.18.1'
+gps_version = '3.19-dev'
 if gps.__version__ != gps_version:
     sys.stderr.write("%s: ERROR: need gps module version %s, got %s\n" %
                      (PROG_NAME, gps_version, gps.__version__))

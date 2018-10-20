@@ -23,7 +23,7 @@ except ImportError:
           sys.exc_info()[0])
     sys.exit(1)
 
-gps_version = '3.18.1'
+gps_version = '3.19-dev'
 
 
 class ntpOffset(object):
