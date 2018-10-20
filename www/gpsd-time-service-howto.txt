@@ -1098,7 +1098,7 @@ throw off the time measurements to servers on the local lan.
 On a RaspberryPi ARP has been shown to impact the remote offset by up to
 600 uSec in some rare cases.
 
-The solution is the same for both ntpd and chronyd, add the "minpoll 5"
+The solution is the same for both ntpd and chronyd, add the "maxpoll 5"
 command to any 'server" or "peer directive.  This will cause the maximum
 polling period to be 32 seconds, well under the 60 second ARP timeout.
 
