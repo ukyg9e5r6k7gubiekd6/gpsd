@@ -1901,13 +1901,13 @@ struct dop_t {
 
 struct rawdata_t {
     /* raw measurement data */
-    double codephase[MAXCHANNELS];	/* meters */
-    double carrierphase[MAXCHANNELS];	/* meters */
-    double pseudorange[MAXCHANNELS];	/* meters */
-    double deltarange[MAXCHANNELS];	/* meters/sec */
-    double doppler[MAXCHANNELS];	/* Hz */
-    double mtime[MAXCHANNELS];		/* sec */
-    unsigned satstat[MAXCHANNELS];	/* tracking status */
+    double codephase;	/* meters */
+    double carrierphase;	/* meters */
+    double pseudorange;	/* meters */
+    double deltarange;	/* meters/sec */
+    double doppler;	/* Hz */
+    double mtime;		/* sec */
+    unsigned satstat;	/* tracking status */
 #define SAT_ACQUIRED	0x01		/* satellite acquired */
 #define SAT_CODE_TRACK	0x02		/* code-tracking loop acquired */
 #define SAT_CARR_TRACK	0x04		/* carrier-tracking loop acquired */
@@ -2100,7 +2100,7 @@ struct gps_data_t {
 	struct ais_t ais;
 	struct attitude_t attitude;
         struct navdata_t navdata;
-	struct rawdata_t raw;
+	struct rawdata_t raw[MAXCHANNELS];
 	struct gst_t gst;
 	struct oscillator_t osc;
 	/* "artificial" structures for various protocol responses */

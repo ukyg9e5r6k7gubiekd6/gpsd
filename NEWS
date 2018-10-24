@@ -1,6 +1,7 @@
 			GPSD project news
 
 3.19: not released yet
+  Rearrange rawdata_t.  Bump the API because gps_data_t changed.
 
 3.18.1: 2018-10-19 (Gary E. Miller <gem@rellim.com>)
   Fix some installation issues.

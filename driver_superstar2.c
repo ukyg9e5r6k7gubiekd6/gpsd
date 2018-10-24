@@ -297,18 +297,23 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
 	return 0;
     }
     t = getled64((char *)buf, 7);		/* measurement time */
+    /* this is so we can tell which never got set */
+    for (i = 0; i < MAXCHANNELS; i++)
+        session->gpsdata.raw[i].mtime = 0;
     for (i = 0; i < n; i++) {
 	unsigned long ul;
-	session->gpsdata.raw.mtime[i] = t;
-	session->gpsdata.skyview[i].PRN = (short)(getub(buf, 11 * i + 15) & 0x1f);
-	session->gpsdata.skyview[i].ss = (double)getub(buf, 11 * i * 15 + 1) / 4.0;
-	session->gpsdata.raw.codephase[i] =
+	session->gpsdata.raw[i].mtime = t;
+	session->gpsdata.skyview[i].PRN = \
+            (short)(getub(buf, 11 * i + 15) & 0x1f);
+	session->gpsdata.skyview[i].ss = \
+            (double)getub(buf, 11 * i * 15 + 1) / 4.0;
+	session->gpsdata.raw[i].codephase =
 	    (double)getleu32(buf, 11 * i * 15 + 2);
 	ul = (unsigned long)getleu32(buf, 11 * i * 15 + 6);
 
-	session->gpsdata.raw.satstat[i] = (unsigned int)(ul & 0x03L);
-	session->gpsdata.raw.carrierphase[i] = (double)((ul >> 2) & 0x03ffL);
-	session->gpsdata.raw.pseudorange[i] = (double)(ul >> 12);
+	session->gpsdata.raw[i].satstat = (unsigned int)(ul & 0x03L);
+	session->gpsdata.raw[i].carrierphase = (double)((ul >> 2) & 0x03ffL);
+	session->gpsdata.raw[i].pseudorange = (double)(ul >> 12);
     }
 
     mask |= RAW_IS;

@@ -55,7 +55,7 @@ from leapsecond import conditional_leapsecond_fetch
 gpsd_version = "3.19-dev"
 
 # client library version
-libgps_version_current = 24
+libgps_version_current = 25
 libgps_version_revision = 0
 libgps_version_age = 0
 

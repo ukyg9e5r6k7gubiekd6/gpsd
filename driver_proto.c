@@ -260,16 +260,19 @@ _proto__msg_raw(struct gps_device_t *session, unsigned char *buf, size_t data_le
 	return 0;
     }
 
+    /* this is so we can tell which never got set */
+    for (i = 0; i < MAXCHANNELS; i++)
+        session->gpsdata.raw[i].mtime = 0;
     for (i = 0; i < n; i++){
 	session->gpsdata.PRN[i] = GET_PRN();
 	session->gpsdata.ss[i] = GET_SIGNAL()
-	session->gpsdata.raw.satstat[i] = GET_FLAGS();
-	session->gpsdata.raw.pseudorange[i] = GET_PSEUDORANGE();
-	session->gpsdata.raw.doppler[i] = GET_DOPPLER();
-	session->gpsdata.raw.carrierphase[i] = GET_CARRIER_PHASE();
-	session->gpsdata.raw.mtime[i] = GET_MEASUREMENT_TIME();
-	session->gpsdata.raw.codephase[i] = GET_CODE_PHASE();
-	session->gpsdata.raw.deltarange[i] = GET_DELTA_RANGE();
+	session->gpsdata.raw[i].satstat = GET_FLAGS();
+	session->gpsdata.raw[i].pseudorange = GET_PSEUDORANGE();
+	session->gpsdata.raw[i].doppler = GET_DOPPLER();
+	session->gpsdata.raw[i].carrierphase = GET_CARRIER_PHASE();
+	session->gpsdata.raw[i].mtime = GET_MEASUREMENT_TIME();
+	session->gpsdata.raw[i].codephase = GET_CODE_PHASE();
+	session->gpsdata.raw[i].deltarange = GET_DELTA_RANGE();
     }
     return RAW_IS;
 }

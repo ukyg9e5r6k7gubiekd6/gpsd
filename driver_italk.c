@@ -260,17 +260,25 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
 						 (unsigned short int)getleu16((char *)buf, 7 + 8),
 	(unsigned int)getleu32(buf, 7 + 38) / 1000.0);
 
+    /* this is so we can tell which never got set */
+    for (i = 0; i < MAXCHANNELS; i++)
+        session->gpsdata.raw[i].mtime = 0;
     for (i = 0; i < n; i++){
-	session->gpsdata.skyview[i].PRN = getleu16(buf, 7 + 26 + (i*36)) & 0xff;
-	session->gpsdata.skyview[i].ss = getleu16(buf, 7 + 26 + (i*36 + 2)) & 0x3f;
-	session->gpsdata.raw.satstat[i] = getleu32(buf, 7 + 26 + (i*36 + 4));
-	session->gpsdata.raw.pseudorange[i] = getled64((char *)buf, 7 + 26 + (i*36 + 8));
-	session->gpsdata.raw.doppler[i] = getled64((char *)buf, 7 + 26 + (i*36 + 16));
-	session->gpsdata.raw.carrierphase[i] = getleu16(buf, 7 + 26 + (i*36 + 28));
+	session->gpsdata.skyview[i].PRN = \
+            getleu16(buf, 7 + 26 + (i*36)) & 0xff;
+	session->gpsdata.skyview[i].ss = \
+            getleu16(buf, 7 + 26 + (i*36 + 2)) & 0x3f;
+	session->gpsdata.raw[i].satstat = getleu32(buf, 7 + 26 + (i*36 + 4));
+	session->gpsdata.raw[i].pseudorange = \
+            getled64((char *)buf, 7 + 26 + (i*36 + 8));
+	session->gpsdata.raw[i].doppler = \
+            getled64((char *)buf, 7 + 26 + (i*36 + 16));
+	session->gpsdata.raw[i].carrierphase = \
+            getleu16(buf, 7 + 26 + (i*36 + 28));
 
-	session->gpsdata.raw.mtime[i] = session->newdata.time;
-	session->gpsdata.raw.codephase[i] = NAN;
-	session->gpsdata.raw.deltarange[i] = NAN;
+	session->gpsdata.raw[i].mtime = session->newdata.time;
+	session->gpsdata.raw[i].codephase = NAN;
+	session->gpsdata.raw[i].deltarange = NAN;
     }
     return RAW_IS;
 }
