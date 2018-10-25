@@ -637,7 +637,7 @@ static int nmeaid_to_prn(char *talker, int satnum, unsigned char *gnssid,
     } else if (65 <= satnum && 96 >= satnum) {
         /* GLONASS */
         *gnssid = 6;
-        *svid = satnum - 65;
+        *svid = satnum - 64;
     } else if (120 <= satnum && 158 >= satnum) {
         /* SBAS */
         *gnssid = 1;
