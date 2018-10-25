@@ -24,6 +24,7 @@ char *json_stringify(char *, size_t, const char *);
 void json_tpv_dump(const struct gps_device_t *,
 		   const struct gps_policy_t *, char *, size_t);
 void json_noise_dump(const struct gps_data_t *, char *, size_t);
+void json_raw_dump(const struct gps_data_t *, char *, size_t);
 void json_sky_dump(const struct gps_data_t *, char *, size_t);
 void json_att_dump(const struct gps_data_t *, char *, size_t);
 void json_oscillator_dump(const struct gps_data_t *, char *, size_t);

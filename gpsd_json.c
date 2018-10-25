@@ -718,6 +718,67 @@ void json_subframe_dump(const struct gps_data_t *datap,
     (void)strlcat(buf, "}\r\n", buflen);
 }
 
+/* RAW dump */
+void json_raw_dump(const struct gps_data_t *gpsdata,
+		   char *reply, size_t replylen)
+{
+    int i;
+
+    assert(replylen > sizeof(char *));
+    (void)strlcpy(reply, "{\"class\":\"RAW\",", replylen);
+    if (gpsdata->dev.path[0] != '\0')
+	str_appendf(reply, replylen, "\"device\":\"%s\",", gpsdata->dev.path);
+
+    (void)strlcat(reply, "\"rawdata\":[", replylen);
+    for (i = 0; i < MAXCHANNELS; i++) {
+        bool comma = false;
+        if (0 == gpsdata->raw[i].mtime) {
+            continue;
+        }
+        (void)strlcat(reply, "{", replylen);
+        if (0 != isfinite(gpsdata->raw[i].codephase)) {
+            str_appendf(reply, replylen, "\"codephase\":\"%f\"",
+                        gpsdata->raw[i].codephase);
+            comma = true;
+        }
+        if (0 != isfinite(gpsdata->raw[i].carrierphase)) {
+            if (comma)
+                (void)strlcat(reply, ",", replylen);
+            str_appendf(reply, replylen, "\"carrierphase\":\"%f\"",
+                        gpsdata->raw[i].carrierphase);
+            comma = true;
+        }
+        if (0 != isfinite(gpsdata->raw[i].pseudorange)) {
+            if (comma)
+                (void)strlcat(reply, ",", replylen);
+            str_appendf(reply, replylen, "\"pseudorange\":\"%f\"",
+                        gpsdata->raw[i].pseudorange);
+            comma = true;
+        }
+        if (0 != isfinite(gpsdata->raw[i].deltarange)) {
+            if (comma)
+                (void)strlcat(reply, ",", replylen);
+            str_appendf(reply, replylen, "\"deltarange\":\"%f\"",
+                        gpsdata->raw[i].deltarange);
+            comma = true;
+        }
+        if (0 != isfinite(gpsdata->raw[i].doppler)) {
+            if (comma)
+                (void)strlcat(reply, ",", replylen);
+            str_appendf(reply, replylen, "\"doppler\":\"%f\"",
+                        gpsdata->raw[i].doppler);
+            comma = true;
+        }
+
+        (void)strlcat(reply, "},", replylen);
+    }
+    str_rstrip_char(reply, ',');
+    (void)strlcat(reply, "]", replylen);
+
+    str_rstrip_char(reply, ',');
+    (void)strlcat(reply, "}\r\n", replylen);
+}
+
 #if defined(RTCM104V2_ENABLE)
 void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 		     const char *device,
@@ -3464,6 +3525,10 @@ void json_data_report(const gps_mask_t changed,
 
     if ((changed & SUBFRAME_SET) != 0) {
 	json_subframe_dump(datap, buf+strlen(buf), buflen-strlen(buf));
+    }
+
+    if ((changed & RAW_IS) != 0) {
+	json_raw_dump(datap, buf+strlen(buf), buflen-strlen(buf));
     }
 
 #ifdef COMPASS_ENABLE

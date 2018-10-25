@@ -41,8 +41,10 @@ extern "C" {
  *       increased length of devconfig_t.subtype
  *       add gnssid:svid:sigid to satellite_t
  *       add mtime to attitude_t
+ *       changed MAXCHANNELS
+ * 8.0 - Change shape of rawdata_t.
  */
-#define GPSD_API_MAJOR_VERSION	7	/* bump on incompatible changes */
+#define GPSD_API_MAJOR_VERSION	8	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
 
 #define MAXCHANNELS	120	/* u-blox 9 tracks 140 signals */
