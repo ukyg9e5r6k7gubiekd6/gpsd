@@ -316,7 +316,8 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
 	session->gpsdata.raw[i].pseudorange = (double)(ul >> 12);
     }
 
-    mask |= RAW_IS;
+    /*The above decode does not look correct, do not report */
+    /* mask |= RAW_IS; */
     return mask;
 }
 
