@@ -1902,7 +1902,15 @@ struct dop_t {
 };
 
 struct rawdata_t {
-    /* raw measurement data */
+    /* raw measurement data, suitable for RINEX 3 */
+    /* gnssid see satellite_t for decode */
+    unsigned char gnssid;
+    /* svid see satellite_t for decode */
+    unsigned char svid;
+    /* sigid see satellite_t for decode */
+    unsigned char sigid;
+    /* SNR.  0 to 100 dB-Hz. */
+    unsigned char snr;
     double codephase;	/* meters */
     double carrierphase;	/* meters */
     double pseudorange;	/* meters */
