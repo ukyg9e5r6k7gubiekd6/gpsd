@@ -303,9 +303,9 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
     for (i = 0; i < n; i++) {
 	unsigned long ul;
 	session->gpsdata.raw[i].mtime = t;
-	session->gpsdata.skyview[i].PRN = \
+	session->gpsdata.skyview[i].PRN =
             (short)(getub(buf, 11 * i + 15) & 0x1f);
-	session->gpsdata.skyview[i].ss = \
+	session->gpsdata.skyview[i].ss =
             (double)getub(buf, 11 * i * 15 + 1) / 4.0;
 	session->gpsdata.raw[i].codephase =
 	    (double)getleu32(buf, 11 * i * 15 + 2);
