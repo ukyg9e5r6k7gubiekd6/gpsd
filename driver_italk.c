@@ -264,16 +264,16 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
     for (i = 0; i < MAXCHANNELS; i++)
         session->gpsdata.raw[i].mtime = 0;
     for (i = 0; i < n; i++){
-	session->gpsdata.skyview[i].PRN = \
+	session->gpsdata.skyview[i].PRN =
             getleu16(buf, 7 + 26 + (i*36)) & 0xff;
-	session->gpsdata.skyview[i].ss = \
+	session->gpsdata.skyview[i].ss =
             getleu16(buf, 7 + 26 + (i*36 + 2)) & 0x3f;
 	session->gpsdata.raw[i].satstat = getleu32(buf, 7 + 26 + (i*36 + 4));
-	session->gpsdata.raw[i].pseudorange = \
+	session->gpsdata.raw[i].pseudorange =
             getled64((char *)buf, 7 + 26 + (i*36 + 8));
-	session->gpsdata.raw[i].doppler = \
+	session->gpsdata.raw[i].doppler =
             getled64((char *)buf, 7 + 26 + (i*36 + 16));
-	session->gpsdata.raw[i].carrierphase = \
+	session->gpsdata.raw[i].carrierphase =
             getleu16(buf, 7 + 26 + (i*36 + 28));
 
 	session->gpsdata.raw[i].mtime = session->newdata.time;
