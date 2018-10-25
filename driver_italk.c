@@ -257,7 +257,7 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
 	return 0; // bail if measurement time not valid.
 
     session->newdata.time = gpsd_gpstime_resolve(session,
-						 (unsigned short int)getleu16((char *)buf, 7 + 8),
+        (unsigned short int)getleu16((char *)buf, 7 + 8),
 	(unsigned int)getleu32(buf, 7 + 38) / 1000.0);
 
     /* this is so we can tell which never got set */
@@ -280,7 +280,8 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
 	session->gpsdata.raw[i].codephase = NAN;
 	session->gpsdata.raw[i].deltarange = NAN;
     }
-    return RAW_IS;
+    /* return RAW_IS; The above decode does not give reasonable results */
+    return 0;         /* do not report valid until decode is fixed */
 }
 
 static gps_mask_t italk_parse(struct gps_device_t *session,
