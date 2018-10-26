@@ -880,6 +880,8 @@ extern void gpsd_time_init(struct gps_context_t *, time_t);
 extern void gpsd_set_century(struct gps_device_t *);
 extern timestamp_t gpsd_gpstime_resolve(struct gps_device_t *,
 			      const unsigned short, const double);
+extern timespec_t gpsd_gpstime_resolv(struct gps_device_t *,
+			      const unsigned short, const timespec_t);
 extern timestamp_t gpsd_utc_resolve(struct gps_device_t *);
 extern void gpsd_century_update(struct gps_device_t *, int);
 

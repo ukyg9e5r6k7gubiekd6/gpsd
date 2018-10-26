@@ -82,6 +82,7 @@ extern "C" {
  * ref: https://en.wikipedia.org/wiki/Decimal_degrees
  */
 typedef double timestamp_t;	/* Unix time in seconds with fractional part */
+typedef struct timespec timespec_t;	/* Unix time as sec, nsec */
 
 struct gps_fix_t {
     timestamp_t time;	/* Time of update */

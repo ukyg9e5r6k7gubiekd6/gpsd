@@ -326,6 +326,9 @@ void gpsd_century_update(struct gps_device_t *session, int century)
 }
 #endif /* NMEA0183_ENABLE */
 
+/* gpsd_gpstime_resolve() convert week/tow to UTC as a double
+ * deprecated, use gpsd_gpstime_resolv()
+ */
 timestamp_t gpsd_gpstime_resolve(struct gps_device_t *session,
 			 unsigned short week, double tow)
 {
@@ -360,6 +363,48 @@ timestamp_t gpsd_gpstime_resolve(struct gps_device_t *session,
 
     session->context->gps_week = week;
     session->context->gps_tow = tow;
+    session->context->valid |= GPS_TIME_VALID;
+
+    return t;
+}
+
+/* gpsd_gpstime_resolv() convert week/tow to UTC as a timespec
+ */
+timespec_t gpsd_gpstime_resolv(struct gps_device_t *session,
+			 unsigned short week, timespec_t tow)
+{
+    timespec_t t;
+
+    /*
+     * This code detects and compensates for week counter rollovers that
+     * happen while gpsd is running. It will not save you if there was a
+     * rollover that confused the receiver before gpsd booted up.  It *will*
+     * work even when Block IIF satellites increase the week counter width
+     * to 13 bits.
+     */
+    if ((int)week < (session->context->gps_week & 0x3ff)) {
+	gpsd_log(&session->context->errout, LOG_INF,
+		 "GPS week 10-bit rollover detected.\n");
+	++session->context->rollovers;
+    }
+
+    /*
+     * This guard copes with both conventional GPS weeks and the "extended"
+     * 15-or-16-bit version with no wraparound that appears in Zodiac
+     * chips and is supposed to appear in the Geodetic Navigation
+     * Information (0x29) packet of SiRF chips.  Some SiRF firmware versions
+     * (notably 231) actually ship the wrapped 10-bit week, despite what
+     * the protocol reference claims.
+     */
+    if (week < 1024)
+	week += session->context->rollovers * 1024;
+
+    t.tv_sec = GPS_EPOCH + (week * SECS_PER_WEEK) + tow.tv_sec;
+    t.tv_sec -= session->context->leap_seconds;
+    t.tv_nsec = tow.tv_nsec;
+
+    session->context->gps_week = week;
+    session->context->gps_tow = tow.tv_sec + (tow.tv_nsec * 10e-9);
     session->context->valid |= GPS_TIME_VALID;
 
     return t;
