@@ -718,7 +718,7 @@ void json_subframe_dump(const struct gps_data_t *datap,
     (void)strlcat(buf, "}\r\n", buflen);
 }
 
-/* RAW dump */
+/* RAW dump - should be good enough to make a RINEX 3 file */
 void json_raw_dump(const struct gps_data_t *gpsdata,
 		   char *reply, size_t replylen)
 {
@@ -735,16 +735,13 @@ void json_raw_dump(const struct gps_data_t *gpsdata,
         if (0 == gpsdata->raw[i].mtime) {
             continue;
         }
-        (void)strlcat(reply, "{", replylen);
-        if (0 != isfinite(gpsdata->raw[i].codephase)) {
-            str_appendf(reply, replylen, "\"codephase\":\"%f\"",
-                        gpsdata->raw[i].codephase);
-            comma = true;
-        }
+        str_appendf(reply, replylen, "{\"gnssid\":%d,\"svid\":%d,\"snr\":%d",
+                    gpsdata->raw[i].gnssid, gpsdata->raw[i].svid,
+                    gpsdata->raw[i].snr);
+        comma = true;
+
         if (0 != isfinite(gpsdata->raw[i].carrierphase)) {
-            if (comma)
-                (void)strlcat(reply, ",", replylen);
-            str_appendf(reply, replylen, "\"carrierphase\":\"%f\"",
+            str_appendf(reply, replylen, ",\"carrierphase\":\"%f\"",
                         gpsdata->raw[i].carrierphase);
             comma = true;
         }
@@ -753,13 +750,6 @@ void json_raw_dump(const struct gps_data_t *gpsdata,
                 (void)strlcat(reply, ",", replylen);
             str_appendf(reply, replylen, "\"pseudorange\":\"%f\"",
                         gpsdata->raw[i].pseudorange);
-            comma = true;
-        }
-        if (0 != isfinite(gpsdata->raw[i].deltarange)) {
-            if (comma)
-                (void)strlcat(reply, ",", replylen);
-            str_appendf(reply, replylen, "\"deltarange\":\"%f\"",
-                        gpsdata->raw[i].deltarange);
             comma = true;
         }
         if (0 != isfinite(gpsdata->raw[i].doppler)) {
