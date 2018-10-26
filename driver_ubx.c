@@ -813,6 +813,7 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
     int8_t leapS;
     uint8_t numMeas;
     uint8_t recStat;
+    int i;
 
     if (16 > data_len) {
 	gpsd_log(&session->context->errout, LOG_WARN,
@@ -830,29 +831,51 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 	     "UBX_RXM_RAWX: rcvTow %f week %u leapS %d numMeas %u recStat %d\n",
 	     rcvTow, week, leapS, numMeas, recStat);
 
-    for (int i = 0; i < numMeas; i++) {
+    for (i = 0; i < numMeas; i++) {
         int off = 32 * i;
+        /* psuedorange in meters */
         double prMes = getled64((const char *)buf, off + 16);
+        /* carrier phase in cycles */
         double cpMes = getled64((const char *)buf, off + 24);
+        /* doppler in Hz, positive towards sat */
         double doMes = getlef32((const char *)buf, off + 32);
         uint8_t gnssId = getub(buf, off + 36);
         uint8_t svId = getub(buf, off + 37);
+        /* GLONASS frequency slot */
         uint8_t freqId = getub(buf, off + 39);
+        /* carrier phase locktime in ms, max 64500ms */
         uint16_t locktime = getleu16(buf, off + 40);
+        /* carrier-to-noise density ratio dB-Hz */
         uint8_t cno = getub(buf, off + 42);
         uint8_t prStdev = getub(buf, off + 43);
         uint8_t cpStdev = getub(buf, off + 44);
         uint8_t doStdev = getub(buf, off + 45);
+        /* tracking stat
+         * bit 0 - prMes valid
+         * bit 1 - cpMes valid
+         * bit 2 - halfCycle valid
+         * bit 3 - halfCycle subtracted from phase
+         */
         uint8_t trkStat = getub(buf, off + 46);
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "%u:%u:%u prMes %f cpMes %f doMes %f locktime %u\n"
 		 "cno %u prStdev %u cpStdev %u doStdev %u rtkStat %u\n",
 		 gnssId, svId, freqId, prMes, cpMes, doMes, locktime,
 		 cno, prStdev, cpStdev, doStdev, trkStat);
+
+	session->gpsdata.raw[i].gnssid = gnssId;
+	session->gpsdata.raw[i].svid = svId;
+	session->gpsdata.raw[i].snr = cno;
+	session->gpsdata.raw[i].satstat = trkStat;
+	session->gpsdata.raw[i].pseudorange = prMes;
+	session->gpsdata.raw[i].carrierphase = cpMes;
+	session->gpsdata.raw[i].doppler = doMes;
+	session->gpsdata.raw[i].mtime = 1;    /* time? */
+	session->gpsdata.raw[i].codephase = NAN;
+	session->gpsdata.raw[i].deltarange = NAN;
     }
 
-    /* TODO: no place to put this data, yet */
-    return 0;
+    return RAW_IS;
 }
 
 /*
