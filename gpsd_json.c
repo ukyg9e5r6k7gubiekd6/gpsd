@@ -725,38 +725,43 @@ void json_raw_dump(const struct gps_data_t *gpsdata,
     int i;
 
     assert(replylen > sizeof(char *));
+    if (0 == isfinite(gpsdata->raw.mtime)) {
+        /* no data to dump */
+        return;
+    }
     (void)strlcpy(reply, "{\"class\":\"RAW\",", replylen);
     if (gpsdata->dev.path[0] != '\0')
-	str_appendf(reply, replylen, "\"device\":\"%s\",", gpsdata->dev.path);
+	str_appendf(reply, replylen, "\"device\":\"%s\",\"time\":%f,",
+                    gpsdata->dev.path, gpsdata->raw.mtime);
 
     (void)strlcat(reply, "\"rawdata\":[", replylen);
     for (i = 0; i < MAXCHANNELS; i++) {
         bool comma = false;
-        if (0 == gpsdata->raw[i].mtime) {
+        if (0 == gpsdata->raw.meas[i].svid) {
             continue;
         }
         str_appendf(reply, replylen, "{\"gnssid\":%d,\"svid\":%d,\"snr\":%d",
-                    gpsdata->raw[i].gnssid, gpsdata->raw[i].svid,
-                    gpsdata->raw[i].snr);
+                    gpsdata->raw.meas[i].gnssid, gpsdata->raw.meas[i].svid,
+                    gpsdata->raw.meas[i].snr);
         comma = true;
 
-        if (0 != isfinite(gpsdata->raw[i].carrierphase)) {
+        if (0 != isfinite(gpsdata->raw.meas[i].carrierphase)) {
             str_appendf(reply, replylen, ",\"carrierphase\":\"%f\"",
-                        gpsdata->raw[i].carrierphase);
+                        gpsdata->raw.meas[i].carrierphase);
             comma = true;
         }
-        if (0 != isfinite(gpsdata->raw[i].pseudorange)) {
+        if (0 != isfinite(gpsdata->raw.meas[i].pseudorange)) {
             if (comma)
                 (void)strlcat(reply, ",", replylen);
             str_appendf(reply, replylen, "\"pseudorange\":\"%f\"",
-                        gpsdata->raw[i].pseudorange);
+                        gpsdata->raw.meas[i].pseudorange);
             comma = true;
         }
-        if (0 != isfinite(gpsdata->raw[i].doppler)) {
+        if (0 != isfinite(gpsdata->raw.meas[i].doppler)) {
             if (comma)
                 (void)strlcat(reply, ",", replylen);
             str_appendf(reply, replylen, "\"doppler\":\"%f\"",
-                        gpsdata->raw[i].doppler);
+                        gpsdata->raw.meas[i].doppler);
             comma = true;
         }
 

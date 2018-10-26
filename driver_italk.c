@@ -260,25 +260,26 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
         (unsigned short int)getleu16((char *)buf, 7 + 8),
 	(unsigned int)getleu32(buf, 7 + 38) / 1000.0);
 
+    session->gpsdata.raw.mtime = session->newdata.time;
     /* this is so we can tell which never got set */
     for (i = 0; i < MAXCHANNELS; i++)
-        session->gpsdata.raw[i].mtime = 0;
+        session->gpsdata.raw.meas[i].svid = 0;
     for (i = 0; i < n; i++){
 	session->gpsdata.skyview[i].PRN =
             getleu16(buf, 7 + 26 + (i*36)) & 0xff;
 	session->gpsdata.skyview[i].ss =
             getleu16(buf, 7 + 26 + (i*36 + 2)) & 0x3f;
-	session->gpsdata.raw[i].satstat = getleu32(buf, 7 + 26 + (i*36 + 4));
-	session->gpsdata.raw[i].pseudorange =
+	session->gpsdata.raw.meas[i].satstat =
+            getleu32(buf, 7 + 26 + (i*36 + 4));
+	session->gpsdata.raw.meas[i].pseudorange =
             getled64((char *)buf, 7 + 26 + (i*36 + 8));
-	session->gpsdata.raw[i].doppler =
+	session->gpsdata.raw.meas[i].doppler =
             getled64((char *)buf, 7 + 26 + (i*36 + 16));
-	session->gpsdata.raw[i].carrierphase =
+	session->gpsdata.raw.meas[i].carrierphase =
             getleu16(buf, 7 + 26 + (i*36 + 28));
 
-	session->gpsdata.raw[i].mtime = session->newdata.time;
-	session->gpsdata.raw[i].codephase = NAN;
-	session->gpsdata.raw[i].deltarange = NAN;
+	session->gpsdata.raw.meas[i].codephase = NAN;
+	session->gpsdata.raw.meas[i].deltarange = NAN;
     }
     /* return RAW_IS; The above decode does not give reasonable results */
     return 0;         /* do not report valid until decode is fixed */

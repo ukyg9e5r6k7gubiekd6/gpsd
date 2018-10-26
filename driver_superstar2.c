@@ -297,23 +297,24 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
 	return 0;
     }
     t = getled64((char *)buf, 7);		/* measurement time */
+    session->gpsdata.raw.mtime = t;
     /* this is so we can tell which never got set */
     for (i = 0; i < MAXCHANNELS; i++)
-        session->gpsdata.raw[i].mtime = 0;
+        session->gpsdata.raw.meas[i].svid = 0;
     for (i = 0; i < n; i++) {
 	unsigned long ul;
-	session->gpsdata.raw[i].mtime = t;
 	session->gpsdata.skyview[i].PRN =
             (short)(getub(buf, 11 * i + 15) & 0x1f);
 	session->gpsdata.skyview[i].ss =
             (double)getub(buf, 11 * i * 15 + 1) / 4.0;
-	session->gpsdata.raw[i].codephase =
+	session->gpsdata.raw.meas[i].codephase =
 	    (double)getleu32(buf, 11 * i * 15 + 2);
 	ul = (unsigned long)getleu32(buf, 11 * i * 15 + 6);
 
-	session->gpsdata.raw[i].satstat = (unsigned int)(ul & 0x03L);
-	session->gpsdata.raw[i].carrierphase = (double)((ul >> 2) & 0x03ffL);
-	session->gpsdata.raw[i].pseudorange = (double)(ul >> 12);
+	session->gpsdata.raw.meas[i].satstat = (unsigned int)(ul & 0x03L);
+	session->gpsdata.raw.meas[i].carrierphase =
+            (double)((ul >> 2) & 0x03ffL);
+	session->gpsdata.raw.meas[i].pseudorange = (double)(ul >> 12);
     }
 
     /*The above decode does not look correct, do not report */

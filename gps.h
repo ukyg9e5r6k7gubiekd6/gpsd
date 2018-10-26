@@ -1903,28 +1903,29 @@ struct dop_t {
 
 struct rawdata_t {
     /* raw measurement data, suitable for RINEX 3 */
-    /* gnssid see satellite_t for decode */
-    unsigned char gnssid;
-    /* svid see satellite_t for decode */
-    unsigned char svid;
-    /* sigid see satellite_t for decode */
-    unsigned char sigid;
-    /* SNR.  0 to 100 dB-Hz. */
-    unsigned char snr;
-    double codephase;	/* meters */
-    double carrierphase;	/* meters */
-    double pseudorange;	/* meters */
-    double deltarange;	/* meters/sec */
-    double doppler;	/* Hz */
     double mtime;		/* sec */
-    unsigned satstat;	/* tracking status */
-#define SAT_ACQUIRED	0x01		/* satellite acquired */
-#define SAT_CODE_TRACK	0x02		/* code-tracking loop acquired */
-#define SAT_CARR_TRACK	0x04		/* carrier-tracking loop acquired */
-#define SAT_DATA_SYNC	0x08		/* data-bit synchronization done */
-#define SAT_FRAME_SYNC	0x10		/* frame synchronization done */
-#define SAT_EPHEMERIS	0x20		/* ephemeris collected */
-#define SAT_FIX_USED	0x40		/* used for position fix */
+    struct {
+        /* gnssid see satellite_t for decode */
+        unsigned char gnssid;
+        /* svid see satellite_t for decode */
+        unsigned char svid;
+        /* sigid see satellite_t for decode */
+        unsigned char sigid;
+        unsigned char snr;      /* SNR.  0 to 100 dB-Hz. */
+        double codephase;	/* meters */
+        double carrierphase;	/* meters */
+        double pseudorange;	/* meters */
+        double deltarange;	/* meters/sec */
+        double doppler;	        /* Hz */
+        unsigned satstat;	/* tracking status */
+#define SAT_ACQUIRED	0x01	/* satellite acquired */
+#define SAT_CODE_TRACK	0x02	/* code-tracking loop acquired */
+#define SAT_CARR_TRACK	0x04	/* carrier-tracking loop acquired */
+#define SAT_DATA_SYNC	0x08	/* data-bit synchronization done */
+#define SAT_FRAME_SYNC	0x10	/* frame synchronization done */
+#define SAT_EPHEMERIS	0x20	/* ephemeris collected */
+#define SAT_FIX_USED	0x40	/* used for position fix */
+    } meas[MAXCHANNELS];
 };
 
 struct version_t {
@@ -2110,7 +2111,7 @@ struct gps_data_t {
 	struct ais_t ais;
 	struct attitude_t attitude;
         struct navdata_t navdata;
-	struct rawdata_t raw[MAXCHANNELS];
+	struct rawdata_t raw;
 	struct gst_t gst;
 	struct oscillator_t osc;
 	/* "artificial" structures for various protocol responses */

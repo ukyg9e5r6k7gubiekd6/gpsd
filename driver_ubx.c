@@ -831,6 +831,13 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 	     "UBX_RXM_RAWX: rcvTow %f week %u leapS %d numMeas %u recStat %d\n",
 	     rcvTow, week, leapS, numMeas, recStat);
 
+    session->newdata.time = gpsd_gpstime_resolve(session, week,
+                                                 rcvTow / 1000.0);
+    session->gpsdata.raw.mtime = session->newdata.time;
+
+    /* this is so we can tell which never got set */
+    for (i = 0; i < MAXCHANNELS; i++)
+        session->gpsdata.raw.meas[i].svid = 0;
     for (i = 0; i < numMeas; i++) {
         int off = 32 * i;
         /* psuedorange in meters */
@@ -863,16 +870,15 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 		 gnssId, svId, freqId, prMes, cpMes, doMes, locktime,
 		 cno, prStdev, cpStdev, doStdev, trkStat);
 
-	session->gpsdata.raw[i].gnssid = gnssId;
-	session->gpsdata.raw[i].svid = svId;
-	session->gpsdata.raw[i].snr = cno;
-	session->gpsdata.raw[i].satstat = trkStat;
-	session->gpsdata.raw[i].pseudorange = prMes;
-	session->gpsdata.raw[i].carrierphase = cpMes;
-	session->gpsdata.raw[i].doppler = doMes;
-	session->gpsdata.raw[i].mtime = 1;    /* time? */
-	session->gpsdata.raw[i].codephase = NAN;
-	session->gpsdata.raw[i].deltarange = NAN;
+	session->gpsdata.raw.meas[i].gnssid = gnssId;
+	session->gpsdata.raw.meas[i].svid = svId;
+	session->gpsdata.raw.meas[i].snr = cno;
+	session->gpsdata.raw.meas[i].satstat = trkStat;
+	session->gpsdata.raw.meas[i].pseudorange = prMes;
+	session->gpsdata.raw.meas[i].carrierphase = cpMes;
+	session->gpsdata.raw.meas[i].doppler = doMes;
+	session->gpsdata.raw.meas[i].codephase = NAN;
+	session->gpsdata.raw.meas[i].deltarange = NAN;
     }
 
     return RAW_IS;
