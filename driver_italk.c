@@ -238,6 +238,7 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
 				      unsigned char *buf, size_t len)
 {
     unsigned short flags, n, i;
+    unsigned int tow;             /* time of week, in ms */
 
     n = (unsigned short) getleu16(buf, 7 + 4);
     if ((n < 1) || (n > MAXCHANNELS)){
@@ -256,11 +257,13 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
     if ((flags & 0x3) != 0x3)
 	return 0; // bail if measurement time not valid.
 
+    tow = (unsigned int)getleu32(buf, 7 + 38);
     session->newdata.time = gpsd_gpstime_resolve(session,
-        (unsigned short int)getleu16((char *)buf, 7 + 8),
-	(unsigned int)getleu32(buf, 7 + 38) / 1000.0);
+        (unsigned short int)getleu16((char *)buf, 7 + 8), tow / 1000.0);
 
-    session->gpsdata.raw.mtime = session->newdata.time;
+    session->gpsdata.raw.mtime.tv_sec = (time_t)session->newdata.time;
+    session->gpsdata.raw.mtime.tv_nsec = (tow % 1000) * 1000000;
+
     /* this is so we can tell which never got set */
     for (i = 0; i < MAXCHANNELS; i++)
         session->gpsdata.raw.meas[i].svid = 0;

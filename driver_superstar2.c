@@ -285,7 +285,7 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
 {
     gps_mask_t mask = 0;
     int i, n;
-    double t;
+    double t, t_intp;
 
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "superstar2 #23 - measurement block\n");
@@ -297,7 +297,9 @@ superstar2_msg_measurement(struct gps_device_t *session, unsigned char *buf,
 	return 0;
     }
     t = getled64((char *)buf, 7);		/* measurement time */
-    session->gpsdata.raw.mtime = t;
+    session->gpsdata.raw.mtime.tv_nsec = modf(t, &t_intp) * 10e9;
+    session->gpsdata.raw.mtime.tv_sec = (time_t)t_intp;
+
     /* this is so we can tell which never got set */
     for (i = 0; i < MAXCHANNELS; i++)
         session->gpsdata.raw.meas[i].svid = 0;

@@ -1904,7 +1904,7 @@ struct dop_t {
 
 struct rawdata_t {
     /* raw measurement data, suitable for RINEX 3 */
-    double mtime;		/* sec */
+    timespec_t mtime;		/* sec, nsec */
     struct {
         /* gnssid see satellite_t for decode */
         unsigned char gnssid;

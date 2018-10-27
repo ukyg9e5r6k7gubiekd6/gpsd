@@ -235,6 +235,7 @@ _proto__msg_raw(struct gps_device_t *session, unsigned char *buf, size_t data_le
 {
     unsigned char i, st, nchan, nsv;
     unsigned int tow;
+    double t_intp;
 
     if (data_len != RAW_MSG_LEN )
 	return 0;
@@ -260,7 +261,10 @@ _proto__msg_raw(struct gps_device_t *session, unsigned char *buf, size_t data_le
 	return 0;
     }
 
-    session->gpsdata.raw.mtime = session->newdata.time;
+    session->gpsdata.raw.mtime.tv_nsec =
+        modf(session->newdata.time, &t_intp) * 10e8;
+    session->gpsdata.raw.mtime.tv_sec = (time_t)t_intp;
+
     /* this is so we can tell which never got set */
     for (i = 0; i < MAXCHANNELS; i++)
         session->gpsdata.raw.meas[i].svid = 0;

@@ -808,7 +808,7 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
                                const unsigned char *buf,
                                size_t data_len)
 {
-    double rcvTow;
+    double rcvTow, t_intp;
     uint16_t week;
     int8_t leapS;
     uint8_t numMeas;
@@ -821,7 +821,7 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 	return 0;
     }
 
-    rcvTow = getled64((const char *)buf, 0);
+    rcvTow = getled64((const char *)buf, 0) / 1000.0;
     week = getleu16(buf, 8);
     leapS = getsb(buf, 10);
     numMeas = getub(buf, 11);
@@ -831,9 +831,10 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 	     "UBX_RXM_RAWX: rcvTow %f week %u leapS %d numMeas %u recStat %d\n",
 	     rcvTow, week, leapS, numMeas, recStat);
 
-    session->newdata.time = gpsd_gpstime_resolve(session, week,
-                                                 rcvTow / 1000.0);
-    session->gpsdata.raw.mtime = session->newdata.time;
+    session->newdata.time = gpsd_gpstime_resolve(session, week, rcvTow);
+    session->gpsdata.raw.mtime.tv_nsec =
+        modf(session->newdata.time, &t_intp) * 10e8;
+    session->gpsdata.raw.mtime.tv_sec = (time_t)t_intp;
 
     /* this is so we can tell which never got set */
     for (i = 0; i < MAXCHANNELS; i++)
