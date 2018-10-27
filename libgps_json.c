@@ -132,6 +132,48 @@ static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
     return json_read_object(buf, json_attrs_1, endptr);
 }
 
+/* decode a RAW messages into gpsdata.raw */
+static int json_raw_read(const char *buf, struct gps_data_t *gpsdata,
+			 const char **endptr)
+{
+    int measurements;
+    const struct json_attr_t json_attrs_meas[] = {
+	/* *INDENT-OFF* */
+	{"gnssid",	   t_short,   STRUCTOBJECT(struct meas_t, gnssid)},
+	{"svid",	   t_short,   STRUCTOBJECT(struct meas_t, svid)},
+	{"snr", 	   t_short,   STRUCTOBJECT(struct meas_t, snr)},
+	{"carrierphase",   t_short,   STRUCTOBJECT(struct meas_t, carrierphase)},
+	{"pseudorange",	   t_short,   STRUCTOBJECT(struct meas_t, pseudorange)},
+	{"doppler",	   t_real,    STRUCTOBJECT(struct meas_t, doppler)},
+	/* *INDENT-ON* */
+	{NULL},
+    };
+    const struct json_attr_t json_attrs_raw[] = {
+	/* *INDENT-OFF* */
+	{"class",      t_check,   .dflt.check = "RAW"},
+	{"device",     t_string,  .addr.string  = gpsdata->dev.path,
+                                    .len = sizeof(gpsdata->dev.path)},
+	{"time",       t_time,    .addr.real = &gpsdata->skyview_time,
+                                    .dflt.real = NAN},
+	{"time",       t_real,    .addr.real = &gpsdata->skyview_time,
+                                     .dflt.real = NAN},
+	{"meas", t_array,
+	                           STRUCTARRAY(gpsdata->raw.meas,
+                                     json_attrs_meas, &measurements)},
+	{NULL},
+	/* *INDENT-ON* */
+    };
+    int status;
+
+    memset(&gpsdata->raw, 0, sizeof(gpsdata->raw));
+
+    status = json_read_object(buf, json_attrs_raw, endptr);
+    if (status != 0)
+	return status;
+
+    return 0;
+}
+
 static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 			 const char **endptr)
 {
@@ -605,6 +647,13 @@ int libgps_json_unpack(const char *buf,
 	if (status == 0) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= OSCILLATOR_SET;
+	}
+	return status;
+    } else if (str_starts_with(classtag, "\"class\":\"RAW\"")) {
+	status = json_raw_read(buf, gpsdata, end);
+	if (status == 0) {
+	    gpsdata->set &= ~UNION_SET;
+	    gpsdata->set |= RAW_IS;
 	}
 	return status;
     } else
