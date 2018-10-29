@@ -1913,6 +1913,29 @@ struct rawdata_t {
         /* sigid see satellite_t for decode */
         unsigned char sigid;
         unsigned char snr;      /* SNR.  0 to 100 dB-Hz. */
+        unsigned char obs_code[4];    /* 3 char RINEX observation code */
+        /* see RINEX documenetation
+         * GPS: L1: L1C, L1S, L1L, L1X, L1P, L1W, L1N
+         *      L2: L2C, L2D, L2S, L2L, L2X, L2P, L2W, L2N
+         *      L5: L5I, L5Q
+         * GLONASS: G1: L1C, L1P
+         *          G2: L2C, L2P
+         *          G3: L3I, L3Q, L3X
+         * GALILEO: E1: L1B, L1C, L1X
+         *          E5A: L5I, L5Ql L5X
+         *          E5B: L7I, L7Q, L7X
+         *          E5(A+B): L8I, L8Q, L8X
+         *          E6: L6B, L6C, L6X
+         * QZSS: L1: L1C, L1S, L1L, L1X, L1Z
+         *       L2: L2S, L2L, L2X
+         *       L5: L5I, L5Q, L5X
+         *       LEX(6): L6S, L6L, L6X
+         * BeiDou: B1: L2I, L2Q, L2X
+         *         B2: L7I, L7Q, L7X
+         *         B3: L6I, L6Q, L6X
+         * IRNSS: L5: L5A, L5B, L5C, L5X
+         *        S: L9A, L9B, L9C, L9X
+         */
         double codephase;	/* meters */
         double carrierphase;	/* meters */
         double pseudorange;	/* meters */
