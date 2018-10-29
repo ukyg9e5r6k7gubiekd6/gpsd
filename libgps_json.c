@@ -137,6 +137,8 @@ static int json_raw_read(const char *buf, struct gps_data_t *gpsdata,
 			 const char **endptr)
 {
     int measurements;
+    double mtime_s, mtime_ns;
+
     const struct json_attr_t json_attrs_meas[] = {
 	/* *INDENT-OFF* */
 	{"gnssid",	   t_short,   STRUCTOBJECT(struct meas_t, gnssid)},
@@ -153,10 +155,10 @@ static int json_raw_read(const char *buf, struct gps_data_t *gpsdata,
 	{"class",      t_check,   .dflt.check = "RAW"},
 	{"device",     t_string,  .addr.string  = gpsdata->dev.path,
                                     .len = sizeof(gpsdata->dev.path)},
-	{"time",       t_time,    .addr.real = &gpsdata->skyview_time,
-                                    .dflt.real = NAN},
-	{"time",       t_real,    .addr.real = &gpsdata->skyview_time,
-                                     .dflt.real = NAN},
+	{"time",       t_real,    .addr.real = &mtime_s,
+			         .dflt.real = NAN},
+	{"nsec",       t_real,    .addr.real = &mtime_ns,
+			         .dflt.real = NAN},
 	{"meas", t_array,
 	                           STRUCTARRAY(gpsdata->raw.meas,
                                      json_attrs_meas, &measurements)},
@@ -170,6 +172,10 @@ static int json_raw_read(const char *buf, struct gps_data_t *gpsdata,
     status = json_read_object(buf, json_attrs_raw, endptr);
     if (status != 0)
 	return status;
+    if (0 == isfinite(mtime_s) || 0 == isfinite(mtime_ns))
+	return status;
+    gpsdata->raw.mtime.tv_sec = (time_t)mtime_s;
+    gpsdata->raw.mtime.tv_nsec = (long)mtime_ns;
 
     return 0;
 }

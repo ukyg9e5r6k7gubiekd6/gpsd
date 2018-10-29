@@ -731,7 +731,8 @@ void json_raw_dump(const struct gps_data_t *gpsdata,
     }
     (void)strlcpy(reply, "{\"class\":\"RAW\",", replylen);
     if (gpsdata->dev.path[0] != '\0')
-	str_appendf(reply, replylen, "\"device\":\"%s\",\"time\":%ld.%09ld,",
+	str_appendf(reply, replylen,
+                    "\"device\":\"%s\",\"time\":%ld,\"nsec\":%9ld,",
                     gpsdata->dev.path, (long)gpsdata->raw.mtime.tv_sec,
                     gpsdata->raw.mtime.tv_nsec);
 
