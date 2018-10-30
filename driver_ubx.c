@@ -814,6 +814,7 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
     uint8_t numMeas;
     uint8_t recStat;
     int i;
+    const char * obs_code;
 
     if (16 > data_len) {
 	gpsd_log(&session->context->errout, LOG_WARN,
@@ -872,6 +873,29 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 		 cno, prStdev, cpStdev, doStdev, trkStat);
 
 	session->gpsdata.raw.meas[i].gnssid = gnssId;
+        switch (gnssId) {
+        case 0:       /* GPS */
+        case 1:       /* SBAS */
+        case 5:       /* QZSS */
+            obs_code = "L1C";       /* u-blox calles this L1C/A */
+            break;
+        case 2:       /* GALILEO */
+            obs_code = "L1B";       /* u-blox calls this E1OS */
+            break;
+        case 3:       /* BeiDou */
+            obs_code = "L2I";       /* u-blox calls this B1I */
+            break;
+        default:      /* huh? */
+        case 4:       /* IMES.  really? */
+            obs_code = "";       /* u-blox calls this L1 */
+            break;
+        case 6:       /* GLONASS */
+            obs_code = "L1C";       /* u-blox calls this L1OF */
+            break;
+        }
+        (void)strlcpy(session->gpsdata.raw.meas[i].obs_code, obs_code,
+                      sizeof(session->gpsdata.raw.meas[i].obs_code));
+
 	session->gpsdata.raw.meas[i].svid = svId;
 	session->gpsdata.raw.meas[i].snr = cno;
 	session->gpsdata.raw.meas[i].satstat = trkStat;
