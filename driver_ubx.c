@@ -897,6 +897,7 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
                       sizeof(session->gpsdata.raw.meas[i].obs_code));
 
 	session->gpsdata.raw.meas[i].svid = svId;
+	session->gpsdata.raw.meas[i].freqid = freqId;
 	session->gpsdata.raw.meas[i].snr = cno;
 	session->gpsdata.raw.meas[i].satstat = trkStat;
 	session->gpsdata.raw.meas[i].pseudorange = prMes;

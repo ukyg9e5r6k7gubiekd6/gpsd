@@ -1913,7 +1913,8 @@ struct rawdata_t {
         /* sigid see satellite_t for decode */
         unsigned char sigid;
         unsigned char snr;      /* SNR.  0 to 100 dB-Hz. */
-        char obs_code[4];    /* 3 char RINEX observation code */
+        unsigned char freqid;   /* The GLONASS (Only) frequency, 0 - 13 */
+        char obs_code[4];       /* 3 char RINEX observation code */
         /* see RINEX documenetation
          * GPS: L1: L1C, L1S, L1L, L1X, L1P, L1W, L1N
          *      L2: L2C, L2D, L2S, L2L, L2X, L2P, L2W, L2N
