@@ -115,6 +115,10 @@ message 6 and 8 subtypes - specifically, 6/23, 8/21, 8/22, 8/24, and
 
 ** New features **
 
+** Qt **
+
+Add a sample client
+
 *** Time tracking
 
 Our goal is to be independent of the system clock.
