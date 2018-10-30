@@ -141,12 +141,14 @@ static int json_raw_read(const char *buf, struct gps_data_t *gpsdata,
 
     const struct json_attr_t json_attrs_meas[] = {
 	/* *INDENT-OFF* */
-	{"gnssid",	   t_short,   STRUCTOBJECT(struct meas_t, gnssid)},
-	{"svid",	   t_short,   STRUCTOBJECT(struct meas_t, svid)},
-	{"snr", 	   t_short,   STRUCTOBJECT(struct meas_t, snr)},
-	{"carrierphase",   t_short,   STRUCTOBJECT(struct meas_t, carrierphase)},
-	{"pseudorange",	   t_short,   STRUCTOBJECT(struct meas_t, pseudorange)},
-	{"doppler",	   t_real,    STRUCTOBJECT(struct meas_t, doppler)},
+	{"gnssid",	 t_short,   STRUCTOBJECT(struct meas_t, gnssid)},
+	{"svid",	 t_short,   STRUCTOBJECT(struct meas_t, svid)},
+	{"snr", 	 t_short,   STRUCTOBJECT(struct meas_t, snr)},
+	{"freqid", 	 t_short,   STRUCTOBJECT(struct meas_t, freqid)},
+	{"ops", 	 t_string,  STRUCTOBJECT(struct meas_t, obs_code)},
+	{"carrierphase", t_short,   STRUCTOBJECT(struct meas_t, carrierphase)},
+	{"pseudorange",	 t_short,   STRUCTOBJECT(struct meas_t, pseudorange)},
+	{"doppler",	 t_real,    STRUCTOBJECT(struct meas_t, doppler)},
 	/* *INDENT-ON* */
 	{NULL},
     };
