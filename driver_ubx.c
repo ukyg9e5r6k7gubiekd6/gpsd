@@ -822,7 +822,7 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 	return 0;
     }
 
-    rcvTow = getled64((const char *)buf, 0) / 1000.0;
+    rcvTow = getled64((const char *)buf, 0);   /* time of week in seconds */
     week = getleu16(buf, 8);
     leapS = getsb(buf, 10);
     numMeas = getub(buf, 11);
