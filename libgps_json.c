@@ -661,7 +661,7 @@ int libgps_json_unpack(const char *buf,
 	status = json_raw_read(buf, gpsdata, end);
 	if (status == 0) {
 	    gpsdata->set &= ~UNION_SET;
-	    gpsdata->set |= RAW_IS;
+	    gpsdata->set |= RAW_SET;
 	}
 	return status;
     } else

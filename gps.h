@@ -2077,7 +2077,8 @@ struct gps_data_t {
 #define ECEF_SET	(1llu<<36)
 #define VECEF_SET	(1llu<<37)
 #define MAGNETIC_TRACK_SET (1llu<<38)
-#define SET_HIGH_BIT	39
+#define RAW_SET         (1llu<<39)
+#define SET_HIGH_BIT	40
     timestamp_t online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences
@@ -2127,7 +2128,10 @@ struct gps_data_t {
     } devices;
 
     /* pack things never reported together to reduce structure size */
-#define UNION_SET	(RTCM2_SET|RTCM3_SET|SUBFRAME_SET|AIS_SET|ATTITUDE_SET|GST_SET|OSCILLATOR_SET|VERSION_SET|LOGMESSAGE_SET|ERROR_SET|TOFF_SET|PPS_SET)
+#define UNION_SET	(AIS_SET|ATTITUDE_SET|ERROR_SET|GST_SET| \
+			 LOGMESSAGE_SET|OSCILLATOR_SET|PPS_SET|RAW_SET| \
+			 RTCM2_SET|RTCM3_SET|SUBFRAME_SET|TOFF_SET|VERSION_SET)
+
     union {
 	/* unusual forms of sensor data that might come up the pipe */
 	struct rtcm2_t	rtcm2;
