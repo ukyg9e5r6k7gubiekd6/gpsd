@@ -371,6 +371,8 @@ void libgps_dump_state(struct gps_data_t *collect)
 			  sp->used ? 'Y' : 'N');
 	}
     }
+    if (collect->set & RAW_SET)
+	(void)fprintf(debugfp, "RAW: got raw data\n");
     if (collect->set & DEVICE_SET)
 	(void)fprintf(debugfp, "DEVICE: Device is '%s', driver is '%s'\n",
 		      collect->dev.path, collect->dev.driver);
