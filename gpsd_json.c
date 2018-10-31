@@ -751,21 +751,21 @@ void json_raw_dump(const struct gps_data_t *gpsdata,
         comma = true;
 
         if (0 != isfinite(gpsdata->raw.meas[i].carrierphase)) {
-            str_appendf(reply, replylen, ",\"carrierphase\":\"%f\"",
+            str_appendf(reply, replylen, ",\"carrierphase\":%f",
                         gpsdata->raw.meas[i].carrierphase);
             comma = true;
         }
         if (0 != isfinite(gpsdata->raw.meas[i].pseudorange)) {
             if (comma)
                 (void)strlcat(reply, ",", replylen);
-            str_appendf(reply, replylen, "\"pseudorange\":\"%f\"",
+            str_appendf(reply, replylen, "\"pseudorange\":%f",
                         gpsdata->raw.meas[i].pseudorange);
             comma = true;
         }
         if (0 != isfinite(gpsdata->raw.meas[i].doppler)) {
             if (comma)
                 (void)strlcat(reply, ",", replylen);
-            str_appendf(reply, replylen, "\"doppler\":\"%f\"",
+            str_appendf(reply, replylen, "\"doppler\":%f",
                         gpsdata->raw.meas[i].doppler);
             comma = true;
         }
