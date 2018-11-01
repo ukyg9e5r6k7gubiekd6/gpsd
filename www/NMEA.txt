@@ -856,7 +856,7 @@ Field Number:
 7. Checksum
 
 In real-world sensors, sometimes not all three conversions are reported.
-So you night see something like $SDDBT,,f,22.5,M,,F*cs
+So you might see something like $SDDBT,,f,22.5,M,,F*cs
 
 === DCN - Decca Position ===
 
