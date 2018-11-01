@@ -626,8 +626,7 @@ def GetPythonValue(context, name, imp, expr, brief=False):
     if not env['target_python']:
         status, value = 0, str(eval(expr))
     else:
-        command = [target_python_path, '-c',
-                   '%s; print(%s)' % (imp, expr)]
+        command = [target_python_path, '-c', '%s; print(%s)' % (imp, expr)]
         try:
             status, value = _getstatusoutput(command, shell=False)
         except OSError:
@@ -636,7 +635,9 @@ def GetPythonValue(context, name, imp, expr, brief=False):
             value = value.strip()
         else:
             value = ''
-            announce("Python command failed - disabling Python.")
+            announce('Python command "%s" failed - disabling Python.\n'
+                     'Python components will NOT be installed' %
+		     command[2])
             env['python'] = False
     context.Result('failed' if status else 'ok' if brief else value)
     return value
