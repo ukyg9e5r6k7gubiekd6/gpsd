@@ -277,24 +277,23 @@ the following are well known:
 
 .Common talker IDs
 |================================================================
-|GP    |  Global Positioning System receiver
-|LC    |  Loran-C receiver
-|II    |  Integrated Instrumentation
-|IN    |  Integrated Navigation
-|EC    |  Electronic Chart Display & Information System (ECDIS)
+|BD    |  BeiDou (China)
 |CD    |  Digital Selective Calling (DSC)
+|EC    |  Electronic Chart Display & Information System (ECDIS)
 |GA    |  Galileo Positioning System
+|GB    |  BeiDou (China)
 |GL    |  GLONASS, according to IEIC 61162-1
 |GN    |  Mixed GPS and GLONASS data, according to IEIC 61162-1
-|GB    |  BeiDou (China)
-|BD    |  BeiDou (China)
+|GP    |  Global Positioning System receiver
+|II    |  Integrated Instrumentation
+|IN    |  Integrated Navigation
+|LC    |  Loran-C receiver
 |QZ    |  QZSS regional GPS augmentation system (Japan)
 |================================================================
 
-LC - Loran-C is a marine navigation system run by the U.S. government,
-which is planning to shut it down in favor of GPS.  Some non-Loran
-devices emit GLL but use this talker ID for backward-compatibility
-reasons, so it may outlast the actual Loran system.
+EC -- ECDIS is a specialized geographical information system intended
+to support professional maritime navigation.  NMEA talker units
+meeting the ECDIS standard use this prefix.  Some of these emit GLL.
 
 II - II is emitted by the NMEA interfaces of several widely-used lines
 of marine-navigation electronics. One is the AutoHelm system by
@@ -302,10 +301,6 @@ Raymarine; see also <<SEATALK>> for the native protocol of these
 devices.
 
 IN -- Some Garmin GPS units use an IN talker ID.
-
-EC -- ECDIS is a specialized geographical information system intended
-to support professional maritime navigation.  NMEA talker units
-meeting the ECDIS standard use this prefix.  Some of these emit GLL.
 
 CD -- Modern marine VHF radios use conventions collectively known as
 Digital Selective Calling (DSC).  These radios typically take data
@@ -319,6 +314,11 @@ least one instance of a DSC enabled radio overloading (mis-using) the
 LC talker prefix for this purpose.  Otherwise they use the CD prefix.
 A vessel's nav system is likely to have both CD and some other
 position indicating talker on its bus(es).
+
+LC - Loran-C is a marine navigation system run by the U.S. government,
+which is planning to shut it down in favor of GPS.  Some non-Loran
+devices emit GLL but use this talker ID for backward-compatibility
+reasons, so it may outlast the actual Loran system.
 
 Until the U.S. Coast Guard terminated the Omega Navigation System in
 1997, another common talker prefix was "OM" for an Omega Navigation
@@ -347,6 +347,7 @@ for them may be present in the GPSD project.
 |CX	| Communications - Scanning Receiver
 |DE	| DECCA Navigation (obsolete)
 |DF	| Direction Finder
+|DM	| Velocity Sensor, Speed Log, Water, Magnetic
 |DU	| Duplex repeater station
 |EC	| Electronic Chart Display & Information System (ECDIS)
 |EP	| Emergency Position Indicating Beacon (EPIRB)
@@ -372,7 +373,6 @@ for them may be present in the GPSD project.
 |U#	| '#' is a digit 0 ... 9; User Configured
 |UP	| Microprocessor controller
 |VD	| Velocity Sensor, Doppler, other/general
-|DM	| Velocity Sensor, Speed Log, Water, Magnetic
 |VW	| Velocity Sensor, Speed Log, Water, Mechanical
 |WI	| Weather Instruments
 |YC	| Transducer - Temperature (obsolete)
