@@ -599,7 +599,9 @@ Field Number:
 
 Fields 5 through 15 are dumped as raw hex.
 
-Example: $GPALM,1,1,15,1159,00,441d,4e,16be,fd5e,a10c9f,4a2da4,686e81,58cbe1,0a4,001*5B
+Example:
+
+$GPALM,1,1,15,1159,00,441d,4e,16be,fd5e,a10c9f,4a2da4,686e81,58cbe1,0a4,001*5B
 
 === APA - Autopilot Sentence "A" ===
 
@@ -858,6 +860,8 @@ Field Number:
 In real-world sensors, sometimes not all three conversions are reported.
 So you might see something like $SDDBT,,f,22.5,M,,F*cs
 
+Example: $SDDBT,7.8,f,2.4,M,1.3,F*0D
+
 === DCN - Decca Position ===
 
 ------------------------------------------------------------------------------
@@ -912,6 +916,8 @@ This sentence was incorrectly titled "Heading - Deviation & Variation"
 in <<BETKE>>.  It's documented at
 <http://www.humminbird.com/normal.asp?id=853>
 
+Example: $INDPT,2.3,0.0*46
+
 === DTM - Datum Reference ===
 
 ------------------------------------------------------------------------------
@@ -932,6 +938,8 @@ Field Number:
 8. Datum name. What's usually seen here is "W84", the standard
    WGS84 datum used by GPS.
 9. Checksum.
+
+Example: $GPDTM,W84,C*52
 
 === FSI - Frequency Set Information ===
 
@@ -973,6 +981,8 @@ Field Number:
 
 Note: Source <<MX521>> describes a proprietary extension of GBS with
 a 9th data field. The 8-field version is in NMEA 3.0.
+
+Example: $GPGBS,125027,23.43,M,13.91,M,34.01,M*07
 
 === GGA - Global Positioning System Fix Data ===
 
@@ -1017,6 +1027,10 @@ Field Number:
      type 1 or 9 update, null field when DGPS is not used
 14. Differential reference station ID, 0000-1023
 15. Checksum
+
+Example:
+
+$GNGGA,001043.00,4404.14036,N,12118.85961,W,1,12,0.98,1113.0,M,-21.3,M,,*47
 
 === GLC - Geographic Position, Loran-C ===
 
@@ -1070,6 +1084,8 @@ Field Number:
 7. FAA mode indicator (NMEA 2.3 and later)
 8. Checksum
 
+Example: $GNGLL,4404.14012,N,12118.85993,W,001037.00,A,A*67
+
 === GNS - Fix data ===
 
 ------------------------------------------------------------------------------
@@ -1107,6 +1123,8 @@ each system, the character can have a value (table may be incomplete):
 * E = Estimated (dead reckoning) Mode
 * M = Manual Input Mode
 * S = Simulator Mode
+
+Example: $GPGNS,112257.00,3844.24011,N,00908.43828,W,AN,03,10.5,,,,*57
 
 === GRS - GPS Range Residuals ===
 
@@ -1161,6 +1179,8 @@ Field Number:
 8. Standard deviation (meters) of altitude error
 9. Checksum
 
+Example: $GPGST,182141.000,15.5,15.3,7.2,21.8,0.9,0.5,0.8*54
+
 
 === GSA - GPS DOP and active satellites ===
 
@@ -1192,6 +1212,8 @@ Field Number:
 16. HDOP
 17. VDOP
 18. Checksum
+
+Example: $GNGSA,A,3,80,71,73,79,69,,,,,,,,1.83,1.09,1.47*17
 
 === GSV - Satellites in view ===
 
@@ -1230,6 +1252,7 @@ report quads for satellites they aren't tracking, in which case the
 SNR field will be null; we don't know whether this is formally allowed
 or not.
 
+Example: $GLGSV,3,3,09,88,07,028,*51
 
 === GTD - Geographic Location in Time Differences ===
 
@@ -1322,6 +1345,8 @@ Field Number:
 1. Heading Degrees, true
 2. T = True
 3. Checksum
+
+Example: $GPHDT,274.07,T*03
 
 === HFB - Trawl Headrope to Footrope and Bottom ===
 
@@ -1470,6 +1495,8 @@ Field Number:
 5. Unknown integer value
 6. Checksum
 
+Example: $GPMSS,0,0,0.000000,200,*5A
+
 === MTW - Mean Temperature of Water ===
 
 ------------------------------------------------------------------------------
@@ -1486,6 +1513,8 @@ Field Number:
 
 <<GLOBALSAT>> lists this as "Meteorological Temperature of Water", which
 is probably incorrect.
+
+Example: $INMTW,17.9,C*1B
 
 === MWV - Wind Speed and Angle ===
 
@@ -1644,6 +1673,8 @@ A status of V means the GPS has a valid fix that is below an internal
 quality threshold, e.g. because the dilution of precision is too high
 or an elevation mask test failed.
 
+Example: $GNRMC,001031.00,A,4404.13993,N,12118.86023,W,0.146,,100117,,,A*7B
+
 === ROT - Rate Of Turn ===
 
 ------------------------------------------------------------------------------
@@ -1657,6 +1688,8 @@ Field Number:
 1. Rate Of Turn, degrees per minute, "-" means bow turns to port
 2. Status, A means data is valid
 3. Checksum
+
+Example: $HEROT,0.0,A*2B
 
 === RPM - Revolutions ===
 
@@ -1740,6 +1773,8 @@ Field Number:
 More waypoints follow.  Last field is a checksum as usual.
 
 The Garmin 65 and possibly other units report a $GPR00 in the same format.
+
+Example: $GPRTE,1,1,c,0*07
 
 === SFI - Scanning Frequency Information ===
 
@@ -2067,6 +2102,8 @@ to have been introduced with NMEA 3.01 in 2002.
 Some devices, such as those described in <<GLOBALSAT>>, leave the
 magnetic-bearing fields 3 and 4 empty.
 
+Example: $GPVTG,220.86,T,,M,2.550,N,4.724,K,A*34
+
 === VWR - Relative Wind Speed and Angle ===
 
 ------------------------------------------------------------------------------
@@ -2155,6 +2192,10 @@ Field Number:
 There may be any number of quadruplets like this, each describing a
 sensor.  The last field will be a checksum as usual.
 
+Example:
+
+$HCXDR,A,171,D,PITCH,A,-37,D,ROLL,G,367,,MAGX,G,2420,,MAGY,G,-8984,,MAGZ*41
+
 === XTE - Cross-Track Error, Measured ===
 
 ------------------------------------------------------------------------------
@@ -2177,6 +2218,8 @@ Field Number:
 5. Cross Track Units, N = Nautical Miles
 6. FAA mode indicator (NMEA 2.3 and later, optional)
 7. Checksum
+
+Example: $GPXTE,V,V,,,N,S*43
 
 === XTR - Cross Track Error - Dead Reckoning ===
 
@@ -2372,6 +2415,7 @@ Only emitted by the now-obsolete Zodiac (Rockwell) chipset.
 ------------------------------------------------------------------------------
 
 Example:
+
 $PUBX,00,081350.00,4717.113210,N,00833.915187,E,546.589,G3,2.1,2.0,0.007,77.52,0+.007,,0.92,1.19,0.77,9,0,0*5F<CR><LF>
 
 Only emitted by u-blox Antaris chipset.
@@ -2386,6 +2430,7 @@ $PUBX,01,hhmmss.ss,Easting,E,Northing,N,AltMSL,NavStat,Hacc,Vacc,SOG,COG,Vvel,ag
 ------------------------------------------------------------------------------
 
 Example:
+
 $PUBX,01,075142.00,467125.245,E,5236949.763,N,498.235,G3,2.1,1.9,0.005,85.63,0.0+00,,0.78,0.90,0.52,12,0,0*65
 
 Only emitted by u-blox Antaris chipset.
@@ -2397,6 +2442,7 @@ Only emitted by u-blox Antaris chipset.
 ------------------------------------------------------------------------------
 
 Example:
+
 $PUBX,03,11,23,-,,,45,010,29,-,,,46,013,07,-,,,42,015,08,U,067,31,42,025,10,U,19+5,33,46,026,18,U,326,08,39,026,17,-,,,32,015,26,U,306,66,48,025,27,U,073,10,36,+026,28,U,089,61,46,024,15,-,,,39,014*0D
 
 Only emitted by u-blox Antaris chipset.
