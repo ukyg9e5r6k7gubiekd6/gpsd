@@ -442,8 +442,8 @@ this gives a range of 65 through 88. The numbers 89 through 96 are
 available if slot numbers above 24 are allocated to on-orbit spares.
 
 Other sources such as <<SATSTAT>> confirm that the NMEA standard
-assigns NMEA IDs 65-96 to GLONASS.  It goes on with the following
-table:
+assigns NMEA IDs 65-96 to GLONASS.  The following
+table is our best guess of NMEA usage in 2018:
 
 [frame="topbot",options="header"]
 |====================================================
@@ -454,10 +454,14 @@ table:
 | 89 - 96   | GLONASS (future extensions?)
 | 97 - 119  | not used
 | 120 - 151 | not used (SBAS PRNs occupy this range)
-| 152 - 192 | not used
-| 193 - 195 | QZSS
+| 152 - 158 | Various SBAS systems (EGNOS, WAAS, SDCM, GAGAN, MSAS)
+| 159 - 172 | not used
+| 173 - 182 | IMES
+| 193 - 197 | QZSS
 | 196 - 200 | QZSS (future extensions?)
-| 201 - 235 | BeiDou
+| 201 - 235 | BeiDou (u-blox, not NMEA)
+| 301 - 336 | GALILEO
+| 401 - 437 | BeiDou (NMEA)
 |====================================================
 
 GLONASS satellite numbers come in two flavors.  If a sentence
@@ -483,6 +487,11 @@ including 5 geostationary for compatability with BeiDou-1.
 As of late 2015, coverage is complete over most of Asia and the
 West Pacific.  It is expected to be fully operational by 2020, by
 when coverage area is expected to be worldwide.
+
+Note that the PRN system is becoming increasingly fragmented and
+unworkable.  New GPS denote each satellite, and their signals, by their
+constellation (gnssID), satellite id in that constellation (svId), and
+signal type (sigId).  NMEA, as of version 4, has not adapted.
 
 == Obsolete sentences ==
 
