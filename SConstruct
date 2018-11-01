@@ -1751,14 +1751,19 @@ if tiocmiwait:
         "ppscheck.8": "ppscheck.xml",
     })
 
-all_manpages = list(base_manpages.keys()) + list(python_manpages.keys())
+all_manpages = list(base_manpages.keys())
+if python_manpages:
+    all_manpages += list(python_manpages.keys())
 
 man_env = env.Clone()
 if man_env.GetOption('silent'):
     man_env['SPAWN'] = filtered_spawn  # Suppress stderr chatter
 manpage_targets = []
 if manbuilder:
-    items = list(base_manpages.items()) + list(python_manpages.items())
+    items = list(base_manpages.items())
+    if python_manpages:
+        items += list(python_manpages.items())
+
     for (man, xml) in items:
         manpage_targets.append(man_env.Man(source=xml, target=man))
 
@@ -1907,7 +1912,7 @@ if qt_env:
 
 
 maninstall = []
-for manpage in list(base_manpages.keys()) + list(python_manpages.keys()):
+for manpage in all_manpages:
     if not manbuilder and not os.path.exists(manpage):
         continue
     section = manpage.split(".")[1]
@@ -2517,7 +2522,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     if ".gitignore" in distfiles:
         distfiles.remove(".gitignore")
     distfiles += generated_sources
-    distfiles += list(base_manpages.keys()) + list(python_manpages.keys())
+    distfiles += all_manpages
     if "packaging/rpm/gpsd.spec" not in distfiles:
         distfiles.append("packaging/rpm/gpsd.spec")
 
