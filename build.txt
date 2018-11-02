@@ -142,6 +142,7 @@ various additional capabilities and extensions:
 |Qt 4.53+         | allows building libQgpsmm C++ wrapper for client library
 |libcap           | Capabilities library, allows 1PPS support under Linux
 |(n)curses        | curses screen-painting library, used by cgps and gpsmon
+|pps-tools        | adds support for the KPPS API, for improved timing
 |============================================================================
 
 If you have libusb-1.0.0 or later, the GPSD build will autodetect
@@ -173,6 +174,12 @@ packaging/tinfo.pc in /usr/lib/pkgconfig/tinfo.pc. 13.10 fixed this.
 We've seen a report that compiling on the Raspberry Pi fails with
 a complaint about curses.h not being found.  You need to install
 Raspbian's curses development library if this happens.
+
+If your kernel provides the RFC 2783 KPPS (kernel PPS) API, gpsd will
+use that for extra accuracy. Many Linux distributions have a package
+called "pps-tools" that will install KPPS support and the timepps.h
+header file.  We recommend you do that.  If your kernel is built in
+the normal modular way, this package installation will suffice.
 
 For building from the source tree, or if you change the man page
 source, xslt and docbook xsl style files are used to generate nroff
