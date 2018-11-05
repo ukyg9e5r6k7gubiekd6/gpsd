@@ -857,9 +857,9 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
         uint16_t locktime = getleu16(buf, off + 40);
         /* carrier-to-noise density ratio dB-Hz */
         uint8_t cno = getub(buf, off + 42);
-        uint8_t prStdev = getub(buf, off + 43);
-        uint8_t cpStdev = getub(buf, off + 44);
-        uint8_t doStdev = getub(buf, off + 45);
+        uint8_t prStdev = getub(buf, off + 43) & 0x0f;
+        uint8_t cpStdev = getub(buf, off + 44) & 0x0f;
+        uint8_t doStdev = getub(buf, off + 45) & 0x0f;
         /* tracking stat
          * bit 0 - prMes valid
          * bit 1 - cpMes valid
@@ -907,7 +907,7 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
         } else {
 	    session->gpsdata.raw.meas[i].pseudorange = NAN;
         }
-        if (trkStat & 2) {
+        if ((trkStat & 2) && (0 != cpStdev)) {
             /* cpMeas valid */
 	    session->gpsdata.raw.meas[i].carrierphase = cpMes;
         } else {
