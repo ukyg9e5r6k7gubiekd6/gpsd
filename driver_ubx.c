@@ -904,10 +904,14 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
         if (trkStat & 1) {
             /* prMeas valid */
 	    session->gpsdata.raw.meas[i].pseudorange = prMes;
+        } else {
+	    session->gpsdata.raw.meas[i].pseudorange = NAN;
         }
         if (trkStat & 2) {
             /* cpMeas valid */
 	    session->gpsdata.raw.meas[i].carrierphase = cpMes;
+        } else {
+	    session->gpsdata.raw.meas[i].carrierphase = NAN;
         }
 	session->gpsdata.raw.meas[i].doppler = doMes;
 	session->gpsdata.raw.meas[i].codephase = NAN;

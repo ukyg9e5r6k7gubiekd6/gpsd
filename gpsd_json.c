@@ -744,10 +744,10 @@ void json_raw_dump(const struct gps_data_t *gpsdata,
         }
         str_appendf(reply, replylen,
                     "{\"gnssid\":%d,\"svid\":%d,\"snr\":%d,\"freqid\":%d,"
-                    "\"obs\":\"%3s\"",
+                    "\"obs\":\"%3s\",\"lli\":%1d",
                     gpsdata->raw.meas[i].gnssid, gpsdata->raw.meas[i].svid,
                     gpsdata->raw.meas[i].snr, gpsdata->raw.meas[i].freqid,
-                    gpsdata->raw.meas[i].obs_code);
+                    gpsdata->raw.meas[i].obs_code, gpsdata->raw.meas[i].lli);
         comma = true;
 
         if (0 != isfinite(gpsdata->raw.meas[i].carrierphase)) {
