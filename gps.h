@@ -1914,6 +1914,11 @@ struct rawdata_t {
         unsigned char sigid;
         unsigned char snr;      /* SNR.  0 to 100 dB-Hz. */
         unsigned char freqid;   /* The GLONASS (Only) frequency, 0 - 13 */
+        unsigned char lli;      /* RINEX Loss of Lock Indicator
+                                 * bit 0 - Lost Lock
+                                 * bit 1 - half-cycle ambiguity/slip possible
+                                 * bit 2 - GALILEO BOC-tracking of MBOC signal
+                                 */
         char obs_code[4];       /* 3 char RINEX observation code */
         /* see RINEX documenetation
          * GPS: L1: L1C, L1S, L1L, L1X, L1P, L1W, L1N
