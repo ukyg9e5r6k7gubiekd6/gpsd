@@ -837,9 +837,10 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
         modf(session->newdata.time, &t_intp) * 10e8;
     session->gpsdata.raw.mtime.tv_sec = (time_t)t_intp;
 
-    /* this is so we can tell which never got set */
-    for (i = 0; i < MAXCHANNELS; i++)
-        session->gpsdata.raw.meas[i].svid = 0;
+    /* zero the measurement data */
+    /* so we can tell which meas never got set */
+    memset(session->gpsdata.raw.meas, 0, sizeof(session->gpsdata.raw.meas));
+
     for (i = 0; i < numMeas; i++) {
         int off = 32 * i;
         /* psuedorange in meters */
@@ -900,8 +901,14 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 	session->gpsdata.raw.meas[i].freqid = freqId;
 	session->gpsdata.raw.meas[i].snr = cno;
 	session->gpsdata.raw.meas[i].satstat = trkStat;
-	session->gpsdata.raw.meas[i].pseudorange = prMes;
-	session->gpsdata.raw.meas[i].carrierphase = cpMes;
+        if (trkstat & 1) {
+            /* prMeas valid */
+	    session->gpsdata.raw.meas[i].pseudorange = prMes;
+        }
+        if (trkstat & 2) {
+            /* cpMeas valid */
+	    session->gpsdata.raw.meas[i].carrierphase = cpMes;
+        }
 	session->gpsdata.raw.meas[i].doppler = doMes;
 	session->gpsdata.raw.meas[i].codephase = NAN;
 	session->gpsdata.raw.meas[i].deltarange = NAN;
