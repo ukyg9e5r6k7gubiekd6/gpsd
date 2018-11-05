@@ -901,17 +901,21 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 	session->gpsdata.raw.meas[i].freqid = freqId;
 	session->gpsdata.raw.meas[i].snr = cno;
 	session->gpsdata.raw.meas[i].satstat = trkStat;
-        if (trkstat & 1) {
+        if (trkStat & 1) {
             /* prMeas valid */
 	    session->gpsdata.raw.meas[i].pseudorange = prMes;
         }
-        if (trkstat & 2) {
+        if (trkStat & 2) {
             /* cpMeas valid */
 	    session->gpsdata.raw.meas[i].carrierphase = cpMes;
         }
 	session->gpsdata.raw.meas[i].doppler = doMes;
 	session->gpsdata.raw.meas[i].codephase = NAN;
 	session->gpsdata.raw.meas[i].deltarange = NAN;
+        if (0 == locktime) {
+            /* possible slip */
+	    session->gpsdata.raw.meas[i].lli = 2;
+        }
     }
 
     return RAW_IS;
