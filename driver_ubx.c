@@ -928,6 +928,7 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 	session->gpsdata.raw.meas[i].doppler = doMes;
 	session->gpsdata.raw.meas[i].codephase = NAN;
 	session->gpsdata.raw.meas[i].deltarange = NAN;
+	session->gpsdata.raw.meas[i].locktime = locktime;
         if (0 == locktime) {
             /* possible slip */
 	    session->gpsdata.raw.meas[i].lli = 2;

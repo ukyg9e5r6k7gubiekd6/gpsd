@@ -1909,7 +1909,7 @@ struct rawdata_t {
     struct meas_t {
         /* gnssid see satellite_t for decode */
         unsigned char gnssid;
-        /* svid see satellite_t for decode */
+        /* svid see RINEX 3 for decode, not satellite_t */
         unsigned char svid;
         /* sigid see satellite_t for decode */
         unsigned char sigid;
@@ -1948,6 +1948,8 @@ struct rawdata_t {
         double pseudorange;	/* meters */
         double deltarange;	/* meters/sec */
         double doppler;	        /* Hz */
+        unsigned locktime;      /* Carrier Phase Locktime in ms.
+                                 * max 64,500 ms */
         unsigned satstat;	/* tracking status */
 #define SAT_ACQUIRED	0x01	/* satellite acquired */
 #define SAT_CODE_TRACK	0x02	/* code-tracking loop acquired */
