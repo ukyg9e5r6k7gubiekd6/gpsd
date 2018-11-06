@@ -838,11 +838,13 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 	session->context->leap_seconds = -leapS;
 	session->context->valid |= LEAP_SECOND_VALID;
     }
-    /* covert GPS weeks and TOW to UTC */
+    /* convert GPS weeks and TOW to UTC */
     session->newdata.time = gpsd_gpstime_resolve(session, week, rcvTow);
+    /* get mtime in GPS time, not UTC */
     session->gpsdata.raw.mtime.tv_nsec =
         modf(session->newdata.time, &t_intp) * 10e8;
-    session->gpsdata.raw.mtime.tv_sec = (time_t)t_intp;
+    /* u-blox says to add in leapS, valid or not */
+    session->gpsdata.raw.mtime.tv_sec = (time_t)t_intp + leapS;
 
     /* zero the measurement data */
     /* so we can tell which meas never got set */
