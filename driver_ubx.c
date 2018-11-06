@@ -835,7 +835,7 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 
     if (recStat & 1) {
 	/* Valid leap seconds */
-	session->context->leap_seconds = -leapS;
+	session->context->leap_seconds = leapS;
 	session->context->valid |= LEAP_SECOND_VALID;
     }
     /* convert GPS weeks and TOW to UTC */
@@ -919,8 +919,8 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
         } else {
 	    session->gpsdata.raw.meas[i].pseudorange = NAN;
         }
-        if ((trkStat & 2) && (5 < cpStdev)) {
-            /* cpMeas valid, RTKLIB uses 5 < cpStdev */
+        if ((trkStat & 2) && (5 >= cpStdev)) {
+            /* cpMes valid, RTKLIB uses 5 < cpStdev */
 	    session->gpsdata.raw.meas[i].carrierphase = cpMes;
         } else {
 	    session->gpsdata.raw.meas[i].carrierphase = NAN;
