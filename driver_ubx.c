@@ -885,9 +885,12 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 	session->gpsdata.raw.meas[i].gnssid = gnssId;
         switch (gnssId) {
         case 0:       /* GPS */
-        case 1:       /* SBAS */
         case 5:       /* QZSS */
-            obs_code = "L1C";       /* u-blox calles this L1C/A */
+            obs_code = "L1C";       /* u-blox calls this L1C/A */
+            break;
+        case 1:       /* SBAS */
+            svId -= 100;            /* adjust for RINEX 3 svid */
+            obs_code = "L1C";       /* u-blox calls this L1C/A */
             break;
         case 2:       /* GALILEO */
             obs_code = "L1B";       /* u-blox calls this E1OS */
