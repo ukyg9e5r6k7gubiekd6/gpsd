@@ -480,6 +480,7 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
     if ((valid & UBX_TIMEGPS_VALID_LEAP_SECOND) ==
         UBX_TIMEGPS_VALID_LEAP_SECOND) {
 	session->context->leap_seconds = (int)getub(buf, 10);
+	session->context->valid |= LEAP_SECOND_VALID;
     }
     // Valid GPS time of week and week number
 #define VALID_TIME (UBX_TIMEGPS_VALID_TIME | UBX_TIMEGPS_VALID_WEEK)

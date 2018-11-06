@@ -156,6 +156,10 @@ void json_tpv_dump(const struct gps_device_t *session,
 		       "\"time\":\"%s\",",
 		       unix_to_iso8601(gpsdata->fix.time, tbuf, sizeof(tbuf)));
     }
+    if (LEAP_SECOND_VALID == (session->context->valid & LEAP_SECOND_VALID)) {
+	str_appendf(reply, replylen, "\"leapseconds\":%d,",
+                    session->context->leap_seconds);
+    }
     if (isfinite(gpsdata->fix.ept) != 0)
 	str_appendf(reply, replylen, "\"ept\":%.3f,", gpsdata->fix.ept);
     /*
