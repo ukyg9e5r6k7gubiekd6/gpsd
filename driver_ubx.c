@@ -902,13 +902,13 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 	session->gpsdata.raw.meas[i].snr = cno;
 	session->gpsdata.raw.meas[i].satstat = trkStat;
         if (trkStat & 1) {
-            /* prMeas valid */
+            /* prMes valid */
 	    session->gpsdata.raw.meas[i].pseudorange = prMes;
         } else {
 	    session->gpsdata.raw.meas[i].pseudorange = NAN;
         }
-        if ((trkStat & 2) && (0 != cpStdev)) {
-            /* cpMeas valid */
+        if ((trkStat & 2) && (5 < cpStdev)) {
+            /* cpMeas valid, RTKLIB uses 5 < cpStdev */
 	    session->gpsdata.raw.meas[i].carrierphase = cpMes;
         } else {
 	    session->gpsdata.raw.meas[i].carrierphase = NAN;
