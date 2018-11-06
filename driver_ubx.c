@@ -832,6 +832,11 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 	     "UBX_RXM_RAWX: rcvTow %f week %u leapS %d numMeas %u recStat %d\n",
 	     rcvTow, week, leapS, numMeas, recStat);
 
+    if (recStat & 1) {
+	/* Valid leap seconds */
+	session->context->leap_seconds = -leapS;
+	session->context->valid |= LEAP_SECOND_VALID;
+    }
     /* covert GPS weeks and TOW to UTC */
     session->newdata.time = gpsd_gpstime_resolve(session, week, rcvTow);
     session->gpsdata.raw.mtime.tv_nsec =
