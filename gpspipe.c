@@ -130,7 +130,7 @@ static void usage(void)
 		  "-t Time stamp the data.\n"
 		  "-u usec time stamp, implies -t. Use -uu to output sec.usec\n"
 		  "-v Print a little spinner.\n"
-		  "-V Print version and exit.\n\n"
+		  "-V Print version and exit.\n"
 		  "-w Dump gpsd native data.\n"
 		  "-x [seconds] Exit after given delay.\n"
 		  "You must specify one, or more, of -r, -R, or -w\n"
