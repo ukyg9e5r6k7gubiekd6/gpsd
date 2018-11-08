@@ -612,7 +612,7 @@ is easier.<p>
 <ol>
 <li><p>Use asserts sparingly.</p></li>
 
-<li><p>One valid use is to pass hints to sratic analyzers. This
+<li><p>One valid use is to pass hints to static analyzers. This
 sort of assert should be guarded with, e.g., #ifdef
 __COVERITY_ so we get the benefit of asserting the invariant without
 the risk of the assertion failing in production.</p></li>
