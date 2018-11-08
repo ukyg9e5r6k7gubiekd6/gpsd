@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!--
-This file is Copyright (c) 2010 by the GPSD project
+This file is Copyright (c) 2010-2019 by the GPSD project
 SPDX-License-Identifier: BSD-2-clause
 -->
 <!DOCTYPE refentry PUBLIC
@@ -65,7 +65,7 @@ altitude reports when the fix quality is too low.</para>
 <application>gpsmon</application> never writes control or probe
 strings to the device unless you explicitly tell it to.  Thus, while
 it will auto-sync to binary packet types, it won't automatically
-reecognize a device shipping an extended NMEA protocol as anything
+recognize a device shipping an extended NMEA protocol as anything
 other than a plain NMEA device. Use the <option>-t</option> option or
 the <command>t</command> to work around this.</para>
 
