@@ -499,11 +499,9 @@ timestamp_t iso8601_to_unix(char *isotime)
 #endif /* __clang_analyzer__ */
 }
 
-/* *INDENT-OFF* */
-char *unix_to_iso8601(timestamp_t fixtime,
-				     char isotime[], size_t len)
 /* Unix UTC time to ISO8601, no timezone adjustment */
 /* example: 2007-12-11T23:38:51.033Z */
+char *unix_to_iso8601(timestamp_t fixtime, char isotime[], size_t len)
 {
     struct tm when;
     double integral, fractional;
@@ -512,6 +510,13 @@ char *unix_to_iso8601(timestamp_t fixtime,
     char fractstr[10];
 
     fractional = modf(fixtime, &integral);
+    /* snprintf rounding of %3f can get ugly, so pre-round */
+    if ( 0.999499999 < fractional) {
+        /* round up */
+        integral++;
+        /* give the fraction a nudge to ensure rounding */
+        fractional += 0.0005;
+    }
     intfixtime = (time_t) integral;
 #ifdef HAVE_GMTIME_R
     (void)gmtime_r(&intfixtime, &when);
@@ -531,7 +536,6 @@ char *unix_to_iso8601(timestamp_t fixtime,
     (void)snprintf(isotime, len, "%s%sZ",timestr, strchr(fractstr,'.'));
     return isotime;
 }
-/* *INDENT-ON* */
 
 #define Deg2Rad(n)	((n) * DEG_2_RAD)
 

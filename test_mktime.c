@@ -1,10 +1,13 @@
 /*
+ * tests for mktime() and unix_to_iso8601().
+ *
  * This file is Copyright (c) 2010 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
-#include <stdlib.h>
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <time.h>
 
 #include "gps.h"
@@ -82,6 +85,30 @@ static struct
 };
 
 
+/* tests for unit_to_iso8601() */
+static struct
+{
+    timestamp_t unixtime;   /* unix time */
+    char *iso8601;        /* iso8601 result */
+} tests1[] = {
+    /* time zero */
+    {(timestamp_t)0, "1970-01-01T00:00:00.000Z"},
+
+    /* before/after leap second end of 2008, notice no :60! */
+    {(timestamp_t)1230767999.01, "2008-12-31T23:59:59.010Z"},
+    {(timestamp_t)1230768000.02, "2009-01-01T00:00:00.020Z"},
+
+    /* test for rounding at %.3f */
+    {(timestamp_t)1541766896.999412, "2018-11-09T12:34:56.999Z"},
+    {(timestamp_t)1541766896.999499, "2018-11-09T12:34:56.999Z"},
+    {(timestamp_t)1541766896.999500, "2018-11-09T12:34:57.000Z"},
+    {(timestamp_t)1541766896.999501, "2018-11-09T12:34:57.000Z"},
+
+    /* the end of time: 2038 */
+    {(timestamp_t)2147483647.123456, "2038-01-19T03:14:07.123Z"},
+    {(timestamp_t)2147483648.123456, "2038-01-19T03:14:08.123Z"},
+};
+
 int main(int argc UNUSED, char *argv[] UNUSED)
 {
     int i;
@@ -90,17 +117,30 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
     (void)setenv("TZ", "GMT", 1);
 
+
     for (i = 0; i < (int)(sizeof(tests) / sizeof(tests[0])); i++) {
 	time_t ts = mktime(&tests[i].t);
 	if (ts != tests[i].result) {
 	    failed = true;
 	    (void)strftime(tbuf, sizeof(tbuf), "%F %T", &tests[i].t);
-	    (void)printf("test %2d failed. "
-			 "Time returned from: %s should be %lu (but was: %lu)\n",
+	    (void)printf("test_mktime: test %2d failed.\n"
+			 "  Time returned from: %s should be %lu "
+                         " (but was: %lu)\n",
 			 i, tbuf, (unsigned long)tests[i].result,
 			 (unsigned long)ts);
 	}
     }
+
+    /* test unix_to_iso8601() */
+    for (i = 0; i < (int)(sizeof(tests1) / sizeof(tests1[0])); i++) {
+	unix_to_iso8601(tests1[i].unixtime, tbuf, sizeof(tbuf));
+        if (0 != strcmp(tests1[i].iso8601, tbuf)) {
+	    failed = true;
+	    (void)printf("test_mktime: test1 %f failed.\n  Got %s, s/b %s\n",
+                         tests1[i].unixtime, tbuf, tests1[i].iso8601);
+        }
+    }
+
     return (int)failed;
 }
 
