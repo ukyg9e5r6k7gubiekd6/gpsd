@@ -756,8 +756,8 @@ data.</p>
 
 <h2 id="porting">Porting to weird machines: endianness, width, and signedness issues.</h2>
 
-<p>The gpsd code is well-tested on 32- and 64-bit IA chips, also on
-PPCs, also on MIPS.  Thus, it's known to work on mainstream chips of
+<p>The gpsd code is well-tested on IA32 and x86-64 (amd64) chips, also on ARM,
+PPCs, and MIPS.  Thus, it's known to work on mainstream chips of
 either 32 or 64 bits and either big-endian or little-endian
 representation with IEE754 floating point.</p>
 
