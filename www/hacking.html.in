@@ -1746,7 +1746,7 @@ regular commits on the dev list.</p></dd>
 <h2>Packaging links</h2>
 
 <p><a
-href='https://git.recluse.de/?p=debian/pkg-gpsd.git;a=summary'>Debian
+href='https://github.com/bzed/pkg-gpsd'>Debian
 build controls</a></p>
 
 <hr>
