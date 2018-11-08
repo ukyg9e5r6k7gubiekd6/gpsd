@@ -97,7 +97,7 @@ else:  # Otherwise we do something real
 
 
 def isotime(s):
-    """Convert timestamps in ISO8661 format to and from Unix time including
+    """Convert timestamps in ISO8601 format to and from Unix time including
     optional fractional seconds.
     """
 
