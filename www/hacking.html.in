@@ -1620,7 +1620,7 @@ include any other devices that aren't static-testable.  When the
 correctness of drivers and core code in handling is suspect, they have
 to be live-tested by someone with access to the actual device.</p>
 
-<p>The goal of our release procedure is simple: prevent functional progressions.
+<p>The goal of our release procedure is simple: prevent functional regressions.
 No device that worked in release N should break in release N+1.  Of course
 we also want to prevent shipping broken core code.</p>
 
