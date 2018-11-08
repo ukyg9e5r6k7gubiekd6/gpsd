@@ -122,18 +122,18 @@ into a file or a pipe. By default the spinner is advanced with every
 messages written; specifying -v more than once will double the number
 of messages required to rotate the spinner.</para>
   <para>-V prints the version, then exits.</para>
-  <para>-w causes native <application>gpsd</application>sentences to be
+  <para>-w causes native <application>gpsd</application> sentences to be
 output.</para>
   <para>-x [seconds] Exit after delay of [seconds].</para>
   <para>At least one of -R, -r or -w must be specified.</para>
  </refsect1>
  <refsect1 id='exampletitle'>
   <title>EXAMPLES</title>
-  <para>When <application>gpsd is running</application>
+  <para>When <application>gpsd</application> is running,
    <command>gpspipe
 -r -n 100</command> will send one hundred raw NMEA sentences to
 standard output, then exit.</para>
-  <para>When <application>gpsd is running</application> <command>gpspipe
+  <para>When <application>gpsd</application> is running, <command>gpspipe
 -x 5 -w|sed -n '/TPV/{p;q}'</command> will wait at most 5 seconds for a
 TPV message, print it to stdout, then exit.</para>
  </refsect1>
