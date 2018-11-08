@@ -47,7 +47,7 @@ fields.</para>
 
 <para>Here is an example of the beginning of a report file:
 
-<literallayout>
+<screen>
 ntpshmmon version 1
 #      Name   Seen@                Clock                Real               L Prec
 sample NTP2 1424926256.443030206 1424926256.115869233 1424926256.000000000 0  -1
@@ -57,7 +57,7 @@ sample NTP2 1424926257.112433572 1424926257.111936726 1424926257.000000000 0  -1
 sample NTP3 1424926257.996221153 1424926257.995410232 1424926258.000000000 0 -20
 sample NTP2 1424926258.107769409 1424926258.107451006 1424926258.000000000 0  -1
 sample NTP3 1424926258.995647636 1424926258.995406476 1424926259.000000000 0 -20
-</literallayout></para>
+</screen></para>
 
 <para>The output always begins with a header line expressing the
 version of the output format; the version line begins with "ntpshmmon
@@ -65,8 +65,7 @@ version" and is followed by a numeric version field.</para>
 
 <para>The remainder of the file is either commments or sample lines. A
 comment line begins with a # and should ignored by programs that
-interpret this format. This program never generates such lines
-itself.</para>
+interpret this format.</para>
 
 <para>The fields of a sample line are as follows:
 
