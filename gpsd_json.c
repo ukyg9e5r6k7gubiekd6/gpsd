@@ -737,9 +737,8 @@ void json_raw_dump(const struct gps_data_t *gpsdata,
     if (gpsdata->dev.path[0] != '\0')
 	str_appendf(reply, replylen, "\"device\":\"%s\",", gpsdata->dev.path);
 
-    str_appendf(reply, "\"time\":%ld,\"nsec\":%9ld,\"rawdata\":[",
-                replylen, (long)gpsdata->raw.mtime.tv_sec,
-                gpsdata->raw.mtime.tv_nsec);
+    str_appendf(reply, replylen, "\"time\":%ld,\"nsec\":%9ld,\"rawdata\":[",
+                (long)gpsdata->raw.mtime.tv_sec, gpsdata->raw.mtime.tv_nsec);
 
     for (i = 0; i < MAXCHANNELS; i++) {
         bool comma = false;
