@@ -1301,6 +1301,9 @@ gpsdctl = env.Program('gpsdctl', ['gpsdctl.c'],
 gpspipe = env.Program('gpspipe', ['gpspipe.c'],
                       LIBS=['gps_static'],
                       parse_flags=gpsflags)
+gpsrinex = env.Program('gpsrinex', ['gpsrinex.c'],
+                      LIBS=['gps_static'],
+                      parse_flags=gpsflags)
 gps2udp = env.Program('gps2udp', ['gps2udp.c'],
                       LIBS=['gps_static'],
                       parse_flags=gpsflags)
@@ -1324,7 +1327,15 @@ if env["gpsd"]:
     sbin_binaries += [gpsd]
 if env["gpsdclients"]:
     sbin_binaries += [gpsdctl]
-    bin_binaries += [gpsdecode, gpsctl, gpspipe, gps2udp, gpxlogger, lcdgps]
+    bin_binaries += [
+        gps2udp,
+        gpsctl,
+        gpsdecode,
+        gpspipe,
+        gpsrinex,
+        gpxlogger,
+        lcdgps
+    ]
 if env['pps'] and (env["timeservice"] or env["gpsdclients"]):
     bin_binaries += [ntpshmmon]
     if tiocmiwait:
