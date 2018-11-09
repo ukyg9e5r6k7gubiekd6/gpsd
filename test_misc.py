@@ -101,8 +101,6 @@ for (lat1, lon1, lat2, lon2, dist) in tests:
             "misc small: %.8f %.8f, %.8f %.8f, expected %.7f got %.7f\n"
             % (lat1, lon1, lat2, lon2, dist, distance))
         errors += 1
-    else:
-        print("OK")
 
 # EarthDistance
 for (lat1, lon1, lat2, lon2, dist) in tests:
@@ -115,10 +113,10 @@ for (lat1, lon1, lat2, lon2, dist) in tests:
             "misc large: %.8f %.8f, %.8f %.8f, expected %.7f got %.7f\n"
             % (lat1, lon1, lat2, lon2, dist, distance))
         errors += 1
-    else:
-        print("OK")
 
 if errors:
+    print("test_misc.py: failed")
     sys.exit(1)
 else:
+    print("test_misc.py: OK")
     sys.exit(0)
