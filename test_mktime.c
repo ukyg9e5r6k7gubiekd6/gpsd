@@ -114,6 +114,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     int i;
     char tbuf[128];
     bool failed = false;
+    timestamp_t ttime;
 
     (void)setenv("TZ", "GMT", 1);
 
@@ -136,8 +137,20 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 	unix_to_iso8601(tests1[i].unixtime, tbuf, sizeof(tbuf));
         if (0 != strcmp(tests1[i].iso8601, tbuf)) {
 	    failed = true;
-	    (void)printf("test_mktime: test1 %f failed.\n  Got %s, s/b %s\n",
+	    (void)printf("test_mktime: test1 %f failed.\n"
+                         "  Got %s, s/b %s\n",
                          tests1[i].unixtime, tbuf, tests1[i].iso8601);
+        }
+    }
+
+    /* test iso8601_to_unix() */
+    for (i = 0; i < (int)(sizeof(tests1) / sizeof(tests1[0])); i++) {
+	ttime = iso8601_to_unix(tests1[i].iso8601);
+        if (0.001 <= fabs(ttime - tests1[i].unixtime)) {
+	    failed = true;
+	    (void)printf("test_mktime: test1 %s failed.\n"
+                         "  Got %.3f, s/b %.3f\n",
+                         tests1[i].iso8601, ttime, tests1[i].unixtime);
         }
     }
 
