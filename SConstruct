@@ -2177,15 +2177,21 @@ time_regress = Utility('time-regress', [test_mktime], [
     '$SRCDIR/tests/test_mktime'
 ])
 
-# Regression test the unpacking code in libgps
 if not env['python']:
     unpack_regress = None
+    misc_regress = None
 else:
+    # Regression test the unpacking code in libgps
     unpack_regress = UtilityWithHerald(
         'Testing the client-library sentence decoder...',
         'unpack-regress', [test_libgps], [
             '$SRCDIR/regress-driver $REGRESSOPTS -c'
             ' $SRCDIR/test/clientlib/*.log', ])
+    # Unit-test the bitfield extractor
+    misc_regress = Utility('misc-regress', [], [
+	'$SRCDIR/test_misc.py'
+    ])
+
 
 # Build the regression test for the sentence unpacker
 Utility('unpack-makeregress', [test_libgps], [
@@ -2261,6 +2267,7 @@ test_nondaemon = [
     maidenhead_locator_regress,
     matrix_regress,
     method_regress,
+    misc_regress,
     packet_regress,
     python_compilation_regress,
     python_versions,
