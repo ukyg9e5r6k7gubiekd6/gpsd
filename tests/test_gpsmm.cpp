@@ -11,8 +11,8 @@
 
 #include <getopt.h>
 
-#include "libgpsmm.h"
-#include "gpsdclient.c"
+#include "../libgpsmm.h"
+#include "../gpsdclient.c"
 /*     YES   --->  ^^^^
  Using .c rather than the .h to embed gpsd_source_spec() source here
   so that it is compiled in C++ rather than C of the gps library

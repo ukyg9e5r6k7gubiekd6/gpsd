@@ -1378,7 +1378,8 @@ else:
         LIBS=['gps_static'],
         parse_flags=["-lm"] + rtlibs + usbflags + dbusflags)
 
-test_gpsmm = env.Program('test_gpsmm', ['test_gpsmm.cpp'],
+# duplicate below?
+test_gpsmm = env.Program('tests/test_gpsmm', ['tests/test_gpsmm.cpp'],
                          LIBS=['gps_static'],
                          parse_flags=["-lm"] + rtlibs + dbusflags)
 testprogs = [test_bits, test_float, test_geoid, test_libgps, test_matrix,
@@ -1788,7 +1789,8 @@ build = env.Alias('build',
                    "libgps.pc", "gpsd.rules"])
 
 if qt_env:
-    test_qgpsmm = env.Program('test_qgpsmm', ['test_gpsmm.cpp'],
+    # duplicate above?
+    test_qgpsmm = env.Program('tests/test_qgpsmm', ['tests/test_gpsmm.cpp'],
                               LIBPATH=['.'],
                               OBJPREFIX='qt-',
                               LIBS=['Qgpsmm'])
