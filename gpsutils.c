@@ -351,8 +351,12 @@ timestamp_t timestamp(void)
      return (timestamp_t)(ts.tv_sec + ts.tv_nsec * 1e-9);
 }
 
+/* mkgmtime(tm)
+ * convert struct tm, as UTC, to seconds since Unix epoch
+ * This differs from mktime() from libc.
+ * mktime() takes struct tm as localtime.
+ */
 time_t mkgmtime(register struct tm * t)
-/* struct tm to seconds since Unix epoch */
 {
     register int year;
     register time_t result;

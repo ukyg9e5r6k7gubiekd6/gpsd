@@ -1,5 +1,6 @@
 /*
- * tests for mktime() and unix_to_iso8601().
+ * tests for mktime(), mkgmtime(), unix_to_iso8601() and iso8601_to_unix().
+ * mktime() is a libc function, why test it?
  *
  * This file is Copyright (c) 2010 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
@@ -118,13 +119,27 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
     (void)setenv("TZ", "GMT", 1);
 
-
+    /* test mktime() */
     for (i = 0; i < (int)(sizeof(tests) / sizeof(tests[0])); i++) {
 	time_t ts = mktime(&tests[i].t);
 	if (ts != tests[i].result) {
 	    failed = true;
 	    (void)strftime(tbuf, sizeof(tbuf), "%F %T", &tests[i].t);
-	    (void)printf("test_mktime: test %2d failed.\n"
+	    (void)printf("test_mktime: mktime() test %2d failed.\n"
+			 "  Time returned from: %s should be %lu "
+                         " (but was: %lu)\n",
+			 i, tbuf, (unsigned long)tests[i].result,
+			 (unsigned long)ts);
+	}
+    }
+
+    /* test mkgmtime() */
+    for (i = 0; i < (int)(sizeof(tests) / sizeof(tests[0])); i++) {
+	time_t ts = mkgmtime(&tests[i].t);
+	if (ts != tests[i].result) {
+	    failed = true;
+	    (void)strftime(tbuf, sizeof(tbuf), "%F %T", &tests[i].t);
+	    (void)printf("test_mktime: mkgmtime() test %2d failed.\n"
 			 "  Time returned from: %s should be %lu "
                          " (but was: %lu)\n",
 			 i, tbuf, (unsigned long)tests[i].result,
@@ -137,7 +152,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 	unix_to_iso8601(tests1[i].unixtime, tbuf, sizeof(tbuf));
         if (0 != strcmp(tests1[i].iso8601, tbuf)) {
 	    failed = true;
-	    (void)printf("test_mktime: test1 %f failed.\n"
+	    (void)printf("test_mktime: unix_to_iso8601() test %f failed.\n"
                          "  Got %s, s/b %s\n",
                          tests1[i].unixtime, tbuf, tests1[i].iso8601);
         }
@@ -148,7 +163,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 	ttime = iso8601_to_unix(tests1[i].iso8601);
         if (0.001 <= fabs(ttime - tests1[i].unixtime)) {
 	    failed = true;
-	    (void)printf("test_mktime: test1 %s failed.\n"
+	    (void)printf("test_mktime: iso8601_to_unit() test %s failed.\n"
                          "  Got %.3f, s/b %.3f\n",
                          tests1[i].iso8601, ttime, tests1[i].unixtime);
         }
