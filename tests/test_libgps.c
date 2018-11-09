@@ -11,9 +11,9 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-#include "gps.h"
-#include "libgps.h"
-#include "gpsdclient.h"
+#include "../gps.h"
+#include "../libgps.h"
+#include "../gpsdclient.h"
 
 #include <unistd.h>
 #include <getopt.h>

@@ -10,7 +10,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "bits.h"
+#include "../bits.h"
 
 static unsigned char buf[80];
 static signed char sb1, sb2;

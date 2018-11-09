@@ -1334,26 +1334,27 @@ if env["ncurses"]:
         bin_binaries += [cgps, gpsmon]
 
 # Test programs - always link locally and statically
-test_bits = env.Program('test_bits', ['test_bits.c'],
+test_bits = env.Program('tests/test_bits', ['tests/test_bits.c'],
                         LIBS=['gps_static'])
-test_float = env.Program('test_float', ['test_float.c'])
-test_geoid = env.Program('test_geoid', ['test_geoid.c'],
+test_float = env.Program('tests/test_float', ['tests/test_float.c'])
+test_geoid = env.Program('tests/test_geoid', ['tests/test_geoid.c'],
                          LIBS=['gpsd', 'gps_static'],
                          parse_flags=gpsdflags)
-test_matrix = env.Program('test_matrix', ['test_matrix.c'],
+test_matrix = env.Program('tests/test_matrix', ['tests/test_matrix.c'],
                           LIBS=['gpsd', 'gps_static'],
                           parse_flags=gpsdflags)
-test_mktime = env.Program('test_mktime', ['test_mktime.c'],
+test_mktime = env.Program('tests/test_mktime', ['tests/test_mktime.c'],
                           LIBS=['gps_static'], parse_flags=["-lm"])
-test_packet = env.Program('test_packet', ['test_packet.c'],
+test_packet = env.Program('tests/test_packet', ['tests/test_packet.c'],
                           LIBS=['gpsd', 'gps_static'],
                           parse_flags=gpsdflags)
-test_timespec = env.Program('test_timespec', ['test_timespec.c'],
+test_timespec = env.Program('tests/test_timespec', ['tests/test_timespec.c'],
                             LIBS=['gpsd', 'gps_static'],
                             parse_flags=gpsdflags)
-test_trig = env.Program('test_trig', ['test_trig.c'], parse_flags=["-lm"])
+test_trig = env.Program('tests/test_trig', ['tests/test_trig.c'],
+                        parse_flags=["-lm"])
 # test_libgps for glibc older than 2.17
-test_libgps = env.Program('test_libgps', ['test_libgps.c'],
+test_libgps = env.Program('tests/test_libgps', ['tests/test_libgps.c'],
                           LIBS=['gps_static'],
                           parse_flags=["-lm"] + rtlibs + dbusflags)
 
@@ -1362,7 +1363,7 @@ if not env['socket_export']:
     test_json = None
 else:
     test_json = env.Program(
-        'test_json', ['test_json.c'],
+        'tests/test_json', ['tests/test_json.c'],
         LIBS=['gps_static'],
         parse_flags=["-lm"] + rtlibs + usbflags + dbusflags)
 
@@ -1853,7 +1854,8 @@ if env['python']:
     maidenhead_locator_regress = UtilityWithHerald(
         'Testing the Maidenhead Locator conversion...',
         'maidenhead-locator-regress', [python_built_extensions], [
-            '$PYTHON $PYTHON_COVERAGE $SRCDIR/test_maidenhead.py >/dev/null'])
+            '$PYTHON $PYTHON_COVERAGE $SRCDIR/test_maidenhead.py '
+            ' >/dev/null'])
 
     # Sanity-check Python code.
     # Bletch.  We don't really want to suppress W0231 E0602 E0611 E1123,
@@ -1995,12 +1997,12 @@ audit = env.Alias('audit',
 
 # Unit-test the bitfield extractor
 bits_regress = Utility('bits-regress', [test_bits], [
-    '$SRCDIR/test_bits --quiet'
+    '$SRCDIR/tests/test_bits --quiet'
 ])
 
 # Unit-test the bitfield extractor
 matrix_regress = Utility('matrix-regress', [test_matrix], [
-    '$SRCDIR/test_matrix --quiet'
+    '$SRCDIR/tests/test_matrix --quiet'
 ])
 
 # using regress-drivers requires socket_export being enabled.
@@ -2152,26 +2154,27 @@ Utility('aivdm-makeregress', [gpsdecode], [
 packet_regress = UtilityWithHerald(
     'Testing detection of invalid packets...',
     'packet-regress', [test_packet], [
-        '$SRCDIR/test_packet | diff -u $SRCDIR/test/packet.test.chk -', ])
+        '$SRCDIR/tests/test_packet | diff -u $SRCDIR/test/packet.test.chk -', ])
 
 # Rebuild the packet-getter regression test
 Utility('packet-makeregress', [test_packet], [
-    '$SRCDIR/test_packet >$SRCDIR/test/packet.test.chk', ])
+    '$SRCDIR/tests/test_packet >$SRCDIR/test/packet.test.chk', ])
 
 # Rebuild the geoid test
 Utility('geoid-makeregress', [test_geoid], [
-    '$SRCDIR/test_geoid 37.371192 122.014965 >$SRCDIR/test/geoid.test.chk'])
+    '$SRCDIR/tests/test_geoid 37.371192 122.014965 '
+    ' >$SRCDIR/test/geoid.test.chk'])
 
 # Regression-test the geoid tester.
 geoid_regress = UtilityWithHerald(
     'Testing the geoid model...',
     'geoid-regress', [test_geoid], [
-        '$SRCDIR/test_geoid 37.371192 122.014965'
+        '$SRCDIR/tests/test_geoid 37.371192 122.014965'
         ' | diff -u $SRCDIR/test/geoid.test.chk -', ])
 
 # Regression-test the calendar functions
 time_regress = Utility('time-regress', [test_mktime], [
-    '$SRCDIR/test_mktime'
+    '$SRCDIR/tests/test_mktime'
 ])
 
 # Regression test the unpacking code in libgps
@@ -2194,18 +2197,29 @@ Utility('unpack-makeregress', [test_libgps], [
 if not env['socket_export']:
     json_regress = None
 else:
-    json_regress = Utility('json-regress', [test_json], ['$SRCDIR/test_json'])
+    json_regress = Utility('json-regress', [test_json],
+                           ['$SRCDIR/tests/test_json'])
 
 # Unit-test timespec math
 timespec_regress = Utility('timespec-regress', [test_timespec], [
-    '$SRCDIR/test_timespec'
+    '$SRCDIR/tests/test_timespec'
+])
+
+# Unit-test float math
+float_regress = Utility('float-regress', [test_float], [
+    '$SRCDIR/tests/test_float'
+])
+
+# Unit-test trig math
+trig_regress = Utility('trig-regress', [test_trig], [
+    '$SRCDIR/tests/test_trig'
 ])
 
 # consistency-check the driver methods
 method_regress = UtilityWithHerald(
     'Consistency-checking driver methods...',
     'method-regress', [test_packet], [
-        '$SRCDIR/test_packet -c >/dev/null', ])
+        '$SRCDIR/tests/test_packet -c >/dev/null', ])
 
 # Test the xgps/xgpsspeed dependencies
 if not env['python'] or not env['xgps']:
@@ -2241,6 +2255,7 @@ test_nondaemon = [
     aivdm_regress,
     bits_regress,
     describe,
+    float_regress,
     geoid_regress,
     json_regress,
     maidenhead_locator_regress,
@@ -2253,6 +2268,7 @@ test_nondaemon = [
     test_xgps_deps,
     time_regress,
     timespec_regress,
+    # trig_regress,  # not ready
     unpack_regress,
 ]
 

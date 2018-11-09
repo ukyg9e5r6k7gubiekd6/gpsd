@@ -3,6 +3,9 @@
  *
  * Check examples computed at
  * http://www.elektro-energetika.cz/calculations/matreg.php
+ *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
  */
 #include <stdlib.h>
 #include <stdbool.h>
@@ -10,8 +13,8 @@
 #include <stdio.h>
 #include <math.h>
 
-#include "compiler.h"
-#include "matrix.h"
+#include "../compiler.h"
+#include "../matrix.h"
 
 static struct {
     double mat[4][4];

@@ -10,9 +10,9 @@
 #include <stddef.h>
 #include <getopt.h>
 
-#include "gpsd.h"
-#include "gps_json.h"
-#include "revision.h"
+#include "../gpsd.h"
+#include "../gps_json.h"
+#include "../revision.h"
 
 /* GPSD is built with JSON_MINIMAL.  Any !JSON_MINIMAL tests,
  * like 18, 19 and 20 will thus fail.

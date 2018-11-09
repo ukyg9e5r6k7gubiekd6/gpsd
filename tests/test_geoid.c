@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-#include "gpsd.h"
+#include "../gpsd.h"
 
 int main(int argc, char **argv)
 {

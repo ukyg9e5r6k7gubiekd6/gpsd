@@ -11,7 +11,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include "gpsd.h"
+#include "../gpsd.h"
 
 static int verbose = 0;
 

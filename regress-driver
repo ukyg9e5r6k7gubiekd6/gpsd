@@ -138,7 +138,7 @@ case $mode in
 		trap 'rm -f ${TMP}/test-$$.chk; exit $errors' EXIT HUP INT TERM
 		case $testing in
 		daemon) TMPDIR=${TMP} ${PYTHON} ${PYTHON_COVERAGE} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ${ALTFILTER} >${TMP}/test-$$.chk ;;
-		clientlib) ${GPSD_HOME}/test_libgps -b <${f} >${TMP}/test-$$.chk ;;
+		clientlib) ${GPSD_HOME}/tests/test_libgps -b <${f} >${TMP}/test-$$.chk ;;
 		esac
 		if [ "${ALTFILTER}" ]
 		then

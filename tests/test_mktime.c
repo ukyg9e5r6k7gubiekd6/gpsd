@@ -5,14 +5,15 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
+#include <math.h>       /* for fabs() */
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
-#include "gps.h"
-#include "compiler.h"
+#include "../gps.h"
+#include "../compiler.h"
 
 static struct
 {

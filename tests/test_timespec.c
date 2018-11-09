@@ -1,6 +1,9 @@
 /*
  * Unit test for timespec's
  *
+ * This file is Copyright (c) 2010 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
+ *
  */
 #include <stdlib.h>
 #include <stdbool.h>
@@ -11,10 +14,10 @@
 #include <math.h>
 #include <unistd.h>
 
-#include "compiler.h"
-#include "revision.h"
-#include "ppsthread.h"
-#include "timespec.h"
+#include "../compiler.h"
+#include "../revision.h"
+#include "../ppsthread.h"
+#include "../timespec.h"
 
 #define TS_ZERO         {0,0}
 #define TS_ZERO_ONE     {0,1}
