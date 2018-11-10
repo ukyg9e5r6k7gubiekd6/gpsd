@@ -304,13 +304,13 @@ class greis(object):
         u = struct.unpack_from('<f', payload, 0)
         return " acc %.3e\n" % u[0]
 
-    def msg_DC(self, payload):
-        "[DC] decode, P/L1 Doppler"
+    def msg_D_(self, payload):
+        "[D?] decode, Doppler"
 
         s = " dp"
         for i in range(0, len(payload) - 1, 4):
-            u = struct.unpack_from('<L', payload, i)
-            s += " %d" % (u[0])
+            u = struct.unpack_from('<f', payload, i)
+            s += " " + self.f4_s(u[0])
 
         return s + '\n'
 
@@ -469,6 +469,16 @@ class greis(object):
                 (chr(u[0]), chr(u[1]), chr(u[2]), chr(u[3]),
                  chr(u[4]), chr(u[5]), chr(u[6])))
 
+    def msg_P_(self, payload):
+        "[P?] decode, Carrier Phases"
+
+        s = " cp"
+        for i in range(0, len(payload) - 1, 8):
+            u = struct.unpack_from('<d', payload, i)
+            s += " " + self.f8_s(u[0])
+
+        return s + '\n'
+
     def msg_PM(self, payload):
         "[PM] parameters"
 
@@ -486,6 +496,16 @@ class greis(object):
                 (self.f8_s(u[0]), self.f8_s(u[1]), self.f8_s(u[2]),
                  self.f4_s(u[3]), self.f4_s(u[4]), self.f4_s(u[5]),
                  self.f4_s(u[6]), self.f4_s(u[7]), self.soltypes[u[8]]))
+
+    def msg_R_(self, payload):
+        """[R?] decode, Pseudo-ranges"""
+
+        s = " pr"
+        for i in range(0, len(payload) - 1, 8):
+            u = struct.unpack_from('<d', payload, i)
+            s += " %s" % self.f8_s(u[0])
+
+        return s + '\n'
 
     def msg_RD(self, payload):
         "[RD] decode, Receiver Date"
@@ -699,9 +719,15 @@ class greis(object):
         '[cp]': (msg__p, 1),
         '[cr]': (msg__r, 1),
         '[CS]': (msg_S_, 8),
-        '[DC]': (msg_DC, 1),
+        '[D1]': (msg_D_, 1),
+        '[D2]': (msg_D_, 1),
+        '[D3]': (msg_D_, 1),
+        '[D5]': (msg_D_, 1),
+        '[DC]': (msg_D_, 1),
+        '[Dl]': (msg_D_, 1),
         '[DO]': (msg_DO, 6),
         '[DP]': (msg_DP, 18),
+        '[DX]': (msg_D_, 1),
         '[E1]': (msg_E_, 1),
         '[E2]': (msg_E_, 1),
         '[E3]': (msg_E_, 1),
@@ -732,26 +758,38 @@ class greis(object):
         '[Is]': (msg_S_, 8),
         '[ld]': (msg__d, 1),
         '[lE]': (msg__E, 1),
+        '[LO]': (msg_LO, 1),
         '[lp]': (msg__p, 1),
         '[lr]': (msg__r, 1),
-        '[LO]': (msg_LO, 1),
         '[MF]': (msg_MF, 9),
         '[::]': (msg_ET, 4),
         '[~~]': (msg_RT, 4),
         '[NS]': (msg_S_, 8),
+        '[P1]': (msg_P_, 1),
+        '[P2]': (msg_P_, 1),
+        '[P3]': (msg_P_, 1),
+        '[P5]': (msg_P_, 1),
+        '[PC]': (msg_P_, 1),
+        '[Pl]': (msg_P_, 1),
         '[PM]': (msg_PM, 0),
         '[PV]': (msg_PV, 46),
         '[QA]': (msg__A, 47),
         '[QE]': (msg__E1, 123),
         '[QS]': (msg_S_, 8),
         '[r1]': (msg_r, 1),
+        '[R1]': (msg_R_, 1),
         '[r2]': (msg_r, 1),
+        '[R2]': (msg_R_, 1),
         '[r3]': (msg_r, 1),
+        '[R3]': (msg_R_, 1),
         '[r5]': (msg_r, 1),
+        '[R5]': (msg_R_, 1),
         '[rc]': (msg_r, 1),
+        '[RC]': (msg_R_, 1),
         '[RD]': (msg_RD, 6),
         '[RE]': (msg_RE, 1),
         '[rl]': (msg_r, 1),
+        '[Rl]': (msg_R_, 1),
         '[rx]': (msg_r, 1),
         '[SE]': (msg_SE, 6),
         '[SG]': (msg_SG, 18),
@@ -1227,6 +1265,18 @@ class greis(object):
             # disable
             self.gps_send(b"%nmea%dm,," + messages)
 
+    def send_able_raw(self, able):
+        """dis/enable Psuedo-Range, Carrierphase and Doppler messages"""
+        self.expect_statement_identifier = 'em'
+        if able:
+            self.gps_send(b"%em%em,,jps/{RC,R1,R2,R3,R5,Rl}")
+            self.gps_send(b"%em%em,,jps/{PC,P1,P2,P3,P5,Pl}")
+            self.gps_send(b"%em%em,,jps/{DC,D1,D2,D3,D5,Dl}")
+        else:
+            self.gps_send(b"%em%dm,,jps/{RC,R1,R2,R3,R5,Rl}")
+            self.gps_send(b"%em%dm,,jps/{PC,P1,P2,P3,P5,Pl}")
+            self.gps_send(b"%em%dm,,jps/{DC,D1,D2,D3,D5,Dl}")
+
     def send_able_sbas(self, able):
         "dis/enable SBAS"
         self.expect_statement_identifier = 'cons'
@@ -1278,6 +1328,9 @@ class greis(object):
         # en/disable NMEA 4.1e
         "NMEA": {"command": send_able_nmea41,
                  "help": "basic messages NMEA 4.1 at 4Hz"},
+        # en/disable Psuedo Range, Carrier Phase and Doppler messages
+        "RAW": {"command": send_able_raw,
+                "help": "all Psuedo Range, Carrierphase and Doppler messages"},
         # en/disable SBAS
         "SBAS": {"command": send_able_sbas,
                  "help": "SBAS"},
