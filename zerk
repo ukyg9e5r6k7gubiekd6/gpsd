@@ -305,12 +305,13 @@ class greis(object):
         return " acc %.3e\n" % u[0]
 
     def msg_D_(self, payload):
-        "[D?] decode, Doppler"
+        """[D?] decode, Doppler"""
 
         s = " dp"
         for i in range(0, len(payload) - 1, 4):
-            u = struct.unpack_from('<f', payload, i)
-            s += " " + self.f4_s(u[0])
+            # This is dopple in Hz * 1e4
+            u = struct.unpack_from('<l', payload, i)
+            s += " " + self.i4_s(u[0])
 
         return s + '\n'
 
@@ -474,6 +475,7 @@ class greis(object):
 
         s = " cp"
         for i in range(0, len(payload) - 1, 8):
+            # carrier phases in cycles
             u = struct.unpack_from('<d', payload, i)
             s += " " + self.f8_s(u[0])
 
@@ -502,6 +504,7 @@ class greis(object):
 
         s = " pr"
         for i in range(0, len(payload) - 1, 8):
+            # psuedo in seconds
             u = struct.unpack_from('<d', payload, i)
             s += " %s" % self.f8_s(u[0])
 
