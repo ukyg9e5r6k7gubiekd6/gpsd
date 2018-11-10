@@ -26,7 +26,7 @@
  *    # ubxtool -e RAWX
  *
  * After collecting the default number of observations, gpsrinex will
- * create the file 'gpsrinx.obx' and exit.  Upload this file to an
+ * create the RINEX .obs file and exit.  Upload this file to an
  * offline processing service to get cm accuracy.
  *
  * One service known to work with obsrinex output is:

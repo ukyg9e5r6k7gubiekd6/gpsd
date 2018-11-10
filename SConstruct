@@ -1747,6 +1747,7 @@ base_manpages = {
     "gpsinit.8": "gpsinit.xml",
     "gpsmon.1": "gpsmon.xml",
     "gpspipe.1": "gpspipe.xml",
+    "gpsrinex.1": "gpsrinex.xml",
     "gpxlogger.1": "gpxlogger.xml",
     "lcdgps.1": "gps.xml",
     "libgps.3": "libgps.xml",

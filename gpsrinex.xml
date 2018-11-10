@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN" "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
+<!--
+This file is Copyright (c) 2018 by the GPSD project
+SPDX-License-Identifier: BSD-2-clause
+--><refentry id="gpsrinex.1">
+  <refentryinfo>
+    <date>09 Nov 2018</date>
+  </refentryinfo>
+  <refmeta>
+    <refentrytitle>gpsrinex</refentrytitle>
+    <manvolnum>1</manvolnum>
+    <refmiscinfo class="source">The GPSD Project</refmiscinfo>
+    <refmiscinfo class="manual">GPSD Documentation</refmiscinfo>
+  </refmeta>
+  <refnamediv id="name">
+    <refname>gpsrinex</refname>
+    <refpurpose>Read data from gpsd convert to RINEX3 and save to a file.</refpurpose>
+  </refnamediv>
+  <refsynopsisdiv id="synopsis">
+    <cmdsynopsis>
+      <command>gpsrinex</command>
+      <arg choice="opt">-D <replaceable>debuglevel</replaceable></arg>
+      <arg choice="opt">-f <replaceable>filename</replaceable></arg>
+      <arg choice="opt">-h</arg>
+      <arg choice="opt">-i <replaceable>interval</replaceable></arg>
+      <arg choice="opt">-n <replaceable>count</replaceable></arg>
+      <arg choice="opt">-V</arg>
+      <group>
+        <replaceable>server</replaceable>
+        <group>
+          <replaceable>:port</replaceable>
+          <group>
+            <replaceable>:device</replaceable>
+          </group>
+        </group>
+      </group>
+    </cmdsynopsis>
+  </refsynopsisdiv>
+  <refsect1 id="description">
+    <title>DESCRIPTION</title>
+    <para>
+      <application>gpsrinex</application> is a tool to connect to
+<application>gpsd</application> and output the received raw measurements
+as a RINEX 3 observation file.  This is useful for sending raw measurements
+(pseudorange and carrierphase) from <application>gpsd</application> to
+a Precise Point Positioning (PPP) program or service.</para>
+    <para>
+      <application>gpsrinex</application> does not require root
+privileges, and can be run concurrently with other tools connecting
+to a local or remote <application>gpsd</application> without causing
+problems.</para>
+    <para>gpsrinex needs the GPS receiver to be sending raw measurements
+to <application>gpsd</application>.  Only a few GPS have this capability.
+In addition, the <application>gpsd</application> driver for that GPS
+must support raw mode.  Currently only the u-blox driver has this support.
+Only a few u-blox 8 GPS implment the required UBX-RXM-RAWX message.  The
+NEO-M8T is known to work, but requires configuration with
+<application>ubxtool</application>.</para>
+    <para>RINEX has its own definitions and abbreviations.  Be
+sure to consult their documentation.  An observation file (.obs)
+contains data sets, called epochs, that contain the pseudorange
+and carrierphase for each satellite seen.</para>
+    <para>
+      <application>gpsrinex</application> by default will acquire
+20 epochs spaced apart by 30 seconds.  That will take 10 minutes to
+complete.  Most users consider the 30 second interval to be optimal.
+Many PPP programs require at least 1 or 2 hours data, but no more than
+24 or 48 hours of data.  Most users consider 4 to 6 hours of data
+as a minimum for good accuracy.  Additional hours will not yield much
+improvement. </para>
+    <para>The output will consist of one RINEX 3 observation file that
+is ready to be read by your PPP program.  The default filename will be
+in the form: gpsrinexYYYYJJJHHMMSS.obs.  You can override this filename
+with the -f option.</para>
+    <para>Optionally a server, TCP/IP port number and remote device can
+be given.  If omitted, <application>gpsrinex</application> connects to
+localhost on the default port (2947) and watches all devices opened by
+<application>gpsd</application>.</para>
+  </refsect1>
+  <refsect1 id="options">
+    <title>OPTIONS</title>
+    <para>-D [debuglevel]  set debug level to [debuglevel].</para>
+    <para>-f [filename] save RINEX into [filename].</para>
+    <para>-h makes <application>gpsrinex</application> print
+a usage message and exit.</para>
+    <para>-i [interval] wait [interval] seconds between epochs.</para>
+    <para>-n [count] causes [count] epochs to be output.</para>
+    <para>-V makes <application>gpsrinex</application> print
+its version and exit.</para>
+  </refsect1>
+  <refsect1 id="exampletitle">
+    <title>EXAMPLES</title>
+    <para>Example 1:</para>
+    <para>Create a 4 hour .obs file.  With a running
+<application>gpsd</application> accessible on the localhost do all of
+the following, in order.  Order matters.</para>
+    <para>The raw measurement messages are long.  Be sure your serial port
+speed is high enough:
+<programlisting>
+gpsctl -s 115200
+</programlisting></para>
+    <para>Disable all NMEA messages, and enable binary messages:
+<programlisting>
+ubxtool -d NMEA
+ubxtool -e BINARY
+</programlisting></para>
+    <para>The NEO-M8N will only reliably output raw measurements
+when only the GPS and QZSS constellations are enabled.
+<application>ubxtool</application>, as recommended by u-blox, enables
+the QZSS constellation in tandem with GPS.  Disable all constellations,
+except GPS (and QZSS):
+
+<programlisting>
+ubxtool -d GLONASS
+ubxtool -d BEIDOU
+ubxtool -d GALILEO
+ubxtool -d SBAS
+ubxtool -e GPS
+</programlisting></para>
+    <para>Verify the constellations enabled:
+<programlisting>
+ubxtool -p GNSS
+</programlisting></para>
+    <para>Enable the good stuff, the raw measurement messages:
+<programlisting>
+ubxtool -e RAWX
+</programlisting></para>
+    <para>Verify raw data messages are being sent:
+<programlisting>
+ubxtool | fgrep RAWX
+</programlisting>
+You should see this output:
+<programlisting>
+UBX-RXM-RAWX:
+UBX-RXM-RAWX:
+</programlisting></para>
+    <para>Collect 4 hours of samples at 30 second intervals, save then
+RINEX 3 observations in the file today.obs:
+<programlisting>
+gpsrinex -i 30 -n 480 -f today.obs
+</programlisting></para>
+    <para>Wait 4 hours.  Enjoy a meal, or do some exercise.  When 
+<application>gpsrinex</application> finishes, upload the file today.obs
+to your favorite PPP service.</para>
+    <para>Example 2:</para>
+    <para>Collect raw masurement data from a remote gpsd.  The
+process it later with <application>gpsrinex</application> and
+<application>gpsprof</application>.</para>
+    <para>Ensure the GPS is configured properly, as shown in Example 1.</para>
+    <para>Grab 4 hours of raw live data from remote
+<application>gpsd</application> at 10.168.1.2:
+<programlisting>
+gpspipe -x 14400 -R 10.168.1.2 > 4h-raw.ubx
+</programlisting></para>
+    <para>When <application>gpspipe</application> is complete, feed the
+data to <application>gpsfake</application>:
+<programlisting>
+gpsfake -1 -P 3000 4h-raw.ubx
+</programlisting></para>
+    <para>In another window, feed the data to 
+<application>gpsrinex</application>.  Use -n 10000000 so that
+all the data from the raw file is used::
+<programlisting>
+gpsrinex -i 30 -n 1000000
+</programlisting></para>
+    <para>Repeat the process with 
+<application>gpsfake</application> to send the data to 
+<application>gpsprof</application>.</para>
+  </refsect1>
+  <refsect1 id="see_also">
+    <title>SEE ALSO</title>
+    <para>One service known to work with obsrinex output is at:
+https://webapp.geod.nrcan.gc.ca/geod/tools-outils/ppp.php</para>
+    <para>The curious can find the RINEX 3.03 format described here:
+ftp://igs.org/pub/data/format/rinex303_update1.pdf</para>
+    <para>
+      <citerefentry>
+        <refentrytitle>gpsd</refentrytitle>
+        <manvolnum>8</manvolnum>
+      </citerefentry>,
+<citerefentry><refentrytitle>gpsfake</refentrytitle><manvolnum>1</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>ubxtool</refentrytitle><manvolnum>1</manvolnum></citerefentry>.
+</para>
+  </refsect1>
+  <refsect1 id="maintainer">
+    <title>AUTHOR</title>
+    <para>Gary E. Miller <email>gem@rellim.com</email>.</para>
+  </refsect1>
+</refentry>
