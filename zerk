@@ -1269,16 +1269,19 @@ class greis(object):
             self.gps_send(b"%nmea%dm,," + messages)
 
     def send_able_raw(self, able):
-        """dis/enable Psuedo-Range, Carrierphase and Doppler messages"""
-        self.expect_statement_identifier = 'em'
+        """dis/enable Raw mode messages"""
+        self.expect_statement_identifier = 'raw'
+
+        messages = (b"jps/{RT,UO,GT,PV,SG,DP,SI,EL,AZ,EC,SS,"
+                    b"PC,P1,P2,P3,P5,Pl,"
+                    b"RC,R1,R2,R3,R5,Rl,"
+                    b"DC,D1,D2,D3,D5,Dl,"
+                    b"ET}")
+
         if able:
-            self.gps_send(b"%em%em,,jps/{RC,R1,R2,R3,R5,Rl}")
-            self.gps_send(b"%em%em,,jps/{PC,P1,P2,P3,P5,Pl}")
-            self.gps_send(b"%em%em,,jps/{DC,D1,D2,D3,D5,Dl}")
+            self.gps_send(b"%raw%em,," + messages + b":1")
         else:
-            self.gps_send(b"%em%dm,,jps/{RC,R1,R2,R3,R5,Rl}")
-            self.gps_send(b"%em%dm,,jps/{PC,P1,P2,P3,P5,Pl}")
-            self.gps_send(b"%em%dm,,jps/{DC,D1,D2,D3,D5,Dl}")
+            self.gps_send(b"%raw%dm,," + messages)
 
     def send_able_sbas(self, able):
         "dis/enable SBAS"
@@ -1333,7 +1336,7 @@ class greis(object):
                  "help": "basic messages NMEA 4.1 at 4Hz"},
         # en/disable Psuedo Range, Carrier Phase and Doppler messages
         "RAW": {"command": send_able_raw,
-                "help": "all Psuedo Range, Carrierphase and Doppler messages"},
+                "help": "Raw mode messages"},
         # en/disable SBAS
         "SBAS": {"command": send_able_sbas,
                  "help": "SBAS"},
