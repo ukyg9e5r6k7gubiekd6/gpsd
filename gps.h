@@ -1948,6 +1948,7 @@ struct rawdata_t {
         double pseudorange;	/* meters */
         double deltarange;	/* meters/sec */
         double doppler;	        /* Hz */
+#define LOCKMAX         64500   /* locktime capped at 64500 */
         unsigned locktime;      /* Carrier Phase Locktime in ms.
                                  * max 64,500 ms */
         unsigned satstat;	/* tracking status */

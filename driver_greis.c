@@ -414,6 +414,8 @@ static gps_mask_t greis_msg_SI(struct gps_device_t *session,
             session->gpsdata.skyview[i].gnssid;
 	session->gpsdata.raw.meas[i].svid =
             session->gpsdata.skyview[i].svid;
+        /* GREIS does not report locktime, so assume max */
+	session->gpsdata.raw.meas[i].locktime = LOCKMAX;
     }
 
     session->driver.greis.seen_si = true;
@@ -559,9 +561,10 @@ static gps_mask_t greis_msg_PC(struct gps_device_t *session,
 	return 0;
     }
 
-    for (i = 0; i < session->gpsdata.satellites_visible; i++)
+    for (i = 0; i < session->gpsdata.satellites_visible; i++) {
 	session->gpsdata.raw.meas[i].carrierphase = getled64((char *)buf,
                                                             i * 8);
+    }
 
     session->driver.greis.seen_raw = true;
     gpsd_log(&session->context->errout, LOG_DATA, "GREIS: PC\n");
