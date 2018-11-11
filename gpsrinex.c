@@ -342,7 +342,7 @@ static void print_rinex_header(void)
             /* done */
             break;
         }
-        for (j = 0; j <= CODEMAX; j++) {
+        for (j = 0; j < CODEMAX; j++) {
             cnt += obs_cnt[i].obs_cnts[j];
         }
         if (0 > cnt) {
