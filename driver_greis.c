@@ -93,6 +93,7 @@ static gps_mask_t greis_msg_RT(struct gps_device_t *session,
     }
 
     session->driver.greis.rt_tod = getleu32(buf, 0);
+    memset(&session->gpsdata.raw, 0, sizeof(session->gpsdata.raw));
 
     session->driver.greis.seen_rt = true;
     session->driver.greis.seen_az = false;
@@ -164,6 +165,7 @@ static gps_mask_t greis_msg_UO(struct gps_device_t *session,
 static gps_mask_t greis_msg_GT(struct gps_device_t *session,
 			       unsigned char *buf, size_t len)
 {
+    double t_intp;
     uint32_t tow;	     /* Time of week [ms] */
     uint16_t wn;	     /* GPS week number (modulo 1024) [dimensionless] */
 
@@ -188,6 +190,16 @@ static gps_mask_t greis_msg_GT(struct gps_device_t *session,
 	     "GREIS: GT, tow: %u, wn: %u, time: %.2f\n", tow, wn,
 	     session->newdata.time);
 
+    /* save raw.mtime, just in case */
+    session->gpsdata.raw.mtime.tv_nsec =
+	modf(session->newdata.time, &t_intp) * 1e9;
+    session->gpsdata.raw.mtime.tv_sec = (time_t)t_intp + \
+	session->context->leap_seconds;
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "GREIS: GT, RAW @ %ld.%09ld\n",
+	     (long)session->gpsdata.raw.mtime.tv_sec,
+	     session->gpsdata.raw.mtime.tv_nsec);
+
     return TIME_SET | NTPTIME_IS | ONLINE_SET;
 }
 
@@ -202,7 +214,6 @@ static gps_mask_t greis_msg_PV(struct gps_device_t *session,
     float vx, vy, vz;	    /* Cartesian velocities [m/s] */
     float v_sigma;	    /* Velocity SEP [m/s] */
     uint8_t solution_type;
-    gps_mask_t mask;
 
     if (len < 46) {
 	gpsd_log(&session->context->errout, LOG_WARN,
@@ -260,12 +271,8 @@ static gps_mask_t greis_msg_PV(struct gps_device_t *session,
 	     session->newdata.longitude, session->newdata.altitude,
 	     solution_type);
 
-    mask = LATLON_SET | ALTITUDE_SET | CLIMB_SET | TRACK_SET | SPEED_SET |
+   return LATLON_SET | ALTITUDE_SET | CLIMB_SET | TRACK_SET | SPEED_SET |
 	MODE_SET | STATUS_SET | ECEF_SET | VECEF_SET;
-    if (session->driver.greis.seen_raw) {
-        mask |= RAW_SET;
-    }
-    return mask;
 }
 
 /**
@@ -402,6 +409,7 @@ static gps_mask_t greis_msg_SI(struct gps_device_t *session,
             session->gpsdata.skyview[i].gnssid = 3;
             session->gpsdata.skyview[i].svid = PRN - 210;
         }
+	session->gpsdata.raw.meas[i].obs_code[0] = '\0';
 	session->gpsdata.raw.meas[i].gnssid =
             session->gpsdata.skyview[i].gnssid;
 	session->gpsdata.raw.meas[i].svid =
@@ -694,7 +702,17 @@ static gps_mask_t greis_msg_ET(struct gps_device_t *session,
 	 session->driver.greis.seen_el && session->driver.greis.seen_si)) {
         /* Skyview seen, update it.  Go even if no seen_ss or none visible */
         mask |= SATELLITE_SET;
+
+	if (session->driver.greis.seen_raw) {
+	    mask |= RAW_IS;
+	} else {
+	    session->gpsdata.raw.mtime.tv_sec = 0;
+	    session->gpsdata.raw.mtime.tv_nsec = 0;
+        }
+
     } else {
+	session->gpsdata.raw.mtime.tv_sec = 0;
+	session->gpsdata.raw.mtime.tv_nsec = 0;
 	gpsd_log(&session->context->errout, LOG_WARN,
 		 "GREIS: ET: missing satellite details in this epoch\n");
     }
