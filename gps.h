@@ -2227,6 +2227,8 @@ extern double wgs84_separation(double, double);
 #define WGS84F 298.257223563	/* flattening */
 #define WGS84B 6356752.3142	/* polar radius */
 
+#define CLIGHT      299792458.0  /* speed of light (m/s) */
+
 /* netlib_connectsock() errno return values */
 #define NL_NOSERVICE	-1	/* can't get service entry */
 #define NL_NOHOST	-2	/* can't get host entry */
