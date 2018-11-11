@@ -592,9 +592,11 @@ static gps_mask_t greis_msg_RC(struct gps_device_t *session,
 	return 0;
     }
 
-    for (i = 0; i < session->gpsdata.satellites_visible; i++)
-	session->gpsdata.raw.meas[i].pseudorange = getled64((char *)buf,
-                                                            i * 8);
+    for (i = 0; i < session->gpsdata.satellites_visible; i++) {
+        /* get, and convert to meters */
+	session->gpsdata.raw.meas[i].pseudorange = \
+            getled64((char *)buf, i * 8) * CLIGHT;
+    }
 
     session->driver.greis.seen_raw = true;
     gpsd_log(&session->context->errout, LOG_DATA, "GREIS: RC\n");
