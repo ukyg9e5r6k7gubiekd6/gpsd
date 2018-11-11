@@ -506,6 +506,46 @@ static gps_mask_t greis_msg_AZ(struct gps_device_t *session,
 }
 
 /**
+ * Handle the message [DC] Doppler (CA/L1)
+ */
+static gps_mask_t greis_msg_DC(struct gps_device_t *session,
+			       unsigned char *buf, size_t len)
+{
+    int i;
+    long int_doppler;
+    size_t len_needed = (session->gpsdata.satellites_visible * 4) + 1;
+
+    if (!session->driver.greis.seen_si) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "GREIS: can't use DC until after SI provides indices\n");
+	return 0;
+    }
+
+    /* check against number of satellites + checksum */
+    if (len < len_needed) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "GREIS: DC bad len %zu, needed at least %zu\n", len,
+		 len_needed);
+	return 0;
+    }
+
+    for (i = 0; i < session->gpsdata.satellites_visible; i++) {
+	int_doppler = getles32((char *)buf, i * 4);
+        if (0x7fffffff == int_doppler) {
+            /* out of range */
+	    session->gpsdata.raw.meas[i].doppler = NAN;
+        } else {
+	    session->gpsdata.raw.meas[i].doppler = int_doppler * 1e-4;
+        }
+    }
+
+    session->driver.greis.seen_raw = true;
+    gpsd_log(&session->context->errout, LOG_DATA, "GREIS: DC\n");
+
+    return 0;
+}
+
+/**
  * Handle the message [EC] SNR (CA/L1).
  * EC really outputs CNR, but what gpsd refers to as SNR _is_ CNR.
  */
@@ -748,6 +788,7 @@ struct dispatch_table_entry {
 static struct dispatch_table_entry dispatch_table[] = {
     {':', ':', greis_msg_ET},
     {'A', 'Z', greis_msg_AZ},
+    {'D', 'C', greis_msg_DC},
     {'D', 'P', greis_msg_DP},
     {'E', 'C', greis_msg_EC},
     {'E', 'R', greis_msg_ER},
