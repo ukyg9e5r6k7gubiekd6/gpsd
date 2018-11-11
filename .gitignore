@@ -1,18 +1,19 @@
 # Binaries
-gpsd
-rtcmdecode
-gpsmon
+cgps
+cgpxlogger
+gps2udp
 gpsctl
+gpsd
 gpsdctl
 gpsdecode
-cgps
-lcdgps
-gpxlogger
-cgpxlogger
+gpsmon
 gpspipe
-gps2udp
+gpsrinex
+gpxlogger
+lcdgps
 ntpshmmon
 ppscheck
+rtcmdecode
 contrib/clock_test
 *.exe
 # These are built from .in files
