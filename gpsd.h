@@ -610,6 +610,8 @@ struct gps_device_t {
 	    bool seen_az;		/* true if seen AZ message */
 	    bool seen_ec;		/* true if seen EC message */
 	    bool seen_el;		/* true if seen EL message */
+            /* true if seen a raw measurement message */
+	    bool seen_raw;
 	} greis;
 #endif /* GREIS_ENABLE */
 #ifdef SIRF_ENABLE
