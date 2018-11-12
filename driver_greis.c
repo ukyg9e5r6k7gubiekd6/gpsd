@@ -579,7 +579,40 @@ static gps_mask_t greis_msg_EC(struct gps_device_t *session,
 
 
 /**
- * Handle the message [PC] Carrier Phases (CA/L1)
+ * Handle the message [P3] CA/L2 Carrier Phases, RINEX L2C
+ */
+static gps_mask_t greis_msg_P3(struct gps_device_t *session,
+			       unsigned char *buf, size_t len)
+{
+    int i;
+    size_t len_needed = (session->gpsdata.satellites_visible * 8) + 1;
+
+    if (!session->driver.greis.seen_si) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "GREIS: can't use P3 until after SI provides indices\n");
+	return 0;
+    }
+
+    /* check against number of satellites + checksum */
+    if (len < len_needed) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "GREIS: P3 bad len %zu, needed at least %zu\n", len,
+		 len_needed);
+	return 0;
+    }
+
+    for (i = 0; i < session->gpsdata.satellites_visible; i++) {
+	session->gpsdata.raw.meas[i].l2c = getled64((char *)buf, i * 8);
+    }
+
+    session->driver.greis.seen_raw = true;
+    gpsd_log(&session->context->errout, LOG_DATA, "GREIS: P3\n");
+
+    return 0;
+}
+
+/**
+ * Handle the message [PC] CA/L1 Carrier Phases, RINEX L1C
  */
 static gps_mask_t greis_msg_PC(struct gps_device_t *session,
 			       unsigned char *buf, size_t len)
@@ -613,7 +646,42 @@ static gps_mask_t greis_msg_PC(struct gps_device_t *session,
 }
 
 /**
- * Handle the message [RC] Pseudo-range CA/L1
+ * Handle the message [R3] CA/L2 Pseudo-range, RINEX C2C
+ */
+static gps_mask_t greis_msg_R3(struct gps_device_t *session,
+			       unsigned char *buf, size_t len)
+{
+    int i;
+    size_t len_needed = (session->gpsdata.satellites_visible * 8) + 1;
+
+    if (!session->driver.greis.seen_si) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "GREIS: can't use R3 until after SI provides indices\n");
+	return 0;
+    }
+
+    /* check against number of satellites + checksum */
+    if (len < len_needed) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "GREIS: R3 bad len %zu, needed at least %zu\n", len,
+		 len_needed);
+	return 0;
+    }
+
+    for (i = 0; i < session->gpsdata.satellites_visible; i++) {
+        /* get, and convert to meters */
+	session->gpsdata.raw.meas[i].c2c = \
+            getled64((char *)buf, i * 8) * CLIGHT;
+    }
+
+    session->driver.greis.seen_raw = true;
+    gpsd_log(&session->context->errout, LOG_DATA, "GREIS: R3\n");
+
+    return 0;
+}
+
+/**
+ * Handle the message [RC] Pseudo-range CA/L1, RINEX C1C
  */
 static gps_mask_t greis_msg_RC(struct gps_device_t *session,
 			       unsigned char *buf, size_t len)
@@ -794,7 +862,9 @@ static struct dispatch_table_entry dispatch_table[] = {
     {'E', 'R', greis_msg_ER},
     {'E', 'L', greis_msg_EL},
     {'G', 'T', greis_msg_GT},
+    {'R', '3', greis_msg_R3},
     {'R', 'C', greis_msg_RC},
+    {'P', '3', greis_msg_P3},
     {'P', 'C', greis_msg_PC},
     {'P', 'V', greis_msg_PV},
     {'R', 'E', greis_msg_RE},

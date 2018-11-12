@@ -754,17 +754,19 @@ void json_raw_dump(const struct gps_data_t *gpsdata,
                     gpsdata->raw.meas[i].locktime);
         comma = true;
 
-        if (0 != isfinite(gpsdata->raw.meas[i].carrierphase)) {
-            str_appendf(reply, replylen, ",\"carrierphase\":%f",
-                        gpsdata->raw.meas[i].carrierphase);
-            comma = true;
-        }
-        if (0 != isfinite(gpsdata->raw.meas[i].pseudorange)) {
+        if (0 != isfinite(gpsdata->raw.meas[i].pseudorange) &&
+            1.0 < gpsdata->raw.meas[i].pseudorange) {
             if (comma)
                 (void)strlcat(reply, ",", replylen);
             str_appendf(reply, replylen, "\"pseudorange\":%f",
                         gpsdata->raw.meas[i].pseudorange);
             comma = true;
+
+	    if (0 != isfinite(gpsdata->raw.meas[i].carrierphase)) {
+		str_appendf(reply, replylen, ",\"carrierphase\":%f",
+			    gpsdata->raw.meas[i].carrierphase);
+		comma = true;
+	    }
         }
         if (0 != isfinite(gpsdata->raw.meas[i].doppler)) {
             if (comma)
@@ -774,6 +776,24 @@ void json_raw_dump(const struct gps_data_t *gpsdata,
             comma = true;
         }
 
+        /* L2 C/A pseudo range, RINEX C2C */
+        if (0 != isfinite(gpsdata->raw.meas[i].c2c) &&
+            1.0 < gpsdata->raw.meas[i].c2c) {
+            if (comma)
+                (void)strlcat(reply, ",", replylen);
+            str_appendf(reply, replylen, "\"c2c\":%f",
+                        gpsdata->raw.meas[i].c2c);
+            comma = true;
+
+	    /* L2 C/A carrier phase, RINEX L2C */
+	    if (0 != isfinite(gpsdata->raw.meas[i].l2c)) {
+		if (comma)
+		    (void)strlcat(reply, ",", replylen);
+		str_appendf(reply, replylen, "\"l2c\":%f",
+			    gpsdata->raw.meas[i].l2c);
+		comma = true;
+	    }
+        }
         (void)strlcat(reply, "},", replylen);
     }
     str_rstrip_char(reply, ',');

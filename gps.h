@@ -1944,13 +1944,15 @@ struct rawdata_t {
          *        S: L9A, L9B, L9C, L9X
          */
         double codephase;	/* meters */
-        double carrierphase;	/* meters */
-        double pseudorange;	/* meters */
-        double deltarange;	/* meters/sec */
+        double carrierphase;	/* L1 C/A meters, RINEX L1C */
+        double pseudorange;	/* L1 C/A meters, RINEX C1C */
+        double deltarange;	/* L1 C/A meters/sec, RINEX D1C */
         double doppler;	        /* Hz */
 #define LOCKMAX         64500   /* locktime capped at 64500 */
         unsigned locktime;      /* Carrier Phase Locktime in ms.
                                  * max 64,500 ms */
+        double l2c;		/* L2 C/A carrier phase meters, RINEX L2C */
+        double c2c;	        /* L2 C/A pseudo-range meters, RINEX C2C */
         unsigned satstat;	/* tracking status */
 #define SAT_ACQUIRED	0x01	/* satellite acquired */
 #define SAT_CODE_TRACK	0x02	/* code-tracking loop acquired */

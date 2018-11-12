@@ -155,6 +155,10 @@ static int json_raw_read(const char *buf, struct gps_data_t *gpsdata,
 			            .dflt.real = NAN},
 	{"doppler",	 t_real,    STRUCTOBJECT(struct meas_t, doppler),
 			             .dflt.real = NAN},
+	{"c2c",	         t_real,    STRUCTOBJECT(struct meas_t, c2c),
+			            .dflt.real = NAN},
+	{"l2c",	         t_real,    STRUCTOBJECT(struct meas_t, l2c),
+			            .dflt.real = NAN},
 	/* *INDENT-ON* */
 	{NULL},
     };
