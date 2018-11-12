@@ -102,18 +102,21 @@ static timespec_t last_mtime = {0};      /* GPS time, not UTC */
  */
 
 /* observation codes:
- * C1C  L1 Pseudorange
- * D1C  L1 Doppler
- * L1C  L1 carrier phase
+ * C1C  L1 C/A Pseudorange
+ * D1C  L1 C/A Doppler
+ * L1C  L1 C/A carrier phase
+ * C2C  L2 C/A Pseudorange
+ * D2C  L2 C/A Doppler
+ * L2C  L2 C/A carrier phase
  */
-typedef enum {C1C = 0, D1C, L1C, CODEMAX} obs_codes;
+typedef enum {C1C = 0, D1C, L1C, C2C, D2C, L2C, CODEMAX} obs_codes;
 /* structure to hold count of observations by gnssid:svid
- * MAXCHANNEL*4 is just a WAG of max size */
-#define MAXCNT (MAXCHANNELS * 4)
+ * MAXCHANNEL+1 is just a WAG of max size */
+#define MAXCNT (MAXCHANNELS + 1)
 static struct obs_cnt_t {
         unsigned char gnssid;
         unsigned char svid;     /* svid of 0 means unused slot */
-        obs_codes obs_cnts[CODEMAX];
+        obs_codes obs_cnts[CODEMAX+1];
         unsigned int count;        /* count of obscode */
 } obs_cnt[MAXCNT] = {0};
 
@@ -292,43 +295,44 @@ static void print_rinex_header(void)
         prn_count[i] = obs_cnt_prns(i);
     }
     /* CSRS-PPP needs C1C, L1C or C1C, L1C, D1C */
+    /* CSRS-PPP refuses files with L1C first
     /* convbin wants C1C, L1C, D1C */
     /* for some reason gfzrnx_lx wants C1C, D1C, L1C, not C1C, L1C, D1C */
     if (0 < prn_count[0]) {
         /* GPS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(0), 3, "C1C", "L1C", "D1C", "", "", "", "", "", "",
-             "SYS / # / OBS TYPES");
+             gnssid2rinex(0), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
+             "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[1]) {
         /* SBAS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(1), 3, "C1C", "L1C", "D1C", "", "", "", "", "", "",
-             "SYS / # / OBS TYPES");
+             gnssid2rinex(0), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
+             "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[2]) {
         /* GALILEO */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(2), 3, "C1A", "L1A", "D1A", "", "", "", "", "", "",
-             "SYS / # / OBS TYPES");
+             gnssid2rinex(0), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
+             "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[3]) {
         /* BeiDou, BDS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(3), 3, "C1I", "L1I", "D1I", "", "", "", "", "", "",
-             "SYS / # / OBS TYPES");
+             gnssid2rinex(0), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
+             "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[5]) {
         /* QZSS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(5), 3, "C1C", "L1C", "D1C", "", "", "", "", "", "",
-             "SYS / # / OBS TYPES");
+             gnssid2rinex(0), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
+             "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[6]) {
         /* GLONASS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(6), 3, "C1C", "L1C", "D1C", "", "", "", "", "", "",
-             "SYS / # / OBS TYPES");
+             gnssid2rinex(0), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
+             "", "", "", "SYS / # / OBS TYPES");
     }
 
     (void)fprintf(log_file, "%6d%54s%-20s\n", obs_cnt_prns(255),
@@ -633,23 +637,35 @@ static void print_raw(struct gps_data_t *gpsdata)
                         C1C);
         }
 
-        if (0 != isfinite(gpsdata->raw.meas[i].doppler)) {
-            obs_cnt_inc(gpsdata->raw.meas[i].gnssid, gpsdata->raw.meas[i].svid,
-                        D1C);
-        }
-
         if (0 != isfinite(gpsdata->raw.meas[i].carrierphase)) {
             obs_cnt_inc(gpsdata->raw.meas[i].gnssid, gpsdata->raw.meas[i].svid,
                         L1C);
         }
 
+        if (0 != isfinite(gpsdata->raw.meas[i].doppler)) {
+            obs_cnt_inc(gpsdata->raw.meas[i].gnssid, gpsdata->raw.meas[i].svid,
+                        D1C);
+        }
+
+        if (0 != isfinite(gpsdata->raw.meas[i].c2c)) {
+            obs_cnt_inc(gpsdata->raw.meas[i].gnssid, gpsdata->raw.meas[i].svid,
+                        C2C);
+        }
+
+        if (0 != isfinite(gpsdata->raw.meas[i].l2c)) {
+            obs_cnt_inc(gpsdata->raw.meas[i].gnssid, gpsdata->raw.meas[i].svid,
+                        L2C);
+        }
+
+        /* line no longer must be 80 chars in RINEX 3 */
         (void)fprintf(tmp_file,"%c%02d", gnssid, svid);
         (void)fputs(fmt_obs(gpsdata->raw.meas[i].pseudorange, 0, snr),
                     tmp_file);
         (void)fputs(fmt_obs(gpsdata->raw.meas[i].carrierphase,
                             gpsdata->raw.meas[i].lli, 0), tmp_file);
-        (void)fputs(fmt_obs(gpsdata->raw.meas[i].doppler, 0, 0),
-                    tmp_file);
+        (void)fputs(fmt_obs(gpsdata->raw.meas[i].doppler, 0, 0), tmp_file);
+        (void)fputs(fmt_obs(gpsdata->raw.meas[i].c2c, 0, 0), tmp_file);
+        (void)fputs(fmt_obs(gpsdata->raw.meas[i].l2c, 0, 0), tmp_file);
         (void)fputs("\n", tmp_file);
 
         nsat--;
