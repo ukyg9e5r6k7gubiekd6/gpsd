@@ -197,23 +197,22 @@ static int compare_obs_cnt(const void  *A, const void  *B)
 {
     const struct obs_cnt_t *a = (const struct obs_cnt_t *)A;
     const struct obs_cnt_t *b = (const struct obs_cnt_t *)B;
-    unsigned char a_svid;
-    unsigned char b_svid;
+    unsigned char a_gnssid = a->gnssid;
+    unsigned char b_gnssid = b->gnssid;
 
-    if (a->gnssid != b->gnssid) {
-        return a->gnssid - b->gnssid;
+    /* 0 = svid means unused, make those last */
+    if (0 == a->svid) {
+	a_gnssid = 255;
+    }
+    if (0 == b->svid) {
+	b_gnssid = 255;
+    }
+    if (a_gnssid != b_gnssid) {
+        return a_gnssid - b_gnssid;
     }
     /* put unused last */
     if (a->svid != b->svid) {
-        a_svid = a->svid;
-        b_svid = b->svid;
-        if (0 == a_svid) {
-            a_svid = 255;
-        }
-        if (0 == b_svid) {
-            b_svid = 255;
-        }
-        return a_svid - b_svid;
+        return a->svid - b->svid;
     }
     /* two blank records */
     return 0;
