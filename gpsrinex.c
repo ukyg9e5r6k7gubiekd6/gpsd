@@ -549,8 +549,12 @@ static void print_raw(struct gps_data_t *gpsdata)
     int nsat = 0;
     int i;
 
-    if ( (last_mtime.tv_sec + sample_interval) > gpsdata->raw.mtime.tv_sec ) {
+    if ((last_mtime.tv_sec + sample_interval) > gpsdata->raw.mtime.tv_sec) {
         /* not time yet */
+        return;
+    }
+    /* opus insists (time % interval) = 0 */
+    if (0 != (last_mtime.tv_sec % sample_interval)) {
         return;
     }
 
