@@ -554,7 +554,7 @@ static void print_raw(struct gps_data_t *gpsdata)
         return;
     }
     /* opus insists (time % interval) = 0 */
-    if (0 != (last_mtime.tv_sec % sample_interval)) {
+    if (0 != (gpsdata->raw.mtime.tv_sec % sample_interval)) {
         return;
     }
 
