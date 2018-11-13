@@ -84,8 +84,11 @@ localhost on the default port (2947) and watches all devices opened by
     <para>-f [filename] save RINEX into [filename].</para>
     <para>-h makes <application>gpsrinex</application> print
 a usage message and exit.</para>
-    <para>-i [interval] wait [interval] seconds between epochs.</para>
-    <para>-n [count] causes [count] epochs to be output.</para>
+    <para>-i [interval] wait [interval] seconds between epochs.  OPUS
+accepts intervals of 1, 2, 3, 5, 10, 15 or,30 seconds.  OPUS then
+reduces the data to 30 second intervals.</para>
+    <para>-n [count] causes [count] epochs to be output.  OPUS requires a
+minimum af 15 minutes, and a maximum of 48 hours, of data.</para>
     <para>-V makes <application>gpsrinex</application> print
 its version and exit.</para>
   </refsect1>
@@ -172,6 +175,8 @@ gpsrinex -i 30 -n 1000000
     <title>SEE ALSO</title>
     <para>One service known to work with obsrinex output is at:
 https://webapp.geod.nrcan.gc.ca/geod/tools-outils/ppp.php</para>
+    <para>OPUS requires 2 frequency observation files.
+https://www.ngs.noaa.gov/OPUS/</para>
     <para>The curious can find the RINEX 3.03 format described here:
 ftp://igs.org/pub/data/format/rinex303_update1.pdf</para>
     <para>
