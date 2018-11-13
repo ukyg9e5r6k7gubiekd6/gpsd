@@ -305,33 +305,33 @@ static void print_rinex_header(void)
              "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[1]) {
-        /* SBAS */
+        /* SBAS, L1 and L5 only */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(0), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
+             gnssid2rinex(1), 3, "C1C", "L1C", "D1C", "", "", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[2]) {
-        /* GALILEO */
+        /* GALILEO, E1, E5 aand E6 only  */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(0), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
+             gnssid2rinex(2), 3, "C1C", "L1C", "D1C", "", "", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[3]) {
         /* BeiDou, BDS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(0), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
+             gnssid2rinex(3), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[5]) {
         /* QZSS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(0), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
+             gnssid2rinex(5), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[6]) {
         /* GLONASS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(0), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
+             gnssid2rinex(6), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
 
@@ -352,12 +352,33 @@ static void print_rinex_header(void)
             /* no  counts for this sat */
             continue;
         }
-        (void)fprintf(log_file,"   %c%02d%6u%6u%6u%36s%-20s\n",
-                      gnssid2rinex(obs_cnt[i].gnssid), obs_cnt[i].svid,
-                      obs_cnt[i].obs_cnts[0],
-                      obs_cnt[i].obs_cnts[1],
-                      obs_cnt[i].obs_cnts[2],
-                      "", "PRN / # OF OBS");
+        switch (obs_cnt[i].gnssid) {
+        case 0:
+            /* GPS */
+	    (void)fprintf(log_file,"   %c%02d%6u%6u%6u%6u%6u%24s%-20s\n",
+			  gnssid2rinex(obs_cnt[i].gnssid), obs_cnt[i].svid,
+			  obs_cnt[i].obs_cnts[C1C],
+			  obs_cnt[i].obs_cnts[L1C],
+			  obs_cnt[i].obs_cnts[D1C],
+			  obs_cnt[i].obs_cnts[C2C],
+			  obs_cnt[i].obs_cnts[L2C],
+			  "", "PRN / # OF OBS");
+            break;
+        case 1:
+            /* SBAS */
+            /* FALLTHROUGH */
+        case 2:
+            /* GALILEO */
+            /* FALLTHROUGH */
+        default:
+	    (void)fprintf(log_file,"   %c%02d%6u%6u%6u%6s%6s%24s%-20s\n",
+			  gnssid2rinex(obs_cnt[i].gnssid), obs_cnt[i].svid,
+			  obs_cnt[i].obs_cnts[C1C],
+			  obs_cnt[i].obs_cnts[L1C],
+			  obs_cnt[i].obs_cnts[D1C],
+			  "", "",
+			  "", "PRN / # OF OBS");
+        }
     }
 
     (void)fprintf(log_file, "%10.3f%50s%-20s\n",
@@ -392,14 +413,16 @@ static void print_rinex_header(void)
         /* GPS */
         (void)fprintf(log_file, "%-60s%-20s\n",
              "G L1C", "SYS / PHASE SHIFT");
+        (void)fprintf(log_file, "%-60s%-20s\n",
+             "G L2C", "SYS / PHASE SHIFT");
     }
     if (0 < prn_count[1]) {
-        /* SBAS */
+        /* SBAS, L1 and L5 only */
         (void)fprintf(log_file, "%-60s%-20s\n",
              "S L1C", "SYS / PHASE SHIFT");
     }
     if (0 < prn_count[2]) {
-        /* GALILEO */
+        /* GALILEO, E1, E5 and E6 */
         (void)fprintf(log_file, "%-60s%-20s\n",
              "E L1C", "SYS / PHASE SHIFT");
     }
@@ -407,16 +430,22 @@ static void print_rinex_header(void)
         /* BeiDou */
         (void)fprintf(log_file, "%-60s%-20s\n",
              "B L1C", "SYS / PHASE SHIFT");
+        (void)fprintf(log_file, "%-60s%-20s\n",
+             "B L2C", "SYS / PHASE SHIFT");
     }
     if (0 < prn_count[5]) {
         /* QZSS */
         (void)fprintf(log_file, "%-60s%-20s\n",
              "J L1C", "SYS / PHASE SHIFT");
+        (void)fprintf(log_file, "%-60s%-20s\n",
+             "J L2C", "SYS / PHASE SHIFT");
     }
     if (0 < prn_count[6]) {
         /* GLONASS */
         (void)fprintf(log_file, "%-60s%-20s\n",
              "R L1I", "SYS / PHASE SHIFT");
+        (void)fprintf(log_file, "%-60s%-20s\n",
+             "R L2I", "SYS / PHASE SHIFT");
     }
     (void)fprintf(log_file, "%-60s%-20s\n",
          "", "END OF HEADER");
