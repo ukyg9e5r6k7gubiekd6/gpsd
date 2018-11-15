@@ -121,12 +121,23 @@ extensions are installed:
 |python-gi-cairo    | Python bindings for Cairo toolkit under GI
 |===========================================================================
 
+On Gentoo systems those packages are named:
+|============================================================================
+|dev-python/pygobject
+|dev-python/pycairo
+|============================================================================
+
 The ubxtool and zerk clients will only be installed if this Python
 extensions is installed:
 
 |============================================================================
 |pyserial           | Python Serial Port extension
 |===========================================================================
+
+On Gentoo systems that package is named:
+|============================================================================
+|dev-python/pyserial
+|============================================================================
 
 === Scons ===
 
