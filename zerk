@@ -38,6 +38,7 @@ from __future__ import absolute_import, print_function, division
 
 import binascii      # for binascii.hexlify()
 import getopt        # for getopt.getopt(), to parse CLI options
+import gps.misc      # for polybyte() polystr()
 import hashlib       # for hashlib.sha1
 import os            # for os.environ
 import socket        # for socket.error
@@ -900,7 +901,7 @@ class greis(object):
                     # Got newline or linefeed
                     # GREIS terminates messages on <CR> or <LF>
                     # Done, got a full message
-                    if b'{"class":"ERROR"' in comment:
+                    if '{"class":"ERROR"' in comment:
                         # always print gpsd errors
                         print(comment)
                     elif VERB_DECODE <= opts['verbosity']:
