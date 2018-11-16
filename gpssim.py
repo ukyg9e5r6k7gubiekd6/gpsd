@@ -10,8 +10,15 @@ import random
 import sys
 import time
 
-import gps
-import gpslib
+# pylint wants local modules last
+try:
+    import gps
+    import gpslib
+except ImportError as e:
+    sys.stderr.write(
+        "gpssim.py: can't load Python gps libraries -- check PYTHONPATH.\n")
+    sys.stderr.write("%s\n" % e)
+    sys.exit(1)
 
 # First, the mathematics.  We simulate a moving viewpoint on the Earth
 # and a satellite with specified orbital elements in the sky.
