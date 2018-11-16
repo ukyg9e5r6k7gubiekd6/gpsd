@@ -23,8 +23,15 @@ import socket
 import sys
 import time
 
-import gps
-import gps.fake as gpsfake   # The "as" pacifies pychecker
+# pylint wants local modules last
+try:
+    import gps
+    import gps.fake as gpsfake   # The "as" pacifies pychecker
+except ImportError as e:
+    sys.stderr.write(
+        "gpsfake: can't load Python gps libraries -- check PYTHONPATH.\n")
+    sys.stderr.write("%s\n" % e)
+    sys.exit(1)
 
 gps_version = '3.19-dev'
 if gps.__version__ != gps_version:
