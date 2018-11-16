@@ -48,8 +48,15 @@ from gi.repository import Gdk  # pylint: disable=wrong-import-position
 from gi.repository import Pango  # pylint: disable=wrong-import-position
 
 # pylint wants local modules last
-import gps
-import gps.clienthelpers
+try:
+    import gps
+    import gps.clienthelpers
+except ImportError as e:
+    sys.stderr.write(
+        "xgps: can't load Python gps libraries -- check PYTHONPATH.\n")
+    sys.stderr.write("%s\n" % e)
+    sys.exit(1)
+
 
 gps_version = '3.19-dev'
 if gps.__version__ != gps_version:
