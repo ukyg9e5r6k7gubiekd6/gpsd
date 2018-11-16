@@ -225,8 +225,10 @@ process:
 On Gentoo systems those packages are named:
 
 |============================================================================
-|app-text/xmlto        | DocBook formatter program
-|app-text/asscidoc     | DocBook front end with lighter markup
+|app-text/xmlto                       | DocBook formatter program
+|app-text/asciidoc                    | DocBook front end with lighter markup
+|dev-libs/libxslt                     | pulled in by asciidoc
+|app-text/docbook-xsl-stylesheets     | pulled in by asciidoc
 |============================================================================
 
 The build degrades gracefully in the absence of any of these. You should
