@@ -294,10 +294,10 @@ static void print_rinex_header(void)
     for (i = 0; i < 7; i++ ) {
         prn_count[i] = obs_cnt_prns(i);
     }
-    /* CSRS-PPP needs C1C, L1C or C1C, L1C, D1C */
-    /* CSRS-PPP refuses files with L1C first
-    /* convbin wants C1C, L1C, D1C */
-    /* for some reason gfzrnx_lx wants C1C, D1C, L1C, not C1C, L1C, D1C */
+    /* CSRS-PPP needs C1C, L1C or C1C, L1C, D1C
+     * CSRS-PPP refuses files with L1C first
+     * convbin wants C1C, L1C, D1C
+     * for some reason gfzrnx_lx wants C1C, D1C, L1C, not C1C, L1C, D1C */
     if (0 < prn_count[0]) {
         /* GPS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
