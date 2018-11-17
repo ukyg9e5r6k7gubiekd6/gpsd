@@ -1462,6 +1462,7 @@ class gps_io(object):
         "Initialize class"
 
         Serial = serial_class
+        Serial_v3 = Serial.VERSION.split('.')[0] >= '3'
         # buffer to hold read data
         self.out = b''
 
@@ -1520,6 +1521,9 @@ class gps_io(object):
             # configure the serial connections (the parameters refer to
             # the device you are connecting to)
 
+            # pyserial Ver 3.0+ changes writeTimeout to write_timeout
+            # Using the wrong one causes an error
+            write_timeout_arg = 'write_timeout' if Serial_v3 else 'writeTimeout'
             try:
                 self.ser = Serial.Serial(
                     baudrate=opts['input_speed'],
@@ -1530,10 +1534,7 @@ class gps_io(object):
                     stopbits=Serial.STOPBITS_ONE,
                     # read timeout
                     timeout=0.05,
-                    # pyserial Ver 3.0+ changes writeTimeout to write_timeout
-                    # just set both
-                    write_timeout=0.5,
-                    writeTimeout=0.5,
+                    **{write_timeout_arg: 0.5}
                 )
             except Serial.serialutil.SerialException:
                 # this exception happens on bad serial port device name
@@ -1550,6 +1551,8 @@ class gps_io(object):
                 sys.exit(1)
 
             # flush input buffer, discarding all its contents
+            # pyserial 3.0+ deprecates flushInput() in favor of
+            # reset_input_buffer(), but flushInput() is still present.
             self.ser.flushInput()
 
         else:
@@ -1606,7 +1609,8 @@ class gps_io(object):
                 while read_opts['input_wait'] > (time.clock() - start):
                     # First priority is to be sure the input buffer is read.
                     # This is to prevent input buffer overuns
-                    # pyserial 3.0 replaces inWaiting() with in_waiting
+                    # pyserial 3.0+ deprecates inWaiting() in favor of
+                    # in_waiting, but inWaiting() is still present.
                     if 0 < self.ser.inWaiting():
                         # We have serial input waiting, get it
                         # 1024 is comfortably large, almost always the
