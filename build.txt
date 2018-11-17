@@ -72,6 +72,12 @@ Necessary components for any build:
 |Python2.x(x>=6) or 3.y(y>=2)  | for scons and some helper scripts
 |============================================================================
 
+On Gentoo, a basic build only requires this package:
+
+|============================================================================
+|dev-util/scons                | for executing the build recipe
+|============================================================================
+
 === C compiler ===
 
 C99 conformance is required in the compiler. The C code depends on one
@@ -151,9 +157,21 @@ various additional capabilities and extensions:
 |============================================================================
 |C++ compiler     | allows building libgpsmm C++ wrapper for client library
 |Qt 4.53+         | allows building libQgpsmm C++ wrapper for client library
-|libcap           | Capabilities library, allows 1PPS support under Linux
+|libcap           | Capabilities library, improved security under Linux
 |(n)curses        | curses screen-painting library, used by cgps and gpsmon
 |pps-tools        | adds support for the KPPS API, for improved timing
+|libusb           | Userspace access to USB devices
+|============================================================================
+
+On Gentoo systems those packages are named:
+
+|============================================================================
+|dev-qt/qtcore       | Basic Qt
+|dev-qt/qtnetwork    | Qt network components
+|sys-libs/libcap     | Capabilities library
+|sys-libs/ncurses    | curses screen-painting library, used by cgps and gpsmon
+|net-misc/pps-tools  | adds support for the KPPS API, for improved timing
+|virtual/libusb      | Userspace access to USB devices
 |============================================================================
 
 If you have libusb-1.0.0 or later, the GPSD build will autodetect
@@ -204,6 +222,13 @@ process:
 |asciidoc           | DocBook front end with lighter markup
 |============================================================================
 
+On Gentoo systems those packages are named:
+
+|============================================================================
+|app-text/xmlto        | DocBook formatter program
+|app-text/asscidoc     | DocBook front end with lighter markup
+|============================================================================
+
 The build degrades gracefully in the absence of any of these. You should
 be able to tell from scons messages which extensions you will get.
 
@@ -216,12 +241,15 @@ If you are custom-building a Linux kernel for embedded deployment, you
 will need some subset of the following modules:
 
 |============================================================================
-|pl2303     | Prolific Technology, Inc. PL2303 Serial Port
-|ftdi_sio   | FTDI 8U232AM / FT232
-|cypress_m8 | M8/CY7C64013
-|cp210x     | Cygnal Integrated Products devices
-|garmin_gps | Garmin USB mice including GPS-18
-|cdc_am     | USB Communication Device Class Abstract Control Model interface
+|pl2303       | Prolific Technology, Inc. PL2303 Serial Port
+|ftdi_sio     | FTDI 8U232AM / FT232
+|cypress_m8   | M8/CY7C64013
+|cp210x       | Cygnal Integrated Products devices
+|garmin_gps   | Garmin USB mice including GPS-18
+|cdc_am       | USB Communication Device Class Abstract Control Model interface
+|pps-gpio     | For KPPS support on ARM systems
+|pps-ldisc    | For KPPS support with RS-232 ports
+|pps_parport  | For KPPS support with a parallel port
 |============================================================================
 
 These are listed in rough order of devices covered as of 2013; the
