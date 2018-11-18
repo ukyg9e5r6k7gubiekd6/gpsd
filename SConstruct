@@ -1399,6 +1399,7 @@ if not env['python']:
 else:
     # installed python programs
     python_progs = ["gegps", "gpscat", "gpsfake", "gpsprof"]
+    python_deps = {'gpscat': 'packet'}
 
     # python misc helpers and stuff
     python_misc = [
@@ -1412,6 +1413,7 @@ else:
         "test_xgps_deps.py",
         "valgrind-audit.py"
     ]
+    python_deps['test_maidenhead.py'] = 'clienthelpers'
 
     python_manpages = {
         "gegps.1": "gps.xml",
@@ -1458,6 +1460,8 @@ else:
             "xgps.1": "gps.xml",
             "xgpsspeed.1": "gps.xml",
         })
+        python_deps['xgps'] = 'clienthelpers'
+
     python_modules = Glob('gps/*.py')
 
     # Build Python binding
@@ -1541,6 +1545,11 @@ else:
             )
         python_compiled_libs[ext] = python_env.SharedLibrary(
             ext, python_objects[ext])
+
+    # Make sure we know about compiled dependencies
+    for prog, dep in python_deps.items():
+        env.Depends(prog, python_compiled_libs['gps' + os.sep + dep])
+
     # Make PEP 241 Metadata 1.0.
     # Why not PEP 314 (V1.1) or PEP 345 (V1.2)?
     # V1.2 and V1.2 require a Download-URL to an installable binary
