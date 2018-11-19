@@ -35,6 +35,8 @@ PERMISSIONS
 static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
 			 const char **endptr)
 {
+    int leapseconds;
+
     const struct json_attr_t json_attrs_1[] = {
 	/* *INDENT-OFF* */
 	{"class",  t_check,   .dflt.check = "TPV"},
@@ -44,6 +46,7 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
 			         .dflt.real = NAN},
 	{"time",   t_real,    .addr.real = &gpsdata->fix.time,
 			         .dflt.real = NAN},
+	{"leapseconds",   t_integer, .addr.integer = &leapseconds},
 	{"ept",    t_real,    .addr.real = &gpsdata->fix.ept,
 			         .dflt.real = NAN},
 	{"lon",    t_real,    .addr.real = &gpsdata->fix.longitude,
