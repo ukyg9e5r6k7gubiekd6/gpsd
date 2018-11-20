@@ -10,7 +10,7 @@ the daemon and the client library.
 
 PERMISSIONS
   Written by Eric S. Raymond, 2009
-  This file is Copyright (c) 2010 by the GPSD project
+  This file is Copyright (c) 2009-2018 The GPSD project
   SPDX-License-Identifier: BSD-2-clause
 
 ***************************************************************************/

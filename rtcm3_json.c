@@ -8,7 +8,7 @@ DESCRIPTION
 representations to libgps structures.
 
 PERMISSIONS
-   This file is Copyright (c) 2013 by the GPSD project
+   This file is Copyright (c) 2013-2018 by the GPSD project
    SPDX-License-Identifier: BSD-2-clause
 
 ***************************************************************************/

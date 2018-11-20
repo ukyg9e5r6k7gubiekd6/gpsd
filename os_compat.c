@@ -1,7 +1,4 @@
 /*
- * This file is Copyright (c) 2017 by the GPSD project
- * SPDX-License-Identifier: BSD-2-clause
- *
  * This file contains functions to deal with compatibility issues across OSes.
  *
  * The initial version of this file is a near-verbatim concatenation of the
@@ -11,6 +8,9 @@
  *     strl.c
  * History of this code prior to the creation of this file can be found
  * in the histories of those files.
+ *
+ * This file is Copyright (c)2017-2018 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 #include "os_compat.h"	/* Includes gpsd_config.h */

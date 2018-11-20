@@ -2,7 +2,7 @@
  * This is the main sequence of the gpsd daemon. The IO dispatcher, main
  * select loop, and user command handling lives here.
  *
- * This file is Copyright (c) 2010 by the GPSD project
+ * This file is Copyright (c) 2010-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 

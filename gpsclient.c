@@ -1,8 +1,9 @@
 /*
- * This file is Copyright (c) 2010 by the GPSD project
+ * Python binding for selected libgps library functions
+ *
+ * This file is Copyright (c) 2010-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  *
- * Python binding for selected libgps library functions
  */
 #include <Python.h>
 

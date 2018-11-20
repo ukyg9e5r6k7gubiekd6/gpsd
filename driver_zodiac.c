@@ -6,7 +6,7 @@
  * be adding a fixed offset based on a hidden epoch value, in which case
  * unhappy things will occur on the next rollover.
  *
- * This file is Copyright (c) 2010 by the GPSD project
+ * This file is Copyright (c) 2010-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 

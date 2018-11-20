@@ -1,5 +1,5 @@
 /*
- * This file is Copyright (c) 2011 by Eckhart Wörner
+ * This file is Copyright (c) 2011-2018 by Eckhart Wörner
  * SPDX-License-Identifier: BSD-2-clause
  */
 

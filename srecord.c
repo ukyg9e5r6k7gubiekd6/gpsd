@@ -1,6 +1,4 @@
 /*
- * Copyright (c) 2005 Chris Kuethe <chris.kuethe@gmail.com>
- *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
@@ -12,6 +10,11 @@
  * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *
+ * Copyright (c) 2005 Chris Kuethe <chris.kuethe@gmail.com>
+ * This file is Copyright (c)2005-2018 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
+ *
  */
 #include <stdio.h>
 #include <string.h>

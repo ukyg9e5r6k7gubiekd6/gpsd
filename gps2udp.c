@@ -7,7 +7,7 @@
  * Author: Fulup Ar Foll (directly inspired from gpspipe.c)
  * Date:   2013-03-01
  *
- * This file is Copyright (c) 2013 by the GPSD project
+ * This file is Copyright (c) 2013-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  *
  */

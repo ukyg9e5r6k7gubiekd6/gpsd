@@ -1,3 +1,7 @@
+/*
+ * This file is Copyright (c)2010-2018 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>

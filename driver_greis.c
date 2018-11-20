@@ -14,7 +14,7 @@
  * that is configurable. A future improvement could change to read the
  * information in [MF] Message Format.
  *
- * This file is Copyright (c) 2017 Virgin Orbit
+ * This file is Copyright (c) 2017-2018 Virgin Orbit
  * SPDX-License-Identifier: BSD-2-clause
  */
 

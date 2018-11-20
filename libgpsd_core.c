@@ -6,7 +6,7 @@
  * rest is setup and teardown. (For backward compatibility the older gpsd_poll()
  * entry point has been retained.)
  *
- * This file is Copyright (c) 2010 by the GPSD project
+ * This file is Copyright (c) 2010-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 

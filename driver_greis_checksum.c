@@ -1,7 +1,7 @@
 /*
  * Checksum for the GNSS Receiver External Interface Specification (GREIS).
  *
- * This file is Copyright (c) 2017 Virgin Orbit
+ * This file is Copyright (c) 2017-2018 Virgin Orbit
  * SPDX-License-Identifier: BSD-2-clause
  */
 

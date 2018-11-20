@@ -8,6 +8,9 @@
 # pycodestyle replaces pep8 for checking PEP8 conformity.
 # 
 # Use pylint as an advisory tool, not as a blunt instrument.
+#
+# This file is Copyright (c) 2018 by the GPSD project
+# SPDX-License-Identifier: BSD-2-clause
 
 [MESSAGES CONTROL]
 

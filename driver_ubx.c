@@ -14,7 +14,7 @@
  * For the Antaris 4, the default leap-second offset (before getting one from
  * the sats, one presumes) is 0sec; for the u-blox 6 it's 15sec.
  *
- * This file is Copyright (c) 2010 by the GPSD project
+ * This file is Copyright (c) 2010-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  *
  */

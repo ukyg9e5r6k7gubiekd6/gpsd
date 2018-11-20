@@ -1,6 +1,6 @@
 /* net_ntrip.c -- gather and dispatch DGNSS data from Ntrip broadcasters
  *
- * This file is Copyright (c) 2010 by the GPSD project
+ * This file is Copyright (c) 2010-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 #include <stdio.h>

@@ -18,6 +18,8 @@
  * on your Unix there is something very wrong with your Unix.
  *
  * This code by ESR, Copyright (C) 2013, under BSD terms.
+ * This file is Copyright (c)2013-2018 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
  */
 #include <stdio.h>
 #include <stdlib.h>

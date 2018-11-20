@@ -33,7 +33,7 @@ to an RTCM3 standard at revision 4 or later, but the guess in the code
 has been observed to correctly analyze a message with a nonempty Receiver
 field.
 
-This file is Copyright (c) 2010 by the GPSD project
+This file is Copyright (c) 2010-2018 by the GPSD project
 SPDX-License-Identifier: BSD-2-clause
 
 *****************************************************************************/

@@ -23,7 +23,7 @@ connected to the Garmin kernel driver.  But we need to be able to tell the
 others apart and distinguish them from baud barf.
 
 PERMISSIONS
-   This file is Copyright (c) 2010 by the GPSD project
+   This file is Copyright (c) 2010-2018 by the GPSD project
    SPDX-License-Identifier: BSD-2-clause
 
 ***************************************************************************/

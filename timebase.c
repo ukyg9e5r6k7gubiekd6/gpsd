@@ -185,7 +185,7 @@ NTP clock skew goes over 1 second, but this is unlikely to ever happen
 - and if it does the reasons will have nothing to do with GPS
 idiosyncracies.
 
-This file is Copyright (c) 2010 -- 2013 by the GPSD project
+This file is Copyright (c) 2010 - 2018 by the GPSD project
 SPDX-License-Identifier: BSD-2-clause
 
 *****************************************************************************/

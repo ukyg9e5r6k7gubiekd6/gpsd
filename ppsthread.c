@@ -46,8 +46,8 @@
  *
  * You cannot do PPS math with doubles
  *
- * This file is Copyright (c) 2013 by the GPSD project. BSD terms
- * apply: see the file COPYING in the distribution root for details.
+ * This file is Copyright (c)2013-2018 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 #include <string.h>

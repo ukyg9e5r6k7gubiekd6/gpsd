@@ -1,6 +1,8 @@
 /*
  * Copyright (c) 2005 Jeff Francis <jeff@gritch.org>
- * BSD terms apply: see the filr COPYING in the distribution root for details.
+ *
+ * This file is Copyright (c)2010-2018 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 /*

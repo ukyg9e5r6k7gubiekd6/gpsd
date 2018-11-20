@@ -1,13 +1,14 @@
 /*
- * This file is Copyright (c) 2010 by the GPSD project
- * SPDX-License-Identifier: BSD-2-clause
- *
  * Driver for the iTalk binary protocol used by FasTrax
  *
  * Week counters are not limited to 10 bits. It's unknown what
  * the firmware is doing to disambiguate them, if anything; it might just
  * be adding a fixed offset based on a hidden epoch value, in which case
  * unhappy things will occur on the next rollover.
+ *
+ * This file is Copyright (c) 2010-2018 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
+ *
  */
 #include <stdio.h>
 #include <stdbool.h>

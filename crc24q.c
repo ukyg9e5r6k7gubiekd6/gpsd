@@ -23,7 +23,7 @@
  * Note that this version has a seed of 0 wired in.  The RTCM104V3 standard
  * requires this.
  *
- * This file is Copyright (c) 2008,2010 by the GPSD project
+ * This file is Copyright (c) 2008-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 #include <stdbool.h>

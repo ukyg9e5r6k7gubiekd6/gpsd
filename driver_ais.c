@@ -12,7 +12,7 @@
  *  - IMO236 met/hydro message: Type=8, DAC=1, FI=11
  *  - IMO289 met/hydro message: Type=8, DAC=1, FI=31
  *
- * This file is Copyright (c) 2010 by the GPSD project
+ * This file is Copyright (c) 2010-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 

@@ -6,7 +6,7 @@
  * Modifications : ilham@mit.edu   (July 10 '90)
  * Cleaned up and simplified by Eric S. Raymond, December 2004.
  *
- * This file is Copyright (c) 2010 by the GPSD project
+ * This file is Copyright (c) 2004-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 #include <X11/IntrinsicP.h>

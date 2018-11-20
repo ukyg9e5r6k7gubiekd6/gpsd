@@ -1,9 +1,6 @@
 /*
  * gpsrinex: read "RAW" messages from a gpsd and output a RINEX 3 obs file.
  *
- * This file is Copyright (c) 2010 by the GPSD project
- * SPDX-License-Identifier: BSD-2-clause
- *
  * gpsrinex will read live data from gpsd and create a file of RINEX 3
  * observations.  Currently this only works if the GPS is a u-blox
  * GPS and is sending UBX-RXM-RAWX messages.
@@ -56,6 +53,10 @@
  *
  *     [4] RTKLIB: An Open Source Program Package for GNSS Positioning
  *     http://www.rtklib.com/
+ *
+ * This file is Copyright (c) 2018 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
+ *
  */
 
 #ifndef _XOPEN_SOURCE

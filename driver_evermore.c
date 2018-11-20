@@ -120,7 +120,7 @@
  * 8d indicates that message 0x8d was sent;
  * c5 is EverMore checksum, other bytes are fixed
  *
- * This file is Copyright (c) 2010 by the GPSD project
+ * This file is Copyright (c) 2010-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 

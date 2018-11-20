@@ -1,7 +1,7 @@
 /*
  * NMEA2000 over CAN.
  *
- * This file is Copyright (c) 2012 by the GPSD project
+ * This file is Copyright (c) 2012-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 

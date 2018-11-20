@@ -1,7 +1,7 @@
 /*
  * This is the gpsd driver for Skytraq GPSes operating in binary mode.
  *
- * This file is Copyright (c) 2016 by the GPSD project
+ * This file is Copyright (c) 2016-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 
