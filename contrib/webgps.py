@@ -37,6 +37,9 @@ If this file is present on start of webgps.py, it is loaded. This allows to
 restart webgps.py without losing accumulated satellite tracks.
 """
 
+# This file is Copyright (c) 2010-2018 by the GPSD project
+# SPDX-License-Identifier: BSD-2-clause
+
 from __future__ import absolute_import, print_function, division
 
 import math

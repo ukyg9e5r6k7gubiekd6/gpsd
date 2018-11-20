@@ -14,6 +14,9 @@
 # WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+# This file is Copyright (c) 2010-2018 by the GPSD project
+# SPDX-License-Identifier: BSD-2-clause
 
 // This program originally read a logfile of filtered gpsd messages,
 // type Y.  The gpsd protocal changed in 2.90, since when this became

@@ -1,12 +1,12 @@
 /* gpssnmp - poll local gpsd for SNMP variables
  * 
+ * To build this:
+ *     gcc -o gpssnmp gpssnmp.c -lgps
+ *
  * Copyright (c) 2016 David Taylor <gpsd@david.taylor.name>
  *
  * Copyright (c)2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
- *
- * To build this:
- *     gcc -o gpssnmp gpssnmp.c -lgps
  *
  */
 

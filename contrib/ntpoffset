@@ -4,6 +4,8 @@
 # For instructions on how to use this script, see the GPSD Time 
 # Service HOWTO in this distrubution. 
 #
+# This file is Copyright (c) 2010-2018 by the GPSD project
+# SPDX-License-Identifier: BSD-2-clause
 awk '
      /127\.127\.28\.0/ { sum += $5 * 1000; cnt++; }
      END { print sum / cnt; }

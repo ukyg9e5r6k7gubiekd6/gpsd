@@ -4,6 +4,9 @@
 # tinkering with their gear.
 
 # Note that ../gpsd_config.h is required and is built separately
+#
+# This file is Copyright (c) 2010-2018 by the GPSD project
+# SPDX-License-Identifier: BSD-2-clause
 
 
 ashctl = Program("ashctl", "ashctl.c")

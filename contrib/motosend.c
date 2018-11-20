@@ -1,6 +1,6 @@
 /*
- * This file is Copyright (c)2010 by the GPSD project
- * BSD terms apply: see the file COPYING in the distribution root for details.
+ * This file is Copyright (c) 2010-2018 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
  */
 #include <sys/types.h>
 #include <err.h>

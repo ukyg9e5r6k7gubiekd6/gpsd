@@ -3,6 +3,9 @@
  *
  * Compile: gcc clock_test.c -lm -o clock_test
  *
+ * Written by: Gary E. Miller <gem@rellim.com>
+ * This file is Copyright (c) 2018 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 #include <getopt.h>             /* for getopt() */

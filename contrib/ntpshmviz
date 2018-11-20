@@ -9,6 +9,8 @@ Written by Keane Wolter <daemoneye2@gmail.com>
 # 1. Add exit button so the user does not need to do <Ctrl>-w
 # 2. Allow for a continuous stream of data to be graphed
 #
+# This file is Copyright (c) 2010-2018 by the GPSD project
+# SPDX-License-Identifier: BSD-2-clause
 
 from __future__ import absolute_import, print_function, division
 
