@@ -2332,7 +2332,7 @@ Utility('shmclean', [], ["ipcrm  -M 0x4e545030;"
 
 # asciidoc documents
 if env.WhereIs('asciidoc'):
-    txtfiles = ['AIVDM',
+    adocfiles = ['AIVDM',
                 'client-howto',
                 'gpsd-time-service-howto',
                 'NMEA',
@@ -2340,11 +2340,11 @@ if env.WhereIs('asciidoc'):
                 'protocol-transition',
                 'time-service-intro',
                 ]
-    asciidocs = ["www/" + stem + ".html" for stem in txtfiles] \
+    asciidocs = ["www/" + stem + ".html" for stem in adocfiles] \
         + ["www/installation.html"]
-    for stem in txtfiles:
-        env.Command('www/%s.html' % stem, 'www/%s.txt' % stem,
-                    ['asciidoc -b html5 -a toc -o www/%s.html www/%s.txt'
+    for stem in adocfiles:
+        env.Command('www/%s.html' % stem, 'www/%s.adoc' % stem,
+                    ['asciidoc -b html5 -a toc -o www/%s.html www/%s.adoc'
                      % (stem, stem)])
     env.Command("www/installation.html",
                 "INSTALL",
