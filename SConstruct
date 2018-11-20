@@ -1355,7 +1355,7 @@ test_matrix = env.Program('tests/test_matrix', ['tests/test_matrix.c'],
                           LIBS=['gpsd', 'gps_static'],
                           parse_flags=gpsdflags)
 test_mktime = env.Program('tests/test_mktime', ['tests/test_mktime.c'],
-                          LIBS=['gps_static'], parse_flags=["-lm"])
+                          LIBS=['gps_static'], parse_flags=["-lm"] + rtlibs)
 test_packet = env.Program('tests/test_packet', ['tests/test_packet.c'],
                           LIBS=['gpsd', 'gps_static'],
                           parse_flags=gpsdflags)
