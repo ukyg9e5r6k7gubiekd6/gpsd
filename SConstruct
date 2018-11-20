@@ -536,7 +536,7 @@ docbook_html_uri = docbook_url_stem + 'html/docbook.xsl'
 
 def CheckXsltproc(context):
     context.Message('Checking that xsltproc can make man pages... ')
-    ofp = open("xmltest.xml", "w")
+    ofp = open("man/xmltest.xml", "w")
     ofp.write('''
        <refentry id="foo.1">
       <refmeta>
@@ -551,9 +551,9 @@ def CheckXsltproc(context):
     </refentry>
 ''')
     ofp.close()
-    probe = "xsltproc --nonet --noout '%s' xmltest.xml" % (docbook_man_uri,)
+    probe = "xsltproc --nonet --noout '%s' man/xmltest.xml" % (docbook_man_uri,)
     ret = context.TryAction(probe)[0]
-    os.remove("xmltest.xml")
+    os.remove("man/xmltest.xml")
     if os.path.exists("foo.1"):
         os.remove("foo.1")
     context.Result(ret)
@@ -1416,10 +1416,10 @@ else:
     python_deps['test_maidenhead.py'] = 'clienthelpers'
 
     python_manpages = {
-        "gegps.1": "gps.xml",
-        "gpscat.1": "gpscat.xml",
-        "gpsfake.1": "gpsfake.xml",
-        "gpsprof.1": "gpsprof.xml",
+        "man/gegps.1": "man/gps.xml",
+        "man/gpscat.1": "man/gpscat.xml",
+        "man/gpsfake.1": "man/gpsfake.xml",
+        "man/gpsprof.1": "man/gpsprof.xml",
     }
 
     # check for pyserial
@@ -1427,8 +1427,8 @@ else:
         imp.find_module('serial')
         python_progs.extend(["ubxtool", "zerk"])
         python_manpages.update({
-            "ubxtool.1": "ubxtool.xml",
-            "zerk.1": "zerk.xml",
+            "man/ubxtool.1": "man/ubxtool.xml",
+            "man/zerk.1": "man/zerk.xml",
         })
     except ImportError:
         # no pyserial, reduced functionality in ubxtool and zerk
@@ -1457,8 +1457,8 @@ else:
     if env['xgps']:
         python_progs.extend(["xgps", "xgpsspeed"])
         python_manpages.update({
-            "xgps.1": "gps.xml",
-            "xgpsspeed.1": "gps.xml",
+            "man/xgps.1": "man/gps.xml",
+            "man/xgpsspeed.1": "man/gps.xml",
         })
         python_deps['xgps'] = 'clienthelpers'
 
@@ -1745,34 +1745,34 @@ for fn in templated:
 # Documentation
 
 base_manpages = {
-    "cgps.1": "gps.xml",
-    "gps.1": "gps.xml",
-    "gps2udp.1": "gps2udp.xml",
-    "gpsctl.1": "gpsctl.xml",
-    "gpsd.8": "gpsd.xml",
-    "gpsdctl.8": "gpsdctl.xml",
-    "gpsdecode.1": "gpsdecode.xml",
-    "gpsd_json.5": "gpsd_json.xml",
-    "gpsinit.8": "gpsinit.xml",
-    "gpsmon.1": "gpsmon.xml",
-    "gpspipe.1": "gpspipe.xml",
-    "gpsrinex.1": "gpsrinex.xml",
-    "gpxlogger.1": "gpxlogger.xml",
-    "lcdgps.1": "gps.xml",
-    "libgps.3": "libgps.xml",
-    "libgpsmm.3": "libgpsmm.xml",
-    "libQgpsmm.3": "libgpsmm.xml",
-    "srec.5": "srec.xml",
+    "man/cgps.1": "man/gps.xml",
+    "man/gps.1": "man/gps.xml",
+    "man/gps2udp.1": "man/gps2udp.xml",
+    "man/gpsctl.1": "man/gpsctl.xml",
+    "man/gpsd.8": "man/gpsd.xml",
+    "man/gpsdctl.8": "man/gpsdctl.xml",
+    "man/gpsdecode.1": "man/gpsdecode.xml",
+    "man/gpsd_json.5": "man/gpsd_json.xml",
+    "man/gpsinit.8": "man/gpsinit.xml",
+    "man/gpsmon.1": "man/gpsmon.xml",
+    "man/gpspipe.1": "man/gpspipe.xml",
+    "man/gpsrinex.1": "man/gpsrinex.xml",
+    "man/gpxlogger.1": "man/gpxlogger.xml",
+    "man/lcdgps.1": "man/gps.xml",
+    "man/libgps.3": "man/libgps.xml",
+    "man/libgpsmm.3": "man/libgpsmm.xml",
+    "man/libQgpsmm.3": "man/libgpsmm.xml",
+    "man/srec.5": "man/srec.xml",
 }
 
 if env['pps'] and (env["timeservice"] or env["gpsdclients"]):
     base_manpages.update({
-        "ntpshmmon.1": "ntpshmmon.xml",
+        "man/ntpshmmon.1": "man/ntpshmmon.xml",
     })
 
 if tiocmiwait:
     base_manpages.update({
-        "ppscheck.8": "ppscheck.xml",
+        "man/ppscheck.8": "man/ppscheck.xml",
     })
 
 all_manpages = list(base_manpages.keys())
@@ -1942,7 +1942,8 @@ for manpage in all_manpages:
     if not manbuilder and not os.path.exists(manpage):
         continue
     section = manpage.split(".")[1]
-    dest = os.path.join(installdir('mandir'), "man" + section, manpage)
+    dest = os.path.join(installdir('mandir'), "man" + section,
+                        os.path.basename(manpage))
     maninstall.append(env.InstallAs(source=manpage, target=dest))
 install = env.Alias('install', binaryinstall + maninstall + python_install +
                     pc_install + headerinstall)
@@ -1992,7 +1993,7 @@ Utility("scan-build", ["gpsd.h", "packet_names.h"],
 
 
 # Check the documentation for bogons, too
-Utility("xmllint", glob.glob("*.xml"),
+Utility("xmllint", glob.glob("man/*.xml"),
         "for xml in $SOURCES; do xmllint --nonet --noout --valid $$xml; done")
 
 # Use deheader to remove headers not required.  If the statistics line
@@ -2414,8 +2415,8 @@ for fn in glob.glob("www/*.in"):
 
 if htmlbuilder:
     # Manual pages
-    for xml in glob.glob("*.xml"):
-        env.HTML('www/%s.html' % xml[:-4], xml)
+    for xml in glob.glob("man/*.xml"):
+        env.HTML('www/%s.html' % os.path.basename(xml[:-4]), xml)
 
     # DocBook documents
     for stem in ['writing-a-driver', 'performance/performance',
@@ -2529,6 +2530,8 @@ env.Clean(clean_misc, glob.glob('*.gcno') + glob.glob('*.gcda'))
 env.Clean(clean_misc, glob.glob('.coverage*') + ['htmlcov/'])
 # Clean Qt stuff
 env.Clean(clean_misc, ['libQgpsmm.prl', 'Qgpsmm.pc'])
+# Clean old and new location man page files
+env.Clean(clean_misc, glob.glob('*.[0-8]') + glob.glob('man/*.[0-8]'))
 # Other misc items
 env.Clean(clean_misc, ['config.log', 'contrib/ppscheck', 'contrib/clock_test',
                        'TAGS'])
