@@ -2530,8 +2530,10 @@ env.Clean(clean_misc, glob.glob('*.gcno') + glob.glob('*.gcda'))
 env.Clean(clean_misc, glob.glob('.coverage*') + ['htmlcov/'])
 # Clean Qt stuff
 env.Clean(clean_misc, ['libQgpsmm.prl', 'Qgpsmm.pc'])
-# Clean old and new location man page files
-env.Clean(clean_misc, glob.glob('*.[0-8]') + glob.glob('man/*.[0-8]'))
+# Clean shared library files
+env.Clean(clean_misc, glob.glob('*.so') + glob.glob('*.so.*'))
+# Clean old location man page files
+env.Clean(clean_misc, glob.glob('*.[0-8]'))
 # Other misc items
 env.Clean(clean_misc, ['config.log', 'contrib/ppscheck', 'contrib/clock_test',
                        'TAGS'])
