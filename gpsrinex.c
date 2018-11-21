@@ -59,6 +59,14 @@
  *
  */
 
+#ifdef __linux__
+/* isfinite() needs _POSIX_C_SOURCE >= 200112L
+ * isnan(+Inf) is false, isfinite(+Inf) is false
+ * use isfinite() to make sure a float is valid
+ */
+#define _POSIX_C_SOURCE 200112L
+#endif /* __linux__ */
+
 #ifndef _XOPEN_SOURCE
 /* need >= 500 for strdup() */
 #define _XOPEN_SOURCE 500
