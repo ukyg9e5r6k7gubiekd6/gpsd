@@ -521,6 +521,13 @@ int json_oscillator_read(const char *buf, struct gps_data_t *gpsdata,
     return status;
 }
 
+// Test for JSON read status values that should be treated as a go-ahead
+// for further processing.  JSON_BADATTR - to allow JSON attributes uknown
+// to this version of the library, for forward compatibility, is an obvious
+// thing to go here.
+#define PASS(n) (((n) == 0) || ((n) == JSON_ERR_BADATTR))
+#define FILTER(n) ((n) == JSON_ERR_BADATTR ? 0 : n)
+
 int libgps_json_unpack(const char *buf,
 		       struct gps_data_t *gpsdata, const char **end)
 /* the only entry point - unpack a JSON object into gpsdata_t substructures */
@@ -563,120 +570,120 @@ int libgps_json_unpack(const char *buf,
 	    gpsdata->set |= CLIMBERR_SET;
 	if (gpsdata->fix.mode != MODE_NOT_SEEN)
 	    gpsdata->set |= MODE_SET;
-	return status;
+	return FILTER(status);
     } else if (str_starts_with(classtag, "\"class\":\"GST\"")) {
 	status = json_noise_read(buf, gpsdata, end);
-	if (status == 0) {
+	if (PASS(status)) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= GST_SET;
 	}
-	return status;
+	return FILTER(status);
     } else if (str_starts_with(classtag, "\"class\":\"SKY\"")) {
 	status = json_sky_read(buf, gpsdata, end);
-	if (status == 0)
+	if (PASS(status))
 	    gpsdata->set |= SATELLITE_SET;
-	return status;
+	return FILTER(status);
     } else if (str_starts_with(classtag, "\"class\":\"ATT\"")) {
 	status = json_att_read(buf, gpsdata, end);
-	if (status == 0) {
+	if (PASS(status)) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= ATTITUDE_SET;
 	}
-	return status;
+	return FILTER(status);
     } else if (str_starts_with(classtag, "\"class\":\"DEVICES\"")) {
 	status = json_devicelist_read(buf, gpsdata, end);
-	if (status == 0) {
+	if (PASS(status)) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= DEVICELIST_SET;
 	}
-	return status;
+	return FILTER(status);
     } else if (str_starts_with(classtag, "\"class\":\"DEVICE\"")) {
 	status = json_device_read(buf, &gpsdata->dev, end);
-	if (status == 0)
+	if (PASS(status))
 	    gpsdata->set |= DEVICE_SET;
-	return status;
+	return FILTER(status);
     } else if (str_starts_with(classtag, "\"class\":\"WATCH\"")) {
 	status = json_watch_read(buf, &gpsdata->policy, end);
-	if (status == 0) {
+	if (PASS(status)) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= POLICY_SET;
 	}
-	return status;
+	return FILTER(status);
     } else if (str_starts_with(classtag, "\"class\":\"VERSION\"")) {
 	status = json_version_read(buf, gpsdata, end);
 	if (status ==  0) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= VERSION_SET;
 	}
-	return status;
+	return FILTER(status);
 #ifdef RTCM104V2_ENABLE
     } else if (str_starts_with(classtag, "\"class\":\"RTCM2\"")) {
 	status = json_rtcm2_read(buf,
 				 gpsdata->dev.path, sizeof(gpsdata->dev.path),
 				 &gpsdata->rtcm2, end);
-	if (status == 0) {
+	if (PASS(status)) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= RTCM2_SET;
 	}
-	return status;
+	return FILTER(status);
 #endif /* RTCM104V2_ENABLE */
 #ifdef RTCM104V3_ENABLE
     } else if (str_starts_with(classtag, "\"class\":\"RTCM3\"")) {
 	status = json_rtcm3_read(buf,
 				 gpsdata->dev.path, sizeof(gpsdata->dev.path),
 				 &gpsdata->rtcm3, end);
-	if (status == 0) {
+	if (PASS(status)) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= RTCM3_SET;
 	}
-	return status;
+	return FILTER(status);
 #endif /* RTCM104V3_ENABLE */
 #ifdef AIVDM_ENABLE
     } else if (str_starts_with(classtag, "\"class\":\"AIS\"")) {
 	status = json_ais_read(buf,
 			       gpsdata->dev.path, sizeof(gpsdata->dev.path),
 			       &gpsdata->ais, end);
-	if (status == 0) {
+	if (PASS(status)) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= AIS_SET;
 	}
-	return status;
+	return FILTER(status);
 #endif /* AIVDM_ENABLE */
     } else if (str_starts_with(classtag, "\"class\":\"ERROR\"")) {
 	status = json_error_read(buf, gpsdata, end);
-	if (status == 0) {
+	if (PASS(status)) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= ERROR_SET;
 	}
-	return status;
+	return FILTER(status);
     } else if (str_starts_with(classtag, "\"class\":\"TOFF\"")) {
 	status = json_pps_read(buf, gpsdata, end);
-	if (status == 0) {
+	if (PASS(status)) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= TOFF_SET;
 	}
-	return status;
+	return FILTER(status);
     } else if (str_starts_with(classtag, "\"class\":\"PPS\"")) {
 	status = json_pps_read(buf, gpsdata, end);
-	if (status == 0) {
+	if (PASS(status)) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= PPS_SET;
 	}
-	return status;
+	return FILTER(status);
     } else if (str_starts_with(classtag, "\"class\":\"OSC\"")) {
 	status = json_oscillator_read(buf, gpsdata, end);
-	if (status == 0) {
+	if (PASS(status)) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= OSCILLATOR_SET;
 	}
-	return status;
+	return FILTER(status);
     } else if (str_starts_with(classtag, "\"class\":\"RAW\"")) {
 	status = json_raw_read(buf, gpsdata, end);
-	if (status == 0) {
+	if (PASS(status)) {
 	    gpsdata->set &= ~UNION_SET;
 	    gpsdata->set |= RAW_SET;
 	}
-	return status;
+	return FILTER(status);
     } else
 	return -1;
 }
