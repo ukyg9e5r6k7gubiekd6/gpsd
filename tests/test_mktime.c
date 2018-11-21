@@ -5,6 +5,7 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
+#include <limits.h>
 #include <math.h>       /* for fabs() */
 #include <stdbool.h>
 #include <stdio.h>
@@ -14,6 +15,9 @@
 
 #include "../gps.h"
 #include "../compiler.h"
+
+#define TIME_T_BITS ((int)(sizeof(time_t) * CHAR_BIT))
+#define TIME_T_MAX ((1ULL << (TIME_T_BITS - 1)) - 1)
 
 static struct
 {
@@ -111,6 +115,17 @@ static struct
     {(timestamp_t)2147483648.123456, "2038-01-19T03:14:08.123Z"},
 };
 
+/* Skip test if value is out of time_t range */
+static int check_range(const char *name, timestamp_t ts, const char *text)
+{
+    if ((unsigned long long) ts > TIME_T_MAX) {
+	(void)printf("test_mktime: skipping %s for %s due to %d-bit time_t\n",
+		     name, text, TIME_T_BITS);
+	return 1;
+    }
+    return 0;
+}
+
 int main(int argc UNUSED, char *argv[] UNUSED)
 {
     int i;
@@ -150,6 +165,10 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
     /* test unix_to_iso8601() */
     for (i = 0; i < (int)(sizeof(tests1) / sizeof(tests1[0])); i++) {
+	if (check_range("unix_to_iso8601()",
+		        tests1[i].unixtime, tests1[i].iso8601)) {
+	    continue;
+	}
 	unix_to_iso8601(tests1[i].unixtime, tbuf, sizeof(tbuf));
         if (0 != strcmp(tests1[i].iso8601, tbuf)) {
 	    failed = true;
@@ -161,10 +180,14 @@ int main(int argc UNUSED, char *argv[] UNUSED)
 
     /* test iso8601_to_unix() */
     for (i = 0; i < (int)(sizeof(tests1) / sizeof(tests1[0])); i++) {
+	if (check_range("iso8601_to_unix()",
+		        tests1[i].unixtime, tests1[i].iso8601)) {
+	    continue;
+	}
 	ttime = iso8601_to_unix(tests1[i].iso8601);
         if (0.001 <= fabs(ttime - tests1[i].unixtime)) {
 	    failed = true;
-	    (void)printf("test_mktime: iso8601_to_unit() test %s failed.\n"
+	    (void)printf("test_mktime: iso8601_to_unix() test %s failed.\n"
                          "  Got %.3f, s/b %.3f\n",
                          tests1[i].iso8601, ttime, tests1[i].unixtime);
         }
