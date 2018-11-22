@@ -26,7 +26,7 @@
  * create the RINEX .obs file and exit.  Upload this file to an
  * offline processing service to get cm accuracy.
  *
- * One service known to work with obsrinex output is:
+ * One service known to work with obsrinex output is [CSRS-PPP]:
  *  https://webapp.geod.nrcan.gc.ca/geod/tools-outils/ppp.php
  *
  * Examples:
@@ -108,15 +108,27 @@ static timespec_t last_mtime = {0};      /* GPS time, not UTC */
  *  5 = QZSS      RINEX J
  *  6 = GLONASS   RINEX R
  *      IRNSS     RINEX I
- */
-
-/* observation codes:
+ *
+ * RINEX 3 observation codes [1]:
  * C1C  L1 C/A Pseudorange
+ * C1P  L1 P Pseudorange
+ * C1W  L1 Z-tracking Pseudorange
  * D1C  L1 C/A Doppler
- * L1C  L1 C/A carrier phase
+ * L1C  L1 C/A Carrier Phase
+ * L1P  L1 P Carrier Phase
+ * L1W  L1 Z-tracking Carrier Phase
  * C2C  L2 C/A Pseudorange
+ * C2P  L2 P Pseudorange
+ * C2W  L2 Z-tracking Pseudorange
  * D2C  L2 C/A Doppler
- * L2C  L2 C/A carrier phase
+ * L2C  L2 C/A Carrier phase
+ * L2P  L1 P Carrier Phase
+ * L2W  L2 Z-tracking Carrier Phase
+ *
+ * CSRS-PPP supports:
+ * GPS:      C1C  L1C  C2C  L2C  C1W  L1W  C2W  L2W
+ * GLONASS : C1C  L1C  C2C  L2C  C1P  L1P  C2P  L2P
+ *
  */
 typedef enum {C1C = 0, D1C, L1C, C2C, D2C, L2C, CODEMAX} obs_codes;
 /* structure to hold count of observations by gnssid:svid
