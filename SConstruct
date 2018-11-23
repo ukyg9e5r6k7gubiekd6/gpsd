@@ -551,11 +551,15 @@ def CheckXsltproc(context):
     </refentry>
 ''')
     ofp.close()
-    probe = "xsltproc --nonet --noout '%s' man/xmltest.xml" % (docbook_man_uri,)
+    probe = ("xsltproc --output man/foo.1 --nonet --noout '%s' "
+             "man/xmltest.xml" % (docbook_man_uri,))
     ret = context.TryAction(probe)[0]
     os.remove("man/xmltest.xml")
     if os.path.exists("foo.1"):
         os.remove("foo.1")
+    else:
+        # failed to create output
+        ret = False
     context.Result(ret)
     return ret
 
@@ -937,7 +941,7 @@ else:
     manbuilder = htmlbuilder = None
     if env['manbuild']:
         if config.CheckXsltproc():
-            build = "xsltproc --nonet %s $SOURCE >$TARGET"
+            build = "xsltproc --output $TARGET --nonet %s $SOURCE "
             htmlbuilder = build % docbook_html_uri
             manbuilder = build % docbook_man_uri
         elif WhereIs("xmlto"):
