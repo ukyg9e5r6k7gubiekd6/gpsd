@@ -555,8 +555,8 @@ def CheckXsltproc(context):
              "man/xmltest.xml" % (docbook_man_uri,))
     ret = context.TryAction(probe)[0]
     os.remove("man/xmltest.xml")
-    if os.path.exists("foo.1"):
-        os.remove("foo.1")
+    if os.path.exists("man/foo.1"):
+        os.remove("man/foo.1")
     else:
         # failed to create output
         ret = False
@@ -941,12 +941,11 @@ else:
     manbuilder = htmlbuilder = None
     if env['manbuild']:
         if config.CheckXsltproc():
-            build = "xsltproc --output $TARGET --nonet %s $SOURCE "
+            build = "xsltproc --output $TARGET --nonet %s $SOURCE"
             htmlbuilder = build % docbook_html_uri
             manbuilder = build % docbook_man_uri
         elif WhereIs("xmlto"):
-            xmlto = "xmlto %s $SOURCE || mv `basename $TARGET` " \
-                    "`dirname $TARGET`"
+            xmlto = "xmlto -o `dirname $TARGET` %s $SOURCE"
             htmlbuilder = xmlto % "html-nochunks"
             manbuilder = xmlto % "man"
         else:
