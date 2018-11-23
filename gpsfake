@@ -135,28 +135,28 @@ if __name__ == '__main__':
     def usage():
         "Print usage and exit"
         sys.stderr.write("""usage: gpsfake [OPTIONS] logfile...
-    [-1]
-    [-b]
-    [-c cycle]
-    [-D debug]
-    [-g]
-    [-h]
-    [-i]
-    [-l]
-    [-m monitor]
-    [-n]
-    [-o options]
-    [-p]
-    [-P port]
-    [-q]
-    [-r initcmd]
-    [-S]
-    [-s speed]
-    [-t]
-    [-T]
-    [-v]
-    [-V]
-    [-x]
+    [-1]         logfile is interpreted once only rather than repeatedly
+    [-b]         enable a twirling-baton progress indicator
+    [-c cycle]   sets the delay between sentences in seconds
+    [-D debug]   passes a -D option to the daemon
+    [-g]         run the gpsd instance within gpsfake under control of gdb
+    [-h]         print a usage message and exit
+    [-i]         single-stepping through logfile
+    [-l]         dump a line or packet number just before each sentence
+    [-m monitor] specifies a monitor program under which the daemon is run
+    [-n]         start the daemon reading the GPS without waiting for a client
+    [-o options] specifies options to pass to the daemon
+    [-p]         sets watcher mode and dump to stdout
+    [-P port]    sets the daemon's listening port
+    [-q]         act in a quiet manner
+    [-r initcmd] specifies an initialization command to use in pipe mode
+    [-S]         insert realistic delays in the test input
+    [-s speed]   sets the baud rate for the slave tty
+    [-t]         force TCP
+    [-T]         print some system information and exit
+    [-v]         verbose
+    [-V]         Version
+    [-x]         dump packets as gpsfake gathers them
 """)
         raise SystemExit(0)
 
