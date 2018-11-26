@@ -752,8 +752,9 @@ static void quit_handler(int signum)
 static void conditionally_log_fix(struct gps_data_t *gpsdata)
 {
     if ( 4 < debug) {
+        /* The (long long unsigned) is for 32/64-bit compatibility */
         (void)fprintf(tmp_file,"mode %d set %llx\n", gpsdata->fix.mode,
-                      gpsdata->set);
+                      (long long unsigned)gpsdata->set);
     }
 
     /* mostly we don't care if 2D or 3D fix, let the post processor
