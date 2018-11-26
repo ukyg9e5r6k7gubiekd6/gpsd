@@ -977,7 +977,7 @@ else:
     for option in ('-Wextra', '-Wall', '-Wno-uninitialized',
                    '-Wno-missing-field-initializers',
                    '-Wcast-align', '-Wmissing-declarations',
-                   '-Wmissing-prototypes',
+                   '-Wmissing-prototypes', "-Wvla",
                    '-Wstrict-prototypes', '-Wpointer-arith', '-Wreturn-type'):
         if option not in config.env['CFLAGS']:
             config.CheckCompilerOption(option)

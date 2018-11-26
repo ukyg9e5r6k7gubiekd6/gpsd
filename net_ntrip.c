@@ -457,8 +457,6 @@ int ntrip_open(struct gps_device_t *device, char *caster)
     char *stream = NULL;
     char *url = NULL;
     int ret = -1;
-    char t[strlen(caster) + 1];
-    char *tmp = t;
 
     switch (device->ntrip.conn_state) {
 	case ntrip_conn_init:
@@ -467,14 +465,13 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 	    device->ntrip.works = false;
 	    device->ntrip.sourcetable_parse = false;
 	    device->ntrip.stream.set = false;
-	    (void)strlcpy(tmp, caster, sizeof(t));
 
-	    if ((amp = strchr(tmp, '@')) != NULL) {
-		if (((colon = strchr(tmp, ':')) != NULL) && colon < amp) {
-		    auth = tmp;
+	    if ((amp = strchr(caster, '@')) != NULL) {
+		if (((colon = strchr(caster, ':')) != NULL) && colon < amp) {
+		    auth = caster;
 		    *amp = '\0';
-		    tmp = amp + 1;
-		    url = tmp;
+		    caster = amp + 1;
+		    url = caster;
 		} else {
 		    gpsd_log(&device->context->errout, LOG_ERROR,
 			     "can't extract user-ID and password from %s\n",
@@ -483,7 +480,7 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 		    return -1;
 		}
 	    }
-	    if ((slash = strchr(tmp, '/')) != NULL) {
+	    if ((slash = strchr(caster, '/')) != NULL) {
 		*slash = '\0';
 		stream = slash + 1;
 	    } else {
@@ -494,7 +491,7 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 		device->ntrip.conn_state = ntrip_conn_err;
 		return -1;
 	    }
-	    if ((colon = strchr(tmp, ':')) != NULL) {
+	    if ((colon = strchr(caster, ':')) != NULL) {
 		port = colon + 1;
 		*colon = '\0';
 	    }

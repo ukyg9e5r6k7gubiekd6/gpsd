@@ -314,7 +314,7 @@ void monitor_fixframe(WINDOW * win)
 static void packet_dump(const char *buf, size_t buflen)
 {
     if (packetwin != NULL) {
-	char buf2[buflen * 2];
+	char buf2[MAX_PACKET_LENGTH * 2];
 	cond_hexdump(buf2, buflen * 2, buf, buflen);
 	(void)waddstr(packetwin, buf2);
 	(void)waddch(packetwin, (chtype)'\n');

@@ -1539,7 +1539,7 @@ static gps_mask_t nmea2000_parse_input(struct gps_device_t *session)
 
 int nmea2000_open(struct gps_device_t *session)
 {
-    char interface_name[strlen(session->gpsdata.dev.path)+1];
+    char interface_name[GPS_PATH_MAX];
     socket_t sock;
     int status;
     int unit_number;
