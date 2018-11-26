@@ -751,7 +751,7 @@ static void quit_handler(int signum)
 static void conditionally_log_fix(struct gps_data_t *gpsdata)
 {
     if ( 4 < debug) {
-        (void)fprintf(tmp_file,"mode %d set %lx\n", gpsdata->fix.mode,
+        (void)fprintf(tmp_file,"mode %d set %llx\n", gpsdata->fix.mode,
                       gpsdata->set);
     }
 
