@@ -138,7 +138,7 @@ You should see this output:
 UBX-RXM-RAWX:
 UBX-RXM-RAWX:
 </programlisting></para>
-    <para>Collect 4 hours of samples at 30 second intervals, save then
+    <para>Collect 4 hours of samples at 30 second intervals, save the
 RINEX 3 observations in the file today.obs:
 <programlisting>
 gpsrinex -i 30 -n 480 -f today.obs
