@@ -2372,6 +2372,7 @@ htmlpages = Split('''
     www/gpsmon.html
     www/gpspipe.html
     www/gpsprof.html
+    www/gpsrinex.html
     www/gpxlogger.html
     www/hardware.html
     www/internals.html

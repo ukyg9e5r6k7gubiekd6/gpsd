@@ -294,6 +294,10 @@ standard output.</dd>
 <dd>The <code>gpsprof</code> program for plotting spatial scatter of fixes
 and fix latency.</dd>
 
+<dt><a href="gpsrinex.html">gpsrinex.1</a></dt>
+<dd>The <code>gpsrinex</code> program for outputting raw measurements
+into a RINEX 3 file.</dd>
+
 <dt><a href="ntpshmmon.html">ntpshmmon.1</a></dt>
 <dd>Monitor the NTP shared-memory segments created by GPSD.</dd>
 
