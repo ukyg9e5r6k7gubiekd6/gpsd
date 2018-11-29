@@ -265,15 +265,9 @@ latest stable version.</p>
 <dt><a href="gps.html">gps.1</a></dt>
 <dd>The <code>gpsd</code> test clients.</dd>
 
-<dt><a href="libgps.html">libgps.3</a></dt>
-<dd>An interface library that manages communication with the daemon.</dd>
-
-<dt><a href="libgpsmm.html">libgpsmm.3</a></dt>
-<dd>C++ class wrapper for the libgps C binding.</dd>
-
-<dt><a href="gpsprof.html">gpsprof.1</a></dt>
-<dd>The <code>gpsprof</code> program for plotting spatial scatter of fixes
-and fix latency.</dd>
+<dt><a href="gps2udp.html">gps2udp.1</a></dt>
+<dd>Feed the take from <code>gpsd</code> to one or more aggregation
+sites via UDP.</dd>
 
 <dt><a href="gpsfake.html">gpsfake.1</a></dt>
 <dd>The <code>gpsfake</code> test harness simulating a GPS.</dd>
@@ -285,6 +279,9 @@ and fix latency.</dd>
 <dd>The <code>gpscat</code> tool dumps output from a serial
 device. Optionally, it can packetize the data.</dd>
 
+<dt><a href="gpsdecode.html">gpsdecode.1</a></dt>
+<dd>The <code>gpsdecode</code> packet decoder.</dd>
+
 <dt><a href="gpsmon.html">gpsmon.1</a></dt>
 <dd>The <code>gpsmon</code> real-time packet monitor and diagnostic
 tool. (This replaces the <code>sirfmon</code> tool in older versions.)</dd>
@@ -293,8 +290,18 @@ tool. (This replaces the <code>sirfmon</code> tool in older versions.)</dd>
 captures GPS output and/or <code>gpsd</code> reports and sends it to
 standard output.</dd>
 
-<dt><a href="gpsdecode.html">gpsdecode.1</a></dt>
-<dd>The <code>gpsdecode</code> packet decoder.</dd>
+<dt><a href="gpsprof.html">gpsprof.1</a></dt>
+<dd>The <code>gpsprof</code> program for plotting spatial scatter of fixes
+and fix latency.</dd>
+
+<dt><a href="ntpshmmon.html">ntpshmmon.1</a></dt>
+<dd>Monitor the NTP shared-memory segments created by GPSD.</dd>
+
+<dt><a href="libgps.html">libgps.3</a></dt>
+<dd>An interface library that manages communication with the daemon.</dd>
+
+<dt><a href="libgpsmm.html">libgpsmm.3</a></dt>
+<dd>C++ class wrapper for the libgps C binding.</dd>
 
 <dt><a href="gpsd_json.html">gpsd.5</a></dt> <dd>The request/response
 protocol of the <code>gpsd</code> daemon.</dd>
@@ -305,12 +312,6 @@ protocol of the <code>gpsd</code> daemon.</dd>
 <dt><a href="gpsinit.html">gpsinit.8</a></dt>
 <dd>Initialize kernel modules for use with <code>gpsd</code> daemon.</dd>
 
-<dt><a href="gps2udp.html">gps2udp.1</a></dt>
-<dd>Feed the take from <code>gpsd</code> to one or more aggregation
-sites via UDP.</dd>
-
-<dt><a href="ntpshmmon.html">ntpshmmon.1</a></dt>
-<dd>Monitor the NTP shared-memory segments created by GPSD.</dd>
 </dl>
 
 <p>Also, see the <a href="faq.html">FAQ</a>.</p>
