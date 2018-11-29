@@ -145,7 +145,7 @@ presently use <code>gpsd</code> include
 <a href="http://www.freedesktop.org/wiki/Software/GeoClue">geoclue</a>,
 <a href="http://www.qlandkarte.org/">qlandkartegt</a>,
 <a href="http://gpredict.oz9aec.net/">gpredict</a>,
-<a href="http://opencpn.org/">OpenCPN</a>,
+<a href="https://opencpn.org/">OpenCPN</a>,
 <a href="https://github.com/infinet/gpsd-navigator.git">gpsd-navigator</a>,
 <a href="https://github.com/IvanSanchez/gpsd-ais-viewer">gpsd-ais-viewer</a>,
 and <a
