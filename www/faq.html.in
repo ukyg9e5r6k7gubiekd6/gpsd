@@ -241,10 +241,6 @@ Location" rather than computing its location the cheaper way using
 cell-tower signal strengths ("Coarse Location").  What you need to
 do is identify that app, and decide if you wish to remove it.</p>
 
-<p>See <a href="http://www.bitdirect.nl/?p=47">this blog post</a> for
-a procedure for hunting down the bad app. In this particular case it
-was something called <code>buienradar</code></p>.
-
 <p>On the Samsung Galaxy SIII, vendor firmware provides a "Remote
 Location" service with a similar bug. You can disable this through
 Settings.  See <a
@@ -473,8 +469,8 @@ describe that procedure here.</p>
 a copy of the source repository.</p></li>
 
 <li><p>Use <a
-href="https://www.kernel.org/pub/software/scm/git/docs/git-bisect.html">git
-bisect</a> to locate the exact revision that introduced your bug.
+href="https://mirrors.edge.kernel.org/pub/software/scm/git/docs/git-bisect.html"
+>git bisect</a> to locate the exact revision that introduced your bug.
 This will happen very quickly, as the number of tests required will be
 the log to the base 2 of the number of revisions in your original
 span.  Even if there are (say) 500 revisions in the span you should
@@ -790,7 +786,7 @@ href="https://www.clearchain.com/blog/posts/using-serial-devices-in-freebsd-how-
 <h1 id='conflict'>Why does GPSD open non-GPS USB devices?</h1>
 
 <p>Most USB devices have a defined <a
-href="http://www.usb.org/developers/defined_class">device class</a> -
+href="https://www.usb.org/developers/defined_class">device class</a> -
 mass storage, video, hub, and human interface device are three of the
 more common ones.  Using GPSD will never interfere with such devices,
 nor will they interfere with GPSD.</p>
