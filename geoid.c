@@ -1,6 +1,9 @@
 /*
  * geoid.c -- ECEF to WGS84 conversions, including ellipsoid-to-MSL height
  *
+ * This code does not specify, but given the creation date, I assume it
+ * is using the EGM96 geoid revised 2004.
+ *
  * Geoid separation code by Oleg Gusev, from data by Peter Dana.
  * ECEF conversion by Rob Janssen.
  *

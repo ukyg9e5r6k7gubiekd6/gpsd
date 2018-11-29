@@ -71,10 +71,10 @@ earth-fixed) coordinates. After an ECEF position is calculated, it is
 converted into latitude, longitude using a datum.  So many to
 choose from.  You've probably heard of WGS84, NAD83, and maybe ITRF.
 
-NAD83 is pinned to the North American tectonic plate. WGS84 is pinned to
-the prime meridian. NAD83 is the official datum in the USA and Canada,
-and is used by the FAA.  WGS84 is the official datum of GPS and the US
-Department of Defense.
+NAD83 is pinned to the North American tectonic plate. WGS84 is pinned
+to the Reference Meridian (near the Greenwich Meridian). NAD83 is the
+official datum in the USA and Canada, and is used by the FAA.  WGS84 is
+the official datum of GPS and the US Department of Defense.
 
 In 1987 the difference between NAD83 and WGS84 was not measurable. Since
 then the tectonic plates have moved. In 2018 the two datums can differ
