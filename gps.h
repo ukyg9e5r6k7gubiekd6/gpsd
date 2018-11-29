@@ -1830,6 +1830,9 @@ struct satellite_t {
      *  4 = IMES      1-10
      *  5 = QZSS      1-5
      *  6 = GLONASS   1-32, 22255
+     *
+     *  Not defined by u-blox:
+     *  20 = IRNSS    1-11
      */
     unsigned char gnssid;
     /* ignore gnssid and sigid if svid is zero */
