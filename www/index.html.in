@@ -130,7 +130,7 @@ military vehicles.</p>
 <p>Applications that
 presently use <code>gpsd</code> include
 <a href="https://www.kismetwireless.net/">Kismet</a>,
-<a href="http://www.gpsdrive.de/">GpsDrive</a>,
+<a href="https://sourceforge.net/projects/gpsdrive/">GpsDrive</a>,
 <a href="http://qpegps.sourceforge.net/">gpeGPS</a>,
 <a href="http://roadmap.sourceforge.net/">roadmap</a>,
 <a href="http://roadnav.sourceforge.net/">roadnav</a>,
