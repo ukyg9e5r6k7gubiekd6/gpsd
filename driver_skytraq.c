@@ -201,8 +201,39 @@ static gps_mask_t sky_msg_DE(struct gps_device_t *session,
 	unsigned short sv_stat;
 	unsigned short chan_stat;
 	unsigned short ura;
+        short PRN;
 
-	session->gpsdata.skyview[st].PRN = (short)getub(buf, off + 1);
+	PRN = (short)getub(buf, off + 1);
+        /* fit into gnssid:svid */
+	if (0 == PRN) {
+            /* skip 0 PRN */
+	    continue;
+        } else if ((1 <= PRN) && (32 >= PRN)) {
+            /* GPS */
+            session->gpsdata.skyview[st].gnssid = 0;
+            session->gpsdata.skyview[st].svid = PRN;
+        } else if ((65 <= PRN) && (96 >= PRN)) {
+            /* GLONASS */
+            session->gpsdata.skyview[st].gnssid = 6;
+            session->gpsdata.skyview[st].svid = PRN - 64;
+        } else if ((120 <= PRN) && (158 >= PRN)) {
+            /* SBAS */
+            session->gpsdata.skyview[st].gnssid = 1;
+            session->gpsdata.skyview[st].svid = PRN;
+        } else if ((201 <= PRN) && (239 >= PRN)) {
+            /* BeiDou */
+            session->gpsdata.skyview[st].gnssid = 3;
+            session->gpsdata.skyview[st].svid = PRN - 200;
+        } else if ((240 <= PRN) && (251 >= PRN)) {
+            /* IRNSS */
+            session->gpsdata.skyview[st].gnssid = 20;
+            session->gpsdata.skyview[st].svid = PRN - 240;
+        } else {
+            /* huh? */
+            session->gpsdata.skyview[st].gnssid = 0;
+            session->gpsdata.skyview[st].svid = PRN;
+        }
+	session->gpsdata.skyview[st].PRN = PRN;
 	sv_stat = (unsigned short)getub(buf, off + 2);
 	ura = (unsigned short)getub(buf, off + 3);
 	session->gpsdata.skyview[st].ss = (float)getub(buf, off + 4);
