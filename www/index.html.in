@@ -465,10 +465,6 @@ that aims to provide a location service layer for all D-Bus-using
 applications. It can use <code>gpsd</code> as a source for location
 info.</p>
 
-<p>Notes on setting up reliable timekeeping using a Navisys GR-601W
-USB GPS can be found <a
-href="http://whatroute.net/timekeeping.html">here</a>.</p>
-
 <h1 id='others'>Other GPSDs</h1>
 
 <p>There used to be three Linux-based forks of <code>gpsd</code> in the
