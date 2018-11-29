@@ -129,7 +129,6 @@ military vehicles.</p>
 
 <p>Applications that
 presently use <code>gpsd</code> include
-<a href="http://pygps.org">pyGPS</a>,
 <a href="http://www.kismetwireless.net/">Kismet</a>,
 <a href="http://www.gpsdrive.de/">GpsDrive</a>,
 <a href="http://qpegps.sourceforge.net/">gpeGPS</a>,
@@ -245,10 +244,10 @@ sends automatic broadcast notifications of commits to the <code>gpsd</code>
 repository.</li>
 
 <li>There are searchable archives of the old GPSD mailing lists from
-Berlios at <a href="http://marc.info">MARC</a>:
-<a href="http://marc.info/?l=gpsd-users">gpsd-users</a>
-<a href="http://marc.info/?l=gpsd-dev">gpsd-dev</a> and
-<a href="http://marc.info/?l=gpsd-commit-watch">gpsd-commit-watch</a>.</li>
+Berlios at <a href="https://marc.info">MARC</a>:
+<a href="https://marc.info/?l=gpsd-users">gpsd-users</a>
+<a href="https://marc.info/?l=gpsd-dev">gpsd-dev</a> and
+<a href="https://marc.info/?l=gpsd-commit-watch">gpsd-commit-watch</a>.</li>
 </ul>
 
 <h1 id='documentation'>Documentation</h1>
