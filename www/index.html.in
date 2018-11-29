@@ -383,9 +383,9 @@ design of <code>gpsd</code> and vendor claims about binary protocols.</dd>
 in spots, but still quite useful for anyone interested in modifying
 the code.</dd>
 
-<dt><a href="excellence.html">GPSD and Code Excellence</a></dt>
-<dd>An essay written for the <a href="http://codeoffsets.com/">The
-Alliance for Code Excellence</a> on how GPSD drives out bad code.</dd>
+<dt><a href="excellence.html">GPSD and Code Excellence</a></dt> <dd>An
+essay written for the "The Alliance for Code Excellence" on how GPSD
+drives out bad code.</dd>
 
 <dt><a href="http://esr.ibiblio.org/?p=1859">Scenes from the Life of a System Architect</a></dt>
 <dd>The GPSD lead describes some work in progress on the core code of
