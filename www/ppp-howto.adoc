@@ -376,5 +376,4 @@ https://www.ngs.noaa.gov/OPUS/
 The curious can find the RINEX 3.03 format described here:
 ftp://igs.org/pub/data/format/rinex303_update1.pdf
 
-
-
+// vim: set syntax=asciidoc:
