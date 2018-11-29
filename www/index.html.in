@@ -78,21 +78,21 @@
 <tr>
 <td>
 <script type="text/javascript"
-src="http://www.openhub.net/p/3944/widgets/project_basic_stats.js"></script>
+src="https://www.openhub.net/p/3944/widgets/project_basic_stats.js"></script>
 </td>
 <td>
 <script type="text/javascript"
-src="http://www.openhub.net/p/3944/widgets/project_factoids.js"></script>
+src="https://www.openhub.net/p/3944/widgets/project_factoids.js"></script>
 </td>
 </tr>
 <tr>
 <td>
 <script type="text/javascript"
-src="http://www.openhub.net/p/3944/widgets/project_languages.js"></script>
+src="https://www.openhub.net/p/3944/widgets/project_languages.js"></script>
 </td>
 <td>
 <script type="text/javascript"
-src="http://www.openhub.net/p/3944/widgets/project_cocomo.js"></script>
+src="https://www.openhub.net/p/3944/widgets/project_cocomo.js"></script>
 </td>
 </tr>
 </table>
@@ -129,12 +129,12 @@ military vehicles.</p>
 
 <p>Applications that
 presently use <code>gpsd</code> include
-<a href="http://www.kismetwireless.net/">Kismet</a>,
+<a href="https://www.kismetwireless.net/">Kismet</a>,
 <a href="http://www.gpsdrive.de/">GpsDrive</a>,
 <a href="http://qpegps.sourceforge.net/">gpeGPS</a>,
 <a href="http://roadmap.sourceforge.net/">roadmap</a>,
 <a href="http://roadnav.sourceforge.net/">roadnav</a>,
-<a href="http://www.navit-project.org/">navit</a>,
+<a href="https://www.navit-project.org/">navit</a>,
 <a href="http://viking.sf.net">viking</a>,
 <a href="http://www.tangogps.org/">tangogps</a>,
 <a href="http://www.foxtrotGPS.org/">foxtrot</a>,
@@ -148,7 +148,7 @@ presently use <code>gpsd</code> include
 <a href="https://github.com/infinet/gpsd-navigator.git">gpsd-navigator</a>,
 <a href="https://github.com/IvanSanchez/gpsd-ais-viewer">gpsd-ais-viewer</a>,
 and <a
-href="http://www.mozilla.com/en-US/firefox/new/">firefox/mozilla</a>.
+href="https://www.mozilla.com/en-US/firefox/new/">firefox/mozilla</a>.
 In addition, the Android smartphone operating system (from version
 4.0 onwards and possibly earlier; we don't know for sure when the
 change happened) uses GPSD to monitor the phone's on-board GPS, so
@@ -427,11 +427,11 @@ of the problem.</p>
 GPS by pairing it as a Bluetooth device.  Directions from <a
 href="https://bvargo.net/blog/2010/10/17/bluetooth-blues-getting-linux-pc-use-gps-android-d/"
 >Vargoville</a>. There is also a <a
-href="http://www.appszoom.com/android_applications/tools/gps-tether_blgt.html"
+href="https://www.appszoom.com/android_applications/tools/gps-tether_blgt.html"
 >GPS Tether</a> app designed to work with GPSD, but it seems to be in early
 alpha.</p>
 
-<p>The <a href="http://gpsdproxy.sourceforge.net/">GPSDproxy
+<p>The <a href="https://sourceforge.net/projects/gpsdproxy/">GPSDproxy
 project</a> is a small program which reads GPS data from a running
 gpsd process and forwards it to a remote server via an UDP
 connection. GPSDproxy is intended to be run on GPS enabled mobile
@@ -448,7 +448,7 @@ href="http://code.google.com/p/qtgpsc/">Qt-based client</a>, basically
 <code>xgps</code> with a Qt look and feel.</p>
 
 <p>Egil M&#246;ller has written <a
-href="http://redhog.github.com/agpsd/">agpsd</a>,
+href="https://redhog.github.com/agpsd/">agpsd</a>,
 a gpsd replication and logging daemon with support for KML.</p>
 
 <p>You can find Debian-unstable packages
@@ -456,7 +456,7 @@ a gpsd replication and logging daemon with support for KML.</p>
 
 <p><code>gpsd</code> is carried in the OpenBSD ports tree.</p>
 
-<p><a href="http://www.openstreetmap.org/">OpenStreetMap</a> is a wiki
+<p><a href="https://www.openstreetmap.org/">OpenStreetMap</a> is a wiki
 aiming to build a freely available, world-wide streetmap.</p>
 
 <p>Freedesktop.org is hosting a project called <a
@@ -486,7 +486,7 @@ website has been down: http://www.mgix.com/gps3d/</p>
 href='http://www5.musatcha.com/musatcha/computers/software/gpsd/'>Microsoft
 Windows</a>. It provides gpsd service from data in netstumbler under
 win32.  This way programs such as <a
-href='http://wigle.net'>JiGLE</a> can still get GPS data from
+href='https://www.wigle.net'>JiGLE</a> can still get GPS data from
 netstumbler. This program is not genetically related to
 <code>gpsd</code>.</p>
 
