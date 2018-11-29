@@ -404,6 +404,10 @@ other mysteries. Written as a companion to <a
 href="gpsd-time-service-howto.html">GPSD Time Service HOWTO</a> for
 time-service novices.</dd>
 
+<dt><a href="PPP-howto.html">PPP HOWTO</a></dt>
+<dd>A guide to using <code>gpsd</code> and <code>gpsrinex</code> to
+determine your position to the cm level.</dd>
+
 </dl>
 
 <h1 id='recipes'>Recipes and related resources</h1>

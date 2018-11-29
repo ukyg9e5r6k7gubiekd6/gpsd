@@ -2340,6 +2340,7 @@ if env.WhereIs('asciidoc'):
                 'client-howto',
                 'gpsd-time-service-howto',
                 'NMEA',
+                'ppp-howto',
                 'protocol-evolution',
                 'protocol-transition',
                 'time-service-intro',

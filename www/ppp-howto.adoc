@@ -1,0 +1,380 @@
+= Precise Point Positioning (PPP) HOWTO =
+:description: This document is a guide getting high accuracy from your GPS using Precise Point Positioning (PPP).
+:keywords: Precise Point Positioning, PPP, GPSD, GPS
+Gary E. Miller <gem@rellim.com>
+V0.99, Nov 2018 
+
+== Introduction ==
+
+This document is a guide getting high accuracy static positions from
+your GPS using Precise Point Positioning (PPP). The rare few that have a
+GPS that output raw measurement data for L1 and L2 can achieve absolute
+accuracy of around 3 cm. The lucky owners of an L1 GPS that outputs raw
+measurements can get about 0.5 m. The majority will only be able to get
+somewhat better than 1.5 m using simple averaging.
+
+Patience is required.  For best results 6 to 24 hours of data is
+required.  Post processing time may double that.
+
+This document is not about getting high precision dynamic positions
+from your GPS.  That requires Real Time Kinematic (RTK) which will
+not be discussed here.  RTK users will still want to read this document.
+The RTK Best practice is to determine the position of the base using
+PPP before sending the RTK data from the base to its rovers.
+
+== Requirements ==
+
+This document assumes that you have basic knowledge of how to use
+_gpsd_.  Before continuing you should know how to start and stop
+_gpsd_, and how to use _cgps_ to see you current position and fix
+status.
+
+This document also assumes that you have a GPS connected to a local GPSD
+demon and that _cgps_ shows a stable 3D fix. This will allow Simple
+Averaging. You will also need Python and _gnuplot_ installed. The Python
+and _gnuplot_ do not need to be installed on the host that is connected
+to the GPS, they are merely needed for post processing.
+
+For basic PPP (0.5 m) you will need a GPS that outputs L1 raw
+measurement data that GPS understands. Currently that limits you to a
+Javad GPS that support the GREIS language, or a u-blox GPS that support
+the UBX-RXM-RAWX messages.
+
+u-blox GPS known to support UBX-RXM-RAW are: -M8T and -M8F.
+
+For advanced PPP (3 cm) you will need a GPS that outputs L1 and L2 raw
+measurement data that GPS understands. Currently that limits you to a
+Javad GPS that support the GREIS language.
+
+Finally, patience is required.
+
+== Results ==
+
+The end goal of this process is to determine the latitude, longitude and
+altitude of your GPS antenna as precisely as possible.  Additionally
+the Circular Error of Probability (CEP) will be determined.
+
+CEP, also known as the CEP(50), is the radius of a circle, centered on
+the mean, whose boundary includes 50% of the GPS positions.  You probably
+do not want to base any navigation or surveying on a 50% probability. 
+
+More interesting is the CEP(95) which includes 95% of the measurements.
+
+== ITRF00, WGS84, NAD83 and Ellipsoids ==
+
+Ever noticed how two "accurate" GPS placed side by side can give wildly
+different latitude, longitude, and especially altitude for the same
+spot?
+
+All GNSS systems compute positions using ECEF (earth-centered,
+earth-fixed) coordinates. After an ECEF position is calculated, it is
+converted into latitude, longitude using a datum.  So many to
+choose from.  You've probably heard of WGS84, NAD83, and maybe ITRF.
+
+NAD83 is pinned to the North American tectonic plate. WGS84 is pinned to
+the prime meridian. NAD83 is the official datum in the USA and Canada,
+and is used by the FAA.  WGS84 is the official datum of GPS and the US
+Department of Defense.
+
+In 1987 the difference between NAD83 and WGS84 was not measurable. Since
+then the tectonic plates have moved. In 2018 the two datums can differ
+by more than 2 meters in the continental USA.
+
+It is common when using NAD83 to also specify the year (epoch) of the
+measurements.  This allows archival, and current, data to be used
+to similar accuracy.
+
+It gets worse. Most PPP services support the International Terrestrial
+Reference Frame (ITRF). ITRF is pinned to a Celestial Reference Plane
+(CRF).
+
+It gets worse. There is not one WGS84, but many: WGS 1984 (ORIG),
+WGS84(G730), WGS84(G873), WGS84(G1150), WKID: 4326, and more. There is
+not one ITRF but many: ITRF91/92, ITRF94/96, ITRF00, ITRF08 and more.
+
+Original ITRF and WGS84 differ by less than 1 meter, which is huge
+for the purposes here. ITRF2014 and WGS84(G1762) differ by a few
+centimeters.
+
+It gets worse. two expensive GPS often differ in altitude by over 60
+feet. Altitude is calculated as height above Mean Sea Level (MSL). But
+the Earth is not a perfect sphere. It is more pear shaped. In addition
+gravitational anomalies affect 'sea level'.
+
+Fun fact: gravity is at its maximum at 'sea level'.
+
+Many different datums can be used to calculate height. These datums
+are based on different ellipsoids used to approximate sea level. The
+two used by CSRS-PPP are CGVD2013 and CGDV28(HT2_0). GCVD2013 is the
+standard datum in Canada since 2013.  The standard in the USA is the
+North American Vertical Datum of 1988 (NAVD 88). Many GPS use the WGS84
+Ellipsoid as the vertical datum. The WGS84 Ellipsoid is from the same
+organization as the WGS84 coordinate system, but not part of WGS84.
+
+Clearly there is no point knowing your precise position to a few cm
+if you are not certain of your datum and vertical datum (ellipsoid),
+with epoch. This will be important later as you are asked to input your
+choice of horizontal and vertical datums to your PPP service.
+
+== Averaging ==
+
+The first technique covered, Simple Averaging, works with any GPS
+that is supported by GPSD.  For best results a minimum of 6 hours, and
+preferably 24 hours, of continuous observations are required.
+
+_gpsprof_ will be used to gather 24 hours of position data and then
+output a plot file. The plot file is fed into _gnuplot_ to turn it
+into a png image file. The image will contain a scatter plot of all
+the positions reported by your GPS, as well as summary statistics. The
+statistics include the mean latitude, mean longitude, mean altitude and
+other computed values.
+
+The procedure is simple:
+
+. Verify your GPS is communicating with _gpsd_ by running _cgps_ and
+confirming that you have a stable 3D fix.
+
+. Collect 24 hours of data in a plot file: `gpsprof -n 86400 -T pngcairo > scatter.plot`
+
+. Convert the plot to a png: `gnuplot < scatter.plot > scatter.png`
+
+. Display the png with your favorite image viewer.  To use _display_
+from _Imagemagick_: `display scatter.png`
+
+There are many possible adjustments to the above procedure.
+
+Maybe you want to collect just 10 minutes of data to verify that your
+tool-chain is working before doing a 24 hour run. Simple, just change
+`gpsprof -n 86400` to `gpsprof -n 360` and then proceed as above.
+
+Maybe your _gpsd_ host does not have Python installed.  Just run _gpsprof_
+remotely.  On the host you will need to run _gpsd_ with the `-g` parameter so
+that it can be accessed over the network.  Then run _gpsprof_ on a
+remote host that supports Python this way:
+`gpsprof -n 86400 -T pngcairo [hostname] > scatter.plot`
+
+Depending on your GPS, your GPS antenna, and your sky view, you may get
+a CEP(95) of around 1.5 m.
+
+== Precise Point Positioning (PPP) ==
+
+Plain GPS determine their position by measuring the distance to several
+GPS satellites and calculating a position solution. The main limitation
+is that the position of any GPS satellite is not known to better than a
+meter or two in real time.
+
+PPP uses the raw GPS measurements from a worldwide network of precisely
+fixed ground receivers to precisely calculate the actual orbits of
+all the satellites. "Ultra Rapid" orbits take about 90 minutes to be
+available. "Rapid" orbits take a day. The most accurate orbits ("Final")
+take around 14 days to determine.
+
+To use these orbits you need to collect the raw measurements from your
+GPS, then upload them to a service to compute a more precise fix.
+Receiver Independent Exchange Format (RINEX) files are the standard
+for sending your raw measurement data.  _gpsd_ uses RINEX Version 3
+(RINEX 3).
+
+Most PPP services have many limitations making them unsuitable for
+our purposes.  Some limitations include: open only to paid subscribers,
+require L1 and L2 raw data, and/or use proprietary data formats.
+
+There is one online service that is free to all (requires registration),
+accepts L1 only raw data, and accepts RINEX 3 files: Natural Resoruces
+Canada (NRCAN).  Their tool is at https://webapp.geod.nrcan.gc.ca/geod/tools-outils/ppp.php
+
+== PPP Configuration ==
+
+Before you can collect raw data from you GPS, you must configure it to
+output raw data.  This configuration will not be the default configuration
+that _gpsd_ applies to your GPS by default.
+
+The raw data can be quite large, so be sure your GPS serial port speed
+is set to 57,600, or higher.
+
+Many of the configuration steps are order dependent. If in doubt, start
+over from the beginning. Be sure that _gpsd_ is running and that _cgps_
+shows that you have a stable 3D fix.
+
+
+=== u-blox configuration ===
+
+This section is only for u-blox users.
+
+Be sure your serial port speed is high enough:
+
+...................................
+$ gpsctl -s 115200
+...................................
+
+Disable all NMEA messages, and enable binary messages:
+
+...................................
+$ ubxtool -d NMEA
+$ ubxtool -e BINARY
+...................................
+
+Disable all constellations, except GPS (and QZSS):
+
+...................................
+$ ubxtool -d GLONASS
+$ ubxtool -d BEIDOU
+$ ubxtool -d GALILEO
+$ ubxtool -d SBAS
+$ ubxtool -e GPS
+...................................
+
+Verify that only GPS and QZSS are enabled.  Otherwise the u-blox will
+not output raw measurement data.
+
+...................................
+$ ubxtool -p GNSS
+[...]
+UBX-CFG-GNSS:
+ Ver: 0 ChHw; 20 ChUse: 20, Blocks: 7
+ gnssId: GPS TrkCh: 8 maxTrCh: 16, Flags: 0x1 01 00 01
+  L1C/A enabled
+ gnssId: SBAS TrkCh: 1 maxTrCh: 3, Flags: 0x1 01 00 00
+  L1C/A
+ gnssId: Galileo TrkCh: 4 maxTrCh: 8, Flags: 0x1 01 00 00
+  E1OS
+ gnssId: BeiDou TrkCh: 8 maxTrCh: 16, Flags: 0x1 01 00 00
+  B1I
+ gnssId: IMES TrkCh: 0 maxTrCh: 8, Flags: 0x3 01 00 00
+  L1
+ gnssId: QZSS TrkCh: 0 maxTrCh: 3, Flags: 0x5 01 00 01
+  L1C/A enabled
+ gnssId: GLONASS TrkCh: 8 maxTrCh: 14, Flags: 0x1 01 00 00
+  L1OF
+[...]
+...................................
+
+Enable the good stuff, the raw measurement messages:
+
+...................................
+$ ubxtool -e RAWX
+...................................
+
+Verify raw data messages are being sent:
+
+...................................
+$ ubxtool | fgrep RAWX
+...................................
+
+You should see this output that confirms you are seeing raw measurement
+data from the GPS:
+
+...................................
+UBX-RXM-RAWX:
+UBX-RXM-RAWX:
+...................................
+
+=== Javad (GREIS) configuration ===
+
+The section is only for users of Javad GPS supporting the GREIS
+language.
+
+Be sure your serial port speed is high enough.  use _zerk_, _gpsctl_
+may be flaky:
+
+...................................
+$ zerk -S 115200
+...................................
+
+Disable all messages, then enable raw data messages:
+
+...................................
+$ zerk -p DM
+$ zerk -e RAW
+...................................
+
+GREIS will happily send data for all satellites seen, but PPP services
+only use GPS and maybe GLONASS. Disable all constellations, except GPS
+and QZSS:
+
+...................................
+$ zerk -d COMPASS
+$ zerk -d GALILEO
+$ zerk -d SBAS
+$ zerk -e GPS
+...................................
+
+Verify that only GPS and QZSS are enabled:
+
+...................................
+$ zerk -p CONS
+zerk: poll CONS
+RE: %cons%/par/pos/sys={gps=y,glo=y,gal=n,sbas=n,qzss=n,comp=n,irnss=n}
+...................................
+
+Verify raw data messages are being sent:
+
+...................................
+$ zerk -v 2 | fgrep '[PC]'
+...................................
+
+You should see this output that confirms you are seeing raw measurement
+data from the GPS:
+
+...................................
+[PC] cp 199266957.2307 113917941.9777 122453730.9966 108761050.8140 105892190.3611 199725013.5654 117456220.7611 125484683.4227 199977132.8627 126963987.0936 121945102.6244 114688862.4874 140928054.2405 128350477.4361 129924383.6416 199424925.2522 126077127.2204 126780423.4782 120799412.3999
+[PC] cp 199266051.1359 113915242.3018 122452018.0540 108761104.8641 105890706.6420 199724109.4819 117454519.9705 125481341.1019 199976227.8647 126966862.6124 121942821.9832 114690162.3442 140924407.3081 128351475.5908 129920370.5866 199424017.5063 126073289.2387 126782833.2288 120800324.7775
+...................................
+
+== Acquire the Raw Data ==
+
+Configuration complete. Collect 24 hours of samples at 30 second
+intervals, save the raw data as RINEX 3 format in the file _today.obs_.
+Collecting data at a rate faster than 30 second intervals will degrade
+your results. Start the long process:
+
+...................................
+$ gpsrinex -i 30 -n 86400 -f today.obs
+...................................
+
+Now is a good time to go the NRCAN's CSRS-PPP page and sign up
+for a free account.  You need this account to be able to upload the
+RINEX 3 file _today.obs_ to their free PPP service for processing.
+https://webapp.geod.nrcan.gc.ca/geod/tools-outils/ppp.php
+
+Take a break. You now have 24 hours to contemplate the answer to the
+ultimate question of life, the universe, and everything.
+
+== Post Process the Raw Data ==
+
+After _gpsrinex_ is complete, you need to login to CSRS-PPP and 
+upload the RINEX 3 file.  After login you will be taken to the upload
+page.  Enter your email address, so the results can be emailed to you.
+
+Select processing mode of Static, using the ITRF datum.  Use the "Browse"
+button to select the _today.obs_ file with your raw observations.  Then
+push "Submit to PPP".
+
+All done, except for more waiting.  You will receive an email from NRCAN
+maybe within minutes, maybe up to 36 hours later, with a link to a file
+called: full_output.zip.  Unzip, and Voila!  Inside is a PDF file with
+your precise position.
+
+== References ==
+
+Wikipedia has a little information on PPP:
+https://en.wikipedia.org/wiki/Precise_Point_Positioning
+
+Information on how different datums differ:
+https://confluence.qps.nl/qinsy/en/world-geodetic-system-1984-wgs84-29855173.html
+
+Information on vertical datums:
+https://www.nrcan.gc.ca/earth-sciences/geomatics/geodetic-reference-systems/9054#_Toc372901506
+
+One service known to work with obsrinex output is CSRS-PPP at NRCAN:
+https://webapp.geod.nrcan.gc.ca/geod/tools-outils/ppp.php
+
+OPUS requires L1/L2 frequency observation files, and has limited geographic
+coverage:
+https://www.ngs.noaa.gov/OPUS/
+
+The curious can find the RINEX 3.03 format described here:
+ftp://igs.org/pub/data/format/rinex303_update1.pdf
+
+
+

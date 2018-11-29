@@ -124,6 +124,7 @@ www/gpsinit.html
 www/gpsmon.html
 www/gpspipe.html
 www/gpsprof.html
+www/gpsrinex.html
 www/gps_report.cgi
 www/gpxlogger.html
 www/hacking.html
@@ -139,6 +140,7 @@ www/NMEA.html
 www/ntpshmmon.html
 www/performance/performance.html
 www/ppscheck.html
+www/ppp-howto.html
 www/protocol-evolution.html
 www/protocol-transition.html
 www/replacing-nmea.html
