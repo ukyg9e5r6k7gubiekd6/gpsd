@@ -1,6 +1,8 @@
 /*
  * This is the gpsd driver for Skytraq GPSes operating in binary mode.
  *
+ * SkyTraq is Big Endian
+ *
  * This file is Copyright (c) 2016-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
@@ -74,6 +76,44 @@ static bool sky_write(struct gps_device_t *session, unsigned char *msg)
     return (ok);
 }
 #endif /* __UNUSED */
+
+/*
+ * Convert PRN to gnssid and svid
+ */
+static void PRN2_gnssId_svId(short PRN, uint8_t *gnssId, uint8_t *svId)
+{
+    /* fit into gnssid:svid */
+    if (0 == PRN) {
+        /* skip 0 PRN */
+        *gnssId = 0;
+        *svId = 0;
+    } else if ((1 <= PRN) && (32 >= PRN)) {
+        /* GPS */
+        *gnssId = 0;
+        *svId = PRN;
+    } else if ((65 <= PRN) && (96 >= PRN)) {
+        /* GLONASS */
+        *gnssId = 6;
+        *svId = PRN - 64;
+    } else if ((120 <= PRN) && (158 >= PRN)) {
+        /* SBAS */
+        *gnssId = 1;
+        *svId = PRN;
+    } else if ((201 <= PRN) && (239 >= PRN)) {
+        /* BeiDou */
+        *gnssId = 3;
+        *svId = PRN - 200;
+    } else if ((240 <= PRN) && (254 >= PRN)) {
+        /* IRNSS */
+        *gnssId = 20;
+        *svId = PRN - 240;
+    } else {
+        /* huh? */
+        *gnssId = 0;
+        *svId = 0;
+    }
+    return;
+}
 
 /*
  * decode MID 0x80, Software Version
@@ -165,6 +205,8 @@ static gps_mask_t sky_msg_DD(struct gps_device_t *session,
 {
     unsigned int iod;   /* Issue of data 0 - 255 */
     unsigned int nmeas; /* number of measurements */
+    unsigned int i;     /* generic loop variable */
+    double t_intp;
 
     iod = (unsigned int)getub(buf, 1);
     nmeas = (unsigned int)getub(buf, 2);
@@ -172,6 +214,105 @@ static gps_mask_t sky_msg_DD(struct gps_device_t *session,
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "Skytraq: MID 0xDD: iod=%u, nmeas=%u\n",
 	     iod, nmeas);
+
+    /* check IOD? */
+    session->gpsdata.raw.mtime.tv_nsec = \
+        modf(session->gpsdata.skyview_time, &t_intp) * 10e9;
+    session->gpsdata.raw.mtime.tv_sec = (time_t)t_intp;
+
+    /* zero the measurement data */
+    /* so we can tell which meas never got set */
+    memset(session->gpsdata.raw.meas, 0, sizeof(session->gpsdata.raw.meas));
+
+    for (i = 0; i < nmeas; i++) {
+        const char *obs_code;
+        int off = 3 + (23 * i);
+
+        uint8_t PRN = getub(buf, off + 0);
+        /* carrier-to-noise density ratio dB-Hz */
+        uint8_t cno = getub(buf, off + 1);
+        /* psuedorange in meters */
+        double prMes = getbed64((const char *)buf, off + 2);
+        /* carrier phase in cycles */
+        double cpMes = getbed64((const char *)buf, off + 10);
+        /* doppler in Hz, positive towards sat */
+        double doMes = getbef32((const char *)buf, off + 18);
+
+        /* tracking stat
+         * bit 0 - prMes valid
+         * bit 1 - doppler valid
+         * bit 2 - cpMes valid
+         * bit 3 - cp slip
+         * bit 4 - Coherent integration time?
+         */
+        uint8_t trkStat = getub(buf, off + 22);
+        uint8_t gnssId = 0;
+        uint8_t svId = 0;
+        PRN2_gnssId_svId(PRN, &gnssId, &svId);
+
+	session->gpsdata.raw.meas[i].gnssid = gnssId;
+        switch (gnssId) {
+        case 0:       /* GPS */
+        case 5:       /* QZSS */
+        case 20:      /* IRNSS, just guessing here */
+            obs_code = "L1C";       /* u-blox calls this L1C/A */
+            break;
+        case 1:       /* SBAS */
+            svId -= 100;            /* adjust for RINEX 3 svid */
+            obs_code = "L1C";       /* u-blox calls this L1C/A */
+            break;
+        case 2:       /* GALILEO */
+            obs_code = "L1B";       /* u-blox calls this E1OS */
+            break;
+        case 3:       /* BeiDou */
+            obs_code = "L2I";       /* u-blox calls this B1I */
+            break;
+        default:      /* huh? */
+        case 4:       /* IMES.  really? */
+            obs_code = "";       /* u-blox calls this L1 */
+            break;
+        case 6:       /* GLONASS */
+            obs_code = "L1C";       /* u-blox calls this L1OF */
+            break;
+        }
+        (void)strlcpy(session->gpsdata.raw.meas[i].obs_code, obs_code,
+                      sizeof(session->gpsdata.raw.meas[i].obs_code));
+
+	session->gpsdata.raw.meas[i].svid = svId;
+	session->gpsdata.raw.meas[i].snr = cno;
+	session->gpsdata.raw.meas[i].satstat = trkStat;
+        if (trkStat & 1) {
+            /* prMes valid */
+	    session->gpsdata.raw.meas[i].pseudorange = prMes;
+        } else {
+	    session->gpsdata.raw.meas[i].pseudorange = NAN;
+        }
+        if (trkStat & 2) {
+            /* doppler valid */
+            session->gpsdata.raw.meas[i].doppler = doMes;
+        } else {
+	    session->gpsdata.raw.meas[i].doppler = NAN;
+        }
+        if (trkStat & 4) {
+            /* cpMes valid */
+	    session->gpsdata.raw.meas[i].carrierphase = cpMes;
+        } else {
+	    session->gpsdata.raw.meas[i].carrierphase = NAN;
+        }
+	session->gpsdata.raw.meas[i].codephase = NAN;
+	session->gpsdata.raw.meas[i].deltarange = NAN;
+        if (trkStat & 8) {
+            /* possible slip */
+	    session->gpsdata.raw.meas[i].lli = 2;
+        }
+	gpsd_log(&session->context->errout, LOG_DATA,
+		 "PRN %u (%u:%u) prMes %f cpMes %f doMes %f\n"
+		 "cno %u  rtkStat %u\n", PRN,
+		 gnssId, svId, prMes, cpMes, doMes, cno, trkStat);
+
+    }
+
+    // return RAW_IS;  /* WIP */
     return 0;
 }
 
@@ -224,14 +365,14 @@ static gps_mask_t sky_msg_DE(struct gps_device_t *session,
             /* BeiDou */
             session->gpsdata.skyview[st].gnssid = 3;
             session->gpsdata.skyview[st].svid = PRN - 200;
-        } else if ((240 <= PRN) && (251 >= PRN)) {
+        } else if ((240 <= PRN) && (254 >= PRN)) {
             /* IRNSS */
             session->gpsdata.skyview[st].gnssid = 20;
             session->gpsdata.skyview[st].svid = PRN - 240;
         } else {
             /* huh? */
             session->gpsdata.skyview[st].gnssid = 0;
-            session->gpsdata.skyview[st].svid = PRN;
+            session->gpsdata.skyview[st].svid = 0;
         }
 	session->gpsdata.skyview[st].PRN = PRN;
 	sv_stat = (unsigned short)getub(buf, off + 2);
@@ -329,7 +470,7 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
     session->newdata.ecef.z = (double)getbed64((const char *)buf, 29),
     session->newdata.ecef.vx = (double)getbef32((const char *)buf, 37),
     session->newdata.ecef.vy = (double)getbef32((const char *)buf, 41),
-    session->newdata.ecef.vz = (double)getbef32((const char *)buf, 46);
+    session->newdata.ecef.vz = (double)getbef32((const char *)buf, 45);
 
     ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
 	session->newdata.ecef.x, session->newdata.ecef.y,
