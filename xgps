@@ -1172,7 +1172,16 @@ class Base(object):
             for i in range(data.satellites_seen, MAXCHANDISP):
                 for j in range(0, 6):
                     self.set_satlist_field(i, j, "")
-            self.skyview.redraw(satellites)
+        else:
+            # clear all of the list
+            for i in range(0, MAXCHANDISP):
+                for j in range(0, 6):
+                    self.set_satlist_field(i, j, "")
+            satellites = ()
+
+        # repaint Skyview
+        self.skyview.redraw(satellites)
+
 
         # the first 21 fields are updated using TPV data
         # the next 7 fields are updated using SKY data
