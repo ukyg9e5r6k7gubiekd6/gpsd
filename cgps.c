@@ -644,9 +644,18 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
             /* remove More... */
             (void)mvwhline(satellites, sat_no + 2, 1, 0, 8);
         }
-        /* turn off cursor */
-        curs_set(0);
+    } else {
+        int sat_no = 0;
+        /* no sats, clear screen */
+        for ( ; sat_no < display_sats; sat_no++) {
+            (void)mvwprintw(satellites, sat_no + 2, 1, "%-*s",
+                            SATELLITES_WIDTH - 3, "");
+        }
+        /* remove More... */
+        (void)mvwhline(satellites, sat_no + 2, 1, 0, 8);
     }
+    /* turn off cursor */
+    curs_set(0);
 
     /* Print time/date. */
     if (isfinite(gpsdata->fix.time) != 0) {
