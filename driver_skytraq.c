@@ -301,6 +301,8 @@ static gps_mask_t sky_msg_DD(struct gps_device_t *session,
         }
 	session->gpsdata.raw.meas[i].codephase = NAN;
 	session->gpsdata.raw.meas[i].deltarange = NAN;
+        /* skytraq does not report locktime, so assume max */
+	session->gpsdata.raw.meas[i].locktime = LOCKMAX;
         if (trkStat & 8) {
             /* possible slip */
 	    session->gpsdata.raw.meas[i].lli = 2;
