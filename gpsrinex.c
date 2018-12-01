@@ -661,7 +661,9 @@ static void print_raw(struct gps_data_t *gpsdata)
         }
 
         /* map snr to RINEX snr flag [1-9] */
-        if ( 12 > gpsdata->raw.meas[i].snr) {
+        if ( 0 == gpsdata->raw.meas[i].snr) {
+            snr = 0;
+        } else if ( 12 > gpsdata->raw.meas[i].snr) {
             snr = 1;
         } else if ( 18 >= gpsdata->raw.meas[i].snr) {
             snr = 2;
