@@ -148,7 +148,7 @@ presently use <code>gpsd</code> include
 <a href="https://github.com/infinet/gpsd-navigator.git">gpsd-navigator</a>,
 <a href="https://github.com/IvanSanchez/gpsd-ais-viewer">gpsd-ais-viewer</a>,
 and <a
-href="https://www.mozilla.com/en-US/firefox/new/">firefox/mozilla</a>.
+href="https://www.mozilla.org/en-US/firefox/new/">firefox/mozilla</a>.
 In addition, the Android smartphone operating system (from version
 4.0 onwards and possibly earlier; we don't know for sure when the
 change happened) uses GPSD to monitor the phone's on-board GPS, so
@@ -408,7 +408,7 @@ other mysteries. Written as a companion to <a
 href="gpsd-time-service-howto.html">GPSD Time Service HOWTO</a> for
 time-service novices.</dd>
 
-<dt><a href="PPP-howto.html">PPP HOWTO</a></dt>
+<dt><a href="ppp-howto.html">PPP HOWTO</a></dt>
 <dd>A guide to using <code>gpsd</code> and <code>gpsrinex</code> to
 determine your position to the cm level.</dd>
 
@@ -444,11 +444,11 @@ useful tutorial even if your actual device isn't a Garmin 18; many
 of the setup steps and caveats will be the same.</p>
 
 <p>Diego Berge has written a prototype <a
-href="http://code.google.com/p/qtgpsc/">Qt-based client</a>, basically
+href="https://code.google.com/p/qtgpsc/">Qt-based client</a>, basically
 <code>xgps</code> with a Qt look and feel.</p>
 
 <p>Egil M&#246;ller has written <a
-href="https://redhog.github.com/agpsd/">agpsd</a>,
+href="http://redhog.github.com/agpsd/">agpsd</a>,
 a gpsd replication and logging daemon with support for KML.</p>
 
 <p>You can find Debian-unstable packages
