@@ -194,8 +194,7 @@ second from this method.
 For example: SiRF receivers, the make currently most popular in
 consumer-grade GPS receivers, exhibit a wobble of about 170mSec in the
 offset between actual top-of-second and the transmission of the first
-sentence in each reporting cycle. You can see this graphed at
-<<SIRF-WOBBLE>>.
+sentence in each reporting cycle.
 
 To get accurate time, then, the in-band fix report from the GPS
 receiver needs to be supplemented with an out-of-band signal that has
@@ -1751,17 +1750,15 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[TIME-INTRO]]] link:time-service-intro.html[Introduction to Time Service]
 
-- [[[WIKI-NTP]]] http://en.wikipedia.org/wiki/Network_Time_Protocol[Network Time Protocol]
+- [[[WIKI-NTP]]] https://en.wikipedia.org/wiki/Network_Time_Protocol[Network Time Protocol]
 
 - [[[NTP-FAQ]]] http://www.ntp.org/ntpfaq/[NTP FAQ]
 
-- [[[SIRF-WOBBLE]]] http://www.megapathdsl.net/~hmurray/ntp/GPSSiRF-off.gif[Peer Offset of SiRF units]
+- [[[RFC-2783]]] https://tools.ietf.org/html/rfc2783[RFC 2783]
 
-- [[[RFC-2783]]] http://tools.ietf.org/html/rfc2783[RFC 2783]
+- [[[RFC-5905]]] https://tools.ietf.org/html/rfc5905[RFC 5905]
 
-- [[[RFC-5905]]] http://tools.ietf.org/html/rfc5905[RFC 5905]
-
-- [[[MACX-1]]] https://www.etsy.com/listing/280336400/navisys-gr-601w-u-blox-6-macx-1-usb-gps[Navisys GR-601W u-blox-6 "Macx-1" USB GPS receiver]
+- [[[MACX-1]]] https://www.etsy.com/listing/280336400/navisys-gr-601w-u-blox-6-macx-1-usb-gnss[Navisys GR-601W u-blox-6 "Macx-1" USB GPS receiver]
 
 - [[[CHRONY-COMPARE]]] http://chrony.tuxfamily.org/manual.html#Comparison-with-ntpd[ntpd (comparison with chrony)]
 
@@ -1775,11 +1772,11 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[NTP.ORG]]] http://www.ntp.org/[Home of the Network Time Protocol project]
 
-- [[[NTPSEC.ORG]]] http://www.ntpsec.org/[Wecome to NTPsec]
+- [[[NTPSEC.ORG]]] https://www.ntpsec.org/[Wecome to NTPsec]
 
-- [[[USE-POOL]]] http://www.pool.ntp.org/en/use.html[How do I use pool.ntp.org?]
+- [[[USE-POOL]]] https://www.pool.ntp.org/en/use.html[How do I use pool.ntp.org?]
 
-- [[[CVE-2009-3563]]] http://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2009-3563
+- [[[CVE-2009-3563]]] https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2009-3563
 
 - [[[CHRONY]]] http://chrony.tuxfamily.org/[Chrony Home]
 
@@ -1787,19 +1784,19 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[ADEV-PLOT]]] http://www.leapsecond.com/pages/adev-avg/[Allan deviation and Averaging]
 
-- [[[ZONES]]] http://www.pool.ntp.org/zone
+- [[[ZONES]]] https://www.pool.ntp.org/zone
 
-- [[[NTPQ-OUTPUT]]] http://nlug.ml1.co.uk/2012/01/ntpq-p-output/831[ntpq output description]
+- [[[NTPQ-OUTPUT]]] https://nlug.ml1.co.uk/2012/01/ntpq-p-output/831[ntpq output description]
 
-- [[[JOIN-POOL]]] http://www.pool.ntp.org/en/join.html[How do I join pool.ntp.org?]
+- [[[JOIN-POOL]]] https://www.pool.ntp.org/en/join.html[How do I join pool.ntp.org?]
 
 - [[[ANDY-POST]]] http://lists.gnu.org/archive/html/gpsd-dev/2013-10/msg00152.html[Clarifications needed for the time-service HOWTO]
 
 - [[[NTP-MONOPT]]] http://www.eecis.udel.edu/~mills/ntp/html/monopt.html[NTP Monitoring]
 
-- [[[GPSD-LIST]]]http://lists.gnu.org/archive/html/gpsd-dev[gpsd-dev Archives]
+- [[[GPSD-LIST]]]http://lists.gnu.org/archive/html/gpsd-dev/[gpsd-dev Archives]
 
-- [[[PTP]]] http://www.nist.gov/el/isd/ieee/ieee1588.cfm/[PTP]
+- [[[PTP]]] https://www.nist.gov/el/isd/ieee/ieee1588[PTP]
 
 - [[[LINUX-PTP]]] http://linuxptp.sourceforge.net/[Linux PTP]
 
