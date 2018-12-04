@@ -49,7 +49,7 @@ distribution, but adds more information on the following topics:
 * Corrected badly mangled ZDA description.
 * Corrected DPT titling
 * Common talker IDs
-* Sentences HFB, ITS, TPC, TDS, TFI, TPC, TPR, TPT from [GLOBALSAT].
+* Sentences HFB, ITS, TPC, TDS, TFI, TPC, TPR, TPT from GLOBALSAT.
 * Sentence PASHR from <<PASHR>>.
 * Satellite IDs: PRN vs NMEA-ID.
 * Error status indications.
@@ -2520,11 +2520,11 @@ Described in <<MALTESE>>, actually a Maltese government document.
 
 - [[[CANBUS]]]
   "Wikipedia: CAN bus"
-  http://en.wikipedia.org/wiki/CAN_bus
+  https://en.wikipedia.org/wiki/CAN_bus
 
 - [[[NMEA2000]]]
   "Wikipedia: NMEA 2000"
-  http://en.wikipedia.org/wiki/NMEA_2000
+  https://en.wikipedia.org/wiki/NMEA_2000
 
 - [[[KEVERSOFT]]]
   http://www.keversoft.com/downloads/packetlogger_20120305_explain.txt
@@ -2585,10 +2585,6 @@ Described in <<MALTESE>>, actually a Maltese government document.
 
 - [[[SATSTAT]]] "NMEA IDs" https://github.com/mvglasow/satstat/wiki/NMEA-IDs
 
-- [[[GLOBALSAT]]]
-    "NMEA (National Marine Electronics Association) 0183 Protocol"
-    http://www.usglobalsat.com/faq_details/NMEA.htm
-
 - [[[PASHR]]]
     "News - NMEA PASHR Output Format Added"
     http://www.oxts.com/default.asp?pageRef=76&newsID=69
@@ -2619,4 +2615,4 @@ Described in <<MALTESE>>, actually a Maltese government document.
 
 - [[[NORWAY]]]
   "Etterretninger for sjøfarende" Notoces for Mariners, see p26
-  http://kartverket.no/efs-documents/editions/2015/efs01-2015.pdf
+  https://kartverket.no/efs-documents/editions/2015/efs01-2015.pdf
