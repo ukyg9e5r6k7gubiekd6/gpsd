@@ -467,6 +467,10 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	}
 	do_lat_lon(&field[2], &session->newdata);
 	mask |= LATLON_SET;
+
+	if (field[8][0] != '\0')
+	    session->gpsdata.dop.hdop = safe_atof(field[8]);
+
 	/* FIXME: satellites_visible is used as an accumulator in xxGSV
 	 * so if we set it here we break xxGSV
 	 * session->gpsdata.satellites_visible = atoi(field[7]);
