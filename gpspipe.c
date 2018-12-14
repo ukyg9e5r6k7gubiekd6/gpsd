@@ -361,12 +361,12 @@ int main(int argc, char **argv)
 		if (new_line && timestamp) {
 		    char tmstr_u[40];            // time with "usec" resolution
 		    struct timespec now;
-		    struct tm *tmp_now;
+		    struct tm tmp_now;
                     int written;
 
 		    (void)clock_gettime(CLOCK_REALTIME, &now);
-		    tmp_now = gmtime((time_t *)&(now.tv_sec));
-		    (void)strftime(tmstr, sizeof(tmstr), format, tmp_now);
+		    (void)gmtime_r((time_t *)&(now.tv_sec), &tmp_now);
+		    (void)strftime(tmstr, sizeof(tmstr), format, &tmp_now);
 		    new_line = 0;
 
 		    switch( option_u ) {
