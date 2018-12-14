@@ -170,14 +170,36 @@ int main(int argc, char **argv)
     while ((option = getopt(argc, argv,
                             "?dD:lhrRwStT:vVx:n:s:o:pPu2Z")) != -1) {
 	switch (option) {
+	case '2':
+	    flags |= WATCH_SPLIT24;
+	    break;
 	case 'D':
 	    debug = atoi(optarg);
 #ifdef CLIENTDEBUG_ENABLE
 	    gps_enable_debug(debug, stderr);
 #endif /* CLIENTDEBUG_ENABLE */
 	    break;
+	case 'd':
+	    daemonize = true;
+	    break;
+	case 'l':
+	    sleepy = true;
+	    break;
 	case 'n':
 	    count = strtol(optarg, 0, 0);
+	    break;
+	case 'o':
+	    outfile = optarg;
+	    break;
+	case 'P':
+	    flags |= WATCH_PPS;
+	    break;
+	case 'p':
+	    profile = true;
+	    break;
+	case 'R':
+	    flags |= WATCH_RAW;
+	    binary = true;
 	    break;
 	case 'r':
 	    raw = true;
@@ -187,27 +209,27 @@ int main(int argc, char **argv)
 	     */
 	    flags |= WATCH_NMEA;
 	    break;
-	case 'R':
-	    flags |= WATCH_RAW;
-	    binary = true;
+	case 'S':
+	    flags |= WATCH_SCALED;
 	    break;
-	case 'd':
-	    daemonize = true;
-	    break;
-	case 'l':
-	    sleepy = true;
-	    break;
-	case 't':
-	    timestamp = true;
+	case 's':
+	    serialport = optarg;
 	    break;
 	case 'T':
 	    timestamp = true;
 	    format = optarg;
 	    break;
+	case 't':
+	    timestamp = true;
+	    break;
 	case 'u':
 	    timestamp = true;
 	    option_u++;
 	    break;
+	case 'V':
+	    (void)fprintf(stderr, "%s: %s (revision %s)\n",
+			  argv[0], VERSION, REVISION);
+	    exit(EXIT_SUCCESS);
 	case 'v':
 	    vflag++;
 	    break;
@@ -215,35 +237,13 @@ int main(int argc, char **argv)
 	    flags |= WATCH_JSON;
 	    watch = true;
 	    break;
-	case 'S':
-	    flags |= WATCH_SCALED;
-	    break;
-	case 'p':
-	    profile = true;
-	    break;
-	case 'P':
-	    flags |= WATCH_PPS;
-	    break;
-	case 'V':
-	    (void)fprintf(stderr, "%s: %s (revision %s)\n",
-			  argv[0], VERSION, REVISION);
-	    exit(EXIT_SUCCESS);
 	case 'x':
 	    exit_timer = time(NULL) + strtol(optarg, 0, 0);
-	    break;
-	case 's':
-	    serialport = optarg;
-	    break;
-	case 'o':
-	    outfile = optarg;
 	    break;
 	case 'Z':
 	    timestamp = true;
 	    format = zulu_format;
 	    iso8601 = true;
-	    break;
-	case '2':
-	    flags |= WATCH_SPLIT24;
 	    break;
 	case '?':
 	case 'h':
