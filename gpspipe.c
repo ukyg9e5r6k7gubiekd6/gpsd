@@ -133,6 +133,7 @@ static void usage(void)
 		  "-V Print version and exit.\n"
 		  "-w Dump gpsd native data.\n"
 		  "-x [seconds] Exit after given delay.\n"
+		  "-Z sets the timestamp format iso8601: implies '-t'\n"
 		  "You must specify one, or more, of -r, -R, or -w\n"
 		  "You must use -o if you use -d.\n");
 }
@@ -141,7 +142,9 @@ int main(int argc, char **argv)
 {
     char buf[4096];
     bool timestamp = false;
+    bool iso8601 = false;
     char *format = "%F %T";
+    char *zulu_format = "%FT%T";
     char tmstr[200];
     bool daemonize = false;
     bool binary = false;
@@ -164,7 +167,8 @@ int main(int argc, char **argv)
     char *outfile = NULL;
 
     flags = WATCH_ENABLE;
-    while ((option = getopt(argc, argv, "?dD:lhrRwStT:vVx:n:s:o:pPu2")) != -1) {
+    while ((option = getopt(argc, argv,
+                            "?dD:lhrRwStT:vVx:n:s:o:pPu2Z")) != -1) {
 	switch (option) {
 	case 'D':
 	    debug = atoi(optarg);
@@ -232,6 +236,11 @@ int main(int argc, char **argv)
 	    break;
 	case 'o':
 	    outfile = optarg;
+	    break;
+	case 'Z':
+	    timestamp = true;
+	    format = zulu_format;
+	    iso8601 = true;
 	    break;
 	case '2':
 	    flags |= WATCH_SPLIT24;
@@ -353,6 +362,7 @@ int main(int argc, char **argv)
 		    char tmstr_u[40];            // time with "usec" resolution
 		    struct timespec now;
 		    struct tm *tmp_now;
+                    int written;
 
 		    (void)clock_gettime(CLOCK_REALTIME, &now);
 		    tmp_now = gmtime((time_t *)&(now.tv_sec));
@@ -361,14 +371,24 @@ int main(int argc, char **argv)
 
 		    switch( option_u ) {
 		    case 2:
+			if(iso8601){
+			    written = strlen(tmstr);
+			    tmstr[written] = 'Z';
+			    tmstr[written+1] = '\0';
+			}
 			(void)snprintf(tmstr_u, sizeof(tmstr_u),
 				       " %ld.%06ld",
 				       (long)now.tv_sec,
 				       (long)now.tv_nsec/1000);
 			break;
 		    case 1:
-			(void)snprintf(tmstr_u, sizeof(tmstr_u),
-				       ".%06ld", (long)now.tv_nsec/1000);
+                        written = snprintf(tmstr_u, sizeof(tmstr_u),
+                                           ".%06ld", (long)now.tv_nsec/1000);
+
+			if((0 < written) && (40 > written) && iso8601){
+			    tmstr_u[written-1] = 'Z';
+			    tmstr_u[written] = '\0';
+			}
 			break;
 		    default:
 			*tmstr_u = '\0';
