@@ -355,7 +355,7 @@ int main(int argc, char **argv)
 		    struct tm *tmp_now;
 
 		    (void)clock_gettime(CLOCK_REALTIME, &now);
-		    tmp_now = localtime((time_t *)&(now.tv_sec));
+		    tmp_now = gmtime((time_t *)&(now.tv_sec));
 		    (void)strftime(tmstr, sizeof(tmstr), format, tmp_now);
 		    new_line = 0;
 
