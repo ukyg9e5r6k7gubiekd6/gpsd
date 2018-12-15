@@ -125,7 +125,7 @@ static void usage(void)
 		  "-r Dump raw NMEA.\n"
 		  "-R Dump super-raw mode (GPS binary).\n"
 		  "-s [serial dev] emulate a 4800bps NMEA GPS on serial port (use with '-r').\n"
-		  "-S Set scaled flag.\n"
+		  "-S Set scaled flag. For AIS and subframe data.\n"
 		  "-T [format] set the timestamp format (strftime(3)-like; implies '-t')\n"
 		  "-t Time stamp the data.\n"
 		  "-u usec time stamp, implies -t. Use -uu to output sec.usec\n"
@@ -168,7 +168,7 @@ int main(int argc, char **argv)
 
     flags = WATCH_ENABLE;
     while ((option = getopt(argc, argv,
-                            "?dD:lhrRwStT:vVx:n:s:o:pPu2Z")) != -1) {
+                            "2?dD:hln:o:pPrRwSs:tT:uvVx:Z")) != -1) {
 	switch (option) {
 	case '2':
 	    flags |= WATCH_SPLIT24;
