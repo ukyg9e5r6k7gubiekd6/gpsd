@@ -35,7 +35,11 @@ int main(int argc, char **argv)
     int nsamples = INT_MAX;
     time_t timeout = (time_t)0, starttime = time(NULL);
     /* a copy of all old segments */
-    struct shm_stat_t	shm_stat_old[NTPSEGMENTS + 1];;
+    struct shm_stat_t	shm_stat_old[NTPSEGMENTS + 1];
+    char *whoami;
+
+    /* strip path from program name */
+    (whoami = strrchr(argv[0], '/')) ? ++whoami : (whoami = argv[0]);
 
     memset( shm_stat_old, 0 ,sizeof( shm_stat_old));
 
@@ -73,7 +77,7 @@ int main(int argc, char **argv)
 	    break;
 	case 'V':
 	    (void)fprintf(stderr, "%s: version %s (revision %s)\n",
-			  argv[0], VERSION, REVISION);
+			  whoami, VERSION, REVISION);
 	    exit(EXIT_SUCCESS);
 	default:
 	    /* no option, just go and do it */
@@ -104,7 +108,7 @@ int main(int argc, char **argv)
      */
     setvbuf(stdout, NULL, _IOLBF, 0);
 
-    (void)printf("ntpshmmon version 1\n");
+    (void)printf("%s: version %s\n", whoami, VERSION);
     if (offset) {
 	(void)printf("#      Name     Offset           Clock                Real                 L Prc\n");
     } else {
