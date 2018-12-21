@@ -7,7 +7,7 @@ SPDX-License-Identifier: BSD-2-clause
    "-//OASIS//DTD DocBook XML V4.1.2//EN"
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <refentry id='ntpshmmon.1'>
-<refentryinfo><date>25 Jan 2015</date></refentryinfo>
+<refentryinfo><date>21 Dec 2018</date></refentryinfo>
 <refmeta>
 <refentrytitle>ntpshmmon</refentrytitle>
 <manvolnum>1</manvolnum>
@@ -16,16 +16,18 @@ SPDX-License-Identifier: BSD-2-clause
 </refmeta>
 <refnamediv id='name'>
 <refname>ntpshmmon</refname>
-<refpurpose>capture samples from GPS or other ntpd refclock sources</refpurpose>
+<refpurpose>capture samples from gpsd or other ntpd refclock sources</refpurpose>
 </refnamediv>
 <refsynopsisdiv id='synopsis'>
 
 <cmdsynopsis>
   <command>ntpshmmon</command>
+      <arg choice='opt'>-? </arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-n <replaceable>nsamples</replaceable></arg>
+      <arg choice='opt'>-o </arg>
       <arg choice='opt'>-s </arg>
-      <arg choice='opt'>-t <replaceable>seconds</replaceable></arg>
+      <arg choice='opt'>-t <replaceable>nseconds</replaceable></arg>
       <arg choice='opt'>-v </arg>
       <arg choice='opt'>-V </arg>
 </cmdsynopsis>
@@ -35,7 +37,7 @@ SPDX-License-Identifier: BSD-2-clause
 
 <para>This program monitors the shared-memory segments updated by
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>
-(and possibly other refclock sources) as a way of communicating with
+, and possibly other refclock sources, as a way of communicating with
 ntpd, the Network Time Protocol daemon. It reads these in exactly the way an
 ntpd instance does. It can be run concurrently with ntpd without
 interfering with ntpd's normal operation.</para>
@@ -48,8 +50,8 @@ fields.</para>
 <para>Here is an example of the beginning of a report file:
 
 <screen>
-ntpshmmon version 1
-#      Name   Seen@                Clock                Real               L Prec
+ntpshmmon version 3.18
+#      Name   Seen@                Clock                Real               L Pre
 sample NTP2 1424926256.443030206 1424926256.115869233 1424926256.000000000 0  -1
 sample NTP3 1424926256.443060517 1424926255.995430821 1424926256.000000000 0 -20
 sample NTP3 1424926256.995747347 1424926256.995422728 1424926257.000000000 0 -20
@@ -86,24 +88,31 @@ interpret this format.</para>
 </orderedlist>
 </para>
 
-<para>In these fields, "clock time" is the high-precision time
-measured by the source and "receiver time" is Unix UTC time at the
-receiver. It is normal for the seconds part of receiver time to
-coincide with the seconds part of collection time and for the
+<para>In these fields, "clock time" is the high-precision system clock
+time measured by the source and "receiver time" is from the receiver.
+Both times are in UTC. It is normal for the seconds part of receiver
+time to coincide with the seconds part of collection time and for the
 nanoseconds part of receiver time to be zero.</para>
+
+<para>If the -o option is used, the "Seen@" column is replaced with the
+"Offset" column.  The "Offset" is the difference between "Clock" and
+"Real" times.</para>
+
+</refsect1>
+<refsect1 id='options'><title>OPTIONS</title>
 
 <variablelist>
 <varlistentry>
-<term>-v</term>
+<term>-?</term>
 <listitem>
-<para>Enable verbose status messages.</para>
+<para>Display program usage and exit.</para>
 </listitem>
 </varlistentry>
 
 <varlistentry>
-<term>-c</term>
+<term>-h</term>
 <listitem>
-<para>Device poll interval in fractional seconds - defaults to 1.</para>
+<para>Display program usage and exit.</para>
 </listitem>
 </varlistentry>
 
@@ -111,6 +120,15 @@ nanoseconds part of receiver time to be zero.</para>
 <term>-n</term>
 <listitem>
 <para>Set maximum number of samples to collect.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-o</term>
+<listitem>
+<para>Replace the "Seen@" column with the "Offset" column.  The "Offset" is
+the difference between "Clock" and "Real" times.
+</para>
 </listitem>
 </varlistentry>
 
@@ -130,9 +148,9 @@ option will normally only be of interest to GPSD developers.</para>
 </varlistentry>
 
 <varlistentry>
-<term>-h</term>
+<term>-v</term>
 <listitem>
-<para>Display program usage and exit.</para>
+<para>Enable verbose status messages.</para>
 </listitem>
 </varlistentry>
 
