@@ -44,7 +44,7 @@ int main(int argc, char **argv)
 	case 'h':
 	    (void)fprintf(
 	        stderr,
-                "usage: ntpshmmon [-s] [-n max] [-t timeout] [-v] [-h] [-V]\n"
+                "usage: ntpshmmon [-?] [-h] [-n nsamples] [-s] [-t nseconds] [-v] [-V]\n"
                 "  -?           print this help\n"
                 "  -h           print this help\n"
                 "  -n nsamples  exit after nsamples\n"
