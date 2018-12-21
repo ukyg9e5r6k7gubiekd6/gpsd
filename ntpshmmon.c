@@ -30,6 +30,7 @@ int main(int argc, char **argv)
     int option;
     int	i;
     bool killall = false;
+    bool offset = false;            /* show offset, not seen */
     bool verbose = false;
     int nsamples = INT_MAX;
     time_t timeout = (time_t)0, starttime = time(NULL);
@@ -38,16 +39,17 @@ int main(int argc, char **argv)
 
     memset( shm_stat_old, 0 ,sizeof( shm_stat_old));
 
-    while ((option = getopt(argc, argv, "?hn:st:vV")) != -1) {
+    while ((option = getopt(argc, argv, "?hn:ost:vV")) != -1) {
 	switch (option) {
 	case '?':
 	case 'h':
 	    (void)fprintf(
 	        stderr,
-                "usage: ntpshmmon [-?] [-h] [-n nsamples] [-s] [-t nseconds] [-v] [-V]\n"
+                "usage: ntpshmmon [-?] [-h] [-n nsamples] [-o] [-s] [-t nseconds] [-v] [-V]\n"
                 "  -?           print this help\n"
                 "  -h           print this help\n"
                 "  -n nsamples  exit after nsamples\n"
+                "  -o           replace Seen@ with Offset\n"
                 "  -s           remove SHMs and exit\n"
                 "  -t nseconds  exit after nseconds\n"
                 "  -v           be verbose\n"
@@ -56,6 +58,9 @@ int main(int argc, char **argv)
 	    exit(EXIT_SUCCESS);
 	case 'n':
 	    nsamples = atoi(optarg);
+	    break;
+	case 'o':
+	    offset = true;
 	    break;
 	case 's':
 	    killall = true;
@@ -100,7 +105,11 @@ int main(int argc, char **argv)
     setvbuf(stdout, NULL, _IOLBF, 0);
 
     (void)printf("ntpshmmon version 1\n");
-    (void)printf("#      Name Seen@                Clock                Real                 L Prc\n");
+    if (offset) {
+	(void)printf("#      Name     Offset           Clock                Real                 L Prc\n");
+    } else {
+	(void)printf("#      Name Seen@                Clock                Real                 L Prc\n");
+    }
 
     do {
 	/* the current segment */
@@ -130,12 +139,22 @@ int main(int argc, char **argv)
 		}
 		/* time stamp it */
 		clock_gettime(CLOCK_REALTIME, &shm_stat.tvc);
-		printf("sample %s %ld.%09ld %ld.%09ld %ld.%09ld %d %3d\n",
-		       ntp_name(i),
-		       (long)shm_stat.tvc.tv_sec, shm_stat.tvc.tv_nsec,
-		       (long)shm_stat.tvr.tv_sec, shm_stat.tvr.tv_nsec,
-		       (long)shm_stat.tvt.tv_sec, shm_stat.tvt.tv_nsec,
-		       shm_stat.leap, shm_stat.precision);
+                if (offset) {
+		    diff = timespec_diff_ns(shm_stat.tvr, shm_stat.tvt);
+		    printf("sample %s %20.9f %ld.%09ld %ld.%09ld %d %3d\n",
+			   ntp_name(i),
+			   (double)diff * 1e-9,
+			   (long)shm_stat.tvr.tv_sec, shm_stat.tvr.tv_nsec,
+			   (long)shm_stat.tvt.tv_sec, shm_stat.tvt.tv_nsec,
+			   shm_stat.leap, shm_stat.precision);
+                } else {
+		    printf("sample %s %ld.%09ld %ld.%09ld %ld.%09ld %d %3d\n",
+			   ntp_name(i),
+			   (long)shm_stat.tvc.tv_sec, shm_stat.tvc.tv_nsec,
+			   (long)shm_stat.tvr.tv_sec, shm_stat.tvr.tv_nsec,
+			   (long)shm_stat.tvt.tv_sec, shm_stat.tvt.tv_nsec,
+			   shm_stat.leap, shm_stat.precision);
+                }
 		--nsamples;
 		/* save the new time stamp */
 		shm_stat_old[i] = shm_stat; /* structure copy */
