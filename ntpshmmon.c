@@ -98,7 +98,7 @@ int main(int argc, char **argv)
     setvbuf(stdout, NULL, _IOLBF, 0);
 
     (void)printf("ntpshmmon version 1\n");
-    (void)printf("#      Name Seen@                Clock                Real                 L Prec\n");
+    (void)printf("#      Name Seen@                Clock                Real                 L Prc\n");
 
     do {
 	/* the current segment */
