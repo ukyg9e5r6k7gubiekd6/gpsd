@@ -68,7 +68,7 @@ spot?
 
 All GNSS systems compute positions using ECEF (earth-centered,
 earth-fixed) coordinates. After an ECEF position is calculated, it is
-converted into latitude, longitude using a datum.  So many to
+converted into latitude and longitude using a datum.  So many to
 choose from.  You've probably heard of WGS84, NAD83, and maybe ITRF.
 
 NAD83 is pinned to the North American tectonic plate. WGS84 is pinned
@@ -96,7 +96,7 @@ Original ITRF and WGS84 differ by less than 1 meter, which is huge
 for the purposes here. ITRF2014 and WGS84(G1762) differ by a few
 centimeters.
 
-It gets worse. two expensive GPS often differ in altitude by over 60
+It gets worse.  Two expensive GPS often differ in altitude by over 60
 feet. Altitude is calculated as height above Mean Sea Level (MSL). But
 the Earth is not a perfect sphere. It is more pear shaped. In addition
 gravitational anomalies affect 'sea level'.
@@ -145,7 +145,7 @@ There are many possible adjustments to the above procedure.
 
 Maybe you want to collect just 10 minutes of data to verify that your
 tool-chain is working before doing a 24 hour run. Simple, just change
-`gpsprof -n 86400` to `gpsprof -n 360` and then proceed as above.
+`gpsprof -n 86400` to `gpsprof -n 600` and then proceed as above.
 
 Maybe your _gpsd_ host does not have Python installed.  Just run _gpsprof_
 remotely.  On the host you will need to run _gpsd_ with the `-g` parameter so
