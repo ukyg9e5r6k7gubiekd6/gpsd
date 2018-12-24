@@ -2592,7 +2592,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
 
     # How to build a tarball.
     dist = env.Command('dist', distfiles, [
-        '@tar --transform "s:^:gpsd-${VERSION}/:" '
+        '@tar --transform "s:^:gpsd-${VERSION}/:S" '
         ' -czf gpsd-${VERSION}.tar.gz $SOURCES',
         '@ls -l gpsd-${VERSION}.tar.gz',
     ])
