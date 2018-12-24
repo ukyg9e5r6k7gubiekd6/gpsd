@@ -2585,7 +2585,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
 
     # How to build a zip file.
     zip = env.Command('zip', distfiles, [
-        '@zip -r gpsd-${VERSION}.zip $SOURCES',
+        '@zip -ry gpsd-${VERSION}.zip $SOURCES',
         '@ls -l gpsd-${VERSION}.zip',
     ])
     env.Clean(zip, ["gpsd-${VERSION}.zip", "packaging/rpm/gpsd.spec"])
