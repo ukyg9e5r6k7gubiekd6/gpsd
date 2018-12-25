@@ -570,6 +570,7 @@ def CheckCompilerOption(context, option):
     context.env.Append(CFLAGS=option)
     ret = context.TryLink("""
         int main(int argc, char **argv) {
+            (void) argc; (void) argv;
             return 0;
         }
     """, '.c')
@@ -587,6 +588,7 @@ def CheckHeaderDefines(context, file, define):
         #error %s is not defined
         #endif
         int main(int argc, char **argv) {
+            (void) argc; (void) argv;
             return 0;
         }
     """ % (file, define, define), '.c')
@@ -601,6 +603,7 @@ def CheckCompilerDefines(context, define):
         #error %s is not defined
         #endif
         int main(int argc, char **argv) {
+            (void) argc; (void) argv;
             return 0;
         }
     """ % (define, define), '.c')
@@ -617,6 +620,7 @@ def CheckC11(context):
         #error Not C11
         #endif
         int main(int argc, char **argv) {
+            (void) argc; (void) argv;
             return 0;
         }
     """, '.c')
