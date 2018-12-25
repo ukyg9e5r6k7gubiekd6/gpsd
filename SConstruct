@@ -566,7 +566,7 @@ def CheckXsltproc(context):
 
 def CheckCompilerOption(context, option):
     context.Message('Checking if compiler accepts %s... ' % (option,))
-    old_CFLAGS = context.env['CFLAGS']
+    old_CFLAGS = context.env['CFLAGS'][:]  # Get a *copy* of the old list
     context.env.Append(CFLAGS=option)
     ret = context.TryLink("""
         int main(int argc, char **argv) {
