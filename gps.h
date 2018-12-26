@@ -1236,9 +1236,13 @@ struct ais_t
 	/* Type 7 - Binary Acknowledge */
 	struct {
 	    unsigned int mmsi1;
+	    unsigned int seqno1;
 	    unsigned int mmsi2;
+	    unsigned int seqno2;
 	    unsigned int mmsi3;
+	    unsigned int seqno3;
 	    unsigned int mmsi4;
+	    unsigned int seqno4;
 	    /* spares ignored, they're only padding here */
 	} type7;
 	/* Type 8 - Broadcast Binary Message */

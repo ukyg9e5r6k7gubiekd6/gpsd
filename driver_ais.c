@@ -454,16 +454,24 @@ bool ais_binary_decode(const struct gpsd_errout_t *errout,
     case 13: /* Safety Related Acknowledge */
     {
 	unsigned int mmsi[4];
+	unsigned seqno[4];
 	RANGE_CHECK(72, 168);
 	for (u = 0; u < sizeof(mmsi)/sizeof(mmsi[0]); u++)
-	    if (bitlen > 40 + 32*u)
+	    if (bitlen > 40 + 32*u) {
 		mmsi[u] = UBITS(40 + 32*u, 30);
-	    else
+		seqno[u] = UBITS(72 + 32*u, 2);
+    } else {
 		mmsi[u] = 0;
+		seqno[u] = 0;
+	    }
 	ais->type7.mmsi1 = mmsi[0];
+	ais->type7.seqno1 = seqno[0];
 	ais->type7.mmsi2 = mmsi[1];
+	ais->type7.seqno2 = seqno[1];
 	ais->type7.mmsi3 = mmsi[2];
+	ais->type7.seqno2 = seqno[2];
 	ais->type7.mmsi4 = mmsi[3];
+	ais->type7.seqno3 = seqno[3];
 	break;
     }
     case 8: /* Binary Broadcast Message */

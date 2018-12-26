@@ -337,6 +337,10 @@ ais_specs = (
             ('mmsi2',         'uinteger',      '0'),
             ('mmsi3',         'uinteger',      '0'),
             ('mmsi4',         'uinteger',      '0'),
+            ('seqno1',        'uinteger',      '0'),
+            ('seqno2',        'uinteger',      '0'),
+            ('seqno3',        'uinteger',      '0'),
+            ('seqno4',        'uinteger',      '0'),
         ),
     },
     {
