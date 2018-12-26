@@ -23,7 +23,7 @@
 #endif /* __linux__ */
 
 
-#include <sys/time.h>		/* for select() */
+#include <sys/time.h>		/* for pselect() */
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -83,7 +83,7 @@ static bool tsip_detect(struct gps_device_t *session)
     bool ret = false;
     int myfd;
     fd_set fdset;
-    struct timeval to;
+    struct timespec to;
     speed_t old_baudrate;
     char old_parity;
     unsigned int old_stopbits;
@@ -105,8 +105,8 @@ static bool tsip_detect(struct gps_device_t *session)
 	    FD_ZERO(&fdset);
 	    FD_SET(myfd, &fdset);
 	    to.tv_sec = 1;
-	    to.tv_usec = 0;
-	    if (select(myfd + 1, &fdset, NULL, NULL, &to) != 1)
+	    to.tv_nsec = 0;
+	    if (pselect(myfd + 1, &fdset, NULL, NULL, &to, NULL) != 1)
 		break;
 	    if (generic_get(session) >= 0) {
 		if (session->lexer.type == TSIP_PACKET) {

@@ -15,6 +15,11 @@
 /* strsep() needs _DEFAULT_SOURCE */
 #define _DEFAULT_SOURCE
 
+#ifdef __linux__
+/* isfinite() and pselect() needs  _POSIX_C_SOURCE >= 200112L */
+#define  _POSIX_C_SOURCE 200112L
+#endif /* __linux__ */
+
 #include <time.h>
 #include "gpsd_config.h"
 
@@ -230,7 +235,7 @@ static void connect2gpsd(bool restart)
 static ssize_t read_gpsd(char *message, size_t len)
 /* get data from gpsd */
 {
-    struct timeval tv;
+    struct timespec tv;
     fd_set fds,master;
     int ind;
     char c;
@@ -248,9 +253,9 @@ static ssize_t read_gpsd(char *message, size_t len)
 	int result;
         /* prepare for a blocking read with a 10s timeout */
         tv.tv_sec =  10;
-        tv.tv_usec = 0;
+        tv.tv_nsec = 0;
         fds = master;
-        result = select(gpsdata.gps_fd+1, &fds, NULL, NULL, &tv);
+        result = pselect(gpsdata.gps_fd+1, &fds, NULL, NULL, &tv, NULL);
 
         switch (result)
 	{

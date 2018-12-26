@@ -20,7 +20,7 @@
 #include <stdarg.h>
 #include <time.h>
 #include <math.h>
-#include <sys/time.h>		/* expected to declare select(2) a la SuS */
+#include <sys/time.h>		/* expected to declare pselect(2) a la SuS */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/select.h>
@@ -1492,7 +1492,7 @@ int main(int argc, char **argv)
     explanation = NULL;
     switch (bailout) {
     case TERM_SELECT_FAILED:
-	explanation = "select(2) failed\n";
+	explanation = "pselect(2) failed\n";
 	break;
     case TERM_DRIVER_SWITCH:
 	explanation = "Driver type switch failed\n";

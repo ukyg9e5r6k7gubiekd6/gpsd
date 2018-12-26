@@ -1054,7 +1054,7 @@ int gpsd_await_data(fd_set *rfds,
      * actually matter here since select returns whenever one of
      * the file descriptors in the set goes ready.  The point
      * of tracking maxfd is to keep the set of descriptors that
-     * select(2) has to poll here as small as possible (for
+     * pselect(2) has to poll here as small as possible (for
      * low-clock-rate SBCs and the like).
      *
      * pselect() is preferable to vanilla select, to eliminate
@@ -1098,7 +1098,7 @@ int gpsd_await_data(fd_set *rfds,
 	    if (FD_ISSET(i, rfds))
 		str_appendf(dbuf, sizeof(dbuf), " %d ", i);
 	gpsd_log(errout, LOG_SPIN,
-		 "select() {%s} at %f (errno %d)\n",
+		 "pselect() {%s} at %f (errno %d)\n",
 		 dbuf, timestamp(), errno);
     }
 

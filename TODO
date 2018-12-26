@@ -32,7 +32,7 @@ In gps_data_t add more string like subtype for HW version, SW version, etc.
 In gps_data_t, save PPS precision; this will require creating a pps struct.
 Where would PPS precision come from?
 
-Convert all the timestamp_t (double) and timeval (usec) to timespec (nsec).
+Convert all the timestamp_t (double) timespec (nsec).
 That could be done one small step at a time.
 
 Make the Python JSON client as smart as the C JSON client.  Gonna be

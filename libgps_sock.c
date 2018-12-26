@@ -13,7 +13,7 @@
 #include <math.h>
 #include <locale.h>
 #include <assert.h>
-#include <sys/time.h>	 /* expected to have a select(2) prototype a la SuS */
+#include <sys/time.h>	 /* expected to have a pselect(2) prototype a la SuS */
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "gpsd_config.h"
@@ -132,7 +132,7 @@ bool gps_sock_waiting(const struct gps_data_t *gpsdata, int timeout)
 {
 #ifndef USE_QT
     fd_set rfds;
-    struct timeval tv;
+    struct timespec tv;
 
     libgps_debug_trace((DEBUG_CALLS, "gps_waiting(%d): %d\n", timeout, PRIVATE(gpsdata)->waitcount++));
     if (PRIVATE(gpsdata)->waiting > 0)
@@ -144,9 +144,9 @@ bool gps_sock_waiting(const struct gps_data_t *gpsdata, int timeout)
     FD_ZERO(&rfds);
     FD_SET(gpsdata->gps_fd, &rfds);
     tv.tv_sec = timeout / 1000000;
-    tv.tv_usec = timeout % 1000000;
+    tv.tv_nsec = timeout % 1000000000;
     /* all error conditions return "not waiting" -- crude but effective */
-    return (select(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &tv) == 1);
+    return (pselect(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &tv, NULL) == 1);
 #else
     return ((QTcpSocket *) (gpsdata->gps_fd))->waitForReadyRead(timeout / 1000);
 #endif

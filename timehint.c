@@ -333,7 +333,7 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
      * NTP expects leap pending for only 1 month prior to insertion
      * Per http://bugs.ntp.org/1090
      *
-     * ITU-R TF.460-6, Section 2.1, says lappe seconds can be primarily
+     * ITU-R TF.460-6, Section 2.1, says leap seconds can be primarily
      * in Jun/Dec but may be in March or September
      */
     (void)gmtime_r( &(td->real.tv_sec), &tm);

@@ -23,7 +23,7 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <sys/time.h>		/* for select() */
+#include <sys/time.h>		/* for pselect() */
 #include <sys/select.h>
 #include <stdio.h>
 #include <stdint.h>		/* for uint32_t, etc. */
@@ -735,7 +735,7 @@ static bool open_device( struct gps_device_t *device)
     gpsd_log(&context.errout, LOG_INF,
 	     "device %s activated\n", device->gpsdata.dev.path);
     if ( PLACEHOLDING_FD == activated ) {
-	/* it is a /dev/ppsX, no need to select() it */
+	/* it is a /dev/ppsX, no need to pselect() it */
         return true;
     }
     FD_SET(device->gpsdata.gps_fd, &all_fds);

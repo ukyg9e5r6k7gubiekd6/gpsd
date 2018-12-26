@@ -26,6 +26,10 @@
 /* cfmakeraw() needs _DEFAULT_SOURCE */
 #define _DEFAULT_SOURCE
 
+#ifdef __linux__
+/* isfinite() and pselect() needs  _POSIX_C_SOURCE >= 200112L */
+#define  _POSIX_C_SOURCE 200112L
+#endif /* __linux__ */
 
 #include <time.h>               /* for time_t */
 #include "gpsd_config.h"
@@ -327,14 +331,14 @@ int main(int argc, char **argv)
 
     for (;;) {
 	int r = 0;
-	struct timeval tv;
+	struct timespec tv;
 
 	tv.tv_sec = 0;
-	tv.tv_usec = 100000;
+	tv.tv_nsec = 100000000;
 	FD_ZERO(&fds);
 	FD_SET(gpsdata.gps_fd, &fds);
 	errno = 0;
-	r = select(gpsdata.gps_fd+1, &fds, NULL, NULL, &tv);
+	r = pselect(gpsdata.gps_fd+1, &fds, NULL, NULL, &tv, NULL);
 	if (r >= 0 && exit_timer && time(NULL) >= exit_timer)
 		break;
 	if (r == -1 && errno != EINTR) {
