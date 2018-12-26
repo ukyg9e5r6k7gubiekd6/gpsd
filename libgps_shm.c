@@ -59,6 +59,7 @@ int gps_shm_open(struct gps_data_t *gpsdata)
     if (gpsdata->privdata == NULL)
 	return -1;
 
+    PRIVATE(gpsdata)->tick = 0;
     PRIVATE(gpsdata)->shmseg = shmat(shmid, 0, 0);
     if (PRIVATE(gpsdata)->shmseg == (void *) -1) {
 	/* attach failed for sume unknown reason */
