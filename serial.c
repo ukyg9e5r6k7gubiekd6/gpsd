@@ -292,6 +292,19 @@ void gpsd_set_speed(struct gps_device_t *session,
     else
 	rate = B230400;
 
+    /* backward-compatibility hack */
+    switch (parity) {
+    case (char)2:
+	parity = 'E';
+	break;
+    case (char)1:
+	parity = 'O';
+	break;
+    case (char)0:
+	parity = 'N';	/* without this we might emit malformed JSON */
+	break;
+    }
+
     if (rate != cfgetispeed(&session->ttyset)
 	|| parity != session->gpsdata.dev.parity
 	|| stopbits != session->gpsdata.dev.stopbits) {
@@ -315,12 +328,10 @@ void gpsd_set_speed(struct gps_device_t *session,
 	session->ttyset.c_cflag |= (stopbits == 2 ? CS7 | CSTOPB : CS8);
 	switch (parity) {
 	case 'E':
-	case (char)2:
 	    session->ttyset.c_iflag |= INPCK;
 	    session->ttyset.c_cflag |= PARENB;
 	    break;
 	case 'O':
-	case (char)1:
 	    session->ttyset.c_iflag |= INPCK;
 	    session->ttyset.c_cflag |= PARENB | PARODD;
 	    break;
