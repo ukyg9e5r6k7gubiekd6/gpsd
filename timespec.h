@@ -18,9 +18,9 @@
  *
  * NOTE: this normalization is not the same as ntpd uses
  */
-#define NS_IN_SEC	1000000000LL
+#define NS_IN_SEC	1000000000LL     /* nanoseconds in a second */
 #define US_IN_SEC	1000000LL        /* microseconds in a second */
-#define MS_IN_SEC	1000000LL
+#define MS_IN_SEC	1000LL           /* milliseconds in a second */
 
 /* return the difference between timespecs in nanoseconds
  * int may be too small, 32 bit long is too small, floats are too imprecise,
@@ -60,11 +60,11 @@ static inline void TS_NORM( struct timespec *ts)
 /* normalize a timeval */
 #define TV_NORM(tv)  \
     do { \
-	if ( MS_IN_SEC <= (tv)->tv_usec ) { \
-	    (tv)->tv_usec -= MS_IN_SEC; \
+	if ( US_IN_SEC <= (tv)->tv_usec ) { \
+	    (tv)->tv_usec -= US_IN_SEC; \
 	    (tv)->tv_sec++; \
 	} else if ( 0 > (tv)->tv_usec ) { \
-	    (tv)->tv_usec += MS_IN_SEC; \
+	    (tv)->tv_usec += US_IN_SEC; \
 	    (tv)->tv_sec--; \
 	} \
     } while (0)
