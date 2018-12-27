@@ -156,13 +156,14 @@ if __name__ == '__main__':
     [-T]         print some system information and exit
     [-v]         verbose
     [-V]         Version
+    [-W]         specify timeout (default 60s), 0 means none
     [-x]         dump packets as gpsfake gathers them
 """)
         raise SystemExit(0)
 
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "1bc:D:ghilm:no:pP:qr:s:StTuvxV")
+                                             "1bc:D:ghilm:no:pP:qr:s:StTuvxVW:")
     except getopt.GetoptError as msg:
         print("gpsfake: " + str(msg))
         raise SystemExit(1)
@@ -184,6 +185,7 @@ if __name__ == '__main__':
     verbose = 0
     slow = False
     quiet = False
+    timeout = None  # Really means default
     for (switch, val) in options:
         if switch == '-1':
             singleshot = True
@@ -233,6 +235,12 @@ if __name__ == '__main__':
         elif switch == '-V':
             sys.stderr.write("gpsfake: Version %s\n" % gps_version)
             sys.exit(0)
+        elif switch == '-W':
+            try:
+                timeout = int(val)
+            except:
+                sys.stderr.write("gpsfake: bad timeout value.\n")
+                raise SystemExit(1)
         elif switch == '-x':
             predump = True
 
@@ -257,7 +265,7 @@ if __name__ == '__main__':
 
     test = gpsfake.TestSession(prefix=monitor, port=port, options=doptions,
                                tcp=tcp, udp=udp, verbose=verbose,
-                               predump=predump, slow=slow)
+                               predump=predump, slow=slow, timeout=timeout)
 
     if pipe:
         test.reporter = bytesout.write
