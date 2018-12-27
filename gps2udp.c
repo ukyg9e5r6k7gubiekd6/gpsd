@@ -15,10 +15,13 @@
 /* strsep() needs _DEFAULT_SOURCE */
 #define _DEFAULT_SOURCE
 
-#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L
+/* #if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L */
+#ifdef __linux__
 /* isfinite() and pselect() needs  _POSIX_C_SOURCE >= 200112L */
 #define  _POSIX_C_SOURCE 200112L
 #endif /* __linux__ */
+
+#define __DARWIN_C_LEVEL 900000L
 
 #include <time.h>
 #include "gpsd_config.h"
