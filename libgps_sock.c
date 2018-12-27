@@ -17,6 +17,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "gpsd_config.h"
+#include "timespec.h"      /* for NS_IN_SEC */
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #endif /* HAVE_SYS_SELECT_H */
@@ -143,8 +144,8 @@ bool gps_sock_waiting(const struct gps_data_t *gpsdata, int timeout)
 
     FD_ZERO(&rfds);
     FD_SET(gpsdata->gps_fd, &rfds);
-    tv.tv_sec = timeout / 1000000;
-    tv.tv_nsec = timeout % 1000000000;
+    tv.tv_sec = timeout / NS_IN_SEC;
+    tv.tv_nsec = timeout % NS_IN_SEC;
     /* all error conditions return "not waiting" -- crude but effective */
     return (pselect(gpsdata->gps_fd + 1, &rfds, NULL, NULL, &tv, NULL) == 1);
 #else
