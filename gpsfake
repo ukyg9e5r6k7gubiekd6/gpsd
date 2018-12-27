@@ -140,6 +140,7 @@ if __name__ == '__main__':
     [-c cycle]   sets the delay between sentences in seconds
     [-D debug]   passes a -D option to the daemon
     [-g]         run the gpsd instance within gpsfake under control of gdb
+    [-G]         run the gpsd instance within gpsfake under control of lldb
     [-h]         print a usage message and exit
     [-i]         single-stepping through logfile
     [-l]         dump a line or packet number just before each sentence
@@ -162,8 +163,10 @@ if __name__ == '__main__':
         raise SystemExit(0)
 
     try:
-        (options, arguments) = getopt.getopt(sys.argv[1:],
-                                             "1bc:D:ghilm:no:pP:qr:s:StTuvxVW:")
+        (options, arguments) = getopt.getopt(
+            sys.argv[1:],
+            "1bc:D:gGhilm:no:pP:qr:s:StTuvxVW:"
+            )
     except getopt.GetoptError as msg:
         print("gpsfake: " + str(msg))
         raise SystemExit(1)
@@ -197,6 +200,8 @@ if __name__ == '__main__':
             doptions += " -D " + val
         elif switch == '-g':
             monitor = "xterm -e gdb -tui --args "
+        elif switch == '-G':
+            monitor = "xterm -e lldb -- "
         elif switch == '-h':
             usage()
         elif switch == '-i':
