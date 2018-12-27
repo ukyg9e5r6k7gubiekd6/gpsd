@@ -10,6 +10,11 @@
  * http://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_02_01_02 */
 #define _XOPEN_SOURCE 600
 
+#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L
+/* pselect() needs  _POSIX_C_SOURCE >= 200112L */
+#define  _POSIX_C_SOURCE 200112L
+#endif
+
 #include <stdio.h>
 #include <time.h>
 #include <sys/time.h>
@@ -18,10 +23,12 @@
 #include <math.h>
 #include <errno.h>
 #include <ctype.h>
+#include <sys/time.h>	 /* expected to have a pselect(2) prototype a la SuS */
 
 #include "gps.h"
 #include "libgps.h"
 #include "os_compat.h"
+#include "timespec.h"
 
 #ifdef USE_QT
 #include <QDateTime>
@@ -619,6 +626,18 @@ double earth_distance_and_bearings(double lat1, double lon1, double lat2, double
 double earth_distance(double lat1, double lon1, double lat2, double lon2)
 {
 	return earth_distance_and_bearings(lat1, lon1, lat2, lon2, NULL, NULL);
+}
+
+bool nanowait(int fd, int nanoseconds)
+{
+    fd_set fdset;
+    struct timespec to;
+
+    FD_ZERO(&fdset);
+    FD_SET(fd, &fdset);
+    to.tv_sec = nanoseconds / NS_IN_SEC;
+    to.tv_nsec = nanoseconds % NS_IN_SEC;
+    return pselect(fd + 1, &fdset, NULL, NULL, &to, NULL) == 1;
 }
 
 /* end */

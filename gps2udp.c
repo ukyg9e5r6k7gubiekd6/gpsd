@@ -18,7 +18,7 @@
 /* #if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L */
 #ifdef __linux__
 /* breaks osX */
-/* isfinite() and pselect() needs  _POSIX_C_SOURCE >= 200112L */
+/* isfinite() needs  _POSIX_C_SOURCE >= 200112L */
 #define  _POSIX_C_SOURCE 200112L
 #endif /* __linux__ */
 
@@ -50,6 +50,7 @@
 #include "gpsdclient.h"
 #include "revision.h"
 #include "strfuncs.h"
+#include "timespec.h"
 
 #define MAX_TIME_LEN 80
 #define MAX_GPSD_RETRY 10
@@ -239,27 +240,17 @@ static void connect2gpsd(bool restart)
 static ssize_t read_gpsd(char *message, size_t len)
 /* get data from gpsd */
 {
-    struct timespec tv;
-    fd_set fds,master;
     int ind;
     char c;
     int retry=0;
-
-    // prepare select structure */
-    FD_ZERO(&master);
-    FD_SET(gpsdata.gps_fd, &master);
 
     /* allow room for trailing NUL */
     len--;
 
     /* loop until we get some data or an error */
     for (ind = 0; ind < (int)len;) {
-	int result;
         /* prepare for a blocking read with a 10s timeout */
-        tv.tv_sec =  10;
-        tv.tv_nsec = 0;
-        fds = master;
-        result = pselect(gpsdata.gps_fd+1, &fds, NULL, NULL, &tv, NULL);
+        int result = nanowait(gpsdata.gps_fd, 10 % NS_IN_SEC);
 
         switch (result)
 	{

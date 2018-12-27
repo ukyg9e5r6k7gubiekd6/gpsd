@@ -1060,7 +1060,7 @@ int gpsd_await_data(fd_set *rfds,
      * pselect(2) has to poll here as small as possible (for
      * low-clock-rate SBCs and the like).
      *
-     * pselect() is preferable to vanilla select, to eliminate
+     * pselect(2) is preferable to vanilla select, to eliminate
      * the once-per-second wakeup when no sensors are attached.
      * This cuts power consumption.
      */

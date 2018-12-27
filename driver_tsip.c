@@ -26,7 +26,6 @@
 #endif
 
 
-#include <sys/time.h>		/* for pselect() */
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -37,8 +36,7 @@
 #include "gpsd.h"
 #include "bits.h"
 #include "strfuncs.h"
-
-#include <sys/select.h>
+#include "timespec.h"
 
 #define USE_SUPERPACKET	1	/* use Super Packet mode? */
 
@@ -85,8 +83,6 @@ static bool tsip_detect(struct gps_device_t *session)
     char buf[BUFSIZ];
     bool ret = false;
     int myfd;
-    fd_set fdset;
-    struct timespec to;
     speed_t old_baudrate;
     char old_parity;
     unsigned int old_stopbits;
@@ -105,11 +101,7 @@ static bool tsip_detect(struct gps_device_t *session)
     if (write(myfd, buf, 4) == 4) {
 	unsigned int n;
 	for (n = 0; n < 3; n++) {
-	    FD_ZERO(&fdset);
-	    FD_SET(myfd, &fdset);
-	    to.tv_sec = 1;
-	    to.tv_nsec = 0;
-	    if (pselect(myfd + 1, &fdset, NULL, NULL, &to, NULL) != 1)
+	    if (!nanowait(myfd, NS_IN_SEC))
 		break;
 	    if (generic_get(session) >= 0) {
 		if (session->lexer.type == TSIP_PACKET) {

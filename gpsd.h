@@ -928,6 +928,8 @@ extern void ntpshm_link_activate(struct gps_device_t *);
 #endif /* NTPSHM_ENABLE */
 #endif /* NTP_ENABLE */
 
+bool nanowait(int, int);
+
 extern void errout_reset(struct gpsd_errout_t *errout);
 
 extern void gpsd_acquire_reporting_lock(void);

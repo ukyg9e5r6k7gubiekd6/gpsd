@@ -11,11 +11,10 @@
  */
 
 #if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L
-/* isfinite() and pselect() needs  _POSIX_C_SOURCE >= 200112L */
+/* isfinite() needs  _POSIX_C_SOURCE >= 200112L */
 #define  _POSIX_C_SOURCE 200112L
 #endif /* _POSIX_C_SOURCE */
 
-#include <sys/time.h>		/* for pselect() */
 #include <stdbool.h>
 #include <stdio.h>
 #include <math.h>
@@ -24,8 +23,7 @@
 #include "gpsd.h"
 #include "bits.h"
 #include "strfuncs.h"
-
-#include <sys/select.h>
+#include "timespec.h"
 
 #ifdef GEOSTAR_ENABLE
 #define GEOSTAR_CHANNELS	24
@@ -91,8 +89,6 @@ static bool geostar_detect(struct gps_device_t *session)
     unsigned char buf[1 * 4];
     bool ret = false;
     int myfd;
-    fd_set fdset;
-    struct timespec to;
 
     myfd = session->gpsdata.gps_fd;
 
@@ -101,11 +97,7 @@ static bool geostar_detect(struct gps_device_t *session)
     if (geostar_write(session, 0xc1, buf, 1) == 0) {
 	unsigned int n;
 	for (n = 0; n < 3; n++) {
-	    FD_ZERO(&fdset);
-	    FD_SET(myfd, &fdset);
-	    to.tv_sec = 1;
-	    to.tv_nsec = 0;
-	    if (pselect(myfd + 1, &fdset, NULL, NULL, &to, NULL) != 1)
+	    if (!nanowait(myfd, NS_IN_SEC))
 		break;
 	    if (generic_get(session) >= 0) {
 		if (session->lexer.type == GEOSTAR_PACKET) {
