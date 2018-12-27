@@ -1118,8 +1118,8 @@ static bool greis_set_speed(struct gps_device_t *session,
 	return false;
     }
 
-    (void)snprintf(command, sizeof(command) - 1, "%s%u && %s%s && %s%d",
-	     set_rate, speed, set_parity, selected_parity,
+    (void)snprintf(command, sizeof(command) - 1, "%s%lu && %s%s && %s%d",
+	     set_rate, (unsigned long)speed, set_parity, selected_parity,
 	     set_stops, stopbits);
     return (bool)greis_write(session, command, strlen(command));
 }
