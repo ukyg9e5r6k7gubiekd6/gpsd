@@ -15,15 +15,16 @@
 #define  _POSIX_C_SOURCE 200112L
 #endif
 
+#include <ctype.h>
+#include <errno.h>
+#include <math.h>
 #include <stdio.h>
-#include <time.h>
-#include <sys/time.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <errno.h>
-#include <ctype.h>
-#include <sys/time.h>	 /* expected to have a pselect(2) prototype a la SuS */
+#include <sys/select.h>	 /* for to have a pselect(2) prototype a la POSIX */
+#include <sys/time.h>
+#include <sys/time.h>	 /* for to have a pselect(2) prototype a la SuS */
+#include <time.h>
 
 #include "gps.h"
 #include "libgps.h"
