@@ -6,6 +6,8 @@
 #ifndef GPSD_TIMESPEC_H
 #define GPSD_TIMESPEC_H
 
+#include <stdbool.h>       /* for bool */
+
 /* normalize a timespec
  *
  * three cases to note
@@ -102,6 +104,8 @@ static inline void TS_NORM( struct timespec *ts)
 #define TIMESPEC_LEN	22	/* required length of a timespec buffer */
 
 extern void timespec_str(const struct timespec *, char *, size_t);
+
+bool nanowait(int, int);
 
 #endif /* GPSD_TIMESPEC_H */
 
