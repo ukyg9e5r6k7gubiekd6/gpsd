@@ -21,43 +21,44 @@
 /* strlcpy() needs _DARWIN_C_SOURCE */
 #define _DARWIN_C_SOURCE
 
+#include <arpa/inet.h>     /* for htons() and friends */
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <grp.h>
+#include <math.h>
+#include <netdb.h>
+#include <pthread.h>
+#include <pwd.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdint.h>		/* for uint32_t, etc. */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <stdio.h>
-#include <stdint.h>		/* for uint32_t, etc. */
-#include <time.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <stdarg.h>
-#include <setjmp.h>
-#include <assert.h>
-#include <math.h>
+#include <sys/un.h>
 #include <syslog.h>
-#include <errno.h>
-#include <signal.h>
-#include <ctype.h>
-#include <pwd.h>
-#include <grp.h>
-#include <fcntl.h>
-#include <pthread.h>
-#include <netdb.h>
+#include <time.h>
+#include <unistd.h>
+
 #ifndef AF_UNSPEC
 #include <sys/socket.h>
 #endif /* AF_UNSPEC */
 #ifndef INADDR_ANY
 #include <netinet/in.h>
 #endif /* INADDR_ANY */
-#include <sys/un.h>
-#include <arpa/inet.h>     /* for htons() and friends */
-#include <unistd.h>
 
 #include "gpsd_config.h"
 
 #include "gpsd.h"
-#include "sockaddr.h"
-#include "gps_json.h"
+#include "gps_json.h"         /* needs gpsd.h */
 #include "revision.h"
+#include "sockaddr.h"
 #include "strfuncs.h"
 
 #if defined(SYSTEMD_ENABLE)
