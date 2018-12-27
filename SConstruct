@@ -860,8 +860,16 @@ else:
                      "RTCM V2 support disabled.")
             env["rtcm104v2"] = False
 
-    for hdr in ("sys/un", "sys/socket", "sys/select", "netdb", "netinet/in",
-                "netinet/ip", "arpa/inet", "syslog", "termios", "winsock2"):
+    for hdr in ("arpa/inet",
+                "netdb",
+                "netinet/in",
+                "netinet/ip",
+                "sys/socket",
+                "sys/un",
+                "syslog",
+                "termios",
+                "winsock2"
+               ):
         if config.CheckHeader(hdr + ".h"):
             confdefs.append("#define HAVE_%s_H 1\n"
                             % hdr.replace("/", "_").upper())

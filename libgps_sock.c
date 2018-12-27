@@ -17,9 +17,7 @@
 #include <sys/stat.h>
 #include "gpsd_config.h"
 #include "timespec.h"      /* for NS_IN_SEC */
-#ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
-#endif /* HAVE_SYS_SELECT_H */
 #include <unistd.h>
 
 #ifndef USE_QT
