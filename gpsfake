@@ -200,8 +200,10 @@ if __name__ == '__main__':
             doptions += " -D " + val
         elif switch == '-g':
             monitor = "xterm -e gdb -tui --args "
+            timeout = 0
         elif switch == '-G':
             monitor = "xterm -e lldb -- "
+            timeout = 0
         elif switch == '-h':
             usage()
         elif switch == '-i':
