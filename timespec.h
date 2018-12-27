@@ -19,6 +19,7 @@
  * NOTE: this normalization is not the same as ntpd uses
  */
 #define NS_IN_SEC	1000000000LL
+#define US_IN_SEC	1000000LL        /* microseconds in a second */
 #define MS_IN_SEC	1000000LL
 
 /* return the difference between timespecs in nanoseconds
