@@ -26,7 +26,9 @@
 /* cfmakeraw() needs _DEFAULT_SOURCE */
 #define _DEFAULT_SOURCE
 
-#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L
+/* #if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L */
+#ifdef __linux__
+/* breaks osX */
 /* isfinite() and pselect() needs  _POSIX_C_SOURCE >= 200112L */
 #define  _POSIX_C_SOURCE 200112L
 #endif /* __linux__ */
