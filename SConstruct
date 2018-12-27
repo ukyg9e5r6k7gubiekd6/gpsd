@@ -986,11 +986,22 @@ else:
     # because we can't seem to keep scons from passing these to g++.
     #
     # Do this after the other config checks, to keep warnings out of them.
-    for option in ('-Wextra', '-Wall', '-Wno-uninitialized',
+    for option in ('-Wall',
+                   '-Wcast-align',
+                   '-Wextra',
+                   # -Wimplicit-fallthrough same as
+                   # -Wimplicit-fallthrough=3, except osX hates the
+                   # second flavor
+                   '-Wimplicit-fallthrough',
+                   '-Wmissing-declarations',
+                   '-Wmissing-prototypes',
                    '-Wno-missing-field-initializers',
-                   '-Wcast-align', '-Wmissing-declarations',
-                   '-Wmissing-prototypes', "-Wvla",
-                   '-Wstrict-prototypes', '-Wpointer-arith', '-Wreturn-type'):
+                   '-Wno-uninitialized',
+                   '-Wpointer-arith',
+                   '-Wreturn-type',
+                   '-Wstrict-prototypes',
+                   '-Wvla',
+                   ):
         if option not in config.env['CFLAGS']:
             config.CheckCompilerOption(option)
 
