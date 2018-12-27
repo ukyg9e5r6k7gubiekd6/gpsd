@@ -553,7 +553,7 @@ static int json_internal_read_object(const char *cp,
 		    }
 		    break;
 		}
-	    __attribute__ ((fallthrough));
+	    /* FALLTHROUGH */
 	case post_element:
 	    if (isspace((unsigned char) *cp))
 		continue;

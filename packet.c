@@ -1062,7 +1062,7 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	    lexer->state = GROUND_STATE;
 	    break;
 	}
-	__attribute__ ((fallthrough));
+	/* FALLTHROUGH */
 #endif /* TSIP_ENABLE */
 #ifdef NAVCOM_ENABLE
     case NAVCOM_LEADER_1:
