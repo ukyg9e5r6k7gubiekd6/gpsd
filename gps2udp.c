@@ -15,7 +15,7 @@
 /* strsep() needs _DEFAULT_SOURCE */
 #define _DEFAULT_SOURCE
 
-#ifdef __linux__
+#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L
 /* isfinite() and pselect() needs  _POSIX_C_SOURCE >= 200112L */
 #define  _POSIX_C_SOURCE 200112L
 #endif /* __linux__ */

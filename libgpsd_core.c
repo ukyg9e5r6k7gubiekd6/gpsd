@@ -14,9 +14,12 @@
 /* FreeBSD chokes on this */
 /* getsid() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
 #define _XOPEN_SOURCE 500
+#endif /* __linux__ */
+
+#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L
 /* isfinite() and pselect() needs  _POSIX_C_SOURCE >= 200112L */
 #define  _POSIX_C_SOURCE 200112L
-#endif /* __linux__ */
+#endif
 
 /* strlcpy() needs _DARWIN_C_SOURCE */
 #define _DARWIN_C_SOURCE

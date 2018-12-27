@@ -18,12 +18,15 @@ PERMISSIONS
 /* FreeBSD chokes on this */
 /* isascii() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
 #define _XOPEN_SOURCE 500
+#endif /* __linux__ */
+
+#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L
 /* isfinite() needs _POSIX_C_SOURCE >= 200112L
  * check for isfinite() not isnan().
  * isnan(+inf) returns false, isfinite(+inf) returns false.
  */
-#define _POSIX_C_SOURCE 200112L
-#endif /* __linux__ */
+#define  _POSIX_C_SOURCE 200112L
+#endif
 
 /* vsnprintf() needs __DARWIN_C_LEVEL >= 200112L */
 #define __DARWIN_C_LEVEL 200112L

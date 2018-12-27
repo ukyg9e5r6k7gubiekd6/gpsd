@@ -10,10 +10,10 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-#ifdef __linux__
+#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L
 /* isfinite() and pselect() needs  _POSIX_C_SOURCE >= 200112L */
 #define  _POSIX_C_SOURCE 200112L
-#endif /* __linux__ */
+#endif /* _POSIX_C_SOURCE */
 
 #include <sys/time.h>		/* for pselect() */
 #include <stdbool.h>
