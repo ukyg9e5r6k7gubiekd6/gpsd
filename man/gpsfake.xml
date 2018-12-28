@@ -31,6 +31,7 @@ SPDX-License-Identifier: BSD-2-clause
       <arg choice='opt'>-l</arg>
       <arg choice='opt'>-m <replaceable>monitor</replaceable></arg>
       <arg choice='opt'>-g</arg>
+      <arg choice='opt'>-G</arg>
       <arg choice='opt'>-n</arg>
       <arg choice='opt'>-o <replaceable>options</replaceable></arg>
       <arg choice='opt'>-p</arg>
@@ -43,6 +44,7 @@ SPDX-License-Identifier: BSD-2-clause
       <arg choice='opt'>-t</arg>
       <arg choice='opt'>-T</arg>
       <arg choice='opt'>-v</arg>
+      <arg choice='opt'>-W <replaceable>timeout</replaceable></arg>
       <arg rep='repeat'>
             <arg choice='plain'><replaceable>logfile</replaceable></arg>
       </arg>
@@ -121,9 +123,12 @@ daemon should be run.  This option is intended to be used with
 <citerefentry><refentrytitle>gdb</refentrytitle><manvolnum>1</manvolnum></citerefentry>
 and similar programs.</para>
 
-<para>The <option>-g</option> uses the monitor facility to run the
-<application>gpsd</application> instance within gpsfake under control
-of gdb.</para>
+<para>The <option>-g</option> and <option>-G</option> options use the
+monitor facility to run the <application>gpsd</application> instance
+within gpsfake under control of gdb or lldb, respectively.  They also
+disable the timeout on daemon inactivity, to allow for breakpointing. If
+necessary, the timeout can be reenabled by a subsequent
+<option>-W</option>.</para>
 
 <para>The <option>-o</option> specifies options to pass to the daemon.  The -n
 option passes -n to start the daemon reading the GPS without waiting
@@ -167,6 +172,11 @@ to pty devices is locked out.</para>
 <para>The <option>-v</option> enables verbose progress reports to stderr.  It is
 mainly useful for debugging <application>gpsfake</application>
 itself.</para>
+
+<para>The <option>-W</option> ("wait") option sets the timeout on daemon
+inactivity, in seconds.  The default timeout is 60 seconds, and a value
+of 0 suppresses the timeout altogether.  Note that the actual timeout is
+longer due to internal delays, typically by about 20 seconds.</para>
 
 <para>The <option>-x</option> dumps packets as
 <application>gpsfake</application> gathers them.  It is mainly useful
