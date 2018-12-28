@@ -108,7 +108,7 @@ elif sys.platform.startswith("netbsd"):
     WRITE_PAD = 0.004
 elif sys.platform.startswith("darwin"):
     # darwin Darwin-13.4.0-x86_64-i386-64bit
-    WRITE_PAD = 0.03
+    WRITE_PAD = 0.005
 else:
     WRITE_PAD = 0.004
 
