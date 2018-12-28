@@ -181,7 +181,7 @@ static int open_udp(char **hostport)
 	   return (-1);
        }
 
-       memcpy( &remote[channel].sin_addr, hp->h_addr, hp->h_length);
+       memcpy( &remote[channel].sin_addr, hp->h_addr_list[0], hp->h_length);
        remote[channel].sin_port = htons((in_port_t)portnum);
    }
 return (0);
