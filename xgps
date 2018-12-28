@@ -25,12 +25,13 @@ usage: xgps [-?] [-D level] [-h] [-l degmfmt] [-r rotation] [-u units] [-V]
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
+import cairo
 import math
+import os
 import socket
 import sys
 import time
 
-import cairo
 
 # Gtk3 imports.  Gtk3 requires the require_version(), which then causes
 # pylint to complain about the subsequent "non-top" imports.
@@ -1303,6 +1304,10 @@ if __name__ == "__main__":
             target = ":".join(arguments[0:])
         else:
             target = ""
+
+        if 'DISPLAY' not in os.environ:
+            sys.stderr.write("xgps: ERROR: DISPLAY not set\n")
+            exit(1)
 
         base = Base(deg_type=degreefmt, rotation=rotate, title=target)
         base.set_units(unit_system)
