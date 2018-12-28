@@ -731,6 +731,8 @@ class TestSession(object):
         try:
             self.progress("gpsfake: test loop begins\n")
             while self.daemon:
+                if not self.daemon.is_alive():
+                    raise TestSessionError("daemon died")
                 # We have to read anything that gpsd might have tried
                 # to send to the GPS here -- under OpenBSD the
                 # TIOCDRAIN will hang, otherwise.
@@ -759,6 +761,8 @@ class TestSession(object):
                         chosen.send(chosen.enqueued)
                         chosen.enqueued = ""
                     while chosen.waiting():
+                        if not self.daemon or not self.daemon.is_alive():
+                            raise TestSessionError("daemon died")
                         chosen.read()
                         had_output = True
                         if not chosen.valid & gps.PACKET_SET:
