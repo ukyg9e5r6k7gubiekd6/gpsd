@@ -416,6 +416,13 @@ static gps_mask_t greis_msg_SI(struct gps_device_t *session,
             session->gpsdata.skyview[i].svid;
         /* GREIS does not report locktime, so assume max */
 	session->gpsdata.raw.meas[i].locktime = LOCKMAX;
+	/* Make sure the unused raw fields are set consistently */
+	session->gpsdata.raw.meas[i].sigid = 0;
+	session->gpsdata.raw.meas[i].snr = 0;
+	session->gpsdata.raw.meas[i].freqid = 0;
+	session->gpsdata.raw.meas[i].lli = 0;
+	session->gpsdata.raw.meas[i].codephase = NAN;
+	session->gpsdata.raw.meas[i].deltarange = NAN;
     }
 
     session->driver.greis.seen_si = true;
