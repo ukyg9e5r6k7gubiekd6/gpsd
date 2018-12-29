@@ -284,8 +284,12 @@ class NauticalSpeedometer(Speedometer):
            angle: azimuth from from Polar coordinate system, in radian
            polex and poley are the Cartesian coordinate of the pole
         return a tuple contains (x, y)'''
-        angle = (angle + self.rotate) % (pi * 2)  # Note reversed sense
         return (polex + cos(angle) * radius, poley - sin(angle) * radius)
+
+    def polar2xyr(self, radius, angle, polex, poley):
+        '''Version of polar2xy that includes rotation'''
+        angle = (angle + self.rotate) % (pi * 2)  # Note reversed sense
+        return self.polar2xy(radius, angle, polex, poley)
 
     def on_size_allocate(self, _unused, allocation):
         self.width = allocation.width
@@ -378,7 +382,7 @@ class NauticalSpeedometer(Speedometer):
             label = str(n * 90)
             # self.cr.set_source_rgba(0, 1, 0)
             # radius * (1 + NauticalSpeedometer.HEADING_SAT_GAP),
-            tbox_x, tbox_y = self.polar2xy(
+            tbox_x, tbox_y = self.polar2xyr(
                 radius * 0.88,
                 (1 - n) * pi / 2,
                 x, y)
@@ -399,10 +403,10 @@ class NauticalSpeedometer(Speedometer):
         self.cr.arc(x, y, skyradius / 3, 0, 2 * pi)
 
         # draw the cross hair
-        self.cr.move_to(*self.polar2xy(skyradius, 1.5 * pi, x, y))
-        self.cr.line_to(*self.polar2xy(skyradius, 0.5 * pi, x, y))
-        self.cr.move_to(*self.polar2xy(skyradius, 0.0, x, y))
-        self.cr.line_to(*self.polar2xy(skyradius, pi, x, y))
+        self.cr.move_to(*self.polar2xyr(skyradius, 1.5 * pi, x, y))
+        self.cr.line_to(*self.polar2xyr(skyradius, 0.5 * pi, x, y))
+        self.cr.move_to(*self.polar2xyr(skyradius, 0.0, x, y))
+        self.cr.line_to(*self.polar2xyr(skyradius, pi, x, y))
         self.cr.set_line_width(radius / 200)
         self.cr.stroke()
 
@@ -434,7 +438,7 @@ class NauticalSpeedometer(Speedometer):
 
     def draw_heading(self, trig_height, heading, radius, x, y):
         hypo = trig_height * 2 / sqrt(3)
-        h = pi / 2 - radians(heading)  # to xyz
+        h = (pi / 2 - radians(heading) + self.rotate) % (pi * 2)  # to xyz
         self.cr.set_line_width(2)
         self.cr.set_source_rgba(0, 0.3, 0.2, 0.8)
 
@@ -498,7 +502,7 @@ class NauticalSpeedometer(Speedometer):
         self.cr.set_line_width(2)
         self.cr.set_source_rgb(0, 0, 0)
 
-        x0, y0 = self.polar2xy(radius * (90 - el) // 90, h, x, y)
+        x0, y0 = self.polar2xyr(radius * (90 - el) // 90, h, x, y)
 
         self.cr.new_sub_path()
         if gps.is_sbas(satsoup['PRN']):
