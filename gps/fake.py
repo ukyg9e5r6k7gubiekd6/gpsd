@@ -763,7 +763,8 @@ class TestSession(object):
                     while chosen.waiting():
                         if not self.daemon or not self.daemon.is_alive():
                             raise TestSessionError("daemon died")
-                        chosen.read()
+                        if chosen.read() < 0:
+                            raise TestSessionError("daemon output stopped")
                         had_output = True
                         if not chosen.valid & gps.PACKET_SET:
                             continue
