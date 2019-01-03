@@ -54,7 +54,7 @@ If you do not have a u-blox GPS then can stop reading now.</para>
   <para>This tool operates with your u-blox GPS at a very low level.
 To understand <application>ubxtool</application> you must first be familiar
 with your u-blox GPS and the documentation for the u-blox binary protocol.
-The u-blox protocol varies greatly depending o GPS model and firmware
+The u-blox protocol varies greatly depending on GPS model and firmware
 revision.
 </para>
   <para>
@@ -168,7 +168,7 @@ is to enable the option.
     <listitem>
      <para>Connect to a file or device.  Accepts one parameter, FILE,
 the file or device to open.   Files are opened read-only.  Character
-devices are opened red/write, unless the -r parameter is given.
+devices are opened read/write, unless the -r parameter is given.
 </para>
     </listitem>
    </varlistentry>
@@ -330,13 +330,6 @@ after the GPS acknowledges the command, unless the -W is given.
     <term>-v VERBOSITY</term>
     <listitem>
      <para>Set verbosity level to VERBOSITY.  Verbosity can be from 0
-     (very quiet), to 4 (very noisy).  Default 2.</para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>-v VERBOSITY</term>
-    <listitem>
-     <para>Set verbosity level to VERBOSITY.  Verbosity can be from 0
      (very quiet), 2 (decode messages), to 4 (very noisy).  Default 1.</para>
     </listitem>
    </varlistentry>
@@ -387,7 +380,7 @@ ubxtool -r -f ublox-neo-m8n.log
 </programlisting>
   </para>
   <para>
-Change GPS port speed of device on /dev/ttyAMA0 to 230,400 bps::
+Change GPS port speed of device on /dev/ttyAMA0 to 230,400 bps:
 <programlisting>
 ubxtool -S 230400 -f /dev/ttyAMA0
 </programlisting>
