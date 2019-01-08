@@ -481,6 +481,167 @@ static gps_mask_t sirf_msg_nlmd(struct gps_device_t *session,
     return 0;
 }
 
+/* MID_SiRFNavNotification MID 0x33 (51) */
+static gps_mask_t sirf_msg_navnot(struct gps_device_t *session,
+				unsigned char *buf, size_t len)
+{
+    const char *definition = "Unknown";
+    gps_mask_t mask = 0;
+
+    if (len < 3)
+	return 0;
+
+    switch (buf[1]) {
+    case 1:
+        definition = "SID_GPS_SIRFNAV_COMPLETE";
+        mask = CLEAR_IS | REPORT_IS;
+        break;
+    case 2:
+        definition = "SID_GPS_SIRFNAV_TIMING";
+        break;
+    case 3:
+        definition = "SID_GPS_DEMO_TIMING";
+        break;
+    case 4:
+        definition = "SID_GPS_SIRFNAV_TIME_TAGS";
+        break;
+    case 5:
+        definition = "SID_GPS_NAV_IS801_PSEUDORANGE_DATA";
+        break;
+    case 6:
+        definition = "GPS_TRACKER_LOADER_STATE";
+        break;
+    case 7:
+        definition = "SSB_SIRFNAV_START";
+        break;
+    case 8:
+        definition = "SSB_SIRFNAV_STOP";
+        break;
+    case 9:
+        definition = "SSB_RESULT";
+        break;
+    case 16:
+        definition = "DEMO_TEST_STATUS";
+        break;
+    case 17:
+        definition = "DEMO_TEST_STATE";
+        break;
+    case 18:
+        definition = "DEMO_TEST_DATA";
+        break;
+    case 19:
+        definition = "DEMO_TEST_STATS";
+        break;
+    case 20:
+        definition = "DEMO_TEST_ERROR";
+        break;
+    default:
+        definition = "Unknown";
+        break;
+    }
+
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "SiRF IV: NavNotification 51 (0x33), SID: %d (%s), len %lu\n",
+	     buf[1], definition, (long unsigned)len);
+
+    return mask;
+}
+
+/* MID_QUERY_RESP MID 0x51 (81) */
+static gps_mask_t sirf_msg_qresp(struct gps_device_t *session,
+				unsigned char *buf, size_t len)
+{
+
+    if (len < 3)
+	return 0;
+
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "SiRF IV: unused MID_QUERY_RESP 0x51 (81), Q MID: %d, "
+             "SID: %d Elen: %d\n",
+	     buf[1], buf[2], buf[3]);
+    return 0;
+}
+
+/* MID_TCXO_LEARNING_OUT MID 0x5d (93) */
+static gps_mask_t sirf_msg_tcxo(struct gps_device_t *session,
+				unsigned char *buf, size_t len)
+{
+    const char *definition = "Unknown";
+    uint32_t gps_tow = 0;
+    uint16_t gps_week = 0;
+    timespec_t gps_tow_ns = {0};
+    char output[64] = "";
+    timespec_t now = {0};
+    gps_mask_t mask = 0;
+    unsigned int time_status = 0;
+
+    if (len < 2)
+	return 0;
+
+    switch (buf[1]) {
+    case 1:
+        definition = "CLOCK_MODEL_DATA_BASE_OUT";
+        break;
+    case 2:
+        definition = "TEMPERATURE_TABLE";
+        break;
+    case 4:
+        definition = "TEMP_RECORDER_MESSAGE";
+        break;
+    case 5:
+        definition = "EARC";
+        break;
+    case 6:
+        definition = "RTC_ALARM";
+        break;
+    case 7:
+        definition = "RTC_CAL";
+        break;
+    case 8:
+        definition = "MPM_ACQUIRED";
+        break;
+    case 9:
+        definition = "MPM_SEARCHES";
+        break;
+    case 10:
+        definition = "MPM_PREPOS";
+        break;
+    case 11:
+        definition = "MICRO_NAV_MEASUREMENT";
+        break;
+    case 12:
+        definition = "TCXO_UNCEARTAINTY";
+        break;
+    case 13:
+        definition = "SYSTEM_TIME_STAMP";
+        break;
+    case 18:
+        definition = "SIRF_MSG_SSB_XO_TEMP_REC_VALUE";
+	gps_tow = (uint32_t)getbeu32(buf, 2);
+	gps_week = (uint16_t)getbeu16(buf, 6);
+        time_status = (unsigned int)getub(buf, 8);
+        gps_tow_ns.tv_sec = gps_tow;
+        gps_tow_ns.tv_nsec = 0;
+        now = gpsd_gpstime_resolv(session, gps_week, gps_tow_ns);
+        (void)snprintf(output, sizeof(output),
+                       ", GPS Week %d, tow %d, time %ld, time_status %d",
+                       gps_week, gps_tow, now.tv_sec, time_status);
+        if (7 == (time_status & 7)) {
+	    mask |= TIME_SET;
+        }
+        break;
+    default:
+        definition = "Unknown";
+        break;
+    }
+
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "SiRF IV: unused TCXO 0x5D (93), SID: %d (%s)%s\n",
+	     buf[1], definition, output);
+
+    return mask;
+}
+
 static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 				     unsigned char *buf, size_t len)
 {
@@ -1310,6 +1471,9 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_log(&session->context->errout, LOG_PROG,"SiRF: unused SBAS 0x32\n");
 	return 0;
 
+    case 0x33:                /* MID_SiRFNavNotification MID 51, 0x33 */
+	return sirf_msg_navnot(session, buf, len);
+
     case 0x34:			/* PPS Time MID 52 */
 	/*
 	 * Carl Carter from SiRF writes: "We do not output on the
@@ -1345,16 +1509,16 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 		 "SiRF IV: unused Hardware Config 0x47\n");
 	return 0;
 
+    case 0x51:                /* MID_QUERY_RESP MID 81 */
+	return sirf_msg_qresp(session, buf, len);
+
     case 0x5c:                /* CW Controller Output MID 92 */
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "SiRF IV: unused CW Controller Output 0x5c\n");
 	return 0;
 
     case 0x5d:                /* TCXO Output MID 93 */
-	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF IV: unused TCXO Output 0x5d, SubID: %d\n",
-		 buf[1]);
-	return 0;
+	return sirf_msg_tcxo(session, buf, len);
 
     case 0x62:			/* u-blox Extended Measured Navigation Data MID 98 */
 	gpsd_log(&session->context->errout, LOG_PROG,
@@ -1374,8 +1538,8 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 
     default:
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: Unknown packet id %d length %zd\n",
-		 buf[0], len);
+		 "SiRF: Unknown packet id %d (%#x) length %zd\n",
+		 buf[0], buf[0], len);
 	return 0;
     }
 }
