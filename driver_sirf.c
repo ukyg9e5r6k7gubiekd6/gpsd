@@ -35,18 +35,19 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include <strings.h>
-#include <math.h>
-#include <ctype.h>
 #include <unistd.h>
 
 #include "gpsd.h"
 #include "bits.h"
 #include "strfuncs.h"
+#include "timespec.h"
 #if defined(SIRF_ENABLE) && defined(BINARY_ENABLE)
 
 #define HI(n)		((n) >> 8)
@@ -494,7 +495,7 @@ static gps_mask_t sirf_msg_navnot(struct gps_device_t *session,
     switch (buf[1]) {
     case 1:
         definition = "SID_GPS_SIRFNAV_COMPLETE";
-        mask = CLEAR_IS | REPORT_IS;
+        /* mask = CLEAR_IS | REPORT_IS; */
         break;
     case 2:
         definition = "SID_GPS_SIRFNAV_TIMING";
@@ -548,6 +549,7 @@ static gps_mask_t sirf_msg_navnot(struct gps_device_t *session,
 }
 
 /* Multiconstellation Navigation Data response MID 67.1 (0x43)
+ * SIRF_MSG_SSB_GNSS_NAV_DATA
  * this replaces the deprecated MID 41 */
 static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
 				  unsigned char *buf, size_t len)
@@ -563,6 +565,16 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     int16_t time_bias = 0;
     uint8_t time_accuracy = 0;
     uint8_t time_source = 0;
+    struct tm unpacked_date;
+    unsigned char datum;
+    int64_t clk_bias;
+    uint32_t clk_bias_error;
+    int32_t clk_offset;
+    uint32_t clk_offset_error;
+    int32_t lat;
+    int32_t lon;
+    int32_t alt_ellips;               /* altitude over ellipse */
+    int32_t alt_msl;                  /* altitude msl */
 
     if (len < 126)
 	return 0;
@@ -585,14 +597,56 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     gps_tow_ns.tv_sec = gps_tow;
     gps_tow_ns.tv_nsec = gps_tow_sub_ms;
     now = gpsd_gpstime_resolv(session, gps_week, gps_tow_ns);
-    session->newdata.time = now.tv_sec + (now.tv_nsec * 1e-9);
+    /* we'll not use this time, instead the unpacked date below */
 
+    time_bias = getbes16(buf, 20);    /* add in the ns */
+    /* time_accuracy is an odd 8 bit float */
+    time_accuracy = getub(buf, 22);
+    time_source = getub(buf, 23);     /* unused */
+
+    unpacked_date.tm_year = (int)getbeu16(buf, 24) - 1900;
+    unpacked_date.tm_mon = (int)getub(buf, 26) - 1;
+    unpacked_date.tm_mday = (int)getub(buf, 27);
+    unpacked_date.tm_hour = (int)getub(buf, 28);
+    unpacked_date.tm_min = (int)getub(buf, 29);
+    unpacked_date.tm_sec = (int)getbeu16(buf, 30) / 1000;
+    unpacked_date.tm_isdst = 0;
+    session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date);
+    /* add back in the fractional seconds */
+    session->newdata.time += (timestamp_t)gps_tow_sub_ms / NS_IN_SEC;
+    session->context->leap_seconds = (int)getub(buf, 32);
+    session->context->valid |= LEAP_SECOND_VALID;
     /* got time now */
     mask |= TIME_SET;
+
+    datum = getub(buf, 33);
+    clk_bias = getbes64(buf, 34);
+    clk_bias_error = getbeu32(buf, 42);
+    clk_offset = getbes32(buf, 46);
+    clk_offset_error = getbeu32(buf, 50);
+    lat = getbes32(buf, 54);
+    lon = getbes32(buf, 58);
+    alt_ellips = getbes32(buf, 62);
+    alt_msl = getbes32(buf, 66);
+
+    session->newdata.latitude = lat * 1e-7;
+    session->newdata.longitude = lon * 1e-7;
+    session->newdata.altitude = alt_msl * 1e-2;
+    mask |= LATLON_SET | ALTITUDE_SET;
+    /* fake a mode for test */
+
+    session->newdata.mode = MODE_3D;
+    mask |= MODE_SET;
+    mask |= REPORT_IS; /* send it */
 
     gpsd_log(&session->context->errout, LOG_IO,
 		   "GPS Week %d, tow %d.%03d, time %ld.%09ld\n",
 		   gps_week, gps_tow, gps_tow_sub_ms, now.tv_sec, now.tv_nsec);
+    gpsd_log(&session->context->errout, LOG_IO,
+	     "time %.9f leaps %u, datum %u\n",
+	     session->newdata.time, session->context->leap_seconds, datum);
+    gpsd_log(&session->context->errout, LOG_IO,
+	     "lat %d lon %d\n", lat, lon);
     return mask;
 }
 
@@ -668,7 +722,7 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
     /* num_of_sats is total sats tracked, not the number of sats in this
        message */
     for (sat_num = 0; sat_num < num_of_sats; sat_num++) {
-        int offset;
+        unsigned offset;
         uint16_t sat_info;
         uint16_t other_info;
         unsigned char gnssId_sirf;
