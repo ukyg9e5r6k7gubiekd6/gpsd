@@ -547,6 +547,286 @@ static gps_mask_t sirf_msg_navnot(struct gps_device_t *session,
     return mask;
 }
 
+/* Multiconstellation Navigation Data response MID 67.1 (0x43)
+ * this replaces the deprecated MID 41 */
+static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
+				  unsigned char *buf, size_t len)
+{
+    gps_mask_t mask = 0;
+    uint32_t solution_validity;
+    uint32_t solution_info;
+    uint32_t gps_tow = 0;
+    uint32_t gps_tow_sub_ms = 0;
+    uint16_t gps_week = 0;
+    timespec_t gps_tow_ns = {0};
+    timespec_t now = {0};
+    int16_t time_bias = 0;
+    uint8_t time_accuracy = 0;
+    uint8_t time_source = 0;
+
+    if (len < 126)
+	return 0;
+
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "SiRF V: MID 67.1\n");
+
+    solution_validity = getbeu32(buf, 2);
+    if (0 != solution_validity) {
+        /* invalid fix, just give up */
+        return 0;
+    }
+
+    solution_info = getbeu32(buf, 6);
+    gps_week = getbeu16(buf, 10);
+    gps_tow = getbeu32(buf, 12) / 1000;
+    /* get ms part, conver to ns */
+    gps_tow_sub_ms = 1000000 * (getbeu32(buf, 12) % 1000);
+    gps_tow_sub_ms += getbeu32(buf, 16);    /* add in the ns */
+    gps_tow_ns.tv_sec = gps_tow;
+    gps_tow_ns.tv_nsec = gps_tow_sub_ms;
+    now = gpsd_gpstime_resolv(session, gps_week, gps_tow_ns);
+    session->newdata.time = now.tv_sec + (now.tv_nsec * 1e-9);
+
+    /* got time now */
+    mask |= TIME_SET;
+
+    gpsd_log(&session->context->errout, LOG_IO,
+		   "GPS Week %d, tow %d.%03d, time %ld.%09ld\n",
+		   gps_week, gps_tow, gps_tow_sub_ms, now.tv_sec, now.tv_nsec);
+    return mask;
+}
+
+/* Multiconstellation Navigation Data response MID 67.16 (0x43)
+ * this replaces the deprecated MID 41 */
+static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
+				  unsigned char *buf, size_t len)
+{
+    gps_mask_t mask = 0;
+    uint32_t solution_validity;
+    uint32_t solution_info;
+    uint32_t gps_tow = 0;
+    uint32_t gps_tow_sub_ms = 0;
+    uint16_t gps_week = 0;
+    timespec_t gps_tow_ns = {0};
+    timespec_t now = {0};
+    int16_t time_bias = 0;
+    uint8_t time_accuracy = 0;
+    uint8_t time_source = 0;
+    uint8_t msg_info = 0;
+    uint8_t num_of_sats = 0;
+    unsigned int sat_num;
+    int st;                    /* index into skyview */
+
+    if (len < 198) {
+        /* always payload of 15 sats */
+	return 0;
+    }
+
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "SiRF V: MID 67.16 len %lu\n", len);
+
+    gps_week = getbeu16(buf, 2);
+    gps_tow = getbeu32(buf, 4) / 1000;
+    /* get ms part, convert to ns */
+    gps_tow_sub_ms = 1000000 * (getbeu32(buf, 4) % 1000);
+    gps_tow_sub_ms += getbeu32(buf, 8);    /* add in the ns */
+    gps_tow_ns.tv_sec = gps_tow;
+    gps_tow_ns.tv_nsec = gps_tow_sub_ms;
+    now = gpsd_gpstime_resolv(session, gps_week, gps_tow_ns);
+    session->newdata.time = now.tv_sec + (now.tv_nsec * 1e-9);
+    session->gpsdata.skyview_time = session->newdata.time;
+    time_bias = getbes16(buf, 12);
+    /* time_accuracy is an odd 8 bit float */
+    time_accuracy = getub(buf, 14);
+    time_source = getub(buf, 15);
+    msg_info = getub(buf, 16);
+    if (0 == (msg_info & 0x0f)) {
+        /* WTF? */
+        return 0;
+    }
+    if (1 == (msg_info & 0x0f)) {
+        /* first set, zero the sats */
+	gpsd_zero_satellites(&session->gpsdata);
+    }
+    st = ((msg_info & 0x0f) - 1) * 15;
+    num_of_sats = getub(buf, 17);
+    /* got time now */
+    mask |= TIME_SET;
+    gpsd_log(&session->context->errout, LOG_IO,
+             "GPS Week %d, tow %d.%03d, time %ld.%09ld\n",
+	     gps_week, gps_tow, gps_tow_sub_ms, now.tv_sec, now.tv_nsec);
+    gpsd_log(&session->context->errout, LOG_IO,
+	     "Time bias: %u ns, accuracy %02x, source %u, "
+	     "msg_info %#02x, sats %u\n",
+	     time_bias, time_accuracy, time_source, msg_info,
+	     num_of_sats);
+
+    session->gpsdata.satellites_visible = num_of_sats;
+    /* used? */
+
+    /* now decode the individual sat data */
+    /* num_of_sats is total sats tracked, not the number of sats in this
+       message */
+    for (sat_num = 0; sat_num < num_of_sats; sat_num++) {
+        int offset;
+        uint16_t sat_info;
+        uint16_t other_info;
+        unsigned char gnssId_sirf;
+        unsigned char gnssId;
+        unsigned char svId;
+        short PRN;
+        short azimuth;
+        short elevation;
+        short avg_cno;
+        double ss;
+        uint32_t status;
+
+        offset = 18 + (sat_num * 12);
+        if (offset >= len) {
+            /* end of this message */
+            break;
+        }
+        sat_info = getbeu16(buf, offset);
+        if (0 == sat_info) {
+            /* emtpy slot, ignore */
+            continue;;
+        }
+
+        /* 0 = GPS/QZSS
+           1 = SBAS
+           2 = GLONASS
+           3 = Galileo
+           4 = BDS
+         */
+        gnssId_sirf = sat_info >> 13;
+        svId = sat_info & 0x0ff;
+        other_info = (sat_info >> 8) & 0x1f;
+        /* make up a PRN based on gnssId:svId, using table 4-55
+         * from (CS-303979-SP-9) SiRFstarV OSP Extensions
+         * Note: the Qualcomm doc is very vague
+         */
+        switch (gnssId_sirf) {
+        case 0:
+            /* GPS, 1-32 maps to 1-32 */
+            /* and QZSS maps how??? */
+            gnssId = 0;
+            PRN = svId;
+            break;
+        case 1:
+            /* SBAS, 120-158 maps to 120-158 */
+	    if (120 > svId || 158 < svId) {
+		/* skip bad svId */
+		continue;
+	    }
+            gnssId = 1;
+            PRN = svId;
+            break;
+        case 2:
+            /* GLONASS, 1-32 maps to 65-96 */
+	    if (1 > svId) {
+		/* skip bad svId */
+		continue;
+	    }
+	    if (32 < svId) {
+		/* skip bad svId */
+		continue;
+	    }
+            gnssId = 6;
+            PRN = svId + 64;
+            break;
+        case 3:
+            /* Galileo, 1-36 maps to 211-246 */
+	    if (1 > svId) {
+		/* skip bad svId */
+		continue;
+	    }
+	    if (37 < svId) {
+		/* skip bad svId */
+		continue;
+            }
+            gnssId = 2;
+	    PRN = svId + 210;
+            break;
+        case 4:
+            /* BeiDou, 1-37 maps to 159-163,33-64 */
+	    if (1 > svId) {
+		/* skip bad svId */
+		continue;
+            } else if (6 > svId) {
+                /* 1-5 maps to 159-163 */
+                PRN = svId + 158;
+	    } else if (37 < svId) {
+		/* skip bad svId */
+		continue;
+	    } else {
+                /* 6-37 maps to 33-64 */
+                PRN = svId + 27;
+            }
+            gnssId = 3;
+            break;
+        default:
+	    /* Huh?  Skip bad gnssId */
+	    continue;
+        }
+
+        /* throw away tenths in az and el */
+        azimuth = getbeu16(buf, offset + 2) / 10;
+        /* what, no negative elevation? */
+        elevation = getbeu16(buf, offset + 4) / 10;
+        avg_cno = getbeu16(buf, offset + 6);
+        ss = avg_cno / 10.0;
+        status = getbeu32(buf, offset + 8);
+
+	session->gpsdata.skyview[st].PRN = PRN;
+	session->gpsdata.skyview[st].svid = svId;
+	session->gpsdata.skyview[st].gnssid = gnssId;
+	session->gpsdata.skyview[st].azimuth = azimuth;
+	session->gpsdata.skyview[st].elevation = elevation;
+	session->gpsdata.skyview[st].ss = ss;
+        if (0x08000 == (status & 0x08000)) {
+	    session->gpsdata.skyview[st].used = true;
+        }
+	gpsd_log(&session->context->errout, LOG_IO,
+                 "sat_info %04x gnssId %u svId %3u o %2u PRN %3u az %3u "
+                 "el %2u ss %5.1f\n",
+		 sat_info, gnssId, svId, other_info, PRN, azimuth,
+                 elevation, ss);
+        st++;
+        if (st == MAXCHANNELS) {
+            /* filled up skyview */
+            break;
+        }
+    }
+    if ((msg_info >> 4) == (msg_info & 0x0f)) {
+	/* got all the sats */
+	mask |= SATELLITE_SET;
+    }
+    return mask;
+}
+
+/* Multiconstellation Navigation Data response MID 67 (0x43)
+ * this replaces the deprecated MID 41 */
+static gps_mask_t sirf_msg_67(struct gps_device_t *session,
+				  unsigned char *buf, size_t len)
+{
+    gps_mask_t mask = 0;
+
+    if (len < 2)
+	return 0;
+
+    switch (buf[1]) {
+    case 1:
+	return sirf_msg_67_1(session, buf, len);
+    case 16:
+	return sirf_msg_67_16(session, buf, len);
+    default:
+	gpsd_log(&session->context->errout, LOG_PROG,
+		 "SiRF V: unused MID 67 (0x43), SID: %d, len %ld\n", buf[1],
+		 (long)len);
+    }
+    return mask;
+}
+
 /* MID_QUERY_RESP MID 0x51 (81) */
 static gps_mask_t sirf_msg_qresp(struct gps_device_t *session,
 				unsigned char *buf, size_t len)
@@ -623,6 +903,7 @@ static gps_mask_t sirf_msg_tcxo(struct gps_device_t *session,
         gps_tow_ns.tv_sec = gps_tow;
         gps_tow_ns.tv_nsec = 0;
         now = gpsd_gpstime_resolv(session, gps_week, gps_tow_ns);
+	session->newdata.time = now.tv_sec + (now.tv_nsec * 1e-9);
         (void)snprintf(output, sizeof(output),
                        ", GPS Week %d, tow %d, time %ld, time_status %d",
                        gps_week, gps_tow, now.tv_sec, time_status);
@@ -682,6 +963,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
     return DEVICEID_SET;
 }
 
+/* subframe data MID 8 */
 static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 				   unsigned char *buf, size_t len)
 {
@@ -714,8 +996,11 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
     return gpsd_interpret_subframe_raw(session, svid, words);
 }
 
-#define SIRF_CHANNELS	12	/* max channels allowed in SiRF format */
+/* max channels allowed in old MID 4 SiRF format */
+#define SIRF_CHANNELS	12
 
+/* decode MID 4, Measured Tracker Data response
+ * deprecated on Sirfstar V, use MID 67.16 instead */
 static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 				  unsigned char *buf, size_t len)
 {
@@ -1503,6 +1788,9 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 
     case 0x40:                /* Nav Library MID 64 */
 	return sirf_msg_nl(session, buf, len);
+
+    case 0x43:                /* Multiconstellation Nav Data Response MID 67 */
+	return sirf_msg_67(session, buf, len);
 
     case 0x47:                /* Hardware Config MID 71 */
 	gpsd_log(&session->context->errout, LOG_PROG,

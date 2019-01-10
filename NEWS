@@ -2,7 +2,8 @@
 
 3.19: not released yet
   Rearrange rawdata_t.  Bump the API because gps_data_t changed.
-  Report sequwnce-ID fields in type 7 and 13 AIS messages.
+  Report sequence-ID fields in type 7 and 13 AIS messages.
+  Preliminary support for SiRFstar V
 
 3.18.1: 2018-10-19 (Gary E. Miller <gem@rellim.com>)
   Fix some installation issues.

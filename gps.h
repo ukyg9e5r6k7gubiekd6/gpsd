@@ -1837,6 +1837,8 @@ struct satellite_t {
      *
      *  Not defined by u-blox:
      *  20 = IRNSS    1-11
+     *
+     * Note: other GNSS receivers use different mappings!
      */
     unsigned char gnssid;
     /* ignore gnssid and sigid if svid is zero */
