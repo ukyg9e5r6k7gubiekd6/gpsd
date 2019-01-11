@@ -571,16 +571,25 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     uint32_t clk_bias_error;
     int32_t clk_offset;
     uint32_t clk_offset_error;
-    int32_t lat;
-    int32_t lon;
     int32_t alt_ellips;               /* altitude over ellipse */
-    int32_t alt_msl;                  /* altitude msl */
+    int16_t heading_rate;             /* rate of change cog deg/s * 100 */
+    uint32_t distance_travel;         /* distance traveled m * 100 */
+    uint16_t distance_travel_error;   /* distance traveled error in m * 100 */
+
+    uint32_t ehpe;                    /* Est horizontal position error * 100 */
+    unsigned char num_svs_in_sol;     /* Num of satellites used in solution */
+    uint32_t sv_list_1;
+    uint32_t sv_list_2;
+    uint32_t sv_list_3;
+    uint32_t sv_list_4;
+    uint32_t sv_list_5;
+    uint32_t additional_info;
 
     if (len < 126)
 	return 0;
 
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "SiRF V: MID 67.1\n");
+	     "SiRF V: MID 67,1\n");
 
     solution_validity = getbeu32(buf, 2);
     if (0 != solution_validity) {
@@ -624,33 +633,106 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     clk_bias_error = getbeu32(buf, 42);
     clk_offset = getbes32(buf, 46);
     clk_offset_error = getbeu32(buf, 50);
-    lat = getbes32(buf, 54);
-    lon = getbes32(buf, 58);
+    session->newdata.latitude = getbes32(buf, 54) * 1e-7;
+    session->newdata.longitude = getbes32(buf, 58) * 1e-7;
     alt_ellips = getbes32(buf, 62);
-    alt_msl = getbes32(buf, 66);
+    session->newdata.altitude = getbes32(buf, 66) * 1e-2;
 
-    session->newdata.latitude = lat * 1e-7;
-    session->newdata.longitude = lon * 1e-7;
-    session->newdata.altitude = alt_msl * 1e-2;
-    mask |= LATLON_SET | ALTITUDE_SET;
+    mask |= LATLON_SET;
+
     /* fake a mode for test */
-
     session->newdata.mode = MODE_3D;
     mask |= MODE_SET;
+
+    /* sog - speed over ground m/s * 100 */
+    session->newdata.speed = getbeu16(buf, 70) * 1e-2;
+    /* cog - course over ground fm true north deg * 100  */
+    session->newdata.track = getbeu16(buf, 72) * 1e-2;
+    mask |= SPEED_SET | TRACK_SET;
+
+    /* climb_rate - vertical velocity m/s * 100 */
+    session->newdata.climb = getbes16(buf, 74) * 1e-2;
+
+    if (session->newdata.mode == MODE_3D)
+	mask |= ALTITUDE_SET | CLIMB_SET;
+
+    heading_rate = getbes16(buf, 76);     /* rate of change cog deg/s * 100 */
+    distance_travel = getbeu32(buf, 78);  /* distance traveled m * 100 */
+    /* heading_error error of cog deg * 100 */
+    session->newdata.epd = getbes16(buf, 82) * 1e-2;
+    /* distance traveled error in m * 100 */
+    distance_travel_error = getbeu16(buf, 84);
+
+    ehpe = getbeu32(buf, 86);  /* Estimated horizontal position error * 100 */
+    /* Estimated vertical position error * 100 */
+    session->newdata.epv = getbeu16(buf, 90) * 1e-2;
+    /* Estimated horizontal velocity error * 100 */
+    session->newdata.eps = getbeu16(buf, 94) * 1e-2;
+    mask |= SPEEDERR_SET;
+
+    session->gpsdata.dop.gdop = (int)getub(buf, 96) / 5.0;
+    session->gpsdata.dop.pdop = (int)getub(buf, 97) / 5.0;
+    session->gpsdata.dop.hdop = (int)getub(buf, 98) / 5.0;
+    session->gpsdata.dop.vdop = (int)getub(buf, 99) / 5.0;
+    session->gpsdata.dop.tdop = (int)getub(buf, 100) / 5.0;
+    mask |= DOP_SET;
+
+    num_svs_in_sol = getub(buf, 101);
+    sv_list_1 = getbeu32(buf, 102);
+    sv_list_2 = getbeu32(buf, 106);
+    sv_list_3 = getbeu32(buf, 110);
+    sv_list_4 = getbeu32(buf, 114);
+    sv_list_5 = getbeu32(buf, 118);
+    additional_info = getbeu32(buf, 122);
+
     mask |= REPORT_IS; /* send it */
 
-    gpsd_log(&session->context->errout, LOG_IO,
-		   "GPS Week %d, tow %d.%03d, time %ld.%09ld\n",
-		   gps_week, gps_tow, gps_tow_sub_ms, now.tv_sec, now.tv_nsec);
-    gpsd_log(&session->context->errout, LOG_IO,
-	     "time %.9f leaps %u, datum %u\n",
+    if (session->context->errout.debug >= LOG_IO) {
+        /* skip all the pushing and popping, unless needed */
+	gpsd_log(&session->context->errout, LOG_IO,
+	     "GPS Week %d, tow %d.%03d, time %ld.%09ld\n",
+	     gps_week, gps_tow, gps_tow_sub_ms, now.tv_sec, now.tv_nsec);
+	gpsd_log(&session->context->errout, LOG_IO,
+	     "UTC time %.9f leaps %u, datum %u\n",
 	     session->newdata.time, session->context->leap_seconds, datum);
-    gpsd_log(&session->context->errout, LOG_IO,
-	     "lat %d lon %d\n", lat, lon);
+	gpsd_log(&session->context->errout, LOG_IO,
+             "solution_info %08x\n", solution_info);
+	gpsd_log(&session->context->errout, LOG_IO,
+	     "lat %.7f lon %.7f alte %d msl %.2f\n", 
+	     session->newdata.latitude, session->newdata.longitude,
+             alt_ellips, session->newdata.altitude);
+	gpsd_log(&session->context->errout, LOG_IO,
+	     "speed %.2f track %.2f climb %.2f heading_rate %d\n",
+	     session->newdata.speed, session->newdata.track,
+             session->newdata.climb, heading_rate);
+	gpsd_log(&session->context->errout, LOG_IO,
+             "time_bias %d time_accuracy %u, time_source %u\n",
+             time_bias, time_accuracy, time_source);
+	gpsd_log(&session->context->errout, LOG_IO,
+	     "distance_travel %u distance_travel_error %d\n",
+             distance_travel, distance_travel_error);
+	gpsd_log(&session->context->errout, LOG_IO,
+             "clk_bias %ld clk_bias_error %u\n",
+             clk_bias, clk_bias_error);
+	gpsd_log(&session->context->errout, LOG_IO,
+             "clk_offset %d clk_offset_error %u\n",
+             clk_offset, clk_offset_error);
+	gpsd_log(&session->context->errout, LOG_IO,
+	     "ehpe %d epv %.2f eps %.2f epd %.2f num_svs_in_sol %u\n", ehpe,
+	     session->newdata.epv, session->newdata.eps, session->newdata.epd,
+             num_svs_in_sol);
+	gpsd_log(&session->context->errout, LOG_IO,
+             "sv_list_1 %08x sv_list_2 %08x sv_list_3 %08x\n",
+             sv_list_1, sv_list_2, sv_list_3);
+	gpsd_log(&session->context->errout, LOG_IO,
+             "sv_list_4 %08x sv_list_5 %08x add_info %08x\n",
+             sv_list_4, sv_list_5, additional_info);
+    }
+
     return mask;
 }
 
-/* Multiconstellation Navigation Data response MID 67.16 (0x43)
+/* Multiconstellation Navigation Data response MID 67,16 (0x43)
  * this replaces the deprecated MID 41 */
 static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
 				  unsigned char *buf, size_t len)
@@ -677,7 +759,7 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
     }
 
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "SiRF V: MID 67.16 len %lu\n", len);
+	     "SiRF V: MID 67,16 len %lu\n", len);
 
     gps_week = getbeu16(buf, 2);
     gps_tow = getbeu32(buf, 4) / 1000;
@@ -706,14 +788,20 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
     num_of_sats = getub(buf, 17);
     /* got time now */
     mask |= TIME_SET;
-    gpsd_log(&session->context->errout, LOG_IO,
+    if (session->context->errout.debug >= LOG_IO) {
+        /* skip all the pushing and popping, unless needed */
+	gpsd_log(&session->context->errout, LOG_IO,
              "GPS Week %d, tow %d.%03d, time %ld.%09ld\n",
 	     gps_week, gps_tow, gps_tow_sub_ms, now.tv_sec, now.tv_nsec);
-    gpsd_log(&session->context->errout, LOG_IO,
+	gpsd_log(&session->context->errout, LOG_IO,
 	     "Time bias: %u ns, accuracy %02x, source %u, "
 	     "msg_info %#02x, sats %u\n",
 	     time_bias, time_accuracy, time_source, msg_info,
 	     num_of_sats);
+	gpsd_log(&session->context->errout, LOG_IO,
+             "solution_info %08x solution_validity %08x\n",
+             solution_info, solution_validity);
+    }
 
     session->gpsdata.satellites_visible = num_of_sats;
     /* used? */
@@ -1054,7 +1142,7 @@ static gps_mask_t sirf_msg_navdata(struct gps_device_t *session,
 #define SIRF_CHANNELS	12
 
 /* decode MID 4, Measured Tracker Data response
- * deprecated on Sirfstar V, use MID 67.16 instead */
+ * deprecated on Sirfstar V, use MID 67,16 instead */
 static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
 				  unsigned char *buf, size_t len)
 {
