@@ -254,7 +254,8 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     /* can also be false because ACK was received after last send */
     if (session->driver.sirf.need_ack > 0) {
 	gpsd_log(&session->context->errout, LOG_WARN,
-		 "SiRF: warning, write of control type %02x while awaiting ACK for %02x.\n",
+		 "SiRF: warning, write of MID %02x while "
+                 "awaiting ACK for %02x.\n",
 		 type, session->driver.sirf.need_ack);
     }
 
@@ -272,7 +273,7 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     msg[len + 5] = (unsigned char)(crc & 0x00ff);
 
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "SiRF: Writing control type %02x:\n", type);
+	     "SiRF: Writing MID %02x:\n", type);
     ok = (gpsd_write(session, (const char *)msg, len+8) == (ssize_t) (len+8));
 
     session->driver.sirf.need_ack = type;
@@ -849,8 +850,10 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
          */
         switch (gnssId_sirf) {
         case 0:
-            /* GPS, 1-32 maps to 1-32 */
-            /* and QZSS maps how??? */
+            /* GPS, 1-32 maps to 1-32
+	     * 173 to 182: QZSS IMES
+	     * 183 to 187: QZSS SAIF
+	     * 193 to 202: QZSS */
             gnssId = 0;
             PRN = svId;
             break;
@@ -1065,17 +1068,19 @@ static gps_mask_t sirf_msg_tcxo(struct gps_device_t *session,
     return mask;
 }
 
+/* Software Version String MID 6
+ * response to Poll Software Version MID 132 */
 static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 				     unsigned char *buf, size_t len)
 {
     double fv;
     unsigned char *cp;
 
-    if (len < 20)
+    if (len < 1)
 	return 0;
 
-    (void)strlcpy(session->subtype, (char *)buf + 1,
-		  sizeof(session->subtype));
+    (void)strlcpy(session->subtype, (char *)buf + 1, sizeof(session->subtype));
+
     for (cp = buf+1; *cp!=(unsigned char)'\0' && isdigit(*cp)==0; cp++)
 	continue;
     fv = safe_atof((const char *)cp);
