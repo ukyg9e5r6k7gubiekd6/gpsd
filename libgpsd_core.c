@@ -206,6 +206,11 @@ void gpsd_log(const struct gpsd_errout_t *errout,
     char buf[BUFSIZ];
     va_list ap;
 
+    if (errout->debug < errlevel) {
+        /* nothing to do, get out */
+        return;
+    }
+
     buf[0] = '\0';
     va_start(ap, fmt);
     gpsd_vlog(errout, errlevel, buf, sizeof(buf), fmt, ap);
