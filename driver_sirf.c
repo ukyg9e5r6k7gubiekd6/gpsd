@@ -1842,14 +1842,34 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	return sirf_msg_errors(session, buf, len);
 
     case 0x0b:			/* Command Acknowledgement MID 11 */
-	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: ACK 0x0b: %#02x\n", getub(buf, 1));
+        if (2 > len) {
+            return 0;
+        }
+        if (2 == len) {
+	    gpsd_log(&session->context->errout, LOG_PROG,
+		     "SiRF: ACK 0x0b: %#02x\n", getub(buf, 1));
+        } else {
+            /* SiRF III+, has ACK ID */
+	    gpsd_log(&session->context->errout, LOG_PROG,
+		     "SiRF: ACK 0x0b: %#02x/%02x\n",
+                     getub(buf, 1), getub(buf, 2));
+        }
 	session->driver.sirf.need_ack = 0;
 	return 0;
 
     case 0x0c:			/* Command NAcknowledgement MID 12 */
-	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: NAK 0x0c: %#02x\n", getub(buf, 1));
+        if (2 > len) {
+            return 0;
+        }
+        if (2 == len) {
+	    gpsd_log(&session->context->errout, LOG_PROG,
+		     "SiRF: NACK 0x0c: %#02x\n", getub(buf, 1));
+        } else {
+            /* SiRF III+, has NACK ID */
+	    gpsd_log(&session->context->errout, LOG_PROG,
+		     "SiRF: NACK 0x0c: %#02x/%02x\n",
+                     getub(buf, 1), getub(buf, 2));
+        }
 	/* ugh -- there's no alternative but silent failure here */
 	session->driver.sirf.need_ack = 0;
 	return 0;
