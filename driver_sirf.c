@@ -254,8 +254,8 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     /* can also be false because ACK was received after last send */
     if (session->driver.sirf.need_ack > 0) {
 	gpsd_log(&session->context->errout, LOG_WARN,
-		 "SiRF: warning, write of MID %02x while "
-                 "awaiting ACK for %02x.\n",
+		 "SiRF: warning, write of MID %#02x while "
+                 "awaiting ACK for %#02x.\n",
 		 type, session->driver.sirf.need_ack);
     }
 
@@ -273,7 +273,7 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     msg[len + 5] = (unsigned char)(crc & 0x00ff);
 
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "SiRF: Writing MID %02x:\n", type);
+	     "SiRF: Writing MID %#02x:\n", type);
     ok = (gpsd_write(session, (const char *)msg, len+8) == (ssize_t) (len+8));
 
     session->driver.sirf.need_ack = type;
@@ -549,7 +549,7 @@ static gps_mask_t sirf_msg_navnot(struct gps_device_t *session,
     return mask;
 }
 
-/* Multiconstellation Navigation Data response MID 67.1 (0x43)
+/* Multiconstellation Navigation Data response MID 67,1 (0x43)
  * SIRF_MSG_SSB_GNSS_NAV_DATA
  * this replaces the deprecated MID 41 */
 static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
@@ -795,7 +795,7 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
              "GPS Week %d, tow %d.%03d, time %ld.%09ld\n",
 	     gps_week, gps_tow, gps_tow_sub_ms, now.tv_sec, now.tv_nsec);
 	gpsd_log(&session->context->errout, LOG_IO,
-	     "Time bias: %u ns, accuracy %02x, source %u, "
+	     "Time bias: %u ns, accuracy %#02x, source %u, "
 	     "msg_info %#02x, sats %u\n",
 	     time_bias, time_accuracy, time_source, msg_info,
 	     num_of_sats);
@@ -1223,7 +1223,8 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
     } else {
 	/* SiRF says if 3 sats in view the time is good */
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: NTPD valid time MID 0x04, seen=0x%02x, time:%.2lf, leap:%d\n",
+		 "SiRF: NTPD valid time MID 0x04, seen=%#02x, time:%.2lf, "
+                 "leap:%d\n",
 		 session->driver.sirf.time_seen,
 		 session->gpsdata.skyview_time,
 		 session->context->leap_seconds);
@@ -1347,7 +1348,8 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 		 session->newdata.mode);
     } else {
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: NTPD valid time MID 0x02, seen=0x%02x, time;%.2lf, leap:%d\n",
+		 "SiRF: NTPD valid time MID 0x02, seen=%#02x, time;%.2lf, "
+                 "leap:%d\n",
 		 session->driver.sirf.time_seen,
 		 session->newdata.time, session->context->leap_seconds);
     }
@@ -1502,7 +1504,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 		     session->newdata.mode);
 	} else {
 	    gpsd_log(&session->context->errout, LOG_PROG,
-		     "SiRF: NTPD valid time MID 0x29, seen=0x%02x\n",
+		     "SiRF: NTPD valid time MID 0x29, seen=%#02x\n",
 		     session->driver.sirf.time_seen);
 	}
 	if ( 3 <= session->gpsdata.satellites_visible ) {
@@ -1623,7 +1625,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
 		     "SiRF: NTPD just SEEN_UTC_2\n");
 	}
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: NTPD valid time MID 0x62, seen=0x%02x\n",
+		 "SiRF: NTPD valid time MID 0x62, seen=%#02x\n",
 		 session->driver.sirf.time_seen);
 	session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
 #endif /* TIMEHINT_ENABLE */
@@ -1657,7 +1659,7 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session,
 	return 0;
 
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "SiRF: PPS 0x34: Status = 0x%02x\n",
+	     "SiRF: PPS 0x34: Status = %#02x\n",
 	     getub(buf, 14));
     if (((int)getub(buf, 14) & 0x07) == 0x07) {	/* valid UTC time? */
 	struct tm unpacked_date;
@@ -1677,7 +1679,7 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session,
 		     "SiRF: NTPD just SEEN_UTC_2\n");
 	}
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: NTPD valid time MID 0x34, seen=0x%02x, leap=%d\n",
+		 "SiRF: NTPD valid time MID 0x34, seen=%#02x, leap=%d\n",
 		 session->driver.sirf.time_seen,
 		 session->context->leap_seconds);
 	session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
@@ -1784,7 +1786,7 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
     buf += 4;
     len -= 8;
     gpsd_log(&session->context->errout, LOG_RAW,
-	     "SiRF: Raw packet type 0x%02x\n", buf[0]);
+	     "SiRF: Raw packet type %#02x\n", buf[0]);
     session->driver.sirf.lastid = buf[0];
 
     /* could change if the set of messages we enable does */
@@ -1841,13 +1843,13 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 
     case 0x0b:			/* Command Acknowledgement MID 11 */
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: ACK 0x0b: %02x\n", getub(buf, 1));
+		 "SiRF: ACK 0x0b: %#02x\n", getub(buf, 1));
 	session->driver.sirf.need_ack = 0;
 	return 0;
 
     case 0x0c:			/* Command NAcknowledgement MID 12 */
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: NAK 0x0c: %02x\n", getub(buf, 1));
+		 "SiRF: NAK 0x0c: %#02x\n", getub(buf, 1));
 	/* ugh -- there's no alternative but silent failure here */
 	session->driver.sirf.need_ack = 0;
 	return 0;
@@ -2030,7 +2032,7 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 #ifdef RECONFIGURE_ENABLE
 	    /* unset MID 0x40 = 64 first since there is a flood of them */
 	    gpsd_log(&session->context->errout, LOG_PROG,
-		     "SiRF: unset MID 64.\n");
+		     "SiRF: unset MID 0x40.\n");
 	    putbyte(unsetmidXX, 6, 0x40);
 	    (void)sirf_write(session, unsetmidXX);
 	    break;
@@ -2048,7 +2050,7 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	case 3:
 	    /* unset GND (0x29 = 41), it's not reliable on SiRF II */
 	    gpsd_log(&session->context->errout, LOG_PROG,
-		     "SiRF: unset MID 64.\n");
+		     "SiRF: unset MID 0x29.\n");
 	    putbyte(unsetmidXX, 6, 0x29);
 	    (void)sirf_write(session, unsetmidXX);
 	    break;
