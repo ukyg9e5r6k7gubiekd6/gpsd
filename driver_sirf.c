@@ -699,7 +699,7 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
 	gpsd_log(&session->context->errout, LOG_IO,
              "solution_info %08x\n", solution_info);
 	gpsd_log(&session->context->errout, LOG_IO,
-	     "lat %.7f lon %.7f alte %d msl %.2f\n", 
+	     "lat %.7f lon %.7f alte %d msl %.2f\n",
 	     session->newdata.latitude, session->newdata.longitude,
              alt_ellips, session->newdata.altitude);
 	gpsd_log(&session->context->errout, LOG_IO,
@@ -1076,28 +1076,40 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
     double fv;
     unsigned char *cp;
 
-    if (len < 1)
+    if (1 > len)
 	return 0;
 
-    (void)strlcpy(session->subtype, (char *)buf + 1, sizeof(session->subtype));
-
-    for (cp = buf+1; *cp!=(unsigned char)'\0' && isdigit(*cp)==0; cp++)
-	continue;
-    fv = safe_atof((const char *)cp);
-    if (fv < 231) {
-	session->driver.sirf.driverstate |= SIRF_LT_231;
-#ifdef RECONFIGURE_ENABLE
-	if (fv > 200)
-	    sirfbin_mode(session, 0);
-#endif /* RECONFIGURE_ENABLE */
-    } else if (fv < 232) {
-	session->driver.sirf.driverstate |= SIRF_EQ_231;
-    } else {
+    if ((3 < len) && (len == (buf[1] + buf[2] + 3))) {
+        /* new style message, Version 4+ */
+	(void)strlcpy(session->subtype, (char *)buf + 3,
+                      sizeof(session->subtype));
+        (void)strlcat(session->subtype, ";", sizeof(session->subtype));
 	session->driver.sirf.driverstate |= SIRF_GE_232;
+        fv = 4.0;
+    } else {
+        /* old style, version 3 and below */
+
+	(void)strlcpy(session->subtype, (char *)buf + 1,
+                      sizeof(session->subtype));
+
+	for (cp = buf+1; *cp!=(unsigned char)'\0' && isdigit(*cp)==0; cp++)
+	    continue;
+	fv = safe_atof((const char *)cp);
+	if (fv < 231) {
+	    session->driver.sirf.driverstate |= SIRF_LT_231;
+#ifdef RECONFIGURE_ENABLE
+	    if (fv > 200)
+		sirfbin_mode(session, 0);
+#endif /* RECONFIGURE_ENABLE */
+	} else if (fv < 232) {
+	    session->driver.sirf.driverstate |= SIRF_EQ_231;
+	} else {
+	    session->driver.sirf.driverstate |= SIRF_GE_232;
+	}
+	if (strstr((char *)(buf + 1), "ES"))
+	    gpsd_log(&session->context->errout, LOG_INF,
+		     "SiRF: Firmware has XTrac capability\n");
     }
-    if (strstr((char *)(buf + 1), "ES"))
-	gpsd_log(&session->context->errout, LOG_INF,
-		 "SiRF: Firmware has XTrac capability\n");
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "SiRF: fv: %0.2f, Driver state flags are: %0x\n",
 	     fv, session->driver.sirf.driverstate);
@@ -1105,8 +1117,8 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
     session->driver.sirf.time_seen = 0;
 #endif /* TIMEHINT_ENABLE */
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "SiRF: FV MID 0x06: subtype='%s' mask={DEVICEID}\n",
-	     session->subtype);
+	     "SiRF: FV MID 0x06: subtype='%s' len=%ld buf1 %u buf2 %u\n",
+	     session->subtype, len, buf[1], buf[2]);
     return DEVICEID_SET;
 }
 
@@ -2018,6 +2030,9 @@ static void sirfbin_init_query(struct gps_device_t *session)
 {
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "SiRF: Probing for firmware version.\n");
+    /* MID 132 */
+    (void)sirf_write(session, versionprobe);
+    /* ask twice, SiRF IV on USB often misses the first request */
     (void)sirf_write(session, versionprobe);
 }
 
