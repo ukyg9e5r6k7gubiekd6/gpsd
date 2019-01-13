@@ -713,8 +713,8 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
 	     "distance_travel %u distance_travel_error %d\n",
              distance_travel, distance_travel_error);
 	gpsd_log(&session->context->errout, LOG_IO,
-             "clk_bias %ld clk_bias_error %u\n",
-             clk_bias, clk_bias_error);
+             "clk_bias %.2f clk_bias_error %u\n",
+             clk_bias / 100.0, clk_bias_error);
 	gpsd_log(&session->context->errout, LOG_IO,
              "clk_offset %d clk_offset_error %u\n",
              clk_offset, clk_offset_error);
@@ -760,7 +760,7 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
     }
 
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "SiRF V: MID 67,16 len %lu\n", len);
+	     "SiRF V: MID 67,16 len %ld\n", (long)len);
 
     gps_week = getbeu16(buf, 2);
     gps_tow = getbeu32(buf, 4) / 1000;
@@ -1079,7 +1079,7 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
     if (1 > len)
 	return 0;
 
-    if ((3 < len) && (len == (buf[1] + buf[2] + 3))) {
+    if ((3 < len) && (len == (unsigned int)(buf[1] + buf[2] + 3))) {
         /* new style message, Version 4+ */
 	(void)strlcpy(session->subtype, (char *)buf + 3,
                       sizeof(session->subtype));
@@ -1117,8 +1117,8 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
     session->driver.sirf.time_seen = 0;
 #endif /* TIMEHINT_ENABLE */
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "SiRF: FV MID 0x06: subtype='%s' len=%ld buf1 %u buf2 %u\n",
-	     session->subtype, len, buf[1], buf[2]);
+	     "SiRF: FV MID 0x06: subtype='%s' len=%lu buf1 %u buf2 %u\n",
+	     session->subtype, (long)len, buf[1], buf[2]);
     return DEVICEID_SET;
 }
 
