@@ -1080,10 +1080,12 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
 	return 0;
 
     if ((3 < len) && (len == (unsigned int)(buf[1] + buf[2] + 3))) {
-        /* new style message, Version 4+ */
+        /* new style message, Version 4+, max 162 bytes */
 	(void)strlcpy(session->subtype, (char *)buf + 3,
                       sizeof(session->subtype));
         (void)strlcat(session->subtype, ";", sizeof(session->subtype));
+        (void)strlcat(session->subtype, (char *)buf + 3 + buf[1],
+            sizeof(session->subtype));
 	session->driver.sirf.driverstate |= SIRF_GE_232;
         fv = 4.0;
     } else {
