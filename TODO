@@ -121,6 +121,8 @@ Add a sample client
 
 Our goal is to be independent of the system clock.
 
+Create a CLI tool to convert UTC to GPS week/tow and back.
+
 **** Maybe apply wraparound compensation ****
 
 See <http://www.febo.com/pipermail/time-nuts/2013-August/079271.html>
