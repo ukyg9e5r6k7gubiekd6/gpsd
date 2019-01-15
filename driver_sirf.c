@@ -854,8 +854,21 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
 	     * 173 to 182: QZSS IMES
 	     * 183 to 187: QZSS SAIF
 	     * 193 to 202: QZSS */
-            gnssId = 0;
-            PRN = svId;
+            if ((173 <= svId) && (182 >= svId)){
+                /* IMES */
+                gnssId = 4;
+                PRN = svId;
+                svId -= 172;
+            } else if ((193 <= svId) && (202 >= svId)){
+                /* QZSS */
+                gnssId = 5;
+                PRN = svId;
+                svId -= 192;
+            } else {
+                /* GPS, or?? */
+                gnssId = 0;
+                PRN = svId;
+            }
             break;
         case 1:
             /* SBAS, 120-158 maps to 120-158 */
@@ -1981,7 +1994,8 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 
     case 0x47:                /* Hardware Config MID 71 */
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF IV: unused Hardware Config 0x47\n");
+		 "SiRF IV: unused Hardware Config 0x47, len %zd\n",
+                 len);
 	return 0;
 
     case 0x51:                /* MID_QUERY_RESP MID 81 */
