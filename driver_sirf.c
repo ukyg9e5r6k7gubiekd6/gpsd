@@ -420,10 +420,14 @@ static gps_mask_t sirf_msg_debug(struct gps_device_t *device,
     memset(msgbuf, 0, (int)sizeof(msgbuf));
 
     if (0xe1 == buf[0]) {	/* Development statistics messages */
+        if (2 > len) {
+            /* too short */
+            return 0;
+        }
 	for (i = 2; i < (int)len; i++)
 	    str_appendf(msgbuf, sizeof(msgbuf), "%c", buf[i] ^ 0xff);
 	gpsd_log(&device->context->errout, LOG_PROG,
-		 "SiRF: DEV 0xe1: %s\n", msgbuf);
+		 "SiRF: MID 0xe1 (255) SID %#0x %s\n", buf[1], msgbuf);
     } else if (0xff == (unsigned char)buf[0]) {	/* Debug messages */
 	for (i = 1; i < (int)len; i++)
 	    if (isprint(buf[i]))
@@ -1906,7 +1910,9 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	return 0;
 
     case 0x0d:			/* Visible List MID 13 */
-	gpsd_log(&session->context->errout, LOG_PROG,"SiRF: unused VIS 0x0d\n");
+        /* no data her not already in MID 67,16 */
+	gpsd_log(&session->context->errout, LOG_PROG,
+                 "SiRF: unused MID 0x0d (Visible List) len %zd\n", len);
 	return 0;
 
     case 0x0e:			/* Almanac Data MID 14 */
@@ -1993,6 +1999,7 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	return sirf_msg_67(session, buf, len);
 
     case 0x47:                /* Hardware Config MID 71 */
+        /* MID_HW_CONFIG_REQ */
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "SiRF IV: unused Hardware Config 0x47, len %zd\n",
                  len);
