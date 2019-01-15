@@ -921,6 +921,10 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
         avg_cno = getbeu16(buf, offset + 6);
         ss = avg_cno / 10.0;
         status = getbeu32(buf, offset + 8);
+        if ((0 == avg_cno) && (0 == elevation) && (0 == azimuth)) {
+            /* null data, skip it */
+            continue;
+        }
 
 	session->gpsdata.skyview[st].PRN = PRN;
 	session->gpsdata.skyview[st].svid = svId;
