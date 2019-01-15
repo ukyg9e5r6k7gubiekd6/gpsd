@@ -102,8 +102,8 @@ static unsigned char sbasparams[] = {
 static unsigned char requestecef[] = {
     0xa0, 0xa2, 0x00, 0x08,
     0xa6,		/* MID 166 */
-    0x00,		/* enable 1 */
-    0x02,		/* MID 2 */
+    0x03,		/* enable MID 2 and MID 4 */
+    0x00,		/* unused 2 */
     0x01,		/* once per Sec */
     0x00, 0x00,		/* unused */
     0x00, 0x00,		/* unused */
