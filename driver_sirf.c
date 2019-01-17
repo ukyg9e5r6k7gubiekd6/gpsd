@@ -2014,29 +2014,29 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
     case 0x47:                /* Hardware Config MID 71 */
         /* MID_HW_CONFIG_REQ */
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF IV: unused Hardware Config 0x47, len %zd\n",
-                 len);
+		 "SiRF IV: unused MID 71 (0x47)  Hardware Config Report, "
+                 "len %zd\n", len);
 	return 0;
 
     case 0x51:                /* MID_QUERY_RESP MID 81 */
 	return sirf_msg_qresp(session, buf, len);
 
-    case 0x5c:                /* CW Controller Output MID 92 */
+    case 0x5c:                /* Controller Interference Report MID 92 */
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF IV: unused CW Controller Output 0x5c\n");
+		 "SiRF IV: unused MID 92 (0x5c) CW Interference Report\n");
 	return 0;
 
     case 0x5d:                /* TCXO Output MID 93 */
 	return sirf_msg_tcxo(session, buf, len);
 
-    case 0x62:			/* u-blox Extended Measured Navigation Data MID 98 */
+    case 0x62:		/* u-blox Extended Measured Navigation Data MID 98 */
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: u-blox EMND 0x62\n");
+		 "SiRF: MID 98 (0x62) u-blox EMND\n");
 	return sirf_msg_ublox(session, buf, len) | (CLEAR_IS | REPORT_IS);
 
     case 0x80:			/* Initialize Data Source MID 128 */
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: unused INIT 0x80\n");
+		 "SiRF: unused MID 128 (0x80) INIT\n");
 	return 0;
 
     case 0xe1:			/* Development statistics messages MID 225 */
