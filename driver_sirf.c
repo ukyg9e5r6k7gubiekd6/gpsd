@@ -427,7 +427,7 @@ static gps_mask_t sirf_msg_debug(struct gps_device_t *device,
 	for (i = 2; i < (int)len; i++)
 	    str_appendf(msgbuf, sizeof(msgbuf), "%c", buf[i] ^ 0xff);
 	gpsd_log(&device->context->errout, LOG_PROG,
-		 "SiRF: MID 0xe1 (255) SID %#0x %s\n", buf[1], msgbuf);
+		 "SiRF: MID 0xe1 (225) SID %#0x %s\n", buf[1], msgbuf);
     } else if (0xff == (unsigned char)buf[0]) {	/* Debug messages */
 	for (i = 1; i < (int)len; i++)
 	    if (isprint(buf[i]))
@@ -1016,10 +1016,12 @@ static gps_mask_t sirf_msg_tcxo(struct gps_device_t *session,
     uint32_t gps_tow = 0;
     uint16_t gps_week = 0;
     timespec_t gps_tow_ns = {0};
-    char output[64] = "";
+    char output[255] = "";
     timespec_t now = {0};
     gps_mask_t mask = 0;
     unsigned int time_status = 0;
+    int clock_offset = 0;
+    unsigned int temp = 0;
 
     if (len < 2)
 	return 0;
@@ -1062,17 +1064,28 @@ static gps_mask_t sirf_msg_tcxo(struct gps_device_t *session,
         definition = "SYSTEM_TIME_STAMP";
         break;
     case 18:
+        if (26 > len) {
+            gpsd_log(&session->context->errout, LOG_PROG,
+                     "SiRF IV: TCXO 0x5D (93), SID: %d BAD len %zd\n",
+                     buf[1], len);
+            return 0;
+        }
+
         definition = "SIRF_MSG_SSB_XO_TEMP_REC_VALUE";
-	gps_tow = (uint32_t)getbeu32(buf, 2);
-	gps_week = (uint16_t)getbeu16(buf, 6);
-        time_status = (unsigned int)getub(buf, 8);
-        gps_tow_ns.tv_sec = gps_tow;
-        gps_tow_ns.tv_nsec = 0;
+	gps_tow = getbeu32(buf, 2);
+	gps_week = getbeu16(buf, 6);
+        time_status = getub(buf, 8);
+        clock_offset = getsb(buf, 9);  /* looks like leapseconds? */
+        temp = getub(buf, 22);
+        gps_tow_ns.tv_sec = gps_tow / 100;
+        gps_tow_ns.tv_nsec = (gps_tow % 100) * 10000000LL;
         now = gpsd_gpstime_resolv(session, gps_week, gps_tow_ns);
 	session->newdata.time = now.tv_sec + (now.tv_nsec * 1e-9);
         (void)snprintf(output, sizeof(output),
-                       ", GPS Week %d, tow %d, time %ld, time_status %d",
-                       gps_week, gps_tow, now.tv_sec, time_status);
+                       ", GPS Week %d, tow %d, time %ld, time_status %d "
+                       "ClockOffset %d, Temp %.1f",
+                       gps_week, gps_tow, now.tv_sec, time_status,
+                       clock_offset, temp * 0.54902);
         if (7 == (time_status & 7)) {
 	    mask |= TIME_SET;
         }
@@ -1083,7 +1096,7 @@ static gps_mask_t sirf_msg_tcxo(struct gps_device_t *session,
     }
 
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "SiRF IV: unused TCXO 0x5D (93), SID: %d (%s)%s\n",
+	     "SiRF IV: TCXO 0x5D (93), SID: %d (%s)%s\n",
 	     buf[1], definition, output);
 
     return mask;
