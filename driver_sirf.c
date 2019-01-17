@@ -126,11 +126,11 @@ static unsigned char requesttracker[] = {
 static unsigned char unsetmidXX[] = {
     0xa0, 0xa2, 0x00, 0x08,
     0xa6,		/* MID 166 */
-    0x00,		/* enable 1 */
+    0x00,		/* enable XX */
     0x00,		/* MID 0xXX */
-    0x00,		/* never */
-    0x00, 0x00,		/* unused */
-    0x00, 0x00,		/* unused */
+    0x00,		/* rate: never */
+    0x00, 0x00,		/* reserved */
+    0x00, 0x00,		/* reserved */
     0x00, 0x00, 0xb0, 0xb3
 };
 
@@ -1121,7 +1121,10 @@ static gps_mask_t sirf_msg_swversion(struct gps_device_t *session,
         (void)strlcat(session->subtype, (char *)buf + 3 + buf[1],
             sizeof(session->subtype));
 	session->driver.sirf.driverstate |= SIRF_GE_232;
-        fv = 4.0;
+        /* FIXME: this only finding major version, not minor version */
+	for (cp = buf+1; *cp!=(unsigned char)'\0' && isdigit(*cp)==0; cp++)
+	    continue;
+	fv = safe_atof((const char *)cp);
     } else {
         /* old style, version 3 and below */
 
@@ -2108,7 +2111,8 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    /* unset MID 0x40 = 64 first since there is a flood of them */
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "SiRF: unset MID 0x40.\n");
-	    putbyte(unsetmidXX, 6, 0x40);
+	    unsetmidXX[5] = 1;        /* enable/disable */
+	    unsetmidXX[6] = 0x40;     /* MID 0x40 */
 	    (void)sirf_write(session, unsetmidXX);
 	    break;
 
@@ -2126,7 +2130,8 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    /* unset GND (0x29 = 41), it's not reliable on SiRF II */
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "SiRF: unset MID 0x29.\n");
-	    putbyte(unsetmidXX, 6, 0x29);
+	    unsetmidXX[5] = 1;        /* enable/disable */
+	    unsetmidXX[6] = 0x29;     /* MID 0x29 */
 	    (void)sirf_write(session, unsetmidXX);
 	    break;
 
@@ -2190,7 +2195,8 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	     */
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "SiRF: disable MID 7, 28, 29, 30, 31.\n");
-	    putbyte(unsetmidXX, 5, 0x05);
+	    unsetmidXX[5] = 5;
+	    unsetmidXX[6] = 0;
 	    (void)sirf_write(session, unsetmidXX);
 	    break;
 
