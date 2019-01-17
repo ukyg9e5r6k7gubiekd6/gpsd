@@ -203,7 +203,7 @@ static unsigned char enablemid52[] = {
     0x00,			/* enable/disable one message */
     0x34,			/* MID 52 */
     0x01,			/* sent once per second */
-    0x00, 0x00, 0x00, 0x00,	/* unused, set to zero */
+    0x00, 0x00, 0x00, 0x00,	/* reserved, set to zero */
     0x00, 0xdb, 0xb0, 0xb3
 };
 #endif /* RECONFIGURE_ENABLE */
@@ -1850,7 +1850,7 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 				   len) | (CLEAR_IS | REPORT_IS);
 	else {
 	    gpsd_log(&session->context->errout, LOG_PROG,
-		     "SiRF: MND 0x02 skipped, u-blox flag is on.\n");
+		     "SiRF: MID 2 (0x02) MND skipped, u-blox flag is on.\n");
 	    return 0;
 	}
     case 0x04:			/* Measured tracker data out MID 4 */
@@ -1858,14 +1858,15 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 
     case 0x05:			/* Raw Tracker Data Out MID 5 */
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: unused Raw Tracker Data 0x05\n");
+		 "SiRF: unused MID 5 (0x05) Raw Tracker Data\n");
 	return 0;
 
     case 0x06:			/* Software Version String MID 6 */
 	return sirf_msg_swversion(session, buf, len);
 
     case 0x07:			/* Clock Status Data MID 7 */
-	gpsd_log(&session->context->errout, LOG_PROG,"SiRF: unused CLK 0x07\n");
+	gpsd_log(&session->context->errout, LOG_PROG,
+                 "SiRF: unused MID 7 (0x07) CLK\n");
 	return 0;
 
     case 0x08:			/* subframe data MID 8 */
@@ -1884,7 +1885,8 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 
     case 0x09:			/* CPU Throughput MID 9 */
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: THR 0x09: SegStatMax=%.3f, SegStatLat=%3.f, AveTrkTime=%.3f, Last MS=%u\n",
+		 "SiRF: THR 0x09: SegStatMax=%.3f, SegStatLat=%3.f, "
+                 "AveTrkTime=%.3f, Last MS=%u\n",
 		 (float)getbeu16(buf, 1) / 186, (float)getbeu16(buf, 3) / 186,
 		 (float)getbeu16(buf, 5) / 186, getbeu16(buf, 7));
 	return 0;
@@ -1928,24 +1930,27 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
     case 0x0d:			/* Visible List MID 13 */
         /* no data her not already in MID 67,16 */
 	gpsd_log(&session->context->errout, LOG_PROG,
-                 "SiRF: unused MID 0x0d (Visible List) len %zd\n", len);
+                 "SiRF: unused MID 13 (0x0d) Visible List, len %zd\n", len);
 	return 0;
 
     case 0x0e:			/* Almanac Data MID 14 */
-	gpsd_log(&session->context->errout, LOG_PROG,"SiRF: unused ALM  0x0e\n");
+	gpsd_log(&session->context->errout, LOG_PROG,
+                 "SiRF: unused MID 14 (0x0e) ALM\n");
 	return 0;
 
     case 0x0f:			/* Ephemeris Data MID 15 */
-	gpsd_log(&session->context->errout, LOG_PROG,"SiRF: unused EPH  0x0f\n");
+	gpsd_log(&session->context->errout, LOG_PROG,
+                 "SiRF: unused MID 15 (0x0f) EPH\n");
 	return 0;
 
     case 0x11:			/* Differential Corrections MID 17 */
-	gpsd_log(&session->context->errout, LOG_PROG,"SiRF: unused DIFF 0x11\n");
+	gpsd_log(&session->context->errout, LOG_PROG,
+                 "SiRF: unused MID 17 (0x11) DIFF\n");
 	return 0;
 
     case 0x12:			/* OK To Send MID 18 */
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: OTS 0x12: send indicator = %d\n",
+		 "SiRF: MID 18 (0x12) OTS: send indicator = %d\n",
 		 getub(buf, 1));
 	return 0;
 
@@ -1959,23 +1964,28 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 	return sirf_msg_nlmd(session, buf, len);
 
     case 0x1d:			/* Navigation Library DGPS Data MID 29 */
-	gpsd_log(&session->context->errout, LOG_PROG,"SiRF: unused NLDG 0x1d\n");
+	gpsd_log(&session->context->errout, LOG_PROG,
+                 "SiRF: unused MID 29 (0x1d) NLDG\n");
 	return 0;
 
     case 0x1e:			/* Navigation Library SV State Data MID 30 */
-	gpsd_log(&session->context->errout, LOG_PROG,"SiRF: unused NLSV 0x1e\n");
+	gpsd_log(&session->context->errout, LOG_PROG,
+                 "SiRF: unused MID 30 (0x1e) NLSV\n");
 	return 0;
 
-    case 0x1f:			/* Navigation Library Initialization Data MID 31 */
-	gpsd_log(&session->context->errout, LOG_PROG,"SiRF: unused NLID 0x1f\n");
+    case 0x1f:		/* Navigation Library Initialization Data MID 31 */
+	gpsd_log(&session->context->errout, LOG_PROG,
+                 "SiRF: unused MID 32 (0x1f) NLID\n");
 	return 0;
 
     case 0x29:			/* Geodetic Navigation Data MID 41 */
-	gpsd_log(&session->context->errout, LOG_PROG,"SiRF: unused GND 0x29\n");
+	gpsd_log(&session->context->errout, LOG_PROG,
+                 "SiRF: unused MID 41 (0x29) GND\n");
 	return 0;
 
     case 0x32:			/* SBAS corrections MID 50 */
-	gpsd_log(&session->context->errout, LOG_PROG,"SiRF: unused SBAS 0x32\n");
+	gpsd_log(&session->context->errout, LOG_PROG,
+                 "SiRF: unused MID 50 (0x32) SBAS\n");
 	return 0;
 
     case 0x33:                /* MID_SiRFNavNotification MID 51, 0x33 */
@@ -2017,7 +2027,7 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
     case 0x47:                /* Hardware Config MID 71 */
         /* MID_HW_CONFIG_REQ */
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF IV: unused MID 71 (0x47)  Hardware Config Report, "
+		 "SiRF IV: unused MID 71 (0x47) Hardware Config Request, "
                  "len %zd\n", len);
 	return 0;
 
@@ -2169,7 +2179,9 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 
 	case 9:
 	    gpsd_log(&session->context->errout, LOG_PROG,
-		     "SiRF: Enabling PPS message.\n");
+		     "SiRF: Enabling PPS message MID 52 (0x32).\n");
+            /* not supported on some GPS.
+             * it will be NACKed on a USB device */
 	    (void)sirf_write(session, enablemid52);
 	    break;
 
