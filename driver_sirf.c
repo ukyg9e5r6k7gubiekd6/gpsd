@@ -1980,7 +1980,7 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 
     case 0x12:			/* OK To Send MID 18 */
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: MID 18 (0x12) OTS: send indicator = %d\n",
+		 "SiRF: MID 18 (0x12) OkToSend: OK = %d\n",
 		 getub(buf, 1));
 	return 0;
 
