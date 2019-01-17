@@ -594,7 +594,7 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
 	return 0;
 
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "SiRF V: MID 67,1\n");
+	     "SiRF V: MID 67,1 Multiconstellation Navigation Data Response \n");
 
     solution_validity = getbeu32(buf, 2);
     if (0 != solution_validity) {
@@ -645,15 +645,45 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
 
     mask |= LATLON_SET;
 
-    /* fake a mode for test */
-    session->newdata.mode = MODE_3D;
+    switch (solution_info & 0x07) {
+    case 0:      /* no fix */
+        session->newdata.mode = MODE_NO_FIX;
+        break;
+    case 1:      /* unused */
+        session->newdata.mode = MODE_NO_FIX;
+        break;
+    case 2:      /* unused */
+        session->newdata.mode = MODE_NO_FIX;
+        break;
+    case 3:      /* 3-SV KF Solution */
+        session->newdata.mode = MODE_2D;
+        break;
+    case 4:      /* Four or more SV KF Solution */
+        session->newdata.mode = MODE_3D;
+        break;
+    case 5:      /* 2-D Least-squares Solution */
+        session->newdata.mode = MODE_2D;
+        break;
+    case 6:      /* 3-D Least-squaresSolution */
+        session->newdata.mode = MODE_3D;
+        break;
+    case 7:      /* DR solution, assume 3D */
+        session->newdata.mode = MODE_3D;
+        break;
+    default:     /* can't really happen */
+        session->newdata.mode = MODE_NO_FIX;
+        break;
+    }
     mask |= MODE_SET;
 
-    /* sog - speed over ground m/s * 100 */
-    session->newdata.speed = getbeu16(buf, 70) * 1e-2;
+    if (!(solution_info & 0x01000)) {
+        /* sog - speed over ground m/s * 100 */
+        session->newdata.speed = getbeu16(buf, 70) * 1e-2;
+        mask |= SPEED_SET;
+    }
     /* cog - course over ground fm true north deg * 100  */
     session->newdata.track = getbeu16(buf, 72) * 1e-2;
-    mask |= SPEED_SET | TRACK_SET;
+    mask |= TRACK_SET;
 
     /* climb_rate - vertical velocity m/s * 100 */
     session->newdata.climb = getbes16(buf, 74) * 1e-2;
