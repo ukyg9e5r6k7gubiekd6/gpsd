@@ -788,13 +788,13 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
     unsigned int sat_num;
     int st;                    /* index into skyview */
 
-    if (len < 198) {
+    if (198 > len) {
         /* always payload of 15 sats */
 	return 0;
     }
 
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "SiRF V: MID 67,16 len %ld\n", (long)len);
+	     "SiRF V: MID 67,16 Multiconstellation Satellite Data Response\n");
 
     gps_week = getbeu16(buf, 2);
     gps_tow = getbeu32(buf, 4) / 1000;
