@@ -1038,6 +1038,65 @@ static gps_mask_t sirf_msg_qresp(struct gps_device_t *session,
     return 0;
 }
 
+/* Statistice Channel MID 225 (0xe1) */
+static gps_mask_t sirf_msg_stats(struct gps_device_t *session,
+				 unsigned char *buf, size_t len)
+{
+    const char *definition = "Unknown";
+    char output[255] = "unused";
+    uint16_t ttff_reset;
+    uint16_t ttff_aid;
+    uint16_t ttff_nav;
+
+    if (2 > len)
+	return 0;
+
+    switch (buf[1]) {
+    case 6:
+        definition = "SSB_SIRF_STATS 6";
+        ttff_reset = getbeu16(buf, 2);
+        ttff_aid = getbeu16(buf, 4);
+        ttff_nav = getbeu16(buf, 6);
+        (void)snprintf(output, sizeof(output),
+                       "ttff reset %.1f, aid %.1f nav %.1f",
+                       ttff_reset * 0.1, ttff_aid * 0.1, ttff_nav * 0.1);
+        break;
+    case 7:
+        definition = "SSB_SIRF_STATS 7";
+        ttff_reset = getbeu16(buf, 2);
+        ttff_aid = getbeu16(buf, 4);
+        ttff_nav = getbeu16(buf, 6);
+        (void)snprintf(output, sizeof(output),
+                       "ttff reset %.1f, aid %.1f nav %.1f",
+                       ttff_reset * 0.1, ttff_aid * 0.1, ttff_nav * 0.1);
+        break;
+    case 32:
+        definition = "SIRF_MSG_SSB_DL_COMPAT_REC_OUT ";
+        break;
+    case 33:
+        definition = "SIRF_MSG_SSB_DL_OUT_TERM";
+        break;
+    case 34:
+        definition = "SIRF_MSG_SSB_DL_STATUS_OUT";
+        break;
+    case 35:
+        definition = "SIRF_MSG_SSB_SIRF_INTERNAL_OUT";
+        break;
+    case 65:
+        definition = "SIRF_MSG_SSB_EE_SEA_PROVIDE_EPH_EXT";
+        break;
+    default:
+        definition = "Unknown";
+        break;
+    }
+
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "SiRF IV: MID 225 (0xe1), SID: %d (%s)%s\n",
+	     buf[1], definition, output);
+
+    return 0;
+}
+
 /* MID_TCXO_LEARNING_OUT MID 0x5d (93) */
 static gps_mask_t sirf_msg_tcxo(struct gps_device_t *session,
 				unsigned char *buf, size_t len)
@@ -2010,7 +2069,7 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 
     case 0x29:			/* Geodetic Navigation Data MID 41 */
 	gpsd_log(&session->context->errout, LOG_PROG,
-                 "SiRF: unused MID 41 (0x29) GND\n");
+                 "SiRF: unused MID 41 (0x29) Geodetic Nav Data\n");
 	return 0;
 
     case 0x32:			/* SBAS corrections MID 50 */
@@ -2082,8 +2141,9 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 		 "SiRF: unused MID 128 (0x80) INIT\n");
 	return 0;
 
-    case 0xe1:			/* Development statistics messages MID 225 */
-	/* FALLTHROUGH */
+    case 0xe1:			/* statistics messages MID 225 */
+	return sirf_msg_stats(session, buf, len);
+
     case 0xff:			/* Debug messages MID 255 */
 	(void)sirf_msg_debug(session, buf, len);
 	return 0;
