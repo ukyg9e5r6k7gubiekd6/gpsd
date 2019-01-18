@@ -397,6 +397,117 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     return mask;
 }
 
+
+/**
+ * Navigation time to leap second: UBX_NAV_TIMELS
+ *
+ * Sets leap_notify if leap second is < 23 hours away.
+ */
+static void ubx_msg_nav_timels(struct gps_device_t *session,
+                               unsigned char *buf, size_t data_len)
+{
+    int version;
+    unsigned int flags;
+    int valid_curr_ls;
+    int valid_time_to_ls_event;
+
+#define UBX_TIMELS_VALID_CURR_LS 0x01
+#define UBX_TIMELS_VALID_TIME_LS_EVT 0x01
+
+    if (24 > data_len) {
+        gpsd_log(&session->context->errout, LOG_WARN,
+	         "UBX-NAV-TIMELS: unexpected length %zd, expecting 24\n",
+	         data_len);
+	return;
+    }
+    version = getsb(buf, 4);
+    /* Only version 0 is defined so far. */
+    flags = (unsigned int)getub(buf, 23);
+    gpsd_log(&session->context->errout, LOG_DATA,
+             "UBX-NAV-TIMELS: flags 0x%x message version %d\n",
+             flags, version);
+    valid_curr_ls = flags & UBX_TIMELS_VALID_CURR_LS;
+    valid_time_to_ls_event = flags & UBX_TIMELS_VALID_TIME_LS_EVT;
+    if (valid_curr_ls) {
+        unsigned int src_of_curr_ls = getub(buf,8);
+        int curr_ls = getsb(buf,9);
+        char *src = "Unknown";
+        static char *srcOfCurrLs[] = {
+            "firmware",
+            "GPS GLONASS difference",
+            "GPS",
+            "SBAS",
+            "BeiDou",
+            "Galileo",
+            "Aided data",
+            "Configured"
+        };
+
+        if (src_of_curr_ls < (sizeof(srcOfCurrLs) / sizeof(srcOfCurrLs[0])))
+            src = srcOfCurrLs[src_of_curr_ls];
+
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "UBX-NAV-TIMELS: source_of_current_leapsecond=%u:%s "
+                 "curr_ls=%d\n",
+                 src_of_curr_ls, src,curr_ls);
+        session->context->leap_seconds = curr_ls;
+        session->context->valid |= LEAP_SECOND_VALID;
+    } /* Valid current leap second */
+
+    if (valid_time_to_ls_event) {
+        char *src = "Unknown";
+        unsigned int src_of_ls_change;
+        unsigned short dateOfLSGpsWn, dateOfLSGpsDn;
+        int lsChange = getsb(buf, 11);
+        int timeToLsEvent = getles32(buf, 12);
+        static char *srcOfLsChange[] = {
+            "No Source",
+            "Undefined",
+            "GPS",
+            "SBAS",
+            "BeiDou",
+            "Galileo",
+            "GLONOSS",
+        };
+
+        src_of_ls_change = getub(buf,10);
+        if (src_of_ls_change <
+            (sizeof(srcOfLsChange) / sizeof(srcOfLsChange[0]))) {
+            src = srcOfLsChange[src_of_ls_change];
+        }
+
+        dateOfLSGpsWn = getles16(buf,16);
+        dateOfLSGpsDn = getles16(buf,18);
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "UBX_NAV_TIMELS: source_of_leapsecond_change %u:%s "
+                 "leapSecondChage %d timeToLsEvent %d\n",
+                 src_of_ls_change,src,lsChange,timeToLsEvent);
+
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "UBX_NAV_TIMELS: dateOfLSGpsWn=%d dateOfLSGpsDn=%d\n",
+                 dateOfLSGpsWn,dateOfLSGpsDn);
+        if ((0 < timeToLsEvent) && ((60 * 60 * 23) > timeToLsEvent)) {
+            if (0 == lsChange) {
+                session->context->leap_notify = LEAP_NOWARNING;
+            } else if (1 == lsChange) {
+                session->context->leap_notify = LEAP_ADDSECOND;
+                gpsd_log(&session->context->errout,LOG_INF,
+                         "UBX_NAV_TIMELS: Add leap second today\n");
+            } else if (-1 == lsChange) {
+                session->context->leap_notify = LEAP_DELSECOND;
+                gpsd_log(&session->context->errout,LOG_INF,
+                         "UBX_NAV_TIMELS: Remove leap second today\n");
+            }
+        } else {
+            session->context->leap_notify = LEAP_NOWARNING;
+        }
+
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "UBX_NAV_TIMELS: leap_notify %d\n",
+                 session->context->leap_notify);
+    }
+}
+
  /**
  * Geodetic position solution message
  */
@@ -1211,7 +1322,8 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	mask = ubx_msg_nav_timegps(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_TIMELS:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_TIMELS\n");
+        gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_TIMELS\n");
+        ubx_msg_nav_timels(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_TIMEUTC:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_TIMEUTC\n");
