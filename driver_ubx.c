@@ -467,7 +467,7 @@ static void ubx_msg_nav_timels(struct gps_device_t *session,
             "SBAS",
             "BeiDou",
             "Galileo",
-            "GLONOSS",
+            "GLONASS",
         };
 
         src_of_ls_change = getub(buf,10);
