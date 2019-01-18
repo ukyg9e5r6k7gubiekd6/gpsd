@@ -889,14 +889,14 @@ ubx_msg_nav_velecef(struct gps_device_t *session, unsigned char *buf,
 }
 
 /*
- * SBAS Info
+ * SBAS Info UBX-NAV-SBAS
+ * FIXME: not well decoded...
  */
 static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf)
 {
-#ifdef __UNUSED_DEBUG__
     unsigned int i, nsv;
 
-    gpsd_log(&session->context->errout, LOG_WARN,
+    gpsd_log(&session->context->errout, LOG_DATA,
 	     "SBAS: %d %d %d %d %d\n",
 	     (int)getub(buf, 4), (int)getub(buf, 5), (int)getub(buf, 6),
 	     (int)getub(buf, 7), (int)getub(buf, 8));
@@ -904,13 +904,15 @@ static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf)
     nsv = (int)getub(buf, 8);
     for (i = 0; i < nsv; i++) {
 	int off = 12 + 12 * i;
-	gpsd_log(&session->context->errout, LOG_WARN,
+	gpsd_log(&session->context->errout, LOG_DATA,
 		 "SBAS info on SV: %d\n", (int)getub(buf, off));
     }
-#endif /* __UNUSED_DEBUG__ */
-/* really 'in_use' depends on the sats info, EGNOS is still in test */
-/* In WAAS areas one might also check for the type of corrections indicated */
-    session->driver.ubx.sbas_in_use = (unsigned char)getub(buf, 4);
+    /* really 'in_use' depends on the sats info, EGNOS is still
+     * in test.  In WAAS areas one might also check for the type of
+     * corrections indicated
+     */
+
+        session->driver.ubx.sbas_in_use = (unsigned char)getub(buf, 4);
 }
 
 /*
@@ -1770,48 +1772,6 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[2] = 0x01;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 
-
-#ifdef __UNUSED__
-	/*
-	 * In theory this should turn off NMEA reporting even if
-	 * clearing the NMEA protocol mask does not.  In practice it
-	 * doesn't work on the GR601-W.  If it did, we could get rid
-	 * of the crocky code that detects unsuppressed NMEA and
-	 * suppresses UBX.
-	 */
-	msg[0] = 0xf0;		/* class */
-	msg[1] = 0x09;		/* msg id  = GBS */
-	msg[2] = 0x00;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-	msg[0] = 0xf0;		/* class */
-	msg[1] = 0x00;		/* msg id  = GGA */
-	msg[2] = 0x00;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-	msg[0] = 0xf0;		/* class */
-	msg[1] = 0x02;		/* msg id  = GSA */
-	msg[2] = 0x00;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-	msg[0] = 0xf0;		/* class */
-	msg[1] = 0x07;		/* msg id  = GST */
-	msg[2] = 0x00;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-	msg[0] = 0xf0;		/* class */
-	msg[1] = 0x03;		/* msg id  = GSV */
-	msg[2] = 0x00;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-	msg[0] = 0xf0;		/* class */
-	msg[1] = 0x04;		/* msg id  = RMC */
-	msg[2] = 0x00;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-	msg[0] = 0xf0;		/* class */
-	msg[1] = 0x05;		/* msg id  = VTG */
-	msg[2] = 0x00;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-	msg[0] = 0xf0;		/* class */
-	msg[1] = 0x08;		/* msg id  = ZDA */
-	msg[2] = 0x00;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-#endif /* __UNUSED __ */
     }
 }
 
