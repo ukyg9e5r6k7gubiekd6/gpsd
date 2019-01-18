@@ -423,7 +423,7 @@ static void ubx_msg_nav_timels(struct gps_device_t *session,
     version = getsb(buf, 4);
     /* Only version 0 is defined so far. */
     flags = (unsigned int)getub(buf, 23);
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(&session->context->errout, LOG_PROG,
              "UBX-NAV-TIMELS: flags 0x%x message version %d\n",
              flags, version);
     valid_curr_ls = flags & UBX_TIMELS_VALID_CURR_LS;
@@ -486,25 +486,23 @@ static void ubx_msg_nav_timels(struct gps_device_t *session,
         gpsd_log(&session->context->errout, LOG_DATA,
                  "UBX_NAV_TIMELS: dateOfLSGpsWn=%d dateOfLSGpsDn=%d\n",
                  dateOfLSGpsWn,dateOfLSGpsDn);
-        if ((0 < timeToLsEvent) && ((60 * 60 * 23) > timeToLsEvent)) {
-            if (0 == lsChange) {
-                session->context->leap_notify = LEAP_NOWARNING;
-            } else if (1 == lsChange) {
+        if ((0 != lsChange) && (0 < timeToLsEvent) &&
+            ((60 * 60 * 23) > timeToLsEvent)) {
+            if (1 == lsChange) {
                 session->context->leap_notify = LEAP_ADDSECOND;
                 gpsd_log(&session->context->errout,LOG_INF,
-                         "UBX_NAV_TIMELS: Add leap second today\n");
+                         "UBX_NAV_TIMELS: Positive leap second today\n");
             } else if (-1 == lsChange) {
                 session->context->leap_notify = LEAP_DELSECOND;
                 gpsd_log(&session->context->errout,LOG_INF,
-                         "UBX_NAV_TIMELS: Remove leap second today\n");
+                         "UBX_NAV_TIMELS: Negative leap second today\n");
             }
         } else {
             session->context->leap_notify = LEAP_NOWARNING;
+            gpsd_log(&session->context->errout, LOG_DATA,
+                     "UBX_NAV_TIMELS: leap_notify %d, none today\n",
+                     session->context->leap_notify);
         }
-
-        gpsd_log(&session->context->errout, LOG_DATA,
-                 "UBX_NAV_TIMELS: leap_notify %d\n",
-                 session->context->leap_notify);
     }
 }
 
@@ -1324,7 +1322,6 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	mask = ubx_msg_nav_timegps(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_TIMELS:
-        gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_TIMELS\n");
         ubx_msg_nav_timels(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_TIMEUTC:
@@ -1761,7 +1758,10 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[1] = 0x11;		/* msg id  = UBX-NAV-VELECEF */
 	msg[2] = 0x01;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-
+        msg[0] = 0x01;  	/* class */
+        msg[1] = 0x26;  	/* msg id  = UBX_NAV_TIMELS */
+        msg[2] = 0xff;          /* about every 4 minutes if nav rate is 1Hz */
+        (void)ubx_write(session, 0x06, 0x01, msg, 3);
     }
 }
 
