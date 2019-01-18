@@ -1741,16 +1741,6 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[2] = 0x01;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 
-#ifdef __UNUSED__
-        /* leave here for testing.  No need to enable until gpsd
-         * can decode UBX-MON-VER */
-	msg[0] = 0x01;		/* class */
-	msg[1] = 0x07;		/* msg id  = NAV-PVT */
-	msg[2] = 0x01;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-#endif /* __UNUSED __ */
-
-
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x20;		/* msg id  = UBX_NAV_TIMEGPS */
 	msg[2] = 0x01;		/* rate */
