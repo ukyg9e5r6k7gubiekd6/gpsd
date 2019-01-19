@@ -1123,16 +1123,18 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 
     switch (msgid) {
     case UBX_ACK_ACK:
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "UBX_ACK_ACK, class: %02x, id: %02x\n",
-		 buf[UBX_CLASS_OFFSET],
-		 buf[UBX_TYPE_OFFSET]);
+        if (2 <= data_len) {
+            gpsd_log(&session->context->errout, LOG_DATA,
+                     "UBX_ACK_ACK, class: %02x, id: %02x\n",
+                     buf[4], buf[5]);
+        }
 	break;
     case UBX_ACK_NAK:
-	gpsd_log(&session->context->errout, LOG_WARN,
-		 "UBX_ACK_NAK, class: %02x, id: %02x\n",
-		 buf[UBX_CLASS_OFFSET],
-		 buf[UBX_TYPE_OFFSET]);
+        if (2 <= data_len) {
+            gpsd_log(&session->context->errout, LOG_WARN,
+                     "UBX_ACK_NAK, class: %02x, id: %02x\n",
+                     buf[4], buf[5]);
+        }
 	break;
 
     case UBX_CFG_PRT:
