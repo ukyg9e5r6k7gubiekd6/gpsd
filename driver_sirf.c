@@ -244,6 +244,10 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
     bool ok;
     unsigned int type = (unsigned int)msg[4];
 
+    /* do not write if -b (readonly) option set */
+    if (session->context->readonly)
+        return true;
+
     /*
      * Control strings spaced too closely together confuse the SiRF
      * IV.  This wasn't an issue on older SiRFs, but they've gone to a
@@ -274,10 +278,11 @@ static bool sirf_write(struct gps_device_t *session, unsigned char *msg)
 
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "SiRF: Writing MID %#02x:\n", type);
-    ok = (gpsd_write(session, (const char *)msg, len+8) == (ssize_t) (len+8));
+    ok = (gpsd_write(session, (const char *)msg, len + 8) ==
+          (ssize_t) (len + 8));
 
     session->driver.sirf.need_ack = type;
-    return (ok);
+    return ok;
 }
 
 #ifdef CONTROLSEND_ENABLE
