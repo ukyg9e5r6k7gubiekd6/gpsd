@@ -2201,19 +2201,47 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
     }
 
     if (event == event_configure) {
+        /* This wakes up on every received packet.
+         * Use this hook to step, slowly, through the init messages.
+         * We try, but not always succeed, to wait for the ACK/NACK.
+         * Send a message only every 15 times so we get an ACK/NACK
+         * before next one.
+         *
+         * This tries to avoid overrunning the input buffer, and makes
+         * it much easier to identify which messages get a NACK
+         */
+
+	int step;
+
+        if (UINT_MAX == session->driver.sirf.cfg_stage) {
+            /* init done */
+            return;
+        }
+	step = session->driver.sirf.cfg_stage++;
+
+        if (0 != (step % 15)) {
+            /* only every 15 */
+            return;
+        }
+        step /= 15;
+        gpsd_log(&session->context->errout, LOG_DEBUG, "step: %d\n", step);
+
 #ifdef __UNUSED__
 	/* might not be time for the next init string yet */
 	if (session->driver.sirf.need_ack > 0)
 	    return;
 #endif /* UNUSED */
 
-	switch (session->driver.sirf.cfg_stage++) {
+	switch (step) {
 	case 0:
 	    /* this slot used by event_identified */
 	    return;
 
 	case 1:
+            (void)sirf_write(session, versionprobe);
+            break;
 #ifdef RECONFIGURE_ENABLE
+        case 2:
 	    /* unset MID 0x40 = 64 first since there is a flood of them */
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "SiRF: unset MID 0x40.\n");
@@ -2222,7 +2250,7 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    (void)sirf_write(session, unsetmidXX);
 	    break;
 
-	case 2:
+	case 3:
 	    /*
 	     * The response to this request will save the navigation
 	     * parameters so they can be reverted before close.
@@ -2232,7 +2260,7 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    (void)sirf_write(session, navparams);
 	    break;
 
-	case 3:
+	case 4:
 	    /* unset GND (0x29 = 41), it's not reliable on SiRF II */
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "SiRF: unset MID 0x29.\n");
@@ -2241,7 +2269,7 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    (void)sirf_write(session, unsetmidXX);
 	    break;
 
-	case 4:
+	case 5:
 	    if (!session->context->readonly) {
 		gpsd_log(&session->context->errout, LOG_PROG,
 			 "SiRF: Setting Navigation Parameters.\n");
@@ -2249,54 +2277,54 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    }
 	    break;
 
-	case 5:
+	case 6:
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "SiRF: Requesting periodic ecef reports.\n");
 	    (void)sirf_write(session, requestecef);
 	    break;
 
-	case 6:
+	case 7:
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "SiRF: Requesting periodic tracker reports.\n");
 	    (void)sirf_write(session, requesttracker);
 	    break;
 
-	case 7:
+	case 8:
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "SiRF: Setting DGPS control to use SBAS.\n");
 	    (void)sirf_write(session, dgpscontrol);
 	    break;
 
-	case 8:
+	case 9:
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "SiRF: Setting SBAS to auto/integrity mode.\n");
 	    (void)sirf_write(session, sbasparams);
 	    break;
 
-	case 9:
+	case 10:
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "SiRF: Enabling PPS message MID 52 (0x32).\n");
-            /* not supported on some GPS.
-             * it will be NACKed on a USB device */
+            /* Not supported on some GPS.
+             * It will be NACKed is not supported */
 	    (void)sirf_write(session, enablemid52);
 	    break;
 
-	case 10:
-	    /* SiRF recommends at least 57600 for SiRF IV nav data */
+	case 11:
+	    /* SiRF recommends at least 57600 for SiRF IV subframe data */
 	    if (session->gpsdata.dev.baudrate >= 57600) {
-		/* fast enough, turn on nav data */
+		/* fast enough, turn on subframe data */
 		gpsd_log(&session->context->errout, LOG_PROG,
 			 "SiRF: Enabling subframe transmission.\n");
 		(void)sirf_write(session, enablesubframe);
 	    } else {
-		/* too slow, turn off nav data */
+		/* too slow, turn off subframe data */
 		gpsd_log(&session->context->errout, LOG_PROG,
 			 "SiRF: Disabling subframe transmission.\n");
 		(void)sirf_write(session, disablesubframe);
 	    }
 	    break;
 
-	case 11:
+	case 12:
 	    /*
 	     * Disable navigation debug messages (the value 5 is magic)
 	     * must be done *after* subframe enable.
@@ -2311,6 +2339,7 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 #endif /* RECONFIGURE_ENABLE */
 	default:
 	    /* initialization is done */
+            session->driver.sirf.cfg_stage = UINT_MAX;
 	    return;
 	}
     }
