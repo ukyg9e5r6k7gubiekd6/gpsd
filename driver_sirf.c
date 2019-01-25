@@ -2250,8 +2250,9 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
         }
 	session->cfg_step++;
 
-        if (15 > session->cfg_step) {
-            /* only every 15 */
+	if ((0 < session->driver.sirf.need_ack) &&
+            (15 > session->cfg_step)) {
+            /* we are waiting for ACK, just wait for 15 messages */
             return;
         }
 	session->cfg_step = 0;
@@ -2259,11 +2260,6 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
         gpsd_log(&session->context->errout, LOG_DEBUG, "stage: %d\n",
             session->cfg_stage);
 
-#ifdef __UNUSED__
-	/* might not be time for the next init string yet */
-	if (session->driver.sirf.need_ack > 0)
-	    return;
-#endif /* UNUSED */
 
 	switch (session->cfg_stage) {
 	case 0:
