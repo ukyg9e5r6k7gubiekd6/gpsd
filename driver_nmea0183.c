@@ -809,7 +809,7 @@ static gps_mask_t processGSA(int count, char *field[],
     }
 
     gpsd_log(&session->context->errout, LOG_PROG,
-             "xxGSA: mask %lx\n", (unsigned long)mask);
+             "xxGSA: mask %#lx\n", (unsigned long)mask);
     return mask;
 #undef GSA_TALKER
 }
@@ -968,7 +968,7 @@ static gps_mask_t processGSV(int count, char *field[],
     /* not valid data until we've seen a complete set of parts */
     if (session->nmea.part < session->nmea.await) {
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "Partial satellite data (%d of %d).\n",
+		 "xxGSV: Partial satellite data (%d of %d).\n",
 		 session->nmea.part, session->nmea.await);
 	return ONLINE_SET;
     }
@@ -984,14 +984,14 @@ static gps_mask_t processGSV(int count, char *field[],
 	if (session->gpsdata.skyview[n].azimuth != 0)
 	    goto sane;
     gpsd_log(&session->context->errout, LOG_WARN,
-	     "Satellite data no good (%d of %d).\n",
+	     "xxGSV: Satellite data no good (%d of %d).\n",
 	     session->nmea.part, session->nmea.await);
     gpsd_zero_satellites(&session->gpsdata);
     return ONLINE_SET;
   sane:
     session->gpsdata.skyview_time = NAN;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GSV: Satellite data OK (%d of %d).\n",
+	     "xxGSV: Satellite data OK (%d of %d).\n",
 	     session->nmea.part, session->nmea.await);
 
     /* assumes GLGSV or BDGSV group, if present, is emitted after the GPGSV */
