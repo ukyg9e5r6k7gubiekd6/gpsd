@@ -701,7 +701,7 @@ static gps_mask_t processGSA(int count, char *field[],
      * Some Skytraq will emit all GPS in one GNGSA, Then follow with
      * another GNGSA with the BeiDou birds.
      *
-     * SEANEXX and others also do it:
+     * SEANEXX, SiRFstarIV, and others also do it twice in one cycle:
      * $GNGSA,A,3,31,26,21,,,,,,,,,,3.77,2.55,2.77*1A
      * $GNGSA,A,3,75,86,87,,,,,,,,,,3.77,2.55,2.77*1C
      * seems like the first is GNSS and the second GLONASS
@@ -780,6 +780,7 @@ static gps_mask_t processGSA(int count, char *field[],
 		/* check first BEFORE over-writing memory */
 		if ( MAXCHANNELS <= session->gpsdata.satellites_used ) {
 		    /* this should never happen as xxGSA is limited to 12 */
+                    /* but it could happen with multiple GSA per cycle */
 		    break;
 		}
 		session->nmea.sats_used[session->gpsdata.satellites_used++] =
@@ -798,14 +799,17 @@ static gps_mask_t processGSA(int count, char *field[],
     /* assumes GLGSA or BDGSA, if present, is emitted  directly
      * after the GPGSA*/
     if ((session->nmea.seen_glgsa || session->nmea.seen_bdgsa ||
-         session->nmea.seen_gagsa) && GSA_TALKER == 'P')
-	return ONLINE_SET;
+         session->nmea.seen_gagsa) && GSA_TALKER == 'P') {
+	mask = ONLINE_SET;
 
     /* first of two GNGSA */
     /* if mode == 1 some GPS only output 1 GNGSA, so ship mode always */
-    if ( 'N' != last_last_gsa_talker && 'N' == GSA_TALKER)
-	return ONLINE_SET | MODE_SET;
+    } else if ( 'N' != last_last_gsa_talker && 'N' == GSA_TALKER) {
+	mask =  ONLINE_SET | MODE_SET;
+    }
 
+    gpsd_log(&session->context->errout, LOG_PROG,
+             "xxGSA: mask %lx\n", (unsigned long)mask);
     return mask;
 #undef GSA_TALKER
 }
