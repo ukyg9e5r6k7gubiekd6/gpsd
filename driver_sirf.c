@@ -2187,10 +2187,30 @@ static void sirfbin_init_query(struct gps_device_t *session)
 
 static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 {
+    int step;    /* configure step */
+    static unsigned char moderevert[] = {
+        0xa0, 0xa2, 0x00, 0x0e,
+        0x88,
+        0x00, 0x00,	/* pad bytes */
+        0x00,		/* degraded mode */
+        0x00, 0x00,	/* pad bytes */
+        0x00, 0x00,	/* altitude source */
+        0x00,		/* altitude hold mode */
+        0x00,		/* use last computed alt */
+        0x00,		/* reserved */
+        0x00,		/* degraded mode timeout */
+        0x00,		/* dead reckoning timeout */
+        0x00,		/* track smoothing */
+        0x00, 0x00, 0xb0, 0xb3
+    };
+
     if (session->context->readonly)
 	return;
 
-    if (event == event_identified || event == event_reactivate) {
+    switch (event) {
+    case event_identified:
+        /* FALLTHROUGH */
+    case event_reactivate:
 	if (session->lexer.type == NMEA_PACKET) {
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "SiRF: Switching chip mode to binary.\n");
@@ -2198,9 +2218,9 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 			    "$PSRF100,0,%d,8,1,0",
 			    session->gpsdata.dev.baudrate);
 	}
-    }
+        break;
 
-    if (event == event_configure) {
+    case event_configure:
         /* This wakes up on every received packet.
          * Use this hook to step, slowly, through the init messages.
          * We try, but not always succeed, to wait for the ACK/NACK.
@@ -2211,7 +2231,6 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
          * it much easier to identify which messages get a NACK
          */
 
-	int step;
 
         if (UINT_MAX == session->driver.sirf.cfg_stage) {
             /* init done */
@@ -2342,24 +2361,10 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
             session->driver.sirf.cfg_stage = UINT_MAX;
 	    return;
 	}
-    }
+        break;
 
-    if (event == event_deactivate) {
+    case event_deactivate:
 
-	static unsigned char moderevert[] = { 0xa0, 0xa2, 0x00, 0x0e,
-	    0x88,
-	    0x00, 0x00,		/* pad bytes */
-	    0x00,		/* degraded mode */
-	    0x00, 0x00,		/* pad bytes */
-	    0x00, 0x00,		/* altitude source */
-	    0x00,		/* altitude hold mode */
-	    0x00,		/* use last computed alt */
-	    0x00,		/* reserved */
-	    0x00,		/* degraded mode timeout */
-	    0x00,		/* dead reckoning timeout */
-	    0x00,		/* track smoothing */
-	    0x00, 0x00, 0xb0, 0xb3
-	};
 	putbyte(moderevert, 7, session->driver.sirf.degraded_mode);
 	putbe16(moderevert, 10, session->driver.sirf.altitude_source_input);
 	putbyte(moderevert, 12, session->driver.sirf.altitude_hold_mode);
@@ -2370,6 +2375,17 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "SiRF: Reverting navigation parameters...\n");
 	(void)sirf_write(session, moderevert);
+        break;
+
+    case event_driver_switch:
+        /* do what here? */
+        break;
+    case event_triggermatch:
+        /* do what here? */
+        break;
+    case event_wakeup:
+        /* do what here? */
+        break;
     }
 }
 
