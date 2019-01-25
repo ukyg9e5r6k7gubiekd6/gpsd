@@ -382,6 +382,9 @@ static bool sirf_to_nmea(struct gps_device_t *session, speed_t speed)
 	return false;
     }
 
+    /* stop binary initialization */
+    session->cfg_stage = UINT_MAX;
+
     msg[26] = (unsigned char)HI(speed);
     msg[27] = (unsigned char)LO(speed);
     return sirf_write(session, msg);
