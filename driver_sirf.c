@@ -414,7 +414,8 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
 			9 - session->gpsdata.dev.stopbits,
 			session->gpsdata.dev.stopbits, parity);
         /* reset binary init steps */
-        session->driver.sirf.cfg_stage = 0;
+        session->cfg_stage = 0;
+        session->cfg_step = 0;
     }
     session->back_to_nmea = false;
 }
@@ -2183,6 +2184,11 @@ static void sirfbin_init_query(struct gps_device_t *session)
 {
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "SiRF: Probing for firmware version.\n");
+
+    /* reset binary init steps */
+    session->cfg_stage = 0;
+    session->cfg_step = 0;
+
     /* MID 132 */
     (void)sirf_write(session, versionprobe);
     /* ask twice, SiRF IV on USB often misses the first request */
@@ -2191,7 +2197,6 @@ static void sirfbin_init_query(struct gps_device_t *session)
 
 static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 {
-    int step;    /* configure step */
     static unsigned char moderevert[] = {
         0xa0, 0xa2, 0x00, 0x0e,
         0x88,
@@ -2236,18 +2241,20 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
          */
 
 
-        if (UINT_MAX == session->driver.sirf.cfg_stage) {
+        if (UINT_MAX == session->cfg_stage) {
             /* init done */
             return;
         }
-	step = session->driver.sirf.cfg_stage++;
+	session->cfg_step++;
 
-        if (0 != (step % 15)) {
+        if (15 > session->cfg_step) {
             /* only every 15 */
             return;
         }
-        step /= 15;
-        gpsd_log(&session->context->errout, LOG_DEBUG, "step: %d\n", step);
+	session->cfg_step = 0;
+	session->cfg_stage++;
+        gpsd_log(&session->context->errout, LOG_DEBUG, "stage: %d\n",
+            session->cfg_stage);
 
 #ifdef __UNUSED__
 	/* might not be time for the next init string yet */
@@ -2255,7 +2262,7 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 	    return;
 #endif /* UNUSED */
 
-	switch (step) {
+	switch (session->cfg_stage) {
 	case 0:
 	    /* this slot used by event_identified */
 	    return;
@@ -2362,7 +2369,8 @@ static void sirfbin_event_hook(struct gps_device_t *session, event_t event)
 #endif /* RECONFIGURE_ENABLE */
 	default:
 	    /* initialization is done */
-            session->driver.sirf.cfg_stage = UINT_MAX;
+            session->cfg_stage = UINT_MAX;
+            session->cfg_step = 0;
 	    return;
 	}
         break;

@@ -53,6 +53,7 @@ extern "C" {
  * 3.13 gnssid:svid added to SAT
  *      time added to ATT
  * 3.14 Added RAW message class.
+ *      Add cfg_stage and cfg_step, for initialization
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -490,8 +491,10 @@ struct gps_device_t {
 /* session object, encapsulates all global state */
     struct gps_data_t gpsdata;
     const struct gps_type_t *device_type;
-    unsigned int driver_index;		/* numeric index of current driver */
-    unsigned int drivers_identified;	/* bitmask; what drivers have we seen? */
+    unsigned int driver_index;	      /* numeric index of current driver */
+    unsigned int drivers_identified;  /* bitmask; what drivers have we seen? */
+    unsigned int cfg_stage;	/* configuration stage counter */
+    unsigned int cfg_step;	/* configuration step counter */
 #ifdef RECONFIGURE_ENABLE
     const struct gps_type_t *last_controller;
 #endif /* RECONFIGURE_ENABLE */
@@ -617,7 +620,6 @@ struct gps_device_t {
 #ifdef SIRF_ENABLE
 	struct {
 	    unsigned int need_ack;	/* if NZ we're awaiting ACK */
-	    unsigned int cfg_stage;	/* configuration stage counter */
 	    unsigned int driverstate;	/* for private use */
 #define SIRF_LT_231	0x01		/* SiRF at firmware rev < 231 */
 #define SIRF_EQ_231     0x02            /* SiRF at firmware rev == 231 */
