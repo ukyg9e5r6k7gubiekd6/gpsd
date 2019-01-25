@@ -353,8 +353,9 @@ static bool sirfbin_speed(struct gps_device_t *session, speed_t speed, char pari
     return (sirf_write(session, msg));
 }
 
-static bool sirf_to_nmea(struct gps_device_t *session, speed_t speed)
 /* switch from binary to NMEA at specified baud */
+/* FIXME: does not seem to work... */
+static bool sirf_to_nmea(struct gps_device_t *session, speed_t speed)
 {
     static unsigned char msg[] = { 0xa0, 0xa2, 0x00, 0x18,
 	0x81, 0x02,
@@ -375,14 +376,15 @@ static bool sirf_to_nmea(struct gps_device_t *session, speed_t speed)
 
     if (speed >= 0xffff) {
 	gpsd_log(&session->context->errout, LOG_ERROR,
-		 "SiRF: can't switch from SiRF to NMEA because current speed %u is big.",
-		 (unsigned int)speed);
+            "SiRF: can't switch from SiRF to NMEA because "
+            " current speed %u is big.",
+            (unsigned int)speed);
 	return false;
     }
 
     msg[26] = (unsigned char)HI(speed);
     msg[27] = (unsigned char)LO(speed);
-    return (sirf_write(session, msg));
+    return sirf_write(session, msg);
 }
 
 static void sirfbin_mode(struct gps_device_t *session, int mode)
@@ -411,6 +413,8 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
 			session->gpsdata.dev.baudrate,
 			9 - session->gpsdata.dev.stopbits,
 			session->gpsdata.dev.stopbits, parity);
+        /* reset binary init steps */
+        session->driver.sirf.cfg_stage = 0;
     }
     session->back_to_nmea = false;
 }
