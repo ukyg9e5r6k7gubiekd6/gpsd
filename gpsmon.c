@@ -389,7 +389,7 @@ static void monitor_vcomplain(const char *fmt, va_list ap)
     (void)wmove(cmdwin, 0, (int)promptlen);
     (void)wclrtoeol(cmdwin);
     (void)wattrset(cmdwin, A_BOLD);
-    (void)vwprintw(cmdwin, (char *)fmt, ap);
+    (void)vw_printw(cmdwin, (char *)fmt, ap);
     (void)wattrset(cmdwin, A_NORMAL);
     (void)wrefresh(cmdwin);
     (void)doupdate();
@@ -416,7 +416,7 @@ void monitor_log(const char *fmt, ...)
 	va_list ap;
 	report_lock();
 	va_start(ap, fmt);
-	(void)vwprintw(packetwin, (char *)fmt, ap);
+	(void)vw_printw(packetwin, (char *)fmt, ap);
 	va_end(ap);
 	report_unlock();
     }
