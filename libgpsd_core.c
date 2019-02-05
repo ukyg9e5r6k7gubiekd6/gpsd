@@ -329,7 +329,10 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     session->sourcetype = source_unknown;	/* gpsd_open() sets this */
     session->servicetype = service_unknown;	/* gpsd_open() sets this */
     session->context = context;
-    memset( session->subtype, 0, sizeof( session->subtype));
+    memset(session->subtype, 0, sizeof(session->subtype));
+#ifdef NMEA0183_ENABLE
+    memset(&(session->nmea), 0, sizeof(session->nmea));
+#endif /* NMEA0183_ENABLE */
     gps_clear_fix(&session->gpsdata.fix);
     gps_clear_fix(&session->newdata);
     gps_clear_fix(&session->oldfix);
