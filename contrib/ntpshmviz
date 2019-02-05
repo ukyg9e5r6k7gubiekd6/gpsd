@@ -93,8 +93,8 @@ class ntpOffset(object):
                     line = line.lstrip()
                     record = line.split(' ')
                     try:
-                        offset = (numpy.float128(record[3]) -
-                                  numpy.float128(record[4]))
+                        offset = (numpy.longdouble(record[3]) -
+                                  numpy.longdouble(record[4]))
                     except:
                         print ("Invalid data: ", sys.exc_info()[0],
                                ". Data was: ", line)
