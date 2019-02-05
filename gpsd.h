@@ -558,6 +558,7 @@ struct gps_device_t {
 	/* detect receivers that ship GGA with non-advancing timestamp */
 	bool latch_mode;
 	char last_gga_timestamp[16];
+	char last_gga_talker;
 	bool seen_glgsv;
 	bool seen_bdgsv;
 	bool seen_qzss;

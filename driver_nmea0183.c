@@ -428,8 +428,13 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
      * ellipsoid, in Meters
      * (empty field) time in seconds since last DGPS update
      * (empty field) DGPS station ID number (0000-1023)
+     *
+     * Some GPS, like the SiRFstarV in NMEA mode, send both GPGSA and
+     * GLGPSA with identical data.
      */
     gps_mask_t mask;
+    char last_last_gga_talker = session->nmea.last_gga_talker;
+    session->nmea.last_gga_talker = field[0][1];
 
     session->gpsdata.status = atoi(field[6]);
     mask = STATUS_SET;
@@ -437,17 +442,30 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
      * There are some receivers (the Trimble Placer 450 is an example) that
      * don't ship a GSA with mode 1 when they lose satellite lock. Instead
      * they just keep reporting GGA and GSA on subsequent cycles with the
-     * timestamp not advancing and a bogus mode.  On the assumption that GGA
-     * is only issued once per cycle we can detect this here (it would be
-     * nicer to do it on GSA but GSA has no timestamp).
+     * timestamp not advancing and a bogus mode.
+     *
+     * On the assumption that GGA is only issued once per cycle we can
+     * detect this here (it would be nicer to do it on GSA but GSA has
+     * no timestamp).
+     *
+     * SiRFstarV breaks this assumption, sending GGA with different
+     * talker IDs.
      */
-    session->nmea.latch_mode = strncmp(field[1],
-			  session->nmea.last_gga_timestamp,
+    if ('\0' != last_last_gga_talker &&
+        last_last_gga_talker != session->nmea.last_gga_talker) {
+        /* skip the time check */
+        session->nmea.latch_mode = 0;
+    } else {
+        session->nmea.latch_mode = strncmp(field[1],
+                          session->nmea.last_gga_timestamp,
 			  sizeof(session->nmea.last_gga_timestamp))==0;
+    }
 
     if (session->nmea.latch_mode) {
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->newdata.mode = MODE_NO_FIX;
+        gpsd_log(&session->context->errout, LOG_PROG,
+                 "xxGSA: latch mode\n");
     } else
 	(void)strlcpy(session->nmea.last_gga_timestamp,
 		       field[1],
@@ -471,8 +489,10 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	if (field[8][0] != '\0')
 	    session->gpsdata.dop.hdop = safe_atof(field[8]);
 
-	/* FIXME: satellites_visible is used as an accumulator in xxGSV
+	/* satellites_visible is used as an accumulator in xxGSV
 	 * so if we set it here we break xxGSV
+         * Some GPS, like SiRFstarV NMEA, report per GNSS used
+         * counts in GPGGA and GLGGA.
 	 * session->gpsdata.satellites_visible = atoi(field[7]);
 	 */
 	altitude = field[9];
@@ -687,7 +707,7 @@ static gps_mask_t processGSA(int count, char *field[],
      * Not all documentation specifies the number of PRN fields, it
      * may be variable.  Most doc that specifies says 12 PRNs.
      *
-     * the CH-4701 ourputs 24 PRNs!
+     * the CH-4701 outputs 24 PRNs!
      *
      * The Skytraq S2525F8-BD-RTK output both GPGSA and BDGSA in the
      * same cycle:
@@ -723,6 +743,8 @@ static gps_mask_t processGSA(int count, char *field[],
     } else if (session->nmea.latch_mode) {
 	/* last GGA had a non-advancing timestamp; don't trust this GSA */
 	mask = ONLINE_SET;
+	gpsd_log(&session->context->errout, LOG_DATA,
+		 "xxGSA: non-advancing timestamp\n");
     } else {
 	int i;
 	session->newdata.mode = atoi(field[2]);
@@ -753,6 +775,8 @@ static gps_mask_t processGSA(int count, char *field[],
               && 'N' != GSA_TALKER) ) {
 	    session->gpsdata.satellites_used = 0;
 	    memset(session->nmea.sats_used, 0, sizeof(session->nmea.sats_used));
+            gpsd_log(&session->context->errout, LOG_DATA,
+                     "xxGSA: clear sats_used\n");
 	}
 	session->nmea.last_gsa_talker = GSA_TALKER;
 	if ((session->nmea.last_gsa_talker == 'D')
