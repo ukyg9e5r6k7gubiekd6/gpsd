@@ -134,7 +134,7 @@ On Gentoo systems those packages are named:
 |============================================================================
 
 The ubxtool and zerk clients will only be installed if this Python
-extensions is installed:
+extension is installed:
 
 |============================================================================
 |pyserial           | Python Serial Port extension
