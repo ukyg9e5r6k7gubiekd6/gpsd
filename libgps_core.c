@@ -147,9 +147,15 @@ int gps_close(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED)
 	return status;
 }
 
+/* read from a gpsd connection
+ *
+ * parameters:
+ *    gps_data_t *gpsdata   -- structure for GPS data
+ *    char *message         -- NULL, or optional buffer for received JSON
+ *    int message_len       -- zero, or sizeof(message)
+ */
 int gps_read(struct gps_data_t *gpsdata CONDITIONALLY_UNUSED,
              char *message, int message_len)
-/* read from a gpsd connection */
 {
     int status = -1;
 

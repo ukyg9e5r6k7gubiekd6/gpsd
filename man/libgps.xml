@@ -6,9 +6,9 @@ SPDX-License-Identifier: BSD-2-clause
 <!DOCTYPE refentry PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
                    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <refentry>
-<refentryinfo><date>14 Aug 2004</date></refentryinfo>
+<refentryinfo><date>4 Feb 2019</date></refentryinfo>
 <refmeta>
-<refentrytitle>3</refentrytitle>
+<refentrytitle>libgps</refentrytitle>
 <manvolnum>3</manvolnum>
 <refmiscinfo class="source">The GPSD Project</refmiscinfo>
 <refmiscinfo class="manual">GPSD Documentation</refmiscinfo>
@@ -29,7 +29,7 @@ C:
 <funcprototype>
 <funcdef>int <function>gps_open</function></funcdef>
     <paramdef>char *<parameter>server</parameter></paramdef>
-    <paramdef>char * <parameter>port</parameter></paramdef>
+    <paramdef>char *<parameter>port</parameter></paramdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
 </funcprototype>
 <funcprototype>
@@ -40,6 +40,8 @@ C:
 <funcprototype>
 <funcdef>int <function>gps_read</function></funcdef>
     <paramdef>struct gps_data_t *<parameter>gpsdata</parameter></paramdef>
+    <paramdef>char *<parameter>message</parameter></paramdef>
+    <paramdef>int <parameter>message_size</parameter></paramdef>
 </funcprototype>
 <funcprototype>
 <funcdef>bool <function>gps_waiting</function></funcdef>
@@ -313,9 +315,9 @@ libgps interface code from
     (void) gps_stream(&amp;gps_data, WATCH_ENABLE | WATCH_JSON, NULL);
 
     /* Put this in a loop with a call to a high resolution sleep () in it. */
-    if (gps_waiting (&amp;gps_data, 500)) {
+    if (gps_waiting(&amp;gps_data, 500)) {
         errno = 0;
-        if (gps_read (&amp;gps_data) == -1) {
+        if (gps_read(&amp;gps_data, NULL, 0) == -1) {
             ...
         } else {
             /* Display data from the GPS receiver. */
