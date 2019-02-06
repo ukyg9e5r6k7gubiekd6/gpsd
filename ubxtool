@@ -387,8 +387,31 @@ class ubx(object):
 
         u = struct.unpack_from('<BBHLLHHH', buf, 0)
         s = (' PortID: %u reserved1 %u\n'
-             '  txReady: %#x mode: %#x baudRate: %u inProtoMask: %#x'
-             ' outProtoMask: %#x\n flags: %#x' % u)
+             '  txReady: %#x mode: %#x baudRate: %u\n' %
+             (u[0], u[1], u[2], u[3], u[4]))
+        dec = []
+        if u[5] & 0x1:
+            dec.append('UBX')
+        if u[5] & 0x2:
+            dec.append('NMEA')
+        if u[5] & 0x4:
+            dec.append('RTCM2')
+        if u[5] & 0x20:
+            dec.append('RTCM3')
+        s += ('  inProtoMask: %#x (%s)\n' % (u[5], ' '.join(dec)))
+
+        dec = []
+        if u[6] & 0x1:
+            dec.append('UBX')
+        if u[6] & 0x2:
+            dec.append('NMEA')
+        if u[6] & 0x20:
+            dec.append('RTCM3')
+        s += ('  outProtoMask: %#x (%s)\n' % (u[6], ' '.join(dec)))
+        dec = []
+        if u[7] & 0x2:
+            dec.append('extendedTxTimeout')
+        s += ('  flags: %#x (%s)' % (u[7], ' '.join(dec)))
         return s
 
     def cfg_sbas(self, buf):
@@ -1696,8 +1719,13 @@ class ubx(object):
             # enable survey-in
             m_data[0] = 1
 
-        # Survey-in minimum duration seconds 86400
-        seconds = 86400
+        # on a NEO-M8T, with good antenna
+        # five minutes, gets about 1 m
+        # ten minutes, gets about 0.9 m
+        # twenty minutes, gets about 0.7 m
+
+        # Survey-in minimum duration seconds
+        seconds = 300
         m_data[20] = seconds & 0x0ff
         seconds >>= 8
         m_data[21] = seconds & 0x0ff
@@ -1706,8 +1734,9 @@ class ubx(object):
         seconds >>= 8
         m_data[23] = seconds & 0x0ff
 
-        # Survey-in position accuracy limit 500 mm
-        mmeters = 500
+        # Survey-in position accuracy limit in mm
+        # make it big, so the duration decides when to end survey
+        mmeters = 50000
         m_data[24] = mmeters & 0x0ff
         mmeters >>= 8
         m_data[25] = mmeters & 0x0ff
@@ -1984,8 +2013,8 @@ class ubx(object):
         "TP": {"command": send_able_tp,
                "help": "TP Time Pulse message"},
         # en/dis able TMODE2 Survey-in
-        "TMODE2": {"command": send_able_tmode2,
-                   "help": "TMODE2"},
+        "SURVEYIN": {"command": send_able_tmode2,
+                     "help": "Survey-in mode with TMODE2"},
     }
     commands = {
         # UBX-CFG-ANT, poll antenna config decode
