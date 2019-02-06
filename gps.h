@@ -43,6 +43,7 @@ extern "C" {
  *       add mtime to attitude_t
  *       changed MAXCHANNELS
  * 8.0 - Change shape of rawdata_t.
+ *       Added values for gps_data_t->status
  */
 #define GPSD_API_MAJOR_VERSION	8	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -2122,8 +2123,13 @@ struct gps_data_t {
     /* GPS status -- always valid */
     int    status;		/* Do we have a fix? */
 #define STATUS_NO_FIX	0	/* no */
-#define STATUS_FIX	1	/* yes, without DGPS */
+#define STATUS_FIX	1	/* yes, GPS, without DGPS */
 #define STATUS_DGPS_FIX	2	/* yes, with DGPS */
+#define STATUS_RTK_FIX	3	/* yes, with RTK Fixed */
+#define STATUS_RTK_FLT	4	/* yes, with RTK Float */
+#define STATUS_DR	5	/* yes, with dead reckoning */
+#define STATUS_GNSSDR	6	/* yes, with GNSS + dead reckoning */
+#define STATUS_TIME	7	/* yes, time only (surveyed in) */
 
     /* precision of fix -- valid if satellites_used > 0 */
     int satellites_used;	/* Number of satellites used in solution */
