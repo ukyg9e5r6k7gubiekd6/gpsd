@@ -362,24 +362,37 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     case UBX_MODE_TMONLY:
 	/* Surveyed-in, better not have moved */
 	session->newdata.mode = MODE_3D;
+        session->gpsdata.status = STATUS_TIME;
 	mask |= GOODTIME_IS;
 	break;
     case UBX_MODE_3D:
 	session->newdata.mode = MODE_3D;
+        session->gpsdata.status = STATUS_FIX;
+	mask |= GOODTIME_IS;
 	break;
     case UBX_MODE_2D:
-    case UBX_MODE_DR:		/* consider this too as 2D */
-    case UBX_MODE_GPSDR:	/* FIX-ME: DR-aided GPS may be valid 3D */
 	session->newdata.mode = MODE_2D;
+        session->gpsdata.status = STATUS_FIX;
+	mask |= GOODTIME_IS;
+	break;
+    case UBX_MODE_DR:		/* consider this too as 2D */
+	session->newdata.mode = MODE_2D;
+        session->gpsdata.status = STATUS_DR;
+	mask |= GOODTIME_IS;
+	break;
+    case UBX_MODE_GPSDR:	/* DR-aided GPS is valid 3D */
+	session->newdata.mode = MODE_3D;
+        session->gpsdata.status = STATUS_GNSSDR;
+	mask |= GOODTIME_IS;
 	break;
     default:
 	session->newdata.mode = MODE_NO_FIX;
+        session->gpsdata.status = STATUS_NO_FIX;
+	break;
     }
 
     if ((flags & UBX_SOL_FLAG_DGPS) != 0)
 	session->gpsdata.status = STATUS_DGPS_FIX;
-    else if (session->newdata.mode != MODE_NO_FIX)
-	session->gpsdata.status = STATUS_FIX;
 
     mask |= MODE_SET | STATUS_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
