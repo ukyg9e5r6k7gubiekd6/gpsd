@@ -806,6 +806,7 @@ class ubx(object):
 
         return s
 
+    # u-blox TIME ONLY is same as Surveyed
     fix_types = ('None', 'Dead Reckoning', '2D', '3D', 'GPS+DR', 'Surveyed')
 
     def nav_sol(self, buf):
