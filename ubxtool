@@ -1713,7 +1713,7 @@ class ubx(object):
         gps_model.send_cfg_gnss1(1, able)
 
     def send_able_tmode2(self, able):
-        "UBX-CFG-TMODE2, set time mode 2 config"
+        """SURVEYIN, UBX-CFG-TMODE2, set time mode 2 config"""
 
         m_data = bytearray(28)
         if able:
