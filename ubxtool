@@ -1724,6 +1724,8 @@ class ubx(object):
         # five minutes, gets about 1 m
         # ten minutes, gets about 0.9 m
         # twenty minutes, gets about 0.7 m
+        # one hour, gets about 0.5 m
+        # twelve hours, gets about 0.14 m
 
         # Survey-in minimum duration seconds
         seconds = 300
