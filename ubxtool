@@ -387,8 +387,9 @@ class ubx(object):
 
         u = struct.unpack_from('<BBHLLHHH', buf, 0)
         s = (' PortID: %u reserved1 %u\n'
-             '  txReady: %#x mode: %#x baudRate: %u\n' %
-             (u[0], u[1], u[2], u[3], u[4]))
+             '  txReady: %#x mode: %#x baudRate: %u\n'
+             '  inProtoMask: %#x  outProtoMask: %#x flags: %#x\n' % u)
+
         dec = []
         if u[5] & 0x1:
             dec.append('UBX')
@@ -398,7 +399,7 @@ class ubx(object):
             dec.append('RTCM2')
         if u[5] & 0x20:
             dec.append('RTCM3')
-        s += ('  inProtoMask: %#x (%s)\n' % (u[5], ' '.join(dec)))
+        s += ('    inProtoMask: %s\n' % ' '.join(dec))
 
         dec = []
         if u[6] & 0x1:
@@ -407,11 +408,11 @@ class ubx(object):
             dec.append('NMEA')
         if u[6] & 0x20:
             dec.append('RTCM3')
-        s += ('  outProtoMask: %#x (%s)\n' % (u[6], ' '.join(dec)))
+        s += ('    outProtoMask: %s\n' % ' '.join(dec))
         dec = []
         if u[7] & 0x2:
             dec.append('extendedTxTimeout')
-        s += ('  flags: %#x (%s)' % (u[7], ' '.join(dec)))
+        s += ('    flags: %s' % ' '.join(dec))
         return s
 
     def cfg_sbas(self, buf):
@@ -437,7 +438,7 @@ class ubx(object):
         u = struct.unpack_from('<BBHlllLLL', buf, 0)
         s = (' timeMode: %u reserved1: %u  usage: %#x\n'
              '  ecefXOrLat: %d ecefYOrLon: %d ecefZOrLon: %d\n'
-             '  fixeedPosAcc %u svinMinDur %u svinAccLimit %u\n' % u)
+             '  fixeedPosAcc %u svinMinDur %u svinAccLimit %u' % u)
         return s
 
     def cfg_tp5(self, buf):
