@@ -729,30 +729,48 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         newstate = 0;
         (void)snprintf(scr, sizeof(scr), "OFFLINE");
     } else {
+        const char *fmt;
+        const char *mod = "";
+
         newstate = gpsdata->fix.mode;
+	switch (gpsdata->status) {
+	case STATUS_DGPS_FIX:
+            mod = "DIFF ";
+	    break;
+	case STATUS_RTK_FIX:
+            mod = "RTK ";
+	    break;
+	case STATUS_RTK_FLT:
+            mod = "RTK ";
+	    break;
+	case STATUS_DR:
+            mod = "DR ";
+	    break;
+	case STATUS_GNSSDR:
+            mod = "+DR ";
+	    break;
+	default:
+	    /* ignore: */
+	    mod = "";
+	    break;
+	}
         switch (gpsdata->fix.mode) {
         case MODE_2D:
-            (void)snprintf(scr, sizeof(scr), "2D %sFIX (%d secs)",
-                           (gpsdata->status ==
-                            STATUS_DGPS_FIX) ? "DIFF " : "",
-                           (int)(time(NULL) - status_timer));
+            fmt = "2D %sFIX (%d secs)";
             break;
         case MODE_3D:
 	    if (STATUS_TIME == gpsdata->status) {
-		(void)snprintf(scr, sizeof(scr), "SURVEYED (%d secs)",
-                           (int)(time(NULL) - status_timer));
+		fmt = "%sSURVEYED (%d secs)";
 	    } else {
-		(void)snprintf(scr, sizeof(scr), "3D %sFIX (%d secs)",
-                           (gpsdata->status ==
-                            STATUS_DGPS_FIX) ? "DIFF " : "",
-                           (int)(time(NULL) - status_timer));
+		fmt = "3D %sFIX (%d secs)";
 	    }
             break;
         default:
-            (void)snprintf(scr, sizeof(scr), "NO FIX (%d secs)",
-                           (int)(time(NULL) - status_timer));
+            fmt = "NO %sFIX (%d secs)";
             break;
         }
+	(void)snprintf(scr, sizeof(scr), fmt,  mod,
+	               (int)(time(NULL) - status_timer));
     }
     (void)mvwprintw(datawin, 8, DATAWIN_VALUE_OFFSET + 1, "%-*s", 26, scr);
 
