@@ -738,10 +738,15 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
                            (int)(time(NULL) - status_timer));
             break;
         case MODE_3D:
-            (void)snprintf(scr, sizeof(scr), "3D %sFIX (%d secs)",
+	    if (STATUS_TIME == gpsdata->status) {
+		(void)snprintf(scr, sizeof(scr), "SURVEYED (%d secs)",
+                           (int)(time(NULL) - status_timer));
+	    } else {
+		(void)snprintf(scr, sizeof(scr), "3D %sFIX (%d secs)",
                            (gpsdata->status ==
                             STATUS_DGPS_FIX) ? "DIFF " : "",
                            (int)(time(NULL) - status_timer));
+	    }
             break;
         default:
             (void)snprintf(scr, sizeof(scr), "NO FIX (%d secs)",
