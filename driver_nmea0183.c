@@ -370,9 +370,16 @@ static gps_mask_t processGLL(int count, char *field[],
 	if (count >= 8 ) {
 	    switch ( *status ) {
 	    case 'D':	/* differential */
-	    case 'F':	/* float RTK */
-	    case 'R':	/* integer RTK */
 		newstatus = STATUS_DGPS_FIX;	/* differential */
+		break;
+	    case 'E':	/* dead reckoning */
+		newstatus = STATUS_DR;
+		break;
+	    case 'F':	/* float RTK */
+		newstatus = STATUS_RTK_FLT;
+		break;
+	    case 'R':	/* fixed RTK */
+		newstatus = STATUS_RTK_FIX;
 		break;
 	    case 'S':	/* simulator */
 		newstatus = STATUS_NO_FIX;
@@ -433,11 +440,44 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
      * GLGPSA with identical data.
      */
     gps_mask_t mask;
+    int newstatus;
     char last_last_gga_talker = session->nmea.last_gga_talker;
     session->nmea.last_gga_talker = field[0][1];
 
-    session->gpsdata.status = atoi(field[6]);
-    mask = STATUS_SET;
+    switch (atoi(field[6])) {
+    case 0:	/* no fix */
+	newstatus = STATUS_NO_FIX;
+	break;
+    case 1:
+        /* could be 2D, 3D, GNSSDR */
+	newstatus = STATUS_FIX;
+	break;
+    case 2:	/* differential */
+	newstatus = STATUS_DGPS_FIX;
+	break;
+    /* no 3 */
+    case 4:	/* fixed RTK */
+	newstatus = STATUS_RTK_FIX;
+	break;
+    case 5:	/* float RTK */
+	newstatus = STATUS_RTK_FLT;
+	break;
+    case 6:
+        /* dead reckoning, could be valid or invalid */
+	newstatus = STATUS_DR;
+	break;
+    case 8:
+        /* WTF?  Garmin GPSMAP and Gecko sends an 8, but undocumented */
+	newstatus = STATUS_FIX;
+	break;
+    default:
+	newstatus = -1;
+	break;
+    }
+    if (0 <= newstatus) {
+	session->gpsdata.status = newstatus;
+	mask = STATUS_SET;
+    }
     /*
      * There are some receivers (the Trimble Placer 450 is an example) that
      * don't ship a GSA with mode 1 when they lose satellite lock. Instead
