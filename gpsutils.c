@@ -521,6 +521,9 @@ char *unix_to_iso8601(timestamp_t fixtime, char isotime[], size_t len)
     char timestr[30];
     char fractstr[10];
 
+    if (!isfinite(fixtime)) {
+        return "NaN";
+    }
     fractional = modf(fixtime, &integral);
     /* snprintf rounding of %3f can get ugly, so pre-round */
     if ( 0.999499999 < fractional) {
