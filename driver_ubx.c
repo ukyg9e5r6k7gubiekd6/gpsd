@@ -317,7 +317,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 	tow = (unsigned int)getleu32(buf, 0);
 	gw = (unsigned short)getles16(buf, 8);
 	session->newdata.time = gpsd_gpstime_resolve(session, gw, tow / 1000.0);
-	mask |= TIME_SET | NTPTIME_IS;
+	mask |= TIME_SET | NTPTIME_IS | GOODTIME_IS;
     }
 #undef DATE_VALID
 
@@ -363,27 +363,22 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 	/* Surveyed-in, better not have moved */
 	session->newdata.mode = MODE_3D;
         session->gpsdata.status = STATUS_TIME;
-	mask |= GOODTIME_IS;
 	break;
     case UBX_MODE_3D:
 	session->newdata.mode = MODE_3D;
         session->gpsdata.status = STATUS_FIX;
-	mask |= GOODTIME_IS;
 	break;
     case UBX_MODE_2D:
 	session->newdata.mode = MODE_2D;
         session->gpsdata.status = STATUS_FIX;
-	mask |= GOODTIME_IS;
 	break;
     case UBX_MODE_DR:		/* consider this too as 2D */
 	session->newdata.mode = MODE_2D;
         session->gpsdata.status = STATUS_DR;
-	mask |= GOODTIME_IS;
 	break;
     case UBX_MODE_GPSDR:	/* DR-aided GPS is valid 3D */
 	session->newdata.mode = MODE_3D;
         session->gpsdata.status = STATUS_GNSSDR;
-	mask |= GOODTIME_IS;
 	break;
     default:
 	session->newdata.mode = MODE_NO_FIX;
