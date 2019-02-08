@@ -833,9 +833,8 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
             session->gpsdata.skyview[st].gnssid = 2;
             session->gpsdata.skyview[st].svid = PRN - 210;
         } else if (255 == PRN) {
-            /* GLONASS, again */
-            session->gpsdata.skyview[st].gnssid = 6;
-            session->gpsdata.skyview[st].svid = 255;
+            /* GLONASS, again, unused, untracked */
+            continue;
         }
 	session->gpsdata.skyview[st].PRN = PRN;
 
