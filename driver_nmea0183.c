@@ -234,15 +234,25 @@ static gps_mask_t processRMC(int count, char *field[],
     /*
      * RMC,225446.33,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E,A*68
      * 1     225446.33    Time of fix 22:54:46 UTC
-     * 2     A          Status of Fix: A = Autonomous, valid;
-     * D = Differential, valid; V = invalid
+     * 2     A            Status of Fix:
+     *                    A = Autonomous, valid;
+     *                    D = Differential, valid;
+     *                    V = invalid
      * 3,4   4916.45,N    Latitude 49 deg. 16.45 min North
      * 5,6   12311.12,W   Longitude 123 deg. 11.12 min West
-     * 7     000.5      Speed over ground, Knots
-     * 8     054.7      Course Made Good, True north
+     * 7     000.5        Speed over ground, Knots
+     * 8     054.7        Course Made Good, True north
      * 9     181194       Date of fix  18 November 1994
      * 10,11 020.3,E      Magnetic variation 20.3 deg East
-     * 12    A      FAA mode indicator (NMEA 2.3 and later)
+     * 12    A            FAA mode indicator (NMEA 2.3 and later)
+     *                    N = No Fix
+     *                    E = Dead Reckoning
+     *                    A = GNSS fix
+     *                    D = DGNSS fix
+     *                    F = RTK Float
+     *                    R = RTK Fixed
+     * 13    V            Nav Status (NMEA 4.1 and later)
+     *                    V = Valid
      * A=autonomous, D=differential, E=Estimated,
      * N=not valid, S=Simulator, M=Manual input mode
      * *68        mandatory nmea_checksum
@@ -250,8 +260,14 @@ static gps_mask_t processRMC(int count, char *field[],
      * * SiRF chipsets don't return either Mode Indicator or magnetic variation.
      */
     gps_mask_t mask = 0;
+    char status = field[2][0];
 
-    if (strcmp(field[2], "V") == 0) {
+    switch (status) {
+    default:
+        /* missing */
+        /* FALLTHROUGH */
+    case 'V':
+        /* status: warning */
 	/* copes with Magellan EC-10X, see below */
 	if (session->gpsdata.status != STATUS_NO_FIX) {
 	    session->gpsdata.status = STATUS_NO_FIX;
@@ -263,7 +279,12 @@ static gps_mask_t processRMC(int count, char *field[],
 	}
 	/* set something nz, so it won't look like an unknown sentence */
 	mask |= ONLINE_SET;
-    } else if (strcmp(field[2], "A") == 0) {
+        break;
+    case 'D':
+        /* DGPS */
+        /* FALLTHROUGH */
+    case 'A':
+        /* status: warning */
 	/*
 	 * The MTK3301, Royaltek RGM-3800, and possibly other
 	 * devices deliver bogus time values when the navigation
@@ -287,8 +308,12 @@ static gps_mask_t processRMC(int count, char *field[],
 	 * received a fix.
 	 */
 	if (session->gpsdata.status == STATUS_NO_FIX) {
-            /* could be DGPS_FIX, we can't tell */
-	    session->gpsdata.status = STATUS_FIX;
+            if ('D' == status) {
+		session->gpsdata.status = STATUS_DGPS_FIX;
+            } else {
+		/* could be DGPS_FIX, we can't tell */
+		session->gpsdata.status = STATUS_FIX;
+            }
 	    mask |= STATUS_SET;
 	}
 	if (session->newdata.mode < MODE_2D) {
@@ -424,17 +449,19 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
      * 1     123519       Fix taken at 12:35:19 UTC
      * 2,3   4807.038,N   Latitude 48 deg 07.038' N
      * 4,5   01131.324,E  Longitude 11 deg 31.324' E
-     * 6         1            Fix quality: 0 = invalid, 1 = GPS, 2 = DGPS,
-     * 3=PPS (Precise Position Service),
-     * 4=RTK (Real Time Kinematic) with fixed integers,
-     * 5=Float RTK, 6=Estimated, 7=Manual, 8=Simulator
-     * 7     08       Number of satellites being tracked
-     * 8     0.9              Horizontal dilution of position
+     * 6     1            Fix quality: 0 = invalid, 1 = GPS, 2 = DGPS,
+     *                    3=PPS (Precise Position Service),
+     *                    4=RTK (Real Time Kinematic) with fixed integers,
+     *                    5=Float RTK, 6=Estimated, 7=Manual, 8=Simulator
+     * 7     08           Number of satellites in use
+     * 8     0.9          Horizontal dilution of position
      * 9,10  545.4,M      Altitude, Metres above mean sea level
      * 11,12 46.9,M       Height of geoid (mean sea level) above WGS84
-     * ellipsoid, in Meters
-     * (empty field) time in seconds since last DGPS update
-     * (empty field) DGPS station ID number (0000-1023)
+     *                    ellipsoid, in Meters
+     * 13    33           time in seconds since last DGPS update
+     *                    usually empty
+     * 14    1023         DGPS station ID number (0000-1023)
+     *                    usually empty
      *
      * Some GPS, like the SiRFstarV in NMEA mode, send both GPGSA and
      * GLGPSA with identical data.
@@ -442,9 +469,19 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
     gps_mask_t mask;
     int newstatus;
     char last_last_gga_talker = session->nmea.last_gga_talker;
+    int fix;
+    char *altitude = field[9];
     session->nmea.last_gga_talker = field[0][1];
 
-    switch (atoi(field[6])) {
+    if (0 == strlen(field[6])) {
+	/* no data is no data, assume no fix
+         * the test/daemon/myguide-3100.log shows lat/lon/alt but
+         * no status, and related RMC shows no fix. */
+	fix = -1;
+    } else {
+        fix = atoi(field[6]);
+    }
+    switch (fix) {
     case 0:	/* no fix */
 	newstatus = STATUS_NO_FIX;
 	break;
@@ -512,7 +549,6 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 		       sizeof(session->nmea.last_gga_timestamp));
     /* if we have a fix and the mode latch is off, go... */
     if (session->gpsdata.status > STATUS_NO_FIX) {
-	char *altitude;
 
 	merge_hhmmss(field[1], session);
 	register_fractional_time(field[0], field[1], session);
@@ -535,7 +571,6 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
          * counts in GPGGA and GLGGA.
 	 * session->gpsdata.satellites_visible = atoi(field[7]);
 	 */
-	altitude = field[9];
 	/*
 	 * SiRF chipsets up to version 2.2 report a null altitude field.
 	 * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
