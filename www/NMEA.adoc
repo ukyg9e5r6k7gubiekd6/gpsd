@@ -2,7 +2,7 @@
 :description: A programmer's guide to NMEA0183, the GPS protocol reporting standard
 :keywords: NMEA0183, GPS, standard, protocol
 Eric S. Raymond <esr@thyrsus.com>
-v2.22, Nov 2018
+v2.23, Feb 2019
 
 NMEA 0183 is a proprietary protocol issued by the National Marine
 Electronics Association for use in boat navigation and control
@@ -263,6 +263,16 @@ In addition, some sentences may use empty fields to signify invalid
 data. It is not clear whether NMEA 0183 allows this, but real-world
 software must cope.
 
+.FAA Mode Indicator
+|================================================================
+|A | Autonomous mode 
+|D | Differential mode 
+|E | Estimated (dead reckoning) mode 
+|M | Manual input mode 
+|S | Simulator mode 
+|N | Data not valid 
+|================================================================
+
 == Talker IDs ==
 
 NMEA sentences do not identify the individual device that issued
@@ -418,11 +428,8 @@ Here is a table of NMEA-ID allocations above 32 as of March 2010:
 |WAAS       |Anik            |138            |51
 |====================================================
 
-In general, NMEA-ID = PRN - 87. Theoretically, all NMEA-emitting
-devices should emit NMEA-IDs. In practice, some pass through PRNs.
-
-Documentation on IDs for GLONASS satellites is scanty.
-The manual for one GLONASS-capable receiver has this to say:
+Theoretically, all NMEA-emitting devices should emit NMEA-IDs. In
+practice, some pass through PRNs.
 
 To avoid possible confusion caused by repetition of satellite ID
 numbers when using multiple satellite systems, the following
@@ -590,7 +597,7 @@ This sentence expresses orbital data for a specified GPS satellite.
 Field Number:
 
 1. Total number of messages
-2. Message Number
+2. Sentence Number
 3. Satellite PRN number (01 to 32)
 4. GPS Week Number
 5. SV health, bits 17-24 of each almanac page
@@ -674,6 +681,7 @@ bearings are different.
 Field Number:
 
 1. Status
+     A = DAta valid
      V = Loran-C Blink or SNR warning
      V = general warning flag or other navigation systems when a reliable
          fix is not available
@@ -708,12 +716,12 @@ Example: $GPAPB,A,A,0.10,R,N,V,V,011,M,DEST,011,M,011,M*82
 
 Field Number:
 
-1. Bearing Degrees, TRUE
+1. Bearing Degrees, True
 2. T = True
 3. Bearing Degrees, Magnetic
 4. M = Magnetic
-5. TO Waypoint
-6. FROM Waypoint
+5. Destination Waypoint
+6. origin Waypoint
 7. Checksum
 
 Example 1: $GPBOD,099.3,T,105.6,M,POINTB,*01
@@ -749,16 +757,16 @@ earlier versions) <<ANON>>.
 
 Field Number:
 
-1. UTCTime
+1. UTC Time or observation
 2. Waypoint Latitude
 3. N = North, S = South
 4. Waypoint Longitude
 5. E = East, W = West
-6. Bearing, True
+6. Bearing, degrees True
 7. T = True
-8. Bearing, Magnetic
+8. Bearing, degrees Magnetic
 9. M = Magnetic
-10. Nautical Miles
+10. Distance, Nautical Miles
 11. N = Nautical Miles
 12. Waypoint ID
 13. FAA mode indicator (NMEA 2.3 and later, optional)
@@ -771,27 +779,28 @@ Example 2: GPBWC,220516,5130.02,N,00046.34,W,213.8,T,218.0,M,0004.6,N,EGLM*11
 === BWR - Bearing and Distance to Waypoint - Rhumb Line ===
 
 ------------------------------------------------------------------------------
-                                                   11
-        1         2       3 4        5 6   7 8   9 10  | 12   13
-        |         |       | |        | |   | |   | |   | |    |
- $--BWR,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x.x,T,x.x,M,x.x,N,c--c*hh<CR><LF>
+                                                       11       14
+        1         2       3 4        5 6   7 8   9 10  | 12   13 |
+        |         |       | |        | |   | |   | |   | |    |  |
+ $--BWR,hhmmss.ss,llll.ll,a,yyyyy.yy,a,x.x,T,x.x,M,x.x,N,c--c,m*hh<CR><LF>
 ------------------------------------------------------------------------------
 
 Field Number:
 
-1. UTCTime
+1. UTC Time of observation
 2. Waypoint Latitude
 3. N = North, S = South
 4. Waypoint Longitude
 5. E = East, W = West
-6. Bearing, True
+6. Bearing, degrees True
 7. T = True
-8. Bearing, Magnetic
+8. Bearing, degrees Magnetic
 9. M = Magnetic
-10. Nautical Miles
+10. Distance, Nautical Miles
 11. N = Nautical Miles
 12. Waypoint ID
-13. Checksum
+13. FAA mode indicator (NMEA 2.3 and later, optional)
+14. Checksum
 
 === BWW - Bearing - Waypoint to Waypoint ===
 
@@ -804,12 +813,12 @@ Bearing calculated at the FROM waypoint.
 ------------------------------------------------------------------------------
 
  Field Number:
-1. Bearing Degrees, TRUE
+1. Bearing, degrees True
 2. T = True
 3. Bearing Degrees, Magnetic
 4. M = Magnetic
-5. TO Waypoint
-6. FROM Waypoint
+5. TO Waypoint ID
+6. FROM Waypoint ID
 7. Checksum
 
 === DBK - Depth Below Keel ===
@@ -858,11 +867,11 @@ Field Number:
 
 Field Number:
 
-1. Depth, feet
+1. Water depth, feet
 2. f = feet
-3. Depth, meters
+3. Water depth, meters
 4. M = meters
-5. Depth, Fathoms
+5. Water depth, Fathoms
 6. F = Fathoms
 7. Checksum
 
@@ -908,18 +917,19 @@ Field Number:
 === DPT - Depth of Water ===
 
 ------------------------------------------------------------------------------
-        1   2   3
-        |   |   |
- $--DPT,x.x,x.x*hh<CR><LF>
+        1   2   3   4
+        |   |   |   |
+ $--DPT,x.x,x.x,x.x*hh<CR><LF>
 ------------------------------------------------------------------------------
 
 Field Number:
 
-1. Depth, meters
-2. Offset from transducer,
+1. Water depth relative to transducer, meters
+2. Offset from transducer, meters
      positive means distance from tansducer to water line
      negative means distance from transducer to keel
-3. Checksum
+3. Maximum range scale in use (NMEA 3.0 and above)
+4. Checksum
 
 This sentence was incorrectly titled "Heading - Deviation & Variation"
 in <<BETKE>>.  It's documented at
@@ -965,7 +975,7 @@ radiotelephone.
 1. Transmitting Frequency
 2. Receiving Frequency
 3. Communications Mode (NMEA Syntax 2)
-4. Power Level
+4. Power Level (0 = standby, 1 = lowest, 9 = highest)
 5. Checksum
 
 === GBS - GPS Satellite Fault Detection ===
@@ -982,7 +992,7 @@ Field Number:
 2. Expected error in latitude (meters)
 3. Expected error in longitude (meters)
 4. Expected error in altitude (meters)
-5. PRN of most likely failed satellite
+5. ID of most likely failed satellite (1 to 138)
 6. Probability of missed detection for most likely failed satellite
 7. Estimate of bias in meters on most likely failed satellite
 8. Standard deviation of bias estimate
@@ -1008,12 +1018,12 @@ Time, Position and fix related data for a GPS receiver.
 
 Field Number:
 
-1. Universal Time Coordinated (UTC)
+1. UTC of this position report
 2. Latitude
 3. N or S (North or South)
 4. Longitude
 5. E or W (East or West)
-6. GPS Quality Indicator,
+6. GPS Quality Indicator (non null)
      - 0 - fix not available,
      - 1 - GPS fix,
      - 2 - Differential GPS fix
@@ -1024,7 +1034,7 @@ Field Number:
      - 6 = estimated (dead reckoning)
      - 7 = Manual input mode
      - 8 = Simulation mode
-7. Number of satellites in view, 00 - 12
+7. Number of satellites in use, 00 - 12
 8. Horizontal Dilution of precision (meters)
 9. Antenna Altitude above/below mean-sea-level (geoid) (in meters)
 10. Units of antenna altitude, meters
@@ -1088,7 +1098,7 @@ Field Number:
 2. N or S (North or South)
 3. Longitude
 4. E or W (East or West)
-5. Universal Time Coordinated (UTC)
+5. UTC of this position
 6. Status A - Data Valid, V - Data Invalid
 7. FAA mode indicator (NMEA 2.3 and later)
 8. Checksum
@@ -1105,15 +1115,15 @@ $--GNS,hhmmss.ss,llll.ll,a,yyyyy.yy,a,c--c,xx,x.x,x.x,x.x,x.x,x.x*hh
 
 Field Number:
 
-1. UTC
+1. UTC of position
 2. Latitude
 3. N or S (North or South)
 4. Longitude
 5. E or W (East or West)
 6. Mode indicator (non-null)
-7. Total number of satelites in use,00-99
-8. HDROP
-9. Antenna altitude, meters, re:mean-sea-level(geoid.
+7. Total number of satelites in use, 00-99
+8. Horizontal Dilution of Precision, HDOP
+9. Antenna altitude, meters, re:mean-sea-level(geoid).
 10. Goeidal separation meters
 11. Age of diferential data
 12. Differential reference station ID
@@ -1145,7 +1155,7 @@ Example: $GPGNS,112257.00,3844.24011,N,00908.43828,W,AN,03,10.5,,,,*57
 
 Field Number:
 
-1. TC time of associated GGA fix
+1. UTC time of associated GGA fix
 2. 0 = Residuals used in GGA, 1 = residuals calculated after GGA
 3. Satellite 1 residual in meters
 4. Satellite 2 residual in meters
@@ -1203,7 +1213,7 @@ This is one of the sentences commonly emitted by GPS units.
 
 Field Number:
 
-1. Selection mode: M=Manual, forced to operate in 2D or 3D, A=Automatic, 3D/2D
+1. Selection mode: M=Manual, forced to operate in 2D or 3D, A=Automatic, 2D/3D
 2. Mode (1 = no fix, 2 = 2D fix, 3 = 3D fix)
 3. ID of 1st satellite used for fix
 4. ID of 2nd satellite used for fix
@@ -1239,10 +1249,10 @@ Typically they're shipped in a group of 2 or 3.
 
 Field Number:
 
-1. total number of GSV messages to be transmitted in this group
-2. 1-origin number of this GSV message  within current group
+1. total number of GSV sentences to be transmitted in this group
+2. Sentence number, 1-9 of this GSV message within current group
 3. total number of satellites in view (leading zeros sent)
-4. satellite PRN number (leading zeros sent)
+4. satellite ID number (leading zeros sent)
 5. elevation in degrees (-90 to 90) (leading zeros sent)
 6. azimuth in degrees to true north (000 to 359) (leading zeros sent)
 7. SNR in dB (00-99) (leading zeros sent)
@@ -1351,7 +1361,7 @@ producing true heading.
 
 Field Number:
 
-1. Heading Degrees, true
+1. Heading, degrees True
 2. T = True
 3. Checksum
 
@@ -1412,6 +1422,8 @@ Field Number)
 From <<GLOBALSAT>>. Shown with a "@II" leader rather than "$GP".
 
 === LCD - Loran-C Signal Data ===
+
+Obsolete.
 
 ------------------------------------------------------------------------------
         1    2   3   4   5   6   7   8   9   10  11  12  13  14
@@ -1480,11 +1492,11 @@ Obsolete as of 2009.
 
 Field Number:
 
-1. Frequency to use
+1. Beacon frequency to use, 283.5-325.0 kHz
 2. Frequency mode, A=auto, M=manual
-3. Beacon bit rate
+3. Beacon bit rate (25, 50, 100, 200)
 4. Bitrate, A=auto, M=manual
-5. Frequency for MSS message status (null for no status)
+5. Interval for MSS message status (null for no status), seconds
 6. Checksum
 
 === MSS - Beacon Receiver Status ===
@@ -1499,9 +1511,9 @@ Field Number:
 
 1. Signal strength (dB 1uV)
 2. Signal to noise ratio (dB)
-3. Beacon frequency (kHz)
-4. Beacon data rate (BPS)
-5. Unknown integer value
+3. Beacon frequency,283.5-325.0 kHz
+4. Beacon data rate, 25, 50, 100, 200 bps
+5. Channel number
 6. Checksum
 
 Example: $GPMSS,0,0,0.000000,200,*5A
@@ -1516,7 +1528,7 @@ Example: $GPMSS,0,0,0.000000,200,*5A
 
 Field Number:
 
-1. Degrees
+1. Temperature, degrees
 2. Unit of Measurement, Celcius
 3. Checksum
 
@@ -1535,14 +1547,16 @@ Example: $INMTW,17.9,C*1B
 
 Field Number:
 
-1. Wind Angle, 0 to 360 degrees
+1. Wind Angle, 0 to 359 degrees
 2. Reference, R = Relative, T = True
 3. Wind Speed
-4. Wind Speed Units, K/M/N
-5. Status, A = Data Valid
+4. Wind Speed Units, K/M/
+5. Status, A = Data Valid, V = Invalid
 6. Checksum
 
 === OLN - Omega Lane Numbers ===
+
+Obsolete.
 
 ------------------------------------------------------------------------------
         1          2          3          4
@@ -1569,15 +1583,15 @@ Field Number:
 
 Field Number:
 
-1. Heading, degrees true
-2. Status, A = Data Valid
+1. Heading, degrees True
+2. Status, A = Data Valid, V = Invalid
 3. Vessel Course, degrees True
-4. Course Reference
+4. Course Reference B/M/W/R/P
 5. Vessel Speed
-6. Speed Reference
+6. Speed Reference B/M/W/R/P
 7. Vessel Set, degrees True
 8. Vessel drift (speed)
-9. Speed Units
+9. Speed Units K/N
 10. Checksum
 
 === R00 - Waypoints in active route ===
@@ -1607,7 +1621,7 @@ n) checksum
 
 Field Number:
 
-1. Blink Warning
+1. Status, A = Valid, V = Invalid
 2. Latitude
 3. N or S
 4. Longitude
@@ -1615,7 +1629,7 @@ Field Number:
 6. Time Difference A, uS
 7. Time Difference B, uS
 8. Speed Over Ground, Knots
-9. Track Made Good, degrees true
+9. Track Made Good, degrees True
 10. Magnetic Variation, degrees
 11. E or W
 12. Checksum
@@ -1633,11 +1647,11 @@ To be sent by a navigation receiver when a destination waypoint is active.
 
 Field Number:
 
-1. Status, A= Active, V = Void
+1. Status, A = Active, V = Invalid
 2. Cross Track error - nautical miles
 3. Direction to Steer, Left or Right
-4. TO Waypoint ID
-5. FROM Waypoint ID
+4. Origin Waypoint ID
+5. Destination Waypoint ID
 6. Destination Waypoint Latitude
 7. N or S
 8. Destination Waypoint Longitude
@@ -1645,7 +1659,7 @@ Field Number:
 10. Range to destination in nautical miles
 11. Bearing to destination in degrees True
 12. Destination closing velocity in knots
-13. Arrival Status, A = Arrival Circle Entered
+13. Arrival Status, A = Arrival Circle Entered. V = not entered/passed
 14. FAA mode indicator (NMEA 2.3 and later)
 15. Checksum
 
@@ -1664,8 +1678,8 @@ This is one of the sentences commonly emitted by GPS units.
 
 Field Number:
 
-1. UTC Time
-2. Status, V=Navigation receiver warning A=Valid
+1. UTC Time of postion
+2. Status, A = Valid, V = Warning
 3. Latitude
 4. N or S
 5. Longitude
@@ -1710,11 +1724,11 @@ Example: $HEROT,0.0,A*2B
 
 Field Number:
 
-1. Sourse, S = Shaft, E = Engine
+1. Source, S = Shaft, E = Engine
 2. Engine or shaft number
 3. Speed, Revolutions per minute
 4. Propeller pitch, % of maximum, "-" means astern
-5. Status, A means data is valid
+5. Status, A = Valid, V = Invalid
 6. Checksum
 
 
@@ -1729,9 +1743,9 @@ Field Number:
 Field Number:
 
 1. Starboard (or single) rudder sensor, "-" means Turn To Port
-2. Status, A means data is valid
+2. Status, A = valid, V = Invalid
 3. Port rudder sensor
-4. Status, A means data is valid
+4. Status, A = valid, V = Invalid
 5. Checksum
 
 === RSD - RADAR System Data ===
@@ -1746,19 +1760,19 @@ Field Number:
 (Some fields are missing from this description.)
 
 Field Number:
-1. Unknown
-2. Unknown
-3. Unknown
-4. Unknown
-5. Unknown
-6. Unknown
-7. Unknown
-8. Unknown
+1. Origin 1 range
+2. Origin 1 bearing
+3. Variable Rangs Marker 1
+4. Bearing Line 1
+5. Origin 2 range
+6. Origin 2 bearing
+7. Variable Range Marker 2
+8. Bearing Line 2
 9. Cursor Range From Own Ship
 10. Cursor Bearing Degrees Clockwise From Zero
 11. Range Scale
 12. Range Units
-13  Unknown
+13. Display rotation (C = course up, H = heading up, N - North up)
 14. Checksum
 
 === RTE - Routes ===
@@ -1771,13 +1785,15 @@ Field Number:
 
 Field Number:
 
-1. Total number of messages being transmitted
-2. Message Number
-3. Message mode
+1. Total number of RE sentences being transmitted
+2. Sentence Number
+3. Sentence mode
      c = complete route, all waypoints
      w = working route, the waypoint you just left, the waypoint
      you're heading to, then all the rest
-4. Waypoint ID
+4. Route ID
+5. Waypoint ID
+6. Additiobal waypint IDs
 
 More waypoints follow.  Last field is a checksum as usual.
 
@@ -1794,10 +1810,11 @@ Example: $GPRTE,1,1,c,0*07
 ------------------------------------------------------------------------------
 
 Field Number:
-1. Total Number Of Messages
-2. Message Number
+1. Total Number Of sentences
+2. Sentenence Number
 3. Frequency 1
 4. Mode 1
+5. Additional Frequency, Mode pairs
 x. Checksum
 
 === STN - Multiple Data ID ===
@@ -1946,10 +1963,10 @@ Field Number:
 === TTM - Tracked Target Message ===
 
 ------------------------------------------------------------------------------
-                                         11     13
-        1  2   3   4 5   6   7 8   9   10|    12| 14
-        |  |   |   | |   |   | |   |   | |    | | |
- $--TTM,xx,x.x,x.x,a,x.x,x.x,a,x.x,x.x,a,c--c,a,a*hh<CR><LF>
+                                         11     13            16
+        1  2   3   4 5   6   7 8   9   10|    12| 14       15  |
+        |  |   |   | |   |   | |   |   | |    | | |         |  |
+ $--TTM,xx,x.x,x.x,a,x.x,x.x,a,x.x,x.x,a,c--c,a,a,hhmmss.ss,a*hh<CR><LF>
 ------------------------------------------------------------------------------
 
 Field Number:
@@ -1957,17 +1974,19 @@ Field Number:
 1. Target Number (0-99)
 2. Target Distance
 3. Bearing from own ship
-4. Bearing Units
+4. T = True, R = Relative
 5. Target Speed
 6. Target Course
-7. Course Units
+7. T = True, R = Relative
 8. Distance of closest-point-of-approach
 9. Time until closest-point-of-approach "-" means increasing
-10. "-" means increasing
+10. Speed/distance units, K/N
 11. Target name
 12. Target Status
 13. Reference Target
-14. Checksum
+14. UTC of data (NMEA 3 and above)
+15. Type, A = Auto, M = Manual, R = Reported (NMEA 3 and above)
+16. Checksum
 
 <<GLOBALSAT>> gives this in a slightly different form, with 14th and
 15th fields conveying time of observation and whether target
@@ -1976,20 +1995,24 @@ acquisition was automatic or manual.
 === VBW - Dual Ground/Water Speed ===
 
 ------------------------------------------------------------------------------
-        1   2   3 4   5   6 7
-        |   |   | |   |   | |
- $--VBW,x.x,x.x,A,x.x,x.x,A*hh<CR><LF>
+        1   2   3 4   5   6 7   8  0 10 11
+        |   |   | |   |   | |   |  |  |  |
+ $--VBW,x.x,x.x,A,x.x,x.x,A,x.x,A,x.x,A*hh<CR><LF>
 ------------------------------------------------------------------------------
 
 Field Number:
 
-1. Longitudinal water speed, "-" means astern
-2. Transverse water speed, "-" means port
+1. Longitudinal water speed, "-" means astern, knots
+2. Transverse water speed, "-" means port, knots
 3. Status, A = Data Valid
-4. Longitudinal ground speed, "-" means astern
-5. Transverse ground speed, "-" means port
+4. Longitudinal ground speed, "-" means astern, knots
+5. Transverse ground speed, "-" means port, knots
 6. Status, A = Data Valid
-7. Checksum
+7. Stern traverse water speed, knots *NMEA 3 and above)
+8. Status, stern traverse water speed A = Valid (NMEA 3 and above)
+9. Stern traverse ground speed, knots *NMEA 3 and above)
+10. Status, stern ground speed A = Valid (NMEA 3 and above)
+11. Checksum
 
 === VDR - Set and Drift ===
 
@@ -2001,11 +2024,11 @@ Field Number:
 
 Field Number:
 
-1. Degress True
+1. Direction degress, True
 2. T = True
-3. Degrees Magnetic
+3. Direction degrees Magnetic
 4. M = Magnetic
-5. Knots (speed of current)
+5. Current speed, knots
 6. N = Knots
 7. Checksum
 
@@ -2019,13 +2042,13 @@ Field Number:
 
 Field Number:
 
-1. Degress True
+1. Heading degress, True
 2. T = True
-3. Degrees Magnetic
+3. Heading degrees, Magnetic
 4. M = Magnetic
-5. Knots (speed of vessel relative to the water)
+5. Speed of vessel relative to the water, knots
 6. N = Knots
-7. Kilometers (speed of vessel relative to the water)
+7. Speed of vessel relative to the water, km/hr
 8. K = Kilometers
 9. Checksum
 
@@ -2036,17 +2059,21 @@ is correct.
 === VLW - Distance Traveled through Water ===
 
 ------------------------------------------------------------------------------
-        1   2 3   4 5
-        |   | |   | |
- $--VLW,x.x,N,x.x,N*hh<CR><LF>
+        1   2 3   4 5   6  7  9  9
+        |   | |   | |   |  |  |  |
+ $--VLW,x.x,N,x.x,N,x.x,N,x.x,N*hh<CR><LF>
 ------------------------------------------------------------------------------
 
 Field Number:
 
-1. Total cumulative distance
+1. Total cumulative water distance, nm
 2. N = Nautical Miles
-3. Distance since Reset
+3. Water distance since Reset, nm
 4. N = Nautical Miles
+5. Total cumulative ground distance, nm (NMEA 3 and above)
+6. N = Nautical Miles (NMEA 3 and above)
+7. Ground distance since reset, nm (NMEA 3 and above)
+8. N = Nautical Miles (NMEA 3 and above)
 5. Checksum
 
 === VPW - Speed - Measured Parallel to Wind ===
@@ -2059,9 +2086,9 @@ Field Number:
 
 Field Number:
 
-1. Speed, "-" means downwind
+1. Speed, "-" means downwind, knots
 2. N = Knots
-3. Speed, "-" means downwind
+3. Speed, "-" means downwind, m/s
 4. M = Meters per second
 5. Checksum
 
@@ -2077,13 +2104,13 @@ This is one of the sentences commonly emitted by GPS units.
 
 Field Number:
 
-1. Track Degrees
+1. Course over ground, degrees True
 2. T = True
-3. Track Degrees
+3. Course over ground, degrees Magnetic
 4. M = Magnetic
-5. Speed Knots
+5. Speed over ground, knots
 6. N = Knots
-7. Speed Kilometers Per Hour
+7. Speed over ground, km/hr
 8. K = Kilometers Per Hour
 9. FAA mode indicator (NMEA 2.3 and later)
 10. Checksum
@@ -2136,17 +2163,18 @@ Field Number:
 === WCV - Waypoint Closure Velocity ===
 
 ------------------------------------------------------------------------------
-        1   2 3    4
-        |   | |    |
- $--WCV,x.x,N,c--c*hh<CR><LF>
+        1   2 3    4  5
+        |   | |    |  |
+ $--WCV,x.x,N,c--c,a*hh<CR><LF>
 ------------------------------------------------------------------------------
 
 Field Number:
 
-1. Velocity
+1. Velocity, knots
 2. N = knots
 3. Waypoint ID
-4. Checksum
+4. FAA Mode indicator, not null (NMEA 3 and above)
+5. Checksum
 
 === WNC - Distance - Waypoint to Waypoint ===
 
@@ -2216,12 +2244,13 @@ $HCXDR,A,171,D,PITCH,A,-37,D,ROLL,G,367,,MAGX,G,2420,,MAGY,G,-8984,,MAGZ*41
 Field Number:
 
 1. Status
+     - A - Valid
      - V = Loran-C Blink or SNR warning
      - V = general warning flag or other navigation systems when a reliable
          fix is not available
 2. Status
      - V = Loran-C Cycle Lock warning flag
-     - A = OK or not used
+     - A = Valid
 3. Cross Track Error Magnitude
 4. Direction to steer, L or R
 5. Cross Track Units, N = Nautical Miles
@@ -2262,7 +2291,7 @@ Field Number:
 3. Month, 01 to 12
 4. Year (4 digits)
 5. Local zone description, 00 to +- 13 hours
-6. Local zone minutes description, apply same sign as local hours
+6. Local zone minutes description, 00 to 59, apply same sign as local hours
 7. Checksum
 
 Example: $GPZDA,160012.71,11,03,2004,-1,00*7D
@@ -2292,7 +2321,7 @@ Field Number:
 
 Field Number:
 
-1. Universal Time Coordinated (UTC)
+1. UTC of observation
 2. Time Remaining
 3. Destination Waypoint ID
 4. Checksum
