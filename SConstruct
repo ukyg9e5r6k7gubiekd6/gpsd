@@ -2061,7 +2061,7 @@ bits_regress = Utility('bits-regress', [test_bits], [
     '$SRCDIR/tests/test_bits --quiet'
 ])
 
-# Unit-test the deg_to_str() extractor
+# Unit-test the deg_to_str() converter
 bits_regress = Utility('deg-regress', [test_gpsdclient], [
     '$SRCDIR/tests/test_gpsdclient'
 ])

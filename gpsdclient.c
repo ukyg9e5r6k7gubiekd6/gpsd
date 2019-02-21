@@ -35,6 +35,10 @@ static struct exportmethod_t exportmethods[] = {
  *      deg_ddmm   : return DD MM.mmmmmm'
  *      deg_ddmmss : return DD MM' SS.sssss"
  *
+ * returns 'nan' for 0 > f or 360 < f
+ *
+ * NOTE: degrees must be positive.
+ *
  * for cm level accuracy we need degrees to 7+ decimal places
  * Ref: https://en.wikipedia.org/wiki/Decimal_degrees
  *
