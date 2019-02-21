@@ -27,6 +27,7 @@ valgrind-audit.py
 test_bits
 test_float
 test_geoid
+test_gpsdclient
 test_gpsmm
 test_json
 test_libgps

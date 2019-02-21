@@ -72,7 +72,7 @@ char *deg_to_str(enum deg_str_type type, double f)
     /* else DD MM SS.sss */
     fdsec = modf(fsec * 60, &fsec);
     sec = (int)fsec;
-    dsec = (int)(fdsec * 10000.0);
+    dsec = (int)(fdsec * 100000.0);
     (void)snprintf(str, sizeof(str), "%3d %02d' %02d.%05d\"", deg, min, sec,
 		   dsec);
 

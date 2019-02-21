@@ -1377,6 +1377,9 @@ test_float = env.Program('tests/test_float', ['tests/test_float.c'])
 test_geoid = env.Program('tests/test_geoid', ['tests/test_geoid.c'],
                          LIBS=['gpsd', 'gps_static'],
                          parse_flags=gpsdflags)
+test_gpsdclient = env.Program('tests/test_gpsdclient',
+                              ['tests/test_gpsdclient.c'],
+                              LIBS=['gps_static', 'm'])
 test_matrix = env.Program('tests/test_matrix', ['tests/test_matrix.c'],
                           LIBS=['gpsd', 'gps_static'],
                           parse_flags=gpsdflags)
@@ -1408,8 +1411,16 @@ else:
 test_gpsmm = env.Program('tests/test_gpsmm', ['tests/test_gpsmm.cpp'],
                          LIBS=['gps_static'],
                          parse_flags=["-lm"] + rtlibs + dbusflags)
-testprogs = [test_bits, test_float, test_geoid, test_libgps, test_matrix,
-             test_mktime, test_packet, test_timespec, test_trig]
+testprogs = [test_bits,
+             test_float,
+             test_geoid,
+             test_gpsdclient,
+             test_libgps,
+             test_matrix,
+             test_mktime,
+             test_packet,
+             test_timespec,
+             test_trig]
 if env['socket_export']:
     testprogs.append(test_json)
 if env["libgpsmm"]:
@@ -2048,6 +2059,11 @@ audit = env.Alias('audit',
 # Unit-test the bitfield extractor
 bits_regress = Utility('bits-regress', [test_bits], [
     '$SRCDIR/tests/test_bits --quiet'
+])
+
+# Unit-test the deg_to_str() extractor
+bits_regress = Utility('deg-regress', [test_gpsdclient], [
+    '$SRCDIR/tests/test_gpsdclient'
 ])
 
 # Unit-test the bitfield extractor
