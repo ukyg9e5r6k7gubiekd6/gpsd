@@ -49,11 +49,12 @@ char *deg_to_str(enum deg_str_type type, double f)
     int dsec, sec, deg, min;
     double fdsec, fsec, fdeg, fmin;
 
-    if (f < 0 || f > 360) {
+    if (0.0 > f || 360.0 < f) {
 	(void)strlcpy(str, "nan", sizeof(str));
 	return str;
     }
 
+    /* FIXME: s/b rounding */
     fmin = modf(f, &fdeg);
     deg = (int)fdeg;
 
