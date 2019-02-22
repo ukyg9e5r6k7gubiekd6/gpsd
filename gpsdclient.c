@@ -29,6 +29,7 @@ static struct exportmethod_t exportmethods[] = {
 };
 
 /* convert double degrees to a static string and return a pointer to it
+ * WARNING: not thread safe!
  *
  * deg_str_type:
  *   	deg_dd     : return DD.ddddddd
@@ -38,8 +39,10 @@ static struct exportmethod_t exportmethods[] = {
  * returns 'nan' for 0 > f or 360 < f
  *
  * NOTE: degrees must be positive.
+ *       360.0 is rolled over to 0.0
  *
- * for cm level accuracy we need degrees to 7+ decimal places
+ * for cm level accuracy, at sea level, we need degrees
+ * to 7+ decimal places
  * Ref: https://en.wikipedia.org/wiki/Decimal_degrees
  *
  */
@@ -54,17 +57,43 @@ char *deg_to_str(enum deg_str_type type, double f)
 	return str;
     }
 
-    /* FIXME: s/b rounding */
+    /* add rounding quanta */
+    /* IEEE 754 wants round to nearest even.
+     * We cheat and just round to nearest.
+     * Intel trying to kill off round to nearest even. */
+    switch (type) {
+    default:
+        /* huh? */
+        type = deg_dd;
+        /* FALLTHROUGH */
+    case deg_dd:
+	/* DD.dddddddd */
+	f += 0.5 * 1e-8;              /* round up */
+        break;
+    case deg_ddmm:
+	/* DD MM.mmmmmm */
+	f += (0.5 * 1e-6) / 60;       /* round up */
+        break;
+    case deg_ddmmss:
+	f += (0.5 * 1e-5) / 3600;     /* round up */
+        break;
+    }
     fmin = modf(f, &fdeg);
     deg = (int)fdeg;
+    if (360 == deg) {
+	/* fix round-up roll-over */
+	deg = 0;
+	fmin = 0.0;
+    }
 
     if (deg_dd == type) {
 	/* DD.dddddddd */
+	long frac_deg = (long)(fmin * 100000000.0);
         /* cm level accuracy requires the %08ld */
-	long frac_deg = (long)(fmin * 100000000);
 	(void)snprintf(str, sizeof(str), "%3d.%08ld", deg, frac_deg);
 	return str;
     }
+
     fsec = modf(fmin * 60, &fmin);
     min = (int)fmin;
 
@@ -75,7 +104,7 @@ char *deg_to_str(enum deg_str_type type, double f)
 	return str;
     }
     /* else DD MM SS.sss */
-    fdsec = modf(fsec * 60, &fsec);
+    fdsec = modf(fsec * 60.0, &fsec);
     sec = (int)fsec;
     dsec = (int)(fdsec * 100000.0);
     (void)snprintf(str, sizeof(str), "%3d %02d' %02d.%05d\"", deg, min, sec,
