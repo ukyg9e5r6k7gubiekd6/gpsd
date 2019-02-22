@@ -668,7 +668,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
     /* Fill in the latitude. */
     if (gpsdata->fix.mode >= MODE_2D && isfinite(gpsdata->fix.latitude) != 0) {
         (void)snprintf(scr, sizeof(scr), "  %s %c",
-                       deg_to_str(deg_type, fabs(gpsdata->fix.latitude)),
+                       deg_to_str(deg_type, gpsdata->fix.latitude),
                        (gpsdata->fix.latitude < 0) ? 'S' : 'N');
     } else
         (void)snprintf(scr, sizeof(scr), "n/a");
@@ -677,7 +677,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
     /* Fill in the longitude. */
     if (gpsdata->fix.mode >= MODE_2D && isfinite(gpsdata->fix.longitude) != 0) {
         (void)snprintf(scr, sizeof(scr), "  %s %c",
-                       deg_to_str(deg_type, fabs(gpsdata->fix.longitude)),
+                       deg_to_str(deg_type, gpsdata->fix.longitude),
                        (gpsdata->fix.longitude < 0) ? 'W' : 'E');
     } else
         (void)snprintf(scr, sizeof(scr), "n/a");

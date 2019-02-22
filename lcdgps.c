@@ -189,12 +189,16 @@ static void update_lcd(struct gps_data_t *gpsdata)
     int track;
     char *s;
 
-    s = deg_to_str(deg_type,  fabs(gpsdata->fix.latitude));
-    snprintf(tmpbuf, sizeof(tmpbuf) - 1, "widget_set gpsd one 1 1 {Lat: %s %c}\n", s, (gpsdata->fix.latitude < 0) ? 'S' : 'N');
+    s = deg_to_str(deg_type, gpsdata->fix.latitude);
+    snprintf(tmpbuf, sizeof(tmpbuf) - 1,
+             "widget_set gpsd one 1 1 {Lat: %s %c}\n", s,
+             (gpsdata->fix.latitude < 0) ? 'S' : 'N');
     send_lcd(tmpbuf);
 
-    s = deg_to_str(deg_type,  fabs(gpsdata->fix.longitude));
-    snprintf(tmpbuf, sizeof(tmpbuf) - 1, "widget_set gpsd two 1 2 {Lon: %s %c}\n", s, (gpsdata->fix.longitude < 0) ? 'W' : 'E');
+    s = deg_to_str(deg_type, gpsdata->fix.longitude);
+    snprintf(tmpbuf, sizeof(tmpbuf) - 1,
+             "widget_set gpsd two 1 2 {Lon: %s %c}\n", s,
+             (gpsdata->fix.longitude < 0) ? 'W' : 'E');
     send_lcd(tmpbuf);
 
     /* As a pilot, a heading of "0" gives me the heebie-jeebies (ie, 0

@@ -166,8 +166,7 @@ static void cooked_pvt(void)
     if (session.gpsdata.fix.mode >= MODE_2D
 	&& isfinite(session.gpsdata.fix.latitude) != 0) {
 	(void)snprintf(scr, sizeof(scr), "%s %c",
-		       deg_to_str(deg_ddmmss,
-				  fabs(session.gpsdata.fix.latitude)),
+		       deg_to_str(deg_ddmmss, session.gpsdata.fix.latitude),
 		       (session.gpsdata.fix.latitude < 0) ? 'S' : 'N');
     } else
 	(void)snprintf(scr, sizeof(scr), "n/a");
@@ -176,8 +175,7 @@ static void cooked_pvt(void)
     if (session.gpsdata.fix.mode >= MODE_2D
 	&& isfinite(session.gpsdata.fix.longitude) != 0) {
 	(void)snprintf(scr, sizeof(scr), "%s %c",
-		       deg_to_str(deg_ddmmss,
-				  fabs(session.gpsdata.fix.longitude)),
+		       deg_to_str(deg_ddmmss, session.gpsdata.fix.longitude),
 		       (session.gpsdata.fix.longitude < 0) ? 'W' : 'E');
     } else
 	(void)snprintf(scr, sizeof(scr), "n/a");

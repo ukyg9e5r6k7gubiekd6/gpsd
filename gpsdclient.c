@@ -52,7 +52,8 @@ char *deg_to_str(enum deg_str_type type, double f)
     int dsec, sec, deg, min;
     double fdsec, fsec, fdeg, fmin;
 
-    if (0.0 > f || 360.0 < f) {
+    f = fabs(f);
+    if (360.0 < f) {
 	(void)strlcpy(str, "nan", sizeof(str));
 	return str;
     }

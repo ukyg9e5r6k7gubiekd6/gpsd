@@ -34,7 +34,8 @@ enum unit gpsd_units(void);
 enum deg_str_type { deg_dd, deg_ddmm, deg_ddmmss };
 float true2magnetic(double, double, double);
 
-extern char *deg_to_str( enum deg_str_type type,  double f);
+/* Warning: not thread safe */
+extern char *deg_to_str(enum deg_str_type type, double f);
 
 extern void gpsd_source_spec(const char *fromstring,
 			     struct fixsource_t *source);

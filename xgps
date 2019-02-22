@@ -623,7 +623,6 @@ class AISView(object):
             latsuff = "N"
         else:
             latsuff = ""
-        lat = abs(lat)
         lat = gps.clienthelpers.deg_to_str(self.deg_type, lat)
         if lon < 0:
             lonsuff = "W"
@@ -631,7 +630,6 @@ class AISView(object):
             lonsuff = "E"
         else:
             lonsuff = ""
-        lon = abs(lon)
         lon = gps.clienthelpers.deg_to_str(gps.clienthelpers.deg_ddmmss, lon)
         return lat + latsuff + "/" + lon + lonsuff
 
@@ -977,7 +975,7 @@ class Base(object):
     def update_latitude(self, data):
         "Update latitude"
         if data.mode >= gps.MODE_2D and hasattr(data, "lat"):
-            lat = gps.clienthelpers.deg_to_str(self.deg_type, abs(data.lat))
+            lat = gps.clienthelpers.deg_to_str(self.deg_type, data.lat)
             if data.lat < 0:
                 ns = 'S'
             else:
@@ -989,7 +987,7 @@ class Base(object):
     def update_longitude(self, data):
         "Update longitude"
         if data.mode >= gps.MODE_2D and hasattr(data, "lon"):
-            lon = gps.clienthelpers.deg_to_str(self.deg_type, abs(data.lon))
+            lon = gps.clienthelpers.deg_to_str(self.deg_type, data.lon)
             if data.lon < 0:
                 ew = 'W'
             else:
@@ -1029,7 +1027,7 @@ class Base(object):
         "Update track"
         if hasattr(data, "track"):
             return "%14s °" % (
-                gps.clienthelpers.deg_to_str(self.deg_type, abs(data.track)))
+                gps.clienthelpers.deg_to_str(self.deg_type, data.track))
 
         return "n/a"
 

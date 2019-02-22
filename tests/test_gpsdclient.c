@@ -65,16 +65,28 @@ struct test tests[] = {
      " 12 02.050000'",
      " 12 02' 02.99999\""},     /* not rounded up */
     /* -44.99999999999 */
-    /* nan because not positive degrees */
-    {-44.99999999999,
-     "nan",
-     "nan",
-     "nan"},
+    /* fabs() */
+    {-44.0,
+     " 44.00000000",
+     " 44 00.000000'",
+     " 44 00' 00.00000\""},
     /* 359.99999999999 */
     {359.99999999999,
      "  0.00000000",         /* rounded up, and rolled over */
      "  0 00.000000'",
      "  0 00' 00.00000\""},
+    /* 361 */
+    /* nan because out of range */
+    {361,
+     "nan",
+     "nan",
+     "nan"},
+    /* -361 */
+    /* nan because out of range */
+    {361,
+     "nan",
+     "nan",
+     "nan"},
 };
 
 
