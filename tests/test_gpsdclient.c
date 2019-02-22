@@ -9,6 +9,7 @@
 
 /* first so the #defs work */
 #include "../gpsd_config.h"
+#include <math.h>              /* for nan() */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,6 +23,8 @@ struct test {
     char ddmm[20];
     char ddmmss[20];
 };
+
+#define NANFLAG 9999
 
 struct test tests[] = {
     /* 1.999999995 sec */
@@ -82,8 +85,14 @@ struct test tests[] = {
      "nan",
      "nan"},
     /* -361 */
-    /* nan because out of range */
-    {361,
+    /* nan, just because */
+    {NANFLAG,
+     "nan",
+     "nan",
+     "nan"},
+    /* FP_INFINITE */
+    /* gcc too 'smart' to let us put a Nan here */
+    {9999,
      "nan",
      "nan",
      "nan"},
@@ -120,6 +129,10 @@ int main(int argc, char **argv)
 
 
      for (i = 0; i < (sizeof(tests)/sizeof(struct test)); i++) {
+	 if (NANFLAG == tests[i].deg) {
+            /* make it a NaN */
+            tests[i].deg = nan("a");
+         }
 	 s = deg_to_str (deg_dd, tests[i].deg);
 	 if (0 != strcmp(s, tests[i].dd)) {
 	     printf("ERROR: %s s/b %s\n", s, tests[i].dd);
