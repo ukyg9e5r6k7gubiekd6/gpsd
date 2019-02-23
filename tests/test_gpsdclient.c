@@ -114,30 +114,30 @@ struct test tests[] = {
     /* 361 */
     /* nan because out of range */
     {361,
-     "nan",
-     "nan",
-     "nan",
-     "nan",
-     "nan",
-     "nan"},
+     "n/a",
+     "n/a",
+     "n/a",
+     "n/a",
+     "n/a",
+     "n/a"},
     /* -361 */
     /* nan, just because */
     {NANFLAG,
-     "nan",
-     "nan",
-     "nan",
-     "nan",
-     "nan",
-     "nan"},
+     "n/a",
+     "n/a",
+     "n/a",
+     "n/a",
+     "n/a",
+     "n/a"},
     /* FP_INFINITE */
     /* gcc too 'smart' to let us put a Nan here */
     {9999,
-     "nan",
-     "nan",
-     "nan",
-     "nan",
-     "nan",
-     "nan"},
+     "n/a",
+     "n/a",
+     "n/a",
+     "n/a",
+     "n/a",
+     "n/a"},
 };
 
 

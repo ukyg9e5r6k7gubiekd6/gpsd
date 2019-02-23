@@ -38,7 +38,7 @@ static struct exportmethod_t exportmethods[] = {
  *      deg_ddmm   : return DD MM.mmmmmm'[suffix]
  *      deg_ddmmss : return DD MM' SS.sssss"[suffix]
  *
- * returns 'nan' for 360 < f or -360 > f
+ * returns 'n/a' for 360 < f or -360 > f
  *
  * NOTE: 360.0 is rolled over to 0.0
  *
@@ -62,7 +62,7 @@ char *deg_to_str2(enum deg_str_type type, double f,
     }
 
     if (!isfinite(f) || 360.0 < fabs(f)) {
-	(void)strlcpy(buf, "nan", buf_size);
+	(void)strlcpy(buf, "n/a", buf_size);
 	return buf;
     }
 
@@ -142,7 +142,7 @@ char *deg_to_str2(enum deg_str_type type, double f,
  *      deg_ddmm   : return DD MM.mmmmmm'
  *      deg_ddmmss : return DD MM' SS.sssss"
  *
- * returns 'nan' for 360 < f
+ * returns 'n/a' for 360 < f
  *
  * NOTE: 360.0 is rolled over to 0.0
  *
