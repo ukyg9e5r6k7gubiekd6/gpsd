@@ -163,22 +163,18 @@ static void cooked_pvt(void)
     (void)mvwprintw(cookedwin, 1, 7, "%-24s", scr);
 
 
-    if (session.gpsdata.fix.mode >= MODE_2D
-	&& isfinite(session.gpsdata.fix.latitude) != 0) {
-	(void)snprintf(scr, sizeof(scr), "%s %c",
-		       deg_to_str(deg_ddmmss, session.gpsdata.fix.latitude),
-		       (session.gpsdata.fix.latitude < 0) ? 'S' : 'N');
+    if (session.gpsdata.fix.mode >= MODE_2D) {
+	deg_to_str2(deg_ddmm, session.gpsdata.fix.latitude,
+		    scr, sizeof(scr), " N", " S");
     } else
-	(void)snprintf(scr, sizeof(scr), "n/a");
+        (void)strncpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(cookedwin, 1, 37, "%-17s", scr);
 
-    if (session.gpsdata.fix.mode >= MODE_2D
-	&& isfinite(session.gpsdata.fix.longitude) != 0) {
-	(void)snprintf(scr, sizeof(scr), "%s %c",
-		       deg_to_str(deg_ddmmss, session.gpsdata.fix.longitude),
-		       (session.gpsdata.fix.longitude < 0) ? 'W' : 'E');
+    if (session.gpsdata.fix.mode >= MODE_2D) {
+	deg_to_str2(deg_ddmm, session.gpsdata.fix.longitude,
+		    scr, sizeof(scr), " E", " W");
     } else
-	(void)snprintf(scr, sizeof(scr), "n/a");
+        (void)strncpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(cookedwin, 1, 60, "%-17s", scr);
 }
 
