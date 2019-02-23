@@ -34,8 +34,11 @@ enum unit gpsd_units(void);
 enum deg_str_type { deg_dd, deg_ddmm, deg_ddmmss };
 float true2magnetic(double, double, double);
 
-/* Warning: not thread safe */
+/* Warning: deg_to_str() not thread safe */
 extern char *deg_to_str(enum deg_str_type type, double f);
+extern char *deg_to_str2(enum deg_str_type type, double f,
+                         char *buf, unsigned int buf_size,
+                         const char *suffix_pos, const char *suffix_neg);
 
 extern void gpsd_source_spec(const char *fromstring,
 			     struct fixsource_t *source);

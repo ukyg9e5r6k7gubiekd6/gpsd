@@ -28,34 +28,52 @@ static struct exportmethod_t exportmethods[] = {
 #endif /* SOCKET_EXPORT_ENABLE */
 };
 
-/* convert double degrees to a static string and return a pointer to it
- * WARNING: not thread safe!
+/* convert value of double degrees to a buffer.
+ * add suffix_pos or suffix_neg depending on sign.
+ * buffer should be at least 20 bytes.
+ * Return a pointer to the buffer.
  *
  * deg_str_type:
- *   	deg_dd     : return DD.ddddddd
- *      deg_ddmm   : return DD MM.mmmmmm'
- *      deg_ddmmss : return DD MM' SS.sssss"
+ *   	deg_dd     : return DD.ddddddd[suffix]
+ *      deg_ddmm   : return DD MM.mmmmmm'[suffix]
+ *      deg_ddmmss : return DD MM' SS.sssss"[suffix]
  *
- * returns 'nan' for 0 > f or 360 < f
+ * returns 'nan' for 360 < f or -360 > f
  *
- * NOTE: degrees must be positive.
- *       360.0 is rolled over to 0.0
+ * NOTE: 360.0 is rolled over to 0.0
  *
  * for cm level accuracy, at sea level, we need degrees
  * to 7+ decimal places
  * Ref: https://en.wikipedia.org/wiki/Decimal_degrees
  *
  */
-char *deg_to_str(enum deg_str_type type, double f)
+char *deg_to_str2(enum deg_str_type type, double f,
+                  char *buf, unsigned int buf_size,
+                  const char *suffix_pos, const char *suffix_neg)
+
 {
-    static char str[40];
     int dsec, sec, deg, min;
     double fdsec, fsec, fdeg, fmin;
+    const char *suffix = "";
 
-    f = fabs(f);
-    if (!isfinite(f) || 360.0 < f) {
-	(void)strlcpy(str, "nan", sizeof(str));
-	return str;
+    if (20 > buf_size) {
+	(void)strlcpy(buf, "Err", buf_size);
+	return buf;
+    }
+
+    if (!isfinite(f) || 360.0 < fabs(f)) {
+	(void)strlcpy(buf, "nan", buf_size);
+	return buf;
+    }
+
+    /* suffix? */
+    if (0.0 > f) {
+	f = -f;
+        if (NULL != suffix_neg) {
+            suffix = suffix_neg;
+        }
+    } else if (NULL != suffix_pos) {
+	suffix = suffix_pos;
     }
 
     /* add rounding quanta */
@@ -91,8 +109,8 @@ char *deg_to_str(enum deg_str_type type, double f)
 	/* DD.dddddddd */
 	long frac_deg = (long)(fmin * 100000000.0);
         /* cm level accuracy requires the %08ld */
-	(void)snprintf(str, sizeof(str), "%3d.%08ld", deg, frac_deg);
-	return str;
+	(void)snprintf(buf, buf_size, "%3d.%08ld%s", deg, frac_deg, suffix);
+	return buf;
     }
 
     fsec = modf(fmin * 60, &fmin);
@@ -101,17 +119,43 @@ char *deg_to_str(enum deg_str_type type, double f)
     if (deg_ddmm == type) {
 	/* DD MM.mmmmmm */
 	sec = (int)(fsec * 1000000.0);
-	(void)snprintf(str, sizeof(str), "%3d %02d.%06d'", deg, min, sec);
-	return str;
+	(void)snprintf(buf, buf_size, "%3d %02d.%06d'%s", deg, min, sec,
+                       suffix);
+	return buf;
     }
     /* else DD MM SS.sss */
     fdsec = modf(fsec * 60.0, &fsec);
     sec = (int)fsec;
     dsec = (int)(fdsec * 100000.0);
-    (void)snprintf(str, sizeof(str), "%3d %02d' %02d.%05d\"", deg, min, sec,
-		   dsec);
+    (void)snprintf(buf, buf_size, "%3d %02d' %02d.%05d\"%s", deg, min, sec,
+		   dsec, suffix);
 
-    return str;
+    return buf;
+}
+
+/* convert absolute value of double degrees to a static string.
+ * Return a pointer to the static string.
+ * WARNING: Not thread safe.
+ *
+ * deg_str_type:
+ *   	deg_dd     : return DD.ddddddd
+ *      deg_ddmm   : return DD MM.mmmmmm'
+ *      deg_ddmmss : return DD MM' SS.sssss"
+ *
+ * returns 'nan' for 360 < f
+ *
+ * NOTE: 360.0 is rolled over to 0.0
+ *
+ * for cm level accuracy, at sea level, we need degrees
+ * to 7+ decimal places
+ * Ref: https://en.wikipedia.org/wiki/Decimal_degrees
+ *
+ */
+char *deg_to_str(enum deg_str_type type, double f)
+{
+    static char buf[20];
+
+    return deg_to_str2(type, f, buf, sizeof(buf), "", "");
 }
 
 /*
