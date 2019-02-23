@@ -666,29 +666,27 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 
 
     /* Fill in the latitude. */
-    if (gpsdata->fix.mode >= MODE_2D && isfinite(gpsdata->fix.latitude) != 0) {
-        (void)snprintf(scr, sizeof(scr), "  %s %c",
-                       deg_to_str(deg_type, gpsdata->fix.latitude),
-                       (gpsdata->fix.latitude < 0) ? 'S' : 'N');
+    if (gpsdata->fix.mode >= MODE_2D) {
+	deg_to_str2(deg_type, gpsdata->fix.latitude,
+		    scr, sizeof(scr), " N", " S");
     } else
-        (void)snprintf(scr, sizeof(scr), "n/a");
-    (void)mvwprintw(datawin, 2, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
+        (void)strncpy(scr, "n/a", sizeof(scr));
+    (void)mvwprintw(datawin, 2, DATAWIN_VALUE_OFFSET, "  %-*s", 27, scr);
 
     /* Fill in the longitude. */
-    if (gpsdata->fix.mode >= MODE_2D && isfinite(gpsdata->fix.longitude) != 0) {
-        (void)snprintf(scr, sizeof(scr), "  %s %c",
-                       deg_to_str(deg_type, gpsdata->fix.longitude),
-                       (gpsdata->fix.longitude < 0) ? 'W' : 'E');
+    if (gpsdata->fix.mode >= MODE_2D) {
+	deg_to_str2(deg_type, gpsdata->fix.longitude,
+	            scr, sizeof(scr), " E", " W");
     } else
-        (void)snprintf(scr, sizeof(scr), "n/a");
-    (void)mvwprintw(datawin, 3, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
+        (void)strncpy(scr, "n/a", sizeof(scr));
+    (void)mvwprintw(datawin, 3, DATAWIN_VALUE_OFFSET, "  %-*s", 27, scr);
 
     /* Fill in the altitude. */
     if (gpsdata->fix.mode >= MODE_3D && isfinite(gpsdata->fix.altitude) != 0)
         (void)snprintf(scr, sizeof(scr), "%9.3f %s",
                        gpsdata->fix.altitude * altfactor, altunits);
     else
-        (void)snprintf(scr, sizeof(scr), "n/a");
+        (void)strncpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(datawin, 4, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* Fill in the speed. */
