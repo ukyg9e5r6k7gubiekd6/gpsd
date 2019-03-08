@@ -1127,7 +1127,12 @@ Field Number:
 10. Goeidal separation meters
 11. Age of diferential data
 12. Differential reference station ID
-13. Checksum
+13. Navigational status (optional)
+    S = Safe
+    C = Caution
+    U = Unsafe
+    V = Not valid for navigation
+14. Checksum
 
 The Mode indicator is two or more characters, with the first and second
 defined for GPS and GLONASS.  Further characters may be defined.  For
