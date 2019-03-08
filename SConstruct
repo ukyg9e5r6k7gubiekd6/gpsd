@@ -899,6 +899,9 @@ else:
         announce("Forcing pps=no (neither TIOCMIWAIT nor RFC2783 "
                  "API is available)")
         env["pps"] = False
+        if env["timeservice"]:
+            announce("ERROR: timeservice specified, but no PPS available")
+            Exit(1)
 
     # Map options to libraries required to support them that might be absent.
     optionrequires = {
