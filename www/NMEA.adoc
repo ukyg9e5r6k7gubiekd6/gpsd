@@ -2,7 +2,7 @@
 :description: A programmer's guide to NMEA0183, the GPS protocol reporting standard
 :keywords: NMEA0183, GPS, standard, protocol
 Eric S. Raymond <esr@thyrsus.com>
-v2.23, Feb 2019
+v2.23, Mar 2019
 
 NMEA 0183 is a proprietary protocol issued by the National Marine
 Electronics Association for use in boat navigation and control
@@ -120,10 +120,12 @@ FAA Mode Indicator
      A = Autonomous mode
      D = Differential Mode
      E = Estimated (dead-reckoning) mode
+     F = RTK Float mode
      M = Manual Input Mode
-     S = Simulated Mode
      N = Data Not Valid
      P = Precise (4.00 and later)
+     R = RTK Integer mode
+     S = Simulated Mode
 
 This field may be empty.  In pre-2.3 versions it is omitted. <<NTUM>> says
 that according to the NMEA specification, it dominates the Status field --
@@ -1134,18 +1136,18 @@ Field Number:
     V = Not valid for navigation
 14. Checksum
 
-The Mode indicator is two or more characters, with the first and second
+The Mode indicator is one to four characters, with the first and second
 defined for GPS and GLONASS.  Further characters may be defined.  For
 each system, the character can have a value (table may be incomplete):
 
-* N = Constellation not in use, or no valid fix
 * A = Autonomous (non-differential)
 * D = Differential mode
-* P = Precise (no degradation, like Selective Availability)
-* R = Real Time Kinematic
-* F = Float RTK
 * E = Estimated (dead reckoning) Mode
+* F = RTK Float
 * M = Manual Input Mode
+* N = Constellation not in use, or no valid fix
+* P = Precise (no degradation, like Selective Availability, and hires)
+* R = RTK Integer
 * S = Simulator Mode
 
 Example: $GPGNS,112257.00,3844.24011,N,00908.43828,W,AN,03,10.5,,,,*57
