@@ -335,6 +335,7 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
 #endif /* NMEA0183_ENABLE */
     gps_clear_fix(&session->gpsdata.fix);
     gps_clear_fix(&session->newdata);
+    gps_clear_fix(&session->lastfix);
     gps_clear_fix(&session->oldfix);
     session->gpsdata.set = 0;
     gps_clear_att(&session->gpsdata.attitude);
@@ -877,17 +878,22 @@ static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
     return DOP_SET;
 }
 
-static void gpsd_error_model(struct gps_device_t *session,
-			     struct gps_fix_t *fix, struct gps_fix_t *oldfix)
 /* compute errors and derived quantities */
+static void gpsd_error_model(struct gps_device_t *session)
 {
+    struct gps_fix_t *fix;           /* current fix */
+    struct gps_fix_t *lastfix;       /* last fix, maybe same time stamp */
+    struct gps_fix_t *oldfix;        /* old fix, previsou time stamp */
+    timestamp_t deltatime = -1.0;    /* time span to compute rates */
+
     /*
      * Now we compute derived quantities.  This is where the tricky error-
      * modeling stuff goes. Presently we don't know how to derive
      * time error.
      *
      * Some drivers set the position-error fields.  Only the Zodiacs
-     * report speed error.  Nobody reports track error or climb error.
+     * report speed error.  No NMEA 183 reports climb error. GPXTE
+     * and PSRFEPE can report track error, but are rare.
      *
      * The UERE constants are our assumption about the base error of
      * GPS fixes in different directions.
@@ -903,6 +909,22 @@ static void gpsd_error_model(struct gps_device_t *session,
     if (NULL == session)
 	return;
 
+    fix = &session->gpsdata.fix;
+    lastfix = &session->lastfix;
+    oldfix = &session->oldfix;
+
+    if (0 != isfinite(fix->time)) {
+        if (0 != isfinite(lastfix->time) &&
+            fix->time > lastfix->time) {
+	    /* time just moved forward, lastfix is now the previous (old) fix */
+	    *oldfix = *lastfix;
+        }
+        if (0 != isfinite(oldfix->time) &&
+            fix->time > oldfix->time) {
+	    deltatime = fix->time - oldfix->time;
+        }
+    }
+
     h_uere =
 	(session->gpsdata.status ==
 	 STATUS_DGPS_FIX ? H_UERE_WITH_DGPS : H_UERE_NO_DGPS);
@@ -913,42 +935,56 @@ static void gpsd_error_model(struct gps_device_t *session,
 	(session->gpsdata.status ==
 	 STATUS_DGPS_FIX ? P_UERE_WITH_DGPS : P_UERE_NO_DGPS);
 
-    /* sanity check the speed, 10,000 m/s should be a nice max */
-    if ( 9999.9 < fix->speed )
-	fix->speed = NAN;
-    else if ( -9999.9 > fix->speed )
+    /* If you are in a rocket, and your GPS is ITAR unlocked, then
+     * triple check these sanity checks.
+     *
+     * u-blox 8: Max altitude: 50,000m
+     *           Max horizontal speed: 250 m/s
+     *           Max climb: 100 m/s
+     *
+     * u-blox ZED-F9P: Max Velocity: 500 m/s
+     */
+
+    /* sanity check the speed, 10,000 m/s should be a nice max
+     * Low Earth Orbit (LEO) is about 7,800 m/s */
+    if (9999.9 < fabs(fix->speed))
 	fix->speed = NAN;
 
     /* sanity check the climb, 10,000 m/s should be a nice max */
-    if ( 9999.9 < fix->climb )
+    if (9999.9 < fabs(fix->climb))
 	fix->climb = NAN;
-    else if ( -9999.9 > fix->climb )
-	fix->climb = NAN;
-
 
     /*
      * OK, this is not an error computation, but we're at the right
      * place in the architecture for it.  Compute speed over ground
      * and climb/sink in the simplest possible way.
      */
-    if (fix->mode >= MODE_2D && oldfix->mode >= MODE_2D
-	&& isfinite(fix->speed) == 0) {
-	if (fix->time == oldfix->time)
-	    fix->speed = 0;
-	else
-	    fix->speed =
-		earth_distance(fix->latitude, fix->longitude,
-			       oldfix->latitude, oldfix->longitude)
-		/ (fix->time - oldfix->time);
-    }
-    if (fix->mode >= MODE_3D && oldfix->mode >= MODE_3D
-	&& isfinite(fix->climb) == 0) {
-	if (fix->time == oldfix->time)
-	    fix->climb = 0;
-	else if ((isfinite(fix->altitude) != 0 &&
-	         isfinite(oldfix->altitude) != 0)) {
-	    fix->climb = ((fix->altitude - oldfix->altitude) /
-	                  (fix->time - oldfix->time));
+    if (0 < deltatime) {
+        /* have a valid time duration */
+
+	if (MODE_2D <= fix->mode &&
+	    MODE_2D <= oldfix->mode) {
+
+	    if (0 == isfinite(fix->speed)) {
+		fix->speed = earth_distance(fix->latitude, fix->longitude,
+				            oldfix->latitude, oldfix->longitude)
+		                            / deltatime;
+                /* sanity check */
+		if (9999.9 < fabs(fix->speed))
+		    fix->speed = NAN;
+	    }
+
+	    if (MODE_3D <= fix->mode &&
+		MODE_3D <= oldfix->mode &&
+		0 == isfinite(fix->climb) &&
+		0 != isfinite(fix->altitude) &&
+		0 != isfinite(oldfix->altitude)) {
+		    fix->climb = (fix->altitude - oldfix->altitude) / deltatime;
+
+		    /* sanity check the climb */
+		    if (9999.9 < fabs(fix->climb))
+			fix->climb = NAN;
+	    }
 	}
     }
 
@@ -992,26 +1028,29 @@ static void gpsd_error_model(struct gps_device_t *session,
 	 * didn't set the speed error and climb error members itself,
 	 * try to compute them now.
 	 */
-	if (isfinite(fix->eps) == 0) {
-	    if (oldfix->mode > MODE_NO_FIX && fix->mode > MODE_NO_FIX
-		&& isfinite(oldfix->epx) != 0 && isfinite(oldfix->epy) != 0
-		&& isfinite(oldfix->time) != 0 && isfinite(fix->time) != 0
-		&& fix->time > oldfix->time) {
-		timestamp_t t = fix->time - oldfix->time;
-		double e =
-		    EMIX(oldfix->epx, oldfix->epy) + EMIX(fix->epx, fix->epy);
-		fix->eps = e / t;
+	if (0 == isfinite(fix->eps)) {
+            if (0 < deltatime &&
+	        MODE_2D <= oldfix->mode &&
+                MODE_2D <= fix->mode &&
+		0 != isfinite(oldfix->epx) &&
+                0 != isfinite(oldfix->epy)) {
+		fix->eps = (EMIX(oldfix->epx, oldfix->epy) +
+                            EMIX(fix->epx, fix->epy)) / deltatime;
 	    } else
 		fix->eps = NAN;
 	}
-	if ((fix->mode >= MODE_3D)
-	    && isfinite(fix->epc) == 0 && fix->time > oldfix->time) {
-	    if (oldfix->mode >= MODE_3D && fix->mode >= MODE_3D) {
-		timestamp_t t = fix->time - oldfix->time;
-		double e = oldfix->epv + fix->epv;
+
+	if (0 < deltatime && MODE_3D <= fix->mode) {
+	    if (0 == isfinite(fix->epc) &&
+	        oldfix->mode >= MODE_3D) {
+                /* Is this really valid? */
 		/* if vertical uncertainties are zero this will be too */
-		fix->epc = e / t;
+                /* luckily this propogates NAN */
+		fix->epc = (oldfix->epv + fix->epv) / deltatime;
 	    }
+        }
+
+	if (0 < deltatime && MODE_2D <= fix->mode) {
 	    /*
 	     * We compute a track error estimate solely from the
 	     * position of this fix and the last one.  The maximum
@@ -1028,23 +1067,20 @@ static void gpsd_error_model(struct gps_device_t *session,
 	     * garbage, throw back NaN if the distance from the previous
 	     * fix is less than the error estimate.
 	     */
-	    fix->epd = NAN;
-	    if (oldfix->mode >= MODE_2D) {
-		double adj =
-		    earth_distance(oldfix->latitude, oldfix->longitude,
-				   fix->latitude, fix->longitude);
-		if (isfinite(adj) != 0 && adj > EMIX(fix->epx, fix->epy)) {
-		    double opp = EMIX(fix->epx, fix->epy);
-		    double hyp = sqrt(adj * adj + opp * opp);
-		    fix->epd = RAD_2_DEG * 2 * asin(opp / hyp);
-		}
+	    double adj = earth_distance(oldfix->latitude, oldfix->longitude,
+			                fix->latitude, fix->longitude);
+	    if (isfinite(adj) != 0 && adj > EMIX(fix->epx, fix->epy)) {
+		double opp = EMIX(fix->epx, fix->epy);
+		double hyp = sqrt(adj * adj + opp * opp);
+		fix->epd = RAD_2_DEG * 2 * asin(opp / hyp);
 	    }
 	}
     }
 
-    /* save old fix for later error computations */
-    if (fix->mode >= MODE_2D)
-	*oldfix = *fix;
+    if (0 != isfinite(fix->time)) {
+	/* save lastfix, not yet oldfix, for later error computations */
+	*lastfix = *fix;
+    }
 }
 #endif /* NOFLOATS_ENABLE */
 
@@ -1405,6 +1441,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		     session->lexer.outbuflen,
 		     gpsd_prettydump(session));
 
+
 	/* Get data from current packet into the fix structure */
 	if (session->lexer.type != COMMENT_PACKET)
 	    if (session->device_type != NULL
@@ -1457,21 +1494,20 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	/* copy/merge device data into staging buffers */
 	if ((session->gpsdata.set & CLEAR_IS) != 0) {
+            /* CLEAR_IS should only be set on first sentence of cycle */
 	    gps_clear_fix(&session->gpsdata.fix);
             gps_clear_att(&session->gpsdata.attitude);
         }
-	/* don't downgrade mode if holding previous fix */
-	if (session->gpsdata.fix.mode > session->newdata.mode)
-	    session->gpsdata.set &= ~MODE_SET;
+
 	/* gpsd_log(&session->context->errout, LOG_PROG,
 	                 "transfer mask: %s\n",
                          gps_maskdump(session->gpsdata.set)); */
 	gps_merge_fix(&session->gpsdata.fix,
 		      session->gpsdata.set, &session->newdata);
-#ifndef NOFLOATS_ENABLE
-	gpsd_error_model(session, &session->gpsdata.fix, &session->oldfix);
-#endif /* NOFLOATS_ENABLE */
 
+#ifndef NOFLOATS_ENABLE
+	gpsd_error_model(session);
+#endif /* NOFLOATS_ENABLE */
 
 	/*
 	 * Count good fixes. We used to check

@@ -514,7 +514,8 @@ static gps_mask_t sirf_msg_navnot(struct gps_device_t *session,
     case 1:
         /* last message sent every cycle */
         definition = "SID_GPS_SIRFNAV_COMPLETE";
-        mask = CLEAR_IS | REPORT_IS;
+        /* so push a report now */
+        mask = REPORT_IS;
         break;
     case 2:
         definition = "SID_GPS_SIRFNAV_TIMING";

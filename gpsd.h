@@ -54,6 +54,7 @@ extern "C" {
  *      time added to ATT
  * 3.14 Added RAW message class.
  *      Add cfg_stage and cfg_step, for initialization
+ *      Add oldfix2 for better oldfix
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -546,6 +547,7 @@ struct gps_device_t {
     bool cycle_end_reliable;		/* does driver signal REPORT_MASK */
     int fixcnt;				/* count of fixes from this device */
     struct gps_fix_t newdata;		/* where drivers put their data */
+    struct gps_fix_t lastfix;		/* not qute yet ready for oldfix */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
 #ifdef NMEA0183_ENABLE
     struct {
