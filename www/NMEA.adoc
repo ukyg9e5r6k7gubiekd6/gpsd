@@ -989,9 +989,9 @@ radiotelephone.
 Field Number:
 
 1. UTC time of the GGA or GNS fix associated with this sentence
-2. Expected error in latitude (meters)
-3. Expected error in longitude (meters)
-4. Expected error in altitude (meters)
+2. Expected 1-sigma error in latitude (meters)
+3. Expected 1-sigma error in longitude (meters)
+4. Expected 1-sigma  error in altitude (meters)
 5. ID of most likely failed satellite (1 to 138)
 6. Probability of missed detection for most likely failed satellite
 7. Estimate of bias in meters on most likely failed satellite
@@ -2413,6 +2413,23 @@ Field Number:
 7. Checksum
 
 Example: $PGRME,15.0,M,45.0,M,25.0,M*22
+
+=== PGRMZ - Garmin Altitude ===
+
+------------------------------------------------------------------------------
+        1  2  3  4
+        |  |  |  |
+ $PGRMZ,hhh,f,M*hh<CR><LF>
+------------------------------------------------------------------------------
+
+Field Number:
+
+1. Current Altitude Feet
+2. f=feet
+3. Mode (1 = no fix, 2 = 2D fix, 3 = 3D fix)
+4. Checksum
+
+Example:  $PGRMZ,2282,f,3*21
 
 === PMGNST - Magellan Status ===
 
