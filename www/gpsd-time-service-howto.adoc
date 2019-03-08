@@ -320,8 +320,7 @@ assumes 8 bit bytes, so the above locks the daemon to 9600 8N1. Besides
 the daemon, this also builds gpsmon and ntpshmmon.
 
 Otherwise, make sure the build is with pps=yes and ntpshm=yes (the
-default).  The command "gpsd -L" should indicate that time-service
-features and PPS are enabled.
+default).
 
 === Kernel support ===
 
