@@ -117,9 +117,11 @@
  */
 #define NICEVAL	-10
 
-#if defined(FIXED_PORT_SPEED) || !defined(SOCKET_EXPORT_ENABLE)
+#if (defined(FIXED_PORT_SPEED) || \
+     defined(TIMESERVICE_ENABLE) || \
+     !defined(SOCKET_EXPORT_ENABLE))
     /*
-     * Force nowait in two circumstances:
+     * Force nowait in three circumstances:
      *
      * (1) If we're running with FIXED_PORT_SPEED we're some sort
      * of embedded configuration where we don't want to wait for connect
@@ -127,6 +129,8 @@
      * (2) Socket export has been disabled.  In this case we have no
      * way to know when client apps are watching the export channels,
      * so we need to be running all the time.
+     *
+     * (3) timeservice mode where we want the GPS always on for timing.
      */
 #define FORCE_NOWAIT
 #endif /* defined(FIXED_PORT_SPEED) || !defined(SOCKET_EXPORT_ENABLE) */
@@ -152,11 +156,10 @@ static int highwater;
 #ifndef FORCE_GLOBAL_ENABLE
 static bool listen_global = false;
 #endif /* FORCE_GLOBAL_ENABLE */
-#ifndef FORCE_NOWAIT
-#define NOWAIT nowait
-static bool nowait = false;
+#ifdef FORCE_NOWAIT
+static bool nowait = true;
 #else /* FORCE_NOWAIT */
-#define NOWAIT true
+static bool nowait = false;
 #endif /* FORCE_NOWAIT */
 static bool batteryRTC = false;
 static jmp_buf restartbuf;
@@ -241,7 +244,10 @@ static void usage(void)
 "  -G         		    = make gpsd listen on INADDR_ANY\n"
 #endif /* FORCE_GLOBAL_ENABLE */
 "  -h		     	    = help message \n"
-#ifndef FORCE_NOWAIT
+#ifdef FORCE_NOWAIT
+"  -n			    = don't wait for client connects to poll GPS\n"
+"                             forced on in this binary\n"
+#else
 "  -n			    = don't wait for client connects to poll GPS\n"
 #endif /* FORCE_NOWAIT */
 "  -N			    = don't go into background\n\
@@ -869,7 +875,7 @@ static void handle_control(int sfd, char *buf)
 	} else {
 	    gpsd_log(&context.errout, LOG_INF,
 		     "<= control(%d): adding %s\n", sfd, stash);
-	    if (gpsd_add_device(stash, NOWAIT))
+	    if (gpsd_add_device(stash, nowait))
 		ignore_return(write(sfd, "OK\n", 3));
 	    else {
 		ignore_return(write(sfd, "ERROR\n", 6));
@@ -1914,9 +1920,7 @@ int main(int argc, char *argv[])
 #endif /* SOCKET_EXPORT_ENABLE */
 	    break;
 	case 'n':
-#ifndef FORCE_NOWAIT
 	    nowait = true;
-#endif /* FORCE_NOWAIT */
 	    break;
 	case 'r':
 	    batteryRTC = true;
@@ -2086,7 +2090,7 @@ int main(int argc, char *argv[])
      */
     in_restart = false;
     for (i = optind; i < argc; i++) {
-      if (!gpsd_add_device(argv[i], NOWAIT)) {
+      if (!gpsd_add_device(argv[i], nowait)) {
 	    gpsd_log(&context.errout, LOG_ERROR,
 		     "initial GPS device %s open failed\n",
 		     argv[i]);
@@ -2219,7 +2223,7 @@ int main(int argc, char *argv[])
      */
     if (in_restart)
 	for (i = optind; i < argc; i++) {
-	  if (!gpsd_add_device(argv[i], NOWAIT)) {
+	  if (!gpsd_add_device(argv[i], nowait)) {
 		gpsd_log(&context.errout, LOG_ERROR,
 			 "GPS device %s open failed\n",
 			 argv[i]);
@@ -2442,7 +2446,7 @@ int main(int argc, char *argv[])
 	 */
 	for (device = devices; device < devices + MAX_DEVICES; device++) {
 
-	    bool device_needed = NOWAIT;
+	    bool device_needed = nowait;
 
 	    if (!allocated_device(device))
 		continue;

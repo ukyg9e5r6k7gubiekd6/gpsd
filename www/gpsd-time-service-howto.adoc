@@ -302,9 +302,11 @@ is mostly autoconfiguring and requires no special setup.
 You can build a version stripped to the mimimum configuration required
 for time service.  This reduces the size of the binary and may be
 helpful on embedded systems or for SBCs like the Raspberry Pi, Odroid,
-or BeagleBone.  Also, when gpsd is built in this way, the -n (nowait)
-option is forced; gpsd opens its command-line devices immediately on
-startup.
+or BeagleBone.  Only do this if you have serious size contraints.  When
+gpsd is built in this way, the -n (nowait) option is forced: gpsd opens
+its command-line devices immediately on startup.  The timerservice=yes
+option also forces the building of ntpshmmon, cgps and gpsmon.  Those
+program would be built by default anyway, unless gpsdclients=n0.
 
 Do it like this:
 
