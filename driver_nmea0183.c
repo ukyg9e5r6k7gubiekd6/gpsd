@@ -285,7 +285,7 @@ static gps_mask_t processRMC(int count, char *field[],
      * 9     181194       Date of fix  18 November 1994
      * 10,11 020.3,E      Magnetic variation 20.3 deg East
      * 12    A            FAA mode indicator (NMEA 2.3 and later)
-     *                            see faa_mode() for possible mode values
+     *                     see faa_mode() for possible mode values
      * 13    V            Nav Status (NMEA 4.1 and later)
      *                     A=autonomous,
      *                     D=differential,
@@ -402,12 +402,7 @@ static gps_mask_t processGLL(int count, char *field[],
      * 5 UTC of position
      * 6 A=Active, V=Void
      * 7 Mode Indicator
-     *   A = Autonomous mode
-     *   D = Differential Mode
-     *   E = Estimated (dead-reckoning) mode
-     *   M = Manual Input Mode
-     *   S = Simulated Mode
-     *   N = Data Not Valid
+     *    See faa_mode() for possible mode values.
      *
      * I found a note at <http://www.secoh.ru/windows/gps/nmfqexep.txt>
      * indicating that the Garmin 65 does not return time and status.
@@ -494,16 +489,12 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
      * 4:  12311.12      Longitude 111 deg. 53.3538273 min
      * 5:  W             Longitude West
      * 6:  D             FAA mode indicator
-     *                    A=Autonomous
-     *                    D=Differential
-     *                    E=Estimated,
-     *                    M=Manual input
-     *                    N=Not valid
-     *                    P=Precise
-     *                    S=Simulator
-     *                   May be two characters.
-     *                    Char 1 = GPS
-     *                    Char 2 = GLONASS
+     *                     see faa_mode() for possible mode values
+     *                     May be one to four characters.
+     *                       Char 1 = GPS
+     *                       Char 2 = GLONASS
+     *                       Char 3 = ?
+     *                       Char 4 = ?
      * 7:  19           Number of Satellites used in solution
      * 8:  0.6          HDOP
      * 9:  406110       Altitude in meters
@@ -604,6 +595,7 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
      * 6     1            Fix quality:
      *                     0 = invalid,
      *                     1 = GPS,
+     *                         u-blox may use 1 for Estimated
      *                     2 = DGPS,
      *                     3 = PPS (Precise Position Service),
      *                     4 = RTK (Real Time Kinematic) with fixed integers,
@@ -2049,23 +2041,22 @@ static gps_mask_t processPSTI030(int count, char *field[],
 {
     /*
      * $PSTI,030,hhmmss.sss,A,dddmm.mmmmmmm,a,dddmm.mmmmmmm,a,x.x,x.x,x.x,x.x,ddmmyy,a.x.x,x.x*hh<CR><LF>
-     * 1     225446.334    Time of fix 22:54:46 UTC
-     * 2     A          Status of Fix: A = Autonomous, valid;
+     * 1     030          Sentence ID
+     * 2     225446.334   Time of fix 22:54:46 UTC
+     * 3     A            Status of Fix: A = Autonomous, valid;
      *                                 V = invalid
-     * 3,4   4916.45,N    Latitude 49 deg. 16.45 min North
-     * 5,6   12311.12,W   Longitude 123 deg. 11.12 min West
-     * 7     103.323      Mean Sea Level meters
-     * 8     0.00         East Velocity meters/sec
-     * 9     0.00         North Velocity meters/sec
-     * 10    0.00         Up Velocity meters/sec
-     * 11    181194       Date of fix  18 November 1994
-     * 12    A            FAA mode indicator
-     * A=autonomous, D=differential, E=Estimated,
-     * F=Float RTK, M=Manual input mode, N=not valid, R=Integer RTK
-     * S=Simulator
-     * 13    1.2          RTK Age
-     * 14    4.2          RTK Ratio
-     * 15    *68          mandatory nmea_checksum
+     * 4,5   4916.45,N    Latitude 49 deg. 16.45 min North
+     * 6,7   12311.12,W   Longitude 123 deg. 11.12 min West
+     * 8     103.323      Mean Sea Level meters
+     * 9     0.00         East Velocity meters/sec
+     * 10    0.00         North Velocity meters/sec
+     * 11    0.00         Up Velocity meters/sec
+     * 12    181194       Date of fix  18 November 1994
+     * 13    A            FAA mode indicator
+     *                        See faa_mode() for possible mode values.
+     * 14    1.2          RTK Age
+     * 15    4.2          RTK Ratio
+     * 16    *68          mandatory nmea_checksum
      *
      * In private email, SkyTraq says F mode is 10x more accurate
      * than R mode.
@@ -2075,12 +2066,13 @@ static gps_mask_t processPSTI030(int count, char *field[],
     if ( 16 != count )
 	    return 0;
 
-    if ( 0 == strcmp(field[3], "V")) {
-        /* nav warning, ignore the rest of the data */
+    if ('V' == field[3][0] ||
+        'N' == field[13][0]) {
+        /* nav warning, or FAA not valid, ignore the rest of the data */
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->newdata.mode = MODE_NO_FIX;
-	mask |= STATUS_SET | MODE_SET;
-    } else if ( 0 == strcmp(field[3], "A")) {
+	mask |= MODE_SET;
+    } else if ('A' == field[3][0]) {
 	double east, north;
 
         /* data valid */
@@ -2094,6 +2086,10 @@ static gps_mask_t processPSTI030(int count, char *field[],
 	do_lat_lon(&field[4], &session->newdata);
 	mask |= LATLON_SET;
 
+	if ('\0' != field[8][0]) {
+	    session->newdata.altitude = safe_atof(field[8]);
+	    mask |= ALTITUDE_SET;
+	}
 	/* convert ENU to speed/track */
 	/* this has more precision than GPVTG, GPVTG comes earlier
 	 * in the cycle */
@@ -2108,19 +2104,8 @@ static gps_mask_t processPSTI030(int count, char *field[],
 	session->newdata.climb = safe_atof(field[11]);
         mask |= SPEED_SET | TRACK_SET | CLIMB_SET;
 
-        switch ( field[13][0] ) {
-	case 'A':
-	    session->gpsdata.status = STATUS_FIX;
-	    break;
-	case 'D':
-	    session->gpsdata.status = STATUS_DGPS_FIX;
-	    break;
-        default:
-	    session->gpsdata.status = STATUS_NO_FIX;
-	    break;
-        }
-	mask |= STATUS_SET;
-	/* RTK Age and RTK Ratio, for now */
+	session->gpsdata.status = faa_mode(field[13][0]);
+	/* Ignore RTK Age and RTK Ratio, for now */
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
