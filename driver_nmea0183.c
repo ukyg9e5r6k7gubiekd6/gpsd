@@ -340,7 +340,7 @@ static gps_mask_t processRMC(int count, char *field[],
 	mask |= (TRACK_SET | SPEED_SET);
 
 	newstatus = STATUS_FIX;
-	if (count >= 8) {
+	if (count >= 12) {
 	    newstatus = faa_mode(field[12][0]);
         }
         /* anything useful in field 13 ? */
@@ -366,7 +366,7 @@ static gps_mask_t processRMC(int count, char *field[],
 	    session->newdata.mode = MODE_2D;
 	    mask |= MODE_SET;
 	}
-	/* NOT YET session->gpsdata.status = newstatus; */
+	session->gpsdata.status = newstatus;
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
