@@ -347,9 +347,9 @@ static gps_mask_t processRMC(int count, char *field[],
     return mask;
 }
 
+/* Geographic position - Latitude, Longitude */
 static gps_mask_t processGLL(int count, char *field[],
 			       struct gps_device_t *session)
-/* Geographic position - Latitude, Longitude */
 {
     /* Introduced in NMEA 3.0.
      *
@@ -461,6 +461,156 @@ static gps_mask_t processGLL(int count, char *field[],
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "GLL: hhmmss=%s lat=%.2f lon=%.2f mode=%d status=%d\n",
 	     field[5],
+	     session->newdata.latitude,
+	     session->newdata.longitude,
+	     session->newdata.mode,
+	     session->gpsdata.status);
+    return mask;
+}
+
+/* Geographic position - Latitude, Longitude, and more */
+static gps_mask_t processGNS(int count UNUSED, char *field[],
+			       struct gps_device_t *session)
+{
+    /* Introduced in NMEA 4.0?
+     *
+     * This mostly duplicates RMC, except for the multi GNSS mode
+     * indicatore.
+     *
+     * Example.  Ignore the line break.
+     * $GPGNS,224749.00,3333.4268304,N,11153.3538273,W,D,19,0.6,406.110,
+     *        -26.294,6.0,0138,S,*6A
+     *
+     * 1:  224749.00     UTC HHMMSS.SS.  22:47:49.00
+     * 2:  3333.4268304  Latitude DDMM.MMMMM. 33 deg. 33.4268304 min
+     * 3:  N             Latitude North
+     * 4:  12311.12      Longitude 111 deg. 53.3538273 min
+     * 5:  W             Longitude West
+     * 6:  D             FAA mode indicator
+     *                    A=Autonomous
+     *                    D=Differential
+     *                    E=Estimated,
+     *                    M=Manual input
+     *                    N=Not valid
+     *                    P=Precise
+     *                    S=Simulator
+     *                   May be two characters.
+     *                    Char 1 = GPS
+     *                    Char 2 = GLONASS
+     * 7:  19           Number of Satellites used in solution
+     * 8:  0.6          HDOP
+     * 9:  406110       Altitude in meters
+     * 10: -26.294      Geoid separation in meters
+     * 11: 6.0          Age of differential corrections, in seconds
+     * 12: 0138         Differential reference station ID
+     * 13: S            Navigation status
+     *                   S = Safe
+     *                   C = Caution
+     *                   U = Unsafe
+     *                   V = Not valid for navigation
+     * 8:   *6A          Mandatory NMEA checksum
+     *
+     */
+    char *mode = field[6];
+    int newstatus;
+    int satellites_used;
+    gps_mask_t mask = 0;
+
+    if ('\0' == mode[0] || 'N' == mode[0]) {
+        /* not valid, ignore */
+        /* Yes, in 2019 a GLONASS only fix may be valid, but not worth
+         * the confusion */
+        return mask;
+    }
+
+    if (field[1][0] != '\0') {
+	merge_hhmmss(field[1], session);
+	register_fractional_time(field[0], field[1], session);
+	if (session->nmea.date.tm_year == 0) {
+	    gpsd_log(&session->context->errout, LOG_WARN,
+		     "can't use GNS time until after ZDA or RMC"
+                     " has supplied a year.\n");
+	} else {
+	    mask = TIME_SET;
+	}
+    }
+
+    /* check navigation status, assume S=safe and C=caution are OK */
+    if ('\0' == field[13][0] ||     /* missing */
+        'U' == field[13][0] ||      /* Unsafe */
+        'V' == field[13][0]) {      /* not valid */
+        /* stop here */
+        return mask;
+    }
+
+    if ('\0' != field[2][0]) {
+	do_lat_lon(&field[2], &session->newdata);
+	mask |= LATLON_SET;
+    }
+
+    if (field[8][0] != '\0') {
+	session->gpsdata.dop.hdop = safe_atof(field[8]);
+    }
+
+    if ('\0' != field[9][0]) {
+	session->newdata.altitude = safe_atof(field[9]);
+	mask |= ALTITUDE_SET;
+    }
+
+    newstatus = STATUS_FIX;
+    switch (mode[0]) {
+    case '\0':	/* missing */
+	/* already handled, for paranoia sake also here */
+	newstatus = STATUS_NO_FIX;
+	break;
+    case 'A':   /* Autonomous */
+    default:
+	newstatus = STATUS_FIX;
+	break;
+    case 'D':	/* differential */
+	newstatus = STATUS_DGPS_FIX;	/* differential */
+	break;
+    case 'E':	/* dead reckoning */
+	newstatus = STATUS_DR;
+	break;
+    case 'F':	/* float RTK */
+	newstatus = STATUS_RTK_FLT;
+	break;
+    case 'N':	/* Data Not Valid */
+	/* already handled, for paranoia sake also here */
+	newstatus = STATUS_NO_FIX;
+	break;
+    case 'P':	/* Precise (NMEA 4+) */
+	newstatus = STATUS_DGPS_FIX;	/* sort of DGPS */
+	break;
+    case 'R':	/* fixed RTK */
+	newstatus = STATUS_RTK_FIX;
+	break;
+    case 'S':	/* simulator */
+	newstatus = STATUS_NO_FIX;      /* or maybe MODE_FIX? */
+	break;
+    }
+    session->gpsdata.status = newstatus;
+
+    satellites_used = atoi(field[7]);
+    if (0 == isfinite(session->newdata.latitude) ||
+        0 == isfinite(session->newdata.longitude)) {
+        /* no lat/lon, no fix */
+	session->newdata.mode = MODE_NO_FIX;
+    } else if (0 == isfinite(session->newdata.altitude) ||
+               3 >= satellites_used) {
+        /* lat/lon, no alt, so 2D fix */
+	/* less than 3 sats used means 2D */
+	session->newdata.mode = MODE_2D;
+    } else {
+	/* lat/lon/alt and 4 sats used means 3D */
+	session->newdata.mode = MODE_3D;
+    }
+    mask |= MODE_SET;
+
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "GNS: hhmmss=%s lat=%.2f lon=%.2f mode=%d status=%d\n",
+	     field[1],
 	     session->newdata.latitude,
 	     session->newdata.longitude,
 	     session->newdata.mode,
@@ -605,8 +755,9 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	do_lat_lon(&field[2], &session->newdata);
 	mask |= LATLON_SET;
 
-	if (field[8][0] != '\0')
+	if (field[8][0] != '\0') {
 	    session->gpsdata.dop.hdop = safe_atof(field[8]);
+        }
 
 	/*
 	 * SiRF chipsets up to version 2.2 report a null altitude field.
@@ -2165,6 +2316,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{"GBS", 7,  false, processGBS},
 	{"GGA", 13, false, processGGA},
 	{"GLL", 7,  false, processGLL},
+	{"GNS", 13, false, processGNS},
 	{"GSA", 17, false, processGSA},
 	{"GST", 8,  false, processGST},
 	{"GSV", 0,  false, processGSV},
@@ -2283,21 +2435,31 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	    s += 2;		/* skip talker ID */
         }
 	if (strcmp(nmea_phrase[i].name, s) == 0) {
-	    if (nmea_phrase[i].decoder != NULL
-		&& (count >= nmea_phrase[i].nf)) {
-		retval =
-		    (nmea_phrase[i].decoder) (count,
+	    if (NULL == nmea_phrase[i].decoder) {
+                /* no decoder for this sentence */
+		retval = ONLINE_SET;
+		gpsd_log(&session->context->errout, LOG_DATA,
+                         "No decoder for sentence %s\n",
+                         session->nmea.field[0]);
+                break;
+            }
+	    if (count < nmea_phrase[i].nf) {
+                /* sentence to short */
+		retval = ONLINE_SET;
+		gpsd_log(&session->context->errout, LOG_DATA,
+                         "Sentence %s too short\n", session->nmea.field[0]);
+                break;
+            }
+	    retval = (nmea_phrase[i].decoder)(count,
 					      session->nmea.field,
 					      session);
-		if (nmea_phrase[i].cycle_continue)
-		    session->nmea.cycle_continue = true;
-		/*
-		 * Must force this to be nz, as we're going to rely on a zero
-		 * value to mean "no previous tag" later.
-		 */
-		thistag = i + 1;
-	    } else
-		retval = ONLINE_SET;	/* unknown sentence */
+	    if (nmea_phrase[i].cycle_continue)
+		session->nmea.cycle_continue = true;
+	    /*
+	     * Must force this to be nz, as we're going to rely on a zero
+	     * value to mean "no previous tag" later.
+	     */
+	    thistag = i + 1;
 	    break;
 	}
     }
