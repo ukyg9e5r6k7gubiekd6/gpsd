@@ -24,7 +24,6 @@
  *
  **************************************************************************/
 
-static void do_lat_lon(char *field[], struct gps_fix_t *out)
 /* process a pair of latitude/longitude fields starting at field index BEGIN
  * The input fields look like this:
  *     field[0]: 4404.1237962
@@ -35,6 +34,7 @@ static void do_lat_lon(char *field[], struct gps_fix_t *out)
  * yes, 7 digits of precision from survey grade GPS
  *
  */
+static void do_lat_lon(char *field[], struct gps_fix_t *out)
 {
     double d, m;
     char str[20], *p;
@@ -62,6 +62,47 @@ static void do_lat_lon(char *field[], struct gps_fix_t *out)
 	    lon = -lon;
 	out->longitude = lon;
     }
+}
+
+/* process an FAA mode character
+ * return status as in session->gpsdata.status
+ */
+static int faa_mode(char mode)
+{
+    int newstatus = STATUS_FIX;
+
+    switch (mode) {
+    case '\0':	/* missing */
+	newstatus = STATUS_NO_FIX;
+	break;
+    case 'A':   /* Autonomous */
+    default:
+	newstatus = STATUS_FIX;
+	break;
+    case 'D':	/* Differential */
+	newstatus = STATUS_DGPS_FIX;
+	break;
+    case 'E':	/* Estimated dead reckoning */
+	newstatus = STATUS_DR;
+	break;
+    case 'F':	/* Float RTK */
+	newstatus = STATUS_RTK_FLT;
+	break;
+    case 'N':	/* Data Not Valid */
+	/* already handled, for paranoia sake also here */
+	newstatus = STATUS_NO_FIX;
+	break;
+    case 'P':	/* Precise (NMEA 4+) */
+	newstatus = STATUS_DGPS_FIX;	/* sort of DGPS */
+	break;
+    case 'R':	/* fixed RTK */
+	newstatus = STATUS_RTK_FIX;
+	break;
+    case 'S':	/* simulator */
+	newstatus = STATUS_NO_FIX;      /* or maybe MODE_FIX? */
+	break;
+    }
+    return newstatus;
 }
 
 /**************************************************************************
@@ -153,23 +194,25 @@ static void register_fractional_time(const char *tag, const char *fld,
  * NMEA sentence handling begins here
  *
  **************************************************************************/
+
+/* process xxVTG
+ *     $GPVTG,054.7,T,034.4,M,005.5,N,010.2,K
+ *     $GPVTG,054.7,T,034.4,M,005.5,N,010.2,K,A
+ *
+ * where:
+ *         1,2     054.7,T      True track made good (degrees)
+ *         3,4     034.4,M      Magnetic track made good
+ *         5,6     005.5,N      Ground speed, knots
+ *         7,8     010.2,K      Ground speed, Kilometers per hour
+ *         9       A            Mode Indicator (optional)
+ *                                see faa_mode() for possible mode values
+ *
+ * see also:
+ *     http://www.catb.org/gpsd/NMEA.html#_vtg_track_made_good_and_ground_speed
+ */
 static gps_mask_t processVTG(int count,
                              char *field[],
                              struct gps_device_t *session)
-//     $GPVTG,054.7,T,034.4,M,005.5,N,010.2,K
-//     $GPVTG,054.7,T,034.4,M,005.5,N,010.2,K,A
-//
-// where:
-//         1,2     054.7,T      True track made good (degrees)
-//         3,4     034.4,M      Magnetic track made good
-//         5,6     005.5,N      Ground speed, knots
-//         7,8     010.2,K      Ground speed, Kilometers per hour
-//         9       A            Mode Indicator (optional)
-//                              A=autonomous, D=differential, E=Estimated,
-//                              N=not valid, S=Simulator, M=Manual input mode
-//
-// see also:
-//     http://www.catb.org/gpsd/NMEA.html#_vtg_track_made_good_and_ground_speed
 {
     gps_mask_t mask = 0;
 
@@ -224,9 +267,9 @@ static gps_mask_t processVTG(int count,
     return mask;
 }
 
-static gps_mask_t processRMC(int count, char *field[],
-			       struct gps_device_t *session)
 /* Recommend Minimum Course Specific GPS/TRANSIT Data */
+static gps_mask_t processRMC(int count, char *field[],
+                             struct gps_device_t *session)
 {
     /*
      * RMC,225446.33,A,4916.45,N,12311.12,W,000.5,054.7,191194,020.3,E,A*68
@@ -242,12 +285,7 @@ static gps_mask_t processRMC(int count, char *field[],
      * 9     181194       Date of fix  18 November 1994
      * 10,11 020.3,E      Magnetic variation 20.3 deg East
      * 12    A            FAA mode indicator (NMEA 2.3 and later)
-     *                     N = No Fix
-     *                     E = Dead Reckoning
-     *                     A = GNSS fix
-     *                     D = DGNSS fix
-     *                     F = RTK Float
-     *                     R = RTK Fixed
+     *                            see faa_mode() for possible mode values
      * 13    V            Nav Status (NMEA 4.1 and later)
      *                     A=autonomous,
      *                     D=differential,
@@ -262,6 +300,7 @@ static gps_mask_t processRMC(int count, char *field[],
      */
     gps_mask_t mask = 0;
     char status = field[2][0];
+    int newstatus;
 
     switch (status) {
     default:
@@ -299,24 +338,19 @@ static gps_mask_t processRMC(int count, char *field[],
 	session->newdata.speed = safe_atof(field[7]) * KNOTS_TO_MPS;
 	session->newdata.track = safe_atof(field[8]);
 	mask |= (TRACK_SET | SPEED_SET);
+
+	newstatus = STATUS_FIX;
+	if (count >= 8) {
+	    newstatus = faa_mode(field[12][0]);
+        }
+        /* anything useful in field 13 ? */
+
 	/*
 	 * This copes with GPSes like the Magellan EC-10X that *only* emit
 	 * GPRMC. In this case we set mode and status here so the client
 	 * code that relies on them won't mistakenly believe it has never
 	 * received a fix.
 	 */
-	if (session->gpsdata.status == STATUS_NO_FIX) {
-            /* FIXME, this should prolly set something in newdata instead */
-            if ('D' == status) {
-		session->gpsdata.status = STATUS_DGPS_FIX;
-            } else {
-		/* could be DGPS_FIX, we can't tell */
-		session->gpsdata.status = STATUS_FIX;
-            }
-	    /* mask |= STATUS_SET; only after status is moved to newdata */
-	}
-        /* FIXME: look at fields 12 and 13 */
-
 	if (3 < session->gpsdata.satellites_used) {
             /* 4 sats used means 3D */
 	    session->newdata.mode = MODE_3D;
@@ -332,6 +366,7 @@ static gps_mask_t processRMC(int count, char *field[],
 	    session->newdata.mode = MODE_2D;
 	    mask |= MODE_SET;
 	}
+	/* NOT YET session->gpsdata.status = newstatus; */
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
@@ -405,35 +440,8 @@ static gps_mask_t processGLL(int count, char *field[],
 	mask |= LATLON_SET;
 
 	newstatus = STATUS_FIX;
-	if (count >= 8 ) {
-	    switch ( *status ) {
-	    case 'A':   /* Autonomous */
-	    default:
-		newstatus = STATUS_FIX;
-		break;
-	    case 'D':	/* differential */
-		newstatus = STATUS_DGPS_FIX;	/* differential */
-		break;
-	    case 'E':	/* dead reckoning */
-		newstatus = STATUS_DR;
-		break;
-	    case 'F':	/* float RTK */
-		newstatus = STATUS_RTK_FLT;
-		break;
-	    case 'N':	/* Data Not Valid */
-                /* already handled, for paranoia sake also here */
-		newstatus = STATUS_NO_FIX;
-		break;
-	    case 'P':	/* Precise (NMEA 4+) */
-		newstatus = STATUS_DGPS_FIX;	/* sort of DGPS */
-		break;
-	    case 'R':	/* fixed RTK */
-		newstatus = STATUS_RTK_FIX;
-		break;
-	    case 'S':	/* simulator */
-		newstatus = STATUS_NO_FIX;      /* or maybe MODE_FIX? */
-		break;
-	    }
+	if (count >= 8) {
+	    newstatus = faa_mode(*status);
         }
 	/*
          * This is a bit dodgy.  Technically we shouldn't set the mode
@@ -455,7 +463,6 @@ static gps_mask_t processGLL(int count, char *field[],
 	    mask |= MODE_SET;
 	}
 	session->gpsdata.status = newstatus;
-	mask |= STATUS_SET;
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
@@ -511,12 +518,11 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
      * 8:   *6A          Mandatory NMEA checksum
      *
      */
-    char *mode = field[6];
     int newstatus;
     int satellites_used;
     gps_mask_t mask = 0;
 
-    if ('\0' == mode[0] || 'N' == mode[0]) {
+    if ('\0' == field[6][0] || 'N' == field[6][0]) {
         /* not valid, ignore */
         /* Yes, in 2019 a GLONASS only fix may be valid, but not worth
          * the confusion */
@@ -557,40 +563,7 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
 	mask |= ALTITUDE_SET;
     }
 
-    newstatus = STATUS_FIX;
-    switch (mode[0]) {
-    case '\0':	/* missing */
-	/* already handled, for paranoia sake also here */
-	newstatus = STATUS_NO_FIX;
-	break;
-    case 'A':   /* Autonomous */
-    default:
-	newstatus = STATUS_FIX;
-	break;
-    case 'D':	/* differential */
-	newstatus = STATUS_DGPS_FIX;	/* differential */
-	break;
-    case 'E':	/* dead reckoning */
-	newstatus = STATUS_DR;
-	break;
-    case 'F':	/* float RTK */
-	newstatus = STATUS_RTK_FLT;
-	break;
-    case 'N':	/* Data Not Valid */
-	/* already handled, for paranoia sake also here */
-	newstatus = STATUS_NO_FIX;
-	break;
-    case 'P':	/* Precise (NMEA 4+) */
-	newstatus = STATUS_DGPS_FIX;	/* sort of DGPS */
-	break;
-    case 'R':	/* fixed RTK */
-	newstatus = STATUS_RTK_FIX;
-	break;
-    case 'S':	/* simulator */
-	newstatus = STATUS_NO_FIX;      /* or maybe MODE_FIX? */
-	break;
-    }
-    session->gpsdata.status = newstatus;
+    newstatus = faa_mode(field[6][0]);
 
     satellites_used = atoi(field[7]);
     if (0 == isfinite(session->newdata.latitude) ||
@@ -606,6 +579,7 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
 	/* lat/lon/alt and 4 sats used means 3D */
 	session->newdata.mode = MODE_3D;
     }
+    session->gpsdata.status = newstatus;
     mask |= MODE_SET;
 
     gpsd_log(&session->context->errout, LOG_DATA,
