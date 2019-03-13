@@ -1050,7 +1050,9 @@ static void gpsd_error_model(struct gps_device_t *session)
 	    }
         }
 
-	if (0 < deltatime && MODE_2D <= fix->mode) {
+	if (0 == isfinite(fix->epd) &&
+	    0 < deltatime &&
+            MODE_2D <= fix->mode) {
 	    /*
 	     * We compute a track error estimate solely from the
 	     * position of this fix and the last one.  The maximum

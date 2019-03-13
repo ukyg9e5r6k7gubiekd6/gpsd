@@ -604,6 +604,7 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     uint32_t sv_list_4;
     uint32_t sv_list_5;
     uint32_t additional_info;
+    int debug_base = LOG_PROG;
 
     if (len < 126)
 	return 0;
@@ -649,10 +650,10 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     mask |= TIME_SET;
 
     datum = getub(buf, 33);
-    clk_bias = getbes64(buf, 34);
-    clk_bias_error = getbeu32(buf, 42);
-    clk_offset = getbes32(buf, 46);
-    clk_offset_error = getbeu32(buf, 50);
+    clk_bias = getbes64(buf, 34) / 100.0;
+    clk_bias_error = getbeu32(buf, 42) / 100.0;
+    clk_offset = getbes32(buf, 46) / 100.0;
+    clk_offset_error = getbeu32(buf, 50) / 100.0;
     session->newdata.latitude = getbes32(buf, 54) * 1e-7;
     session->newdata.longitude = getbes32(buf, 58) * 1e-7;
     alt_ellips = getbes32(buf, 62);
@@ -693,15 +694,15 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
 
     if (!(solution_info & 0x01000)) {
         /* sog - speed over ground m/s * 100 */
-        session->newdata.speed = getbeu16(buf, 70) * 1e-2;
+        session->newdata.speed = getbeu16(buf, 70) / 100.0;
         mask |= SPEED_SET;
     }
     /* cog - course over ground fm true north deg * 100  */
-    session->newdata.track = getbeu16(buf, 72) * 1e-2;
+    session->newdata.track = getbeu16(buf, 72) / 100.0;
     mask |= TRACK_SET;
 
     /* climb_rate - vertical velocity m/s * 100 */
-    session->newdata.climb = getbes16(buf, 74) * 1e-2;
+    session->newdata.climb = getbes16(buf, 74) / 100.0;
 
     if (session->newdata.mode == MODE_3D)
 	mask |= ALTITUDE_SET | CLIMB_SET;
@@ -709,15 +710,15 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     heading_rate = getbes16(buf, 76);     /* rate of change cog deg/s * 100 */
     distance_travel = getbeu32(buf, 78);  /* distance traveled m * 100 */
     /* heading_error error of cog deg * 100 */
-    session->newdata.epd = getbes16(buf, 82) * 1e-2;
+    session->newdata.epd = getbeu16(buf, 82) / 100.0;
     /* distance traveled error in m * 100 */
-    distance_travel_error = getbeu16(buf, 84);
+    distance_travel_error = getbeu16(buf, 84) / 100.0;
 
     ehpe = getbeu32(buf, 86);  /* Estimated horizontal position error * 100 */
     /* Estimated vertical position error * 100 */
-    session->newdata.epv = getbeu16(buf, 90) * 1e-2;
+    session->newdata.epv = getbeu16(buf, 90) / 100.0;
     /* Estimated horizontal velocity error * 100 */
-    session->newdata.eps = getbeu16(buf, 94) * 1e-2;
+    session->newdata.eps = getbeu16(buf, 94) / 100.0;
     mask |= SPEEDERR_SET;
 
     session->gpsdata.dop.gdop = (int)getub(buf, 96) / 5.0;
@@ -737,44 +738,44 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
 
     mask |= REPORT_IS; /* send it */
 
-    if (session->context->errout.debug >= LOG_IO) {
+    if (session->context->errout.debug >= debug_base) {
         /* skip all the pushing and popping, unless needed */
-	gpsd_log(&session->context->errout, LOG_IO,
+	gpsd_log(&session->context->errout, debug_base,
 	     "GPS Week %d, tow %d.%03d, time %ld.%09ld\n",
 	     gps_week, gps_tow, gps_tow_sub_ms, now.tv_sec, now.tv_nsec);
-	gpsd_log(&session->context->errout, LOG_IO,
+	gpsd_log(&session->context->errout, debug_base,
 	     "UTC time %.9f leaps %u, datum %u\n",
 	     session->newdata.time, session->context->leap_seconds, datum);
-	gpsd_log(&session->context->errout, LOG_IO,
+	gpsd_log(&session->context->errout, debug_base,
              "solution_info %08x\n", solution_info);
-	gpsd_log(&session->context->errout, LOG_IO,
+	gpsd_log(&session->context->errout, debug_base,
 	     "lat %.7f lon %.7f alte %d msl %.2f\n",
 	     session->newdata.latitude, session->newdata.longitude,
              alt_ellips, session->newdata.altitude);
-	gpsd_log(&session->context->errout, LOG_IO,
+	gpsd_log(&session->context->errout, debug_base,
 	     "speed %.2f track %.2f climb %.2f heading_rate %d\n",
 	     session->newdata.speed, session->newdata.track,
              session->newdata.climb, heading_rate);
-	gpsd_log(&session->context->errout, LOG_IO,
+	gpsd_log(&session->context->errout, debug_base,
              "time_bias %d time_accuracy %u, time_source %u\n",
              time_bias, time_accuracy, time_source);
-	gpsd_log(&session->context->errout, LOG_IO,
+	gpsd_log(&session->context->errout, debug_base,
 	     "distance_travel %u distance_travel_error %d\n",
              distance_travel, distance_travel_error);
-	gpsd_log(&session->context->errout, LOG_IO,
+	gpsd_log(&session->context->errout, debug_base,
              "clk_bias %.2f clk_bias_error %u\n",
              clk_bias / 100.0, clk_bias_error);
-	gpsd_log(&session->context->errout, LOG_IO,
+	gpsd_log(&session->context->errout, debug_base,
              "clk_offset %d clk_offset_error %u\n",
              clk_offset, clk_offset_error);
-	gpsd_log(&session->context->errout, LOG_IO,
+	gpsd_log(&session->context->errout, debug_base,
 	     "ehpe %d epv %.2f eps %.2f epd %.2f num_svs_in_sol %u\n", ehpe,
 	     session->newdata.epv, session->newdata.eps, session->newdata.epd,
              num_svs_in_sol);
-	gpsd_log(&session->context->errout, LOG_IO,
+	gpsd_log(&session->context->errout, debug_base,
              "sv_list_1 %08x sv_list_2 %08x sv_list_3 %08x\n",
              sv_list_1, sv_list_2, sv_list_3);
-	gpsd_log(&session->context->errout, LOG_IO,
+	gpsd_log(&session->context->errout, debug_base,
              "sv_list_4 %08x sv_list_5 %08x add_info %08x\n",
              sv_list_4, sv_list_5, additional_info);
     }

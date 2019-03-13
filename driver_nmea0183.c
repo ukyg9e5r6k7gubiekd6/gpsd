@@ -1284,6 +1284,7 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[],
      * * in libgpsd_core.c where we generate $PGRME.
      */
     gps_mask_t mask = ONLINE_SET;
+
     if ((strcmp(field[2], "M") != 0) ||
 	(strcmp(field[4], "M") != 0) || (strcmp(field[6], "M") != 0)) {
 	session->newdata.epx =
@@ -1400,9 +1401,72 @@ static gps_mask_t processPMGNST(int c UNUSED, char *field[],
     return mask;
 }
 
+/* SiRF Estimated Position Errors */
+static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
+			       struct gps_device_t *session)
+{
+    /*
+     * $PSRFEPE,100542.000,A,0.7,6.82,10.69,0.0,180.0*24
+     * 1    = UTC Time hhmmss.sss
+     * 2    = Status.  A = Valid, V = Data not valid
+     * 3    = HDOP
+     * 4    = EHPE meters
+     * 5    = EVPE meters
+     * 6    = EHVE meters
+     * 7    = EHE meters
+     *
+     * SiRF won't say if these are 1-sigma or what...
+     */
+    gps_mask_t mask = 0;
+
+    if ('A' != field[2][0]) {
+	/* not valid */
+        return 0;
+    }
+    if ('\0' != field[1][0]) {
+	merge_hhmmss(field[1], session);
+	register_fractional_time(field[0], field[1], session);
+	if (session->nmea.date.tm_year == 0) {
+	    gpsd_log(&session->context->errout, LOG_WARN,
+		     "can't use PSRFEPE time until after ZDA or RMC"
+                     " has supplied a year.\n");
+	} else {
+	    mask |= TIME_SET;
+	}
+    }
+
+    if ('\0' != field[3][0]) {
+        /* This adds nothing, it just agrees with the gpsd calculation
+         * from the skyview.  Which is a nice confirmation. */
+	session->gpsdata.dop.hdop = safe_atof(field[3]);
+        mask |= DOP_SET;
+    }
+    /* don't use EHPE (Estimated Horizontal Position Error) as
+     * we compute epx and epy later from the skyview */
+
+    if ('\0' != field[5][0]) {
+        /* Estimated Vertical Position Error (meters, 0.01 resolution)
+	session->newdata.epv = safe_atof(field[5]);
+	mask |= VERR_SET;
+        not ready for prime time */
+    }
+
+    if ('\0' != field[7][0]) {
+        /* Estimated Heading Error degrees */
+	session->newdata.epd = safe_atof(field[7]);
+    }
+
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "PSRFEPE: hdop=%.1f epv=%.1f epd=%.1f\n",
+	     session->gpsdata.dop.hdop,
+	     session->newdata.epv,
+	     session->newdata.epd);
+    return mask;
+}
+
+/* NMEA 3.0 Estimated Position Error */
 static gps_mask_t processGBS(int c UNUSED, char *field[],
 			       struct gps_device_t *session)
-/* NMEA 3.0 Estimated Position Error */
 {
     /*
      * $GPGBS,082941.00,2.4,1.5,3.9,25,,-43.7,27.5*65
@@ -2284,7 +2348,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{"PMTKCHN", 0, false, NULL},	/* ignore MediaTek Channel Status */
 #endif /* MTK3301_ENABLE */
 	{"PRWIZCH", 0, false, NULL},	/* ignore Rockwell Channel Status */
-	{"PSRFEPE", 0, false, NULL},	/* ignore SiRF Estimated Errors */
+	{"PSRFEPE", 7, false, processPSRFEPE},	/* SiRF Estimated Errors */
 	{"PTFTTXT", 0, false, NULL},	/* ignore unknown uptime */
 	{"PUBX", 0, false, NULL},	/* ignore u-blox Antaris */
 #ifdef TNT_ENABLE
