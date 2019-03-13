@@ -1002,52 +1002,58 @@ static void gpsd_error_model(struct gps_device_t *session)
      * opened.  Also, some devices (notably plain NMEA0183 receivers)
      * never ship an indication of when they have valid leap second.
      */
-    if (isfinite(fix->time) != 0 && isfinite(fix->ept) == 0)
+    if (0 != isfinite(fix->time) &&
+        0 == isfinite(fix->ept)) {
 	fix->ept = 0.005;
+    }
+
     /* Other error computations depend on having a valid fix */
     if (fix->mode >= MODE_2D) {
-	if (isfinite(fix->epx) == 0 && isfinite(session->gpsdata.dop.hdop) != 0)
+	if (0 == isfinite(fix->epx) &&
+            0 != isfinite(session->gpsdata.dop.hdop)) {
 	    fix->epx = session->gpsdata.dop.xdop * h_uere;
+        }
 
-	if (isfinite(fix->epy) == 0 && isfinite(session->gpsdata.dop.hdop) != 0)
+	if (0 == isfinite(fix->epy) &&
+            0 != isfinite(session->gpsdata.dop.hdop)) {
 	    fix->epy = session->gpsdata.dop.ydop * h_uere;
+        }
 
-	if ((fix->mode >= MODE_3D)
-	    && isfinite(fix->epv) == 0
-	    && isfinite(session->gpsdata.dop.vdop) != 0)
+	if ((fix->mode >= MODE_3D) &&
+	    0 == isfinite(fix->epv) &&
+	    0 != isfinite(session->gpsdata.dop.vdop)) {
 	    fix->epv = session->gpsdata.dop.vdop * v_uere;
+        }
 
-	if (isfinite(session->gpsdata.epe) == 0
-	    && isfinite(session->gpsdata.dop.pdop) != 0)
+	if (0 == isfinite(session->gpsdata.epe) &&
+	    0 != isfinite(session->gpsdata.dop.pdop)) {
 	    session->gpsdata.epe = session->gpsdata.dop.pdop * p_uere;
-	else
-	    session->gpsdata.epe = NAN;
+	} else
+            session->gpsdata.epe = NAN;
 
 	/*
 	 * If we have a current fix and an old fix, and the packet handler
 	 * didn't set the speed error and climb error members itself,
 	 * try to compute them now.
 	 */
-	if (0 == isfinite(fix->eps)) {
-            if (0 < deltatime &&
-	        MODE_2D <= oldfix->mode &&
-                MODE_2D <= fix->mode &&
-		0 != isfinite(oldfix->epx) &&
-                0 != isfinite(oldfix->epy)) {
+	if (0 == isfinite(fix->eps) &&
+	    0 < deltatime &&
+	    MODE_2D <= oldfix->mode &&
+	    MODE_2D <= fix->mode &&
+	    0 != isfinite(oldfix->epx) &&
+	    0 != isfinite(oldfix->epy)) {
 		fix->eps = (EMIX(oldfix->epx, oldfix->epy) +
                             EMIX(fix->epx, fix->epy)) / deltatime;
-	    }
-	    /* else, leave as NAN */
 	}
 
-	if (0 < deltatime && MODE_3D <= fix->mode) {
-	    if (0 == isfinite(fix->epc) &&
-	        oldfix->mode >= MODE_3D) {
+	if (0 < deltatime &&
+            MODE_3D <= fix->mode &&
+	    0 == isfinite(fix->epc) &&
+	    oldfix->mode >= MODE_3D) {
                 /* Is this really valid? */
 		/* if vertical uncertainties are zero this will be too */
                 /* luckily this propogates NAN */
 		fix->epc = (oldfix->epv + fix->epv) / deltatime;
-	    }
         }
 
 	if (0 == isfinite(fix->epd) &&
