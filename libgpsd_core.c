@@ -1028,8 +1028,7 @@ static void gpsd_error_model(struct gps_device_t *session)
 	if (0 == isfinite(session->gpsdata.epe) &&
 	    0 != isfinite(session->gpsdata.dop.pdop)) {
 	    session->gpsdata.epe = session->gpsdata.dop.pdop * p_uere;
-	} else
-            session->gpsdata.epe = NAN;
+	}
 
 	/*
 	 * If we have a current fix and an old fix, and the packet handler
