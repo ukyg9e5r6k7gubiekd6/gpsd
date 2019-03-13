@@ -1410,10 +1410,10 @@ static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
      * 1    = UTC Time hhmmss.sss
      * 2    = Status.  A = Valid, V = Data not valid
      * 3    = HDOP
-     * 4    = EHPE meters
-     * 5    = EVPE meters
-     * 6    = EHVE meters
-     * 7    = EHE meters
+     * 4    = EHPE meters (Estimated Horizontal Position Error)
+     * 5    = EVPE meters (Estimated Vertical Position Error)
+     * 6    = EHVE meters (Estimated Speed Over Ground/Velocity Error)
+     * 7    = EHE degrees (Estimated Heading Error)
      *
      * SiRF won't say if these are 1-sigma or what...
      */
@@ -1451,15 +1451,20 @@ static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
         not ready for prime time */
     }
 
+    if ('\0' != field[6][0]) {
+        /* Estimated Horizontal Speed Error meters/sec */
+	session->newdata.eps = safe_atof(field[6]);
+    }
+
     if ('\0' != field[7][0]) {
         /* Estimated Heading Error degrees */
 	session->newdata.epd = safe_atof(field[7]);
     }
 
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "PSRFEPE: hdop=%.1f epv=%.1f epd=%.1f\n",
+	     "PSRFEPE: hdop=%.1f eps=%.1f epd=%.1f\n",
 	     session->gpsdata.dop.hdop,
-	     session->newdata.epv,
+	     session->newdata.eps,
 	     session->newdata.epd);
     return mask;
 }

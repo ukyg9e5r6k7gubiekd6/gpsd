@@ -1036,8 +1036,8 @@ static void gpsd_error_model(struct gps_device_t *session)
                 0 != isfinite(oldfix->epy)) {
 		fix->eps = (EMIX(oldfix->epx, oldfix->epy) +
                             EMIX(fix->epx, fix->epy)) / deltatime;
-	    } else
-		fix->eps = NAN;
+	    }
+	    /* else, leave as NAN */
 	}
 
 	if (0 < deltatime && MODE_3D <= fix->mode) {
