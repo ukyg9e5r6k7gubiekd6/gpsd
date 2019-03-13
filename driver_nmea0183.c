@@ -214,10 +214,10 @@ static gps_mask_t processVTG(int count,
                              char *field[],
                              struct gps_device_t *session)
 {
-    gps_mask_t mask = 0;
+    gps_mask_t mask = ONLINE_SET;
 
     if( (field[1][0] == '\0') || (field[5][0] == '\0')){
-        return 0;
+        return mask;
     }
 
     /* ignore empty/missing field, fix mode of last resort */
@@ -240,7 +240,7 @@ static gps_mask_t processVTG(int count,
             // MODE_SET here causes issues
 	    // mask |= MODE_SET;
             // nothing to use here, leave
-            return 0;
+            return mask;
         default:
             /* Huh? */
             break;
@@ -298,7 +298,7 @@ static gps_mask_t processRMC(int count, char *field[],
      *
      * SiRF chipsets don't return either Mode Indicator or magnetic variation.
      */
-    gps_mask_t mask = 0;
+    gps_mask_t mask = ONLINE_SET;
     char status = field[2][0];
     int newstatus;
 
@@ -415,7 +415,7 @@ static gps_mask_t processGLL(int count, char *field[],
      *
      */
     char *status = field[7];
-    gps_mask_t mask = 0;
+    gps_mask_t mask = ONLINE_SET;
 
     if (field[5][0] != '\0') {
 	merge_hhmmss(field[5], session);
@@ -511,7 +511,7 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
      */
     int newstatus;
     int satellites_used;
-    gps_mask_t mask = 0;
+    gps_mask_t mask = ONLINE_SET;
 
     if ('\0' == field[6][0] || 'N' == field[6][0]) {
         /* not valid, ignore */
@@ -616,7 +616,7 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
      * Some GPS, like the SiRFstarV in NMEA mode, send both GPGSA and
      * GLGPSA with identical data.
      */
-    gps_mask_t mask;
+    gps_mask_t mask = ONLINE_SET;
     int newstatus;
     char last_last_gga_talker = session->nmea.last_gga_talker;
     int fix;
@@ -782,9 +782,10 @@ static gps_mask_t processGST(int count, char *field[],
      * 7 Standard deviation (meters) of longitude error
      * 8 Standard deviation (meters) of altitude error
      * 9 Checksum
-*/
+     */
+    gps_mask_t mask = ONLINE_SET;
     if (count < 8) {
-      return 0;
+      return mask;
     }
 
 #define PARSE_FIELD(n) (*field[n]!='\0' ? safe_atof(field[n]) : NAN)
@@ -817,7 +818,8 @@ static gps_mask_t processGST(int count, char *field[],
 	     session->gpsdata.gst.lon_err_deviation,
 	     session->gpsdata.gst.alt_err_deviation);
 
-    return GST_SET | ONLINE_SET;
+    mask = GST_SET | ONLINE_SET;
+    return mask;
 }
 
 static int nmeaid_to_prn(char *talker, int satnum, unsigned char *gnssid,
@@ -955,7 +957,7 @@ static gps_mask_t processGSA(int count, char *field[],
      * $GNGSA,A,3,75,86,87,,,,,,,,,,3.77,2.55,2.77*1C
      * seems like the first is GNSS and the second GLONASS
      */
-    gps_mask_t mask;
+    gps_mask_t mask = ONLINE_SET;
     char last_last_gsa_talker = session->nmea.last_gsa_talker;
 
     /*
@@ -983,7 +985,7 @@ static gps_mask_t processGSA(int count, char *field[],
 	 * for a dead-reckoning estimate.  Fix by Andreas Stricker.
 	 */
 	if ('E' == field[2][0])
-	    mask = 0;
+	    mask = ONLINE_SET;
 	else
 	    mask = MODE_SET;
 	gpsd_log(&session->context->errout, LOG_PROG,
@@ -1281,13 +1283,13 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[],
      * * where we scale error estimates from Garmin binary packets, and
      * * in libgpsd_core.c where we generate $PGRME.
      */
-    gps_mask_t mask;
+    gps_mask_t mask = ONLINE_SET;
     if ((strcmp(field[2], "M") != 0) ||
 	(strcmp(field[4], "M") != 0) || (strcmp(field[6], "M") != 0)) {
 	session->newdata.epx =
 	    session->newdata.epy =
 	    session->newdata.epv = session->gpsdata.epe = 100;
-	mask = 0;
+	mask = ONLINE_SET;
     } else {
 	session->newdata.epx = session->newdata.epy =
 	    safe_atof(field[1]) * (1 / sqrt(2))
@@ -1324,7 +1326,7 @@ static gps_mask_t processPGRMZ(int c UNUSED, char *field[],
      *       technical Specifications
      *       190-00684-00, Revision C December 2008
      */
-    gps_mask_t mask = 0;
+    gps_mask_t mask = ONLINE_SET;
 
     if ('f' == field[2][0] &&
         0 < strlen(field[1])) {
@@ -1371,7 +1373,7 @@ static gps_mask_t processPMGNST(int c UNUSED, char *field[],
      * 6 = numbers change (freq. compensation?)
      * 7 = PRN number receiving current focus
      */
-    gps_mask_t mask;
+    gps_mask_t mask = ONLINE_SET;
     int newmode = atoi(field[3]);
 
     if ('T' == field[4][0]) {
@@ -1414,6 +1416,7 @@ static gps_mask_t processGBS(int c UNUSED, char *field[],
      * 8) Standard deviation of bias estimate
      * 9) Checksum
      */
+    gps_mask_t mask = ONLINE_SET;
 
     /* register fractional time for end-of-cycle detection */
     register_fractional_time(field[0], field[1], session);
@@ -1430,12 +1433,12 @@ static gps_mask_t processGBS(int c UNUSED, char *field[],
 		 session->newdata.epx,
 		 session->newdata.epy,
 		 session->newdata.epv);
-	return HERR_SET | VERR_SET;
+	mask = HERR_SET | VERR_SET;
     } else {
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "second in $GPGBS error estimates doesn't match.\n");
-	return 0;
     }
+    return mask;
 }
 
 static gps_mask_t processZDA(int c UNUSED, char *field[],
@@ -1456,7 +1459,7 @@ static gps_mask_t processZDA(int c UNUSED, char *field[],
      * with some fields blank under poorly-understood circumstances (probably
      * when they don't have satellite lock yet).
      */
-    gps_mask_t mask = 0;
+    gps_mask_t mask = ONLINE_SET;
 
     if (field[1][0] == '\0' || field[2][0] == '\0' || field[3][0] == '\0'
 	|| field[4][0] == '\0') {
@@ -1507,10 +1510,8 @@ static gps_mask_t processHDT(int c UNUSED, char *field[],
      * The following field is required to be 'T' indicating a true heading.
      * It is followed by a mandatory nmea_checksum.
      */
-    gps_mask_t mask;
+    gps_mask_t mask = ONLINE_SET;
     double heading;
-
-    mask = ONLINE_SET;
 
     if ( 0 == strlen(field[1])) {
         /* no data */
@@ -1548,8 +1549,7 @@ static gps_mask_t processDBT(int c UNUSED, char *field[],
      *
      * In real-world sensors, sometimes not all three conversions are reported.
      */
-    gps_mask_t mask;
-    mask = ONLINE_SET;
+    gps_mask_t mask = ONLINE_SET;
 
     /* this is criminal.  Depth != altitude */
     if (field[3][0] != '\0') {
@@ -1606,16 +1606,13 @@ static gps_mask_t processTXT(int count, char *field[],
      *   GP (GPS, SBAS, QZSS),
      *   QZ (QZSS).
      */
-    gps_mask_t mask = 0;
+    gps_mask_t mask = ONLINE_SET;
     int msgType = 0;
     char *msgType_txt = "Unknown";
 
     if ( 5 != count) {
-      return 0;
+      return mask;
     }
-
-    /* set something, so it won't look like an unknown sentence */
-    mask |= ONLINE_SET;
 
     msgType = atoi(field[3]);
 
@@ -1675,8 +1672,7 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[],
      technical manual says either 0 to 65535 or -32768 to 32767 can
      occur as a range.
      */
-    gps_mask_t mask;
-    mask = ONLINE_SET;
+    gps_mask_t mask = ONLINE_SET;
 
     session->gpsdata.attitude.heading = safe_atof(field[1]);
     session->gpsdata.attitude.mag_st = *field[2];
@@ -1721,8 +1717,7 @@ static gps_mask_t processTNTA(int c UNUSED, char *field[],
         than x hours, 3:GPS, fresh.
 
      */
-    gps_mask_t mask;
-    mask = ONLINE_SET;
+    gps_mask_t mask = ONLINE_SET;
 
     if (strcmp(field[3], "T4") == 0) {
 	struct oscillator_t *osc = &session->gpsdata.osc;
@@ -1778,8 +1773,7 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[],
      18. Reserved
      *hh          mandatory nmea_checksum
      */
-    gps_mask_t mask;
-    mask = ONLINE_SET;
+    gps_mask_t mask = ONLINE_SET;
 
     session->gpsdata.attitude.heading = safe_atof(field[1]);
     session->gpsdata.attitude.pitch = safe_atof(field[2]);
@@ -1819,8 +1813,7 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[],
 static gps_mask_t processPASHR(int c UNUSED, char *field[],
 			       struct gps_device_t *session)
 {
-    gps_mask_t mask;
-    mask = 0;
+    gps_mask_t mask = ONLINE_SET;
 
     if (0 == strcmp("ACK", field[1])) {
         /* ACK */
@@ -2061,10 +2054,10 @@ static gps_mask_t processPSTI030(int count, char *field[],
      * In private email, SkyTraq says F mode is 10x more accurate
      * than R mode.
      */
-    gps_mask_t mask = 0;
+    gps_mask_t mask = ONLINE_SET;
 
     if ( 16 != count )
-	    return 0;
+	    return mask;
 
     if ('V' == field[3][0] ||
         'N' == field[13][0]) {
@@ -2131,10 +2124,7 @@ static gps_mask_t processPSTI030(int count, char *field[],
 static gps_mask_t processPSTI(int count, char *field[],
 			       struct gps_device_t *session)
 {
-    gps_mask_t mask;
-
-    /* set something, so it won't look like an unknown sentence */
-    mask = ONLINE_SET;
+    gps_mask_t mask = ONLINE_SET;
 
     if ( 0 != strncmp(session->subtype, "Skytraq", 7) ) {
 	/* this is skytraq, but not marked yet, so probe for Skytraq */
@@ -2143,7 +2133,7 @@ static gps_mask_t processPSTI(int count, char *field[],
 
     if (0 == strcmp("00", field[1]) ) {
 	if ( 4 != count )
-		return 0;
+		return mask;
 	/* 1 PPS Timing report ID */
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "PSTI,00: Mode: %s, Length: %s, Quant: %s\n",
@@ -2169,7 +2159,7 @@ static gps_mask_t processPSTI(int count, char *field[],
     if (0 == strcmp("032", field[1])) {
 
 	if ( 16 != count )
-		return 0;
+		return mask;
 	/* RTK Baseline */
 	if ( 0 == strcmp(field[4], "A")) {
 	    /* Status Valid */
@@ -2191,7 +2181,7 @@ static gps_mask_t processPSTI(int count, char *field[],
     gpsd_log(&session->context->errout, LOG_DATA,
 		 "PSTI,%s: Unknown type, Count: %d\n", field[1], count);
 
-    return 0;
+    return mask;
 }
 
 /*
@@ -2203,10 +2193,7 @@ static gps_mask_t processPSTI(int count, char *field[],
 static gps_mask_t processSTI(int count, char *field[],
 			       struct gps_device_t *session)
 {
-    gps_mask_t mask;
-
-    /* set something, so it won't look like an unknown sentence */
-    mask = ONLINE_SET;
+    gps_mask_t mask = ONLINE_SET;
 
     if ( 0 != strncmp(session->subtype, "Skytraq", 7) ) {
 	/* this is skytraq, but marked yet, so probe for Skytraq */
