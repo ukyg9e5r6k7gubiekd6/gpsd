@@ -566,8 +566,6 @@ int libgps_json_unpack(const char *buf,
 	    gpsdata->set |= SPEEDERR_SET;
 	if (isfinite(gpsdata->fix.epc) != 0)
 	    gpsdata->set |= CLIMBERR_SET;
-	if (isfinite(gpsdata->fix.epc) != 0)
-	    gpsdata->set |= CLIMBERR_SET;
 	if (gpsdata->fix.mode != MODE_NOT_SEEN)
 	    gpsdata->set |= MODE_SET;
 	return FILTER(status);
