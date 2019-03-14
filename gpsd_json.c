@@ -149,6 +149,7 @@ void json_tpv_dump(const struct gps_device_t *session,
     assert(replylen > sizeof(char *));
     (void)strlcpy(reply, "{\"class\":\"TPV\",", replylen);
     if (gpsdata->dev.path[0] != '\0')
+	/* Note: Assumes /dev paths are always plain ASCII */
 	str_appendf(reply, replylen, "\"device\":\"%s\",", gpsdata->dev.path);
     if (STATUS_DGPS_FIX <= gpsdata->status) {
         /* to save rebuilding all the regressions, skip NO_FIX and FIX */
