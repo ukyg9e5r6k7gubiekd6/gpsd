@@ -6,6 +6,7 @@
 /* for vsnprintf() FreeBSD wants __ISO_C_VISIBLE >= 1999 */
 #define __ISO_C_VISIBLE 1999
 
+#include <ctype.h>       /* for isdigit() */
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -133,6 +134,31 @@ static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
     int mon = DD(ddmmyy + 2);
     int mday = DD(ddmmyy);
     int year;
+    int i;
+
+    if (NULL == ddmmyy) {
+        return 1;
+    }
+    for (i = 0; i < 6; i++) {
+        if (0 == isdigit(ddmmyy[i])) {
+            /* catches NUL and non-digits */
+            /* Telit HE910 can set year to "-9" */
+	    gpsd_log(&session->context->errout, LOG_WARN,
+		     "merge_ddmmyy(%s), malformed date\n",  ddmmyy);
+            return 2;
+        }
+    }
+    /* check for termination */
+    if ('\0' != ddmmyy[6]) {
+	/* missing NUL */
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "merge_ddmmyy(%s), malformed date\n",  ddmmyy);
+	return 3;
+    }
+
+    yy = DD(ddmmyy + 4);
+    mon = DD(ddmmyy + 2);
+    mday = DD(ddmmyy);
 
     /* check for century wrap */
     if (session->nmea.date.tm_year % 100 == 99 && yy == 0)
@@ -142,11 +168,11 @@ static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
     if ( (1 > mon ) || (12 < mon ) ) {
 	gpsd_log(&session->context->errout, LOG_WARN,
 		 "merge_ddmmyy(%s), malformed month\n",  ddmmyy);
-        return 1;
+        return 4;
     } else if ( (1 > mday ) || (31 < mday ) ) {
 	gpsd_log(&session->context->errout, LOG_WARN,
 		 "merge_ddmmyy(%s), malformed day\n",  ddmmyy);
-        return 1;
+        return 5;
     } else {
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "merge_ddmmyy(%s) sets year %d\n",
