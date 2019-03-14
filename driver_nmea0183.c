@@ -698,20 +698,28 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
     case 2:	/* differential */
 	newstatus = STATUS_DGPS_FIX;
 	break;
-    /* no 3 */
-    case 4:	/* fixed RTK */
+    case 3:
+        /* GPS PPS, fix valid, could be 2D, 3D, GNSSDR */
+	newstatus = STATUS_FIX;
+	break;
+    case 4:	/* RTK integer */
 	newstatus = STATUS_RTK_FIX;
 	break;
-    case 5:	/* float RTK */
+    case 5:	/* RTK float */
 	newstatus = STATUS_RTK_FLT;
 	break;
     case 6:
         /* dead reckoning, could be valid or invalid */
 	newstatus = STATUS_DR;
 	break;
+    case 7:
+        /* manual input, surveyed */
+	newstatus = STATUS_TIME;
+	break;
     case 8:
-        /* WTF?  Garmin GPSMAP and Gecko sends an 8, but undocumented */
-	newstatus = STATUS_FIX;
+        /* simulated mode */
+        /* Garmin GPSMAP and Gecko sends an 8, but undocumented */
+	newstatus = STATUS_SIM;
 	break;
     default:
 	newstatus = -1;

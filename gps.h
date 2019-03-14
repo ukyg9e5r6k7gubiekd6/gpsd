@@ -2129,7 +2129,8 @@ struct gps_data_t {
 #define STATUS_RTK_FLT	4	/* yes, with RTK Float */
 #define STATUS_DR	5	/* yes, with dead reckoning */
 #define STATUS_GNSSDR	6	/* yes, with GNSS + dead reckoning */
-#define STATUS_TIME	7	/* yes, time only (surveyed in) */
+#define STATUS_TIME	7	/* yes, time only (surveyed in, manual) */
+#define STATUS_SIM	8	/* yes, simulated */
 
     /* precision of fix -- valid if satellites_used > 0 */
     int satellites_used;	/* Number of satellites used in solution */
