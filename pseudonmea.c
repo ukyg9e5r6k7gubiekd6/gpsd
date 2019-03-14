@@ -134,6 +134,7 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
     char *bufp2 = bufp;
     bufp[0] = '\0';
 
+    /* FIXME: should check skyview{} for valid sats first */
     for (i = 0; i < session->gpsdata.satellites_visible; i++) {
 	if (i % 4 == 0) {
 	    bufp2 = bufp + strlen(bufp);
@@ -145,8 +146,8 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 	}
 	if (i < session->gpsdata.satellites_visible) {
             if ( 0 == session->gpsdata.skyview[i].PRN) {
-                /* bad prn, just make all zeros */
-                str_appendf(bufp, len, ",00,00,000,00");
+                /* bad prn, just make blanks */
+                str_appendf(bufp, len, ",,,,");
             } else {
                 str_appendf(bufp, len,
 			    ",%02d,%02d,%03d,%02.0f",
