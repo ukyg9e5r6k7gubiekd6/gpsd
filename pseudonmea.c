@@ -33,16 +33,19 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
 			    char bufp[], size_t len)
 {
     struct tm tm;
-    time_t intfixtime;
+    double integral;
+    time_t integral_time;
+    double fractional = modf(session->gpsdata.fix.time, &integral);
+    integral_time = (time_t) integral;
 
-    intfixtime = (time_t) session->gpsdata.fix.time;
-    (void)gmtime_r(&intfixtime, &tm);
+    (void)gmtime_r(&integral_time, &tm);
+
     if (session->gpsdata.fix.mode > MODE_NO_FIX) {
 	(void)snprintf(bufp, len,
-		       "$GPGGA,%02d%02d%02d,%09.4f,%c,%010.4f,%c,%d,%02d,",
+		       "$GPGGA,%02d%02d%05.2f,%09.4f,%c,%010.4f,%c,%d,%02d,",
 		       tm.tm_hour,
 		       tm.tm_min,
-		       tm.tm_sec,
+		       tm.tm_sec + fractional,
 		       degtodm(fabs(session->gpsdata.fix.latitude)),
 		       ((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
 		       degtodm(fabs(session->gpsdata.fix.longitude)),
