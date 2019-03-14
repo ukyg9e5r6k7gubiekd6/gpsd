@@ -238,20 +238,28 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     if (0 != isfinite(session->gpsdata.fix.epx) &&
 	0 != isfinite(session->gpsdata.fix.epy) &&
 	0 != isfinite(session->gpsdata.fix.epv) &&
-	0 != isfinite(session->gpsdata.epe) &&
-	0 != isfinite(session->gpsdata.fix.time)) {
-	struct tm tm;
-	double integral;
-	time_t integral_time;
-	double fractional = modf(session->gpsdata.fix.time, &integral);
-	integral_time = (time_t) integral;
+	0 != isfinite(session->gpsdata.epe)) {
 
-	(void)gmtime_r(&integral_time, &tm);
+	char time_str[20];
 
+	if (0 != isfinite(session->gpsdata.fix.time)) {
+	    struct tm tm;
+	    double integral;
+	    double fractional = modf(session->gpsdata.fix.time, &integral);
+	    time_t integral_time = (time_t)integral;
+
+	    (void)gmtime_r(&integral_time, &tm);
+
+	    (void)snprintf(time_str, sizeof(time_str),
+			   "%02d%02d%05.2f",
+			   tm.tm_hour, tm.tm_min, tm.tm_sec + fractional);
+	} else {
+	    time_str[0] = '\0';
+        }
 	bufp2 = bufp + strlen(bufp);
 	str_appendf(bufp, len,
-		       "$GPGBS,%02d%02d%05.2f,%.3f,%.3f,%.3f,,,,",
-		       tm.tm_hour, tm.tm_min, tm.tm_sec + fractional,
+		       "$GPGBS,%s,%.3f,%.3f,%.3f,,,,",
+		       time_str,
 		       session->gpsdata.fix.epx,
 		       session->gpsdata.fix.epy,
 		       session->gpsdata.fix.epv);
