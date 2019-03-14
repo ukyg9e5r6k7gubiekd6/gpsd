@@ -78,23 +78,34 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
 static void gpsd_transit_fix_dump(struct gps_device_t *session,
 				  char bufp[], size_t len)
 {
-    struct tm tm;
-    time_t intfixtime;
+    char time_str[20];
+    char time2_str[20];
 
-    tm.tm_mday = tm.tm_mon = tm.tm_year = tm.tm_hour = tm.tm_min = tm.tm_sec =
-	0;
     if (0 != isfinite(session->gpsdata.fix.time)) {
-	intfixtime = (time_t) session->gpsdata.fix.time;
-	(void)gmtime_r(&intfixtime, &tm);
+	struct tm tm;
+	double integral;
+	double fractional = modf(session->gpsdata.fix.time, &integral);
+	time_t integral_time = (time_t)integral;
+
+	(void)gmtime_r(&integral_time, &tm);
+
 	tm.tm_mon++;
 	tm.tm_year %= 100;
+	(void)snprintf(time_str, sizeof(time_str),
+		       "%02d%02d%05.2f",
+		       tm.tm_hour, tm.tm_min, tm.tm_sec + fractional);
+	(void)snprintf(time2_str, sizeof(time2_str),
+		       "%02d%02d%02d",
+		       tm.tm_mday, tm.tm_mon, tm.tm_year);
+    } else {
+        time_str[0] = '\0';
+        time2_str[0] = '\0';
     }
 #define ZEROIZE(x)	(isfinite(x)==0 ? 0.0 : x)
     (void)snprintf(bufp, len,
-		   "$GPRMC,%02d%02d%02d,%c,%09.4f,%c,%010.4f,%c,%.4f,%.3f,%02d%02d%02d,,",
-		   tm.tm_hour,
-		   tm.tm_min,
-		   tm.tm_sec,
+		   "$GPRMC,%s,%c,%09.4f,%c,%010.4f,"
+                   "%c,%.4f,%.3f,%s,,",
+		   time_str,
 		   session->gpsdata.status ? 'A' : 'V',
 		   ZEROIZE(degtodm(fabs(session->gpsdata.fix.latitude))),
 		   ((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
@@ -102,7 +113,7 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
 		   ((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
 		   ZEROIZE(session->gpsdata.fix.speed * MPS_TO_KNOTS),
 		   ZEROIZE(session->gpsdata.fix.track),
-		   tm.tm_mday, tm.tm_mon, tm.tm_year);
+		   time2_str);
 #undef ZEROIZE
     nmea_add_checksum(bufp);
 }
