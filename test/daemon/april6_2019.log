@@ -3,11 +3,8 @@
 # Submitter: Gary E. Miller <gem@rellim.com>
 # Date: 2019-3-14
 # Location: 48 29.0005 N, 000 22.0016 E
-# Note: Bad year at moment of 1st GPS epoch roll over on:
-#       "1999-08-22T00:02:31.420Z"
-#       99 becomes -1
-#       1999 shown as 2099
-#       GPRMC hhmmss goes backwards!
+# Note: Bad year just after 6 Apr 2019 GPS week rollover
+#       year is either 99 or -1, no longer 19.
 #       From the Telit App note:
 # https://rutronik-tec.com/wp-content/uploads/2019/02/Telit_Cellular_WeekRollover_Application_Note_r0.pdf
 #
@@ -15,5 +12,5 @@
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
 $GPRMC,,V,,,,,,,,,,N*53
-$GPRMC,000231.42,A,4829.0005,N,00022.0016,E,0.16,212.28,220899,,,A*59
 $GPRMC,000231.099,A,4829.0005,N,00022.0015,E,0.15,212.28,2208-1,,,A*73
+$GPRMC,000231.42,A,4829.0005,N,00022.0016,E,0.16,212.28,220899,,,A*59
