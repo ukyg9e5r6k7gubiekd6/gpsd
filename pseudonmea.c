@@ -206,29 +206,34 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 	}
 	nmea_add_checksum(bufp2);
     }
-    if (isfinite(session->gpsdata.fix.epx) != 0
-	&& isfinite(session->gpsdata.fix.epy) != 0
-	&& isfinite(session->gpsdata.fix.epv) != 0
-	&& isfinite(session->gpsdata.epe) != 0) {
-	struct tm tm;
-	time_t intfixtime;
 
-	tm.tm_hour = tm.tm_min = tm.tm_sec = 0;
-	if (0 != isfinite(session->gpsdata.fix.time)) {
-	    intfixtime = (time_t) session->gpsdata.fix.time;
-	    (void)gmtime_r(&intfixtime, &tm);
-	}
+    /* create $GPGBS
+     * Not really kosher, not have enough info to compute the RAIM
+     *
+     * If anyone uses this it might be nice to report partial data
+     * instead of all or nothing. */
+    if (0 != isfinite(session->gpsdata.fix.epx) &&
+	0 != isfinite(session->gpsdata.fix.epy) &&
+	0 != isfinite(session->gpsdata.fix.epv) &&
+	0 != isfinite(session->gpsdata.epe) &&
+	0 != isfinite(session->gpsdata.fix.time)) {
+	struct tm tm;
+	double integral;
+	time_t integral_time;
+	double fractional = modf(session->gpsdata.fix.time, &integral);
+	integral_time = (time_t) integral;
+
+	(void)gmtime_r(&integral_time, &tm);
+
 	bufp2 = bufp + strlen(bufp);
-#define ZEROIZE(x)      (isfinite(x)==0 ? 0.0 : x)
 	str_appendf(bufp, len,
-		       "$GPGBS,%02d%02d%02d,%.2f,M,%.2f,M,%.2f,M",
-		       tm.tm_hour, tm.tm_min, tm.tm_sec,
-		       ZEROIZE(session->gpsdata.fix.epx),
-		       ZEROIZE(session->gpsdata.fix.epy),
-		       ZEROIZE(session->gpsdata.fix.epv));
+		       "$GPGBS,%02d%02d%05.2f,%.3f,%.3f,%.3f,,,,",
+		       tm.tm_hour, tm.tm_min, tm.tm_sec + fractional,
+		       session->gpsdata.fix.epx,
+		       session->gpsdata.fix.epy,
+		       session->gpsdata.fix.epv);
 	nmea_add_checksum(bufp2);
     }
-#undef ZEROIZE
 }
 
 static void gpsd_binary_time_dump(struct gps_device_t *session,
