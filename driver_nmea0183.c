@@ -362,7 +362,8 @@ static gps_mask_t processRMC(int count, char *field[],
 	/* copes with Magellan EC-10X, see below */
 	if (session->gpsdata.status != STATUS_NO_FIX) {
 	    session->gpsdata.status = STATUS_NO_FIX;
-	    mask |= STATUS_SET;
+	    session->newdata.mode = MODE_NO_FIX;
+	    mask |= STATUS_SET | MODE_SET;
 	}
 	/* set something nz, so it won't look like an unknown sentence */
 	mask |= ONLINE_SET;
