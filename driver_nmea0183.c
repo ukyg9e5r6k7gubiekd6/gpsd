@@ -359,14 +359,9 @@ static gps_mask_t processRMC(int count, char *field[],
         /* FALLTHROUGH */
     case 'V':
         /* Invalid */
-	/* copes with Magellan EC-10X, see below */
-	if (session->gpsdata.status != STATUS_NO_FIX) {
-	    session->gpsdata.status = STATUS_NO_FIX;
-	    session->newdata.mode = MODE_NO_FIX;
-	    mask |= STATUS_SET | MODE_SET;
-	}
-	/* set something nz, so it won't look like an unknown sentence */
-	mask |= ONLINE_SET;
+	session->gpsdata.status = STATUS_NO_FIX;
+	session->newdata.mode = MODE_NO_FIX;
+	mask |= STATUS_SET | MODE_SET;
         break;
     case 'D':
         /* Differential Fix */
@@ -2063,7 +2058,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 	session->gpsdata.attitude.heading = safe_atof(field[2]);
 	session->gpsdata.attitude.roll = safe_atof(field[4]);
 	session->gpsdata.attitude.pitch = safe_atof(field[5]);
-	/* mask |= ATTITUDE_SET;  /* confuses cycle order ?? */
+	/* mask |= ATTITUDE_SET;  * confuses cycle order ?? */
 	gpsd_log(&session->context->errout, LOG_RAW,
 	    "PASHR (OxTS) time %.3f, heading %lf.\n",
 	    session->newdata.time,

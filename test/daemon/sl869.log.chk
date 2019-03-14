@@ -1,5 +1,6 @@
 $GPTXT,TELIT SW Version: SL869 v3.1.2.1 -STD -N96
 $GPRMC,102136.000,V,3340.8472,S,15117.3205,E,0.0,0.0,251112,0.0,W*79
+{"class":"TPV","mode":1}
 $GPGGA,102136.000,3340.8472,S,15117.3205,E,0,02,99.0,064.19,M,22.4,M,,*41
 $GNGSA,A,1,10,17,,,,,,,,,,,99.0,99.0,99.0*19
 {"class":"TPV","mode":1}
@@ -17,6 +18,7 @@ $GLGSV,2,2,08,77,51,333,,88,48,233,,87,41,153,,71,11,142,*68
 $QZGSV,1,1,01,193,34,332,,,,,,,,,,,,,*6A
 {"class":"SKY","vdop":99.00,"hdop":99.00,"pdop":99.00,"satellites":[{"PRN":2,"el":86,"az":86,"ss":0,"used":false,"gnssid":0,"svid":2},{"PRN":4,"el":40,"az":133,"ss":0,"used":false,"gnssid":0,"svid":4},{"PRN":5,"el":20,"az":23,"ss":39,"used":false,"gnssid":0,"svid":5},{"PRN":9,"el":36,"az":327,"ss":0,"used":false,"gnssid":0,"svid":9},{"PRN":10,"el":31,"az":83,"ss":38,"used":true,"gnssid":0,"svid":10},{"PRN":12,"el":61,"az":213,"ss":0,"used":false,"gnssid":0,"svid":12},{"PRN":17,"el":7,"az":105,"ss":20,"used":true,"gnssid":0,"svid":17},{"PRN":24,"el":38,"az":321,"ss":0,"used":false,"gnssid":0,"svid":24},{"PRN":25,"el":25,"az":224,"ss":31,"used":false,"gnssid":0,"svid":25},{"PRN":29,"el":12,"az":267,"ss":34,"used":false,"gnssid":0,"svid":29},{"PRN":76,"el":8,"az":7,"ss":0,"used":false,"gnssid":6,"svid":12},{"PRN":65,"el":10,"az":40,"ss":0,"used":false,"gnssid":6,"svid":1},{"PRN":81,"el":9,"az":277,"ss":16,"used":false,"gnssid":6,"svid":17},{"PRN":78,"el":51,"az":239,"ss":0,"used":false,"gnssid":6,"svid":14},{"PRN":77,"el":51,"az":333,"ss":0,"used":false,"gnssid":6,"svid":13},{"PRN":88,"el":48,"az":233,"ss":0,"used":false,"gnssid":6,"svid":24},{"PRN":87,"el":41,"az":153,"ss":0,"used":false,"gnssid":6,"svid":23},{"PRN":71,"el":11,"az":142,"ss":0,"used":false,"gnssid":6,"svid":7},{"PRN":193,"el":34,"az":332,"ss":0,"used":false,"gnssid":5,"svid":1}]}
 $GPRMC,102137.000,V,3340.8472,S,15117.3205,E,0.0,0.0,251112,0.0,W*78
+{"class":"TPV","mode":1}
 $GPGGA,102137.000,3340.8472,S,15117.3205,E,0,02,99.0,064.19,M,22.4,M,,*40
 $GNGSA,A,1,10,17,,,,,,,,,,,99.0,99.0,99.0*19
 {"class":"TPV","mode":1}
@@ -33,6 +35,7 @@ $GLGSV,2,2,08,77,51,333,,88,48,233,,87,41,153,,71,11,142,*68
 $QZGSV,1,1,01,193,34,332,,,,,,,,,,,,,*6A
 {"class":"SKY","vdop":99.00,"hdop":99.00,"pdop":99.00,"satellites":[{"PRN":2,"el":86,"az":86,"ss":0,"used":false,"gnssid":0,"svid":2},{"PRN":4,"el":40,"az":133,"ss":0,"used":false,"gnssid":0,"svid":4},{"PRN":5,"el":20,"az":23,"ss":39,"used":false,"gnssid":0,"svid":5},{"PRN":9,"el":36,"az":327,"ss":0,"used":false,"gnssid":0,"svid":9},{"PRN":10,"el":31,"az":83,"ss":38,"used":true,"gnssid":0,"svid":10},{"PRN":12,"el":61,"az":213,"ss":0,"used":false,"gnssid":0,"svid":12},{"PRN":17,"el":7,"az":105,"ss":20,"used":true,"gnssid":0,"svid":17},{"PRN":24,"el":38,"az":321,"ss":0,"used":false,"gnssid":0,"svid":24},{"PRN":25,"el":25,"az":224,"ss":31,"used":false,"gnssid":0,"svid":25},{"PRN":29,"el":12,"az":267,"ss":34,"used":false,"gnssid":0,"svid":29},{"PRN":76,"el":8,"az":7,"ss":0,"used":false,"gnssid":6,"svid":12},{"PRN":65,"el":10,"az":40,"ss":0,"used":false,"gnssid":6,"svid":1},{"PRN":81,"el":9,"az":277,"ss":16,"used":false,"gnssid":6,"svid":17},{"PRN":78,"el":51,"az":239,"ss":0,"used":false,"gnssid":6,"svid":14},{"PRN":77,"el":51,"az":333,"ss":0,"used":false,"gnssid":6,"svid":13},{"PRN":88,"el":48,"az":233,"ss":0,"used":false,"gnssid":6,"svid":24},{"PRN":87,"el":41,"az":153,"ss":0,"used":false,"gnssid":6,"svid":23},{"PRN":71,"el":11,"az":142,"ss":0,"used":false,"gnssid":6,"svid":7},{"PRN":193,"el":34,"az":332,"ss":0,"used":false,"gnssid":5,"svid":1}]}
 $GPRMC,102138.000,V,3340.8472,S,15117.3205,E,0.0,0.0,251112,0.0,W*77
+{"class":"TPV","mode":1}
 $GPGGA,102138.000,3340.8472,S,15117.3205,E,0,02,99.0,064.19,M,22.4,M,,*4F
 $GNGSA,A,1,10,17,,,,,,,,,,,99.0,99.0,99.0*19
 {"class":"TPV","mode":1}
@@ -49,6 +52,7 @@ $GLGSV,2,2,08,77,51,333,,88,48,233,,87,41,153,,71,11,142,*68
 $QZGSV,1,1,01,193,34,332,,,,,,,,,,,,,*6A
 {"class":"SKY","vdop":99.00,"hdop":99.00,"pdop":99.00,"satellites":[{"PRN":2,"el":86,"az":86,"ss":0,"used":false,"gnssid":0,"svid":2},{"PRN":4,"el":40,"az":133,"ss":0,"used":false,"gnssid":0,"svid":4},{"PRN":5,"el":20,"az":23,"ss":39,"used":false,"gnssid":0,"svid":5},{"PRN":9,"el":36,"az":327,"ss":0,"used":false,"gnssid":0,"svid":9},{"PRN":10,"el":31,"az":83,"ss":38,"used":true,"gnssid":0,"svid":10},{"PRN":12,"el":61,"az":213,"ss":0,"used":false,"gnssid":0,"svid":12},{"PRN":17,"el":7,"az":105,"ss":20,"used":true,"gnssid":0,"svid":17},{"PRN":24,"el":38,"az":321,"ss":0,"used":false,"gnssid":0,"svid":24},{"PRN":25,"el":25,"az":224,"ss":31,"used":false,"gnssid":0,"svid":25},{"PRN":29,"el":12,"az":267,"ss":34,"used":false,"gnssid":0,"svid":29},{"PRN":76,"el":8,"az":7,"ss":0,"used":false,"gnssid":6,"svid":12},{"PRN":65,"el":10,"az":40,"ss":0,"used":false,"gnssid":6,"svid":1},{"PRN":81,"el":9,"az":277,"ss":16,"used":false,"gnssid":6,"svid":17},{"PRN":78,"el":51,"az":239,"ss":0,"used":false,"gnssid":6,"svid":14},{"PRN":77,"el":51,"az":333,"ss":0,"used":false,"gnssid":6,"svid":13},{"PRN":88,"el":48,"az":233,"ss":0,"used":false,"gnssid":6,"svid":24},{"PRN":87,"el":41,"az":153,"ss":0,"used":false,"gnssid":6,"svid":23},{"PRN":71,"el":11,"az":142,"ss":0,"used":false,"gnssid":6,"svid":7},{"PRN":193,"el":34,"az":332,"ss":0,"used":false,"gnssid":5,"svid":1}]}
 $GPRMC,102139.000,V,3340.8472,S,15117.3205,E,0.0,0.0,251112,0.0,W*76
+{"class":"TPV","mode":1}
 $GPGGA,102139.000,3340.8472,S,15117.3205,E,0,02,99.0,064.19,M,22.4,M,,*4E
 $GNGSA,A,1,10,17,,,,,,,,,,,99.0,99.0,99.0*19
 {"class":"TPV","mode":1}
@@ -65,6 +69,7 @@ $GLGSV,2,2,08,77,51,333,,88,48,233,,87,41,153,,71,11,142,*68
 $QZGSV,1,1,01,193,34,332,,,,,,,,,,,,,*6A
 {"class":"SKY","vdop":99.00,"hdop":99.00,"pdop":99.00,"satellites":[{"PRN":2,"el":86,"az":86,"ss":0,"used":false,"gnssid":0,"svid":2},{"PRN":4,"el":40,"az":133,"ss":0,"used":false,"gnssid":0,"svid":4},{"PRN":5,"el":20,"az":23,"ss":39,"used":false,"gnssid":0,"svid":5},{"PRN":9,"el":36,"az":327,"ss":0,"used":false,"gnssid":0,"svid":9},{"PRN":10,"el":31,"az":83,"ss":38,"used":true,"gnssid":0,"svid":10},{"PRN":12,"el":61,"az":213,"ss":0,"used":false,"gnssid":0,"svid":12},{"PRN":17,"el":7,"az":105,"ss":20,"used":true,"gnssid":0,"svid":17},{"PRN":24,"el":38,"az":321,"ss":0,"used":false,"gnssid":0,"svid":24},{"PRN":25,"el":25,"az":224,"ss":31,"used":false,"gnssid":0,"svid":25},{"PRN":29,"el":12,"az":267,"ss":34,"used":false,"gnssid":0,"svid":29},{"PRN":76,"el":8,"az":7,"ss":0,"used":false,"gnssid":6,"svid":12},{"PRN":65,"el":10,"az":40,"ss":0,"used":false,"gnssid":6,"svid":1},{"PRN":81,"el":9,"az":277,"ss":0,"used":false,"gnssid":6,"svid":17},{"PRN":78,"el":51,"az":239,"ss":0,"used":false,"gnssid":6,"svid":14},{"PRN":77,"el":51,"az":333,"ss":0,"used":false,"gnssid":6,"svid":13},{"PRN":88,"el":48,"az":233,"ss":0,"used":false,"gnssid":6,"svid":24},{"PRN":87,"el":41,"az":153,"ss":0,"used":false,"gnssid":6,"svid":23},{"PRN":71,"el":11,"az":142,"ss":0,"used":false,"gnssid":6,"svid":7},{"PRN":193,"el":34,"az":332,"ss":0,"used":false,"gnssid":5,"svid":1}]}
 $GPRMC,102140.000,V,3340.8472,S,15117.3205,E,0.0,0.0,251112,0.0,W*78
+{"class":"TPV","mode":1}
 $GPGGA,102140.000,3340.8472,S,15117.3205,E,0,02,99.0,064.19,M,22.4,M,,*40
 $GNGSA,A,1,10,17,,,,,,,,,,,99.0,99.0,99.0*19
 {"class":"TPV","mode":1}
@@ -81,6 +86,7 @@ $GLGSV,2,2,08,77,51,333,,88,48,233,,87,41,153,,71,11,142,*68
 $QZGSV,1,1,01,193,34,332,,,,,,,,,,,,,*6A
 {"class":"SKY","vdop":99.00,"hdop":99.00,"pdop":99.00,"satellites":[{"PRN":2,"el":86,"az":86,"ss":0,"used":false,"gnssid":0,"svid":2},{"PRN":4,"el":40,"az":133,"ss":0,"used":false,"gnssid":0,"svid":4},{"PRN":5,"el":20,"az":23,"ss":39,"used":false,"gnssid":0,"svid":5},{"PRN":9,"el":36,"az":327,"ss":0,"used":false,"gnssid":0,"svid":9},{"PRN":10,"el":31,"az":83,"ss":38,"used":true,"gnssid":0,"svid":10},{"PRN":12,"el":61,"az":213,"ss":0,"used":false,"gnssid":0,"svid":12},{"PRN":17,"el":7,"az":105,"ss":20,"used":true,"gnssid":0,"svid":17},{"PRN":24,"el":38,"az":321,"ss":0,"used":false,"gnssid":0,"svid":24},{"PRN":25,"el":25,"az":224,"ss":31,"used":false,"gnssid":0,"svid":25},{"PRN":29,"el":12,"az":267,"ss":34,"used":false,"gnssid":0,"svid":29},{"PRN":76,"el":8,"az":7,"ss":0,"used":false,"gnssid":6,"svid":12},{"PRN":65,"el":10,"az":40,"ss":0,"used":false,"gnssid":6,"svid":1},{"PRN":81,"el":9,"az":277,"ss":15,"used":false,"gnssid":6,"svid":17},{"PRN":78,"el":51,"az":239,"ss":0,"used":false,"gnssid":6,"svid":14},{"PRN":77,"el":51,"az":333,"ss":0,"used":false,"gnssid":6,"svid":13},{"PRN":88,"el":48,"az":233,"ss":0,"used":false,"gnssid":6,"svid":24},{"PRN":87,"el":41,"az":153,"ss":0,"used":false,"gnssid":6,"svid":23},{"PRN":71,"el":11,"az":142,"ss":0,"used":false,"gnssid":6,"svid":7},{"PRN":193,"el":34,"az":332,"ss":0,"used":false,"gnssid":5,"svid":1}]}
 $GPRMC,102141.000,V,3340.8472,S,15117.3205,E,0.0,0.0,251112,0.0,W*79
+{"class":"TPV","mode":1}
 $GPGGA,102141.000,3340.8472,S,15117.3205,E,0,02,99.0,064.19,M,22.4,M,,*41
 $GNGSA,A,1,10,17,,,,,,,,,,,99.0,99.0,99.0*19
 {"class":"TPV","mode":1}
@@ -97,6 +103,7 @@ $GLGSV,2,2,08,77,51,333,,88,48,233,,87,41,153,,71,11,142,*68
 $QZGSV,1,1,01,193,34,332,,,,,,,,,,,,,*6A
 {"class":"SKY","vdop":99.00,"hdop":99.00,"pdop":99.00,"satellites":[{"PRN":2,"el":86,"az":86,"ss":43,"used":false,"gnssid":0,"svid":2},{"PRN":4,"el":40,"az":133,"ss":0,"used":false,"gnssid":0,"svid":4},{"PRN":5,"el":20,"az":23,"ss":39,"used":false,"gnssid":0,"svid":5},{"PRN":9,"el":36,"az":327,"ss":0,"used":false,"gnssid":0,"svid":9},{"PRN":10,"el":31,"az":83,"ss":38,"used":true,"gnssid":0,"svid":10},{"PRN":12,"el":61,"az":213,"ss":0,"used":false,"gnssid":0,"svid":12},{"PRN":17,"el":7,"az":105,"ss":21,"used":true,"gnssid":0,"svid":17},{"PRN":24,"el":38,"az":321,"ss":0,"used":false,"gnssid":0,"svid":24},{"PRN":25,"el":25,"az":224,"ss":31,"used":false,"gnssid":0,"svid":25},{"PRN":29,"el":12,"az":267,"ss":34,"used":false,"gnssid":0,"svid":29},{"PRN":76,"el":8,"az":7,"ss":0,"used":false,"gnssid":6,"svid":12},{"PRN":65,"el":10,"az":40,"ss":0,"used":false,"gnssid":6,"svid":1},{"PRN":81,"el":9,"az":277,"ss":15,"used":false,"gnssid":6,"svid":17},{"PRN":78,"el":51,"az":239,"ss":0,"used":false,"gnssid":6,"svid":14},{"PRN":77,"el":51,"az":333,"ss":0,"used":false,"gnssid":6,"svid":13},{"PRN":88,"el":48,"az":233,"ss":0,"used":false,"gnssid":6,"svid":24},{"PRN":87,"el":41,"az":153,"ss":0,"used":false,"gnssid":6,"svid":23},{"PRN":71,"el":11,"az":142,"ss":0,"used":false,"gnssid":6,"svid":7},{"PRN":193,"el":34,"az":332,"ss":0,"used":false,"gnssid":5,"svid":1}]}
 $GPRMC,102142.000,V,3340.8472,S,15117.3205,E,0.0,0.0,251112,0.0,W*7A
+{"class":"TPV","mode":1}
 $GPGGA,102142.000,3340.8472,S,15117.3205,E,0,02,99.0,064.19,M,22.4,M,,*42
 $GNGSA,A,1,10,17,,,,,,,,,,,99.0,99.0,99.0*19
 {"class":"TPV","mode":1}
