@@ -4,6 +4,9 @@
   Rearrange rawdata_t.  Bump the API because gps_data_t changed.
   Report sequence-ID fields in type 7 and 13 AIS messages.
   Preliminary support for SiRFstar V
+  Improve error modeling.
+  Update pseudo NMEA to v3.0, with fractional time.
+  Improve cycle detection, mostly for NMEA.
 
 3.18.1: 2018-10-19 (Gary E. Miller <gem@rellim.com>)
   Fix some installation issues.
