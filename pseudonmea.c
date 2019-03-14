@@ -29,23 +29,32 @@ static double degtodm(double angle)
     return floor(angle) * 100 + fraction * 60;
 }
 
+/* Dump a $GPGGA.
+ * looks like this is only called from net_ntrip.c
+ */
 void gpsd_position_fix_dump(struct gps_device_t *session,
 			    char bufp[], size_t len)
 {
-    struct tm tm;
-    double integral;
-    time_t integral_time;
-    double fractional = modf(session->gpsdata.fix.time, &integral);
-    integral_time = (time_t) integral;
+    char time_str[20];
 
-    (void)gmtime_r(&integral_time, &tm);
+    if (0 != isfinite(session->gpsdata.fix.time)) {
+	struct tm tm;
+	double integral;
+	double fractional = modf(session->gpsdata.fix.time, &integral);
+	time_t integral_time = (time_t)integral;
 
+	(void)gmtime_r(&integral_time, &tm);
+
+	(void)snprintf(time_str, sizeof(time_str),
+		       "%02d%02d%05.2f",
+		       tm.tm_hour, tm.tm_min, tm.tm_sec + fractional);
+    } else {
+        time_str[0] = '\0';
+    }
     if (session->gpsdata.fix.mode > MODE_NO_FIX) {
 	(void)snprintf(bufp, len,
-		       "$GPGGA,%02d%02d%05.2f,%09.4f,%c,%010.4f,%c,%d,%02d,",
-		       tm.tm_hour,
-		       tm.tm_min,
-		       tm.tm_sec + fractional,
+		       "$GPGGA,%s,%09.4f,%c,%010.4f,%c,%d,%02d,",
+		       time_str,
 		       degtodm(fabs(session->gpsdata.fix.latitude)),
 		       ((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
 		       degtodm(fabs(session->gpsdata.fix.longitude)),
