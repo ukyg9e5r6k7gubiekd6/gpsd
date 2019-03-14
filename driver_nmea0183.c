@@ -123,8 +123,11 @@ static int faa_mode(char mode)
 
 #define DD(s)	((int)((s)[0]-'0')*10+(int)((s)[1]-'0'))
 
-static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
-/* sentence supplied ddmmyy, but no century part */
+/* sentence supplied ddmmyy, but no century part
+ *
+ * return: 0 == OK,  greater than zero on failure
+ */
+static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 {
     int yy = DD(ddmmyy + 4);
     int mon = DD(ddmmyy + 2);
@@ -139,9 +142,11 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
     if ( (1 > mon ) || (12 < mon ) ) {
 	gpsd_log(&session->context->errout, LOG_WARN,
 		 "merge_ddmmyy(%s), malformed month\n",  ddmmyy);
+        return 1;
     } else if ( (1 > mday ) || (31 < mday ) ) {
 	gpsd_log(&session->context->errout, LOG_WARN,
 		 "merge_ddmmyy(%s), malformed day\n",  ddmmyy);
+        return 1;
     } else {
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "merge_ddmmyy(%s) sets year %d\n",
@@ -150,6 +155,7 @@ static void merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 	session->nmea.date.tm_mon = mon - 1;
 	session->nmea.date.tm_mday = mday;
     }
+    return 0;
 }
 
 static void merge_hhmmss(char *hhmmss, struct gps_device_t *session)
@@ -329,9 +335,10 @@ static gps_mask_t processRMC(int count, char *field[],
 	if (count > 9 && field[1][0] != '\0' && field[9][0] != '\0') {
             /* looks like a good time */
 	    merge_hhmmss(field[1], session);
-	    merge_ddmmyy(field[9], session);
-	    mask |= TIME_SET;
-	    register_fractional_time(field[0], field[1], session);
+	    if (0 == merge_ddmmyy(field[9], session)) {
+		mask |= TIME_SET;
+		register_fractional_time(field[0], field[1], session);
+            }
 	}
 	do_lat_lon(&field[3], &session->newdata);
 	mask |= LATLON_SET;
@@ -2141,9 +2148,10 @@ static gps_mask_t processPSTI030(int count, char *field[],
 	if (field[2][0] != '\0' && field[12][0] != '\0') {
 	    /* good date and time */
 	    merge_hhmmss(field[2], session);
-	    merge_ddmmyy(field[12], session);
-	    mask |= TIME_SET;
-	    register_fractional_time( "PSTI030", field[2], session);
+	    if (0 == merge_ddmmyy(field[12], session)) {
+		mask |= TIME_SET;
+		register_fractional_time( "PSTI030", field[2], session);
+            }
 	}
 	do_lat_lon(&field[4], &session->newdata);
 	mask |= LATLON_SET;
@@ -2235,9 +2243,10 @@ static gps_mask_t processPSTI(int count, char *field[],
 	    if (field[2][0] != '\0' && field[3][0] != '\0') {
 		/* good date and time */
 		merge_hhmmss(field[2], session);
-		merge_ddmmyy(field[3], session);
-		mask |= TIME_SET;
-		register_fractional_time( "PSTI032", field[2], session);
+		if (0 == merge_ddmmyy(field[3], session)) {
+		    mask |= TIME_SET;
+		    register_fractional_time( "PSTI032", field[2], session);
+                }
 	    }
 	}
 	gpsd_log(&session->context->errout, LOG_DATA,
