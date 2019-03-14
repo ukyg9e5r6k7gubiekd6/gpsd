@@ -2240,6 +2240,10 @@ extern double wgs84_separation(double, double);
 #define RAD_2_DEG	57.2957795130823208767981548141051703
 #define DEG_2_RAD	0.0174532925199432957692369076848861271
 
+/* other mathematical constants */
+#define GPS_LN2         0.693147180559945309417232121458176568
+
+
 /* geodetic constants */
 #define WGS84A 6378137		/* equatorial radius */
 #define WGS84F 298.257223563	/* flattening */

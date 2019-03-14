@@ -13,13 +13,6 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-#ifdef __linux__
-/* FreeBSD chokes on this */
-/* if we insist on C99, then we need this to get M_LN2 from math.h */
-/* 500 mean X/Open 1995 */
-#define _XOPEN_SOURCE 500
-#endif /* __linux__ */
-
 #if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L
 /* round() needs  _POSIX_C_SOURCE >= 200112L */
 #define  _POSIX_C_SOURCE 200112L
@@ -1186,7 +1179,7 @@ static bool tsip_speed_switch(struct gps_device_t *session,
     }
 
     putbyte(buf, 0, 0xff);	/* current port */
-    putbyte(buf, 1, (round(log((double)speed / 300) / M_LN2)) + 2);	/* input dev.baudrate */
+    putbyte(buf, 1, (round(log((double)speed / 300) / GPS_LN2)) + 2);	/* input dev.baudrate */
     putbyte(buf, 2, getub(buf, 1));	/* output baudrate */
     putbyte(buf, 3, 3);		/* character width (8 bits) */
     putbyte(buf, 4, parity);	/* parity (normally odd) */

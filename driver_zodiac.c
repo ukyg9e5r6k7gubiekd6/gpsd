@@ -10,14 +10,6 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-#ifdef __linux__
-/* FreeBSD chokes on this */
-/* if we insist on C99, then we need this to get M_LN2 from math.h */
-/* if we insisnt on C99, then we need this to get M_LN2 from math.h */
-/* 500 means X/Open 1995 */
-#define _XOPEN_SOURCE 500
-#endif /* __linux__ */
-
 #if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L
 /* round() needs  _POSIX_C_SOURCE >= 200112L */
 #define  _POSIX_C_SOURCE 200112L
@@ -447,7 +439,7 @@ static bool zodiac_speed_switch(struct gps_device_t *session,
     data[2] = (unsigned short)parity;	/* port 1 character width (8 bits) */
     data[3] = (unsigned short)(stopbits - 1);	/* port 1 stop bits (1 stopbit) */
     data[4] = 0;		/* port 1 parity (none) */
-    data[5] = (unsigned short)(round(log((double)speed / 300) / M_LN2) + 1);	/* port 1 speed */
+    data[5] = (unsigned short)(round(log((double)speed / 300) / GPS_LN2) + 1);	/* port 1 speed */
     data[14] = zodiac_checksum(data, 14);
 
     (void)zodiac_spew(session, 1330, data, 15);
