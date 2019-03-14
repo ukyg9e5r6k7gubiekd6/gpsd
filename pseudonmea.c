@@ -267,6 +267,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
     }
 }
 
+/* Dump $GPZDA if we have time and a fix */
 static void gpsd_binary_time_dump(struct gps_device_t *session,
 				     char bufp[], size_t len)
 {
@@ -274,7 +275,9 @@ static void gpsd_binary_time_dump(struct gps_device_t *session,
     double integral;
     time_t integral_time;
 
-    if (session->newdata.mode > MODE_NO_FIX) {
+    if (MODE_NO_FIX < session->newdata.mode &&
+        0 != isfinite(session->gpsdata.fix.time)) {
+
 	double fractional = modf(session->newdata.time, &integral);
 	integral_time = (time_t) integral;
 	(void)gmtime_r(&integral_time, &tm);
