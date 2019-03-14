@@ -130,9 +130,9 @@ static int faa_mode(char mode)
  */
 static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 {
-    int yy = DD(ddmmyy + 4);
-    int mon = DD(ddmmyy + 2);
-    int mday = DD(ddmmyy);
+    int yy;
+    int mon;
+    int mday;
     int year;
     int i;
 
@@ -156,6 +156,7 @@ static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 	return 3;
     }
 
+    /* should be no defects left to segfault DD() */
     yy = DD(ddmmyy + 4);
     mon = DD(ddmmyy + 2);
     mday = DD(ddmmyy);
