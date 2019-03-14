@@ -185,10 +185,27 @@ static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
     return 0;
 }
 
-static void merge_hhmmss(char *hhmmss, struct gps_device_t *session)
-/* update from a UTC time */
+/* update from a UTC time
+ *
+ * return: 0 == OK,  greater than zero on failure
+ */
+static int merge_hhmmss(char *hhmmss, struct gps_device_t *session)
 {
     int old_hour = session->nmea.date.tm_hour;
+    int i;
+
+    if (NULL == hhmmss) {
+        return 1;
+    }
+    for (i = 0; i < 6; i++) {
+        if (0 == isdigit(hhmmss[i])) {
+            /* catches NUL and non-digits */
+	    gpsd_log(&session->context->errout, LOG_WARN,
+		     "merge_hhmmss(%s), malformed time\n",  hhmmss);
+            return 2;
+        }
+    }
+    /* don't check for termination, might have fractional seconds */
 
     session->nmea.date.tm_hour = DD(hhmmss);
     if (session->nmea.date.tm_hour < old_hour)	/* midnight wrap */
@@ -197,6 +214,7 @@ static void merge_hhmmss(char *hhmmss, struct gps_device_t *session)
     session->nmea.date.tm_sec = DD(hhmmss + 4);
     session->nmea.subseconds =
 	safe_atof(hhmmss + 4) - session->nmea.date.tm_sec;
+    return 0;
 }
 
 static void register_fractional_time(const char *tag, const char *fld,
@@ -361,8 +379,8 @@ static gps_mask_t processRMC(int count, char *field[],
 	 */
 	if (count > 9 && field[1][0] != '\0' && field[9][0] != '\0') {
             /* looks like a good time */
-	    merge_hhmmss(field[1], session);
-	    if (0 == merge_ddmmyy(field[9], session)) {
+	    if (0 == merge_hhmmss(field[1], session) &&
+	        0 == merge_ddmmyy(field[9], session)) {
 		mask |= TIME_SET;
 		register_fractional_time(field[0], field[1], session);
             }
@@ -452,15 +470,16 @@ static gps_mask_t processGLL(int count, char *field[],
     gps_mask_t mask = ONLINE_SET;
 
     if (field[5][0] != '\0') {
-	merge_hhmmss(field[5], session);
-	register_fractional_time(field[0], field[5], session);
-	if (session->nmea.date.tm_year == 0)
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "can't use GLL time until after ZDA or RMC"
-                     " has supplied a year.\n");
-	else {
-	    mask = TIME_SET;
-	}
+	if (0 == merge_hhmmss(field[5], session)) {
+	    register_fractional_time(field[0], field[5], session);
+	    if (session->nmea.date.tm_year == 0)
+		gpsd_log(&session->context->errout, LOG_WARN,
+			 "can't use GLL time until after ZDA or RMC"
+			 " has supplied a year.\n");
+	    else {
+		mask = TIME_SET;
+	    }
+        }
     }
     if (strcmp(field[6], "A") == 0 && (count < 8 || *status != 'N')) {
 	int newstatus;
@@ -555,15 +574,16 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
     }
 
     if (field[1][0] != '\0') {
-	merge_hhmmss(field[1], session);
-	register_fractional_time(field[0], field[1], session);
-	if (session->nmea.date.tm_year == 0) {
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "can't use GNS time until after ZDA or RMC"
-                     " has supplied a year.\n");
-	} else {
-	    mask = TIME_SET;
-	}
+	if (0 == merge_hhmmss(field[1], session)) {
+	    register_fractional_time(field[0], field[1], session);
+	    if (session->nmea.date.tm_year == 0) {
+		gpsd_log(&session->context->errout, LOG_WARN,
+			 "can't use GNS time until after ZDA or RMC"
+			 " has supplied a year.\n");
+	    } else {
+		mask = TIME_SET;
+	    }
+        }
     }
 
     /* check navigation status, assume S=safe and C=caution are OK */
@@ -742,15 +762,15 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
     /* May be able to say MODE_2D if satellites_visible is 3
      * if we have a fix and the mode latch is off, go... */
     if (session->gpsdata.status > STATUS_NO_FIX) {
-
-	merge_hhmmss(field[1], session);
-	register_fractional_time(field[0], field[1], session);
-	if (session->nmea.date.tm_year == 0)
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "can't use GGA time until after ZDA or RMC"
-                     " has supplied a year.\n");
-	else {
-	    mask |= TIME_SET;
+	if (0 == merge_hhmmss(field[1], session)) {
+	    register_fractional_time(field[0], field[1], session);
+	    if (session->nmea.date.tm_year == 0)
+		gpsd_log(&session->context->errout, LOG_WARN,
+			 "can't use GGA time until after ZDA or RMC"
+			 " has supplied a year.\n");
+	    else {
+		mask |= TIME_SET;
+            }
 	}
 	do_lat_lon(&field[2], &session->newdata);
 	mask |= LATLON_SET;
@@ -1458,14 +1478,15 @@ static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
         return 0;
     }
     if ('\0' != field[1][0]) {
-	merge_hhmmss(field[1], session);
-	register_fractional_time(field[0], field[1], session);
-	if (session->nmea.date.tm_year == 0) {
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "can't use PSRFEPE time until after ZDA or RMC"
-                     " has supplied a year.\n");
-	} else {
-	    mask |= TIME_SET;
+	if (0 == merge_hhmmss(field[1], session)) {
+	    register_fractional_time(field[0], field[1], session);
+	    if (session->nmea.date.tm_year == 0) {
+		gpsd_log(&session->context->errout, LOG_WARN,
+			 "can't use PSRFEPE time until after ZDA or RMC"
+			 " has supplied a year.\n");
+	    } else {
+		mask |= TIME_SET;
+            }
 	}
     }
 
@@ -1563,41 +1584,45 @@ static gps_mask_t processZDA(int c UNUSED, char *field[],
      * when they don't have satellite lock yet).
      */
     gps_mask_t mask = ONLINE_SET;
+    int year, mon, mday, century;
 
     if (field[1][0] == '\0' || field[2][0] == '\0' || field[3][0] == '\0'
 	|| field[4][0] == '\0') {
 	gpsd_log(&session->context->errout, LOG_WARN, "ZDA fields are empty\n");
-    } else {
-    	int year, mon, mday, century;
+        return mask;
+    }
 
-	merge_hhmmss(field[1], session);
-	/*
-	 * We don't register fractional time here because want to leave
-	 * ZDA out of end-of-cycle detection. Some devices sensibly emit it only
-	 * when they have a fix, so watching for it can make them look
-	 * like they have a variable fix reporting cycle.
-	 */
-	year = atoi(field[4]);
-	mon = atoi(field[3]);
-	mday = atoi(field[2]);
-	century = year - year % 100;
-	if ( (1900 > year ) || (2200 < year ) ) {
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "malformed ZDA year: %s\n",  field[4]);
-	} else if ( (1 > mon ) || (12 < mon ) ) {
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "malformed ZDA month: %s\n",  field[3]);
-	} else if ( (1 > mday ) || (31 < mday ) ) {
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "malformed ZDA day: %s\n",  field[2]);
-	} else {
-	    gpsd_century_update(session, century);
-	    session->nmea.date.tm_year = year - 1900;
-	    session->nmea.date.tm_mon = mon - 1;
-	    session->nmea.date.tm_mday = mday;
-	    mask = TIME_SET;
-	}
-    };
+    if (0 != merge_hhmmss(field[1], session)) {
+        /* bad time */
+        return mask;
+    }
+
+    /*
+     * We don't register fractional time here because want to leave
+     * ZDA out of end-of-cycle detection. Some devices sensibly emit it only
+     * when they have a fix, so watching for it can make them look
+     * like they have a variable fix reporting cycle.
+     */
+    year = atoi(field[4]);
+    mon = atoi(field[3]);
+    mday = atoi(field[2]);
+    century = year - year % 100;
+    if ( (1900 > year ) || (2200 < year ) ) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "malformed ZDA year: %s\n",  field[4]);
+    } else if ( (1 > mon ) || (12 < mon ) ) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "malformed ZDA month: %s\n",  field[3]);
+    } else if ( (1 > mday ) || (31 < mday ) ) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "malformed ZDA day: %s\n",  field[2]);
+    } else {
+	gpsd_century_update(session, century);
+	session->nmea.date.tm_year = year - 1900;
+	session->nmea.date.tm_mon = mon - 1;
+	session->nmea.date.tm_mday = mday;
+	mask = TIME_SET;
+    }
     return mask;
 }
 
@@ -1962,8 +1987,10 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 	    /* don't use as this breaks the GPGSV counter
              * session->gpsdata.satellites_used = atoi(field[3]);  */
 	    satellites_used = atoi(field[3]);
-	    merge_hhmmss(field[4], session);
-	    register_fractional_time(field[0], field[4], session);
+	    if (0 == merge_hhmmss(field[4], session)) {
+		register_fractional_time(field[0], field[4], session);
+		mask |= TIME_SET;
+            }
 	    do_lat_lon(&field[5], &session->newdata);
 	    session->newdata.altitude = safe_atof(field[9]);
 	    session->newdata.track = safe_atof(field[11]);
@@ -1973,7 +2000,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 	    session->gpsdata.dop.hdop = safe_atof(field[15]);
 	    session->gpsdata.dop.vdop = safe_atof(field[16]);
 	    session->gpsdata.dop.tdop = safe_atof(field[17]);
-	    mask |= (TIME_SET | LATLON_SET | ALTITUDE_SET);
+	    mask |= (LATLON_SET | ALTITUDE_SET);
 	    mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
 	    mask |= DOP_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
@@ -2020,12 +2047,14 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 
     } else if (0 == strcmp("T", field[3])) { /* Assume OxTS PASHR */
 	/* FIXME: decode OxTS $PASHDR, time is wrong, breaks cycle order */
-	merge_hhmmss(field[1], session);
-	register_fractional_time(field[0], field[1], session);
+	if (0 == merge_hhmmss(field[1], session)) {
+	    register_fractional_time(field[0], field[1], session);
+	    /* mask |= TIME_SET; confuses cycle order */
+        }
 	session->gpsdata.attitude.heading = safe_atof(field[2]);
 	session->gpsdata.attitude.roll = safe_atof(field[4]);
 	session->gpsdata.attitude.pitch = safe_atof(field[5]);
-	/* mask |= (TIME_SET | ATTITUDE_SET); confuses cycle order */
+	/* mask |= ATTITUDE_SET;  /* confuses cycle order ?? */
 	gpsd_log(&session->context->errout, LOG_RAW,
 	    "PASHR (OxTS) time %.3f, heading %lf.\n",
 	    session->newdata.time,
@@ -2174,8 +2203,8 @@ static gps_mask_t processPSTI030(int count, char *field[],
         /* data valid */
 	if (field[2][0] != '\0' && field[12][0] != '\0') {
 	    /* good date and time */
-	    merge_hhmmss(field[2], session);
-	    if (0 == merge_ddmmyy(field[12], session)) {
+	    if (0 == merge_hhmmss(field[2], session) &&
+	        0 == merge_ddmmyy(field[12], session)) {
 		mask |= TIME_SET;
 		register_fractional_time( "PSTI030", field[2], session);
             }
@@ -2269,8 +2298,8 @@ static gps_mask_t processPSTI(int count, char *field[],
 	    /* Status Valid */
 	    if (field[2][0] != '\0' && field[3][0] != '\0') {
 		/* good date and time */
-		merge_hhmmss(field[2], session);
-		if (0 == merge_ddmmyy(field[3], session)) {
+		if (0 == merge_hhmmss(field[2], session) &&
+		    0 == merge_ddmmyy(field[3], session)) {
 		    mask |= TIME_SET;
 		    register_fractional_time( "PSTI032", field[2], session);
                 }
