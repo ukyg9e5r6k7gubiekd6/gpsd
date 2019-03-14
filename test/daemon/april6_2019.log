@@ -1,0 +1,15 @@
+# Name: april6_2019
+# Chipset: Telit HE910
+# Submitter: Gary E. Miller <gem@rellim.com>
+# Date: 2019-3-14
+# Location: 48 29.0005 N, 000 22.0016 E
+# Note: Bad year at moment of 2nd GPS epoch roll over
+#       From the Telit App note:
+# https://rutronik-tec.com/wp-content/uploads/2019/02/Telit_Cellular_WeekRollover_Application_Note_r0.pdf
+#
+# This file is Copyright (c) 2010 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
+#
+$GPRMC,,V,,,,,,,,,,N*53
+$GPRMC,000231.42,A,4829.0005,N,00022.0016,E,0.16,212.28,220899,,,A*59
+$GPRMC,000231.099,A,4829.0005,N,00022.0015,E,0.15,212.28,2208-1,,,A*73
