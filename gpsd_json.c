@@ -192,7 +192,9 @@ void json_tpv_dump(const struct gps_device_t *session,
 	    str_appendf(reply, replylen, "\"epx\":%.3f,", gpsdata->fix.epx);
 	if (isfinite(gpsdata->fix.epy) != 0)
 	    str_appendf(reply, replylen, "\"epy\":%.3f,", gpsdata->fix.epy);
-	if ((gpsdata->fix.mode >= MODE_3D) && isfinite(gpsdata->fix.epv) != 0)
+	if (isfinite(gpsdata->fix.epe) != 0)
+	    str_appendf(reply, replylen, "\"epe\":%.3f,", gpsdata->fix.epe);
+	if (isfinite(gpsdata->fix.epv) != 0)
 	    str_appendf(reply, replylen, "\"epv\":%.3f,", gpsdata->fix.epv);
 	if (isfinite(gpsdata->fix.track) != 0)
 	    str_appendf(reply, replylen, "\"track\":%.4f,", gpsdata->fix.track);
