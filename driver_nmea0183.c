@@ -142,7 +142,7 @@ static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
     for (i = 0; i < 6; i++) {
         if (0 == isdigit(ddmmyy[i])) {
             /* catches NUL and non-digits */
-            /* Telit HE910 can set year to "-9" */
+            /* Telit HE910 can set year to "-1" (1999 - 2000) */
 	    gpsd_log(&session->context->errout, LOG_WARN,
 		     "merge_ddmmyy(%s), malformed date\n",  ddmmyy);
             return 2;
