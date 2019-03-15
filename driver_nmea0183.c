@@ -1225,7 +1225,8 @@ static gps_mask_t processGSV(int count, char *field[],
 	session->nmea.last_gsv_talker = GSV_TALKER;
 	if (session->nmea.last_gsv_talker == 'L')
 	    session->nmea.seen_glgsv = true;
-	if (session->nmea.last_gsv_talker == 'D' || session->nmea.last_gsv_talker == 'B')
+	if (session->nmea.last_gsv_talker == 'D' ||
+            session->nmea.last_gsv_talker == 'B')
 	    session->nmea.seen_bdgsv = true;
 	if (session->nmea.last_gsv_talker == 'Z')
 	    session->nmea.seen_qzss = true;
@@ -1481,11 +1482,19 @@ static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
      *
      * SiRF won't say if these are 1-sigma or what...
      */
-    gps_mask_t mask = 0;
+    gps_mask_t mask = STATUS_SET;
 
+    if ('\0' == field[2][0] ||
+        'V' == field[2][0]) {
+        /* Invalid */
+	session->gpsdata.status = STATUS_NO_FIX;
+	session->newdata.mode = MODE_NO_FIX;
+	mask |= MODE_SET;
+        return mask;
+    }
     if ('A' != field[2][0]) {
-	/* not valid */
-        return 0;
+	/* Huh? */
+        return mask;
     }
     if ('\0' != field[1][0]) {
 	if (0 == merge_hhmmss(field[1], session)) {
