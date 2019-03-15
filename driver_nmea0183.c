@@ -166,6 +166,16 @@ static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 	gpsd_century_update(session, session->context->century + 100);
     year = (session->context->century + yy);
 
+    /* 32 bit systems will break in 2038.
+     * Telix fails on GPS rollover to 2099, which 32 bit system
+     * can not handle.  So wrap at 2080.  That way 64 bit systems
+     * work until 2080, and 2099 gets reported as 1999.
+     * since GPS epoch started in 1981, allows for old NMEA to work.
+     */
+    if (2080 < year) {
+        year -= 100;
+    }
+
     if ( (1 > mon ) || (12 < mon ) ) {
 	gpsd_log(&session->context->errout, LOG_WARN,
 		 "merge_ddmmyy(%s), malformed month\n",  ddmmyy);
@@ -225,7 +235,7 @@ static void register_fractional_time(const char *tag, const char *fld,
 	session->nmea.this_frac_time = safe_atof(fld);
 	session->nmea.latch_frac_time = true;
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "%s: registers fractional time %.2f\n",
+		 "%s: registers fractional time %.3f\n",
 		 tag, session->nmea.this_frac_time);
     }
 }
@@ -235,6 +245,8 @@ static void register_fractional_time(const char *tag, const char *fld,
  * Compare GPS timestamps for equality.  Depends on the fact that the
  * timestamp granularity of GPS is 1/100th of a second.  Use this to avoid
  * naive float comparisons.
+ *
+ * FIXME: many GPS now report time to .sss.  1/1000th
  *
  **************************************************************************/
 
