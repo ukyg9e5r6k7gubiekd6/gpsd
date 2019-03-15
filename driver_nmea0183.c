@@ -448,7 +448,7 @@ static gps_mask_t processGLL(int count, char *field[],
      * 1,2 Latitude, N (North) or S (South)
      * 3,4 Longitude, E (East) or W (West)
      * 5 UTC of position
-     * 6 A=Active, V=Void
+     * 6 A = Active, V = Invalid data
      * 7 Mode Indicator
      *    See faa_mode() for possible mode values.
      *
@@ -477,7 +477,13 @@ static gps_mask_t processGLL(int count, char *field[],
 	    }
         }
     }
-    if (strcmp(field[6], "A") == 0 && (count < 8 || *status != 'N')) {
+    if ('\0' == field[6][0] ||
+        'V' == field[6][0]) {
+        /* Invalid */
+	session->gpsdata.status = STATUS_NO_FIX;
+	session->newdata.mode = MODE_NO_FIX;
+	mask |= STATUS_SET | MODE_SET;
+    } else if ('A' == field[6][0] && (count < 8 || *status != 'N')) {
 	int newstatus;
 
 	do_lat_lon(&field[1], &session->newdata);
@@ -2652,6 +2658,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     /* usually because of xxRMC which does not report 2D/3D */
     if (MODE_SET == (retval & MODE_SET) &&
         MODE_3D == session->gpsdata.fix.mode &&
+        MODE_NO_FIX != session->newdata.mode &&
         (0 != isfinite(session->lastfix.altitude) ||
          0 != isfinite(session->oldfix.altitude))) {
         session->newdata.mode = session->gpsdata.fix.mode;

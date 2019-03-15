@@ -1,4 +1,5 @@
 $GPGLL,,,,,,V,N*64
+{"class":"TPV","mode":1}
 $GPBOD,,T,,M,,*47
 $PGRME,,M,,M,,M*00
 $PGRMZ,,f,1*29
@@ -14,6 +15,7 @@ $GPGSV,3,2,12,15,02,014,00,18,27,053,00,19,74,257,41,22,56,080,41*72
 $GPGSV,3,3,12,24,85,096,00,28,15,328,00,33,23,211,40,37,26,166,00*7F
 {"class":"SKY","satellites":[{"PRN":3,"el":57,"az":171,"ss":0,"used":false,"gnssid":0,"svid":3},{"PRN":6,"el":46,"az":153,"ss":0,"used":false,"gnssid":0,"svid":6},{"PRN":8,"el":6,"az":303,"ss":0,"used":false,"gnssid":0,"svid":8},{"PRN":11,"el":17,"az":274,"ss":0,"used":false,"gnssid":0,"svid":11},{"PRN":15,"el":2,"az":14,"ss":0,"used":false,"gnssid":0,"svid":15},{"PRN":18,"el":27,"az":53,"ss":0,"used":false,"gnssid":0,"svid":18},{"PRN":19,"el":74,"az":257,"ss":41,"used":false,"gnssid":0,"svid":19},{"PRN":22,"el":56,"az":80,"ss":41,"used":false,"gnssid":0,"svid":22},{"PRN":24,"el":85,"az":96,"ss":0,"used":false,"gnssid":0,"svid":24},{"PRN":28,"el":15,"az":328,"ss":0,"used":false,"gnssid":0,"svid":28},{"PRN":120,"el":23,"az":211,"ss":40,"used":false,"gnssid":1,"svid":120},{"PRN":124,"el":26,"az":166,"ss":0,"used":false,"gnssid":1,"svid":124}]}
 $GPGLL,,,,,,V,N*64
+{"class":"TPV","mode":1}
 $GPBOD,,T,,M,,*47
 $PGRME,,M,,M,,M*00
 $PGRMZ,,f,1*29
@@ -29,6 +31,7 @@ $GPGSV,3,2,12,15,02,014,00,18,27,053,00,19,74,257,41,22,56,080,41*72
 $GPGSV,3,3,12,24,85,096,00,28,15,328,00,33,23,211,40,37,26,166,00*7F
 {"class":"SKY","satellites":[{"PRN":3,"el":57,"az":171,"ss":45,"used":false,"gnssid":0,"svid":3},{"PRN":6,"el":46,"az":153,"ss":0,"used":false,"gnssid":0,"svid":6},{"PRN":8,"el":6,"az":303,"ss":0,"used":false,"gnssid":0,"svid":8},{"PRN":11,"el":17,"az":274,"ss":0,"used":false,"gnssid":0,"svid":11},{"PRN":15,"el":2,"az":14,"ss":0,"used":false,"gnssid":0,"svid":15},{"PRN":18,"el":27,"az":53,"ss":0,"used":false,"gnssid":0,"svid":18},{"PRN":19,"el":74,"az":257,"ss":41,"used":false,"gnssid":0,"svid":19},{"PRN":22,"el":56,"az":80,"ss":41,"used":false,"gnssid":0,"svid":22},{"PRN":24,"el":85,"az":96,"ss":0,"used":false,"gnssid":0,"svid":24},{"PRN":28,"el":15,"az":328,"ss":0,"used":false,"gnssid":0,"svid":28},{"PRN":120,"el":23,"az":211,"ss":40,"used":false,"gnssid":1,"svid":120},{"PRN":124,"el":26,"az":166,"ss":0,"used":false,"gnssid":1,"svid":124}]}
 $GPGLL,,,,,,V,N*64
+{"class":"TPV","mode":1}
 $GPBOD,,T,,M,,*47
 $PGRME,,M,,M,,M*00
 $PGRMZ,,f,1*29
@@ -44,6 +47,7 @@ $GPGSV,3,2,12,15,02,014,00,18,27,053,00,19,74,257,41,22,56,080,41*72
 $GPGSV,3,3,12,24,85,096,00,28,15,328,00,33,23,211,41,37,26,166,00*7E
 {"class":"SKY","satellites":[{"PRN":3,"el":56,"az":170,"ss":45,"used":false,"gnssid":0,"svid":3},{"PRN":6,"el":46,"az":153,"ss":0,"used":false,"gnssid":0,"svid":6},{"PRN":8,"el":6,"az":303,"ss":0,"used":false,"gnssid":0,"svid":8},{"PRN":11,"el":17,"az":274,"ss":0,"used":false,"gnssid":0,"svid":11},{"PRN":15,"el":2,"az":14,"ss":0,"used":false,"gnssid":0,"svid":15},{"PRN":18,"el":27,"az":53,"ss":0,"used":false,"gnssid":0,"svid":18},{"PRN":19,"el":74,"az":257,"ss":41,"used":false,"gnssid":0,"svid":19},{"PRN":22,"el":56,"az":80,"ss":41,"used":false,"gnssid":0,"svid":22},{"PRN":24,"el":85,"az":96,"ss":0,"used":false,"gnssid":0,"svid":24},{"PRN":28,"el":15,"az":328,"ss":0,"used":false,"gnssid":0,"svid":28},{"PRN":120,"el":23,"az":211,"ss":41,"used":false,"gnssid":1,"svid":120},{"PRN":124,"el":26,"az":166,"ss":0,"used":false,"gnssid":1,"svid":124}]}
 $GPGLL,,,,,,V,N*64
+{"class":"TPV","mode":1}
 $GPBOD,,T,,M,,*47
 $PGRME,,M,,M,,M*00
 $PGRMZ,,f,1*29
@@ -59,6 +63,7 @@ $GPGSV,3,2,12,15,02,014,00,18,27,053,00,19,74,257,41,22,56,080,41*72
 $GPGSV,3,3,12,24,85,096,00,28,15,328,00,33,23,211,41,37,26,166,00*7E
 {"class":"SKY","satellites":[{"PRN":3,"el":56,"az":170,"ss":44,"used":false,"gnssid":0,"svid":3},{"PRN":6,"el":46,"az":153,"ss":0,"used":false,"gnssid":0,"svid":6},{"PRN":8,"el":6,"az":303,"ss":0,"used":false,"gnssid":0,"svid":8},{"PRN":11,"el":17,"az":274,"ss":0,"used":false,"gnssid":0,"svid":11},{"PRN":15,"el":2,"az":14,"ss":0,"used":false,"gnssid":0,"svid":15},{"PRN":18,"el":27,"az":53,"ss":0,"used":false,"gnssid":0,"svid":18},{"PRN":19,"el":74,"az":257,"ss":41,"used":false,"gnssid":0,"svid":19},{"PRN":22,"el":56,"az":80,"ss":41,"used":false,"gnssid":0,"svid":22},{"PRN":24,"el":85,"az":96,"ss":0,"used":false,"gnssid":0,"svid":24},{"PRN":28,"el":15,"az":328,"ss":0,"used":false,"gnssid":0,"svid":28},{"PRN":120,"el":23,"az":211,"ss":41,"used":false,"gnssid":1,"svid":120},{"PRN":124,"el":26,"az":166,"ss":0,"used":false,"gnssid":1,"svid":124}]}
 $GPGLL,,,,,,V,N*64
+{"class":"TPV","mode":1}
 $GPBOD,,T,,M,,*47
 $PGRME,,M,,M,,M*00
 $PGRMZ,,f,1*29
