@@ -1072,11 +1072,10 @@ static void gpsd_error_model(struct gps_device_t *session)
             }
 
 	    if (0 == isfinite(fix->epc) &&
-	        MODE_3D <= fix->mode &&
-		MODE_3D <= oldfix->mode) {
+	        0 != isfinite(fix->epv) &&
+	        0 != isfinite(oldfix->epv)) {
 		    /* Is this really valid? */
 		    /* if vertical uncertainties are zero this will be too */
-		    /* luckily this propagates NAN */
 		    fix->epc = (oldfix->epv + fix->epv) / deltatime;
 	    }
 	}
