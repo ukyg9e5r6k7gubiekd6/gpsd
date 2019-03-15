@@ -1350,11 +1350,9 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[],
      */
     gps_mask_t mask = ONLINE_SET;
 
-    if ((strcmp(field[2], "M") != 0) ||
-	(strcmp(field[4], "M") != 0) || (strcmp(field[6], "M") != 0)) {
-	session->newdata.epx =
-	    session->newdata.epy =
-	    session->newdata.epv = session->gpsdata.epe = 100;
+    if ('M' != field[2][0] ||
+        'M' != field[4][0] ||
+        'M' != field[6][0]) {
 	mask = ONLINE_SET;
     } else {
 	session->newdata.epx = session->newdata.epy =
@@ -1362,7 +1360,7 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[],
                       * (GPSD_CONFIDENCE / CEP50_SIGMA);
 	session->newdata.epv =
 	    safe_atof(field[3]) * (GPSD_CONFIDENCE / CEP50_SIGMA);
-	session->gpsdata.epe =
+	session->newdata.epe =
 	    safe_atof(field[5]) * (GPSD_CONFIDENCE / CEP50_SIGMA);
 	mask = HERR_SET | VERR_SET | PERR_IS;
     }

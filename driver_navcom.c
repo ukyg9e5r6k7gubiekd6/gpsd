@@ -898,7 +898,7 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	double alt_sd = getled64(buf, 57);
 	double hrms = sqrt(pow(lat_sd, 2) + pow(lon_sd, 2));
 #endif /*  __UNUSED__ */
-	session->gpsdata.epe = rms * 1.96;
+	session->newdata.epe = rms * 1.96;
 	mask |= PERR_IS;
 #ifdef __UNUSED__
 	session->newdata.eph = hrms * 1.96;
@@ -911,7 +911,7 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "Navcom: received packet type 0xb5 (Pseudorange Noise Statistics)\n");
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "Navcom: epe = %f\n", session->gpsdata.epe);
+		 "Navcom: epe = %f\n", session->newdata.epe);
 	return mask;
     } else {
 	/* Ignore this message block */

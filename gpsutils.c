@@ -262,6 +262,7 @@ void gps_clear_fix(struct gps_fix_t *fixp)
     fixp->epd = NAN;
     fixp->eps = NAN;
     fixp->epc = NAN;
+    fixp->epe = NAN;
     /* clear ECEF too */
     fixp->ecef.x = NAN;
     fixp->ecef.y = NAN;
@@ -337,6 +338,9 @@ void gps_merge_fix(struct gps_fix_t *to,
     }
     if (0 != isfinite(from->epd)) {
 	to->epd = from->epd;
+    }
+    if (0 != isfinite(from->epe)) {
+	to->epe = from->epe;
     }
     if ((transfer & VERR_SET) != 0)
 	to->epv = from->epv;

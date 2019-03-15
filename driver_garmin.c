@@ -180,7 +180,7 @@ typedef struct __attribute__((__packed__))
 typedef struct __attribute__((__packed__))
 {
     float alt;			/* altitude above WGS 84 (meters) */
-    float epe;			/* estimated position error, 2 sigma (meters)  */
+    float epe;			/* estimated position error, 2 sigma (meters) */
     float eph;			/* epe, but horizontal only (meters) */
     float epv;			/* epe but vertical only (meters ) */
     int16_t fix;		/* 0 - failed integrity check
@@ -419,7 +419,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	// We follow the advice at <http://gpsinformation.net/main/errors.htm>.
 	// If this assumption changes here, it should also change in
 	// nmea_parse.c where we analyze PGRME.
-	session->gpsdata.epe = pvt->epe * (GPSD_CONFIDENCE / CEP50_SIGMA);
+	session->newdata.epe = pvt->epe * (GPSD_CONFIDENCE / CEP50_SIGMA);
 	/* eph is a circular error, sqrt(epx**2 + epy**2) */
 	session->newdata.epx = session->newdata.epy =
 	    pvt->eph * (1 / sqrt(2)) * (GPSD_CONFIDENCE / CEP50_SIGMA);

@@ -340,7 +340,6 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     session->gpsdata.set = 0;
     gps_clear_att(&session->gpsdata.attitude);
     gps_clear_dop(&session->gpsdata.dop);
-    session->gpsdata.epe = NAN;
     session->mag_var = NAN;
     session->gpsdata.dev.cycle = session->gpsdata.dev.mincycle = 1;
 #ifdef TIMING_ENABLE
@@ -1025,9 +1024,9 @@ static void gpsd_error_model(struct gps_device_t *session)
 	    fix->epv = session->gpsdata.dop.vdop * v_uere;
         }
 
-	if (0 == isfinite(session->gpsdata.epe) &&
+	if (0 == isfinite(fix->epe) &&
 	    0 != isfinite(session->gpsdata.dop.pdop)) {
-	    session->gpsdata.epe = session->gpsdata.dop.pdop * p_uere;
+	    fix->epe = session->gpsdata.dop.pdop * p_uere;
 	}
 
 	/*
@@ -1492,7 +1491,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    session->gpsdata.set |= fill_dop(&session->context->errout,
 					     &session->gpsdata,
 					     &session->gpsdata.dop);
-	    session->gpsdata.epe = NAN;
 	}
 #endif /* NOFLOATS_ENABLE */
 

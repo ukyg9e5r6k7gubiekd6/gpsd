@@ -44,6 +44,7 @@ extern "C" {
  *       changed MAXCHANNELS
  * 8.0 - Change shape of rawdata_t.
  *       Added values for gps_data_t->status
+ *       Move epe from gps_data_t to be near its friends in gps_fix_t.
  */
 #define GPSD_API_MAJOR_VERSION	8	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -105,6 +106,7 @@ struct gps_fix_t {
     double eps;		/* Speed uncertainty, meters/sec */
     double climb;       /* Vertical speed, meters/sec */
     double epc;		/* Vertical speed uncertainty */
+    double epe;         /* spherical position error, 95% confidence (meters) */
 
     double magnetic_track;  /* Course (relative to Magnetic North) */
 
@@ -2135,9 +2137,6 @@ struct gps_data_t {
     /* precision of fix -- valid if satellites_used > 0 */
     int satellites_used;	/* Number of satellites used in solution */
     struct dop_t dop;
-
-    /* redundant with the estimate elements in the fix structure */
-    double epe;  /* spherical position error, 95% confidence (meters)  */
 
     /* satellite status -- valid when satellites_visible > 0 */
     timestamp_t skyview_time;	/* skyview timestamp */
