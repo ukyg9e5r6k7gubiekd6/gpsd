@@ -21,12 +21,30 @@
  * value NAN, it is a valid WGS84 geoidal separation in meters for the fix.
  */
 
-static double degtodm(double angle)
+#define BUF_SZ 20
+static char *degtodm_str(double angle, const char *fmt, char *buf)
 /* decimal degrees to GPS-style, degrees first followed by minutes */
 {
     double fraction, integer;
-    fraction = modf(angle, &integer);
-    return floor(angle) * 100 + fraction * 60;
+    if (0 == isfinite(angle)) {
+        buf[0] = '\0';
+    } else {
+        angle = fabs(angle);
+	fraction = modf(angle, &integer);
+	(void)snprintf(buf, BUF_SZ, fmt, floor(angle) * 100 + fraction * 60);
+    }
+    return buf;
+}
+
+/* format a float/lon/alt into a string, handle NAN, INFINITE */
+static char *f_str(double f, const char *fmt, char *buf)
+{
+    if (0 == isfinite(f)) {
+        buf[0] = '\0';
+    } else {
+	(void)snprintf(buf, BUF_SZ, fmt, f);
+    }
+    return buf;
 }
 
 /* Dump a $GPGGA.
@@ -36,6 +54,8 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
 			    char bufp[], size_t len)
 {
     char time_str[20];
+    char lat_str[BUF_SZ];
+    char lon_str[BUF_SZ];
 
     if (0 != isfinite(session->gpsdata.fix.time)) {
 	struct tm tm;
@@ -53,11 +73,13 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
     }
     if (session->gpsdata.fix.mode > MODE_NO_FIX) {
 	(void)snprintf(bufp, len,
-		       "$GPGGA,%s,%09.4f,%c,%010.4f,%c,%d,%02d,",
+		       "$GPGGA,%s,%s,%c,%s,%c,%d,%02d,",
 		       time_str,
-		       degtodm(fabs(session->gpsdata.fix.latitude)),
+		       degtodm_str(session->gpsdata.fix.latitude, "%09.4f",
+                                   lat_str),
 		       ((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
-		       degtodm(fabs(session->gpsdata.fix.longitude)),
+		       degtodm_str(session->gpsdata.fix.longitude, "%010.4f",
+                                   lon_str),
 		       ((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
 		       session->gpsdata.status,
 		       session->gpsdata.satellites_used);
@@ -89,6 +111,10 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
 {
     char time_str[20];
     char time2_str[20];
+    char lat_str[BUF_SZ];
+    char lon_str[BUF_SZ];
+    char speed_str[BUF_SZ];
+    char track_str[BUF_SZ];
 
     if (0 != isfinite(session->gpsdata.fix.time)) {
 	struct tm tm;
@@ -110,20 +136,20 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
         time_str[0] = '\0';
         time2_str[0] = '\0';
     }
-#define ZEROIZE(x)	(isfinite(x)==0 ? 0.0 : x)
     (void)snprintf(bufp, len,
-		   "$GPRMC,%s,%c,%09.4f,%c,%010.4f,"
-                   "%c,%.4f,%.3f,%s,,",
+		   "$GPRMC,%s,%c,%s,%c,%s,%c,%s,%s,%s,,",
 		   time_str,
 		   session->gpsdata.status ? 'A' : 'V',
-		   ZEROIZE(degtodm(fabs(session->gpsdata.fix.latitude))),
+		   degtodm_str(session->gpsdata.fix.latitude, "%09.4f",
+                               lat_str),
 		   ((session->gpsdata.fix.latitude > 0) ? 'N' : 'S'),
-		   ZEROIZE(degtodm(fabs(session->gpsdata.fix.longitude))),
+		   degtodm_str(session->gpsdata.fix.longitude, "%010.4f",
+                               lon_str),
 		   ((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
-		   ZEROIZE(session->gpsdata.fix.speed * MPS_TO_KNOTS),
-		   ZEROIZE(session->gpsdata.fix.track),
+		   f_str(session->gpsdata.fix.speed * MPS_TO_KNOTS, "%.4f",
+                            speed_str),
+		   f_str(session->gpsdata.fix.track, "%.3f", track_str),
 		   time2_str);
-#undef ZEROIZE
     nmea_add_checksum(bufp);
 }
 
