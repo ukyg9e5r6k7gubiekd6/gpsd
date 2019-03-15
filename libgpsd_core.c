@@ -1008,7 +1008,7 @@ static void gpsd_error_model(struct gps_device_t *session)
     }
 
     /* Other error computations depend on having a valid fix */
-    if (fix->mode >= MODE_2D) {
+    if (MODE_2D <= fix->mode) {
 	if (0 == isfinite(fix->epx) &&
             0 != isfinite(session->gpsdata.dop.hdop)) {
 	    fix->epx = session->gpsdata.dop.xdop * h_uere;
@@ -1019,7 +1019,7 @@ static void gpsd_error_model(struct gps_device_t *session)
 	    fix->epy = session->gpsdata.dop.ydop * h_uere;
         }
 
-	if ((fix->mode >= MODE_3D) &&
+	if (MODE_3D <= fix->mode &&
 	    0 == isfinite(fix->epv) &&
 	    0 != isfinite(session->gpsdata.dop.vdop)) {
 	    fix->epv = session->gpsdata.dop.vdop * v_uere;
@@ -1032,54 +1032,52 @@ static void gpsd_error_model(struct gps_device_t *session)
 
 	/*
 	 * If we have a current fix and an old fix, and the packet handler
-	 * didn't set the speed error and climb error members itself,
-	 * try to compute them now.
+	 * didn't set the speed error, climb error or track error members
+         * itself, try to compute them now.
 	 */
-	if (0 == isfinite(fix->eps) &&
-	    0 < deltatime &&
-	    MODE_2D <= oldfix->mode &&
-	    MODE_2D <= fix->mode &&
-	    0 != isfinite(oldfix->epx) &&
-	    0 != isfinite(oldfix->epy)) {
-		fix->eps = (EMIX(oldfix->epx, oldfix->epy) +
-                            EMIX(fix->epx, fix->epy)) / deltatime;
-	}
-
 	if (0 < deltatime &&
-            MODE_3D <= fix->mode &&
-	    0 == isfinite(fix->epc) &&
-	    oldfix->mode >= MODE_3D) {
-                /* Is this really valid? */
-		/* if vertical uncertainties are zero this will be too */
-                /* luckily this propogates NAN */
-		fix->epc = (oldfix->epv + fix->epv) / deltatime;
-        }
+	    MODE_2D <= oldfix->mode) {
 
-	if (0 == isfinite(fix->epd) &&
-	    0 < deltatime &&
-            MODE_2D <= fix->mode) {
-	    /*
-	     * We compute a track error estimate solely from the
-	     * position of this fix and the last one.  The maximum
-	     * track error, as seen from the position of last fix, is
-	     * the angle subtended by the two most extreme possible
-	     * error positions of the current fix; the expected track
-	     * error is half that.  Let the position of the old fix be
-	     * A and of the new fix B.  We model the view from A as
-	     * two right triangles ABC and ABD with BC and BD both
-	     * having the length of the new fix's estimated error.
-	     * adj = len(AB), opp = len(BC) = len(BD), hyp = len(AC) =
-	     * len(AD). This leads to spurious uncertainties
-	     * near 180 when we're moving slowly; to avoid reporting
-	     * garbage, throw back NaN if the distance from the previous
-	     * fix is less than the error estimate.
-	     */
-	    double adj = earth_distance(oldfix->latitude, oldfix->longitude,
-			                fix->latitude, fix->longitude);
-	    if (isfinite(adj) != 0 && adj > EMIX(fix->epx, fix->epy)) {
+	    if (0 == isfinite(fix->eps) &&
+		0 != isfinite(oldfix->epx) &&
+		0 != isfinite(oldfix->epy)) {
+		    fix->eps = (EMIX(oldfix->epx, oldfix->epy) +
+				EMIX(fix->epx, fix->epy)) / deltatime;
+	    }
+
+	    if (0 == isfinite(fix->epd)) {
+		/*
+		 * We compute a track error estimate solely from the
+		 * position of this fix and the last one.  The maximum
+		 * track error, as seen from the position of last fix, is
+		 * the angle subtended by the two most extreme possible
+		 * error positions of the current fix; the expected track
+		 * error is half that.  Let the position of the old fix be
+		 * A and of the new fix B.  We model the view from A as
+		 * two right triangles ABC and ABD with BC and BD both
+		 * having the length of the new fix's estimated error.
+		 * adj = len(AB), opp = len(BC) = len(BD), hyp = len(AC) =
+		 * len(AD). This leads to spurious uncertainties
+		 * near 180 when we're moving slowly; to avoid reporting
+		 * garbage, throw back NaN if the distance from the previous
+		 * fix is less than the error estimate.
+		 */
+		double adj = earth_distance(oldfix->latitude, oldfix->longitude,
+					    fix->latitude, fix->longitude);
 		double opp = EMIX(fix->epx, fix->epy);
-		double hyp = sqrt(adj * adj + opp * opp);
-		fix->epd = RAD_2_DEG * 2 * asin(opp / hyp);
+		if (isfinite(adj) != 0 && adj > opp) {
+		    double hyp = sqrt(adj * adj + opp * opp);
+		    fix->epd = RAD_2_DEG * 2 * asin(opp / hyp);
+		}
+            }
+
+	    if (0 == isfinite(fix->epc) &&
+	        MODE_3D <= fix->mode &&
+		MODE_3D <= oldfix->mode) {
+		    /* Is this really valid? */
+		    /* if vertical uncertainties are zero this will be too */
+		    /* luckily this propagates NAN */
+		    fix->epc = (oldfix->epv + fix->epv) / deltatime;
 	    }
 	}
     }
