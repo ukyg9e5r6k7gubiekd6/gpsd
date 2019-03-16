@@ -2595,7 +2595,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	 * is a timestamp whenever TIME_SET is set.
 	 */
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "%s time is %2f = %d-%02d-%02dT%02d:%02d:%02.2fZ\n",
+		 "%s time is %.3f = %d-%02d-%02dT%02d:%02d:%02.2fZ\n",
 		 session->nmea.field[0], session->newdata.time,
 		 1900 + session->nmea.date.tm_year,
 		 session->nmea.date.tm_mon + 1,
