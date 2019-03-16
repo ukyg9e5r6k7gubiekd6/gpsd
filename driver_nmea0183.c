@@ -1148,7 +1148,7 @@ static gps_mask_t processGSA(int count, char *field[],
     }
 
     gpsd_log(&session->context->errout, LOG_PROG,
-             "xxGSA: mask %#lx\n", (unsigned long)mask);
+             "xxGSA: mask %#llx\n", mask);
     return mask;
 #undef GSA_TALKER
 }
