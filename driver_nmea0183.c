@@ -2626,7 +2626,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     /* FIXME, Skytraq may end in $PSTI,030 and $PSTI,032 */
     if (session->nmea.latch_frac_time) {
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "%s sentence timestamped %.2f.\n",
+		 "%s sentence timestamped %.3f.\n",
 		 session->nmea.field[0],
 		 session->nmea.this_frac_time);
 	if (!GPS_TIME_EQUAL
