@@ -202,7 +202,7 @@ static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 static int merge_hhmmss(char *hhmmss, struct gps_device_t *session)
 {
     int old_hour = session->nmea.date.tm_hour;
-    int i;
+    int i, sublen;
 
     if (NULL == hhmmss) {
         return 1;
@@ -222,8 +222,16 @@ static int merge_hhmmss(char *hhmmss, struct gps_device_t *session)
 	session->nmea.date.tm_mday++;
     session->nmea.date.tm_min = DD(hhmmss + 2);
     session->nmea.date.tm_sec = DD(hhmmss + 4);
-    session->nmea.subseconds =
-	safe_atof(hhmmss + 4) - session->nmea.date.tm_sec;
+
+    if ('.' == hhmmss[6] &&
+        0 != isdigit(hhmmss[7])) {
+	i = atoi(hhmmss + 7);
+        sublen = strlen(hhmmss + 7);
+	session->nmea.subseconds = i / pow(10.0, sublen);
+    } else {
+	session->nmea.subseconds = 0.0;
+    }
+
     return 0;
 }
 
