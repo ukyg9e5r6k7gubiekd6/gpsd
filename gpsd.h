@@ -582,8 +582,8 @@ struct gps_device_t {
 	 */
 	timestamp_t this_frac_time, last_frac_time;
 	bool latch_frac_time;
-	unsigned long lasttag;
-	unsigned long cycle_enders;
+	int lasttag;              /* index into nmea_phrase[] */
+	uint64_t cycle_enders;    /* bit map into nmea_phrase{} */
 	bool cycle_continue;
     } nmea;
 #endif /* NMEA0183_ENABLE */

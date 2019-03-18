@@ -452,7 +452,7 @@ static gps_mask_t processRMC(int count, char *field[],
 
 /* Geographic position - Latitude, Longitude */
 static gps_mask_t processGLL(int count, char *field[],
-			       struct gps_device_t *session)
+			     struct gps_device_t *session)
 {
     /* Introduced in NMEA 3.0.
      *
@@ -659,9 +659,9 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
     return mask;
 }
 
+/* Global Positioning System Fix Data */
 static gps_mask_t processGGA(int c UNUSED, char *field[],
 			       struct gps_device_t *session)
-/* Global Positioning System Fix Data */
 {
     /*
      * GGA,123519,4807.038,N,01131.324,E,1,08,0.9,545.4,M,46.9,M, , *42
@@ -739,7 +739,7 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	break;
     case 8:
         /* simulated mode */
-        /* Garmin GPSMAP and Gecko sends an 8, but undocumented */
+        /* Garmin GPSMAP and Gecko sends an 8, but undocumented why */
 	newstatus = STATUS_SIM;
 	break;
     default:
@@ -1000,7 +1000,7 @@ static int nmeaid_to_prn(char *talker, int satnum, unsigned char *gnssid,
 }
 
 static gps_mask_t processGSA(int count, char *field[],
-			       struct gps_device_t *session)
+			     struct gps_device_t *session)
 /* GPS DOP and Active Satellites */
 {
 #define GSA_TALKER	field[0][1]
@@ -1147,14 +1147,15 @@ static gps_mask_t processGSA(int count, char *field[],
 	mask =  ONLINE_SET | MODE_SET;
     }
 
+    /* cast for 32/64 compatibility */
     gpsd_log(&session->context->errout, LOG_PROG,
-             "xxGSA: mask %#llx\n", mask);
+             "xxGSA: mask %#llx\n", (long long unsigned)mask);
     return mask;
 #undef GSA_TALKER
 }
 
 static gps_mask_t processGSV(int count, char *field[],
-			       struct gps_device_t *session)
+			     struct gps_device_t *session)
 /* GPS Satellites in View */
 {
 #define GSV_TALKER	field[0][1]
@@ -1420,7 +1421,7 @@ static gps_mask_t processPGRMZ(int c UNUSED, char *field[],
     }
     switch (field[3][0]) {
     default:
-        /* WTF? */
+        /* Huh? */
         break;
     case '1':
 	session->newdata.mode = MODE_NO_FIX;
@@ -1502,14 +1503,6 @@ static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
      */
     gps_mask_t mask = STATUS_SET;
 
-    if ('\0' == field[2][0] ||
-        'V' == field[2][0]) {
-        /* Invalid */
-	session->gpsdata.status = STATUS_NO_FIX;
-	session->newdata.mode = MODE_NO_FIX;
-	mask |= MODE_SET;
-        return mask;
-    }
     if ('A' != field[2][0]) {
 	/* Huh? */
         return mask;
@@ -1747,9 +1740,9 @@ static gps_mask_t processDBT(int c UNUSED, char *field[],
     return mask;
 }
 
-static gps_mask_t processTXT(int count, char *field[],
-			       struct gps_device_t *session)
 /* GPS Text message */
+static gps_mask_t processTXT(int count, char *field[],
+			     struct gps_device_t *session)
 {
     /*
      * $GNTXT,01,01,01,PGRM inv format*2A
@@ -2197,9 +2190,9 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
 
 #ifdef SKYTRAQ_ENABLE
 
-static gps_mask_t processPSTI030(int count, char *field[],
-			       struct gps_device_t *session)
 /*  Recommended Minimum 3D GNSS Data */
+static gps_mask_t processPSTI030(int count, char *field[],
+			        struct gps_device_t *session)
 {
     /*
      * $PSTI,030,hhmmss.sss,A,dddmm.mmmmmmm,a,dddmm.mmmmmmm,a,x.x,x.x,x.x,x.x,ddmmyy,a.x.x,x.x*hh<CR><LF>
@@ -2292,7 +2285,7 @@ static gps_mask_t processPSTI030(int count, char *field[],
  *
  */
 static gps_mask_t processPSTI(int count, char *field[],
-			       struct gps_device_t *session)
+			      struct gps_device_t *session)
 {
     gps_mask_t mask = ONLINE_SET;
 
@@ -2324,7 +2317,7 @@ static gps_mask_t processPSTI(int count, char *field[],
     }
     if (0 == strcmp("030", field[1])) {
 	/*  Recommended Minimum 3D GNSS Data */
-	return processPSTI030( count, field, session);
+	return processPSTI030(count, field, session);
     }
     if (0 == strcmp("032", field[1])) {
 
@@ -2362,7 +2355,7 @@ static gps_mask_t processPSTI(int count, char *field[],
  * Note: NO checksum
  */
 static gps_mask_t processSTI(int count, char *field[],
-			       struct gps_device_t *session)
+			     struct gps_device_t *session)
 {
     gps_mask_t mask = ONLINE_SET;
 
@@ -2473,10 +2466,12 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     };
 
     int count;
-    gps_mask_t retval = 0;
-    unsigned int i, thistag;
+    gps_mask_t mask = 0;
+    unsigned int i, thistag, lasttag;
     char *p, *e;
     volatile char *t;
+    uint64_t lasttag_mask = 0;
+    uint64_t thistag_mask = 0;
 #ifdef SKYTRAQ_ENABLE
     bool skytraq_sti = false;
 #endif
@@ -2554,7 +2549,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	if (strcmp(nmea_phrase[i].name, s) == 0) {
 	    if (NULL == nmea_phrase[i].decoder) {
                 /* no decoder for this sentence */
-		retval = ONLINE_SET;
+		mask = ONLINE_SET;
 		gpsd_log(&session->context->errout, LOG_DATA,
                          "No decoder for sentence %s\n",
                          session->nmea.field[0]);
@@ -2562,14 +2557,13 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
             }
 	    if (count < nmea_phrase[i].nf) {
                 /* sentence to short */
-		retval = ONLINE_SET;
+		mask = ONLINE_SET;
 		gpsd_log(&session->context->errout, LOG_DATA,
                          "Sentence %s too short\n", session->nmea.field[0]);
                 break;
             }
-	    retval = (nmea_phrase[i].decoder)(count,
-					      session->nmea.field,
-					      session);
+	    mask = (nmea_phrase[i].decoder)(count, session->nmea.field,
+					    session);
 	    if (nmea_phrase[i].cycle_continue)
 		session->nmea.cycle_continue = true;
 	    /*
@@ -2588,14 +2582,11 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	session->nmea.last_gsa_talker = '\0';
 
     /* timestamp recording for fixes happens here */
-    if ((retval & TIME_SET) != 0) {
+    if ((mask & TIME_SET) != 0) {
 	session->newdata.time = gpsd_utc_resolve(session);
-	/*
-	 * WARNING: This assumes time is always field 0, and that field 0
-	 * is a timestamp whenever TIME_SET is set.
-	 */
+
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "%s time is %.3f = %d-%02d-%02dT%02d:%02d:%02.2fZ\n",
+		 "%s time is %.3f = %d-%02d-%02dT%02d:%02d:%.3fZ\n",
 		 session->nmea.field[0], session->newdata.time,
 		 1900 + session->nmea.date.tm_year,
 		 session->nmea.date.tm_mon + 1,
@@ -2609,7 +2600,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	 * information for a sharper test, so we'll leave it up to the
 	 * PPS code to do its own sanity filtering.
 	 */
-	retval |= NTPTIME_IS;
+	mask |= NTPTIME_IS;
     }
 
     /*
@@ -2623,74 +2614,90 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
      * occurs just before timestamp increments also occurs in
      * mid-cycle, as in the Garmin eXplorist 210; those might jitter.
      */
-    /* FIXME, Skytraq may end in $PSTI,030 and $PSTI,032 */
+    /* cast for 32/64 bit compat */
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "%s time %.3f last %.3f latch %d cont %d enders %#llx\n",
+	     session->nmea.field[0],
+	     session->nmea.this_frac_time,
+	     session->nmea.last_frac_time,
+	     session->nmea.latch_frac_time,
+	     session->nmea.cycle_continue,
+	     (unsigned long long)session->nmea.cycle_enders);
+    lasttag = session->nmea.lasttag;
+    if (0 < session->nmea.lasttag) {
+        lasttag_mask = (uint64_t)1 << lasttag;
+    }
+    if (0 < thistag) {
+        thistag_mask = (uint64_t)1 << thistag;
+    }
     if (session->nmea.latch_frac_time) {
-	gpsd_log(&session->context->errout, LOG_PROG,
-		 "%s sentence timestamped %.3f.\n",
-		 session->nmea.field[0],
-		 session->nmea.this_frac_time);
-	if (!GPS_TIME_EQUAL
-	    (session->nmea.this_frac_time,
-	     session->nmea.last_frac_time)) {
-	    unsigned int lasttag = session->nmea.lasttag;
-	    retval |= CLEAR_IS;
+	if (!GPS_TIME_EQUAL(session->nmea.this_frac_time,
+	                    session->nmea.last_frac_time)) {
+
+	    mask |= CLEAR_IS;
 	    gpsd_log(&session->context->errout, LOG_PROG,
-		     "%s starts a reporting cycle.\n",
-		     session->nmea.field[0]);
+		     "%s starts a reporting cycle. lasttag %d\n",
+		     session->nmea.field[0], lasttag);
 	    /*
 	     * Have we seen a previously timestamped NMEA tag?
 	     * If so, designate as end-of-cycle marker.
 	     * But not if there are continuation sentences;
 	     * those get sorted after the last timestamped sentence
+             *
 	     */
-	    if (lasttag > 0
-		&& (session->nmea.cycle_enders & (1 << lasttag)) == 0
-		&& !session->nmea.cycle_continue) {
-		session->nmea.cycle_enders |= (1 << lasttag);
+	    if (0 < lasttag &&
+		0 == (session->nmea.cycle_enders & lasttag_mask) &&
+		!session->nmea.cycle_continue) {
+		session->nmea.cycle_enders |= lasttag_mask;
+		/* cast for 32/64 bit compat */
 		gpsd_log(&session->context->errout, LOG_PROG,
-			 "tagged %s as a cycle ender.\n",
-			 nmea_phrase[lasttag - 1].name);
+			 "tagged %s as a cycle ender. %#llx\n",
+			 nmea_phrase[lasttag - 1].name,
+                         (unsigned long long)lasttag_mask);
 	    }
 	}
     } else {
 	/* extend the cycle to an un-timestamped sentence? */
-	if ((session->nmea.lasttag & session->nmea.cycle_enders) != 0)
+	if (0 != (session->nmea.cycle_enders & lasttag_mask)) {
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "%s is just after a cycle ender.\n",
 		     session->nmea.field[0]);
+        }
 	if (session->nmea.cycle_continue) {
 	    gpsd_log(&session->context->errout, LOG_PROG,
 		     "%s extends the reporting cycle.\n",
 		     session->nmea.field[0]);
-	    session->nmea.cycle_enders &=~ (1 << session->nmea.lasttag);
-	    session->nmea.cycle_enders |= (1 << thistag);
+            /* change ender */
+	    session->nmea.cycle_enders &= ~lasttag_mask;
+	    session->nmea.cycle_enders |= thistag_mask;
 	}
     }
+
     /* here's where we check for end-of-cycle */
     if ((session->nmea.latch_frac_time || session->nmea.cycle_continue)
-	&& (session->nmea.cycle_enders & (1 << thistag))!=0) {
+	&& (session->nmea.cycle_enders & thistag_mask)!=0) {
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "%s ends a reporting cycle.\n",
 		 session->nmea.field[0]);
-	retval |= REPORT_IS;
+	mask |= REPORT_IS;
     }
     if (session->nmea.latch_frac_time)
 	session->nmea.lasttag = thistag;
 
-    /* we might have a reliable end-of-cycle */
+    /* we might have a (somewhat) reliable end-of-cycle */
     if (session->nmea.cycle_enders != 0)
 	session->cycle_end_reliable = true;
 
     /* don't downgrade mode if holding previous fix */
     /* usually because of xxRMC which does not report 2D/3D */
-    if (MODE_SET == (retval & MODE_SET) &&
+    if (MODE_SET == (mask & MODE_SET) &&
         MODE_3D == session->gpsdata.fix.mode &&
         MODE_NO_FIX != session->newdata.mode &&
         (0 != isfinite(session->lastfix.altitude) ||
          0 != isfinite(session->oldfix.altitude))) {
         session->newdata.mode = session->gpsdata.fix.mode;
     }
-    return retval;
+    return mask;
 }
 
 #endif /* NMEA0183_ENABLE */
