@@ -22,8 +22,10 @@ extern "C" {
 #include <termios.h>
 #endif
 #ifdef HAVE_WINSOCK2_H
-#include <winsock2.h> /* for fd_set */
-#endif
+#include <winsock2.h>      /* for fd_set */
+#else /* !HAVE_WINSOCK2_H */
+#include <sys/select.h>    /* for fd_set */
+#endif /* !HAVE_WINSOCK2_H */
 #include <time.h>    /* for time_t */
 
 #include "gps.h"

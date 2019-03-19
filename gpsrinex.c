@@ -69,7 +69,8 @@
 
 #ifndef _XOPEN_SOURCE
 /* need >= 500 for strdup() */
-#define _XOPEN_SOURCE 500
+/* OpenBSD needs >= 600 for isfinite() */
+#define _XOPEN_SOURCE 600
 #endif
 
 #include <stdio.h>

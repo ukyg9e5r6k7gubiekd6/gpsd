@@ -13,15 +13,15 @@ import getopt
 import os
 import select
 import socket
+import string
 import sys
 import termios
-
-import curses.ascii
 
 # pylint wants local modules last
 try:
     import gps
     import gps.packet as sniffer
+    from gps.misc import BINARY_ENCODING
 except ImportError as e:
     sys.stderr.write(
         "gpscat: can't load Python gps libraries -- check PYTHONPATH.\n")
@@ -44,12 +44,14 @@ BASELEVEL = sniffer.LOG_IO
 
 highhalf_latch = True
 
+PRINTABLE = set(bytearray(string.printable, encoding=BINARY_ENCODING))
+
 
 def hexdump(st):
     "Convert string to hex string"
     dmp = ""
     for ch in bytearray(st):  # bytearray gets array of ints in Python 2 and 3
-        if curses.ascii.isprint(ch) or curses.ascii.isspace(ch):
+        if ch in PRINTABLE:
             dmp += chr(ch)
         else:
             dmp += "\\x%02x" % ch
