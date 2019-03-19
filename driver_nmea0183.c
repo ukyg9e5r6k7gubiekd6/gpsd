@@ -34,35 +34,41 @@
  * input format of lat/lon is NMEA style  DDDMM.mmmmmmm
  * yes, 7 digits of precision from survey grade GPS
  *
+ * return: 0 == OK, non zero is failure.
  */
-static void do_lat_lon(char *field[], struct gps_fix_t *out)
+static int do_lat_lon(char *field[], struct gps_fix_t *out)
 {
     double d, m;
-    char str[20], *p;
+    double lon;
+    double lat;
 
-    if (*(p = field[0]) != '\0') {
-	double lat;
-	(void)strlcpy(str, p, sizeof(str));
-	lat = safe_atof(str);
-	m = 100.0 * modf(lat / 100.0, &d);
-	lat = d + m / 60.0;
-	p = field[1];
-	if (*p == 'S')
-	    lat = -lat;
-	out->latitude = lat;
+    if ('\0' == field[0][0] ||
+        '\0' == field[1][0] ||
+        '\0' == field[2][0] ||
+        '\0' == field[3][0]) {
+        return 1;
     }
-    if (*(p = field[2]) != '\0') {
-	double lon;
-	(void)strlcpy(str, p, sizeof(str));
-	lon = safe_atof(str);
-	m = 100.0 * modf(lon / 100.0, &d);
-	lon = d + m / 60.0;
 
-	p = field[3];
-	if (*p == 'W')
-	    lon = -lon;
-	out->longitude = lon;
+    lat = safe_atof(field[0]);
+    m = 100.0 * modf(lat / 100.0, &d);
+    lat = d + m / 60.0;
+    if ('S' == field[1][0])
+	lat = -lat;
+
+    lon = safe_atof(field[2]);
+    m = 100.0 * modf(lon / 100.0, &d);
+    lon = d + m / 60.0;
+    if ('W' == field[3][0])
+	lon = -lon;
+
+    if (0 == isfinite(lat) ||
+        0 == isfinite(lon)) {
+        return 2;
     }
+
+    out->latitude = lat;
+    out->longitude = lon;
+    return 0;
 }
 
 /* process an FAA mode character
@@ -406,8 +412,7 @@ static gps_mask_t processRMC(int count, char *field[],
         }
         /* else, no point to the time only case, no regressions with that */
 
-	if ('\0' != field[3][0]) {
-	    do_lat_lon(&field[3], &session->newdata);
+	if (0 == do_lat_lon(&field[3], &session->newdata)) {
 	    newstatus = STATUS_FIX;
 	    mask |= LATLON_SET;
             if (MODE_2D >= session->gpsdata.fix.mode) {
@@ -519,10 +524,11 @@ static gps_mask_t processGLL(int count, char *field[],
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->newdata.mode = MODE_NO_FIX;
 	mask |= STATUS_SET | MODE_SET;
-    } else if ('A' == field[6][0] && (count < 8 || *status != 'N')) {
+    } else if ('A' == field[6][0] &&
+        (count < 8 || *status != 'N') &&
+	0 == do_lat_lon(&field[1], &session->newdata)) {
 	int newstatus;
 
-	do_lat_lon(&field[1], &session->newdata);
 	mask |= LATLON_SET;
 
 	newstatus = STATUS_FIX;
@@ -549,6 +555,10 @@ static gps_mask_t processGLL(int count, char *field[],
 	    mask |= MODE_SET;
 	}
 	session->gpsdata.status = newstatus;
+    } else {
+	session->gpsdata.status = STATUS_NO_FIX;
+	session->newdata.mode = MODE_NO_FIX;
+	mask |= STATUS_SET | MODE_SET;
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
@@ -633,36 +643,33 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
         return mask;
     }
 
-    if ('\0' != field[2][0]) {
-	do_lat_lon(&field[2], &session->newdata);
+    satellites_used = atoi(field[7]);
+
+    if (0 == do_lat_lon(&field[2], &session->newdata)) {
 	mask |= LATLON_SET;
+	session->newdata.mode = MODE_2D;
+
+	if ('\0' != field[9][0]) {
+	    session->newdata.altitude = safe_atof(field[9]);
+	    if (0 != isfinite(session->newdata.altitude)) {
+		mask |= ALTITUDE_SET;
+		if (3 < satellites_used) {
+		    /* more than 3 sats used means 3D */
+		    session->newdata.mode = MODE_3D;
+                }
+            }
+	}
+    } else {
+	session->newdata.mode = MODE_NO_FIX;
+        mask |= MODE_SET;
     }
 
     if (field[8][0] != '\0') {
 	session->gpsdata.dop.hdop = safe_atof(field[8]);
     }
 
-    if ('\0' != field[9][0]) {
-	session->newdata.altitude = safe_atof(field[9]);
-	mask |= ALTITUDE_SET;
-    }
-
     newstatus = faa_mode(field[6][0]);
 
-    satellites_used = atoi(field[7]);
-    if (0 == isfinite(session->newdata.latitude) ||
-        0 == isfinite(session->newdata.longitude)) {
-        /* no lat/lon, no fix */
-	session->newdata.mode = MODE_NO_FIX;
-    } else if (0 == isfinite(session->newdata.altitude) ||
-               3 >= satellites_used) {
-        /* lat/lon, no alt, so 2D fix */
-	/* less than 3 sats used means 2D */
-	session->newdata.mode = MODE_2D;
-    } else {
-	/* lat/lon/alt and 4 sats used means 3D */
-	session->newdata.mode = MODE_3D;
-    }
     session->gpsdata.status = newstatus;
     mask |= MODE_SET;
 
@@ -818,13 +825,9 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	}
     }
 
-    if ('\0' == field[2][0]) {
-	session->newdata.mode = MODE_NO_FIX;
-	mask |= MODE_SET;
-    } else {
-	do_lat_lon(&field[2], &session->newdata);
+    if (0 == do_lat_lon(&field[2], &session->newdata)) {
 	session->newdata.mode = MODE_2D;
-	mask |= MODE_SET | LATLON_SET;
+	mask |= LATLON_SET;
 	if ('\0' == field[11][0]) {
 	    session->gpsdata.separation =
 		wgs84_separation(session->newdata.latitude,
@@ -832,37 +835,37 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	} else {
 	    session->gpsdata.separation = safe_atof(field[11]);
 	}
+	/*
+	 * SiRF chipsets up to version 2.2 report a null altitude field.
+	 * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
+	 * If we see this, force mode to 2D at most.
+	 */
+	if ('\0' != altitude[0]) {
+	    session->newdata.altitude = safe_atof(altitude);
+	    mask |= ALTITUDE_SET;
+	    /*
+	     * This is a bit dodgy.  Technically we shouldn't set the mode
+	     * bit until we see GSA.  But it may be later in the cycle,
+	     * some devices like the FV-18 don't send it by default, and
+	     * elsewhere in the code we want to be able to test for the
+	     * presence of a valid fix with mode > MODE_NO_FIX.
+	     *
+	     * Use satellites_visible as double check on MODE_3D
+	     */
+	    if (4 <= satellites_visible) {
+		session->newdata.mode = MODE_3D;
+	    }
+	}
+	if (3 > satellites_visible) {
+	    session->newdata.mode = MODE_NO_FIX;
+	}
+    } else {
+	session->newdata.mode = MODE_NO_FIX;
     }
+    mask |= MODE_SET;
 
     if ('\0' != field[8][0]) {
 	session->gpsdata.dop.hdop = safe_atof(field[8]);
-    }
-
-    /*
-     * SiRF chipsets up to version 2.2 report a null altitude field.
-     * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
-     * If we see this, force mode to 2D at most.
-     */
-    if ('\0' != altitude[0]) {
-	session->newdata.altitude = safe_atof(altitude);
-	mask |= ALTITUDE_SET;
-	/*
-	 * This is a bit dodgy.  Technically we shouldn't set the mode
-	 * bit until we see GSA.  But it may be later in the cycle,
-	 * some devices like the FV-18 don't send it by default, and
-	 * elsewhere in the code we want to be able to test for the
-	 * presence of a valid fix with mode > MODE_NO_FIX.
-	 *
-	 * Use satellites_visible as double check on MODE_3D
-	 */
-	if (4 <= satellites_visible) {
-	    session->newdata.mode = MODE_3D;
-	    mask |= MODE_SET;
-	}
-    }
-    if (3 > satellites_visible) {
-	session->newdata.mode = MODE_NO_FIX;
-	mask |= MODE_SET;
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
@@ -2047,8 +2050,13 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 		register_fractional_time(field[0], field[4], session);
 		mask |= TIME_SET;
             }
-	    do_lat_lon(&field[5], &session->newdata);
-	    session->newdata.altitude = safe_atof(field[9]);
+	    if (0 == do_lat_lon(&field[5], &session->newdata)) {
+		mask |= LATLON_SET;
+		if ('\0' != field[9][0]) {
+		    session->newdata.altitude = safe_atof(field[9]);
+		    mask |= ALTITUDE_SET;
+                }
+            }
 	    session->newdata.track = safe_atof(field[11]);
 	    session->newdata.speed = safe_atof(field[12]) / MPS_TO_KPH;
 	    session->newdata.climb = safe_atof(field[13]);
@@ -2056,7 +2064,6 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 	    session->gpsdata.dop.hdop = safe_atof(field[15]);
 	    session->gpsdata.dop.vdop = safe_atof(field[16]);
 	    session->gpsdata.dop.tdop = safe_atof(field[17]);
-	    mask |= (LATLON_SET | ALTITUDE_SET);
 	    mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
 	    mask |= DOP_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
@@ -2265,12 +2272,15 @@ static gps_mask_t processPSTI030(int count, char *field[],
 		register_fractional_time( "PSTI030", field[2], session);
             }
 	}
-	do_lat_lon(&field[4], &session->newdata);
-	mask |= LATLON_SET;
-
-	if ('\0' != field[8][0]) {
-	    session->newdata.altitude = safe_atof(field[8]);
-	    mask |= ALTITUDE_SET;
+	if (0 == do_lat_lon(&field[4], &session->newdata)) {
+	    session->newdata.mode = MODE_2D;
+	    mask |= LATLON_SET;
+	    if ('\0' != field[8][0]) {
+		session->newdata.altitude = safe_atof(field[8]);
+		mask |= ALTITUDE_SET;
+		session->newdata.mode = MODE_3D;
+            }
+	    mask |= MODE_SET;
 	}
 	/* convert ENU to speed/track */
 	/* this has more precision than GPVTG, GPVTG comes earlier
