@@ -52,7 +52,7 @@ $GPGSV,2,2,08,27,48,103,46,28,66,323,43,29,33,306,44,31,10,040,00*7E
 {"class":"SKY","xdop":1.49,"ydop":4.03,"vdop":1.00,"tdop":12.53,"hdop":1.90,"gdop":19.87,"pdop":1.90,"satellites":[{"PRN":7,"el":43,"az":197,"ss":45,"used":true,"gnssid":0,"svid":7},{"PRN":8,"el":68,"az":62,"ss":43,"used":true,"gnssid":0,"svid":8},{"PRN":11,"el":18,"az":89,"ss":0,"used":false,"gnssid":0,"svid":11},{"PRN":26,"el":24,"az":314,"ss":41,"used":false,"gnssid":0,"svid":26},{"PRN":27,"el":48,"az":103,"ss":46,"used":true,"gnssid":0,"svid":27},{"PRN":28,"el":66,"az":323,"ss":43,"used":true,"gnssid":0,"svid":28},{"PRN":29,"el":33,"az":306,"ss":44,"used":false,"gnssid":0,"svid":29},{"PRN":31,"el":10,"az":40,"ss":0,"used":false,"gnssid":0,"svid":31}]}
 $PGRME,19.2,M,150.0,M,151.2,M*17
 $GPGLL,3348.608,N,11821.124,W,230155,A*36
-{"class":"TPV","mode":3,"time":"2002-10-26T23:01:55.000Z","ept":0.005,"lat":33.810133333,"lon":-118.352066667,"alt":49.000,"epx":28.188,"epy":28.188,"epe":313.932,"epv":311.441,"speed":1.849,"epc":174.80}
+{"class":"TPV","mode":3,"time":"2002-10-26T23:01:55.000Z","ept":0.005,"lat":33.810133333,"lon":-118.352066667,"alt":49.000,"epx":28.188,"epy":28.188,"epe":313.932,"epv":311.441,"speed":1.849,"epc":110.40}
 $PGRMZ,161,f,3*1D
 $PGRMM,NAD83*29
 $GPBOD,,T,,M,,*47

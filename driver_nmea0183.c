@@ -817,50 +817,54 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	    mask |= TIME_SET;
 	}
     }
-    if (session->gpsdata.status > STATUS_NO_FIX) {
-	if ('\0' != field[2][0]) {
-	    do_lat_lon(&field[2], &session->newdata);
-	    session->newdata.mode = MODE_2D;
-	    mask |= MODE_SET | LATLON_SET;
-        }
 
-	if ('\0' != field[8][0]) {
-	    session->gpsdata.dop.hdop = safe_atof(field[8]);
-        }
-
-	/*
-	 * SiRF chipsets up to version 2.2 report a null altitude field.
-	 * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
-	 * If we see this, force mode to 2D at most.
-	 */
-	if ('\0' != altitude[0]) {
-	    session->newdata.altitude = safe_atof(altitude);
-	    mask |= ALTITUDE_SET;
-	    /*
-	     * This is a bit dodgy.  Technically we shouldn't set the mode
-	     * bit until we see GSA.  But it may be later in the cycle,
-	     * some devices like the FV-18 don't send it by default, and
-	     * elsewhere in the code we want to be able to test for the
-	     * presence of a valid fix with mode > MODE_NO_FIX.
-             *
-             * Use satellites_visible as double check on MODE_3D
-	     */
-	    if (4 <= satellites_visible) {
-		session->newdata.mode = MODE_3D;
-		mask |= MODE_SET;
-	    }
-	}
-	if (strlen(field[11]) > 0) {
-	    session->gpsdata.separation = safe_atof(field[11]);
-	} else {
+    if ('\0' == field[2][0]) {
+	session->newdata.mode = MODE_NO_FIX;
+	mask |= MODE_SET;
+    } else {
+	do_lat_lon(&field[2], &session->newdata);
+	session->newdata.mode = MODE_2D;
+	mask |= MODE_SET | LATLON_SET;
+	if ('\0' == field[11][0]) {
 	    session->gpsdata.separation =
 		wgs84_separation(session->newdata.latitude,
 				 session->newdata.longitude);
+	} else {
+	    session->gpsdata.separation = safe_atof(field[11]);
 	}
-    } else {
-	    session->newdata.mode = MODE_NO_FIX;
-	    mask |= MODE_SET;
     }
+
+    if ('\0' != field[8][0]) {
+	session->gpsdata.dop.hdop = safe_atof(field[8]);
+    }
+
+    /*
+     * SiRF chipsets up to version 2.2 report a null altitude field.
+     * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
+     * If we see this, force mode to 2D at most.
+     */
+    if ('\0' != altitude[0]) {
+	session->newdata.altitude = safe_atof(altitude);
+	mask |= ALTITUDE_SET;
+	/*
+	 * This is a bit dodgy.  Technically we shouldn't set the mode
+	 * bit until we see GSA.  But it may be later in the cycle,
+	 * some devices like the FV-18 don't send it by default, and
+	 * elsewhere in the code we want to be able to test for the
+	 * presence of a valid fix with mode > MODE_NO_FIX.
+	 *
+	 * Use satellites_visible as double check on MODE_3D
+	 */
+	if (4 <= satellites_visible) {
+	    session->newdata.mode = MODE_3D;
+	    mask |= MODE_SET;
+	}
+    }
+    if (3 > satellites_visible) {
+	session->newdata.mode = MODE_NO_FIX;
+	mask |= MODE_SET;
+    }
+
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "GGA: hhmmss=%s lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d\n",
 	     field[1],
