@@ -604,13 +604,6 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
     int satellites_used;
     gps_mask_t mask = ONLINE_SET;
 
-    if ('\0' == field[6][0] || 'N' == field[6][0]) {
-        /* not valid, ignore */
-        /* Yes, in 2019 a GLONASS only fix may be valid, but not worth
-         * the confusion */
-        return mask;
-    }
-
     if (field[1][0] != '\0') {
 	if (0 == merge_hhmmss(field[1], session)) {
 	    register_fractional_time(field[0], field[1], session);
@@ -624,11 +617,19 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
         }
     }
 
-    /* check navigation status, assume S=safe and C=caution are OK */
-    if ('\0' == field[13][0] ||     /* missing */
-        'U' == field[13][0] ||      /* Unsafe */
+    /* FAA mode: not valid, ignore
+     * Yes, in 2019 a GLONASS only fix may be valid, but not worth
+     * the confusion */
+    if ('\0' == field[6][0] ||      /* FAA mode: missing */
+        'N' == field[6][0]) {       /* FAA mode: not valid */
+	session->newdata.mode = MODE_NO_FIX;
+        mask |= MODE_SET;
+        return mask;
+    }
+    /* navigation status, assume S=safe and C=caution are OK */
+    /* can be missing on valid fix */
+    if ('U' == field[13][0] ||      /* Unsafe */
         'V' == field[13][0]) {      /* not valid */
-        /* stop here */
         return mask;
     }
 
