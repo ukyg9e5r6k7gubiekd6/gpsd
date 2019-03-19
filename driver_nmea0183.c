@@ -394,25 +394,45 @@ static gps_mask_t processRMC(int count, char *field[],
 	 * devices deliver bogus time values when the navigation
 	 * warning bit is set.
 	 */
-	if (count > 9 && field[1][0] != '\0' && field[9][0] != '\0') {
-            /* looks like a good time */
+	if ('\0' != field[1][0] &&
+	    9 < count &&
+	    '\0' !=  field[9][0]) {
 	    if (0 == merge_hhmmss(field[1], session) &&
-	        0 == merge_ddmmyy(field[9], session)) {
+		0 == merge_ddmmyy(field[9], session)) {
+		/* got a good data/time */
 		mask |= TIME_SET;
 		register_fractional_time(field[0], field[1], session);
-            }
-	}
-	do_lat_lon(&field[3], &session->newdata);
-	mask |= LATLON_SET;
-	session->newdata.speed = safe_atof(field[7]) * KNOTS_TO_MPS;
-	session->newdata.track = safe_atof(field[8]);
-	mask |= (TRACK_SET | SPEED_SET);
+	    }
+        }
+        /* else, no point to the time only case, no regressions with that */
 
-	newstatus = STATUS_FIX;
+	if ('\0' != field[3][0]) {
+	    do_lat_lon(&field[3], &session->newdata);
+	    newstatus = STATUS_FIX;
+	    mask |= LATLON_SET;
+            if (MODE_2D >= session->gpsdata.fix.mode) {
+		/* we have at least a 2D fix */
+		/* might cause blinking */
+		session->newdata.mode = MODE_2D;
+		mask |= MODE_SET;
+            }
+        } else {
+	    newstatus = STATUS_NO_FIX;
+	    session->newdata.mode = MODE_NO_FIX;
+	    mask |= MODE_SET;
+        }
+	if ('\0' != field[7][0]) {
+	    session->newdata.speed = safe_atof(field[7]) * KNOTS_TO_MPS;
+	    mask |= SPEED_SET;
+        }
+	if ('\0' != field[8][0]) {
+	    session->newdata.track = safe_atof(field[8]);
+	    mask |= TRACK_SET;
+        }
+
 	if (count >= 12) {
 	    newstatus = faa_mode(field[12][0]);
         }
-        /* anything useful in field 13 ? */
 
 	/*
 	 * This copes with GPSes like the Magellan EC-10X that *only* emit
@@ -429,12 +449,7 @@ static gps_mask_t processRMC(int count, char *field[],
             /* this handles old GPS that do not report 3D */
 	    session->newdata.mode = MODE_3D;
 	    mask |= MODE_SET;
-        } else if (MODE_2D >= session->gpsdata.fix.mode) {
-            /* we have at least a 2D fix */
-            /* might cause blinking */
-	    session->newdata.mode = MODE_2D;
-	    mask |= MODE_SET;
-	}
+        }
 	session->gpsdata.status = newstatus;
     }
 
