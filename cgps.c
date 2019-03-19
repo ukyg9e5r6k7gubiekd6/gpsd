@@ -690,7 +690,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
     (void)mvwprintw(datawin, 4, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* Fill in the speed. */
-    if (gpsdata->fix.mode >= MODE_2D && isfinite(gpsdata->fix.track) != 0)
+    if (isfinite(gpsdata->fix.speed) != 0)
         (void)snprintf(scr, sizeof(scr), "%8.2f %s",
                        gpsdata->fix.speed * speedfactor, speedunits);
     else
@@ -714,7 +714,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
     (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET, "  %-*s", 25, scr);
 
     /* Fill in the rate of climb. */
-    if (gpsdata->fix.mode >= MODE_3D && isfinite(gpsdata->fix.climb) != 0)
+    if (isfinite(gpsdata->fix.climb) != 0)
         (void)snprintf(scr, sizeof(scr), "%8.2f %s/min",
                        gpsdata->fix.climb * altfactor * 60, altunits);
     else
