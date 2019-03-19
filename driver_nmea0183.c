@@ -111,14 +111,14 @@ static int faa_mode(char mode)
  * Scary timestamp fudging begins here
  *
  * Four sentences, GGA and GLL and RMC and ZDA, contain timestamps.
- * GGA/GLL/RMC timestamps look like hhmmss.ss, with the trailing .ss
- * part optional.  RMC has a date field, in the format ddmmyy.  ZDA
- * has separate fields for day/month/year, with a 4-digit year.  This
- * means that for RMC we must supply a century and for GGA and GLL we
- * must supply a century, year, and day.  We get the missing data from
- * a previous RMC or ZDA; century in RMC is supplied from the daemon's
- * context (initialized at startup time) if there has been no previous
- * ZDA.
+ * GGA/GLL/RMC timestamps look like hhmmss.ss, with the trailing .ss,
+ * or .sss, part optional.
+ * RMC has a date field, in the format ddmmyy.  ZDA has separate fields
+ * for day/month/year, with a 4-digit year.  This means that for RMC we
+ * must supply a century and for GGA and GLL we must supply a century,
+ * year, and day.  We get the missing data from a previous RMC or ZDA;
+ * century in RMC is supplied from the daemon's context (initialized at
+ * startup time) if there has been no previous ZDA.
  *
  **************************************************************************/
 
@@ -254,7 +254,8 @@ static void register_fractional_time(const char *tag, const char *fld,
  * timestamp granularity of GPS is 1/100th of a second.  Use this to avoid
  * naive float comparisons.
  *
- * FIXME: many GPS now report time to .sss.  1/1000th
+ * WARNING: many GPS now report time to .sss.  1/1000th.  But so far
+ * no GPS reports fixes faster than 20Hz.
  *
  **************************************************************************/
 
@@ -789,23 +790,25 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
      * session->gpsdata.satellites_visible = atoi(field[7]);
      */
     satellites_visible = atoi(field[7]);
-    /* May be able to say MODE_2D if satellites_visible is 3
-     * if we have a fix and the mode latch is off, go... */
-    if (session->gpsdata.status > STATUS_NO_FIX) {
-	if (0 == merge_hhmmss(field[1], session)) {
-	    register_fractional_time(field[0], field[1], session);
-	    if (session->nmea.date.tm_year == 0)
-		gpsd_log(&session->context->errout, LOG_WARN,
-			 "can't use GGA time until after ZDA or RMC"
-			 " has supplied a year.\n");
-	    else {
-		mask |= TIME_SET;
-            }
-	}
-	do_lat_lon(&field[2], &session->newdata);
-	mask |= LATLON_SET;
 
-	if (field[8][0] != '\0') {
+    if (0 == merge_hhmmss(field[1], session)) {
+	register_fractional_time(field[0], field[1], session);
+	if (session->nmea.date.tm_year == 0)
+	    gpsd_log(&session->context->errout, LOG_WARN,
+		     "can't use GGA time until after ZDA or RMC"
+		     " has supplied a year.\n");
+	else {
+	    mask |= TIME_SET;
+	}
+    }
+    if (session->gpsdata.status > STATUS_NO_FIX) {
+	if ('\0' != field[2][0]) {
+	    do_lat_lon(&field[2], &session->newdata);
+	    session->newdata.mode = MODE_2D;
+	    mask |= MODE_SET | LATLON_SET;
+        }
+
+	if ('\0' != field[8][0]) {
 	    session->gpsdata.dop.hdop = safe_atof(field[8]);
         }
 
@@ -838,6 +841,9 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 		wgs84_separation(session->newdata.latitude,
 				 session->newdata.longitude);
 	}
+    } else {
+	    session->newdata.mode = MODE_NO_FIX;
+	    mask |= MODE_SET;
     }
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "GGA: hhmmss=%s lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d\n",

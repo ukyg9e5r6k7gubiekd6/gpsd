@@ -7,6 +7,7 @@ $PSRFTXTCLK:  95879*0B
 $PSRFTXTCHNL: 12*5F
 $PSRFTXTBaud rate: 57600 *51
 $GPGGA,142816.359,,,,,0,00,,,M,0.0,M,,0000*51
+{"class":"TPV","mode":1}
 $GPGLL,,,,,142816.359,V,N*7D
 {"class":"TPV","mode":1}
 $GPGSA,A,1,,,,,,,,,,,,,,,*1E
