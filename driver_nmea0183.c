@@ -176,9 +176,9 @@ static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
      * Telix fails on GPS rollover to 2099, which 32 bit system
      * can not handle.  So wrap at 2080.  That way 64 bit systems
      * work until 2080, and 2099 gets reported as 1999.
-     * since GPS epoch started in 1981, allows for old NMEA to work.
+     * since GPS epoch started in 1980, allows for old NMEA to work.
      */
-    if (2080 < year) {
+    if (2080 <= year) {
         year -= 100;
     }
 

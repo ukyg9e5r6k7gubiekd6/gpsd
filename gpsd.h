@@ -151,7 +151,7 @@ enum isgpsstat_t {
  * choosing this as the cutoff, we'll never reject historical GPS logs
  * that are actually valid.
  */
-#define GPS_EPOCH	315964800	/* 6 Jan 1981 00:00:00 UTC */
+#define GPS_EPOCH	315964800	/* 6 Jan 1980 00:00:00 UTC */
 
 /* time constant */
 #define SECS_PER_DAY	(60*60*24)		/* seconds per day */
