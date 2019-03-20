@@ -138,9 +138,8 @@ typedef enum {C1C = 0, D1C, L1C, C2C, D2C, L2C, CODEMAX} obs_codes;
 static struct obs_cnt_t {
         unsigned char gnssid;
         unsigned char svid;     /* svid of 0 means unused slot */
-        obs_codes obs_cnts[CODEMAX+1];
-        unsigned int count;        /* count of obscode */
-} obs_cnt[MAXCNT] = {0};
+        unsigned int obs_cnts[CODEMAX+1];    /* count of obscode */
+} obs_cnt[MAXCNT] = {{0}};
 
 static FILE * tmp_file;             /* file handle for temp file */
 static int sample_count = 20;       /* number of measurement sets to get */
