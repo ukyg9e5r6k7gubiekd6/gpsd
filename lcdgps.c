@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
             (void)fprintf(stderr, "Unknown -u argument: %s\n", optarg);
             break;
 	case 'V':
-	    (void)fprintf(stderr, "lcdgs revision " REVISION "\n");
+	    (void)fprintf(stderr, "lcdgps revision " REVISION "\n");
 	    exit(EXIT_SUCCESS);
 	}
     }
