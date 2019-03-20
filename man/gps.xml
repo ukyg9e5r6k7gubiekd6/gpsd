@@ -285,7 +285,7 @@ current directory.</para>
 running with the <option>-i</option> option to drop a clue in the
 Google Earth installation directory, as
 'Open_in_Google_Earth_RT_GPS.kml', then open that file in Places (File
-> Open...). Run <application>gpsd</application> in the normal way
+> Open...). Run <application>gegps</application> in the normal way
 after that.</para>
 
 </refsect2>

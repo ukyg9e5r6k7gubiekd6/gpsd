@@ -150,6 +150,6 @@ if __name__ == "__main__":
         except StopIteration:
             pass
         except KeyboardInterrupt:
-            print('gegpsd stopped ')
+            print('gegps stopped ')
 
 # end
