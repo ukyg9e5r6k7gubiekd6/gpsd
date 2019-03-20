@@ -1008,6 +1008,18 @@ else:
         if option not in config.env['CFLAGS']:
             config.CheckCompilerOption(option)
 
+# OSX needs to set the ID for installed shared libraries.  See if this is OSX
+# and whether we have the tool.
+
+if sys.platform.startswith('darwin'):
+    try:
+        tool = config.CheckProg('install_name_tool')
+    except AttributeError:
+        tool = 'install_name_tool'  # Just assume it's there if old SCons
+else:
+    tool = None
+env['osx_lib_tool'] = tool
+
 # Set up configuration for target Python
 
 PYTHON_LIBDIR_CALL = 'sysconfig.get_python_lib()'
@@ -1233,7 +1245,11 @@ else:
                                  SHLIBVERSION=version)
 
     def LibraryInstall(env, libdir, sources, version):
-        return env.InstallVersionedLib(libdir, sources, SHLIBVERSION=version)
+        inst = env.InstallVersionedLib(libdir, sources, SHLIBVERSION=version)
+        if env['osx_lib_tool']:
+            toolcmd = '%s -id $TARGET $TARGET' % env['osx_lib_tool']
+            env.AddPostAction(inst, toolcmd)
+        return inst
 
 compiled_gpslib = Library(env=env,
                           target="gps",
