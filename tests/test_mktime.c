@@ -113,6 +113,9 @@ static struct
     /* the end of time: 2038 */
     {(timestamp_t)2147483647.123456, "2038-01-19T03:14:07.123Z"},
     {(timestamp_t)2147483648.123456, "2038-01-19T03:14:08.123Z"},
+
+    /* test the NaN case */
+    {(timestamp_t)NAN, "NaN"},
 };
 
 /* Skip test if value is out of time_t range */
