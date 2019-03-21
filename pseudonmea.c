@@ -156,36 +156,50 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
 static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 				       char bufp[], size_t len)
 {
-    int i;
+    int i;                  /* index into skyview[] */
+    int j;                  /* index into GPGSV */
     char *bufp2 = bufp;
+    int satellites_visible = 0;
     bufp[0] = '\0';
 
-    /* FIXME: should check skyview{} for valid sats first */
+    /* check skyview[] for valid sats first */
     for (i = 0; i < session->gpsdata.satellites_visible; i++) {
-	if (i % 4 == 0) {
+	if ( 1 > session->gpsdata.skyview[i].PRN) {
+	    /* bad prn, ignore */
+            continue;
+	}
+	if (90 < abs(session->gpsdata.skyview[i].elevation)) {
+	    /* bad elevation, ignore */
+            continue;
+	}
+	satellites_visible++;
+    }
+    for (i = 0, j= 0; i < session->gpsdata.satellites_visible; i++) {
+	if ( 1 > session->gpsdata.skyview[i].PRN) {
+	    /* bad prn, skip */
+	    continue;
+	}
+	if (90 < abs(session->gpsdata.skyview[i].elevation)) {
+	    /* bad elevation, ignore */
+            continue;
+	}
+	if (j % 4 == 0) {
 	    bufp2 = bufp + strlen(bufp);
 	    str_appendf(bufp, len,
 			    "$GPGSV,%d,%d,%02d",
-			    ((session->gpsdata.satellites_visible - 1) / 4) +
-			    1, (i / 4) + 1,
-			    session->gpsdata.satellites_visible);
+			    ((satellites_visible - 1) / 4) + 1, (j / 4) + 1,
+			    satellites_visible);
 	}
-	if (i < session->gpsdata.satellites_visible) {
-            if ( 0 == session->gpsdata.skyview[i].PRN) {
-                /* bad prn, just make blanks */
-                str_appendf(bufp, len, ",,,,");
-            } else {
-                str_appendf(bufp, len,
-			    ",%02d,%02d,%03d,%02.0f",
-			    session->gpsdata.skyview[i].PRN,
-			    session->gpsdata.skyview[i].elevation,
-			    session->gpsdata.skyview[i].azimuth,
-			    session->gpsdata.skyview[i].ss);
-            }
-        }
-	if (i % 4 == 3 || i == session->gpsdata.satellites_visible - 1) {
+	str_appendf(bufp, len, ",%02d,%02d,%03d,%02.0f",
+		    session->gpsdata.skyview[i].PRN,
+		    session->gpsdata.skyview[i].elevation,
+		    session->gpsdata.skyview[i].azimuth,
+		    session->gpsdata.skyview[i].ss);
+
+	if (j % 4 == 3 || j == satellites_visible - 1) {
 	    nmea_add_checksum(bufp2);
 	}
+        j++;
     }
 
 #ifdef ZODIAC_ENABLE
