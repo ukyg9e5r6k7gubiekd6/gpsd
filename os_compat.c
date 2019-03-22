@@ -128,7 +128,7 @@ int os_daemon(int nochdir, int noclose)
 
 /* End of daemon section */
 
-/* Provide BSD strlcat()/strlcpy() on platforms that don't have it */
+/* Provide syslog() on platforms that don't have it */
 
 #ifndef HAVE_SYSLOG_H
 #include "compiler.h"
@@ -160,7 +160,11 @@ void closelog (void)
 }
 #endif /* !HAVE_SYSLOG_H */
 
+/* End of syslog section */
+
 /*
+ * Provide BSD strlcat()/strlcpy() on platforms that don't have it
+ *
  * These versions use memcpy and strlen() because they are often
  * heavily optimized down to assembler level. Thus, likely to be
  * faster even with the function call overhead.
