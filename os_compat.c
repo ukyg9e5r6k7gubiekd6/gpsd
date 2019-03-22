@@ -113,11 +113,36 @@ int os_daemon(int nochdir, int noclose)
 #define _DEFAULT_SOURCE
 #include <unistd.h>
 
-#else /* !__linux__ */
+#elif defined(__APPLE__) /* !__linux__ */
+
+/*
+ * Avoid the OSX deprecation warning.
+ *
+ * Note that on OSX, real daemons like gpsd should run via launchd rather than
+ * self-daemonizing, but we use daemon() for other tools as well.
+ *
+ * There doesn't seem to be an easy way to avoid the warning other than by
+ * providing our own declaration to override the deprecation-flagged version.
+ * Fortunately, the function signature is pretty well frozen at this point.
+ *
+ * Until we fix the kludge where all this code has to be additionally compiled
+ * as C++ for the Qt library, we need this to be compilable as C++ as well.
+ */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int daemon(int nochdir, int noclose);
+
+#ifdef __cplusplus
+}
+#endif
+
+#else /* !__linux__ && !__APPLE__ */
 
 #include <stdlib.h>
 
-#endif /* !__linux__ */
+#endif /* !__linux__ && !__APPLE__ */
 
 int os_daemon(int nochdir, int noclose)
 {
