@@ -240,6 +240,12 @@ after the GPS acknowledges the command, unless the -W is given.
        </listitem>
       </varlistentry>
       <varlistentry>
+       <term>NAVX5</term>
+       <listitem>
+        <para>Poll the Nav Engines Expert Settings (UBX-CFG-NAVX5).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
        <term>PMS</term>
        <listitem>
         <para>Poll power management settings (UBX-CFG-PMS).</para>
@@ -273,6 +279,12 @@ after the GPS acknowledges the command, unless the -W is given.
        <term>SAVE</term>
        <listitem>
         <para>Save current configuration (UBX-CFG-CFG).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>SBAS</term>
+       <listitem>
+        <para>Poll SBAS settings (UBX-CFG-SBAS).</para>
        </listitem>
       </varlistentry>
       <varlistentry>

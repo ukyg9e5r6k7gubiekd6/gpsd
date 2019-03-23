@@ -1899,6 +1899,11 @@ class ubx(object):
         m_data = bytearray(0)
         gps_model.gps_send(6, 0x24, m_data)
 
+    def send_cfg_navx5(self):
+        "UBX-CFG-NAVX5, get Nav Engine Expert Settings"
+        m_data = bytearray(0)
+        gps_model.gps_send(6, 0x23, m_data)
+
     def send_cfg_pms(self):
         "UBX-CFG-PMS, Get Power Management Settings"
 
@@ -1980,6 +1985,11 @@ class ubx(object):
         m_data = bytearray(0)
         gps_model.gps_send(1, 0x11, m_data)
 
+    def send_cfg_sbas(self):
+        "UBX-CFG-SBAS, poll SBAS settings"
+        m_data = bytearray(0)
+        gps_model.gps_send(0x06, 0x16, m_data)
+
     def send_tim_svin(self):
         "UBX-TIM-SVIN, get survey in data"
         m_data = bytearray(0)
@@ -2045,7 +2055,10 @@ class ubx(object):
                   "help": "UBX-CFG-NAV5 set Dynamic Platform Model"},
         # UBX-CFG-NAV5, poll Nav Engine Settings
         "NAV5": {"command": send_cfg_nav5,
-                 "help": "UBX-CFG-NAV5 poll Nav Engines Settings"},
+                 "help": "UBX-CFG-NAV5 poll Nav Engines settings"},
+        # UBX-CFG-NAVX5, poll Nav Engine Expert Settings
+        "NAVX5": {"command": send_cfg_navx5,
+                  "help": "UBX-CFG-NAVX5 poll Nav Engines Expert Settings"},
         # UBX-CFG-PMS, poll power management settings
         "PMS": {"command": send_cfg_pms,
                 "help": "UBX-CFG-PMS poll power management settings"},
@@ -2063,6 +2076,9 @@ class ubx(object):
         "SAVE": {"command": send_cfg_cfg,
                  "help": "UBX-CFG-CFG save current config",
                  "opt": 0},
+        # UBX-CFG-SBAS, get SBAS settings
+        "SBAS": {"command": send_cfg_sbas,
+                 "help": "UBX-CFG-SBAS poll SBAS settings"},
         # UBX-TIM-SVIN, get survey in data
         "SVIN": {"command": send_tim_svin,
                  "help": "UBX-TIM-SVIN get survey in data"},
