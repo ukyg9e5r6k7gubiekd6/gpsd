@@ -1024,9 +1024,16 @@ static void gpsd_error_model(struct gps_device_t *session)
 	    fix->epv = session->gpsdata.dop.vdop * v_uere;
         }
 
-	if (0 == isfinite(fix->epe) &&
+        /* 2D error */
+	if (0 == isfinite(fix->eph) &&
+	    0 != isfinite(session->gpsdata.dop.hdop)) {
+	    fix->eph = session->gpsdata.dop.hdop * p_uere;
+	}
+
+        /* 3D error */
+	if (0 == isfinite(fix->sep) &&
 	    0 != isfinite(session->gpsdata.dop.pdop)) {
-	    fix->epe = session->gpsdata.dop.pdop * p_uere;
+	    fix->sep = session->gpsdata.dop.pdop * p_uere;
 	}
 
 	/*

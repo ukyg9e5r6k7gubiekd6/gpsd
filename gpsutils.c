@@ -246,23 +246,24 @@ void gps_clear_fix(struct gps_fix_t *fixp)
 /* stuff a fix structure with recognizable out-of-band values */
 {
     memset(fixp, 0, sizeof(struct gps_fix_t));
-    fixp->time = NAN;
-    fixp->mode = MODE_NOT_SEEN;
-    fixp->latitude = NAN;
-    fixp->longitude = NAN;
-    fixp->track = NAN;
-    fixp->magnetic_track = NAN;
-    fixp->speed = NAN;
-    fixp->climb = NAN;
     fixp->altitude = NAN;
+    fixp->climb = NAN;
+    fixp->epc = NAN;
+    fixp->epd = NAN;
+    fixp->eph = NAN;
+    fixp->eps = NAN;
     fixp->ept = NAN;
+    fixp->epv = NAN;
     fixp->epx = NAN;
     fixp->epy = NAN;
-    fixp->epv = NAN;
-    fixp->epd = NAN;
-    fixp->eps = NAN;
-    fixp->epc = NAN;
-    fixp->epe = NAN;
+    fixp->latitude = NAN;
+    fixp->longitude = NAN;
+    fixp->magnetic_track = NAN;
+    fixp->mode = MODE_NOT_SEEN;
+    fixp->sep = NAN;
+    fixp->speed = NAN;
+    fixp->time = NAN;
+    fixp->track = NAN;
     /* clear ECEF too */
     fixp->ecef.x = NAN;
     fixp->ecef.y = NAN;
@@ -333,14 +334,17 @@ void gps_merge_fix(struct gps_fix_t *to,
 	to->epx = from->epx;
 	to->epy = from->epy;
     }
-    if (0 != isfinite(from->eps)) {
-	to->eps = from->eps;
-    }
     if (0 != isfinite(from->epd)) {
 	to->epd = from->epd;
     }
-    if (0 != isfinite(from->epe)) {
-	to->epe = from->epe;
+    if (0 != isfinite(from->eph)) {
+	to->eph = from->eph;
+    }
+    if (0 != isfinite(from->eps)) {
+	to->eps = from->eps;
+    }
+    if (0 != isfinite(from->sep)) {
+	to->sep = from->sep;
     }
     if ((transfer & VERR_SET) != 0)
 	to->epv = from->epv;

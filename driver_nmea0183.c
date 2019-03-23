@@ -1410,16 +1410,16 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[],
                       * (GPSD_CONFIDENCE / CEP50_SIGMA);
 	session->newdata.epv =
 	    safe_atof(field[3]) * (GPSD_CONFIDENCE / CEP50_SIGMA);
-	session->newdata.epe =
+	session->newdata.sep =
 	    safe_atof(field[5]) * (GPSD_CONFIDENCE / CEP50_SIGMA);
 	mask = HERR_SET | VERR_SET | PERR_IS;
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "PGRME: epx=%.2f epy=%.2f epv=%.2f\n",
+	     "PGRME: epx=%.2f epy=%.2f sep=%.2f\n",
 	     session->newdata.epx,
 	     session->newdata.epy,
-	     session->newdata.epv);
+	     session->newdata.sep);
     return mask;
 }
 

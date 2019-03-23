@@ -44,7 +44,9 @@ extern "C" {
  *       changed MAXCHANNELS
  * 8.0 - Change shape of rawdata_t.
  *       Added values for gps_data_t->status
- *       Move epe from gps_data_t to be near its friends in gps_fix_t.
+ *       Remove epe from gps_data_t, it duplicates gps_fix_t eph
+ *       Added sep (estimated spherical error, 3D)
+ *       Note: Some GPS call eph as epe, others call sep as epe
  */
 #define GPSD_API_MAJOR_VERSION	8	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -106,7 +108,12 @@ struct gps_fix_t {
     double eps;		/* Speed uncertainty, meters/sec */
     double climb;       /* Vertical speed, meters/sec */
     double epc;		/* Vertical speed uncertainty */
-    double epe;         /* spherical position error, 95% confidence (meters) */
+    /* estimated postion error horizontal (2D) . meters, maybe 50%, maybe 95% */
+    /* aka estimated position error (epe) */
+    double eph;		/* estimated postion error horizontal (2D) */
+    /* sperical error probability, 3D. meters, maybe 50%, maybe 95% */
+    /* Garmin, not gpsd, calls this estimated position error (epe) */
+    double sep;
 
     double magnetic_track;  /* Course (relative to Magnetic North) */
 

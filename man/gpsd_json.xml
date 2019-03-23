@@ -9,7 +9,7 @@ SPDX-License-Identifier: BSD-2-clause
 <!ENTITY gpsdsock	 "/var/run/gpsd.sock">
 ]>
 <refentry id='gpsd_json.5'>
-<refentryinfo><date>17 Jun 2018</date></refentryinfo>
+<refentryinfo><date>23 Mar 2019</date></refentryinfo>
 <refmeta>
 <refentrytitle>gpsd_json</refentrytitle>
 <manvolnum>5</manvolnum>
@@ -135,11 +135,97 @@ Others may be reported or not depending on the fix quality.</para>
         is not 2 or 3.</entry>
 </row>
 <row>
+	<entry>alt</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Altitude in meters. Present if mode is 3.</entry>
+</row>
+<row>
+	<entry>climb</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Climb (positive) or sink (negative) rate, meters per
+	second.</entry>
+</row>
+<row>
+	<entry>epc</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Estimated climb error in meters per second. Present
+        if consecutive 3D fixes.
+        Assumed to be 95% confidence, but many GPS do not specify.
+        </entry>
+</row>
+<row>
+	<entry>epd</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Estimated track (direction) error in degrees. Present if
+        sonsecutive 2D fixes.
+        Assumed to be 95% confidence, but many GPS do not specify.
+        </entry>
+</row>
+<row>
+	<entry>eph</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Estimated horizontal Position (2D) Error in meters.
+        Also known as Estimated Position Error (epe). Present
+        if mode is 2D or 3D and DOPs can be calculated from the satellite
+        view. Assumed to be 95% confidence, but many GPS do not specify.
+        </entry>
+</row>
+<row>
 	<entry>ept</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Estimated timestamp error (%f, seconds, 95% confidence).
         Present if time is present.</entry>
+</row>
+<row>
+	<entry>epv</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Estimated vertical error in meters. Present
+        if mode is 3 and DOPs can be calculated from the satellite
+        view. Assumed to be 95% confidence, but many GPS do not specify.
+        </entry>
+</row>
+<row>
+	<entry>epx</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Longitude error estimate in meters. Present
+        if mode is 2D or 3D and DOPs can be calculated from the satellite
+        view. Assumed to be 95% confidence, but many GPS do not specify.
+        </entry>
+</row>
+<row>
+	<entry>epy</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Latitude error estimate in meters. Present
+        if mode is 2 or 3 and DOPs can be calculated from the satellite
+        view. Assumed to be 95% confidence, but many GPS do not specify.
+        </entry>
+</row>
+<row>
+	<entry>epv</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Estimated vertical error in meters. Present
+        if mode is 3 and DOPs can be calculated from the satellite
+        view. Assumed to be 95% confidence, but many GPS do not specify.
+        </entry>
+</row>
+<row>
+	<entry>eps</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Estimated speed error in meters per second.  Present
+        for consecutive 2D or 3D fixes.
+        Assumed to be 95% confidence, but many GPS do not specify.
+        </entry>
 </row>
 <row>
 	<entry>lat</entry>
@@ -149,41 +235,16 @@ Others may be reported or not depending on the fix quality.</para>
         when mode is 2 or 3.</entry>
 </row>
 <row>
+	<entry>leapseconds</entry>
+	<entry>integer</entry>
+        <entry><para>Current leap seconds.</para></entry>
+</row>
+<row>
 	<entry>lon</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Longitude in degrees: +/- signifies East/West. Present
         when mode is 2 or 3.</entry>
-</row>
-<row>
-	<entry>alt</entry>
-	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Altitude in meters. Present if mode is 3.</entry>
-</row>
-<row>
-	<entry>epx</entry>
-	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Longitude error estimate in meters, 95% confidence. Present
-        if mode is 2 or 3 and DOPs can be calculated from the satellite
-        view.</entry>
-</row>
-<row>
-	<entry>epy</entry>
-	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Latitude error estimate in meters, 95% confidence. Present
-        if mode is 2 or 3 and DOPs can be calculated from the satellite
-        view.</entry>
-</row>
-<row>
-	<entry>epv</entry>
-	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Estimated vertical error in meters, 95% confidence. Present
-        if mode is 3 and DOPs can be calculated from the satellite
-        view.</entry>
 </row>
 <row>
 	<entry>track</entry>
@@ -202,31 +263,6 @@ Others may be reported or not depending on the fix quality.</para>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Speed over ground, meters per second.</entry>
-</row>
-<row>
-	<entry>climb</entry>
-	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Climb (positive) or sink (negative) rate, meters per
-	second.</entry>
-</row>
-<row>
-	<entry>epd</entry>
-	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Direction error estimate in degrees, 95% confidence.</entry>
-</row>
-<row>
-	<entry>eps</entry>
-	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Speed error estinmate in meters/sec, 95% confidence.</entry>
-</row>
-<row>
-	<entry>epc</entry>
-	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Climb/sink error estimate in meters/sec, 95% confidence.</entry>
 </row>
 <row>
 	<entry>ecefx</entry>
@@ -275,6 +311,15 @@ Others may be reported or not depending on the fix quality.</para>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>ECEF velocity error in meters/second.</entry>
+</row>
+<row>
+	<entry>sep</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Estimated Spherical (3D) Position Error in meters.
+         Present if mode is 3D and DOPs can be calculated from the satellite
+        view. Assumed to be 95% confidence, but many GPS do not specify.
+        </entry>
 </row>
 
 </tbody>
@@ -335,36 +380,13 @@ yet, only the "class" field will reliably be present.</para>
 	fractional part of up to .001sec precision.</entry>
 </row>
 <row>
-	<entry>xdop</entry>
+	<entry>gdop</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Longitudinal dilution of precision, a dimensionless
-	factor which should be multiplied by a base UERE to get an
-	error estimate.</entry>
-</row>
-<row>
-	<entry>ydop</entry>
-	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Latitudinal dilution of precision, a dimensionless
-	factor which should be multiplied by a base UERE to get an
-	error estimate.</entry>
-</row>
-<row>
-	<entry>vdop</entry>
-	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Altitude dilution of precision, a dimensionless
-	factor which should be multiplied by a base UERE to get an
-	error estimate.</entry>
-</row>
-<row>
-	<entry>tdop</entry>
-	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Time dilution of precision, a dimensionless
-	factor which should be multiplied by a base UERE to get an
-	error estimate.</entry>
+        <entry>Geometric (hyperspherical) dilution of precision, a
+        combination of PDOP and TDOP.  A dimensionless factor which
+        should be multiplied by a base UERE
+        to get an error estimate.</entry>
 </row>
 <row>
 	<entry>hdop</entry>
@@ -378,15 +400,39 @@ yet, only the "class" field will reliably be present.</para>
 	<entry>pdop</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Spherical dilution of precision, a dimensionless
+        <entry>Position (spherical/3D)  dilution of precision, a dimensionless
 	factor which should be multiplied by a base UERE to get an
 	error estimate.</entry>
 </row>
 <row>
-	<entry>gdop</entry>
+	<entry>tdop</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Hyperspherical dilution of precision, a dimensionless
+        <entry>Time dilution of precision, a dimensionless
+	factor which should be multiplied by a base UERE to get an
+	error estimate.</entry>
+</row>
+<row>
+	<entry>vdop</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Vertical (altitude) dilution of precision, a dimensionless
+	factor which should be multiplied by a base UERE to get an
+	error estimate.</entry>
+</row>
+<row>
+	<entry>xdop</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Longitudinal dilution of precision, a dimensionless
+	factor which should be multiplied by a base UERE to get an
+	error estimate.</entry>
+</row>
+<row>
+	<entry>ydop</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Latitudinal dilution of precision, a dimensionless
 	factor which should be multiplied by a base UERE to get an
 	error estimate.</entry>
 </row>

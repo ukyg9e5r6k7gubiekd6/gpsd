@@ -192,8 +192,6 @@ void json_tpv_dump(const struct gps_device_t *session,
 	    str_appendf(reply, replylen, "\"epx\":%.3f,", gpsdata->fix.epx);
 	if (isfinite(gpsdata->fix.epy) != 0)
 	    str_appendf(reply, replylen, "\"epy\":%.3f,", gpsdata->fix.epy);
-	if (isfinite(gpsdata->fix.epe) != 0)
-	    str_appendf(reply, replylen, "\"epe\":%.3f,", gpsdata->fix.epe);
 	if (isfinite(gpsdata->fix.epv) != 0)
 	    str_appendf(reply, replylen, "\"epv\":%.3f,", gpsdata->fix.epv);
 	if (isfinite(gpsdata->fix.track) != 0)
@@ -268,6 +266,11 @@ void json_tpv_dump(const struct gps_device_t *session,
 			session->context->rollovers);
 	}
 #endif /* TIMING_ENABLE */
+        /* at the end because it is new and microjson chokes on new items */
+	if (isfinite(gpsdata->fix.eph) != 0)
+	    str_appendf(reply, replylen, "\"eph\":%.3f,", gpsdata->fix.eph);
+	if (isfinite(gpsdata->fix.sep) != 0)
+	    str_appendf(reply, replylen, "\"sep\":%.3f,", gpsdata->fix.sep);
     }
     str_rstrip_char(reply, ',');
     (void)strlcat(reply, "}\r\n", replylen);
