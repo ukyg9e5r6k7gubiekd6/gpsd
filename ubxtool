@@ -137,6 +137,13 @@ class ubx(object):
                5: 'QZSS',
                6: 'GLONASS'}
 
+    # Names for portID values in UBX-CFG-PRT
+    port_ids = {1: 'UART',
+                3: 'USB',
+                4: 'SPI',
+                0: 'DDC',  # The inappropriate name for i2c used in the spec
+                }
+
     def ack_ack(self, buf):
         "UBX-ACK-ACK decode"
         m_len = len(buf)
@@ -382,16 +389,34 @@ class ubx(object):
         if 0 == m_len:
             return " Poll request"
 
-        if 1 == m_len:
-            return " Poll request PortID %d" % buf[0]
+        portid = buf[0]
+        idstr = '%u (%s)' % (portid, self.port_ids.get(portid, '?'))
 
+        if 1 == m_len:
+            return " Poll request PortID %s" % idstr
+
+        # Note that this message can contain multiple 20-byte submessages, but
+        # only in the send direction, which we don't currently do.
         if 20 > m_len:
             return "Bad Length %s" % m_len
 
-        u = struct.unpack_from('<BBHLLHHH', buf, 0)
-        s = (' PortID: %u reserved1 %u\n'
-             '  txReady: %#x mode: %#x baudRate: %u\n'
-             '  inProtoMask: %#x  outProtoMask: %#x flags: %#x\n' % u)
+        u = struct.unpack_from('<BBHLLHHHH', buf, 0)
+
+        s = [' PortID: %s reserved1: %u txReady: %#x' % (idstr, u[1], u[2])]
+        s.append({1: '  mode: %#x baudRate: %u',
+                  3: '  reserved2: [%u %u]',
+                  4: '  mode: %#x reserved2: %u',
+                  0: '  mode: %#x reserved2: %u',
+                  }.get(portid, '  ???: %u,%u') % tuple(u[3:5]))
+        s.append('  inProtoMask: %#x  outProtoMask: %#x' % tuple(u[5:7]))
+        s.append({1: '  flags: %#x reserved2: %u',
+                  3: '  reserved3: %u reserved4: %u',
+                  4: '  flags: %#x reserved3: %u',
+                  0: '  flags: %#x reserved3: %u',
+                  }.get(portid, '  ???: %u,%u') % tuple(u[7:]))
+
+        if portid == 0:
+            s.append('    slaveAddr: %#x' % (u[3] >> 1 & 0x7F))
 
         dec = []
         if u[5] & 0x1:
@@ -402,7 +427,7 @@ class ubx(object):
             dec.append('RTCM2')
         if u[5] & 0x20:
             dec.append('RTCM3')
-        s += ('    inProtoMask: %s\n' % ' '.join(dec))
+        s.append('    inProtoMask: %s' % ' '.join(dec))
 
         dec = []
         if u[6] & 0x1:
@@ -411,12 +436,15 @@ class ubx(object):
             dec.append('NMEA')
         if u[6] & 0x20:
             dec.append('RTCM3')
-        s += ('    outProtoMask: %s\n' % ' '.join(dec))
-        dec = []
-        if u[7] & 0x2:
-            dec.append('extendedTxTimeout')
-        s += ('    flags: %s' % ' '.join(dec))
-        return s
+        s.append('    outProtoMask: %s' % ' '.join(dec))
+
+        if portid in set([1, 4, 0]):
+            dec = []
+            if u[7] & 0x2:
+                dec.append('extendedTxTimeout')
+            s.append('    flags: %s' % ' '.join(dec))
+
+        return '\n'.join(s)
 
     def cfg_sbas(self, buf):
         "UBX-CFG-SBAS decode"
