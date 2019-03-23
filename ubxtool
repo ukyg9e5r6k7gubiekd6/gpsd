@@ -294,6 +294,9 @@ class ubx(object):
     def cfg_nav5(self, buf):
         "UBX-CFG-NAV5 nav Engine Settings"
         m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
         if 36 > m_len:
             return "Bad Length %s" % m_len
 
@@ -322,7 +325,7 @@ class ubx(object):
 
         if 40 <= m_len:
             u = struct.unpack_from('<BBHHLHBB', buf, 20)
-            s = ('\n usePPP %d aopCfg %d aopOrbMaxErr %u useAdr %u' %
+            s += ('\n usePPP %d aopCfg %d aopOrbMaxErr %u useAdr %u' %
                  (u[0], u[1], u[3], u[7]))
         return s
 
@@ -366,7 +369,7 @@ class ubx(object):
                   }
         u = struct.unpack_from('<BBHHBB', buf, 0)
         s = (' version: %u powerSetupValue: %u'
-             ' period: %u onTime: %#x reserved1[%u %u]' % u)
+             ' period: %u onTime: %#x reserved1: [%u %u]' % u)
         if u[0] in values:
             s += "\n   powerSetupValue: %s" % values[u[0]]
 
@@ -417,8 +420,10 @@ class ubx(object):
 
     def cfg_sbas(self, buf):
         "UBX-CFG-SBAS decode"
-
         m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
         if 8 > m_len:
             return "Bad Length %s" % m_len
 
@@ -453,11 +458,11 @@ class ubx(object):
         if 32 > m_len:
             return " Bad Length %s" % m_len
 
-        u = struct.unpack_from('<BBhhhLLLLLL', buf, 0)
-        s = ('tpIdx: %u, version: %u reserved1[%u %u]\n'
-             ' antCableDelay: %u rfGroupDelay %u freqPeriod: %u '
-             'freqPeriod %u\n'
-             ' pulseLenRatio: %u pulseLenRationLock %u userConfigDelay: %u\n'
+        u = struct.unpack_from('<BBBBhhLLLLlL', buf, 0)
+        s = ('tpIdx: %u, version: %u reserved1: [%u %u]\n'
+             ' antCableDelay: %d rfGroupDelay %d freqPeriod: %u '
+             'freqPeriodLock: %u\n'
+             ' pulseLenRatio: %u pulseLenRatioLock %u userConfigDelay: %d\n'
              'Flags: %#x\n  ' % u)
 
         if 0x01 & u[10]:
@@ -499,9 +504,9 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<HHHHHH', buf, 0)
-        s = (' vendorID: %#x productID: %#x reserved1[%u %u]'
-             ' reserved2[%u %u]\n'
-             '  powerConsumption %u mA flags: %#x ' % u)
+        s = (' vendorID: %#x productID: %#x reserved1: %u'
+             ' reserved2: %u\n'
+             '  powerConsumption %u mA flags: %#x ' % tuple(u[:6]))
         if 0x01 & u[5]:
             s += "reEnum, "
         if 0x02 & u[5]:
@@ -509,9 +514,9 @@ class ubx(object):
         else:
             s += "bus-powered"
 
-        s += '\nvendorString: %s\n' % gps.polystr(buf[12:43])
-        s += 'productString: %s\n' % gps.polystr(buf[44:75])
-        s += 'serialNumber: %s' % gps.polystr(buf[76:107])
+        s += '\n vendorString: %s\n' % gps.polystr(buf[12:43])
+        s += ' productString: %s\n' % gps.polystr(buf[44:75])
+        s += ' serialNumber: %s' % gps.polystr(buf[76:107])
         return s
 
     cfg_ids = {0: {'str': 'PRT', 'dec': cfg_prt, 'name': 'UBX-CFG-PRT'},
@@ -2040,14 +2045,14 @@ class ubx(object):
                   "help": "UBX-CFG-NAV5 set Dynamic Platform Model"},
         # UBX-CFG-NAV5, poll Nav Engine Settings
         "NAV5": {"command": send_cfg_nav5,
-                 "help": "UBX-CFG-NAV5 poll Nav Engines settings"},
+                 "help": "UBX-CFG-NAV5 poll Nav Engines Settings"},
         # UBX-CFG-PMS, poll power management settings
         "PMS": {"command": send_cfg_pms,
                 "help": "UBX-CFG-PMS poll power management settings"},
-        # UBX-CFG-PRT, poll I/O port number
+        # UBX-CFG-PRT, poll I/O port settings
         "PRT": {"command": send_cfg_prt,
                 "help": "UBX-CFG-PRT poll I/O port settings"},
-        # UBX-CFG-PRT, poll I/O port number
+        # UBX-RXM-RAWX poll raw measurement data
         "RXM-RAWX": {"command": poll_rxm_rawx,
                 "help": "UBX-RXM-RAWX poll raw measurement data"},
         # UBX-CFG-CFG reset config
@@ -2167,7 +2172,7 @@ class gps_io(object):
             try:
                 self.ser = Serial.Serial(
                     baudrate=opts['input_speed'],
-                    # 8N1 is GREIS default
+                    # 8N1 is UBX default
                     bytesize=Serial.EIGHTBITS,
                     parity=Serial.PARITY_NONE,
                     port=opts['input_file_name'],
@@ -2197,7 +2202,7 @@ class gps_io(object):
             self.ser.flushInput()
 
         else:
-            # Read from a plain file of GREIS messages
+            # Read from a plain file of UBX messages
             try:
                 self.ser = open(opts['input_file_name'], 'rb')
             except IOError:

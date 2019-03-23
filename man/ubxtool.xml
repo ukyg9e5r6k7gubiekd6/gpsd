@@ -236,7 +236,25 @@ after the GPS acknowledges the command, unless the -W is given.
       <varlistentry>
        <term>NAV5</term>
        <listitem>
-        <para>Poll the Nav Engines settings (UBX-CFG-NAV6.</para>
+        <para>Poll the Nav Engines Settings (UBX-CFG-NAV5).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>PMS</term>
+       <listitem>
+        <para>Poll power management settings (UBX-CFG-PMS).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>PRT</term>
+       <listitem>
+        <para>Poll I/O port settings (UBX-CFG-PRT).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>RESET</term>
+       <listitem>
+        <para>Reset config to defaults (UBX-CFG-CFG).</para>
        </listitem>
       </varlistentry>
       <varlistentry>
@@ -282,9 +300,15 @@ after the GPS acknowledges the command, unless the -W is given.
        </listitem>
       </varlistentry>
       <varlistentry>
+       <term>USB</term>
+       <listitem>
+        <para>Poll USB config (UBX-CFG-USB).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
        <term>VER</term>
        <listitem>
-        <para>Poll GPS version.</para>
+        <para>Poll GPS version (UBX-MON-VER).</para>
        </listitem>
       </varlistentry>
       <varlistentry>
