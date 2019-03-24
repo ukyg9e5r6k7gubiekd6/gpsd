@@ -1598,6 +1598,8 @@ static gps_mask_t processGBS(int c UNUSED, char *field[],
      * 7) Estimate of bias in meters on most likely failed satellite
      * 8) Standard deviation of bias estimate
      * 9) Checksum
+     *
+     * Fields 2, 3 and 4 are one standard deviation.
      */
     gps_mask_t mask = ONLINE_SET;
 
