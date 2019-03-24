@@ -2459,10 +2459,12 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	     *    infinite loop.
 	     */
 	{"DBT", 7,  true,  processDBT},
+	{"DTM", 0, false, NULL},	/* ignore datum */
 	{"GBS", 7,  false, processGBS},
 	{"GGA", 13, false, processGGA},
 	{"GLL", 7,  false, processGLL},
 	{"GNS", 13, false, processGNS},
+	{"GRS", 0, false, NULL},	/* ignore GNSS Range Residuals */
 	{"GSA", 17, false, processGSA},
 	{"GST", 8,  false, processGST},
 	{"GSV", 0,  false, processGSV},
@@ -2497,8 +2499,9 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 #endif /* SKYTRAQ_ENABLE */
 	{"RMC", 8,  false, processRMC},
 	{"TXT", 5,  false, processTXT},
-	{"ZDA", 4,  false, processZDA},
+	{"VLW", 0, false, NULL},	/* ignore Dual ground/water distance */
 	{"VTG", 5,  false, processVTG},
+	{"ZDA", 4,  false, processZDA},
     };
 
     int count;
