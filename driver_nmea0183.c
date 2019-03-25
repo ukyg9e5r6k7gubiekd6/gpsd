@@ -1555,8 +1555,10 @@ static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
 	session->gpsdata.dop.hdop = safe_atof(field[3]);
         mask |= DOP_SET;
     }
-    /* don't use EHPE (Estimated Horizontal Position Error) as
-     * we compute epx and epy later from the skyview */
+    if ('\0' != field[4][0]) {
+	/* EHPE (Estimated Horizontal Position Error) */
+	session->newdata.eph = safe_atof(field[4]);
+    }
 
     if ('\0' != field[5][0]) {
         /* Estimated Vertical Position Error (meters, 0.01 resolution) */
