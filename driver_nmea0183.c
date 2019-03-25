@@ -1532,10 +1532,7 @@ static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
      */
     gps_mask_t mask = STATUS_SET;
 
-    if ('A' != field[2][0]) {
-	/* Huh? */
-        return mask;
-    }
+    /* get time/ valid or not */
     if ('\0' != field[1][0]) {
 	if (0 == merge_hhmmss(field[1], session)) {
 	    register_fractional_time(field[0], field[1], session);
@@ -1547,6 +1544,10 @@ static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
 		mask |= TIME_SET;
             }
 	}
+    }
+    if ('A' != field[2][0]) {
+	/* Huh? */
+        return mask;
     }
 
     if ('\0' != field[3][0]) {
@@ -1576,8 +1577,10 @@ static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
     }
 
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "PSRFEPE: hdop=%.1f eps=%.1f epd=%.1f\n",
+	     "PSRFEPE: hdop=%.1f eph=%.1f epv=%.1f eps=%.1f epd=%.1f\n",
 	     session->gpsdata.dop.hdop,
+	     session->newdata.eph,
+	     session->newdata.epv,
 	     session->newdata.eps,
 	     session->newdata.epd);
     return mask;
