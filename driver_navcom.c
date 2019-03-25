@@ -496,7 +496,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 #undef DOP_UNDEFINED
 
     mask = LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET | TRACK_SET
-	| STATUS_SET | MODE_SET | USED_IS | HERR_SET | VERR_SET
+	| STATUS_SET | MODE_SET | USED_IS | HERR_SET
 	| TIMERR_SET | DOP_SET
 	| TIME_SET | NTPTIME_IS;
     gpsd_log(&session->context->errout, LOG_DATA,
@@ -903,7 +903,7 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 #ifdef __UNUSED__
 	session->newdata.eph = hrms * 1.96;
 	session->newdata.epv = alt_sd * 1.96;
-	mask |= (HERR_SET | VERR_SET);
+	mask |= HERR_SET;
 #endif /*  __UNUSED__ */
 	session->newdata.time = gpsd_gpstime_resolve(session,
 						  (unsigned short)week,

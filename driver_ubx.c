@@ -277,7 +277,7 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     session->newdata.epx = session->newdata.epy = hacc;
     session->newdata.epv = vacc;
     session->newdata.eps = sacc;
-    mask |= HERR_SET | VERR_SET | SPEEDERR_SET;
+    mask |= HERR_SET | SPEEDERR_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
 	 "NAV_PVT: flags=%02x time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
 	 flags,
@@ -346,7 +346,6 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 
     if (session->driver.ubx.last_verr > 0.0) {
 	session->newdata.epv = session->driver.ubx.last_verr;
-	mask |= VERR_SET;
 	session->driver.ubx.last_verr = 0.0;
     }
 

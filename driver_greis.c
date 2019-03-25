@@ -317,7 +317,7 @@ static gps_mask_t greis_msg_SG(struct gps_device_t *session,
 	     session->newdata.epx, session->newdata.epy,
 	     session->newdata.eps, session->newdata.epc);
 
-    return HERR_SET | VERR_SET | SPEEDERR_SET | CLIMBERR_SET;
+    return HERR_SET | SPEEDERR_SET | CLIMBERR_SET;
 }
 
 /**
