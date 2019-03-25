@@ -346,8 +346,9 @@ void gps_merge_fix(struct gps_fix_t *to,
     if (0 != isfinite(from->sep)) {
 	to->sep = from->sep;
     }
-    if ((transfer & VERR_SET) != 0)
+    if (0 != isfinite(from->epv)) {
 	to->epv = from->epv;
+    }
     if ((transfer & SPEEDERR_SET) != 0)
 	to->eps = from->eps;
     if ((transfer & ECEF_SET) != 0) {

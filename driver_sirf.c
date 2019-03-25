@@ -716,7 +716,7 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
 
     ehpe = getbeu32(buf, 86);  /* Estimated horizontal position error * 100 */
     /* Estimated vertical position error * 100 */
-    session->newdata.epv = getbeu16(buf, 90) / 100.0;
+    session->newdata.epv = getbeu32(buf, 90) / 100.0;
     /* Estimated horizontal velocity error * 100 */
     session->newdata.eps = getbeu16(buf, 94) / 100.0;
     mask |= SPEEDERR_SET;
@@ -1560,6 +1560,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
     unsigned short navtype;
     gps_mask_t mask = 0;
     double eph;
+    double dbl_tmp;
 
     if (len != 91)
 	return 0;
@@ -1592,8 +1593,9 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 	session->newdata.epx = session->newdata.epy = eph / sqrt(2);
 	mask |= HERR_SET;
     }
-    if ((session->newdata.epv = getbes32(buf, 54) * 1e-2) > 0)
-	mask |= VERR_SET;
+    dbl_temp = getbes32(buf, 54) * 1e-2;
+    if (0.01 < dbl_temp)
+        session->newdata.epv = dbl_temp;
     if ((session->newdata.eps = getbes16(buf, 62) * 1e-2) > 0)
 	mask |= SPEEDERR_SET;
 
