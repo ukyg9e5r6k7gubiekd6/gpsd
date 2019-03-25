@@ -806,34 +806,15 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 
         /* extra tall screen, show more DOPs */
         if (show_more_dops) {
-            double cep = NAN;  /* 2D EP */
-            double sep = NAN;  /* 3D EP */
-
-            /* Calculate estimated 2D circular position error, CEP */
-            if (isfinite(gpsdata->fix.epx) != 0
-                && isfinite(gpsdata->fix.epy) != 0) {
-                /* http://gauss.gge.unb.ca/papers.pdf/gpsworld.may99.pdf */
-                /* CEP is just the hypotenuse of the triangle of epx and epy */
-                cep = sqrt((gpsdata->fix.epx * gpsdata->fix.epx) +
-                           (gpsdata->fix.epy * gpsdata->fix.epy));
-                if (isfinite(gpsdata->fix.epv) != 0) {
-                    /* SEP is the spherical (3D) error probability.
-                     * The square root of the sum of the squares of epx, epy,
-                     * and epv */
-                    sep = sqrt((gpsdata->fix.epx * gpsdata->fix.epx) +
-                               (gpsdata->fix.epy * gpsdata->fix.epy) +
-                               (gpsdata->fix.epv * gpsdata->fix.epv));
-                }
-            }
 
             /* Fill in the estimated horizontal (2D) error, HDOP */
-            ep_str = ep_to_str(cep, altfactor, altunits);
+            ep_str = ep_to_str(gpsdata->fix.eph, altfactor, altunits);
             dop_str = dop_to_str(gpsdata->dop.hdop);
             (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET + 8,
                             "%s, %-*s", dop_str, 11, ep_str);
 
             /* (spherical) position error, 3D error, PDOP */
-            ep_str = ep_to_str(sep, altfactor, altunits);
+            ep_str = ep_to_str(gpsdata->fix.sep, altfactor, altunits);
             dop_str = dop_to_str(gpsdata->dop.pdop);
             (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET + 8,
                             "%s, %-*s", dop_str, 11, ep_str);
