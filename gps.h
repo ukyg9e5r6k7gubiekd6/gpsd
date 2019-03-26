@@ -2230,6 +2230,7 @@ extern double earth_distance_and_bearings(double, double, double, double,
 					  double *,
 					  double *);
 extern double wgs84_separation(double, double);
+extern void datum_code_string(int code, char *buffer, size_t len);
 
 /* some multipliers for interpreting GPS output */
 #define METERS_TO_FEET	3.2808399	/* Meters to U.S./British feet */

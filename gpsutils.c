@@ -662,4 +662,47 @@ bool nanowait(int fd, int nanoseconds)
     return pselect(fd + 1, &fdset, NULL, NULL, &to, NULL) == 1;
 }
 
+/* Accept a datum code, return matching string
+ *
+ * There are a ton of these, only a few are here
+ *
+ */
+void datum_code_string(int code, char *buffer, size_t len)
+{
+    const char *datum_str;
+
+    switch (code) {
+    case 0:
+        datum_str = "WGS84";
+        break;
+    case 21:
+        datum_str = "WGS84";
+        break;
+    case 178:
+        datum_str = "Tokyo Mean";
+        break;
+    case 179:
+        datum_str = "Tokyo-Japan";
+        break;
+    case 180:
+        datum_str = "Tokyo-Korea";
+        break;
+    case 181:
+        datum_str = "Tokyo-Okinawa";
+        break;
+    case 182:
+        datum_str = "PZ90.11";
+        break;
+    default:
+        datum_str = NULL;
+        break;
+    }
+
+    if (NULL == datum_str) {
+        /* Fake it */
+        snprintf(buffer, len, "%d", code);
+    } else {
+	strlcpy(buffer, datum_str, len);
+    }
+}
 /* end */

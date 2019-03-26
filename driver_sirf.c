@@ -587,7 +587,6 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     uint8_t time_source = 0;
     struct tm unpacked_date;
     unsigned char datum;
-    const char *datum_str;
     int64_t clk_bias;
     uint32_t clk_bias_error;
     int32_t clk_offset;
@@ -651,29 +650,8 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     mask |= TIME_SET;
 
     datum = getub(buf, 33);
-    switch (datum) {
-    case 21:
-        datum_str = "WGS84";
-        break;
-    case 178:
-        datum_str = "Tokyo Mean";
-        break;
-    case 179:
-        datum_str = "Tokyo-Japan";
-        break;
-    case 180:
-        datum_str = "Tokyo-Korea";
-        break;
-    case 181:
-        datum_str = "Tokyo-Okinawa";
-        break;
-    case 182:
-        datum_str = "PZ90.11";
-        break;
-    default:
-        datum_str = "Other";
-    }
-    strlcpy(session->newdata.datum, datum_str, sizeof(session->newdata.datum));
+    datum_code_string(datum, session->newdata.datum,
+                      sizeof(session->newdata.datum));
 
     clk_bias = getbes64(buf, 34) / 100.0;
     clk_bias_error = getbeu32(buf, 42) / 100.0;
@@ -769,8 +747,9 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
 	     "GPS Week %d, tow %d.%03d, time %ld.%09ld\n",
 	     gps_week, gps_tow, gps_tow_sub_ms, now.tv_sec, now.tv_nsec);
 	gpsd_log(&session->context->errout, debug_base,
-	     "UTC time %.9f leaps %u, datum %u\n",
-	     session->newdata.time, session->context->leap_seconds, datum);
+	     "UTC time %.9f leaps %u, datum %s\n",
+	     session->newdata.time, session->context->leap_seconds,
+	     sizeof(session->newdata.datum));
 	gpsd_log(&session->context->errout, debug_base,
              "solution_info %08x\n", solution_info);
 	gpsd_log(&session->context->errout, debug_base,
