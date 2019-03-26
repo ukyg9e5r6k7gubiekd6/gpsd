@@ -1612,6 +1612,7 @@ static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
 
 /* NMEA Map Datum
  *
+ * FIXME: seems to happen after cycle ender, so nothing happens...
  */
 static gps_mask_t processDTM(int c UNUSED, char *field[],
 			       struct gps_device_t *session)
