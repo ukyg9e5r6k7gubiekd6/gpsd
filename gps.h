@@ -124,6 +124,7 @@ struct gps_fix_t {
 	double vx, vy, vz;	/* ECEF x, y, z velocity */
 	double vAcc;            /* Velocity Accuracy Estimate, probably SEP */
     } ecef;
+    char datum[40];             /* map datum */
 };
 
 /*

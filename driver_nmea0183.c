@@ -1423,6 +1423,30 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[],
     return mask;
 }
 
+/* Garmin Map Datum
+ *
+ * FIXME: seems to happen after cycle ender, so nothing happens...
+ */
+static gps_mask_t processPGRMM(int c UNUSED, char *field[],
+			       struct gps_device_t *session)
+{
+    /*
+     * $PGRMM,NAD83*29
+     * 1    = Map Datum
+     */
+    gps_mask_t mask = ONLINE_SET;
+
+    if ('\0' != field[1][0]) {
+        strlcpy(session->newdata.datum, field[1],
+                sizeof(session->newdata.datum));
+    }
+
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "PGRMM: datum=%.40s\n",
+	     session->newdata.datum);
+    return mask;
+}
+
 /* Garmin Altitude Information */
 static gps_mask_t processPGRMZ(int c UNUSED, char *field[],
 			       struct gps_device_t *session)
@@ -2442,7 +2466,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{"PGRMF", 0, false, NULL},	/* ignore Garmin GPS Fix Data */
 	{"PGRMH", 0, false, NULL},	/* ignore Garmin Aviation Height... */
 	{"PGRMI", 0, false, NULL},	/* ignore Garmin Sensor Init */
-	{"PGRMM", 0, false, NULL},	/* ignore Garmin Map Datum */
+	{"PGRMM", 2, false, processPGRMM},	/* Garmin Map Datum */
 	{"PGRMO", 0, false, NULL},	/* ignore Garmin Sentence Enable */
 	{"PGRMT", 0, false, NULL},	/* ignore Garmin Sensor Info */
 	{"PGRMV", 0, false, NULL},	/* ignore Garmin 3D Velocity Info */
@@ -2463,6 +2487,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	     * 4. The mode is changed back to NMEA, resulting in an
 	     *    infinite loop.
 	     */
+	{"BOD", 0, false, NULL},    /* ignore Bearing Origin to Destination  */
 	{"DBT", 7,  true,  processDBT},
 	{"DTM", 0, false, NULL},	/* ignore datum */
 	{"GBS", 7,  false, processGBS},
@@ -2503,8 +2528,9 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{"STI", 2, false, processSTI},		/* $STI  Skytraq */
 #endif /* SKYTRAQ_ENABLE */
 	{"RMC", 8,  false, processRMC},
+	{"RTE", 0,  false, NULL},	/* ignore Routes */
 	{"TXT", 5,  false, processTXT},
-	{"VLW", 0, false, NULL},	/* ignore Dual ground/water distance */
+	{"VLW", 0,  false, NULL},	/* ignore Dual ground/water distance */
 	{"VTG", 5,  false, processVTG},
 	{"ZDA", 4,  false, processZDA},
     };

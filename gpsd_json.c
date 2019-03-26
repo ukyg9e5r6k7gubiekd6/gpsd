@@ -267,10 +267,13 @@ void json_tpv_dump(const struct gps_device_t *session,
 	}
 #endif /* TIMING_ENABLE */
         /* at the end because it is new and microjson chokes on new items */
-	if (isfinite(gpsdata->fix.eph) != 0)
+	if (0 != isfinite(gpsdata->fix.eph))
 	    str_appendf(reply, replylen, "\"eph\":%.3f,", gpsdata->fix.eph);
-	if (isfinite(gpsdata->fix.sep) != 0)
+	if (0 != isfinite(gpsdata->fix.sep))
 	    str_appendf(reply, replylen, "\"sep\":%.3f,", gpsdata->fix.sep);
+	if ('\0' != gpsdata->fix.datum[0])
+	    str_appendf(reply, replylen, "\"datum\":\"%.40s\",",
+                        gpsdata->fix.datum);
     }
     str_rstrip_char(reply, ',');
     (void)strlcat(reply, "}\r\n", replylen);

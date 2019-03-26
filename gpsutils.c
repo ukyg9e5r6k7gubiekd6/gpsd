@@ -363,6 +363,9 @@ void gps_merge_fix(struct gps_fix_t *to,
 	to->ecef.vz = from->ecef.vz;
 	to->ecef.vAcc = from->ecef.vAcc;
     }
+    if ('\0' != from->datum[0]) {
+        strlcpy(to->datum, from->datum, sizeof(to->datum));
+    }
 }
 
 /* NOTE: timestamp_t is a double, so this is only precise to
