@@ -192,10 +192,9 @@ static gps_mask_t handle1000(struct gps_device_t *session)
                       sizeof(session->newdata.datum));
     /*
      * The manual says these are 1-sigma.  Device reports only eph, circular
-     * error; no harm in assigning it to both x and y components.
+     * error.  Let gpsd_model_error() do the rest
      */
-    session->newdata.epx = session->newdata.epy =
-	(int)getzlong(40) * 1e-2 * (1 / sqrt(2)) * GPSD_CONFIDENCE;
+    session->newdata.eph = (int)getzlong(40) * 1e-2 * GPSD_CONFIDENCE;
     session->newdata.epv = (int)getzlong(42) * 1e-2 * GPSD_CONFIDENCE;
     session->newdata.ept = (int)getzlong(44) * 1e-2 * GPSD_CONFIDENCE;
     session->newdata.eps = (int)getzword(46) * 1e-2 * GPSD_CONFIDENCE;
@@ -204,9 +203,8 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     /* clock_drift                 = (int)getzlong(51) * 1e-2; */
     /* clock_drift_sd              = (int)getzlong(53) * 1e-2; */
 
-    mask =
-	TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET |
-	TRACK_SET | STATUS_SET | MODE_SET;
+    mask = TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET | CLIMB_SET |
+           SPEED_SET | TRACK_SET | STATUS_SET | MODE_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "1000: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d\n",
 	     session->newdata.time, session->newdata.latitude,
