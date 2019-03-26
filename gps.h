@@ -88,6 +88,8 @@ extern "C" {
 typedef double timestamp_t;	/* Unix time in seconds with fractional part */
 typedef struct timespec timespec_t;	/* Unix time as sec, nsec */
 
+/* GPS error estimates are all over the map, and often unspecified.
+ * try for 1-sigma if we can... */
 struct gps_fix_t {
     timestamp_t time;	/* Time of update */
     int    mode;	/* Mode of fix */
