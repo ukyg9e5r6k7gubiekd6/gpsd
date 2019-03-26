@@ -32,11 +32,11 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *,
 static gps_mask_t decode_itk_subframe(struct gps_device_t *, unsigned char *,
 				      size_t);
 
+/* NAVIGATION_MSG, message id 7 */
 static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
 				    unsigned char *buf, size_t len)
 {
     unsigned short flags, pflags;
-    double eph;
 
     gps_mask_t mask = 0;
     if (len != 296) {
@@ -76,10 +76,12 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
 		     session->newdata.ecef.vy, session->newdata.ecef.vz);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET
             | ECEF_SET | VECEF_SET;
-    eph = (double)(getles32(buf, 7 + 252) / 100.0);
-    /* eph is a circular error, sqrt(epx**2 + epy**2) */
-    session->newdata.epx = session->newdata.epy = eph / sqrt(2);
+    /* this eph does not look right, badly documented.
+     * let gpsd_error_model() handle it
+     * session->newdata.eph = (double)(getles32(buf, 7 + 252) / 100.0);
+     */
     session->newdata.eps = (double)(getles32(buf, 7 + 254) / 100.0);
+    /* compute epx/epy in gpsd_error_model(), not here */
 
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
     session->gpsdata.satellites_used =
