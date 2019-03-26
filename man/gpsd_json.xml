@@ -148,6 +148,12 @@ Others may be reported or not depending on the fix quality.</para>
 	second.</entry>
 </row>
 <row>
+	<entry>datum</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+        <entry>Current datum.</entry>
+</row>
+<row>
 	<entry>epc</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
