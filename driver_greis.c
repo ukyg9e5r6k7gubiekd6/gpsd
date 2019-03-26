@@ -299,22 +299,18 @@ static gps_mask_t greis_msg_SG(struct gps_device_t *session,
 
     /*
      * All errors are RMS which can be approximated as 1 sigma, so we can just
-     * multiply to get the length used for GPSD confidence level.
+     * use them directly.
      *
-     * Make the simplifying assumption that error is the same for latitude and
-     * longitude, since GREIS does not provide those as precomputed components.
-     * A future improvement might be to compute the individual errors from the
-     * position covariance matrix, but only if this proves insufficient.
+     * Compute missing items in gpsd_error_model(), not here.
      */
-    session->newdata.epx = session->newdata.epy =
-	hpos * (1 / sqrt(2)) * GPSD_CONFIDENCE;
-    session->newdata.epv = vpos * GPSD_CONFIDENCE;
-    session->newdata.eps = hvel * GPSD_CONFIDENCE;
-    session->newdata.epc = vvel * GPSD_CONFIDENCE;
+    session->newdata.eph = hpos;
+    session->newdata.epv = vpos;
+    session->newdata.eps = hvel;
+    session->newdata.epc = vvel;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GREIS: SG, epx: %.2f, epy: %.2f, eps: %.2f, epc: %.2f\n",
-	     session->newdata.epx, session->newdata.epy,
+	     "GREIS: SG, eph: %.2f, eps: %.2f, epc: %.2f\n",
+	     session->newdata.eph,
 	     session->newdata.eps, session->newdata.epc);
 
     return HERR_SET | SPEEDERR_SET | CLIMBERR_SET;
