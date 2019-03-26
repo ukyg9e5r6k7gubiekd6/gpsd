@@ -1423,6 +1423,81 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[],
     return mask;
 }
 
+/* Garmin GPS Fix Data Sentence
+ *
+ * FIXME: seems to happen after cycle ender, so little happens...
+ */
+static gps_mask_t processPGRMF(int c UNUSED, char *field[],
+			       struct gps_device_t *session)
+{
+ /*
+  * $PGRMF,290,293895,160305,093802,13,5213.1439,N,02100.6511,E,A,2,0,226,2,1*11
+  *
+  * 1 = GPS week
+  * 2 = GPS seconds
+  * 3 = UTC Date ddmmyy
+  * 4 = UTC time hhmmss
+  * 5 = GPS leap seconds
+  * 6 = Latitude ddmm.mmmm
+  * 7 = N or S
+  * 8 = Longitude dddmm.mmmm
+  * 9 = E or W
+  * 10 = Mode, M = Manual, A = Automatic
+  * 11 = Fix type, 0 = No fix, 2 = 2D fix, 2 = 3D fix
+  * 12 = Ground Speed, 0 to 1151 km/hr
+  * 13 = Course over ground, 0 to 359 degrees true
+  * 14 = pdop, 0 to 9
+  * 15 = dop, 0 to 9
+  */
+    gps_mask_t mask = ONLINE_SET;
+
+    if (0 == merge_hhmmss(field[4], session) &&
+	0 == merge_ddmmyy(field[3], session)) {
+	/* got a good data/time */
+	mask |= TIME_SET;
+    }
+    if ('A' != field[10][0]) {
+	/* Huh? */
+        return mask;
+    }
+    if ('\0' != field[5][0]) {
+        session->context->leap_seconds = atoi(field[5]);
+	session->context->valid = LEAP_SECOND_VALID;
+    }
+    if (0 == do_lat_lon(&field[6], &session->newdata)) {
+	mask |= LATLON_SET;
+    }
+    switch (field[11][0]) {
+    default:
+        /* Huh? */
+        break;
+    case '0':
+	session->newdata.mode = MODE_NO_FIX;
+	mask |= MODE_SET;
+        break;
+    case '1':
+	session->newdata.mode = MODE_2D;
+	mask |= MODE_SET;
+        break;
+    case '2':
+	session->newdata.mode = MODE_3D;
+	mask |= MODE_SET;
+        break;
+    }
+    session->newdata.speed = safe_atof(field[12]) / MPS_TO_KPH;
+    session->newdata.track = safe_atof(field[13]);
+    mask |= SPEED_SET | TRACK_SET;
+    session->gpsdata.dop.pdop = safe_atof(field[14]);
+    session->gpsdata.dop.tdop = safe_atof(field[15]);
+    mask |= DOP_SET;
+
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "PGRMF: pdop %.1f tdop %.1f \n",
+	     session->gpsdata.dop.pdop,
+	     session->gpsdata.dop.tdop);
+    return mask;
+}
+
 /* Garmin Map Datum
  *
  * FIXME: seems to happen after cycle ender, so nothing happens...
@@ -2532,17 +2607,17 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	bool cycle_continue;	/* cycle continuer? */
 	nmea_decoder decoder;
     } nmea_phrase[] = {
-	{"PGRMB", 0, false, NULL},	/* ignore Garmin DGPS Beacon Info */
-	{"PGRMC", 0, false, NULL},	/* ignore Garmin Sensor Config */
-	{"PGRME", 7, false, processPGRME},
-	{"PGRMF", 0, false, NULL},	/* ignore Garmin GPS Fix Data */
-	{"PGRMH", 0, false, NULL},	/* ignore Garmin Aviation Height... */
-	{"PGRMI", 0, false, NULL},	/* ignore Garmin Sensor Init */
-	{"PGRMM", 2, false, processPGRMM},	/* Garmin Map Datum */
-	{"PGRMO", 0, false, NULL},	/* ignore Garmin Sentence Enable */
-	{"PGRMT", 0, false, NULL},	/* ignore Garmin Sensor Info */
-	{"PGRMV", 0, false, NULL},	/* ignore Garmin 3D Velocity Info */
-	{"PGRMZ", 4, false, processPGRMZ},
+	{"PGRMB", 0,  false, NULL},	/* ignore Garmin DGPS Beacon Info */
+	{"PGRMC", 0,  false, NULL},	/* ignore Garmin Sensor Config */
+	{"PGRME", 7,  false, processPGRME},
+	{"PGRMF", 15, false, processPGRMF},	/* Garmin GPS Fix Data */
+	{"PGRMH", 0,  false, NULL},	/* ignore Garmin Aviation Height... */
+	{"PGRMI", 0,  false, NULL},	/* ignore Garmin Sensor Init */
+	{"PGRMM", 2,  false, processPGRMM},	/* Garmin Map Datum */
+	{"PGRMO", 0,  false, NULL},	/* ignore Garmin Sentence Enable */
+	{"PGRMT", 0,  false, NULL},	/* ignore Garmin Sensor Info */
+	{"PGRMV", 0,  false, NULL},	/* ignore Garmin 3D Velocity Info */
+	{"PGRMZ", 4,  false, processPGRMZ},
 	    /*
 	     * Basic sentences must come after the PG* ones, otherwise
 	     * Garmins can get stuck in a loop that looks like this:
