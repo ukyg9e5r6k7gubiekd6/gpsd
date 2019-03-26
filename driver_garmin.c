@@ -507,7 +507,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "Garmin: PVT_DATA: time=%.2f, lat=%.2f lon=%.2f "
 		 "speed=%.2f track=%.2f climb=%.2f "
-		 "epx=%.2f epy=%.2f epv=%.2f "
+		 "eph=%.2f sep=%.2f epv=%.2f "
 		 "mode=%d status=%d\n",
 		 session->newdata.time,
 		 session->newdata.latitude,
@@ -515,8 +515,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		 session->newdata.speed,
 		 session->newdata.track,
 		 session->newdata.climb,
-		 session->newdata.epx,
-		 session->newdata.epy,
+		 session->newdata.eph,
+		 session->newdata.sep,
 		 session->newdata.epv,
 		 session->newdata.mode,
 		 session->gpsdata.status);
