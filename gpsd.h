@@ -697,14 +697,6 @@ struct gps_device_t {
 	struct {
 	    unsigned char port_id;
 	    unsigned char sbas_in_use;
-	    /*
-	     * NAV-* message order is not defined, thus we handle them isochronously
-	     * and store the latest data into these variables rather than expect
-	     * some messages to arrive in order. NAV-SOL handler picks up these values
-	     * and inserts them into the fix structure in one go.
-	     */
-	    double last_herr;
-	    double last_verr;
     	} ubx;
 #endif /* UBLOX_ENABLE */
 #ifdef NAVCOM_ENABLE

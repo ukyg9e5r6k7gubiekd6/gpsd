@@ -163,7 +163,8 @@ ubx_msg_nav_posecef(struct gps_device_t *session, unsigned char *buf,
 }
 
 /**
- * Navigation Position Velocity Time  solution message
+ * Navigation Position Velocity Time solution message
+ * UBX-NAV-PVT Class 1, ID 7
  */
 static gps_mask_t
 ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
@@ -270,14 +271,17 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     session->newdata.altitude = 1e-3 * (int32_t)getles32(buf, 32);
     session->newdata.speed = 1e-3 * (int32_t)getles32(buf, 60);
     session->newdata.track = 1e-5 * (int32_t)getles32(buf, 64);
+    /* Height Accuracy estimate, unknown details */
     hacc = (double)(getles32(buf, 40) / 1000.0);
+    /* Velocity Accuracy estimate, unknown details */
     vacc = (double)(getles32(buf, 44) / 1000.0);
+    /* Speed Accuracy estimate, unknown details */
     sacc = (double)(getles32(buf, 48) / 1000.0);
-    // Assuming hacc == epx == epy is the best we can do
-    session->newdata.epx = session->newdata.epy = hacc;
+    /* let gpsd_error_model() do the rest */
+    session->newdata.eph = hacc;
     session->newdata.epv = vacc;
     session->newdata.eps = sacc;
-    mask |= HERR_SET | SPEEDERR_SET;
+    mask |= HERR_SET | SPEEDERR_SET | VERR_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
 	 "NAV_PVT: flags=%02x time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
 	 flags,
@@ -336,18 +340,6 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET \
             | ECEF_SET | VECEF_SET;
-
-    if (session->driver.ubx.last_herr > 0.0) {
-	session->newdata.epx = session->newdata.epy \
-                             = session->driver.ubx.last_herr;
-	mask |= HERR_SET;
-	session->driver.ubx.last_herr = 0.0;
-    }
-
-    if (session->driver.ubx.last_verr > 0.0) {
-	session->newdata.epv = session->driver.ubx.last_verr;
-	session->driver.ubx.last_verr = 0.0;
-    }
 
     session->newdata.eps = (double)(getles32(buf, 40) / 100.0);
     mask |= SPEEDERR_SET;
@@ -515,14 +507,20 @@ static void ubx_msg_nav_timels(struct gps_device_t *session,
 
  /**
  * Geodetic position solution message
+ * UBX-NAV-POSLLH, Class 1, ID 2
  */
 static gps_mask_t
 ubx_msg_nav_posllh(struct gps_device_t *session, unsigned char *buf,
 		   size_t data_len UNUSED)
 {
-    session->driver.ubx.last_herr = (double)(getleu32(buf, 20) / 1000.0);
-    session->driver.ubx.last_verr = (double)(getleu32(buf, 24) / 1000.0);
-    return 0;
+    gps_mask_t mask = ONLINE_SET | VERR_SET;
+
+    /* FIXME: should also get time, lat/lon/alt */
+    /* Horizontal accuracy estimate in mm, unknown type */
+    session->newdata.eph = (double)(getleu32(buf, 20) / 1000.0);
+    /* Vertical accuracy estimate in mm, unknown type */
+    session->newdata.epv = (double)(getleu32(buf, 24) / 1000.0);
+    return mask;
 }
 
 /**
