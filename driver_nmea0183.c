@@ -2559,14 +2559,14 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	     * 4. The mode is changed back to NMEA, resulting in an
 	     *    infinite loop.
 	     */
-	{"BOD", 0, false, NULL},    /* ignore Bearing Origin to Destination  */
+	{"BOD", 0,  false, NULL},    /* ignore Bearing Origin to Destination  */
 	{"DBT", 7,  true,  processDBT},
 	{"DTM", 2,  false, processDTM},	/* datum */
 	{"GBS", 7,  false, processGBS},
 	{"GGA", 13, false, processGGA},
 	{"GLL", 7,  false, processGLL},
 	{"GNS", 13, false, processGNS},
-	{"GRS", 0, false, NULL},	/* ignore GNSS Range Residuals */
+	{"GRS", 0,  false, NULL},	/* ignore GNSS Range Residuals */
 	{"GSA", 17, false, processGSA},
 	{"GST", 8,  false, processGST},
 	{"GSV", 0,  false, processGSV},
