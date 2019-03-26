@@ -147,6 +147,8 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     gps_mask_t mask;
     double subseconds;
     struct tm unpacked_date;
+    int datum;
+
     /* ticks                      = getzlong(6); */
     /* sequence                   = getzword(8); */
     /* measurement_sequence       = getzword(9); */
@@ -185,7 +187,9 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     session->newdata.track = (int)getzword(36) * RAD_2_DEG * 1e-3;
     session->mag_var = ((short)getzword(37)) * RAD_2_DEG * 1e-4;
     session->newdata.climb = ((short)getzword(38)) * 1e-2;
-    /* map_datum                   = getzword(39); */
+    datum = getzword(39);
+    datum_code_string(datum, session->newdata.datum,
+                      sizeof(session->newdata.datum));
     /*
      * The manual says these are 1-sigma.  Device reports only eph, circular
      * error; no harm in assigning it to both x and y components.
