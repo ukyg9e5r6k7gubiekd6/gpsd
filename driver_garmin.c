@@ -415,20 +415,22 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	// gpsd sign is opposite of garmin sign
 	session->gpsdata.separation = -pvt->msl_hght;
 
-	// Estimated position error in meters.
-	// We follow the advice at <http://gpsinformation.net/main/errors.htm>.
-	// If this assumption changes here, it should also change in
-	// nmea_parse.c where we analyze PGRME.
+	/* Estimated position error in meters.  2 sigma
+	 * We follow the advice at <http://gpsinformation.net/main/errors.htm>.
+         * Since GPS data is not gaussian, this is marginal advice...
+	 * If this assumption changes here, it should also change in
+	 * nmea_parse.c where we analyze PGRME.
+         */
 	session->newdata.sep = pvt->epe * (GPSD_CONFIDENCE / CEP50_SIGMA);
-	/* eph is a circular error, sqrt(epx**2 + epy**2) */
-	session->newdata.epx = session->newdata.epy =
-	    pvt->eph * (1 / sqrt(2)) * (GPSD_CONFIDENCE / CEP50_SIGMA);
+        /* eph, horizaontal error, 2 sigma */
+	session->newdata.eph = pvt->eph * (GPSD_CONFIDENCE / CEP50_SIGMA);
+        /* eph, horizaontal error, 2 sigma */
 	session->newdata.epv = pvt->epv * (GPSD_CONFIDENCE / CEP50_SIGMA);
 
-	// convert lat/lon to directionless speed
+	/* convert lat/lon to directionless speed */
 	session->newdata.speed = hypot(pvt->lon_vel, pvt->lat_vel);
 
-	// keep climb in meters/sec
+	/* keep climb in meters/sec */
 	session->newdata.climb = pvt->alt_vel;
 
 	track = atan2(pvt->lon_vel, pvt->lat_vel);
