@@ -1610,6 +1610,77 @@ static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
     return mask;
 }
 
+/* NMEA Map Datum
+ *
+ */
+static gps_mask_t processDTM(int c UNUSED, char *field[],
+			       struct gps_device_t *session)
+{
+    /*
+     * $GPDTM,W84,C*52
+     * $GPDTM,xxx,x,xx.xxxx,x,xx.xxxx,x,,xxx*hh<CR><LF>
+     * 1    = Local datum code (xxx):
+     *          W84 – WGS84
+     *          W72 – WGS72
+     *          S85 – SGS85
+     *          P90 – PE90
+     *          999 – User defined
+     *          IHO datum code
+     * 2     = Local datum sub code (x)
+     * 3     = Latitude offset in minutes (xx.xxxx)
+     * 4     = Latitude offset mark (N: +, S: -) (x)
+     * 5     = Longitude offset in minutes (xx.xxxx)
+     * 6     = Longitude offset mark (E: +, W: -) (x)
+     * 7     = Altitude offset in meters. Always null
+     * 8     = Datum (xxx):
+     *          W84 – WGS84
+     *          W72 – WGS72
+     *          S85 – SGS85
+     *          P90 – PE90
+     *          999 – User defined
+     *          IHO datum code
+     * 9    = checksum
+     */
+    int i;
+    static struct
+    {
+	char *code;
+	char *name;
+    } codes[] = {
+        {"W84", "WGS84"},
+        {"W72", "WGS72"},
+        {"S85", "SGS85"},
+        {"P90", "PE90"},
+        {"999", "User Defined"},
+        {"", ""},
+    };
+
+    gps_mask_t mask = ONLINE_SET;
+
+    if ('\0' == field[1][0]) {
+        return mask;
+    }
+
+    for (i = 0; ; i++) {
+        if ('\0' == codes[i].code[0]) {
+            /* not found */
+	    strlcpy(session->newdata.datum, field[1],
+                    sizeof(session->newdata.datum));
+            break;
+        }
+        if (0 ==strcmp(codes[i].code, field[1])) {
+	    strlcpy(session->newdata.datum, codes[i].name,
+                    sizeof(session->newdata.datum));
+            break;
+        }
+    }
+
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "xxDTM: datum=%.40s\n",
+	     session->newdata.datum);
+    return mask;
+}
+
 /* NMEA 3.0 Estimated Position Error */
 static gps_mask_t processGBS(int c UNUSED, char *field[],
 			       struct gps_device_t *session)
@@ -2489,7 +2560,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	     */
 	{"BOD", 0, false, NULL},    /* ignore Bearing Origin to Destination  */
 	{"DBT", 7,  true,  processDBT},
-	{"DTM", 0, false, NULL},	/* ignore datum */
+	{"DTM", 2,  false, processDTM},	/* datum */
 	{"GBS", 7,  false, processGBS},
 	{"GGA", 13, false, processGGA},
 	{"GLL", 7,  false, processGLL},
