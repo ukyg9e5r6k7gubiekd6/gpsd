@@ -47,6 +47,7 @@ extern "C" {
  *       Remove epe from gps_data_t, it duplicates gps_fix_t eph
  *       Added sep (estimated spherical error, 3D)
  *       Note: Some GPS call eph as epe, others call sep as epe
+ *       Add gps_fix_t datum string
  */
 #define GPSD_API_MAJOR_VERSION	8	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
