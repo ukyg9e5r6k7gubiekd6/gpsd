@@ -693,6 +693,9 @@ void datum_code_string(int code, char *buffer, size_t len)
     case 182:
         datum_str = "PZ90.11";
         break;
+    case 999:
+        datum_str = "User Defined";
+        break;
     default:
         datum_str = NULL;
         break;
