@@ -72,9 +72,9 @@ running gpsd instance.</para>
    <varlistentry>
     <term>-c COMMAND</term>
     <listitem>
-     <para>Send a text string to the GPS.  Accepts one parameter, COMMAND,
-the command string to send to the GPS.  The string is sent verbatim, except
-a newline is appended.
+     <para>Send a command to the GPS.  Accepts one parameter, COMMAND,
+a comma-separated list of hexadecimal bytes specifying the class, the ID,
+and any needed payload.  The header, length, and checksum are added automatically.
 </para>
     </listitem>
    </varlistentry>

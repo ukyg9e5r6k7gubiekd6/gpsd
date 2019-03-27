@@ -29,7 +29,9 @@ usage: ubxtool [OPTIONS] [server[:port[:device]]]
 from __future__ import absolute_import, print_function, division
 
 import binascii      # for binascii.hexlify()
+from functools import reduce  # pylint: disable=redefined-builtin
 import getopt        # for getopt.getopt(), to parse CLI options
+import operator      # for or_
 import os            # for os.environ
 import socket        # for socket.error
 import stat          # for stat.S_ISBLK()
@@ -2395,7 +2397,7 @@ def usage():
     "Ouput usage information, and exit"
     print('usage: %s [-c C] [-f F] [-r] [-p P] [-s S] [-v V]\n'
           '               [-hV?] [-S S]\n'
-          '       -c C          send raw command C to GPS\n'
+          '       -c C          send raw command C (cls,id...) to GPS\n'
           '       -d D          disable D\n'
           '       -e E          enable E\n'
           '       -f F          open F as file/device\n'
@@ -2593,13 +2595,22 @@ try:
         gps_model.send_set_speed(opts['set_speed'])
 
     elif opts['command'] is not None:
-        # zero length is OK to send
-        # add trailing new line
-        opts['command'] += "\n"
-
+        cmd_list = opts['command'].split(',')
+        try:
+            cmd_data = [int(x, 16) for x in cmd_list]
+        except ValueError:
+            badarg = True
+        else:
+            data_or = reduce(operator.or_, cmd_data)
+            badarg = data_or != data_or & 0xFF
+        if badarg or len(cmd_list) < 2:
+            sys.stderr.write('%s: Argument format (hex bytes) is'
+                             ' class,id[,payload...]\n' % PROG_NAME)
+            sys.exit(1)
+        payload = bytearray(cmd_data[2:])
         if VERB_QUIET < opts['verbosity']:
             sys.stderr.write('%s: command %s\n' % (PROG_NAME, opts['command']))
-        gps_model.gps_send_raw(opts['command'])
+        gps_model.gps_send(cmd_data[0], cmd_data[1], payload)
 
     exit_code = io_handle.read(opts)
 
