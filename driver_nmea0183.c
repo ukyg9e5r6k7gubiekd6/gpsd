@@ -2636,18 +2636,30 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	     * 4. The mode is changed back to NMEA, resulting in an
 	     *    infinite loop.
 	     */
+	{"AAM", 0,  false, NULL},    /* ignore Waypoint Arrival Alarm  */
+	{"APB", 0,  false, NULL},    /* ignore Autopilot Sentence B  */
 	{"BOD", 0,  false, NULL},    /* ignore Bearing Origin to Destination  */
+        /* ignore Bearing & Distance to Waypoint, Great Circle*/
+	{"BWC", 0,  false, NULL},
 	{"DBT", 7,  true,  processDBT},
+	{"DPT", 0,  false, NULL},       /* ignore depth  */
 	{"DTM", 2,  false, processDTM},	/* datum */
 	{"GBS", 7,  false, processGBS},
 	{"GGA", 13, false, processGGA},
+	{"GLC", 0,  false, NULL},       /* ignore Geographic Position, LoranC */
 	{"GLL", 7,  false, processGLL},
 	{"GNS", 13, false, processGNS},
 	{"GRS", 0,  false, NULL},	/* ignore GNSS Range Residuals */
 	{"GSA", 17, false, processGSA},
 	{"GST", 8,  false, processGST},
 	{"GSV", 0,  false, processGSV},
+        /* ignore Heading, Deviation and Variation */
+	{"HDG", 0,  false, NULL},
         {"HDT", 1,  false, processHDT},
+	{"MSS", 0,  false, NULL},       /* ignore beacon receiver status */
+	{"MTW", 0,  false, NULL},       /* ignore Water Temperature */
+	{"MWD", 0,  false, NULL},       /* ignore Wind Direction and Speed */
+	{"MWV", 0,  false, NULL},       /* ignore Wind Speed and Angle */
 #ifdef OCEANSERVER_ENABLE
 	{"OHPR", 18, false, processOHPR},
 #endif /* OCEANSERVER_ENABLE */
@@ -2676,11 +2688,16 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{"PSTI", 2, false, processPSTI},	/* $PSTI Skytraq */
 	{"STI", 2, false, processSTI},		/* $STI  Skytraq */
 #endif /* SKYTRAQ_ENABLE */
+        /* ignore Recommended Minimum Navigation Info, waypoint */
+	{"RMB", 0,  false, NULL},
 	{"RMC", 8,  false, processRMC},
 	{"RTE", 0,  false, NULL},	/* ignore Routes */
 	{"TXT", 5,  false, processTXT},
+	{"VHW", 0,  false, NULL},	/* ignore Water Speed and Heading */
 	{"VLW", 0,  false, NULL},	/* ignore Dual ground/water distance */
 	{"VTG", 5,  false, processVTG},
+	{"XDR", 0,  false, NULL},	/* ignore $HCXDR, IMU? */
+	{"XTE", 0,  false, NULL},	/* ignore Cross-Track Error */
 	{"ZDA", 4,  false, processZDA},
     };
 

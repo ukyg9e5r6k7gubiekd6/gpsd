@@ -46,7 +46,7 @@ gps_mask_t generic_parse_input(struct gps_device_t *session)
 
 	if ((st=nmea_parse(sentence, session)) == 0) {
 	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "unknown sentence: \"%s\"\n",	sentence);
+		     "unknown sentence: \"%s\"\n", sentence);
 	}
 	for (dp = gpsd_drivers; *dp; dp++) {
 	    char *trigger = (*dp)->trigger;
