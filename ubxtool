@@ -200,12 +200,12 @@ class ubx(object):
             s += 'navConf '
         if mask & 0x10:
             s += 'rxmConf '
-        if mask & 0x80:
+        if mask & 0x100:
             # not on M8030
             s += 'senConf '
-        if mask & 0x100:
-            s += 'rinvConf '
         if mask & 0x200:
+            s += 'rinvConf '
+        if mask & 0x400:
             s += 'antConf '
         if mask & 0x800:
             s += 'logConf '
@@ -1807,10 +1807,10 @@ class ubx(object):
         # Clear: save_clear = 1
 
         # basic configs alays available to change:
-        # ioPort, msgConf, infMsg, navConf, rxmConf, senConf
-        cfg1 = 0x9f
-        # rinvConf, antConf, logConf
-        cfg2 = 0x03
+        # ioPort, msgConf, infMsg, navConf, rxmConf
+        cfg1 = 0x1f
+        # senConf, rinvConf, antConf, logConf
+        cfg2 = 0x0f
 
         m_data = bytearray(13)
 
@@ -1827,7 +1827,7 @@ class ubx(object):
         m_data[3] = 0       #
 
         # save
-        if 0 == type:
+        if 0 == save_clear:
             # saving
             m_data[4] = cfg1
             m_data[5] = cfg2
@@ -1839,7 +1839,7 @@ class ubx(object):
         m_data[7] = 0       #
 
         # load
-        if False and 0 == type:
+        if False and 0 == save_clear:
             # saving
             m_data[8] = 0
             m_data[9] = 0
