@@ -82,6 +82,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
      */
     session->newdata.eps = (double)(getles32(buf, 7 + 254) / 100.0);
     /* compute epx/epy in gpsd_error_model(), not here */
+    mask |= HERR_SET;
 
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
     session->gpsdata.satellites_used =

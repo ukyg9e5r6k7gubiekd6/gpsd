@@ -204,7 +204,8 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     /* clock_drift_sd              = (int)getzlong(53) * 1e-2; */
 
     mask = TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET | CLIMB_SET |
-           SPEED_SET | TRACK_SET | STATUS_SET | MODE_SET;
+           SPEED_SET | TRACK_SET | STATUS_SET | MODE_SET |
+           HERR_SET | SPEEDERR_SET | VERR_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "1000: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d\n",
 	     session->newdata.time, session->newdata.latitude,

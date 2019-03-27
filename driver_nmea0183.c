@@ -1658,11 +1658,13 @@ static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
     if ('\0' != field[4][0]) {
 	/* EHPE (Estimated Horizontal Position Error) */
 	session->newdata.eph = safe_atof(field[4]);
+	mask |= HERR_SET;
     }
 
     if ('\0' != field[5][0]) {
         /* Estimated Vertical Position Error (meters, 0.01 resolution) */
 	session->newdata.epv = safe_atof(field[5]);
+	mask |= VERR_SET;
     }
 
     if ('\0' != field[6][0]) {

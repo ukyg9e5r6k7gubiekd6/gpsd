@@ -330,7 +330,8 @@ void gps_merge_fix(struct gps_fix_t *to,
 	to->climb = from->climb;
     if ((transfer & TIMERR_SET) != 0)
 	to->ept = from->ept;
-    if ((transfer & HERR_SET) != 0) {
+    if (0 != isfinite(from->epx) &&
+        0 != isfinite(from->epy)) {
 	to->epx = from->epx;
 	to->epy = from->epy;
     }

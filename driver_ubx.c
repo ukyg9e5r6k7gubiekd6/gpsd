@@ -513,7 +513,7 @@ static gps_mask_t
 ubx_msg_nav_posllh(struct gps_device_t *session, unsigned char *buf,
 		   size_t data_len UNUSED)
 {
-    gps_mask_t mask = ONLINE_SET | VERR_SET;
+    gps_mask_t mask = ONLINE_SET | HERR_SET | VERR_SET;
 
     /* FIXME: should also get time, lat/lon/alt */
     /* Horizontal accuracy estimate in mm, unknown type */

@@ -1593,8 +1593,8 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
     if (session->newdata.latitude != 0 && session->newdata.latitude != 0)
 	mask |= LATLON_SET;
 
-    if ((eph = getbes32(buf, 50) * 1e-2) > 0) {
-	session->newdata.epx = session->newdata.epy = eph / sqrt(2);
+    if ((eph = getbes32(buf, 50)) > 0) {
+	session->newdata.eph = eph * 1e-2;
 	mask |= HERR_SET;
     }
     dbl_temp = getbes32(buf, 54) * 1e-2;
