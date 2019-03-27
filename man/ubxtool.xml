@@ -170,6 +170,7 @@ is to enable the option.
      <para>Connect to a file or device.  Accepts one parameter, FILE,
 the file or device to open.   Files are opened read-only.  Character
 devices are opened read/write, unless the -r parameter is given.
+Requires the pyserial module.
 </para>
     </listitem>
    </varlistentry>

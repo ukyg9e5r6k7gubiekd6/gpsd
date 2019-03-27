@@ -192,7 +192,8 @@ same OPTIONs as -d, except the action is to enable the option.
     <listitem>
      <para>Connect to a file or device.  Accepts one parameter, FILE,
 the file or device to open.   Files are opened read-only.  Character
-devices are opened red/write, unless the -r parameter is given.
+devices are opened read/write, unless the -r parameter is given.
+Requires the pyserial module.
 </para>
     </listitem>
    </varlistentry>

@@ -44,9 +44,7 @@ PROG_NAME = 'ubxtool'
 try:
     import serial
 except ImportError:
-    # treat serial as special since it is not part of standard Python
-    sys.stderr.write("%s: failed to import pyserial\n" % PROG_NAME)
-    sys.exit(2)
+    serial = None  # Defer complaining until we know we need it.
 
 try:
     import gps
@@ -2159,11 +2157,11 @@ class gps_io(object):
     ser = None
     input_is_device = False
 
-    def __init__(self, serial_class):
+    def __init__(self):
         "Initialize class"
 
-        Serial = serial_class
-        Serial_v3 = Serial.VERSION.split('.')[0] >= '3'
+        Serial = serial
+        Serial_v3 = Serial and Serial.VERSION.split('.')[0] >= '3'
         # buffer to hold read data
         self.out = b''
 
@@ -2238,6 +2236,9 @@ class gps_io(object):
                     timeout=0.05,
                     **{write_timeout_arg: 0.5}
                 )
+            except AttributeError:
+                sys.stderr.write('%s: failed to import pyserial\n' % PROG_NAME)
+                sys.exit(2)
             except Serial.serialutil.SerialException:
                 # this exception happens on bad serial port device name
                 sys.stderr.write('%s: failed to open serial port "%s"\n'
@@ -2546,7 +2547,7 @@ try:
             sys.exit(1)
 
     # create the I/O instance
-    io_handle = gps_io(serial)
+    io_handle = gps_io()
 
     sys.stdout.flush()
 

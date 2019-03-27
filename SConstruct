@@ -1457,7 +1457,7 @@ if not env['python']:
     python_targets = []
 else:
     # installed python programs
-    python_progs = ["gegps", "gpscat", "gpsfake", "gpsprof"]
+    python_progs = ["gegps", "gpscat", "gpsfake", "gpsprof", "ubxtool", "zerk"]
     python_deps = {'gpscat': 'packet'}
 
     # python misc helpers and stuff
@@ -1479,20 +1479,9 @@ else:
         "man/gpscat.1": "man/gpscat.xml",
         "man/gpsfake.1": "man/gpsfake.xml",
         "man/gpsprof.1": "man/gpsprof.xml",
+        "man/ubxtool.1": "man/ubxtool.xml",
+        "man/zerk.1": "man/zerk.xml",
     }
-
-    # check for pyserial
-    try:
-        imp.find_module('serial')
-        python_progs.extend(["ubxtool", "zerk"])
-        python_manpages.update({
-            "man/ubxtool.1": "man/ubxtool.xml",
-            "man/zerk.1": "man/zerk.xml",
-        })
-    except ImportError:
-        # no pyserial, reduced functionality in ubxtool and zerk
-        announce("WARNING: Python module serial (pyserial) not found.\n"
-                 "    ubxtool and zerk will not be installed")
 
     if env['xgps']:
         # check for pycairo
