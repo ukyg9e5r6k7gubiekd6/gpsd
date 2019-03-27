@@ -1526,7 +1526,7 @@ class ubx(object):
                                       chk[0], chk[1]))
 
                 s_payload = ''.join('{:02x} '.format(x) for x in m_payload)
-                x_payload = binascii.hexlify(m_payload)
+                x_payload = ','.join(['%02x' % x for x in m_payload])
 
                 if m_class in self.classes:
                     this_class = self.classes[m_class]
