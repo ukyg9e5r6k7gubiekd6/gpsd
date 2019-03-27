@@ -1003,6 +1003,7 @@ static void gpsd_error_model(struct gps_device_t *session)
      */
     if (0 != isfinite(fix->time) &&
         0 == isfinite(fix->ept)) {
+        /* can we compute ept from tdop? */
 	fix->ept = 0.005;
     }
 
