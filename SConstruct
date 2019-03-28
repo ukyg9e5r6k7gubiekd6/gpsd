@@ -969,9 +969,12 @@ else:
     else:
         announce("Build of man and HTML documentation is disabled.")
     if manbuilder:
-        env['BUILDERS']["Man"] = Builder(action=manbuilder)
-        env['BUILDERS']["HTML"] = Builder(action=htmlbuilder,
-                                          src_suffix=".xml", suffix=".html")
+        # 18.2. Attaching a Builder to a Construction Environment
+        env.Append(BUILDERS = {"Man" : Builder(action=manbuilder,
+                                               src_suffix=".xml")})
+        env.Append(BUILDERS = {"HTML" : Builder(action=htmlbuilder,
+                                                src_suffix=".xml",
+                                                suffix=".html")})
 
     # Determine if Qt network libraries are present, and
     # if not, force qt to off
