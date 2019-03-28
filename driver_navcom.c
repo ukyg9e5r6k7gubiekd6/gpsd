@@ -874,8 +874,8 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	char *buf = (char *)session->lexer.outbuffer + 3;
 	uint16_t week = getleu16(buf, 3);
 	uint32_t tow = getleu32(buf, 5);
-	double rms = getled64(buf, 9);
 #ifdef __UNUSED__
+	double rms = getled64(buf, 9);
 	/* Reason why it's unused is these figures do not agree
 	 * with those obtained from the PVT report (handle_0xb1).
 	 * The figures from 0xb1 do agree with the values reported
