@@ -1013,12 +1013,12 @@ else:
 
 if sys.platform.startswith('darwin'):
     try:
-        tool = config.CheckProg('install_name_tool')
+        osx_lib_tool = config.CheckProg('install_name_tool')
     except AttributeError:
-        tool = 'install_name_tool'  # Just assume it's there if old SCons
+        # Just assume it's there if old SCons
+        osx_lib_tool = 'install_name_tool'
 else:
-    tool = None
-env['osx_lib_tool'] = tool
+    osx_lib_tool = None
 
 # Set up configuration for target Python
 
@@ -1246,8 +1246,8 @@ else:
 
     def LibraryInstall(env, libdir, sources, version):
         inst = env.InstallVersionedLib(libdir, sources, SHLIBVERSION=version)
-        if env['osx_lib_tool']:
-            toolcmd = '%s -id $TARGET $TARGET' % env['osx_lib_tool']
+        if osx_lib_tool:
+            toolcmd = '%s -id $TARGET $TARGET' % osx_lib_tool
             env.AddPostAction(inst, toolcmd)
         return inst
 
