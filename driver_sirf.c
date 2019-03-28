@@ -749,7 +749,7 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
 	gpsd_log(&session->context->errout, debug_base,
 	     "UTC time %.9f leaps %u, datum %s\n",
 	     session->newdata.time, session->context->leap_seconds,
-	     sizeof(session->newdata.datum));
+	     session->newdata.datum);
 	gpsd_log(&session->context->errout, debug_base,
              "solution_info %08x\n", solution_info);
 	gpsd_log(&session->context->errout, debug_base,
