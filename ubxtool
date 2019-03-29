@@ -99,6 +99,7 @@ opts = {
     # u-blox 7, firmware 1 is protver 14
     # u-blox 8, is protver 15 to 23
     # u-blox 9, firmware 1 is protver 27
+    # u-blox F9T, firmware 2 is protver 29
     'protver': 10,
     # raw log file name
     'raw_file': None,
@@ -627,6 +628,10 @@ class ubx(object):
         if 4 > m_len:
             return "Bad Length %s" % m_len
 
+        # we are at least protver 27
+        if 27 > opts['protver']:
+            opts['protver'] = 27
+
         u = struct.unpack_from('<BBBB', buf, 0)
         s = ' version: %u layer: %#x transaction %#x reserved: %u\n' % u
         s += '    layers: %s, %s\n' % (_layers(u[1]), _transaction(u[2]))
@@ -641,6 +646,10 @@ class ubx(object):
         if 4 > m_len:
             return "Bad Length %s" % m_len
 
+        # we are at least protver 27
+        if 79 > opts['protver']:
+            opts['protver'] = 27
+
         u = struct.unpack_from('<BBBB', buf, 0)
         s = ' version: %u layer: %#x reserved: %u,%u\n' % u
         s += '    layers: %s\n' % _layers(u[1])
@@ -652,6 +661,10 @@ class ubx(object):
 
         if 4 > m_len:
             return "Bad Length %s" % m_len
+
+        # we are at least protver 27
+        if 27 > opts['protver']:
+            opts['protver'] = 27
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = ' version: %u layer: %#x transaction %#x reserved: %u\n' % u
