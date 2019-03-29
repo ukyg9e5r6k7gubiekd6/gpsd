@@ -984,11 +984,11 @@ else:
 
     # Determine if Qt network libraries are present, and
     # if not, force qt to off
-    if env["qt"]:
-        qt_net_name = 'Qt%sNetwork' % env["qt_versioned"]
+    if config.env["qt"]:
+        qt_net_name = 'Qt%sNetwork' % config.env["qt_versioned"]
         qt_network = config.CheckPKG(qt_net_name)
         if not qt_network:
-            env["qt"] = False
+            config.env["qt"] = False
             announce('Turning off Qt support, library not found.')
 
     # If supported by the compiler, enable all warnings except uninitialized
@@ -1059,24 +1059,24 @@ if helping:
 
 else:
 
-    if env['python'] and env['target_python']:
+    if config.env['python'] and config.env['target_python']:
         try:
             config.CheckProg
         except AttributeError:  # Older scons versions don't have CheckProg
-            target_python_path = env['target_python']
+            target_python_path = config.env['target_python']
         else:
-            target_python_path = config.CheckProg(env['target_python'])
+            target_python_path = config.CheckProg(config.env['target_python'])
         if not target_python_path:
             announce("Target Python doesn't exist - disabling Python.")
-            env['python'] = False
-    if env['python']:
+            config.env['python'] = False
+    if config.env['python']:
         # Maximize consistency by using the reported sys.executable
         target_python_path = config.GetPythonValue('exe path',
                                                    'import sys',
                                                    'sys.executable',
                                                    brief=cleaning)
-        if env['python_libdir']:
-            python_libdir = env['python_libdir']
+        if config.env['python_libdir']:
+            python_libdir = config.env['python_libdir']
         else:
             python_libdir = config.GetPythonValue('lib dir',
                                                   PYTHON_SYSCONFIG_IMPORT,
@@ -1094,9 +1094,10 @@ else:
                                                brief=True)
 
 
-if env['python']:  # May have been turned off by error
-    env['PYTHON'] = polystr(target_python_path)
-    env['ENV']['PYTHON'] = polystr(target_python_path)  # For regress-driver
+if config.env['python']:  # May have been turned off by error
+    config.env['PYTHON'] = polystr(target_python_path)
+    # For regress-driver
+    config.env['ENV']['PYTHON'] = polystr(target_python_path)
     py_config_vars = ast.literal_eval(py_config_text.decode())
     py_config_vars = [[] if x is None else x for x in py_config_vars]
     python_config = dict(zip(PYTHON_CONFIG_NAMES, py_config_vars))
