@@ -140,10 +140,11 @@ class ubx(object):
                6: 'GLONASS'}
 
     # Names for portID values in UBX-CFG-PRT
-    port_ids = {1: 'UART',
+    port_ids = {0: 'DDC',  # The inappropriate name for i2c used in the spec
+                1: 'UART 1',
+                2: 'UART 2',
                 3: 'USB',
                 4: 'SPI',
-                0: 'DDC',  # The inappropriate name for i2c used in the spec
                 }
     port_id_map = dict([x[::-1] for x in port_ids.items()])
 
