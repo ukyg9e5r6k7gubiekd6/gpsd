@@ -900,11 +900,11 @@ else:
             announce("Forcing magic_hat=no since RFC2783 API is unavailable")
             config.env["magic_hat"] = False
     tiocmiwait = config.CheckHeaderDefines("sys/ioctl.h", "TIOCMIWAIT")
-    if env["pps"] and not tiocmiwait and not kpps:
+    if config.env["pps"] and not tiocmiwait and not kpps:
         announce("Forcing pps=no (neither TIOCMIWAIT nor RFC2783 "
                  "API is available)")
-        env["pps"] = False
-        if env["timeservice"]:
+        config.env["pps"] = False
+        if config.env["timeservice"]:
             announce("ERROR: timeservice specified, but no PPS available")
             Exit(1)
 
@@ -919,7 +919,7 @@ else:
         + list(map(lambda x: (x[0], x[2]), pathopts))
     keys.sort()
     for (key, help) in keys:
-        value = env[key]
+        value = config.env[key]
         if value and key in optionrequires:
             for required in optionrequires[key]:
                 if not config.CheckLib(required):
@@ -943,7 +943,7 @@ else:
                 confdefs.append("#define %s \"%s\"\n" % (key.upper(), value))
 
     # Simplifies life on hackerboards like the Raspberry Pi
-    if env['magic_hat']:
+    if config.env['magic_hat']:
         confdefs.append('''\
 /* Magic device which, if present, means to grab a static /dev/pps0 for KPPS */
 #define MAGIC_HAT_GPS   "/dev/ttyAMA0"
@@ -959,7 +959,7 @@ else:
 ''')
 
     manbuilder = htmlbuilder = None
-    if env['manbuild']:
+    if config.env['manbuild']:
         if config.CheckXsltproc():
             build = "xsltproc --output $TARGET --nonet %s $SOURCE"
             htmlbuilder = build % docbook_html_uri
@@ -976,11 +976,11 @@ else:
     if manbuilder:
         # 18.2. Attaching a Builder to a Construction Environment
         # this gets lost on scons 3.0.5
-        env.Append(BUILDERS = {"Man" : Builder(action=manbuilder,
-                                               src_suffix=".xml")})
-        env.Append(BUILDERS = {"HTML" : Builder(action=htmlbuilder,
-                                                src_suffix=".xml",
-                                                suffix=".html")})
+        config.env.Append(BUILDERS = {"Man" : Builder(action=manbuilder,
+                                                      src_suffix=".xml")})
+        config.env.Append(BUILDERS = {"HTML" : Builder(action=htmlbuilder,
+                                                       src_suffix=".xml",
+                                                       suffix=".html")})
 
     # Determine if Qt network libraries are present, and
     # if not, force qt to off
