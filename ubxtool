@@ -1142,6 +1142,7 @@ class ubx(object):
                       'name': 'UBX-NAV-TIMEBDS'},
                0x25: {'str': 'TIMEGAL', 'dec': nav_timegal,
                       'name': 'UBX-NAV-TIMEGAL'},
+               0x26: {'str': 'TIMELS', 'name': 'UBX-NAV-TIMELS'},
                0x30: {'str': 'SVINFO', 'dec': nav_svinfo,
                       'name': 'UBX-NAV-SVINFO'},
                0x31: {'str': 'DGPS', 'dec': nav_dgps, 'name': 'UBX-NAV-DGPS'},
@@ -1151,6 +1152,7 @@ class ubx(object):
                0x39: {'str': 'GEOFENCE', 'name': 'UBX-NAV-GEOFENCE'},
                0x3B: {'str': 'SVIN', 'dec': nav_svin, 'name': 'UBX-NAV-SVIN'},
                0x3C: {'str': 'RELPOSNED', 'name': 'UBX-NAV-RELPOSNED'},
+               0x43: {'str': 'SIG', 'name': 'UBX-NAV-SIG'},
                0x60: {'str': 'AOPSTATUS', 'name': 'UBX-NAV-AOPSTATUS'},
                0x61: {'str': 'EOE', 'dec': nav_eoe, 'name': 'UBX-NAV-EOE'},
                }
@@ -1279,6 +1281,8 @@ class ubx(object):
                0x61: {'str': 'IMES', 'name': 'UBX-RXM-IMES'},
                }
 
+    # UBX-SEC- ??
+
     def tim_svin(self, buf):
         "UBX-TIM-SVIN decode, Survey-in data"
         m_len = len(buf)
@@ -1337,6 +1341,8 @@ class ubx(object):
                0x16: {'str': 'FCHG', 'name': 'UBX-TIM-FCHG'},
                0x17: {'str': 'HOC', 'name': 'UBX-TIM-HOC'},
                }
+
+    # UBX-UPD- ??
 
     classes = {
         0x01: {'str': 'NAV', 'ids': nav_ids},
