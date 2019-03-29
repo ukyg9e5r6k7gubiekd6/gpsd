@@ -237,6 +237,7 @@ boolopts = (
     ("slow",          False, "run tests with realistic (slow) delays"),
 )
 
+# now step on the boolopts just read from '.scons-option-cache'
 for (name, default, help) in boolopts:
     opts.Add(BoolVariable(name, help, default))
 
@@ -262,6 +263,7 @@ nonboolopts = (
     ("target_python",    "python",      "target Python version as command"),
 )
 
+# now step on the non boolopts just read from '.scons-option-cache'
 for (name, default, help) in nonboolopts:
     opts.Add(name, help, default)
 
@@ -277,6 +279,7 @@ pathopts = (
     ("udevdir",             "/lib/udev",     "udev rules directory"),
 )
 
+# now step on the path options just read from '.scons-option-cache'
 for (name, default, help) in pathopts:
     opts.Add(PathVariable(name, help, default, PathVariable.PathAccept))
 
