@@ -658,6 +658,9 @@ def GetLoadPath(context):
 cleaning = env.GetOption('clean')
 helping = env.GetOption('help')
 
+# Always set up LIBPATH so that cleaning works properly.
+env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
+
 # from scons 3.0.5, any changes to env after this, until after
 # config.Finish(), will be lost.
 config = Configure(env, custom_tests={
@@ -668,10 +671,6 @@ config = Configure(env, custom_tests={
     'CheckC11': CheckC11,
     'CheckHeaderDefines': CheckHeaderDefines,
     'GetPythonValue': GetPythonValue})
-
-# this gets lost on scons 3.0.5
-# Always set up LIBPATH so that cleaning works properly.
-env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
 
 if cleaning or helping:
     dbusflags = []
