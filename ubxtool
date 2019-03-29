@@ -587,6 +587,9 @@ class ubx(object):
                0x84: {'str': 'FIXSEED', 'name': 'UBX-CFG-FIXSEED'},
                0x85: {'str': 'DYNSEED', 'name': 'UBX-CFG-DYNSEED'},
                0x86: {'str': 'PMS', 'dec': cfg_pms, 'name': 'UBX-CFG-PMS'},
+               0x8a: {'str': 'VALSET', 'name': 'UBX-CFG-VALSET'},
+               0x8b: {'str': 'VALGET', 'name': 'UBX-CFG-VALGET'},
+               0x8c: {'str': 'VALDEL', 'name': 'UBX-CFG-VALDEL'},
                }
 
     def inf_debug(self, buf):
@@ -620,6 +623,9 @@ class ubx(object):
                0x4: {'str': 'DEBUG', 'dec': inf_debug,
                      'name': 'UBX-INF-DEBUG'},
                }
+
+    # UBX-LOG- ???
+    # UBX-MGA- ???
 
     def mon_ver(self, buf):
         "UBX-MON-VER decode"
@@ -657,6 +663,9 @@ class ubx(object):
                0x27: {'str': 'PATCH', 'name': 'UBX-MON-PATCH'},
                0x28: {'str': 'GNSS', 'name': 'UBX-MON-GNSS'},
                0x2e: {'str': 'SMGR', 'name': 'UBX-MON-SMGR'},
+               0x36: {'str': 'COMMS', 'name': 'UBX-MON-COMMS'},
+               0x37: {'str': 'HW3', 'name': 'UBX-MON-HW3'},
+               0x38: {'str': 'RF', 'name': 'UBX-MON-RF'},
                }
 
     def nav_clock(self, buf):
