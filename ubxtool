@@ -145,6 +145,7 @@ class ubx(object):
                 2: 'UART 2',
                 3: 'USB',
                 4: 'SPI',
+                5: 'Reserved',
                 }
     port_id_map = dict([x[::-1] for x in port_ids.items()])
 
