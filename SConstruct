@@ -785,15 +785,15 @@ else:
             announce("Turning off dbus-export support, library not found.")
         config.env["dbus_export"] = False
 
-    if env['bluez'] and config.CheckPKG('bluez'):
+    if config.env['bluez'] and config.CheckPKG('bluez'):
         confdefs.append("#define ENABLE_BLUEZ 1\n")
         bluezflags = pkg_config('bluez')
     else:
         confdefs.append("/* #undef ENABLE_BLUEZ */\n")
         bluezflags = []
-        if env["bluez"]:
+        if config.env["bluez"]:
             announce("Turning off Bluetooth support, library not found.")
-        env["bluez"] = False
+        config.env["bluez"] = False
 
     # in_port_t is not defined on Android
     if not config.CheckType("in_port_t", "#include <netinet/in.h>"):
@@ -816,7 +816,7 @@ else:
     else:
         confdefs.append("/* #undef HAVE_LINUX_CAN_H */\n")
         announce("You do not have kernel CANbus available.")
-        env["nmea2000"] = False
+        config.env["nmea2000"] = False
 
     # check for C11 or better, and __STDC__NO_ATOMICS__ is not defined
     # before looking for stdatomic.h
@@ -862,7 +862,7 @@ else:
             confdefs.append("/* #undef HAVE_MACHINE_ENDIAN_H */\n")
             announce("You do not have the endian.h header file. "
                      "RTCM V2 support disabled.")
-            env["rtcm104v2"] = False
+            config.env["rtcm104v2"] = False
 
     for hdr in ("arpa/inet",
                 "netdb",
@@ -892,13 +892,13 @@ else:
 
     if config.CheckHeader(["sys/types.h", "sys/time.h", "sys/timepps.h"]):
         # this gets lost on scons 3.0.5
-        env.MergeFlags("-DHAVE_SYS_TIMEPPS_H=1")
+        config.env.MergeFlags("-DHAVE_SYS_TIMEPPS_H=1")
         kpps = True
     else:
         kpps = False
-        if env["magic_hat"]:
+        if config.env["magic_hat"]:
             announce("Forcing magic_hat=no since RFC2783 API is unavailable")
-            env["magic_hat"] = False
+            config.env["magic_hat"] = False
     tiocmiwait = config.CheckHeaderDefines("sys/ioctl.h", "TIOCMIWAIT")
     if env["pps"] and not tiocmiwait and not kpps:
         announce("Forcing pps=no (neither TIOCMIWAIT nor RFC2783 "
