@@ -572,6 +572,21 @@ class ubx(object):
 
         return s.strip()
 
+    def _transaction(byte):
+        """Decode transaction byte"""
+        if 0 == byte:
+            s = "Transactionless"
+        elif 1 == byte:
+            s = "(Re)start Transaction"
+        elif 2 == byte:
+            s = "Continue Transaction"
+        elif 3 == byte:
+            s = "Apply and end Transaction"
+        else:
+            s = "Unkown"
+
+        return s
+
     def cfg_valdel(self, buf):
         """"UBX-CFG-VALDEL decode, Delete configuration items"""
         m_len = len(buf)
@@ -580,8 +595,8 @@ class ubx(object):
             return "Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBB', buf, 0)
-        s = ' version: %u layer: %#x reserved: %u,%u\n' % u
-        s += '    layers: %s\n' % _layers(u[1])
+        s = ' version: %u layer: %#x transaction %#x reserved: %u\n' % u
+        s += '    layers: %s, %s\n' % (_layers(u[1]), _transaction(u[2]))
         return s
 
     def cfg_valget(self, buf):
@@ -606,8 +621,8 @@ class ubx(object):
             return "Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBB', buf, 0)
-        s = ' version: %u layer: %#x reserved: %u,%u\n' % u
-        s += '    layers: %s\n' % _layers(u[1])
+        s = ' version: %u layer: %#x transaction %#x reserved: %u\n' % u
+        s += '    layers: %s, %s\n' % (_layers(u[1]), _transaction(u[2]))
         return s
 
     cfg_ids = {0: {'str': 'PRT', 'dec': cfg_prt, 'name': 'UBX-CFG-PRT'},
