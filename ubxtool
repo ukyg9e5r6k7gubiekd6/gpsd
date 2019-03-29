@@ -337,7 +337,7 @@ class ubx(object):
         if 40 <= m_len:
             u = struct.unpack_from('<BBHHLHBB', buf, 20)
             s += ('\n usePPP %d aopCfg %d aopOrbMaxErr %u useAdr %u' %
-                 (u[0], u[1], u[3], u[7]))
+                  (u[0], u[1], u[3], u[7]))
         return s
 
     def cfg_msg(self, buf):
@@ -2122,7 +2122,7 @@ class ubx(object):
                 "help": "UBX-CFG-PRT poll I/O port settings"},
         # UBX-RXM-RAWX poll raw measurement data
         "RXM-RAWX": {"command": poll_rxm_rawx,
-                "help": "UBX-RXM-RAWX poll raw measurement data"},
+                     "help": "UBX-RXM-RAWX poll raw measurement data"},
         # UBX-CFG-CFG reset config
         "RESET": {"command": send_cfg_cfg,
                   "help": "UBX-CFG-CFG reset config to defaults",
@@ -2239,7 +2239,8 @@ class gps_io(object):
 
             # pyserial Ver 3.0+ changes writeTimeout to write_timeout
             # Using the wrong one causes an error
-            write_timeout_arg = 'write_timeout' if Serial_v3 else 'writeTimeout'
+            write_timeout_arg = ('write_timeout'
+                                 if Serial_v3 else 'writeTimeout')
             try:
                 self.ser = Serial.Serial(
                     baudrate=opts['input_speed'],
