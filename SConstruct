@@ -662,7 +662,7 @@ helping = env.GetOption('help')
 env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
 
 # from scons 3.0.5, any changes to env after this, until after
-# config.Finish(), will be lost.
+# config.Finish(), will be lost.  Use config.env until then.
 config = Configure(env, custom_tests={
     'CheckPKG': CheckPKG,
     'CheckXsltproc': CheckXsltproc,
