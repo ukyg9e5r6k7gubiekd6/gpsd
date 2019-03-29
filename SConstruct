@@ -1104,7 +1104,7 @@ if config.env['python']:  # May have been turned off by error
 
 
 env = config.Finish()
-# env can now be modified.
+# All configuration should be finished.  env can now be modified.
 
 if not (cleaning or helping):
 
