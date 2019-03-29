@@ -1521,7 +1521,8 @@ class gps_io(object):
 
             # pyserial Ver 3.0+ changes writeTimeout to write_timeout
             # Using the wrong one causes an error
-            write_timeout_arg = 'write_timeout' if Serial_v3 else 'writeTimeout'
+            write_timeout_arg = ('write_timeout'
+                                 if Serial_v3 else 'writeTimeout')
             try:
                 self.ser = Serial.Serial(
                     baudrate=opts['input_speed'],
