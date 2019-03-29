@@ -551,6 +551,65 @@ class ubx(object):
         s += ' serialNumber: %s' % gps.polystr(buf[76:107])
         return s
 
+    def _layers(byte):
+        """decode layers byte"""
+
+        # what a messy bitmap...
+        s = ''
+        if 0x07 = byte:
+            s = 'Default'
+        elif 0 = byte:
+            s = 'RAM'
+        elif 0x07 & byte:
+            if 1 & byte:
+                s += 'RAM '
+            if 2 & byte:
+                s += 'BBR '
+            if 4 & byte:
+                s += 'FLASH '
+        else:
+            s = 'Unk'
+
+        return s.strip()
+
+    def cfg_valdel(self, buf):
+        """"UBX-CFG-VALDEL decode, Delete configuration items"""
+        m_len = len(buf)
+
+        if 4 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBB', buf, 0)
+        s = ' version: %u layer: %#x reserved: %u,%u\n' % u
+        s += '    layers: %s\n' % _layers(u[1])
+        return s
+
+    def cfg_valget(self, buf):
+        """"UBX-CFG-VALGET decode, Get configuration items"""
+        m_len = len(buf)
+
+        # version zero is a poll
+        # version one is he response
+        if 4 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBB', buf, 0)
+        s = ' version: %u layer: %#x reserved: %u,%u\n' % u
+        s += '    layers: %s\n' % _layers(u[1])
+        return s
+
+    def cfg_valset(self, buf):
+        """"UBX-CFG-VALSET decode, Set configuration items"""
+        m_len = len(buf)
+
+        if 4 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBB', buf, 0)
+        s = ' version: %u layer: %#x reserved: %u,%u\n' % u
+        s += '    layers: %s\n' % _layers(u[1])
+        return s
+
     cfg_ids = {0: {'str': 'PRT', 'dec': cfg_prt, 'name': 'UBX-CFG-PRT'},
                1: {'str': 'MSG', 'dec': cfg_msg, 'name': 'UBX-CFG-MSG'},
                2: {'str': 'INF', 'name': 'UBX-CFG-INF'},
@@ -587,9 +646,12 @@ class ubx(object):
                0x84: {'str': 'FIXSEED', 'name': 'UBX-CFG-FIXSEED'},
                0x85: {'str': 'DYNSEED', 'name': 'UBX-CFG-DYNSEED'},
                0x86: {'str': 'PMS', 'dec': cfg_pms, 'name': 'UBX-CFG-PMS'},
-               0x8a: {'str': 'VALSET', 'name': 'UBX-CFG-VALSET'},
-               0x8b: {'str': 'VALGET', 'name': 'UBX-CFG-VALGET'},
-               0x8c: {'str': 'VALDEL', 'name': 'UBX-CFG-VALDEL'},
+               0x8a: {'str': 'VALSET', 'dec': cfg_valset,
+                      'name': 'UBX-CFG-VALSET'},
+               0x8b: {'str': 'VALGET', 'dec': cfg_valget,
+                      'name': 'UBX-CFG-VALGET'},
+               0x8c: {'str': 'VALDEL', 'dev': cfg_valdel,
+                      'name': 'UBX-CFG-VALDEL'},
                }
 
     def inf_debug(self, buf):
