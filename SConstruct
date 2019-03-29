@@ -700,9 +700,9 @@ else:
     confdefs.append('#define GPSD_URL "%s"\n' % website)
 
     cxx = config.CheckCXX()
-    if not cxx and env["libgpsmm"]:
+    if not cxx and config.env["libgpsmm"]:
         announce("C++ doesn't work, suppressing libgpsmm build.")
-        env["libgpsmm"] = False
+        config.env["libgpsmm"] = False
 
     # define a helper function for pkg-config - we need to pass
     # --static for static linking, too.
@@ -723,7 +723,7 @@ else:
     # anything useful. FreeBSD does, Linux doesn't. Most likely other BSDs
     # are like FreeBSD.
     ncurseslibs = []
-    if env['ncurses']:
+    if config.env['ncurses']:
         if config.CheckPKG('ncurses'):
             ncurseslibs = pkg_config('ncurses', rpath_hack=True)
             if config.CheckPKG('tinfo'):
@@ -742,9 +742,9 @@ else:
             ncurseslibs = ['-lcurses']
         else:
             announce('Turning off ncurses support, library not found.')
-            env['ncurses'] = False
+            config.env['ncurses'] = False
 
-    if env['usb']:
+    if config.env['usb']:
         # In FreeBSD except version 7, USB libraries are in the base system
         if config.CheckPKG('libusb-1.0'):
             confdefs.append("#define HAVE_LIBUSB 1\n")
@@ -763,7 +763,7 @@ else:
     else:
         confdefs.append("/* #undef HAVE_LIBUSB */\n")
         usbflags = []
-        env["usb"] = False
+        config.env["usb"] = False
 
     if config.CheckLib('librt'):
         confdefs.append("#define HAVE_LIBRT 1\n")
@@ -773,7 +773,7 @@ else:
         confdefs.append("/* #undef HAVE_LIBRT */\n")
         rtlibs = []
 
-    if env['dbus_export'] and config.CheckPKG('dbus-1'):
+    if config.env['dbus_export'] and config.CheckPKG('dbus-1'):
         confdefs.append("#define HAVE_DBUS 1\n")
         dbusflags = pkg_config("dbus-1")
         # this gets lost on scons 3.0.5
@@ -781,9 +781,9 @@ else:
     else:
         confdefs.append("/* #undef HAVE_DBUS */\n")
         dbusflags = []
-        if env["dbus_export"]:
+        if config.env["dbus_export"]:
             announce("Turning off dbus-export support, library not found.")
-        env["dbus_export"] = False
+        config.env["dbus_export"] = False
 
     if env['bluez'] and config.CheckPKG('bluez'):
         confdefs.append("#define ENABLE_BLUEZ 1\n")
