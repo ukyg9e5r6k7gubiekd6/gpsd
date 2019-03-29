@@ -450,6 +450,38 @@ class ubx(object):
 
         return '\n'.join(s)
 
+    def cfg_rst(self, buf):
+        """"UBX-CFG-RST decode, Reset Receiver"""
+
+        m_len = len(buf)
+
+        if 4 > m_len:
+            return "Bad Length %s" % m_len
+
+        bbrvalues = {0: "Hot Start",
+                     1: "Warm Start",
+                     0xffff: "Cold Start",
+                     }
+        mode = {0: "Hardware reset",
+                1: "Software reset",
+                2: "Software reset (GNSS only)",
+                4: "Hardware reset, after shutdown",
+                8: "Controled GNSS stop",
+                9: "Controled GNSS start",
+                }
+        u = struct.unpack_from('<HBB', buf, 0)
+        s = ' navBbrmask: %#x resetMode: %u reserved: %u\n' % u
+        if u[0] in bbrvalues:
+            s += "   %s, " % bbrvalues[u[0]]
+        else:
+            s += "   Other, "
+        if u[1] in mode:
+            s += mode[u[1]]
+        else:
+            s += "Other"
+
+        return s
+
     def cfg_sbas(self, buf):
         "UBX-CFG-SBAS decode"
         m_len = len(buf)
@@ -556,9 +588,9 @@ class ubx(object):
 
         # what a messy bitmap...
         s = ''
-        if 0x07 = byte:
+        if 0x07 == byte:
             s = 'Default'
-        elif 0 = byte:
+        elif 0 == byte:
             s = 'RAM'
         elif 0x07 & byte:
             if 1 & byte:
@@ -628,7 +660,7 @@ class ubx(object):
     cfg_ids = {0: {'str': 'PRT', 'dec': cfg_prt, 'name': 'UBX-CFG-PRT'},
                1: {'str': 'MSG', 'dec': cfg_msg, 'name': 'UBX-CFG-MSG'},
                2: {'str': 'INF', 'name': 'UBX-CFG-INF'},
-               4: {'str': 'RST', 'name': 'UBX-CFG-RST'},
+               4: {'str': 'RST', 'dec': cfg_rst, 'name': 'UBX-CFG-RST'},
                6: {'str': 'DAT', 'name': 'UBX-CFG-DAT'},
                8: {'str': 'RATE', 'name': 'UBX-CFG-RATE'},
                9: {'str': 'CFG', 'dec': cfg_cfg, 'name': 'UBX-CFG-CFG'},
