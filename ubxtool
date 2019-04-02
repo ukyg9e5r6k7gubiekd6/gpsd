@@ -2743,7 +2743,7 @@ try:
     elif opts['command'] is not None:
         cmd_list = opts['command'].split(',')
         try:
-            cmd_data = [int(x, 16) for x in cmd_list]
+            cmd_data = [int(v, 16) for v in cmd_list]
         except ValueError:
             badarg = True
         else:
