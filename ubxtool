@@ -142,13 +142,14 @@ class ubx(object):
 
     # Names for portID values in UBX-CFG-PRT
     port_ids = {0: 'DDC',  # The inappropriate name for i2c used in the spec
-                1: 'UART 1',
-                2: 'UART 2',
+                1: 'UART',
+                2: 'UART_2',
                 3: 'USB',
                 4: 'SPI',
-                5: 'Reserved',
                 }
     port_id_map = dict([x[::-1] for x in port_ids.items()])
+    port_id_map['UART_1'] = port_id_map['UART']  # Accept synonym
+    port_ids[5] = 'Reserved'  # Don't include this in port_id_map
 
     def ack_ack(self, buf):
         "UBX-ACK-ACK decode"
@@ -410,12 +411,14 @@ class ubx(object):
 
         s = [' PortID: %s reserved1: %u txReady: %#x' % (idstr, u[1], u[2])]
         s.append({1: '  mode: %#x baudRate: %u',
+                  2: '  mode: %#x baudRate: %u',
                   3: '  reserved2: [%u %u]',
                   4: '  mode: %#x reserved2: %u',
                   0: '  mode: %#x reserved2: %u',
                   }.get(portid, '  ???: %u,%u') % tuple(u[3:5]))
         s.append('  inProtoMask: %#x  outProtoMask: %#x' % tuple(u[5:7]))
         s.append({1: '  flags: %#x reserved2: %u',
+                  2: '  flags: %#x reserved2: %u',
                   3: '  reserved3: %u reserved4: %u',
                   4: '  flags: %#x reserved3: %u',
                   0: '  flags: %#x reserved3: %u',
@@ -444,7 +447,7 @@ class ubx(object):
             dec.append('RTCM3')
         s.append('    outProtoMask: %s' % ' '.join(dec))
 
-        if portid in set([1, 4, 0]):
+        if portid in set([1, 2, 4, 0]):
             dec = []
             if u[7] & 0x2:
                 dec.append('extendedTxTimeout')
