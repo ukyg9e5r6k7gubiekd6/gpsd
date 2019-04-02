@@ -2101,15 +2101,17 @@ class ubx(object):
 
     def send_set_speed(self, speed):
         "UBX-CFG-PRT, set port"
-
-        # Note that this is only applicable to the UART port (1),
-        # so there's no need to pay attention to 'interface'.
-        # If there's any possibility for a receiver to have multiple
-        # UART ports, it's not mentioned in the doc.
+        port = opts['interface']
+        # FIXME!  Determine and use current port as default
+        if port is None:
+            port = 1  # Default to port 1 (UART/UART_1)
+        if port not in set([1, 2]):
+            sys.stderr.write('%s: Invalid UART port - %d\n' % (PROG_NAME, port))
+            sys.exit(2)
 
         # FIXME!  Poll current masks, then adjust speed
         m_data = bytearray(20)
-        m_data[0] = 1             # port 1, UART
+        m_data[0] = port
         m_data[4] = 0xc0          # 8N1
         m_data[5] = 0x8           # 8N1
 
