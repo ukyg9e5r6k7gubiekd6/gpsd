@@ -588,6 +588,7 @@ class ubx(object):
         s += ' serialNumber: %s' % gps.polystr(buf[76:107])
         return s
 
+    @staticmethod
     def _layers(byte):
         """decode layers byte"""
 
@@ -609,6 +610,7 @@ class ubx(object):
 
         return s.strip()
 
+    @staticmethod
     def _transaction(byte):
         """Decode transaction byte"""
         if 0 == byte:
@@ -637,7 +639,8 @@ class ubx(object):
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = ' version: %u layer: %#x transaction %#x reserved: %u\n' % u
-        s += '    layers: %s, %s\n' % (_layers(u[1]), _transaction(u[2]))
+        s += '    layers: %s, %s\n' % (self._layers(u[1]),
+                                       self._transaction(u[2]))
         return s
 
     def cfg_valget(self, buf):
@@ -655,7 +658,7 @@ class ubx(object):
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = ' version: %u layer: %#x reserved: %u,%u\n' % u
-        s += '    layers: %s\n' % _layers(u[1])
+        s += '    layers: %s\n' % self._layers(u[1])
         return s
 
     def cfg_valset(self, buf):
@@ -671,7 +674,8 @@ class ubx(object):
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = ' version: %u layer: %#x transaction %#x reserved: %u\n' % u
-        s += '    layers: %s, %s\n' % (_layers(u[1]), _transaction(u[2]))
+        s += '    layers: %s, %s\n' % (self._layers(u[1]),
+                                       self._transaction(u[2]))
         return s
 
     cfg_ids = {0: {'str': 'PRT', 'dec': cfg_prt, 'name': 'UBX-CFG-PRT'},
