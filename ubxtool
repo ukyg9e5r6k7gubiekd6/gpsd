@@ -151,6 +151,22 @@ class ubx(object):
     port_id_map['UART_1'] = port_id_map['UART']  # Accept synonym
     port_ids[5] = 'Reserved'  # Don't include this in port_id_map
 
+    # u-blox 9 cfg items as a 5-tuple
+    # 1 - Name
+    # 2 - key id
+    # 3 - value type
+    # 4 - scale
+    # 5 - Unit
+    # 6 - Description
+    cfgs = (
+            ("CFG-USBOUTPROT-UBX", 0x10780001, "L", 0, "",
+             "Flag to indicate if UBX should be an output protocol on USB"),
+            ("CFG-USBOUTPROT-NMEA", 0x10780002, "L", 0, "",
+             "Flag to indicate if NMEA should be an output protocol on USB"),
+            ("CFG-USBOUTPROT-RTCM3X", 0x10780004, "L", 0, "",
+             "Flag to indicate if RTCM3X should be an output protocol on USB"),
+           )
+
     def ack_ack(self, buf):
         "UBX-ACK-ACK decode"
         m_len = len(buf)
@@ -2110,7 +2126,8 @@ class ubx(object):
         if port is None:
             port = 1  # Default to port 1 (UART/UART_1)
         if port not in set([1, 2]):
-            sys.stderr.write('%s: Invalid UART port - %d\n' % (PROG_NAME, port))
+            sys.stderr.write('%s: Invalid UART port - %d\n' %
+                             (PROG_NAME, port))
             sys.exit(2)
 
         # FIXME!  Poll current masks, then adjust speed
