@@ -159,6 +159,14 @@ class ubx(object):
     # 5 - Unit
     # 6 - Description
     cfgs = (
+            ("CFG-USBINPROT-UBX", 0x10770001", "L", 0, "",
+             "Flag to indicate if UBX should be an input protocol on USB"),
+            ("CFG-USBINPROT-NMEA", 0x10770002", "L", 0, "",
+             "Flag to indicate if NMEA should be an input protocol on USB"),
+            ("CFG-USBINPROT-RTCM2X", 0x10770003", "L", 0, "",
+             "Flag to indicate if RTCM2X should be an input protocol on USB"),
+            ("CFG-USBINPROT-RTCM3X", 0x10770004", "L", 0, "",
+             "Flag to indicate if RTCM3X should be an input protocol on USB"),
             ("CFG-USBOUTPROT-UBX", 0x10780001, "L", 0, "",
              "Flag to indicate if UBX should be an output protocol on USB"),
             ("CFG-USBOUTPROT-NMEA", 0x10780002, "L", 0, "",
