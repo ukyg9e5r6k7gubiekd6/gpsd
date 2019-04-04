@@ -159,6 +159,21 @@ class ubx(object):
     # 5 - Unit
     # 6 - Description
     cfgs = (
+        ("CFG-ODO-USE_ODO", 0x10220001, "L", 1, "",
+         "Use odometer"),
+        ("CFG-ODO-USE_COG", 0x10220002, "L", 1, "",
+         "Use low-speed course over ground filter"),
+        ("CFG-ODO-OUTLPVEL", 0x10220003, "L", 1, "",
+         "Output low-pass filtered velocity"),
+        ("CFG-ODO-OUTLPCOG", 0x10220004, "L", 1, "",
+         "Output low-pass filtered course over ground (heading)"),
+        ("CFG-ODO-PROFILE", 0x20220005, "E1", 1, "",
+         "Odometer profile configuration"),
+        ("CFG-ODO-COGMAXSPEED", 0x20220021, "U1", 1, "m/s",
+         "Upper speed limit for low-speed course over ground filter"),
+        ("CFG-ODO-COGMAXPOSACC", 0x20220022, "U1", 1, "",
+         "Maximum acceptable position accuracy for computing low-speed  "
+         "filtered course over ground"),
         ("CFG-RATE-MEAS", 0x30210001, "U2", 0.001, "s",
          "Nominal time between GNSS measurements"),
         ("CFG-RATE-NAV", 0x30210002, "U2", 1, "",
