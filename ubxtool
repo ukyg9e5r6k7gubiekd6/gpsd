@@ -373,7 +373,7 @@ class ubx(object):
          "Nominal time between GNSS measurements"),
         ("CFG-RATE-NAV", 0x30210002, "U2", 1, "",
          "Ratio of number of measurements to number of navigation solutions"),
-        ("CFG-RATE-TIMEREF", 0x20210003, "E1", 1. ""
+        ("CFG-RATE-TIMEREF", 0x20210003, "E1", 1., "",
          "Time system to which measurements are aligned"),
         ("CFG-RINV-DUMP", 0x10c70001, "L", 1, "",
          "Dump data at startup"),
@@ -537,7 +537,7 @@ class ubx(object):
          "Time pulse period (TP2)"),
         ("CFG-TP-PERIOD_LOCK_TP2", 0x4005000e, "U4", 0.000001, "s",
          "Time pulse period when locked to GNSS time (TP2)"),
-        ("CFG-TP-FREQ_TP2", 0x40050026, "U4", 1 "Hz",
+        ("CFG-TP-FREQ_TP2", 0x40050026, "U4", 1, "Hz",
          "Time pulse frequency (TP2)"),
         ("CFG-TP-FREQ_LOCK_TP2", 0x40050027, "U4", 1, "Hz",
          "Time pulse frequency when locked to GNSS time (TP2)"),
