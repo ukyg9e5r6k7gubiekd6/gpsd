@@ -159,6 +159,16 @@ class ubx(object):
     # 5 - Unit
     # 6 - Description
     cfgs = (
+        ("CFG-SBAS-USE_TESTMODE", 0x10360002, "L", 1, "",
+         "Use SBAS data when it is in test mode"),
+        ("CFG-SBAS-USE_RANGING", 0x10360003, "L", 1, "",
+         "Use SBAS GEOs as a ranging source (for navigation)"),
+        ("CFG-SBAS-USE_DIFFCORR", 0x10360004, "L", 1, "",
+         "Use SBAS differential corrections"),
+        ("CFG-SBAS-USE_INTEGRITY", 0x10360005, "L", 1, "",
+         "Use SBAS integrity information"),
+        ("CFG-SBAS-PRNSCANMASK", 0x50360006, "X8", 1, "",
+         "SBAS PRN search configuration"),
         ("CFG-SIGNAL-GPS_ENA", 0x1031001f, "L", 1, "",
          "GPS enable"),
         ("CFG-SIGNAL-GPS_L1CA_ENA", 0x10310001, "L", 1, "",
