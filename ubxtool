@@ -159,6 +159,20 @@ class ubx(object):
     # 5 - Unit
     # 6 - Description
     cfgs = (
+        ("CFG-RINV-DUMP", 0x10c70001, "L", 1, "",
+         "Dump data at startup"),
+        ("CFG-RINV-BINARY", 0x10c70002, "L", 1, "",
+         "Data is binary"),
+        ("CFG-RINV-DATA_SIZE", 0x20c70003, "U1", 1, "",
+         "Size of data"),
+        ("CFG-RINV-CHUNK0", 0x50c70004, "X8", 1, "",
+         "Data bytes 1-8 (LSB)"),
+        ("CFG-RINV-CHUNK1", 0x50c70005, "X8", 1, "",
+         "Data bytes 9-16"),
+        ("CFG-RINV-CHUNK2", 0x50c70006, "X8", 1, "",
+         "Data bytes 17-24"),
+        ("CFG-RINV-CHUNK3", 0x50c70007, "X8", 1, "",
+         "Data bytes 25-30 (MSB)"),
         ("CFG-SBAS-USE_TESTMODE", 0x10360002, "L", 1, "",
          "Use SBAS data when it is in test mode"),
         ("CFG-SBAS-USE_RANGING", 0x10360003, "L", 1, "",
