@@ -159,6 +159,87 @@ class ubx(object):
     # 5 - Unit
     # 6 - Description
     cfgs = (
+        ("CFG-MSGOUT-RTCM_3X_TYPE1097_UART1", 0x20910319, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1097 message on port UART1"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1097_UART2", 0x2091031a, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1097 message on port UART2"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1097_USB", 0x2091031b, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1097 message on port USB"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1127_I2C", 0x209102d6, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1127 message on port I2C"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1127_SPI", 0x209102da, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1127 message on port SPI"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1127_UART1", 0x209102d7, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1127 message on port UART1"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1127_UART2", 0x209102d8, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1127 message on port UART2"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1127_USB", 0x209102d9, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1127 message on port USB"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1230_I2C", 0x20910303, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1230 message on port I2C"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1230_SPI", 0x20910307, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1230 message on port SPI"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1230_UART1", 0x20910304, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1230 message on port UART1"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1230_UART2", 0x20910305, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1230 message on port UART2"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1230_USB", 0x20910306, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1230 message on port USB"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE4072_1_I2C", 0x20910381, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE4072, sub-type 1 message on  "
+         "port I2C"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE4072_1_SPI", 0x20910385, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE4072, sub-type 1 message on  "
+         "port SPI"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE4072_1_UART1", 0x20910382, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE4072, sub-type 1 message on  "
+         "port UART1"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE4072_1_UART2", 0x20910383, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE4072, sub-type 1 message on "
+         " port UART2"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE4072_1_USB", 0x20910384, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE4072, sub-type 1 message "
+         "on port USB"),
+        ("CFG-MSGOUT-UBX_LOG_INFO_I2C", 0x20910259, "U1", 1, "",
+         "Output rate of the UBX-LOG-INFO message on port I2C"),
+        ("CFG-MSGOUT-UBX_LOG_INFO_SPI", 0x2091025d, "U1", 1, "",
+         "Output rate of the UBX-LOG-INFO message on port SPI"),
+        ("CFG-MSGOUT-UBX_LOG_INFO_UART1", 0x2091025a, "U1", 1, "",
+         "Output rate of the UBX-LOG-INFO message on port UART1"),
+        ("CFG-MSGOUT-UBX_LOG_INFO_UART2", 0x2091025b, "U1", 1, "",
+         "Output rate of the UBX-LOG-INFO message on port UART2"),
+        ("CFG-MSGOUT-UBX_LOG_INFO_USB", 0x2091025c, "U1", 1, "",
+         "Output rate of the UBX-LOG-INFO message on port USB"),
+        ("CFG-MSGOUT-UBX_MON_COMMS_I2C", 0x2091034f, "U1", 1, "",
+         "Output rate of the UBX-MON-COMMS message on port I2C"),
+        ("CFG-MSGOUT-UBX_MON_COMMS_SPI", 0x20910353, "U1", 1, "",
+         "Output rate of the UBX-MON-COMMS message on port SPI"),
+        ("CFG-MSGOUT-UBX_MON_COMMS_UART1", 0x20910350, "U1", 1, "",
+         "Output rate of the UBX-MON-COMMS message on port UART1"),
+        ("CFG-MSGOUT-UBX_MON_COMMS_UART2", 0x20910351, "U1", 1, "",
+         "Output rate of the UBX-MON-COMMS message on port UART2"),
+        ("CFG-MSGOUT-UBX_MON_COMMS_USB", 0x20910352, "U1", 1, "",
+         "Output rate of the UBX-MON-COMMS message on port USB"),
+        ("CFG-MSGOUT-UBX_MON_HW2_I2C", 0x209101b9, "U1", 1, "",
+         "Output rate of the UBX-MON-HW2 message on port I2C"),
+        ("CFG-MSGOUT-UBX_MON_HW2_SPI", 0x209101bd, "U1", 1, "",
+         "Output rate of the UBX-MON-HW2 message on port SPI"),
+        ("CFG-MSGOUT-UBX_MON_HW2_UART1", 0x209101ba, "U1", 1, "",
+         "Output rate of the UBX-MON-HW2 message on port UART1"),
+        ("CFG-MSGOUT-UBX_MON_HW2_UART2", 0x209101bb, "U1", 1, "",
+         "Output rate of the UBX-MON-HW2 message on port UART2"),
+        ("CFG-MSGOUT-UBX_MON_HW2_USB", 0x209101bc, "U1", 1, "",
+         "Output rate of the UBX-MON-HW2 message on port USB"),
+        ("CFG-MSGOUT-UBX_MON_HW3_I2C", 0x20910354, "U1", 1, "",
+         "Output rate of the UBX-MON-HW3 message on port I2C"),
+        ("CFG-MSGOUT-UBX_MON_HW3_SPI", 0x20910358, "U1", 1, "",
+         "Output rate of the UBX-MON-HW3 message on port SPI"),
+        ("CFG-MSGOUT-UBX_MON_HW3_UART1", 0x20910355, "U1", 1, "",
+         "Output rate of the UBX-MON-HW3 message on port UART1"),
+        ("CFG-MSGOUT-UBX_MON_HW3_UART2", 0x20910356, "U1", 1, "",
+         "Output rate of the UBX-MON-HW3 message on port UART2"),
+        ("CFG-MSGOUT-UBX_MON_HW3_USB", 0x20910357, "U1", 1, "",
+         "Output rate of the UBX-MON-HW3 message on port USB"),
         ("CFG-MSGOUT-UBX_MON_HW_I2C", 0x209101b4, "U1", 1, "",
          "Output rate of the UBX-MON-HW message on port I2C"),
         ("CFG-MSGOUT-UBX_MON_HW_SPI", 0x209101b8, "U1", 1, "",
@@ -419,45 +500,45 @@ class ubx(object):
          "Output rate of the UBX-NAV-TIMEGPS message on port UART2"),
         ("CFG-MSGOUT-UBX_NAV_TIMEGPS_USB", 0x2091004a, "U1", 1, "",
          "Output rate of the UBX-NAV-TIMEGPS message on port USB"),
-        ("CFG-MSGOUT-UBX_NAV_TIMELS_I2C", 0x20910060, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_TIMELS_I2C", 0x20910060, "U1", 1, "",
          "Output rate of the UBX-NAV-TIMELS message on port I2C"),
-        ("CFG-MSGOUT-UBX_NAV_TIMELS_SPI", 0x20910064, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_TIMELS_SPI", 0x20910064, "U1", 1, "",
          "Output rate of the UBX-NAV-TIMELS message on port SPI"),
-        ("CFG-MSGOUT-UBX_NAV_TIMELS_UART1", 0x20910061, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_TIMELS_UART1", 0x20910061, "U1", 1, "",
          "Output rate of the UBX-NAV-TIMELS message on port UART1"),
-        ("CFG-MSGOUT-UBX_NAV_TIMELS_UART2", 0x20910062, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_TIMELS_UART2", 0x20910062, "U1", 1, "",
          "Output rate of the UBX-NAV-TIMELS message on port UART2"),
-        ("CFG-MSGOUT-UBX_NAV_TIMELS_USB", 0x20910063, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_TIMELS_USB", 0x20910063, "U1", 1, "",
          "Output rate of the UBX-NAV-TIMELS message on port USB"),
-        ("CFG-MSGOUT-UBX_NAV_TIMEUTC_I2C", 0x2091005b, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_TIMEUTC_I2C", 0x2091005b, "U1", 1, "",
          "Output rate of the UBX-NAV-TIMEUTC message on port I2C"),
-        ("CFG-MSGOUT-UBX_NAV_TIMEUTC_SPI", 0x2091005f, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_TIMEUTC_SPI", 0x2091005f, "U1", 1, "",
          "Output rate of the UBX-NAV-TIMEUTC message on port S"),
-        ("CFG-MSGOUT-UBX_NAV_TIMEUTC_UART1", 0x2091005c, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_TIMEUTC_UART1", 0x2091005c, "U1", 1, "",
          "Output rate of the UBX-NAV-TIMEUTC message on port UART1"),
-        ("CFG-MSGOUT-UBX_NAV_TIMEUTC_UART2", 0x2091005d, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_TIMEUTC_UART2", 0x2091005d, "U1", 1, "",
          "Output rate of the UBX-NAV-TIMEUTC message on port UART2"),
-        ("CFG-MSGOUT-UBX_NAV_TIMEUTC_USB", 0x2091005e, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_TIMEUTC_USB", 0x2091005e, "U1", 1, "",
          "Output rate of the UBX-NAV- TIMEUTC message on port USB"),
-        ("CFG-MSGOUT-UBX_NAV_VELECEF_I2C", 0x2091003d, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_VELECEF_I2C", 0x2091003d, "U1", 1, "",
          "Output rate of the UBX-NAV-VELECEF message on port I2C"),
-        ("CFG-MSGOUT-UBX_NAV_VELECEF_SPI", 0x20910041, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_VELECEF_SPI", 0x20910041, "U1", 1, "",
          "Output rate of the UBX-NAV-VELECEF message on port SPI"),
-        ("CFG-MSGOUT-UBX_NAV_VELECEF_UART1", 0x2091003e, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_VELECEF_UART1", 0x2091003e, "U1", 1, "",
          "Output rate of the UBX-NAV-VELECEF message on port UART1"),
-        ("CFG-MSGOUT-UBX_NAV_VELECEF_UART2", 0x2091003f, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_VELECEF_UART2", 0x2091003f, "U1", 1, "",
          "Output rate of the UBX-NAV-VELECEF message on port UART2"),
-        ("CFG-MSGOUT-UBX_NAV_VELECEF_USB", 0x20910040, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_VELECEF_USB", 0x20910040, "U1", 1, "",
          "Output rate of the UBX-NAV-VELECEF message on port USB"),
-        ("CFG-MSGOUT-UBX_NAV_VELNED_I2C", 0x20910042, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_VELNED_I2C", 0x20910042, "U1", 1, "",
          "Output rate of the UBX-NAV-VELNED message on port I2C"),
-        ("CFG-MSGOUT-UBX_NAV_VELNED_SPI", 0x20910046, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_VELNED_SPI", 0x20910046, "U1", 1, "",
          "Output rate of the UBX-NAV-VELNED message on port SPI"),
-        ("CFG-MSGOUT-UBX_NAV_VELNED_UART1", 0x20910043, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_VELNED_UART1", 0x20910043, "U1", 1, "",
          "Output rate of the UBX-NAV-VELNED message on port UART1"),
-        ("CFG-MSGOUT-UBX_NAV_VELNED_UART2", 0x20910044, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_VELNED_UART2", 0x20910044, "U1", 1, "",
          "Output rate of the UBX-NAV-VELNED message on port UART2"),
-        ("CFG-MSGOUT-UBX_NAV_VELNED_USB", 0x20910045, "U1", 1, "".
+        ("CFG-MSGOUT-UBX_NAV_VELNED_USB", 0x20910045, "U1", 1, "",
          "Output rate of the UBX-NAV-VELNED message on port USB"),
         ("CFG-MSGOUT-UBX_RXM_MEASX_I2C", 0x20910204, "U1", 1, "",
          "Output rate of the UBX-RXM-MEASX message on port I2C"),
