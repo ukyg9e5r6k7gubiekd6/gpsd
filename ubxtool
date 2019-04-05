@@ -1404,7 +1404,20 @@ class ubx(object):
             if item[1] == key:
                 return item
 
-        return None
+        map = {0: "Z0",
+               1: "L",
+               2: "U1",
+               3: "U2",
+               4: "U4",
+               5: "U8",
+               6: "Z6",
+               7: "Z7",
+               }
+        # build a fake item, guess on decode
+        size = (key >> 28) & 0x07
+        item = ("Unknown", key, map[size], 1, "Unk", "Unknown")
+
+        return item
 
     def cfg_by_name(self, name):
         """Find a config item by name"""
@@ -1927,8 +1940,6 @@ class ubx(object):
         while 0 < m_len:
             u = struct.unpack_from('<L', buf, 4 + i * 4)
             item = self.cfg_by_key(u[0])
-            if not item:
-                item = ("Unknown",0)
             s += ('\n    item: %s/%#x' % (item[0], u[0]))
             m_len -= 4
             i += 1
