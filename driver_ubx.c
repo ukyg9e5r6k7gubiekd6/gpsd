@@ -68,7 +68,8 @@ static gps_mask_t ubx_msg_nav_posecef(struct gps_device_t *session,
 				      unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_pvt(struct gps_device_t *session,
 				  unsigned char *buf, size_t data_len);
-static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf);
+static void ubx_msg_mon_ver(struct gps_device_t *session,
+				      unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_sat(struct gps_device_t *session,
 				  unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_sol(struct gps_device_t *session,
@@ -79,8 +80,9 @@ static gps_mask_t ubx_msg_nav_timegps(struct gps_device_t *session,
 				      unsigned char *buf, size_t data_len);
 static gps_mask_t ubx_msg_nav_velecef(struct gps_device_t *session,
 				      unsigned char *buf, size_t data_len);
-static void ubx_msg_mon_ver(struct gps_device_t *session,
-				      unsigned char *buf, size_t data_len);
+static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf);
+static gps_mask_t ubx_msg_tim_tp(struct gps_device_t *session,
+                                 unsigned char *buf, size_t data_len);
 #ifdef RECONFIGURE_ENABLE
 static void ubx_mode(struct gps_device_t *session, int mode);
 #endif /* RECONFIGURE_ENABLE */
@@ -1108,6 +1110,40 @@ static void ubx_msg_inf(struct gps_device_t *session, unsigned char *buf,
     return;
 }
 
+/**
+ * Time Pulse Timedata - UBX-TIM-TP
+ */
+static gps_mask_t
+ubx_msg_tim_tp(struct gps_device_t *session, unsigned char *buf,
+               size_t data_len)
+{
+    gps_mask_t mask = ONLINE_SET;
+    uint32_t towMS;
+    uint32_t towSubMS;
+    int32_t qErr;
+    uint16_t week;
+    uint8_t flags;
+    uint8_t refInfo;
+
+    if (data_len < 16)
+	return 0;
+
+    towMS = getleu32(buf, 0);
+    towSubMS = getleu32(buf, 4);
+    qErr = getles32(buf, 8);
+    week = getleu16(buf, 12);
+    flags = buf[14];
+    refInfo = buf[15];
+
+    /* cast for 32 bit compatibility */
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "TIM_TP: towMS %lu, towSubMS %lu, qErr %ld week %u\n"
+             "        flags %#x, refInfo %#x\n",
+             (unsigned long)towMS, (unsigned long)towSubMS, (long)qErr,
+              week, flags, refInfo);
+    return mask;
+}
+
 gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 		     size_t len)
 {
@@ -1405,7 +1441,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_TM2\n");
 	break;
     case UBX_TIM_TP:
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_TP\n");
+        mask = ubx_msg_tim_tp(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_TIM_TOS:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_TIM_TOS\n");
