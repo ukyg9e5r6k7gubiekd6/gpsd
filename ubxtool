@@ -109,6 +109,8 @@ opts = {
     'raw_file': None,
     # open port read only -r
     'read_only': False,
+    # default -z item
+    'set_item': None,
     # speed to set GPS -S
     'set_speed': None,
     # target gpsd (server:port:device) to connect to
@@ -1975,8 +1977,16 @@ class ubx(object):
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = ' version: %u layer: %#x transaction %#x reserved: %u\n' % u
-        s += '    layers: %s, %s\n' % (self._layers(u[1]),
-                                       self._transaction(u[2]))
+        s += '  layers: %s, %s' % (self._layers(u[1]),
+                                   self._transaction(u[2]))
+        m_len -= 4
+        i = 0
+        while 0 < m_len:
+            u = struct.unpack_from('<L', buf, 4 + i * 4)
+            item = self.cfg_by_key(u[0])
+            s += ('\n    item: %s/%#x' % (item[0], u[0]))
+            m_len -= 4
+            i += 1
         return s
 
     cfg_ids = {0: {'str': 'PRT', 'dec': cfg_prt, 'name': 'UBX-CFG-PRT'},
@@ -3501,6 +3511,19 @@ class ubx(object):
         m_data[7] = (key >> 24) & 0xff
         gps_model.gps_send(0x06, 0x8b, m_data)
 
+    def send_cfg_valset(self, key, val):
+        """UBX-CFG-VALSET, set config item"""
+
+        # FIXME: does not handle value yet
+        m_data = bytearray(8)
+        m_data[0] = 0      # version, 0 = request, 1 = transaction
+        m_data[1] = 0      # RAM layer, 1=RAM, 2=BBR, 4=Flash
+        m_data[4] = (key) & 0xff
+        m_data[5] = (key >> 8) & 0xff
+        m_data[6] = (key >> 16) & 0xff
+        m_data[7] = (key >> 24) & 0xff
+        gps_model.gps_send(0x06, 0x8a, m_data)
+
     def send_tim_svin(self):
         "UBX-TIM-SVIN, get survey in data"
         m_data = bytearray(0)
@@ -3895,6 +3918,7 @@ def usage():
           '       -v V          Set verbosity level to V, 0 to 4\n'
           '                     default: %s\n'
           '       -x X          delete config item X\n'
+          '       -z Z,z        set config item Z to z\n'
           '       -?            print help\n'
           '\n'
           'D and E can be one of:' %
@@ -3924,7 +3948,8 @@ else:
 
 try:
     (options, arguments) = getopt.getopt(options,
-                                         "?c:d:e:f:g:hi:m:rP:p:s:w:v:R:S:Vx:")
+                                         "?c:d:e:f:g:hi:m:rP:p:"
+                                         "s:w:v:R:S:Vx:z:")
 except getopt.GetoptError as err:
     sys.stderr.write("%s: %s\n"
                      "Try '%s -h' for more information.\n" %
@@ -3986,6 +4011,8 @@ for (opt, val) in options:
         sys.exit(0)
     elif opt == '-x':
         opts['del_item'] = val
+    elif opt == '-z':
+        opts['set_item'] = val
 
 if opts['input_file_name'] is None:
     # no input file given
@@ -4108,6 +4135,16 @@ try:
         else:
             sys.stderr.write('%s: ERROR: item %s unknown\n' %
                              (PROG_NAME, opts['get_item']))
+            exit(1)
+
+    elif opts['set_item'] is not None:
+        (name, val) = opts['set_item'].split(',')
+        item = gps_model.cfg_by_name(name)
+        if item:
+            gps_model.send_cfg_valset(item[1], val)
+        else:
+            sys.stderr.write('%s: ERROR: item %s unknown\n' %
+                             (PROG_NAME, opts['set_item']))
             exit(1)
 
     exit_code = io_handle.read(opts)
