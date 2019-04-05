@@ -1938,20 +1938,28 @@ class ubx(object):
         if 4 > m_len:
             return "Bad Length %s" % m_len
 
-        # this is a poll options, so does not set min protver
-
         u = struct.unpack_from('<BBBB', buf, 0)
         s = ' version: %u layer: %#x reserved: %u,%u\n' % u
         s += '  layers: %s' % self._layers(u[1])
 
         m_len -= 4
         i = 0
-        while 0 < m_len:
-            u = struct.unpack_from('<L', buf, 4 + i * 4)
-            item = self.cfg_by_key(u[0])
-            s += ('\n    item: %s/%#x' % (item[0], u[0]))
-            m_len -= 4
-            i += 1
+
+        if 0 == u[0]:
+            # this is a poll options, so does not set min protver
+            while 0 < m_len:
+                u = struct.unpack_from('<L', buf, 4 + i * 4)
+                item = self.cfg_by_key(u[0])
+                s += ('\n    item: %s/%#x' % (item[0], u[0]))
+                m_len -= 4
+                i += 1
+        else:
+            # answer to poll
+            # we are at least protver 27
+            if 27 > opts['protver']:
+                opts['protver'] = 27
+            # FIXME: decode answers
+
         return s
 
     def cfg_valset(self, buf):
@@ -3474,8 +3482,8 @@ class ubx(object):
     def send_cfg_valdel(self, key):
         """UBX-CFG-VALDEL, delete config item"""
         m_data = bytearray(8)
-        m_data[0] = 0      # version
-        m_data[1] = 0      # RAM layer
+        m_data[0] = 0      # version, 0 = transactionless, 1 = transaction
+        m_data[1] = 2      # 2 = BBR, 4 = flash
         m_data[4] = (key) & 0xff
         m_data[5] = (key >> 8) & 0xff
         m_data[6] = (key >> 16) & 0xff
@@ -3485,7 +3493,7 @@ class ubx(object):
     def send_cfg_valget(self, key):
         """UBX-CFG-VALGET, get config item"""
         m_data = bytearray(8)
-        m_data[0] = 0      # version
+        m_data[0] = 0      # version, 0 = request, 1 = answer
         m_data[1] = 0      # RAM layer
         m_data[4] = (key) & 0xff
         m_data[5] = (key >> 8) & 0xff
@@ -3886,6 +3894,7 @@ def usage():
           '       -V            print version\n'
           '       -v V          Set verbosity level to V, 0 to 4\n'
           '                     default: %s\n'
+          '       -x X          delete config item X\n'
           '       -?            print help\n'
           '\n'
           'D and E can be one of:' %
