@@ -1401,6 +1401,52 @@ class ubx(object):
          "Flag to indicate if RTCM3X should be an output protocol on USB"),
        )
 
+    def item_to_type(self, item):
+        """Return (size, pack format, i/i/f) for item"""
+
+        # conversion of known types from known key
+        cfg_types = {
+                     "E1": (1, "<B", "u"),
+                     "E2": (2, "<H", "u"),
+                     "E4": (4, "<L", "u"),
+                     "I1": (1, "<b", "i"),
+                     "I2": (2, "<h", "i"),
+                     "I4": (4, "<l", "i"),
+                     "I8": (8, "<q", "i"),
+                     "L": (1, "<B", "u"),
+                     "R4": (4, "<f", "f"),
+                     "R8": (2, "<d", "f"),
+                     "U1": (1, "<B", "u"),
+                     "U2": (2, "<H", "u"),
+                     "U4": (4, "<L", "u"),
+                     "U8": (8, "<Q", "u"),
+                     "X1": (1, "<B", "u"),
+                     "X2": (2, "<H", "u"),
+                     "X4": (4, "<L", "u"),
+                     "X8": (8, "<Q", "u"),
+                     }
+        # guess of known types from unknown key
+        key_map = {0: (1, "<B", "u"),       # illegal
+                   1: (1, "<B", "u"),       # one bit
+                   2: (1, "<B", "u"),       # one byte
+                   3: (2, "<H", "u"),       # two byte
+                   4: (4, "<L", "u"),       # four byte
+                   5: (8, "<B", "u"),       # eight byte
+                   6: (1, "<B", "u"),       # illegal
+                   7: (1, "<B", "u"),       # illegal
+                   }
+
+        key = item[1]
+        val_type = item[2]
+        if val_type in cfg_types:
+            cfg_type = cfg_types[val_type]
+        else:
+            # unknown? get length correct
+            key_size = (key >> 28) & 0x07
+            cfg_type = key_map[key_size]
+
+        return cfg_type
+
     def cfg_by_key(self, key):
         """Find a config item by key"""
 
@@ -1408,6 +1454,8 @@ class ubx(object):
             if item[1] == key:
                 return item
 
+        # not found, build a fake item, guess on decode
+        name = "CFG-%u-%u" % ((key >> 16) & 0xff, ket & 0xff)
         map = {0: "Z0",
                1: "L",
                2: "U1",
@@ -1417,9 +1465,8 @@ class ubx(object):
                6: "Z6",
                7: "Z7",
                }
-        # build a fake item, guess on decode
         size = (key >> 28) & 0x07
-        item = ("Unknown", key, map[size], 1, "Unk", "Unknown")
+        item = (name, key, map[size], 1, "Unk", "Unknown")
 
         return item
 
@@ -1948,7 +1995,7 @@ class ubx(object):
         i = 0
 
         if 0 == u[0]:
-            # this is a poll options, so does not set min protver
+            # this is a poll option, so does not set min protver
             while 0 < m_len:
                 u = struct.unpack_from('<L', buf, 4 + i * 4)
                 item = self.cfg_by_key(u[0])
@@ -1971,22 +2018,28 @@ class ubx(object):
         if 4 > m_len:
             return "Bad Length %s" % m_len
 
-        # we are at least protver 27
-        if 27 > opts['protver']:
-            opts['protver'] = 27
+        # this is a poll option, so does not set min protver
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = ' version: %u layer: %#x transaction %#x reserved: %u\n' % u
         s += '  layers: %s, %s' % (self._layers(u[1]),
                                    self._transaction(u[2]))
         m_len -= 4
-        i = 0
+        i = 4
         while 0 < m_len:
-            u = struct.unpack_from('<L', buf, 4 + i * 4)
-            item = self.cfg_by_key(u[0])
-            s += ('\n    item: %s/%#x' % (item[0], u[0]))
+            u = struct.unpack_from('<L', buf, i)
             m_len -= 4
-            i += 1
+            i += 4
+            item = self.cfg_by_key(u[0])
+            cfg_type = self.item_to_type(item)
+
+            size = cfg_type[0]
+            frmat = cfg_type[1]
+            flavor = cfg_type[2]
+            v = struct.unpack_from(frmat, buf, i)
+            s += ('\n    item: %s/%#x val: %s' % (item[0], u[0], v[0]))
+            m_len -= size
+            i += size
         return s
 
     cfg_ids = {0: {'str': 'PRT', 'dec': cfg_prt, 'name': 'UBX-CFG-PRT'},
@@ -3511,17 +3564,35 @@ class ubx(object):
         m_data[7] = (key >> 24) & 0xff
         gps_model.gps_send(0x06, 0x8b, m_data)
 
-    def send_cfg_valset(self, key, val):
+    def send_cfg_valset(self, item, val):
         """UBX-CFG-VALSET, set config item"""
 
+        size = 8
+        key = item[1]
+        val_type = item[2]
+
+        cfg_type = self.item_to_type(item)
+
+        size += cfg_type[0]
+        frmat = cfg_type[1]
+        flavor = cfg_type[2]
+        if 'u' == flavor:
+            val1 = int(val)
+        elif 'i' == flavor:
+            val1 = int(val)
+        elif 'f' == flavor:
+            val1 = float(val)
+
         # FIXME: does not handle value yet
-        m_data = bytearray(8)
+        m_data = bytearray(size)
         m_data[0] = 0      # version, 0 = request, 1 = transaction
         m_data[1] = 0      # RAM layer, 1=RAM, 2=BBR, 4=Flash
         m_data[4] = (key) & 0xff
         m_data[5] = (key >> 8) & 0xff
         m_data[6] = (key >> 16) & 0xff
         m_data[7] = (key >> 24) & 0xff
+
+        struct.pack_into(frmat, m_data, 8, val1)
         gps_model.gps_send(0x06, 0x8a, m_data)
 
     def send_tim_svin(self):
@@ -4141,7 +4212,7 @@ try:
         (name, val) = opts['set_item'].split(',')
         item = gps_model.cfg_by_name(name)
         if item:
-            gps_model.send_cfg_valset(item[1], val)
+            gps_model.send_cfg_valset(item, val)
         else:
             sys.stderr.write('%s: ERROR: item %s unknown\n' %
                              (PROG_NAME, opts['set_item']))
