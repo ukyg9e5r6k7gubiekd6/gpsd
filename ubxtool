@@ -3912,7 +3912,7 @@ def usage():
           '       -S S          set GPS speed to S\n'
           '       -s S          set port speed to S\n'
           '                     default: %s bps\n'
-          '       -w            wait time\n'
+          '       -w W          wait time W before exiting\n'
           '                     default: %s seconds\n'
           '       -V            print version\n'
           '       -v V          Set verbosity level to V, 0 to 4\n'
