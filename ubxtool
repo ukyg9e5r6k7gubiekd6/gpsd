@@ -159,6 +159,30 @@ class ubx(object):
     # 5 - Unit
     # 6 - Description
     cfgs = (
+        # CFG-ITFM-
+        ("CFG-ITFM-BBTHRESHOLD", 0x20410001, "U1", 1, "",
+         "Broadband jamming detection threshold"),
+        ("CFG-ITFM-CWTHRESHOLD", 0x20410002, "U1", 1, "",
+         "CW jamming detection threshold"),
+        ("CFG-ITFM-ENABLE", 0x1041000d, "L", 1, "",
+         "Enable interference detection"),
+        ("CFG-ITFM-ANTSETTING", 0x20410010, "E1", 1, "",
+         "Antenna setting"),
+        ("CFG-ITFM-ENABLE_AUX", 0x10410013, "L", 1, "",
+         "Set to true to scan auxiliary bands"),
+        # CFG-LOGFILTER-
+        ("CFG-LOGFILTER-RECORD_ENA", 0x10de0002, "L", 1, "",
+         "Recording enabled"),
+        ("CFG-LOGFILTER-ONCE_PER_WAKE_UP_ENA", 0x10de0003, "L", 1, "",
+         "Once per wakeup"),
+        ("CFG-LOGFILTER-APPLY_ALL_FILTERS", 0x10de0004, "L", 1, "",
+         "Apply all filter settings"),
+        ("CFG-LOGFILTER-TIME_THRS", 0x30de0006, "U2", 1, "s",
+         "Time threshold"),
+        ("CFG-LOGFILTER-SPEED_THRS", 0x30de0007, "U2", 1, "m/s",
+         "Speed threshold"),
+        ("CFG-LOGFILTER-POSITION_THRS", 0x40de0008, "U4", 1, "m",
+         "Position threshold"),
         # CFG-MOT-
         ("CFG-MOT-GNSSSPEED_THRS", 0x20250038, "U1", 0.01, "m/s",
          "GNSS speed threshold below which platform is considered "
