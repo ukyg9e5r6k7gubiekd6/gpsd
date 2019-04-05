@@ -159,7 +159,36 @@ class ubx(object):
     # 5 - Unit
     # 6 - Description
     cfgs = (
-        # CFG-I2C config items.
+        # CFG-HW
+        ("CFG-HW-ANT_CFG_VOLTCTRL", 0x10a3002e, "L", 1, "",
+         "Active antenna voltage control flag"),
+        ("CFG-HW-ANT_CFG_SHORTDET", 0x10a3002f, "L", 1, "",
+         "Short antenna detection flag"),
+        ("CFG-HW-ANT_CFG_SHORTDET_POL", 0x10a30030, "L", 1, "",
+         "Short antenna detection polarity"),
+        ("CFG-HW-ANT_CFG_OPENDET", 0x10a30031, "L", 1, "",
+         "Open antenna detection flag"),
+        ("CFG-HW-ANT_CFG_OPENDET_POL", 0x10a30032, "L", 1, "",
+         "Open antenna detection polarity"),
+        ("CFG-HW-ANT_CFG_PWRDOWN", 0x10a30033, "L", 1, "",
+         "Power down antenna flag"),
+        ("CFG-HW-ANT_CFG_PWRDOWN_POL", 0x10a30034, "L", 1, "",
+         "Power down antenna logic polarity"),
+        ("CFG-HW-ANT_CFG_RECOVER", 0x10a30035, "L", 1, "",
+         "Automatic recovery from short state flag"),
+        ("CFG-HW-ANT_SUP_SWITCH_PIN", 0x20a30036, "U1", 1, "",
+         "ANT1 PIO number"),
+        ("CFG-HW-ANT_SUP_SHORT_PIN", 0x20a30037, "U1", 1, "",
+         "ANT0 PIO number"),
+        ("CFG-HW-ANT_SUP_OPEN_PIN", 0x20a30038, "U1", 1, "",
+         "ANT2 PIO number"),
+        # CFG-I2C
+        ("CFG-I2C-ADDRESS", 0x20510001, "U1", 1, "",
+         "I2C slave address of the receiver"),
+        ("CFG-I2C-EXTENDEDTIMEOUT", 0x10510002, "L", 1, "",
+         "Flag to disable timeouting the interface after 1.5 s"),
+        ("CFG-I2C-ENABLED", 0x10510003, "L", 1, "",
+         "Flag to indicate if the I2C interface should be enabled"),
         ("CFG-I2CINPROT-UBX", 0x10710001, "L", 1, "",
          "Flag to indicate if UBX should be an input on I2C"),
         ("CFG-I2CINPROT-NMEA", 0x10710002, "L", 1, "",
