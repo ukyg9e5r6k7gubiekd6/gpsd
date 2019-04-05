@@ -72,6 +72,8 @@ VERB_PROG = 5    # program trace
 opts = {
     # command to send to GPS, -c
     'command': None,
+    # default -x item
+    'del_item': None,
     # command for -d disable
     'disable': None,
     # command for -e enable
@@ -1910,14 +1912,21 @@ class ubx(object):
         if 4 > m_len:
             return "Bad Length %s" % m_len
 
-        # we are at least protver 27
-        if 27 > opts['protver']:
-            opts['protver'] = 27
+        # this is a poll options, so does not set min protver
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = ' version: %u layer: %#x transaction %#x reserved: %u\n' % u
-        s += '    layers: %s, %s\n' % (self._layers(u[1]),
-                                       self._transaction(u[2]))
+        s += '  layers: %s, %s' % (self._layers(u[1]),
+                                   self._transaction(u[2]))
+
+        m_len -= 4
+        i = 0
+        while 0 < m_len:
+            u = struct.unpack_from('<L', buf, 4 + i * 4)
+            item = self.cfg_by_key(u[0])
+            s += ('\n    item: %s/%#x' % (item[0], u[0]))
+            m_len -= 4
+            i += 1
         return s
 
     def cfg_valget(self, buf):
@@ -1925,7 +1934,7 @@ class ubx(object):
         m_len = len(buf)
 
         # version zero is a poll
-        # version one is he response
+        # version one is the response
         if 4 > m_len:
             return "Bad Length %s" % m_len
 
@@ -2002,7 +2011,7 @@ class ubx(object):
                       'name': 'UBX-CFG-VALSET'},
                0x8b: {'str': 'VALGET', 'dec': cfg_valget,
                       'name': 'UBX-CFG-VALGET'},
-               0x8c: {'str': 'VALDEL', 'dev': cfg_valdel,
+               0x8c: {'str': 'VALDEL', 'dec': cfg_valdel,
                       'name': 'UBX-CFG-VALDEL'},
                }
 
@@ -3462,6 +3471,17 @@ class ubx(object):
         m_data = bytearray(0)
         gps_model.gps_send(0x06, 0x16, m_data)
 
+    def send_cfg_valdel(self, key):
+        """UBX-CFG-VALDEL, delete config item"""
+        m_data = bytearray(8)
+        m_data[0] = 0      # version
+        m_data[1] = 0      # RAM layer
+        m_data[4] = (key) & 0xff
+        m_data[5] = (key >> 8) & 0xff
+        m_data[6] = (key >> 16) & 0xff
+        m_data[7] = (key >> 24) & 0xff
+        gps_model.gps_send(0x06, 0x8c, m_data)
+
     def send_cfg_valget(self, key):
         """UBX-CFG-VALGET, get config item"""
         m_data = bytearray(8)
@@ -3895,7 +3915,7 @@ else:
 
 try:
     (options, arguments) = getopt.getopt(options,
-                                         "?c:d:e:f:g:hi:m:rP:p:s:w:v:R:S:V")
+                                         "?c:d:e:f:g:hi:m:rP:p:s:w:v:R:S:Vx:")
 except getopt.GetoptError as err:
     sys.stderr.write("%s: %s\n"
                      "Try '%s -h' for more information.\n" %
@@ -3955,6 +3975,8 @@ for (opt, val) in options:
         # version
         sys.stderr.write('%s: Version %s\n' % (PROG_NAME, gps_version))
         sys.exit(0)
+    elif opt == '-x':
+        opts['del_item'] = val
 
 if opts['input_file_name'] is None:
     # no input file given
@@ -4060,6 +4082,15 @@ try:
         if VERB_QUIET < opts['verbosity']:
             sys.stderr.write('%s: command %s\n' % (PROG_NAME, opts['command']))
         gps_model.gps_send(cmd_data[0], cmd_data[1], payload)
+
+    elif opts['del_item'] is not None:
+        item = gps_model.cfg_by_name(opts['del_item'])
+        if item:
+            gps_model.send_cfg_valdel(item[1])
+        else:
+            sys.stderr.write('%s: ERROR: item %s unknown\n' %
+                             (PROG_NAME, opts['del_item']))
+            exit(1)
 
     elif opts['get_item'] is not None:
         item = gps_model.cfg_by_name(opts['get_item'])
