@@ -159,6 +159,13 @@ class ubx(object):
     # 5 - Unit
     # 6 - Description
     cfgs = (
+        # CFG-MOT-
+        ("CFG-MOT-GNSSSPEED_THRS", 0x20250038, "U1", 0.01, "m/s",
+         "GNSS speed threshold below which platform is considered "
+         "as stationary"),
+        ("CFG-MOT-GNSSDIST_THRS", 0x3025003b, "U2", 1, "",
+         "Distance above which GNSS-based stationary motion is exit"),
+        # CFG-MSGOUT-NMEA
         ("CFG-MSGOUT-NMEA_ID_DTM_I2C", 0x209100a6, "U1", 1, "",
          "Output rate of the NMEA-GX-DTM message on port I2C"),
         ("CFG-MSGOUT-NMEA_ID_DTM_SPI", 0x209100aa, "U1", 1, "",
@@ -289,6 +296,7 @@ class ubx(object):
          "Output rate of the NMEA-GX-ZDA message on port UART2"),
         ("CFG-MSGOUT-NMEA_ID_ZDA_USB", 0x209100db, "U1", 1, "",
          "Output rate of the NMEA-GX-ZDA message on port USB"),
+        # CFG-MSGOUT-PUBX
         ("CFG-MSGOUT-PUBX_ID_POLYP_I2C", 0x209100ec, "U1", 1, "",
          "Output rate of the NMEA-GX-PUBX00 message on port I2C"),
         ("CFG-MSGOUT-PUBX_ID_POLYP_SPI", 0x209100f0, "U1", 1, "",
@@ -319,6 +327,7 @@ class ubx(object):
          "Output rate of the NMEA-GX-PUBX04 message on port UART2"),
         ("CFG-MSGOUT-PUBX_ID_POLYT_USB", 0x209100f9, "U1", 1, "",
          "Output rate of the NMEA-GX-PUBX04 message on port USB"),
+        # CFG-MSGOUT-RTCM_3X
         ("CFG-MSGOUT-RTCM_3X_TYPE1005_I2C", 0x209102bd, "U1", 1, "",
          "Output rate of the RTCM-3X-TYPE1005 message on port I2C"),
         ("CFG-MSGOUT-RTCM_3X_TYPE1005_SPI", 0x209102c1, "U1", 1, "",
@@ -394,6 +403,7 @@ class ubx(object):
         ("CFG-MSGOUT-RTCM_3X_TYPE4072_1_USB", 0x20910384, "U1", 1, "",
          "Output rate of the RTCM-3X-TYPE4072, sub-type 1 message "
          "on port USB"),
+        # CFG-MSGOUT-UBX_LOG
         ("CFG-MSGOUT-UBX_LOG_INFO_I2C", 0x20910259, "U1", 1, "",
          "Output rate of the UBX-LOG-INFO message on port I2C"),
         ("CFG-MSGOUT-UBX_LOG_INFO_SPI", 0x2091025d, "U1", 1, "",
@@ -404,6 +414,7 @@ class ubx(object):
          "Output rate of the UBX-LOG-INFO message on port UART2"),
         ("CFG-MSGOUT-UBX_LOG_INFO_USB", 0x2091025c, "U1", 1, "",
          "Output rate of the UBX-LOG-INFO message on port USB"),
+        # CFG-MSGOUT-UBX_MON
         ("CFG-MSGOUT-UBX_MON_COMMS_I2C", 0x2091034f, "U1", 1, "",
          "Output rate of the UBX-MON-COMMS message on port I2C"),
         ("CFG-MSGOUT-UBX_MON_COMMS_SPI", 0x20910353, "U1", 1, "",
@@ -514,6 +525,7 @@ class ubx(object):
          "Output rate of the UBX-MON-TXBUF message on port UART2"),
         ("CFG-MSGOUT-UBX_MON_TXBUF_USB", 0x2091019e, "U1", 1, "",
          "Output rate of the UBX-MON-TXBUF message on port USB"),
+        # CFG-MSGOUT-UBX_NAV
         ("CFG-MSGOUT-UBX_NAV_CLOCK_I2C", 0x20910065, "U1", 1, "",
          "Output rate of the UBX-NAV-CLOCK message on port I2C"),
         ("CFG-MSGOUT-UBX_NAV_CLOCK_SPI", 0x20910069, "U1", 1, "",
@@ -734,6 +746,7 @@ class ubx(object):
          "Output rate of the UBX-NAV-VELNED message on port UART2"),
         ("CFG-MSGOUT-UBX_NAV_VELNED_USB", 0x20910045, "U1", 1, "",
          "Output rate of the UBX-NAV-VELNED message on port USB"),
+        # CFG-MSGOUT-UBX_RXM
         ("CFG-MSGOUT-UBX_RXM_MEASX_I2C", 0x20910204, "U1", 1, "",
          "Output rate of the UBX-RXM-MEASX message on port I2C"),
         ("CFG-MSGOUT-UBX_RXM_MEASX_SPI", 0x20910208, "U1", 1, "",
@@ -784,6 +797,7 @@ class ubx(object):
          "Output rate of the UBX-RXM-SFRBX message on port UART2"),
         ("CFG-MSGOUT-UBX_RXM_SFRBX_USB", 0x20910234, "U1", 1, "",
          "Output rate of the UBX-RXM-SFRBX message on port USB"),
+        # CFG-MSGOUT-UBX_TIM
         ("CFG-MSGOUT-UBX_TIM_SVIN_I2C", 0x20910097, "U1", 1, "",
          "Output rate of the UBX-TIM-SVIN message on port I2C"),
         ("CFG-MSGOUT-UBX_TIM_SVIN_SPI", 0x2091009b, "U1", 1, "",
@@ -824,6 +838,7 @@ class ubx(object):
          "Output rate of the UBX-TIM-VRFY message on port UART2"),
         ("CFG-MSGOUT-UBX_TIM_VRFY_USB", 0x20910095, "U1", 1, "",
          "Output rate of the UBX-TIM-VRFY message on port USB"),
+        # CFG-NAVSPG-
         ("CFG-NAVSPG-FIXMODE", 0x20110011, "E1", 1, "",
          "Position fix mode"),
         ("CFG-NAVSPG-INIFIX3D", 0x10110013, "L", 1, "",
@@ -887,6 +902,7 @@ class ubx(object):
          "Fixed altitude variance for 2D mode"),
         ("CFG-NAVSPG-CONSTR_DGNSSTO", 0x201100c4, "U1", 1, "s",
          "DGNSS timeout"),
+        # CFG-NMEA-
         ("CFG-NMEA-PROTVER", 0x20930001, "E1", 1, "",
          "NMEA protocol version"),
         ("CFG-NMEA-MAXSVS", 0x20930002, "E1", 1, "",
@@ -929,6 +945,7 @@ class ubx(object):
          "Talker ID for GSV NMEA messages"),
         ("CFG-NMEA-BDSTALKERID", 0x30930033, "U2", 1, "",
          "BeiDou Talker ID"),
+        # CFG-ODO-
         ("CFG-ODO-USE_ODO", 0x10220001, "L", 1, "",
          "Use odometer"),
         ("CFG-ODO-USE_COG", 0x10220002, "L", 1, "",
@@ -944,12 +961,14 @@ class ubx(object):
         ("CFG-ODO-COGMAXPOSACC", 0x20220022, "U1", 1, "",
          "Maximum acceptable position accuracy for computing low-speed  "
          "filtered course over ground"),
+        # CFG-RATE-
         ("CFG-RATE-MEAS", 0x30210001, "U2", 0.001, "s",
          "Nominal time between GNSS measurements"),
         ("CFG-RATE-NAV", 0x30210002, "U2", 1, "",
          "Ratio of number of measurements to number of navigation solutions"),
         ("CFG-RATE-TIMEREF", 0x20210003, "E1", 1, "",
          "Time system to which measurements are aligned"),
+        # CFG-RINV-
         ("CFG-RINV-DUMP", 0x10c70001, "L", 1, "",
          "Dump data at startup"),
         ("CFG-RINV-BINARY", 0x10c70002, "L", 1, "",
@@ -964,6 +983,7 @@ class ubx(object):
          "Data bytes 17-24"),
         ("CFG-RINV-CHUNK3", 0x50c70007, "X8", 1, "",
          "Data bytes 25-30 (MSB)"),
+        # CFG-SBAS-
         ("CFG-SBAS-USE_TESTMODE", 0x10360002, "L", 1, "",
          "Use SBAS data when it is in test mode"),
         ("CFG-SBAS-USE_RANGING", 0x10360003, "L", 1, "",
@@ -974,6 +994,7 @@ class ubx(object):
          "Use SBAS integrity information"),
         ("CFG-SBAS-PRNSCANMASK", 0x50360006, "X8", 1, "",
          "SBAS PRN search configuration"),
+        # CFG-SIGNAL-
         ("CFG-SIGNAL-GPS_ENA", 0x1031001f, "L", 1, "",
          "GPS enable"),
         ("CFG-SIGNAL-GPS_L1CA_ENA", 0x10310001, "L", 1, "",
@@ -1010,6 +1031,7 @@ class ubx(object):
          "GLONASS L1"),
         ("CFG-SIGNAL-GLO_L2_ENA", 0x1031001a, "L", 1, "",
          "GLONASS L2"),
+        # CFG-SPI-
         ("CFG-SPI-MAXFF", 0x20640001, "U1", 1, "",
          "Number of bytes containing 0xFF to receive before "
          "switching off reception."),
@@ -1035,6 +1057,7 @@ class ubx(object):
          "Flag to indicate if NMEA should be an output protocol on SPI"),
         ("CFG-SPIOUTPROT-RTCM3X", 0x107a0004, "L", 1, "",
          "Flag to indicate if RTCM3X should be an output protocol on SPI"),
+        # CFG-TMODE-
         ("CFG-TMODE-MODE", 0x20030001, "E1", 1, "",
          "Receiver mode"),
         ("CFG-TMODE-POS_TYPE", 0x20030002, "E1", 1, "",
@@ -1070,6 +1093,7 @@ class ubx(object):
          "Survey-in minimum duration"),
         ("CFG-TMODE-SVIN_ACC_LIMIT", 0x40030011, "U4", 0.1, "mm",
          "Survey-in position accuracy limit"),
+        # CFG-TP-
         ("CFG-TP-PULSE_DEF", 0x20050023, "E1", 1, "",
          "Determines whether the time pulse is interpreted as frequency "
          "or period?"),
@@ -1138,6 +1162,7 @@ class ubx(object):
          "Set time pulse polarity (TP2)"),
         ("CFG-TP-TIMEGRID_TP2", 0x20050017, "E1", 1, "",
          "Time grid to use (TP2)"),
+        # CFG-UART1-
         ("CFG-UART1-BAUDRATE", 0x40520001, "U4", 1, "",
          "The baud rate that should be configured on the UART1"),
         ("CFG-UART1-STOPBITS", 0x20520002, "E1", 1, "",
@@ -1162,6 +1187,7 @@ class ubx(object):
          "Flag to indicate if NMEA should be an output protocol on UART1"),
         ("CFG-UART1OUTPROT-RTCM3X", 0x10740004, "L", 1, "",
          "Flag to indicate if RTCM3X should be an output protocol on UART1"),
+        # CFG-UART2-
         ("CFG-UART2-BAUDRATE", 0x40530001, "U4", 1, "",
          "The baud rate that should be configured on the UART2"),
         ("CFG-UART2-STOPBITS", 0x20530002, "E1", 1, "",
@@ -1188,6 +1214,7 @@ class ubx(object):
          "Flag to indicate if NMEA should be an output protocol on UART2"),
         ("CFG-UART2OUTPROT-RTCM3X", 0x10760004, "L", 1, "",
          "Flag to indicate if RTCM3X should be an output protocol on UART2"),
+        # CFG-USB-
         ("CFG-USB-ENABLED", 0x10650001, "L", 1, "",
          "Flag to indicate if the USB interface should be enabled"),
         ("CFG-USB-SELFPOW", 0x10650002, "L", 1, "",
