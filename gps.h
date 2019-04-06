@@ -47,7 +47,7 @@ extern "C" {
  *       Remove epe from gps_data_t, it duplicates gps_fix_t eph
  *       Added sep (estimated spherical error, 3D)
  *       Note: Some GPS call eph as epe, others call sep as epe
- *       Add gps_fix_t datum string
+ *       Add gps_fix_t datum string, and qErr
  */
 #define GPSD_API_MAJOR_VERSION	8	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -128,6 +128,8 @@ struct gps_fix_t {
 	double vAcc;            /* Velocity Accuracy Estimate, probably SEP */
     } ecef;
     char datum[40];             /* map datum */
+    /* quantization error adjustment to PPS. aka "sawtooth" correction */
+    long qErr;                  /* offset in picoseconds (ps) */
 };
 
 /*

@@ -370,6 +370,9 @@ void gps_merge_fix(struct gps_fix_t *to,
     if ('\0' != from->datum[0]) {
         strlcpy(to->datum, from->datum, sizeof(to->datum));
     }
+    if (0 != from->qErr) {
+	to->qErr = from->qErr;
+    }
 }
 
 /* NOTE: timestamp_t is a double, so this is only precise to

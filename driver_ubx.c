@@ -1135,6 +1135,12 @@ ubx_msg_tim_tp(struct gps_device_t *session, unsigned char *buf,
     flags = buf[14];
     refInfo = buf[15];
 
+    /* are we UTC, and no RAIM? */
+    if ((3 == (flags & 0x03)) &&
+        (8 != (flags & 0x0c))) {
+        /* good, get qErr */
+	session->newdata.qErr = qErr;
+    }
     /* cast for 32 bit compatibility */
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "TIM_TP: towMS %lu, towSubMS %lu, qErr %ld week %u\n"

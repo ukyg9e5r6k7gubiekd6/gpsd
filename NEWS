@@ -9,6 +9,7 @@
   Improve cycle detection, mostly for NMEA.
   Move epe from gps_data_t to be near its friends in gps_fix_t.
   Preliminary u-blox 9 support.
+  Add qErr in gps_data_t to store PPS quantization error.
 
 3.18.1: 2018-10-19 (Gary E. Miller <gem@rellim.com>)
   Fix some installation issues.
