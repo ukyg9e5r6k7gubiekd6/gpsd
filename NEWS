@@ -8,6 +8,7 @@
   Update pseudo NMEA to v3.0, with fractional time.
   Improve cycle detection, mostly for NMEA.
   Move epe from gps_data_t to be near its friends in gps_fix_t.
+  Preliminary u-blox 9 support.
 
 3.18.1: 2018-10-19 (Gary E. Miller <gem@rellim.com>)
   Fix some installation issues.
