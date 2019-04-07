@@ -336,7 +336,7 @@ is first seen. Example: <filename>nmea2000://can0</filename>.
 the daemon has been retired in favor of the more general
 "tcp://".)</para>
 
-<para>Additionally, two serial device names have a side effect:
+<para>Additionally, two serial device names have a side effect:</para>
 <variablelist>
 <varlistentry>
 <term>/dev/ttyAMA0</term>
@@ -346,13 +346,16 @@ opening /dev/pps0 for RFC2783 1PPS data.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
-<term>Generic GPS device 0. Has the side effect of
-opening /dev/pps0 for RFC2783 1PPS data/</term>
+<term>/dev/gpsd0</term>
 <listitem>
-<para> </para>
+<para>Generic GPS device 0. Has the side effect of
+opening /dev/pps0 for RFC2783 1PPS data.</para>
 </listitem>
 </varlistentry>
 </variablelist>
+<para>
+Note, however, that if /dev/pps0 is the fake "ktimer" PPS, then /dev/pps1
+will be used instead.
 </para>
 
 <para>Internally, the daemon maintains a device pool holding the
