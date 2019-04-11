@@ -3147,9 +3147,14 @@ class ubx(object):
         m_data = bytearray([0x01, 0x04, rate])
         gps_model.gps_send(6, 1, m_data)
 
-        # UBX-NAV-SOL is ECEF. deprecated, use UBX-NAV-PVT instead?
-        m_data = bytearray([0x01, 0x06, rate])
-        gps_model.gps_send(6, 1, m_data)
+        if 27 > opts['protver']:
+            # UBX-NAV-SOL is ECEF. deprecated, gone in protver 27
+            m_data = bytearray([0x01, 0x06, rate])
+            gps_model.gps_send(6, 1, m_data)
+        else:
+            # UBX-NAV-PVT
+            m_data = bytearray([0x01, 0x07, rate])
+            gps_model.gps_send(6, 1, m_data)
 
         # UBX-NAV-TIMEGPS
         # Note: UTC may, or may not be UBX-NAV-TIMEGPS.
