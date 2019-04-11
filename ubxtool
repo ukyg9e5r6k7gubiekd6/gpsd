@@ -3174,9 +3174,10 @@ class ubx(object):
         else:
             rate_s = 0
 
-        # UBX-NAV-SBAS
-        m_data = bytearray([0x01, 0x32, rate_s])
-        gps_model.gps_send(6, 1, m_data)
+        if 27 > opts['protver']:
+            # UBX-NAV-SBAS, gone in protver 27
+            m_data = bytearray([0x01, 0x32, rate_s])
+            gps_model.gps_send(6, 1, m_data)
 
         # get Satellite Information
         if 15 > opts['protver']:
@@ -3192,9 +3193,10 @@ class ubx(object):
             m_data = bytearray([0x01, 0x35, rate_s])
             gps_model.gps_send(6, 1, m_data)
 
-            # UBX-NAV-SVINFO turn it off, if we can
-            m_data = bytearray([0x01, 0x30, 0])
-            gps_model.gps_send(6, 1, m_data)
+            if 27 > opts['protver']:
+                # UBX-NAV-SVINFO turn it off, if we can
+                m_data = bytearray([0x01, 0x30, 0])
+                gps_model.gps_send(6, 1, m_data)
 
         # UBX-NAV-EOE, end of epoch.
         # do not bother with EOE until gpsd works with it.
