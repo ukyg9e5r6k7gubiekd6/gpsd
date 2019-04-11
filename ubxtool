@@ -4008,8 +4008,9 @@ def usage():
           '       -?            print help\n'
           '\n'
           'D and E can be one of:' %
-          (PROG_NAME, opts['input_file_name'], opts['raw_file'],
-           opts['protver'], opts['input_speed'], opts['input_wait'],
+          (PROG_NAME, opts['input_file_name'],
+           opts['protver'], opts['raw_file'],
+           opts['input_speed'], opts['input_wait'],
            opts['verbosity'])
           )
 
