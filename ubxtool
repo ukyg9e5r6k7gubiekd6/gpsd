@@ -1651,11 +1651,12 @@ class ubx(object):
         if 36 > m_len:
             return "Bad Length %s" % m_len
 
-        u = struct.unpack_from('<HBBlLbBHHHHbbbbHHb', buf, 0)
+        u = struct.unpack_from('<HBBlLbBHHHHbbbbHHbBBBBB', buf, 0)
         s = (' mask %#x dynModel %u fixmode %d fixedAlt %d FixedAltVar %u\n'
              ' minElev %d drLimit %u pDop %u tDop %u pAcc %u tAcc %u\n'
              ' staticHoldThresh %u dgpsTimeOut %u cnoThreshNumSVs %u\n'
-             ' cnoThresh %u res %u staticHoldMacDist %u utcStandard %u' % u)
+             ' cnoThresh %u res %u staticHoldMaxDist %u utcStandard %u\n'
+             ' reserved %x %x %x %x %x' % u)
         return s
 
     def cfg_navx5(self, buf):
