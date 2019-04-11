@@ -2252,19 +2252,23 @@ class ubx(object):
         if 0 == m_len:
             return " Poll request"
 
-        if 92 > m_len:
+        # 84 bytes long in protver 14.
+        # 92 bytes long in protver 15.
+        if 84 > m_len:
             return " Bad Length %s" % m_len
 
-        u = struct.unpack_from('<LHBBBBBBLlBBBBllllLLlllllLLHbbbbbblhH',
-                               buf, 0)
+        u = struct.unpack_from('<LHBBBBBBLlBBBBllllLLlllllLLHHHH', buf, 0)
         s = (' iTOW %d ms, time %d/%d/%d %2d:%2d:%2d valid %#x\n'
              ' tAcc %d ns nano %d fixType %d flags %#x flags2 %#x\n'
-             ' numSV %d lon %.7f lat %.7f height %.3f\n'
-             ' hMSL %.3f hAcc %.3f' %
-             (u[0], u[1], u[2], u[3], u[4], u[5], u[6], u[7],
-              u[8], u[9], u[10], u[11], u[12],
-              u[13], u[14] * 10e-7, u[15] * 10e-7, u[16] / 1000,
-              u[17] / 1000, u[18] / 1000))
+             ' numSV %d lon %d lat %d height %d\n'
+             ' hMSL %d hAcc %d vAcc %d\n'
+             ' velN %d velE %d velD %d gSpeed %d headMot %d\n'
+             ' sAcc %d headAcc %d pDOP %d reserved1 %d %d %d' % u)
+
+        if 92 <= m_len:
+            # version 15
+            u = struct.unpack_from('<lhH', buf, 81)
+            s += ( '\n headVeh %d magDec %d magAcc %u' % u)
         return s
 
     def nav_sat(self, buf):
@@ -3147,8 +3151,8 @@ class ubx(object):
         m_data = bytearray([0x01, 0x04, rate])
         gps_model.gps_send(6, 1, m_data)
 
-        if 27 > opts['protver']:
-            # UBX-NAV-SOL is ECEF. deprecated, gone in protver 27
+        if 14 > opts['protver']:
+            # UBX-NAV-SOL is ECEF. deprecated in protver 14, gone in protver 27
             m_data = bytearray([0x01, 0x06, rate])
             gps_model.gps_send(6, 1, m_data)
         else:
