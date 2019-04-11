@@ -48,6 +48,7 @@ extern "C" {
  *       Added sep (estimated spherical error, 3D)
  *       Note: Some GPS call eph as epe, others call sep as epe
  *       Add gps_fix_t datum string, and qErr
+ *       enlarge subtype to hold ZED-F9 string
  */
 #define GPSD_API_MAJOR_VERSION	8	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -2005,7 +2006,7 @@ struct devconfig_t {
 #define SEEN_RTCM3	0x04
 #define SEEN_AIS 	0x08
     char driver[64];
-    char subtype[96];
+    char subtype[128];                  /* 96 too small for ZED-F9 */
     /* a buffer to hold data to output to GPS */
     char hexdata[HEXDATA_MAX];
     double activated;
