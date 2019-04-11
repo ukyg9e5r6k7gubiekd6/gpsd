@@ -57,6 +57,7 @@ extern "C" {
  * 3.14 Added RAW message class.
  *      Add cfg_stage and cfg_step, for initialization
  *      Add oldfix2 for better oldfix
+ *      Make subtype longer
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -515,7 +516,8 @@ struct gps_device_t {
     struct gps_lexer_t lexer;
     int badcount;
     int subframe_count;
-    char subtype[96];			/* firmware version or subtype ID */
+    /* firmware version or subtype ID, 96 too small for ZED-F9 */
+    char subtype[128];
     time_t opentime;
     time_t releasetime;
     bool zerokill;
