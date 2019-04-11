@@ -2017,7 +2017,24 @@ class ubx(object):
             # we are at least protver 27
             if 27 > opts['protver']:
                 opts['protver'] = 27
-            # FIXME: decode answers
+
+            # duplicated in cfg_valset()
+            m_len -= 4
+            i = 4
+            while 0 < m_len:
+                u = struct.unpack_from('<L', buf, i)
+                m_len -= 4
+                i += 4
+                item = self.cfg_by_key(u[0])
+                cfg_type = self.item_to_type(item)
+
+                size = cfg_type[0]
+                frmat = cfg_type[1]
+                flavor = cfg_type[2]
+                v = struct.unpack_from(frmat, buf, i)
+                s += ('\n    item: %s/%#x val: %s' % (item[0], u[0], v[0]))
+                m_len -= size
+                i += size
 
         return s
 
@@ -2034,6 +2051,8 @@ class ubx(object):
         s = ' version: %u layer: %#x transaction %#x reserved: %u\n' % u
         s += '  layers: %s, %s' % (self._layers(u[1]),
                                    self._transaction(u[2]))
+
+        # duplicated in cfg_valset()
         m_len -= 4
         i = 4
         while 0 < m_len:
@@ -2268,7 +2287,7 @@ class ubx(object):
         if 92 <= m_len:
             # version 15
             u = struct.unpack_from('<lhH', buf, 81)
-            s += ( '\n headVeh %d magDec %d magAcc %u' % u)
+            s += ('\n headVeh %d magDec %d magAcc %u' % u)
         return s
 
     def nav_sat(self, buf):
