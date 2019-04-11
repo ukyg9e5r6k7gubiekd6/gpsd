@@ -1895,7 +1895,7 @@ class ubx(object):
         else:
             s += 'falling, '
         gridToGps = (u[10] >> 7) & 0x0f
-        gridToGpsDec = ('UTC', 'GPS', 'Glonass', 'BeiDou')
+        gridToGpsDec = ('UTC', 'GPS', 'Glonass', 'BeiDou', 'Galileo')
         syncMode = (u[10] >> 11) & 0x03
         s += "gridToGps %s, syncMode %d " % (gridToGpsDec[gridToGps], syncMode)
 
