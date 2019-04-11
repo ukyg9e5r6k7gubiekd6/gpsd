@@ -1599,9 +1599,9 @@ class ubx(object):
             s += ("\n gnssId: %s TrkCh: %d maxTrCh: %d reserved: %d"
                   " Flags: %#02x %02x %02x %02x" %
                   (s_sat, u[1], u[2], u[3], u[7], u[6], u[5], u[4]))
+            s += '\n  '
             if sat in (0, 1):
                 # gps, sbas
-                s += '\n  '
                 if u[6] & 0x1:
                     s += '  L1C/A'
                 if u[6] & 0x10:
@@ -1609,7 +1609,7 @@ class ubx(object):
             if 2 == sat:
                 # Galileo
                 if u[6] & 0x1:
-                    s += '  E1OS'
+                    s += '  E1'    # formerly E1OS
                 if u[6] & 0x20:
                     s += '  E5b'
             if 3 == sat:
@@ -1633,7 +1633,7 @@ class ubx(object):
             if 6 == sat:
                 # Glonass
                 if u[6] & 0x1:
-                    s += '  L1OF'
+                    s += '  L1'    # formerly L1OF
                 if u[6] & 0x10:
                     s += '  L2'
             if u[4] & 0x01:
