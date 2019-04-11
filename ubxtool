@@ -1586,7 +1586,7 @@ class ubx(object):
             return "Bad Length %d" % m_len
 
         u = struct.unpack_from('<BBBB', buf, 0)
-        s = " Ver: %u ChHw; %x ChUse: %x, Blocks: %x" % u
+        s = " Ver: %u ChHw; %d ChUse: %d, Blocks: %d" % u
         num_blocks = u[3]
         i = 0
         while i < num_blocks:
@@ -1596,37 +1596,46 @@ class ubx(object):
                 s_sat = self.gnss_id[u[0]]
             else:
                 s_sat = u[0]
-            s += ("\n gnssId: %s TrkCh: %d maxTrCh: %d,"
+            s += ("\n gnssId: %s TrkCh: %d maxTrCh: %d reserved: %d"
                   " Flags: %#02x %02x %02x %02x" %
-                  (s_sat, u[1], u[2], u[7], u[6], u[5], u[4]))
+                  (s_sat, u[1], u[2], u[3], u[7], u[6], u[5], u[4]))
             if sat in (0, 1):
                 # gps, sbas
+                s += '\n  '
                 if u[6] & 0x1:
-                    s += '\n  L1C/A'
+                    s += '  L1C/A'
+                if u[6] & 0x10:
+                    s += '  L2C'
             if 2 == sat:
                 # Galileo
                 if u[6] & 0x1:
-                    s += '\n  E1OS'
+                    s += '  E1OS'
+                if u[6] & 0x20:
+                    s += '  E5b'
             if 3 == sat:
                 # BeiDou
                 if u[6] & 0x1:
-                    s += '\n  B1I'
+                    s += '  B1I'
+                if u[6] & 0x10:
+                    s += '  B2I'
             if 4 == sat:
                 # IMES
                 if u[6] & 0x1:
-                    s += '\n  L1'
+                    s += '  L1'
             if 5 == sat:
                 # QZSS
-                if u[6] & 0x5:
-                    s += '\n'
-                    if u[6] & 0x1:
-                        s += '  L1C/A'
-                    if u[6] & 0x4:
-                        s += '  L1SAIF'
+                if u[6] & 0x1:
+                    s += '  L1C/A'
+                if u[6] & 0x4:
+                    s += '  L1S'
+                if u[6] & 0x10:
+                    s += '  L2C'
             if 6 == sat:
                 # Glonass
                 if u[6] & 0x1:
-                    s += '\n  L1OF'
+                    s += '  L1OF'
+                if u[6] & 0x10:
+                    s += '  L2'
             if u[4] & 0x01:
                 s += ' enabled'
 
