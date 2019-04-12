@@ -1215,6 +1215,17 @@ static gps_mask_t processGSV(int count, char *field[],
      * 46          Signal-to-noise ratio in decibels
      * <repeat for up to 4 satellites per sentence>
      *
+     * NMEA 4.10:
+     * $GAGSV,3,1,09,02,00,179,,04,09,321,,07,11,134,11,11,10,227,,7*7F
+     * after the satellite block, before the checksum, new field:
+     * 7           Signal ID
+     *             1 = GPS L1C/A, BeiDou B1I D1, BeiDou B1I D2, GLONASS L1 OF
+     *             2 = Galileo E5 bl, E5 bQ
+     *             3 = BeiDou B2I D1, B2I D2
+     *             5 = GPS L2 CM
+     *             6 = GPS L2 CL
+     *             7 = Galileo E1C, E1B
+     *
      * Can occur with talker IDs:
      *   BD (Beidou),
      *   GA (Galileo),
