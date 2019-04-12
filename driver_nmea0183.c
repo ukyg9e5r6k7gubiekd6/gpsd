@@ -1052,6 +1052,7 @@ static gps_mask_t processGSA(int count, char *field[],
     /*
      * eg1. $GPGSA,A,3,,,,,,16,18,,22,24,,,3.6,2.1,2.2*3C
      * eg2. $GPGSA,A,3,19,28,14,18,27,22,31,39,,,,,1.7,1.0,1.3*35
+     * NMEA 4.10: $GNGSA,A,3,13,12,22,19,08,21,,,,,,,1.05,0.64,0.83,4*0B
      * 1    = Mode:
      *         M=Manual, forced to operate in 2D or 3D
      *         A=Automatic, 3D/2D
@@ -1063,6 +1064,11 @@ static gps_mask_t processGSA(int count, char *field[],
      * 15   = PDOP
      * 16   = HDOP
      * 17   = VDOP
+     * 18   - NMEA defined, u-blox extended, GNSS System ID, NMEA 4.10+
+     *             1 = GPS L1C/A, L2CL, L2CM
+     *             2 = GLONASS L1 OF, L2 OF
+     *             3 = Galileo E1C, E1B, E5 bl, E5 bQ
+     *             4 = BeiDou B1I D1, B1I D2, B2I D1, B2I D12
      *
      * Not all documentation specifies the number of PRN fields, it
      * may be variable.  Most doc that specifies says 12 PRNs.
@@ -1085,6 +1091,12 @@ static gps_mask_t processGSA(int count, char *field[],
      * $GNGSA,A,3,31,26,21,,,,,,,,,,3.77,2.55,2.77*1A
      * $GNGSA,A,3,75,86,87,,,,,,,,,,3.77,2.55,2.77*1C
      * seems like the first is GNSS and the second GLONASS
+     *
+     * u-blox 9 outputs one per GNSS each cycle:
+     * $GNGSA,A,3,13,16,21,15,10,29,27,20,,,,,1.05,0.64,0.83,1*03
+     * $GNGSA,A,3,82,66,81,,,,,,,,,,1.05,0.64,0.83,2*0C
+     * $GNGSA,A,3,07,12,33,,,,,,,,,,1.05,0.64,0.83,3*0A
+     * $GNGSA,A,3,13,12,22,19,08,21,,,,,,,1.05,0.64,0.83,4*0B
      */
     gps_mask_t mask = ONLINE_SET;
     char last_last_gsa_talker = session->nmea.last_gsa_talker;
@@ -1218,7 +1230,7 @@ static gps_mask_t processGSV(int count, char *field[],
      * NMEA 4.10:
      * $GAGSV,3,1,09,02,00,179,,04,09,321,,07,11,134,11,11,10,227,,7*7F
      * after the satellite block, before the checksum, new field:
-     * 7           Signal ID
+     * 7           NMEA Signal ID
      *             1 = GPS L1C/A, BeiDou B1I D1, BeiDou B1I D2, GLONASS L1 OF
      *             2 = Galileo E5 bl, E5 bQ
      *             3 = BeiDou B2I D1, B2I D2
