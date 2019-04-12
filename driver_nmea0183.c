@@ -971,28 +971,44 @@ static int nmeaid_to_prn(char *talker, int satnum, unsigned char *gnssid,
     *svid = 0;     /* default to unnknown svid */
     if (0 != satnum && 32 >= satnum) {
         *svid = satnum;
-	if (talker[0] == 'B' && talker[1] == 'D') {
-            /* map Beidou IDs */
-	    satnum += 200;
-            *gnssid = 3;
-	} else if (talker[0] == 'G' && talker[1] == 'B') {
-            /* map Beidou IDs */
-            *gnssid = 3;
-	    satnum += 200;
-	} else if (talker[0] == 'G' && talker[1] == 'L') {
-	    /* GLONASS GL doesn't seem to do this, better safe than sorry */
-	    satnum += 64;
-            *gnssid = 6;
-	} else if (talker[0] == 'Q' && talker[1] == 'Z') {
-            /* QZSS */
-	    satnum += 192;
-            *gnssid = 5;
-	} else if (talker[0] == 'G' && talker[1] == 'A') {
-            /* Galileo */
-	    satnum += 300; /* Used by u-blox at least */
-            *gnssid = 2;
+	switch (talker[0]) {
+        case 'G':
+	    if (talker[1] == 'A') {
+		/* Galileo */
+		satnum += 300; /* Used by u-blox at least */
+		*gnssid = 2;
+	    } else if (talker[1] == 'B') {
+		/* map Beidou IDs */
+		*gnssid = 3;
+		satnum += 200;
+	    } else if (talker[1] == 'L') {
+		/* GLONASS GL doesn't seem to do this, better safe than sorry */
+		satnum += 64;
+		*gnssid = 6;
+	    } else if (talker[1] == 'N') {
+                /* all of them, but only GPS is 0 < PRN < 33 */
+	    } else if (talker[1] == 'P') {
+                /* GPS,SBAS,QZSS, but only GPS is 0 < PRN < 33 */
+            } /* else ?? */
+            break;
+	case 'B':
+            if (talker[1] == 'D') {
+		/* map Beidou IDs */
+		satnum += 200;
+		*gnssid = 3;
+            } /* else ?? */
+            break;
+	case 'Q':
+            if (talker[1] == 'Z') {
+		/* QZSS */
+		satnum += 192;
+		*gnssid = 5;
+            } /* else ? */
+            break;
+        default:
+            /* huh? */
+            break;
         }
-        /* what about $GN? */
     } else if ( 33 <= satnum && 64 >= satnum) {
         // NMEA-ID (33..64) to SBAS PRN 120-151.
         /* SBAS */
