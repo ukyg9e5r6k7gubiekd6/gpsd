@@ -23,6 +23,7 @@ typedef enum {
     UBX_CLASS_LOG = 0x21,     /**< Log */
     UBX_CLASS_SEC = 0x27,     /**< Security */
     UBX_CLASS_HNR = 0x28,     /**< High Rate Nav Results  */
+    UBX_CLASS_NMEA = 0xf0,    /**< NMEA, for configuring */
 } ubx_classes_t;
 
 #define UBX_MSGID(cls_, id_) (((cls_)<<8)|(id_))
@@ -232,7 +233,9 @@ typedef enum {
 
 #define UBX_NAV_PVT_VALID_DATE      0x01
 #define UBX_NAV_PVT_VALID_TIME      0x02
+#define UBX_NAV_PVT_VALID_RESL      0x04
 #define UBX_NAV_PVT_VALID_DATE_TIME (UBX_NAV_PVT_VALID_DATE | UBX_NAV_PVT_VALID_TIME)
+#define UBX_NAV_PVT_VALID_MAG       0x08
 
 #define UBX_NAV_PVT_FLAG_GPS_FIX_OK 0x01
 #define UBX_NAV_PVT_FLAG_DGPS       0x02
