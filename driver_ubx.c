@@ -187,7 +187,8 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     int *mode = &session->newdata.mode;
     gps_mask_t mask = 0;
 
-    if (92 > data_len) {
+    /* u-blox 6 and 7 are 84 bytes, u-blox 8 and 9 are 92 bytes  */
+    if (84 > data_len) {
 	gpsd_log(&session->context->errout, LOG_WARN,
 		 "Runt NAV-PVT message, payload len %zd", data_len);
 	return 0;
@@ -283,6 +284,8 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     session->newdata.altitude = 1e-3 * (int32_t)getles32(buf, 32);
     session->newdata.speed = 1e-3 * (int32_t)getles32(buf, 60);
     session->newdata.track = 1e-5 * (int32_t)getles32(buf, 64);
+    mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET;
+
     /* Height Accuracy estimate, unknown details */
     hacc = (double)(getles32(buf, 40) / 1000.0);
     /* Velocity Accuracy estimate, unknown details */
@@ -295,7 +298,8 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     session->newdata.eps = sacc;
     mask |= HERR_SET | SPEEDERR_SET | VERR_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
-	 "NAV_PVT: flags=%02x time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
+	 "NAV_PVT: flags=%02x time=%.2f lat=%.2f lon=%.2f alt=%.2f\n"
+         "  track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
 	 flags,
 	 session->newdata.time,
 	 session->newdata.latitude,
@@ -307,6 +311,15 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
 	 session->newdata.mode,
 	 session->gpsdata.status,
 	 session->gpsdata.satellites_used);
+    if (92 <= data_len) {
+        /* u-blox 8 and 9 extended */
+        double headVeh = (double)(getles32(buf, 84) * 1e-5);
+        double magDec = (double)(getles16(buf, 88) * 1e-2);
+        double magAcc = (double)(getleu16(buf, 90) * 1e-2);
+	gpsd_log(&session->context->errout, LOG_DATA,
+	     "  headVeh %.5f magDec %.2f magAcc %.2f\n",
+	     headVeh, magDec, magAcc);
+    }
     return mask;
 }
 
