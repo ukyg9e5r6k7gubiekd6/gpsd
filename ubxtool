@@ -2684,6 +2684,33 @@ class ubx(object):
                0x61: {'str': 'EOE', 'dec': nav_eoe, 'name': 'UBX-NAV-EOE'},
                }
 
+    def rxm_measx(self, buf):
+        "UBX-RXM-RAW decode"
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 44 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBBLLLLLHHHHHBBLL', buf, 0)
+        s = (' version %u reserved1 %u %u %u gpsTOW %u gloTOW %u\n'
+             ' bdsTOW %u reserved2 %u qzssTOW %u gpsTOWacc %u\n'
+             ' gloTOWacc %u bdsTOWacc %u reserved3 %u qzssTOWacc %u\n'
+             ' numSV %u flags %#x reserved4 %u %u' % u)
+
+        m_len -= 44
+        i = 0
+        while 0 < m_len:
+            u = struct.unpack_from('<BBBBllHHLBBH', buf, 44 + i * 24)
+            s += ('\n  gnssID %u svId %u cNo %u mpathIndic %u DopplerMS %d\n'
+                  '    dopplerHz %d wholeChips %u fracChips %u codephase %u\n'
+                  '    intCodePhase %u pseudoRangeRMSErr %u reserved5 %u' % u)
+            m_len -= 24
+            i += 1
+
+        return s
+
     def rxm_raw(self, buf):
         "UBX-RXM-RAW decode"
         m_len = len(buf)
@@ -2799,7 +2826,8 @@ class ubx(object):
                       'name': 'UBX-RXM-SFRB'},
                0x13: {'str': 'SFRBX', 'dec': rxm_sfrbx,
                       'name': 'UBX-RXM-SFRBX'},
-               0x14: {'str': 'MEASX', 'name': 'UBX-RXM-MEASX'},
+               0x14: {'str': 'MEASX', 'dec': rxm_measx,
+                      'name': 'UBX-RXM-MEASX'},
                0x15: {'str': 'RAWX', 'dec': rxm_rawx, 'name': 'UBX-RXM-RAWX'},
                0x20: {'str': 'SVSI', 'dec': rxm_svsi, 'name': 'UBX-RXM-SVSI'},
                0x32: {'str': 'RTCM', 'name': 'UBX-RXM-RTCM'},
