@@ -2684,6 +2684,28 @@ class ubx(object):
                0x61: {'str': 'EOE', 'dec': nav_eoe, 'name': 'UBX-NAV-EOE'},
                }
 
+    # used for NMEA rate config
+    nmea_ids = {0: {'str': 'GGA'},
+                1: {'str': 'GLL'},
+                2: {'str': 'GSA'},
+                3: {'str': 'GSV'},
+                4: {'str': 'RMC'},
+                5: {'str': 'VTG'},
+                6: {'str': 'GRS'},
+                7: {'str': 'GST'},
+                8: {'str': 'ZDA'},
+                9: {'str': 'GBS'},
+                0x0a: {'str': 'DTM'},
+                0x0d: {'str': 'GNS'},
+                0x0f: {'str': 'VLW'},
+                0x40: {'str': 'GPQ'},
+                0x41: {'str': 'TXT'},
+                0x42: {'str': 'GNQ'},
+                0x43: {'str': 'GLQ'},
+                0x44: {'str': 'GBQ'},
+                0x45: {'str': 'GAQ'},
+                }
+
     def rxm_measx(self, buf):
         "UBX-RXM-RAW decode"
         m_len = len(buf)
@@ -2911,9 +2933,9 @@ class ubx(object):
         0x0D: {'str': 'TIM', 'ids': tim_ids},
         0x10: {'str': 'ESF'},
         0x13: {'str': 'MGA'},
-        0x21: {'str': 'LOG'}
-        0x27: {'str': 'SEC'}
-        0xf0: {'str': 'NMEA'}
+        0x21: {'str': 'LOG'},
+        0x27: {'str': 'SEC'},
+        0xf0: {'str': 'NMEA', 'ids': nmea_ids},
     }
 
     def class_id_s(self, m_class, m_id):
