@@ -1275,6 +1275,8 @@ static gps_mask_t processGSV(int count, char *field[],
      */
 
     int n, fldnum;
+    int gnssid = 0;
+
     if (count <= 3) {
 	gpsd_log(&session->context->errout, LOG_WARN,
 		 "malformed GPGSV - fieldcount %d <= 3\n",
@@ -1287,10 +1289,22 @@ static gps_mask_t processGSV(int count, char *field[],
      * This check used to be !=0, but we have loosen it a little to let by
      * NMEA 4.1 GSVs with an extra signal-ID field at the end.
      */
-    if (count % 4 > 1) {
+    switch (count % 4) {
+    case 0:
+	/* normal, pre-NMEA 4.10 */
+	break;
+    case 1:
+	/* NMEA 4.10, get the signal ID */
+	gnssid = field[count - 1][0];
+        if (0 == gnssid) gnssid = '0';
+	gpsd_log(&session->context->errout, LOG_DATA,
+		 "GPGSV fieldcount %d %% 4 == 1, gnssid %c (%#x)\n", count,
+                 gnssid, gnssid);
+	break;
+    default:
+	/* bad count */
 	gpsd_log(&session->context->errout, LOG_WARN,
-		 "malformed GPGSV - fieldcount %d %% 4 != 0\n",
-		 count);
+		 "malformed GPGSV - fieldcount %d %% 4 != 0\n", count);
 	gpsd_zero_satellites(&session->gpsdata);
 	session->gpsdata.satellites_visible = 0;
 	return ONLINE_SET;
@@ -1309,6 +1323,7 @@ static gps_mask_t processGSV(int count, char *field[],
 	 */
 	if (session->nmea.last_gsv_talker == '\0'
             || GSV_TALKER == session->nmea.last_gsv_talker) {
+            /* FIXME: this is zeroing too often */
 	    gpsd_zero_satellites(&session->gpsdata);
 	}
 	session->nmea.last_gsv_talker = GSV_TALKER;
