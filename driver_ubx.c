@@ -328,7 +328,8 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
 /**
  * Navigation solution message: UBX-NAV-SOL
  *
- * Not in u-blox 9
+ * UBX-NAV-SOL deprecated in u-blox 6, gone in u-blox 9.
+ * Use UBX-NAV-PVT instead
  */
 static gps_mask_t
 ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
@@ -414,7 +415,8 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 
     mask |= MODE_SET | STATUS_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "UBX_NAV_SOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
+	     "UBX_NAV_SOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f\n"
+             "  speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
 	     session->newdata.time,
 	     session->newdata.latitude,
 	     session->newdata.longitude,
@@ -1391,6 +1393,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     case UBX_NAV_PVT:
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_PVT\n");
 	mask = ubx_msg_nav_pvt(session, &buf[UBX_PREFIX_LEN], data_len);
+	mask |= REPORT_IS;
         break;
     case UBX_NAV_RELPOSNED:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_RELPOSNED\n");
@@ -1407,7 +1410,8 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	ubx_msg_sbas(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_SOL:
-        /* UBX-NAV-SOL deprecated, use UBX-NAV-PVT instead */
+        /* UBX-NAV-SOL deprecated in u-blox 6, gone in u-blox 9.
+         * Use UBX-NAV-PVT instead */
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_SOL\n");
 	mask = ubx_msg_nav_sol(session, &buf[UBX_PREFIX_LEN], data_len)
 	     | REPORT_IS;
@@ -1539,6 +1543,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 		 "UBX: unknown packet id 0x%04hx (length %zd)\n",
 		 msgid, len);
     }
+    /* FIXME: need cycle detection here... */
     return mask | ONLINE_SET;
 }
 
@@ -1773,7 +1778,8 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[2] = 0x00;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 
-        /* UBX-NAV-SOL deprecated, use UBX-NAV-PVT instead */
+        /* UBX-NAV-SOL deprecated in u-blox 6, gone in u-blox 9.
+         * Use UBX-NAV-PVT instead */
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x06;		/* msg id  = NAV-SOL */
 	msg[2] = 0x00;		/* rate */
@@ -1846,7 +1852,8 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[2] = 0x01;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 
-        /* UBX-NAV-SOL deprecated, use UBX-NAV-PVT instead */
+        /* UBX-NAV-SOL deprecated in u-blox 6, gone in u-blox 9.
+         * Use UBX-NAV-PVT instead */
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x06;		/* msg id  = NAV-SOL */
 	msg[2] = 0x01;		/* rate */
