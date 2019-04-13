@@ -58,7 +58,7 @@ extern "C" {
  *      Add cfg_stage and cfg_step, for initialization
  *      Add oldfix2 for better oldfix
  *      Make subtype longer
- *      Add ubx.protver, ubx.end_class, ubx.end_id to gps_device_t
+ *      Add ubx.protver, ubx.end_class and more to gps_device_t.ubx
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -701,8 +701,8 @@ struct gps_device_t {
 	    unsigned char port_id;
 	    unsigned char sbas_in_use;
 	    unsigned char protver;              /* u-blox protocol version */
-	    unsigned char end_class;            /* cycle ender class */
-	    unsigned char end_id;               /* cycle ender ID */
+	    unsigned char last_msgid;           /* last class/ID */
+	    unsigned char end_msgid;            /* cycle ender class/ID */
     	} ubx;
 #endif /* UBLOX_ENABLE */
 #ifdef NAVCOM_ENABLE

@@ -1553,7 +1553,20 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 		 "UBX: unknown packet id 0x%04hx (length %zd)\n",
 		 msgid, len);
     }
-    /* FIXME: need cycle detection here... */
+    /* end of cycle ? */
+    if (session->driver.ubx.end_msgid == msgid) {
+        /* end of cycle, report it */
+        mask |= REPORT_IS;
+    }
+    /* start of cycle ? */
+    if (TIME_SET & mask) {
+        /* this sentence has a good time */
+	if (session->newdata.time > session->lastfix.time) {
+            /* time advanced, save cycle ender */
+	    session->driver.ubx.end_msgid = session->driver.ubx.last_msgid;
+        }
+	session->driver.ubx.last_msgid = msgid;
+    }
     return mask | ONLINE_SET;
 }
 
