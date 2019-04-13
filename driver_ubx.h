@@ -239,5 +239,6 @@ typedef enum {
 
 #define UBX_NAV_PVT_FLAG_GPS_FIX_OK 0x01
 #define UBX_NAV_PVT_FLAG_DGPS       0x02
+#define UBX_NAV_PVT_FLAG_HDG_OK     0x20
 
 #endif /* _GPSD_UBX_H_ */

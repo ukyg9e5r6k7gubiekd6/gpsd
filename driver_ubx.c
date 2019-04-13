@@ -182,7 +182,6 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     uint8_t flags;
     uint8_t navmode;
     struct tm unpacked_date;
-    double hacc, vacc, sacc;
     int *status = &session->gpsdata.status;
     int *mode = &session->newdata.mode;
     gps_mask_t mask = 0;
@@ -193,7 +192,6 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
 		 "Runt NAV-PVT message, payload len %zd", data_len);
 	return 0;
     }
-
 
     valid = (unsigned int)getub(buf, 11);
     navmode = (unsigned char)getub(buf, 20);
@@ -276,7 +274,7 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
 	subseconds = 1e-9 * (int32_t)getles32(buf, 16);
 	session->newdata.time = \
 	    (timestamp_t)mkgmtime(&unpacked_date) + subseconds;
-	mask |= TIME_SET | NTPTIME_IS;
+	mask |= TIME_SET | NTPTIME_IS | GOODTIME_IS;
     }
 
     session->newdata.longitude = 1e-7 * (int32_t)getles32(buf, 24);
@@ -287,15 +285,13 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET;
 
     /* Height Accuracy estimate, unknown details */
-    hacc = (double)(getles32(buf, 40) / 1000.0);
+    session->newdata.eph = (double)(getles32(buf, 40) / 1000.0);
     /* Velocity Accuracy estimate, unknown details */
-    vacc = (double)(getles32(buf, 44) / 1000.0);
+    session->newdata.epv = (double)(getles32(buf, 44) / 1000.0);
     /* Speed Accuracy estimate, unknown details */
-    sacc = (double)(getles32(buf, 48) / 1000.0);
+    session->newdata.eps = (double)(getles32(buf, 48) / 1000.0);
     /* let gpsd_error_model() do the rest */
-    session->newdata.eph = hacc;
-    session->newdata.epv = vacc;
-    session->newdata.eps = sacc;
+
     mask |= HERR_SET | SPEEDERR_SET | VERR_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
 	 "NAV_PVT: flags=%02x time=%.2f lat=%.2f lon=%.2f alt=%.2f\n"
@@ -313,12 +309,18 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
 	 session->gpsdata.satellites_used);
     if (92 <= data_len) {
         /* u-blox 8 and 9 extended */
-        double headVeh = (double)(getles32(buf, 84) * 1e-5);
-        double magDec = (double)(getles16(buf, 88) * 1e-2);
-        double magAcc = (double)(getleu16(buf, 90) * 1e-2);
+        double magDec = NAN;
+        double magAcc = NAN;
+        if (flags & UBX_NAV_PVT_FLAG_HDG_OK) {
+	    session->newdata.track = (double)(getles32(buf, 84) * 1e-5);
+        }
+	if (valid & UBX_NAV_PVT_VALID_MAG) {
+	    magDec = (double)(getles16(buf, 88) * 1e-2);
+	    magAcc = (double)(getleu16(buf, 90) * 1e-2);
+        }
 	gpsd_log(&session->context->errout, LOG_DATA,
 	     "  headVeh %.5f magDec %.2f magAcc %.2f\n",
-	     headVeh, magDec, magAcc);
+	     session->newdata.track, magDec, magAcc);
     }
     return mask;
 }
