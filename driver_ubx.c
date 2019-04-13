@@ -1625,20 +1625,9 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
     if (session->context->readonly)
 	return;
     else if (event == event_identified) {
-	unsigned char msg[32];
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX identified\n");
 
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX configure\n");
-
-	msg[0] = 0x03;		/* SBAS mode enabled, accept testbed mode */
-	msg[1] = 0x07;		/* SBAS usage: range, differential corrections and integrity */
-	msg[2] = 0x03;		/* use the maximum search range: 3 channels */
-	msg[3] = 0x00;		/* PRN numbers to search for all set to 0 => auto scan */
-	msg[4] = 0x00;
-	msg[5] = 0x00;
-	msg[6] = 0x00;
-	msg[7] = 0x00;
-        /* UBX-CFG-SBAS */
-	(void)ubx_write(session, 0x06u, 0x16, msg, 8);
+        /* no longer set UBX-CFG-SBAS here, u-blox 9 does not have it */
 
 #ifdef RECONFIGURE_ENABLE
 	/*
