@@ -19,12 +19,14 @@
  *
  */
 
-#include <stdio.h>
-#include <stdbool.h>
 #include <assert.h>
-#include <string.h>
 #include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+
 
 #include "gpsd.h"
 #if defined(UBLOX_ENABLE) && defined(BINARY_ENABLE)
@@ -102,13 +104,13 @@ ubx_msg_mon_ver(struct gps_device_t *session, unsigned char *buf,
 {
     size_t n = 0;	/* extended info counter */
     char obuf[128];     /* temp version string buffer */
+    char *cptr;
 
     if (40 > data_len) {
 	gpsd_log(&session->context->errout, LOG_WARN,
 		 "Runt MON-VER message, payload len %zd", data_len);
 	return;
     }
-
 
     /* save SW and HW Version as subtype */
     (void)snprintf(obuf, sizeof(obuf),
@@ -130,6 +132,14 @@ ubx_msg_mon_ver(struct gps_device_t *session, unsigned char *buf,
     }
     /* save what we can */
     (void)strlcpy(session->subtype, obuf, sizeof(session->subtype));
+    /* find PROTVER= */
+    cptr = strstr(session->subtype, "PROTVER=");
+    if (NULL != cptr) {
+        int protver = atoi(cptr + 8);
+        if (9 < protver) {
+	    session->driver.ubx.protver = protver;
+        }
+    }
 
     /* output SW and HW Version at LOG_INFO */
     gpsd_log(&session->context->errout, LOG_INF,
