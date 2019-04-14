@@ -137,6 +137,7 @@ ubx_msg_mon_ver(struct gps_device_t *session, unsigned char *buf,
     if (NULL != cptr) {
         int protver = atoi(cptr + 8);
         if (9 < protver) {
+            /* protver 10, u-blox 5, is the oldest we know */
 	    session->driver.ubx.protver = protver;
         }
     }
@@ -830,7 +831,7 @@ ubx_msg_nav_sat(struct gps_device_t *session, unsigned char *buf,
 
 /**
  * GPS Satellite Info -- deprecated - UBX-NAV-SVINFO
- * Not in u-blox 9
+ * Not in u-blox 9, use UBX-NAV-SAT instead
  */
 static gps_mask_t
 ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
@@ -1830,19 +1831,32 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 
         /* UBX-NAV-SOL deprecated in u-blox 6, gone in u-blox 9.
-         * Use UBX-NAV-PVT instead */
+         * UBX-NAV-PVT for later models.  Turn both off */
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x06;		/* msg id  = NAV-SOL */
 	msg[2] = 0x00;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x07;		/* msg id  = NAV-PVT */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x20;		/* msg id  = UBX_NAV_TIMEGPS */
 	msg[2] = 0x00;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
+        /* NAV-SVINFO became NAV-SAT */
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x30;		/* msg id  = NAV-SVINFO */
 	msg[2] = 0x00;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x35;		/* msg id  = NAV-SAT */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x32;		/* msg id  = NAV-SBAS */
 	msg[2] = 0x00;		/* rate */
@@ -1904,24 +1918,73 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 
         /* UBX-NAV-SOL deprecated in u-blox 6, gone in u-blox 9.
-         * Use UBX-NAV-PVT instead */
+         * Use UBX-NAV-PVT after u-blox 7 */
+	if (10 > session->driver.ubx.protver) {
+            /* unknown version, enable both */
+	    msg[0] = 0x01;		/* class */
+	    msg[1] = 0x06;		/* msg id  = NAV-SOL */
+	    msg[2] = 0x01;		/* rate */
+	    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	    msg[0] = 0x01;		/* class */
+	    msg[1] = 0x07;		/* msg id  = NAV-PVT */
+	    msg[2] = 0x01;		/* rate */
+	    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
+        } else if (15 > session->driver.ubx.protver) {
+            /* before u-blox 8, just NAV-SOL */
+            /* do not do both to avoid NACKs */
+	    msg[0] = 0x01;		/* class */
+	    msg[1] = 0x06;		/* msg id  = NAV-SOL */
+	    msg[2] = 0x01;		/* rate */
+	    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
+        } else {
+            /* u-blox 8 or later */
+	    msg[0] = 0x01;		/* class */
+	    msg[1] = 0x07;		/* msg id  = NAV-PVT */
+	    msg[2] = 0x01;		/* rate */
+	    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
+        }
+
+        /* UBX-NAV-TIMEGPS is a great cycle ender */
 	msg[0] = 0x01;		/* class */
-	msg[1] = 0x06;		/* msg id  = NAV-SOL */
+	msg[1] = 0x20;		/* msg id  = UBX-NAV-TIMEGPS */
 	msg[2] = 0x01;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 
-	msg[0] = 0x01;		/* class */
-	msg[1] = 0x20;		/* msg id  = UBX_NAV_TIMEGPS */
-	msg[2] = 0x01;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-	msg[0] = 0x01;		/* class */
-	msg[1] = 0x30;		/* msg id  = NAV-SVINFO */
-	msg[2] = 0x0a;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
-	msg[0] = 0x01;		/* class */
-	msg[1] = 0x32;		/* msg id  = NAV-SBAS */
-	msg[2] = 0x0a;		/* rate */
-	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+        /* UBX-NAV-SVINFO deprecated in u-blox 8, gone in u-blox 9.
+         * Use UBX-NAV-SAT after u-blox 7 */
+	if (10 > session->driver.ubx.protver) {
+            /* unknown version, enable both */
+	    msg[0] = 0x01;		/* class */
+	    msg[1] = 0x30;		/* msg id  = NAV-SVINFO */
+	    msg[2] = 0x0a;		/* rate */
+	    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
+	    msg[0] = 0x01;		/* class */
+	    msg[1] = 0x35;		/* msg id  = NAV-SAT */
+	    msg[2] = 0x0a;		/* rate */
+	    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
+        } else if (15 > session->driver.ubx.protver) {
+            /* before u-blox 8, just NAV-SVINFO */
+            /* do not do both to avoid NACKs */
+	    msg[0] = 0x01;		/* class */
+	    msg[1] = 0x30;		/* msg id  = NAV-SVINFO */
+	    msg[2] = 0x0a;		/* rate */
+	    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
+        } else {
+            /* u-blox 8 or later */
+	    msg[0] = 0x01;		/* class */
+	    msg[1] = 0x35;		/* msg id  = NAV-SAT */
+	    msg[2] = 0x0a;		/* rate */
+	    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
+        }
+
+	if (24 > session->driver.ubx.protver) {
+            /* Gone after u-blox 8 */
+	    msg[0] = 0x01;		/* class */
+	    msg[1] = 0x32;		/* msg id  = NAV-SBAS */
+	    msg[2] = 0x0a;		/* rate */
+	    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
+        }
+
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x01;		/* msg id  = UBX-NAV-POSECEF */
 	msg[2] = 0x01;		/* rate */
