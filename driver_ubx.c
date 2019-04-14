@@ -1403,7 +1403,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     case UBX_NAV_PVT:
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_PVT\n");
 	mask = ubx_msg_nav_pvt(session, &buf[UBX_PREFIX_LEN], data_len);
-	mask |= REPORT_IS;
+        mask |= REPORT_IS;
         break;
     case UBX_NAV_RELPOSNED:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_RELPOSNED\n");
@@ -1423,8 +1423,8 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
         /* UBX-NAV-SOL deprecated in u-blox 6, gone in u-blox 9.
          * Use UBX-NAV-PVT instead */
 	gpsd_log(&session->context->errout, LOG_PROG, "UBX_NAV_SOL\n");
-	mask = ubx_msg_nav_sol(session, &buf[UBX_PREFIX_LEN], data_len)
-	     | REPORT_IS;
+	mask = ubx_msg_nav_sol(session, &buf[UBX_PREFIX_LEN], data_len);
+        mask |= REPORT_IS;
 	break;
     case UBX_NAV_STATUS:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_STATUS\n");
@@ -1556,16 +1556,44 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     /* end of cycle ? */
     if (session->driver.ubx.end_msgid == msgid) {
         /* end of cycle, report it */
+	gpsd_log(&session->context->errout, LOG_PROG,
+                 "UBX: cycle end %x\n", msgid);
         mask |= REPORT_IS;
     }
     /* start of cycle ? */
     if (TIME_SET & mask) {
+        timestamp_t difftime;
         /* this sentence has a good time */
-	if (session->newdata.time > session->lastfix.time) {
-            /* time advanced, save cycle ender */
+        /* debug
+	gpsd_log(&session->context->errout, LOG_ERROR,
+                 "UBX:      time %.2f      msgid %x\n",
+                 session->newdata.time, msgid);
+	gpsd_log(&session->context->errout, LOG_ERROR,
+                 "     last_time %.2f last_msgid %x\n",
+		 session->driver.ubx.last_time,
+		 session->driver.ubx.last_msgid);
+         */
+        /* no more than 100Hz */
+	difftime = session->newdata.time - session->driver.ubx.last_time;
+	if ((0.01 < difftime) &&
+	    (session->driver.ubx.end_msgid !=
+             session->driver.ubx.last_msgid)) {
+            /* time advanced, new cycle ender */
 	    session->driver.ubx.end_msgid = session->driver.ubx.last_msgid;
+            /* debug
+	    gpsd_log(&session->context->errout, LOG_ERROR,
+		     "UBX: new ender %x, difftime %.2f\n",
+		     session->driver.ubx.end_msgid, difftime);
+             */
         }
 	session->driver.ubx.last_msgid = msgid;
+	session->driver.ubx.last_time = session->newdata.time;
+    } else {
+        /* no time */
+        /* debug
+	gpsd_log(&session->context->errout, LOG_ERROR,
+                 "UBX: No time, msgid %x\n", msgid);
+         */
     }
     return mask | ONLINE_SET;
 }
