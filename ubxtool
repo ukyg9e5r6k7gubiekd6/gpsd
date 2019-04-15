@@ -2150,6 +2150,33 @@ class ubx(object):
     # UBX-LOG- ???
     # UBX-MGA- ???
 
+    def mon_comms(self, buf):
+        "UBX-MON-COMMS decode"
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 8 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBBL', buf, 0)
+        s = 'version %u nPorts %u txErrors %#x reserved1 %u protIds %#x' % u
+
+        i = 0
+        while m_len > (8 + (i * 40)):
+            u = struct.unpack_from('<HHLBBHLBBHHHHHLLL', buf, (8 + (i * 40)))
+            if u[0] in self.port_ids:
+                name = self.port_ids[u[0]]
+            else:
+                name = "Unk"
+            s += ('  Port: %u (%s)\n' % ([0], name))
+            s += ('   txPending %u txBytes %u txUsage %u txPeakUsage %u\n'
+                  '   rxPending %u rxBytes %u rxUsage %u rxPeakUsage %u\n'
+                  '   overrunErrs %u msgs %u reserved %x %x skipped %u\n'
+                  % u[1:])
+            i += 1
+        return s
+
     def mon_io(self, buf):
         "UBX-MON-IO decode"
         m_len = len(buf)
@@ -2160,9 +2187,9 @@ class ubx(object):
         s = ''
         while m_len > (i * 20):
             u = struct.unpack_from('<LLHHHHL', buf, i * 20)
-            if (0 < i):
+            if 0 < i:
                 s += "\n"
-            if (i in self.port_ids):
+            if i in self.port_ids:
                 name = self.port_ids[i]
             else:
                 name = "Unk"
@@ -2208,7 +2235,8 @@ class ubx(object):
                0x27: {'str': 'PATCH', 'name': 'UBX-MON-PATCH'},
                0x28: {'str': 'GNSS', 'name': 'UBX-MON-GNSS'},
                0x2e: {'str': 'SMGR', 'name': 'UBX-MON-SMGR'},
-               0x36: {'str': 'COMMS', 'name': 'UBX-MON-COMMS'},
+               0x36: {'str': 'COMMS', 'dec': mon_comms,
+                      'name': 'UBX-MON-COMMS'},
                0x37: {'str': 'HW3', 'name': 'UBX-MON-HW3'},
                0x38: {'str': 'RF', 'name': 'UBX-MON-RF'},
                }
@@ -3637,6 +3665,11 @@ class ubx(object):
         m_data = bytearray(0)
         gps_model.gps_send(6, 0x1b, m_data)
 
+    def send_mon_comms(self):
+        "UBX-MON-COMMS Comm port information"
+        m_data = bytearray(0)
+        gps_model.gps_send(0x0a, 0x36, m_data)
+
     def send_mon_io(self):
         "UBX-MON-IO poll I/O Subsystem Status"
         m_data = bytearray(0)
@@ -3768,6 +3801,9 @@ class ubx(object):
         "COLDBOOT": {"command": send_cfg_rst,
                      "help": "UBS-CFG-RST coldboot the GPS",
                      "opt": 0xfff},
+        # poll UBX-MON-COMMS
+        "MON-COMMS": {"command": send_mon_comms,
+                      "help": "UBX-MON-COMMS get Comm port information (27+)"},
         # UBX-CFG-GNSS poll gnss config
         "GNSS": {"command": send_cfg_gnss,
                  "help": "UBX-CFG-GNSS poll GNSS config"},
