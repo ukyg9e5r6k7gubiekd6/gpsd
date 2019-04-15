@@ -2169,7 +2169,7 @@ class ubx(object):
         u = struct.unpack_from('<BBBBBBBB', buf, 0)
         s = ('version %u nPorts %u txErrors %#x reserved1 %u\n'
              'protIds %#x/%x/%x/%x' % u)
-        s += ('(%s/%s/%s/%s)\n' %
+        s += (' (%s/%s/%s/%s)\n' %
               (self._protId(u[4]), self._protId(u[5]),
                self._protId(u[6]), self._protId(u[7])))
 
@@ -2922,7 +2922,10 @@ class ubx(object):
                0x61: {'str': 'IMES', 'name': 'UBX-RXM-IMES'},
                }
 
-    # UBX-SEC- ??
+    # UBX-SEC-
+    sec_ids = {0x01: {'str': 'SIGN', 'name': 'UBX-SEC-SIGN'},
+               0x03: {'str': 'UNIQID', 'name': 'UBX-SEC-UNIQID'},
+               }
 
     def tim_svin(self, buf):
         "UBX-TIM-SVIN decode, Survey-in data"
@@ -2998,7 +3001,7 @@ class ubx(object):
         0x10: {'str': 'ESF'},
         0x13: {'str': 'MGA'},
         0x21: {'str': 'LOG'},
-        0x27: {'str': 'SEC'},
+        0x27: {'str': 'SEC', 'ids': sec_ids},
         0x28: {'str': 'HNR'},
         0xf0: {'str': 'NMEA', 'ids': nmea_ids},
     }
