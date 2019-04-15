@@ -2159,9 +2159,12 @@ class ubx(object):
         if 8 > m_len:
             return " Bad Length %s" % m_len
 
+        protId = {0: "UBX", 1: "NMEA", 2: "RTCM2", 3: "RTCM3", 256: "None"}
         u = struct.unpack_from('<BBBBBBBB', buf, 0)
-        s = ('version %u nPorts %u txErrors %#x reserved1 %u '
-             ' protIds %#x/%x/%x/%x\n' % u)
+        s = ('version %u nPorts %u txErrors %#x reserved1 %u\n'
+             'protIds %#x/%x/%x/%x' % u)
+        s += ('(%s/%s/%s/%s)\n' %
+              (protId[u[4]], protId[u[5]], protId[u[6]], protId[u[7]]))
 
         i = 0
         while m_len > (8 + (i * 40)):
