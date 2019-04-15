@@ -2159,8 +2159,9 @@ class ubx(object):
         if 8 > m_len:
             return " Bad Length %s" % m_len
 
-        u = struct.unpack_from('<BBBBL', buf, 0)
-        s = 'version %u nPorts %u txErrors %#x reserved1 %u protIds %#x' % u
+        u = struct.unpack_from('<BBBBBBBB', buf, 0)
+        s = ('version %u nPorts %u txErrors %#x reserved1 %u '
+             ' protIds %#x/%x/%x/%x\n' % u)
 
         i = 0
         while m_len > (8 + (i * 40)):
@@ -2169,10 +2170,11 @@ class ubx(object):
                 name = self.port_ids[u[0]]
             else:
                 name = "Unk"
-            s += ('  Port: %u (%s)\n' % ([0], name))
+            s += ('  Port: %u (%s)\n' % (u[0], name))
             s += ('   txPending %u txBytes %u txUsage %u txPeakUsage %u\n'
                   '   rxPending %u rxBytes %u rxUsage %u rxPeakUsage %u\n'
-                  '   overrunErrs %u msgs %u reserved %x %x skipped %u\n'
+                  '   overrunErrs %u msgs %#x/%x/%x/%x reserved %x %x '
+                  'skipped %u\n'
                   % u[1:])
             i += 1
         return s
