@@ -2150,8 +2150,15 @@ class ubx(object):
     # UBX-LOG- ???
     # UBX-MGA- ???
 
+    def _protID(self, id):
+        """Convert protId to string"""
+        protId = {0: "UBX", 1: "NMEA", 2: "RTCM2", 5: "RTCM3", 255: "None"}
+        if id in protId:
+            return protId[id]
+        return "Unk"
+
     def mon_comms(self, buf):
-        "UBX-MON-COMMS decode"
+        """UBX-MON-COMMS decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2159,12 +2166,12 @@ class ubx(object):
         if 8 > m_len:
             return " Bad Length %s" % m_len
 
-        protId = {0: "UBX", 1: "NMEA", 2: "RTCM2", 3: "RTCM3", 256: "None"}
         u = struct.unpack_from('<BBBBBBBB', buf, 0)
         s = ('version %u nPorts %u txErrors %#x reserved1 %u\n'
              'protIds %#x/%x/%x/%x' % u)
         s += ('(%s/%s/%s/%s)\n' %
-              (protId[u[4]], protId[u[5]], protId[u[6]], protId[u[7]]))
+              (self._protId[u[4]], self._protId[u[5]],
+               self._protId[u[6]], self._protId[u[7]]))
 
         i = 0
         while m_len > (8 + (i * 40)):
@@ -2178,14 +2185,14 @@ class ubx(object):
             s += ('  Port: %u (%s)\n' % (u[1], name))
             s += ('   txPending %u txBytes %u txUsage %u txPeakUsage %u\n'
                   '   rxPending %u rxBytes %u rxUsage %u rxPeakUsage %u\n'
-                  '   overrunErrs %u msgs %#x/%x/%x/%x reserved %x %x '
+                  '   overrunErrs %u msgs %u/%u/%u/%u reserved %x %x '
                   'skipped %u'
                   % u[2:])
             i += 1
         return s
 
     def mon_io(self, buf):
-        "UBX-MON-IO decode"
+        """UBX-MON-IO decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
