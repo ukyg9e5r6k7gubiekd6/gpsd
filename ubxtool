@@ -2150,7 +2150,7 @@ class ubx(object):
     # UBX-LOG- ???
     # UBX-MGA- ???
 
-    def _protID(self, id):
+    def _protId(self, id):
         """Convert protId to string"""
         protId = {0: "UBX", 1: "NMEA", 2: "RTCM2", 5: "RTCM3", 255: "None"}
         if id in protId:
