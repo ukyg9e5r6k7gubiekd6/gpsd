@@ -146,15 +146,15 @@ class ubx(object):
                5: 'QZSS',
                6: 'GLONASS'}
 
-    # Names for portID values in UBX-CFG-PRT
+    # Names for portID values in UBX-CFG-PRT, UBX-MON-IO, etc.
     port_ids = {0: 'DDC',  # The inappropriate name for i2c used in the spec
-                1: 'UART',
-                2: 'UART_2',
+                1: 'UART1',
+                2: 'UART2',
                 3: 'USB',
                 4: 'SPI',
                 }
     port_id_map = dict([x[::-1] for x in port_ids.items()])
-    port_id_map['UART_1'] = port_id_map['UART']  # Accept synonym
+    port_id_map['UART'] = port_id_map['UART1']  # Accept synonym
     port_ids[5] = 'Reserved'  # Don't include this in port_id_map
 
     # u-blox 9 cfg items as a 5-tuple
@@ -2150,6 +2150,28 @@ class ubx(object):
     # UBX-LOG- ???
     # UBX-MGA- ???
 
+    def mon_io(self, buf):
+        "UBX-MON-IO decode"
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        i = 0
+        s = ''
+        while m_len > (i * 20):
+            u = struct.unpack_from('<LLHHHHL', buf, i * 20)
+            if (0 < i):
+                s += "\n"
+            if (i in self.port_ids):
+                name = self.port_ids[i]
+            else:
+                name = "Unk"
+            s += ('  Port: %u (%s)\n' % (i, name))
+            s += ('   rxBytes %u txBytes %u parityErrs %u framingErrs %u\n'
+                  '   overrunErrs %u breakCond %u reserved %u' % u)
+            i += 1
+        return s
+
     def mon_ver(self, buf):
         "UBX-MON-VER decode"
         m_len = len(buf)
@@ -2175,7 +2197,7 @@ class ubx(object):
             i += 1
         return s
 
-    mon_ids = {2: {'str': 'IO', 'name': 'UBX-MON-IO'},
+    mon_ids = {2: {'str': 'IO', 'dec': mon_io, 'name': 'UBX-MON-IO'},
                4: {'str': 'VER', 'dec': mon_ver, 'name': 'UBX-MON-VER'},
                6: {'str': 'MSGPP', 'name': 'UBX-MON-MSGPP'},
                7: {'str': 'RXBUF', 'name': 'UBX-MON-RXBUF'},
@@ -3615,6 +3637,11 @@ class ubx(object):
         m_data = bytearray(0)
         gps_model.gps_send(6, 0x1b, m_data)
 
+    def send_mon_io(self):
+        "UBX-MON-IO poll I/O Subsystem Status"
+        m_data = bytearray(0)
+        gps_model.gps_send(0x0a, 0x02, m_data)
+
     def send_mon_ver(self):
         "UBX-MON-VER get versions"
         m_data = bytearray(0)
@@ -3748,6 +3775,9 @@ class ubx(object):
         "HOTBOOT": {"command": send_cfg_rst,
                     "help": "UBX-CFG-RST hotboot the GPS",
                     "opt": 0},
+        # poll UBX-MON-IO
+        "MON-IO": {"command": send_mon_io,
+                   "help": "UBX-MON-IO get I/O Subsystem Status"},
         # UBX-CFG-NAV5 set Dynamic Platform Model
         "MODEL": {"command": send_cfg_nav5_model,
                   "help": "UBX-CFG-NAV5 set Dynamic Platform Model"},
