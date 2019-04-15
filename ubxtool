@@ -2170,8 +2170,8 @@ class ubx(object):
         s = ('version %u nPorts %u txErrors %#x reserved1 %u\n'
              'protIds %#x/%x/%x/%x' % u)
         s += ('(%s/%s/%s/%s)\n' %
-              (self._protId[u[4]], self._protId[u[5]],
-               self._protId[u[6]], self._protId[u[7]]))
+              (self._protId(u[4]), self._protId(u[5]),
+               self._protId(u[6]), self._protId(u[7])))
 
         i = 0
         while m_len > (8 + (i * 40)):
