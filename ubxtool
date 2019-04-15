@@ -2923,10 +2923,26 @@ class ubx(object):
                }
 
     # UBX-SEC-
+    def sec_uniqid(self, buf):
+        """UBX-SEC_UNIQID decode Unique chip ID"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 9 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBBBBBBB', buf, 0)
+        s = (' version %u reserved %u %u %u uniqueId %#02x%02x%02x%02x%02x'
+             % u)
+        return s
+
     sec_ids = {0x01: {'str': 'SIGN', 'name': 'UBX-SEC-SIGN'},
-               0x03: {'str': 'UNIQID', 'name': 'UBX-SEC-UNIQID'},
+               0x03: {'str': 'UNIQID', 'dec': sec_uniqid,
+                      'name': 'UBX-SEC-UNIQID'},
                }
 
+    # UBX-TIM-
     def tim_svin(self, buf):
         "UBX-TIM-SVIN decode, Survey-in data"
         m_len = len(buf)
@@ -3765,6 +3781,11 @@ class ubx(object):
         struct.pack_into(frmat, m_data, 8, val1)
         gps_model.gps_send(0x06, 0x8a, m_data)
 
+    def send_sec_uniqid(self):
+        "UBX-SEC-UNIQID poll UNique Chip ID"
+        m_data = bytearray(0)
+        gps_model.gps_send(0x27, 0x03, m_data)
+
     def send_tim_svin(self):
         "UBX-TIM-SVIN, get survey in data"
         m_data = bytearray(0)
@@ -3860,6 +3881,9 @@ class ubx(object):
         # UBX-CFG-SBAS, get SBAS settings
         "SBAS": {"command": send_cfg_sbas,
                  "help": "UBX-CFG-SBAS poll SBAS settings"},
+        # UBX-CFG-SBAS, get SBAS settings
+        "SEC-UNIQID": {"command": send_sec_uniqid,
+                       "help": "UBX-SEC-UNIQID poll Unique chip ID"},
         # UBX-TIM-SVIN, get survey in data
         "SVIN": {"command": send_tim_svin,
                  "help": "UBX-TIM-SVIN get survey in data"},
