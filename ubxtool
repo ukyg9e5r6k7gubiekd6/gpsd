@@ -2165,17 +2165,17 @@ class ubx(object):
 
         i = 0
         while m_len > (8 + (i * 40)):
-            u = struct.unpack_from('<HHLBBHLBBHHHHHLLL', buf, (8 + (i * 40)))
-            if u[0] in self.port_ids:
-                name = self.port_ids[u[0]]
+            u = struct.unpack_from('<BBHLBBHLBBHHHHHLLL', buf, (8 + (i * 40)))
+            if u[1] in self.port_ids:
+                name = self.port_ids[u[1]]
             else:
                 name = "Unk"
-            s += ('  Port: %u (%s)\n' % (u[0], name))
+            s += ('  Port: %u (%s)\n' % (u[1], name))
             s += ('   txPending %u txBytes %u txUsage %u txPeakUsage %u\n'
                   '   rxPending %u rxBytes %u rxUsage %u rxPeakUsage %u\n'
                   '   overrunErrs %u msgs %#x/%x/%x/%x reserved %x %x '
                   'skipped %u\n'
-                  % u[1:])
+                  % u[2:])
             i += 1
         return s
 
