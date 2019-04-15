@@ -59,6 +59,7 @@ extern "C" {
  *      Add oldfix2 for better oldfix
  *      Make subtype longer
  *      Add ubx.protver, ubx.last_msgid and more to gps_device_t.ubx
+ *      MAX_PACKET_LENGTH 516 -> 9216
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -141,8 +142,9 @@ enum isgpsstat_t {
  * Data packet (188 bytes). Then it had to be big enough for a UBX SVINFO
  * packet (206 bytes). Now it turns out that a couple of ITALK messages are
  * over 512 bytes. I know we like verbose output, but this is ridiculous.
+ * Whoopie! The u-blox 8 UBX-RXM-RAWX packet is 8214 byte long!
  */
-#define MAX_PACKET_LENGTH	516	/* 7 + 506 + 3 */
+#define MAX_PACKET_LENGTH	9216	/* 4 + 16 + (256 * 32) + 2 + fudge */
 
 /*
  * UTC of second 0 of week 0 of the first rollover period of GPS time.
