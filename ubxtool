@@ -3650,11 +3650,6 @@ class ubx(object):
             m_data.extend([rate])
         gps_model.gps_send(6, 1, m_data)
 
-    def send_cfg_nav5(self):
-        """UBX-CFG-NAV5, get Nav Engine Settings"""
-        m_data = bytearray(0)
-        gps_model.gps_send(6, 0x24, m_data)
-
     def send_cfg_navx5(self):
         """UBX-CFG-NAVX5, get Nav Engine Expert Settings"""
         m_data = bytearray(0)
@@ -3891,26 +3886,26 @@ class ubx(object):
         # UBX-CFG-GNSS poll gnss config
         "CFG-GNSS": {"command": send_poll, "opt": [0x06, 0x3e],
                      "help": "UBX-CFG-GNSS poll GNSS config"},
+        # UBX-CFG-NAV5, poll Nav Engine Settings
+        "CFG-NAV5": {"command": send_poll, "opt": [0x06, 0x24],
+                     "help": "UBX-CFG-NAV5 poll Nav Engines settings"},
         # UBX-CFG-RST cold boot
         "COLDBOOT": {"command": send_cfg_rst,
                      "help": "UBS-CFG-RST coldboot the GPS",
                      "opt": 0xfff},
-        # poll UBX-MON-COMMS
-        "MON-COMMS": {"command": send_mon_comms,
-                      "help": "UBX-MON-COMMS get Comm port information (27+)"},
         # UBX-CFG-RST hot boot
         "HOTBOOT": {"command": send_cfg_rst,
                     "help": "UBX-CFG-RST hotboot the GPS",
                     "opt": 0},
+        # poll UBX-MON-COMMS
+        "MON-COMMS": {"command": send_mon_comms,
+                      "help": "UBX-MON-COMMS get Comm port information (27+)"},
         # poll UBX-MON-IO
         "MON-IO": {"command": send_mon_io,
                    "help": "UBX-MON-IO get I/O Subsystem Status"},
         # UBX-CFG-NAV5 set Dynamic Platform Model
         "MODEL": {"command": send_cfg_nav5_model,
                   "help": "UBX-CFG-NAV5 set Dynamic Platform Model"},
-        # UBX-CFG-NAV5, poll Nav Engine Settings
-        "NAV5": {"command": send_cfg_nav5,
-                 "help": "UBX-CFG-NAV5 poll Nav Engines settings"},
         # UBX-CFG-NAVX5, poll Nav Engine Expert Settings
         "NAVX5": {"command": send_cfg_navx5,
                   "help": "UBX-CFG-NAVX5 poll Nav Engines Expert Settings"},
