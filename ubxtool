@@ -2187,7 +2187,7 @@ class ubx(object):
         while m_len > (8 + (i * 40)):
             u = struct.unpack_from('<HHLBBHLBBHHHHHLLL', buf, (8 + (i * 40)))
             if u[0] in self.port_ids1:
-                name = "%#x (%s)"  % (u[0], self.port_ids1[u[0]])
+                name = "%#x (%s)" % (u[0], self.port_ids1[u[0]])
             else:
                 name = "%#x (UNK)" % u[0]
             if 0 < i:
@@ -3543,7 +3543,6 @@ class ubx(object):
         # senConf, rinvConf, antConf, logConf
         cfg2 = 0x0f
 
-
         m_data = bytearray(13)
 
         # clear
@@ -3955,14 +3954,14 @@ class ubx(object):
         "SEC-UNIQID": {"command": send_sec_uniqid,
                        "help": "UBX-SEC-UNIQID poll Unique chip ID"},
         # UBX-TIM-SVIN, get survey in data
-        "SVIN": {"command": send_tim_svin,
-                 "help": "UBX-TIM-SVIN get survey in data"},
+        "TIM-SVIN": {"command": send_tim_svin,
+                     "help": "UBX-TIM-SVIN get survey in data"},
         # UBX-TIM-TM2, get time mark data
         "TIM-TM2": {"command": send_tim_tm2,
-               "help": "UBX-TIM-TM2 get time mark data"},
+                    "help": "UBX-TIM-TM2 get time mark data"},
         # UBX-TIM-TP, get time pulse timedata
         "TIM-TP": {"command": send_tim_tp,
-               "help": "UBX-TIM-TP get time pulse timedata"},
+                   "help": "UBX-TIM-TP get time pulse timedata"},
         # UBX-CFG-TMODE2, get time mode 2 config
         "TMODE2": {"command": send_cfg_tmode2,
                    "help": "UBX-CFG-TMODE2 get time mode 2 config"},
