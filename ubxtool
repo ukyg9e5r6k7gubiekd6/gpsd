@@ -3895,6 +3895,9 @@ class ubx(object):
         # UBX-CFG-ANT, poll antenna config decode
         "ANT": {"command": send_cfg_ant,
                 "help": "UBX-CFG-ANT poll antenna config"},
+        # UBX-CFG-GNSS poll gnss config
+        "CFG-GNSS": {"command": send_cfg_gnss,
+                     "help": "UBX-CFG-GNSS poll GNSS config"},
         # UBX-CFG-RST cold boot
         "COLDBOOT": {"command": send_cfg_rst,
                      "help": "UBS-CFG-RST coldboot the GPS",
@@ -3902,9 +3905,6 @@ class ubx(object):
         # poll UBX-MON-COMMS
         "MON-COMMS": {"command": send_mon_comms,
                       "help": "UBX-MON-COMMS get Comm port information (27+)"},
-        # UBX-CFG-GNSS poll gnss config
-        "GNSS": {"command": send_cfg_gnss,
-                 "help": "UBX-CFG-GNSS poll GNSS config"},
         # UBX-CFG-RST hot boot
         "HOTBOOT": {"command": send_cfg_rst,
                     "help": "UBX-CFG-RST hotboot the GPS",
