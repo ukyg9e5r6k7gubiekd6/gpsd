@@ -1412,6 +1412,9 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
     case UBX_NAV_RESETODO:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_RESETODO\n");
 	break;
+    case UBX_NAV_SIG:
+	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_SIG\n");
+	break;
     case UBX_NAV_SAT:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX_NAV_SAT\n");
 	mask = ubx_msg_nav_sat(session, &buf[UBX_PREFIX_LEN], data_len);
