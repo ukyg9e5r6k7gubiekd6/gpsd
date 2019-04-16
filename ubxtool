@@ -3836,6 +3836,10 @@ class ubx(object):
         struct.pack_into(frmat, m_data, 8, val1)
         gps_model.gps_send(0x06, 0x8a, m_data)
 
+    def send_poll(self, m_data):
+        """generic send poll request"""
+        gps_model.gps_send(m_data[0], m_data[1], m_data[2:])
+
     def send_sec_uniqid(self):
         """UBX-SEC-UNIQID poll UNique Chip ID"""
         m_data = bytearray(0)
@@ -3921,6 +3925,9 @@ class ubx(object):
         # UBX-CFG-NAVX5, poll Nav Engine Expert Settings
         "NAVX5": {"command": send_cfg_navx5,
                   "help": "UBX-CFG-NAVX5 poll Nav Engines Expert Settings"},
+        # UBX-NAV-CLOCK, poll Clock Solution
+        "NAV-CLOCK": {"command": send_poll, "opt": [0x01, 0x22],
+                      "help": "UBX-NAV-CLOCK poll Clock Solution"},
         # UBX-NAV_SIG, poll Signal information
         "NAV-SIG": {"command": send_nav_sig,
                     "help": "UBX-NAV-SIG poll Signal Information"},
