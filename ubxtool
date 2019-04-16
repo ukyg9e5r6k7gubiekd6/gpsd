@@ -123,7 +123,7 @@ opts = {
 
 
 class ubx(object):
-    "class to hold u-blox stuff"
+    """class to hold u-blox stuff"""
 
     # when a statement identifier is received, it is stored here
     last_statement_identifier = None
@@ -1480,7 +1480,7 @@ class ubx(object):
         return None
 
     def ack_ack(self, buf):
-        "UBX-ACK-ACK decode"
+        """UBX-ACK-ACK decode"""
         m_len = len(buf)
         if 2 > m_len:
             return "Bad Length %s" % m_len
@@ -1492,7 +1492,7 @@ class ubx(object):
                1: {'str': 'ACK', 'dec': ack_ack, 'name': 'UBX-ACK-ACK'}}
 
     def cfg_ant(self, buf):
-        "UBX-CFG-ANT decode"
+        """UBX-CFG-ANT decode"""
         m_len = len(buf)
         if 0 == m_len:
             return "Poll request all"
@@ -1518,7 +1518,7 @@ class ubx(object):
         return s
 
     def cfg_cfg_mask(self, mask):
-        "decode Mask in UBX-CFG-CFG, return string"
+        """decode Mask in UBX-CFG-CFG, return string"""
         s = ''
         if mask & 0x1:
             s += 'ioPort '
@@ -1545,7 +1545,7 @@ class ubx(object):
         return s
 
     def cfg_cfg(self, buf):
-        "UBX-CFG-CFG decode"
+        """UBX-CFG-CFG decode"""
         m_len = len(buf)
         if 12 > m_len:
             return "Bad Length %s" % m_len
@@ -1577,7 +1577,7 @@ class ubx(object):
         return s
 
     def cfg_gnss(self, buf):
-        "UBX-CFG-GNSS decode"
+        """UBX-CFG-GNSS decode"""
         m_len = len(buf)
         if 0 == m_len:
             return "Poll request"
@@ -1643,7 +1643,7 @@ class ubx(object):
         return s
 
     def cfg_nav5(self, buf):
-        "UBX-CFG-NAV5 nav Engine Settings"
+        """UBX-CFG-NAV5 nav Engine Settings"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -1660,7 +1660,7 @@ class ubx(object):
         return s
 
     def cfg_navx5(self, buf):
-        "UBX-CFG-NAVX5 decode"
+        """UBX-CFG-NAVX5 decode"""
 
         # length == 20 case seems broken?
         m_len = len(buf)
@@ -1682,7 +1682,7 @@ class ubx(object):
         return s
 
     def cfg_msg(self, buf):
-        "UBX-CFG-MSG decode "
+        """UBX-CFG-MSG decode"""
         m_len = len(buf)
         if 2 == m_len:
             u = struct.unpack_from('<BB', buf, 0)
@@ -1702,7 +1702,7 @@ class ubx(object):
         return s
 
     def cfg_pms(self, buf):
-        "UBX-CFG-PMS decode, Power Mode Setup"
+        """UBX-CFG-PMS decode, Power Mode Setup"""
 
         m_len = len(buf)
         if 0 == m_len:
@@ -1728,7 +1728,7 @@ class ubx(object):
         return s
 
     def cfg_prt(self, buf):
-        "UBX-CFG-PRT decode"
+        """UBX-CFG-PRT decode"""
 
         m_len = len(buf)
         if 0 == m_len:
@@ -1826,7 +1826,7 @@ class ubx(object):
         return s
 
     def cfg_sbas(self, buf):
-        "UBX-CFG-SBAS decode"
+        """UBX-CFG-SBAS decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -1839,7 +1839,7 @@ class ubx(object):
                 ' scanMode1: %#x' % u)
 
     def cfg_tmode2(self, buf):
-        "UBX-CFG-TMODE2 decode, Time Mode Settings 2"
+        """UBX-CFG-TMODE2 decode, Time Mode Settings 2"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -1854,7 +1854,7 @@ class ubx(object):
         return s
 
     def cfg_tp5(self, buf):
-        "UBX-CFG-TP5 decode, Time Pulse Parameters"
+        """UBX-CFG-TP5 decode, Time Pulse Parameters"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request tpIdx 0"
@@ -1902,7 +1902,7 @@ class ubx(object):
         return s
 
     def cfg_usb(self, buf):
-        "UBX-CFG-USB decode"
+        """UBX-CFG-USB decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2116,23 +2116,23 @@ class ubx(object):
                }
 
     def inf_debug(self, buf):
-        "UBX-INF-DEBUG decode"
+        """UBX-INF-DEBUG decode"""
         return ' Debug: ' + gps.polystr(buf)
 
     def inf_error(self, buf):
-        "UBX-INF-ERROR decode"
+        """UBX-INF-ERROR decode"""
         return ' Error: ' + gps.polystr(buf)
 
     def inf_notice(self, buf):
-        "UBX-INF-NOTICE decode"
+        """UBX-INF-NOTICE decode"""
         return ' Notice: ' + gps.polystr(buf)
 
     def inf_test(self, buf):
-        "UBX-INF-TET decode"
+        """UBX-INF-TET decode"""
         return ' Test: ' + gps.polystr(buf)
 
     def inf_warning(self, buf):
-        "UBX-INF-WARNING decode"
+        """UBX-INF-WARNING decode"""
         return ' Warning: ' + gps.polystr(buf)
 
     inf_ids = {0x0: {'str': 'ERROR', 'dec': inf_error,
@@ -2214,7 +2214,7 @@ class ubx(object):
         return s
 
     def mon_ver(self, buf):
-        "UBX-MON-VER decode"
+        """UBX-MON-VER decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2256,7 +2256,7 @@ class ubx(object):
                }
 
     def nav_clock(self, buf):
-        "UBX-NAV-CLOCK decode, Clock Solution"
+        """UBX-NAV-CLOCK decode, Clock Solution"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2269,7 +2269,7 @@ class ubx(object):
                 'fAcc:%d ns/s' % u)
 
     def nav_dgps(self, buf):
-        "UBX-NAV-DGPS decode, DGPS Data used for NAV"
+        """UBX-NAV-DGPS decode, DGPS Data used for NAV"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2293,7 +2293,7 @@ class ubx(object):
         return s
 
     def nav_dop(self, buf):
-        "UBX-NAV-DOP decode, Dilution of Precision"
+        """UBX-NAV-DOP decode, Dilution of Precision"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2309,7 +2309,7 @@ class ubx(object):
         return s
 
     def nav_eoe(self, buf):
-        "UBX-NAV-EOE decode, End Of Epoch"
+        """UBX-NAV-EOE decode, End Of Epoch"""
         m_len = len(buf)
         if 4 > m_len:
             return " Bad Length %s" % m_len
@@ -2318,7 +2318,7 @@ class ubx(object):
         return ' iTOW:%d ms' % u
 
     def nav_posecef(self, buf):
-        "UBX-NAV-POSECEF decode"
+        """UBX-NAV-POSECEF decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2330,7 +2330,7 @@ class ubx(object):
         return ' iTOW:%d ms, ecefX:%d cm Y:%d cm Z:%d cm\n pAcc:%d cm' % u
 
     def nav_pvt(self, buf):
-        "UBX-NAV-PVT decode"
+        """UBX-NAV-PVT decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2355,7 +2355,7 @@ class ubx(object):
         return s
 
     def nav_sat(self, buf):
-        "UBX-NAV-SAT decode"
+        """UBX-NAV-SAT decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2410,7 +2410,7 @@ class ubx(object):
         return s
 
     def nav_sbas(self, buf):
-        "UBX-NAV-SBAS decode"
+        """UBX-NAV-SBAS decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2447,7 +2447,7 @@ class ubx(object):
     fix_types = ('None', 'Dead Reckoning', '2D', '3D', 'GPS+DR', 'Surveyed')
 
     def nav_sol(self, buf):
-        "UBX-NAV-SOL decode deprecated by u-blox"
+        """UBX-NAV-SOL decode deprecated by u-blox"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2479,7 +2479,7 @@ class ubx(object):
         return s
 
     def nav_status(self, buf):
-        "UBX-NAV-STATUS decode"
+        """UBX-NAV-STATUS decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2492,7 +2492,7 @@ class ubx(object):
                 ' ttff:%d, msss:%d' % u)
 
     def nav_svin(self, buf):
-        "UBX-NAV-SVIN decode, Survey-in data"
+        """UBX-NAV-SVIN decode, Survey-in data"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2507,7 +2507,7 @@ class ubx(object):
                 '  obs %u valid %u active %u\n' % u)
 
     def nav_svinfo(self, buf):
-        "UBX-NAV-SVINFO decode"
+        """UBX-NAV-SVINFO decode"""
         m_len = len(buf)
         if 0 == m_len:
             return "Poll request"
@@ -2548,7 +2548,7 @@ class ubx(object):
         return s
 
     def nav_timebds(self, buf):
-        "UBX-NAV-TIMEBDS decode"
+        """UBX-NAV-TIMEBDS decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2570,7 +2570,7 @@ class ubx(object):
         return s
 
     def nav_timegal(self, buf):
-        "UBX-NAV-TIMEGAL decode"
+        """UBX-NAV-TIMEGAL decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2592,7 +2592,7 @@ class ubx(object):
         return s
 
     def nav_timeglo(self, buf):
-        "UBX-NAV-TIMEGLO decode"
+        """UBX-NAV-TIMEGLO decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2612,7 +2612,7 @@ class ubx(object):
         return s
 
     def nav_timegps(self, buf):
-        "UBX-NAV-TIMEGPS decode"
+        """UBX-NAV-TIMEGPS decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2634,7 +2634,7 @@ class ubx(object):
         return s
 
     def nav_timeutc(self, buf):
-        "UBX-NAV-TIMEUTC decode"
+        """UBX-NAV-TIMEUTC decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2674,7 +2674,7 @@ class ubx(object):
         return s
 
     def nav_velecef(self, buf):
-        "UBX-NAV-VELECEF decode"
+        """UBX-NAV-VELECEF decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2689,7 +2689,7 @@ class ubx(object):
                  u[4] / 100.0))
 
     def nav_velned(self, buf):
-        "UBX-NAV-VELNED decode"
+        """UBX-NAV-VELNED decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2771,7 +2771,7 @@ class ubx(object):
                 }
 
     def rxm_measx(self, buf):
-        "UBX-RXM-RAW decode"
+        """UBX-RXM-RAW decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2798,7 +2798,7 @@ class ubx(object):
         return s
 
     def rxm_raw(self, buf):
-        "UBX-RXM-RAW decode"
+        """UBX-RXM-RAW decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2852,7 +2852,7 @@ class ubx(object):
         return s
 
     def rxm_sfrb(self, buf):
-        "UBX-RXM-SFRB decode, Subframe Buffer"
+        """UBX-RXM-SFRB decode, Subframe Buffer"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2868,7 +2868,7 @@ class ubx(object):
         return s
 
     def rxm_sfrbx(self, buf):
-        "UBX-RXM-SFRBX decode, Broadcast Navigation Data Subframe"
+        """UBX-RXM-SFRBX decode, Broadcast Navigation Data Subframe"""
         m_len = len(buf)
 
         if 8 > m_len:
@@ -2885,7 +2885,7 @@ class ubx(object):
         return s
 
     def rxm_svsi(self, buf):
-        "UBX-RXM-SVSI decode, SV Status Info"
+        """UBX-RXM-SVSI decode, SV Status Info"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2944,7 +2944,7 @@ class ubx(object):
 
     # UBX-TIM-
     def tim_svin(self, buf):
-        "UBX-TIM-SVIN decode, Survey-in data"
+        """UBX-TIM-SVIN decode, Survey-in data"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2958,7 +2958,7 @@ class ubx(object):
         return s
 
     def tim_tp(self, buf):
-        "UBX-TIM-TP decode"
+        """UBX-TIM-TP decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -3023,7 +3023,7 @@ class ubx(object):
     }
 
     def class_id_s(self, m_class, m_id):
-        "Return class and ID numbers as a string."
+        """Return class and ID numbers as a string."""
         s = 'Class: '
         if m_class not in self.classes:
             s += '%#x ID: %#x' % (m_class, m_id)
@@ -3046,7 +3046,7 @@ class ubx(object):
         return s
 
     def decode_msg(self, out):
-        "Decode one message and then return number of chars consumed"
+        """Decode one message and then return number of chars consumed"""
 
         state = 'BASE'
         consumed = 0
@@ -3234,7 +3234,7 @@ class ubx(object):
         return 0
 
     def checksum(self, msg, m_len):
-        "Calculate u-blox message checksum"
+        """Calculate u-blox message checksum"""
         # the checksum is calculated over the Message, starting and including
         # the CLASS field, up until, but excluding, the Checksum Field:
 
@@ -3247,7 +3247,7 @@ class ubx(object):
         return [ck_a & 0xff, ck_b & 0xff]
 
     def make_pkt(self, m_class, m_id, m_data):
-        "Make a message packet"
+        """Make a message packet"""
         # always little endian, leader, class, id, length
         m_len = len(m_data)
 
@@ -3275,12 +3275,12 @@ class ubx(object):
         gps_model.gps_send(2, 0x15, m_data)
 
     def gps_send(self, m_class, m_id, m_data):
-        "Build, and send, a message to GPS"
+        """Build, and send, a message to GPS"""
         m_all = self.make_pkt(m_class, m_id, m_data)
         self.gps_send_raw(m_all)
 
     def gps_send_raw(self, m_all):
-        "Send a raw message to GPS"
+        """Send a raw message to GPS"""
         if not opts['read_only']:
             io_handle.ser.write(m_all)
             if VERB_QUIET < opts['verbosity']:
@@ -3292,13 +3292,13 @@ class ubx(object):
                 sys.stdout.flush()
 
     def send_able_beidou(self, able):
-        "dis/enable BeiDou"
+        """dis/enable BeiDou"""
         # Two frequency GPS use BeiDou or GLONASS
         # disable, then enable
         gps_model.send_cfg_gnss1(3, able)
 
     def send_able_binary(self, able):
-        "dis/enable basic binary messages"
+        """dis/enable basic binary messages"""
 
         rate = 1 if able else 0
 
@@ -3359,14 +3359,14 @@ class ubx(object):
         # gps_model.gps_send(6, 1, m_data)
 
     def send_able_ecef(self, able):
-        "Enable ECEF messages"
+        """Enable ECEF messages"""
         # set NAV-POSECEF rate
         gps_model.send_cfg_msg(1, 1, able)
         # set NAV-VELECEF rate
         gps_model.send_cfg_msg(1, 0x11, able)
 
     def send_able_gps(self, able):
-        "dis/enable GPS/QZSS"
+        """dis/enable GPS/QZSS"""
         # GPS and QZSS both on, or both off, together
         # GPS
         gps_model.send_cfg_gnss1(0, able)
@@ -3374,17 +3374,17 @@ class ubx(object):
         gps_model.send_cfg_gnss1(5, able)
 
     def send_able_galileo(self, able):
-        "dis/enable GALILEO"
+        """dis/enable GALILEO"""
         gps_model.send_cfg_gnss1(2, able)
 
     def send_able_glonass(self, able):
-        "dis/enable GLONASS"
+        """dis/enable GLONASS"""
         # Two frequency GPS use BeiDou or GLONASS
         # disable, then enable
         gps_model.send_cfg_gnss1(6, able)
 
     def send_able_nmea(self, able):
-        "dis/enable basic NMEA messages"
+        """dis/enable basic NMEA messages"""
 
         rate = 1 if able else 0
 
@@ -3425,14 +3425,14 @@ class ubx(object):
         gps_model.gps_send(6, 1, m_data)
 
     def send_able_rawx(self, able):
-        "dis/enable UBX-RXM-RAWX"
+        """dis/enable UBX-RXM-RAWX"""
 
         rate = 1 if able else 0
         m_data = bytearray([0x2, 0x15, rate])
         gps_model.gps_send(6, 1, m_data)
 
     def send_able_sbas(self, able):
-        "dis/enable SBAS"
+        """dis/enable SBAS"""
         gps_model.send_cfg_gnss1(1, able)
 
     def send_able_tmode2(self, able):
@@ -3473,19 +3473,19 @@ class ubx(object):
         gps_model.gps_send(6, 0x3d, m_data)
 
     def send_able_tp(self, able):
-        "dis/enable UBX-TIM-TP Time Pulse"
+        """dis/enable UBX-TIM-TP Time Pulse"""
         rate = 1 if able else 0
         m_data = bytearray([0xd, 0x1, rate])
         gps_model.gps_send(6, 1, m_data)
 
     def send_cfg_ant(self):
-        "UBX-CFG-ANT, Get Antenna Control Settings"
+        """UBX-CFG-ANT, Get Antenna Control Settings"""
 
         m_data = bytearray(0)
         gps_model.gps_send(6, 0x13, m_data)
 
     def send_cfg_cfg(self, save_clear):
-        "UBX-CFG-CFG, save config"
+        """UBX-CFG-CFG, save config"""
 
         # Save: save_clear = 0
         # Clear: save_clear = 1
@@ -3540,7 +3540,7 @@ class ubx(object):
         gps_model.gps_send(6, 0x9, m_data)
 
     def send_cfg_gnss1(self, gnssId, enable):
-        "UBX-CFG-GNSS, set GNSS config"
+        """UBX-CFG-GNSS, set GNSS config"""
         m_data = bytearray(12)
         m_data[0] = 0       # version 0, msgVer
         m_data[1] = 0       # read only, numTrkChHw
@@ -3588,12 +3588,12 @@ class ubx(object):
         gps_model.gps_send(6, 0x3e, m_data)
 
     def send_cfg_gnss(self):
-        "UBX-CFG-GNSS, set Galileo config decode"
+        """UBX-CFG-GNSS, set Galileo config decode"""
         m_data = bytearray(0)
         gps_model.gps_send(6, 0x3e, m_data)
 
     def send_cfg_nav5_model(self):
-        "UBX-CFG-NAV5, set dynamic platform model"
+        """UBX-CFG-NAV5, set dynamic platform model"""
 
         m_data = bytearray(36)
         m_data[0] = 1        # just setting dynamic model
@@ -3603,7 +3603,7 @@ class ubx(object):
         gps_model.gps_send(6, 0x24, m_data)
 
     def send_cfg_msg(self, m_class, m_id, rate=None):
-        "UBX-CFG-MSG, poll, or set, message rates decode"
+        """UBX-CFG-MSG, poll, or set, message rates decode"""
         m_data = bytearray(2)
         m_data[0] = m_class
         m_data[1] = m_id
@@ -3612,17 +3612,17 @@ class ubx(object):
         gps_model.gps_send(6, 1, m_data)
 
     def send_cfg_nav5(self):
-        "UBX-CFG-NAV5, get Nav Engine Settings"
+        """UBX-CFG-NAV5, get Nav Engine Settings"""
         m_data = bytearray(0)
         gps_model.gps_send(6, 0x24, m_data)
 
     def send_cfg_navx5(self):
-        "UBX-CFG-NAVX5, get Nav Engine Expert Settings"
+        """UBX-CFG-NAVX5, get Nav Engine Expert Settings"""
         m_data = bytearray(0)
         gps_model.gps_send(6, 0x23, m_data)
 
     def send_cfg_pms(self):
-        "UBX-CFG-PMS, Get Power Management Settings"
+        """UBX-CFG-PMS, Get Power Management Settings"""
 
         if opts["mode"] is not None:
             m_data = bytearray(8)
@@ -3635,7 +3635,7 @@ class ubx(object):
         gps_model.gps_send(6, 0x86, m_data)
 
     def send_cfg_prt(self):
-        "UBX-CFG-PRT, get I/O Port settings"
+        """UBX-CFG-PRT, get I/O Port settings"""
         port = opts['interface']
         if port is None:
             m_data = bytearray()
@@ -3644,7 +3644,7 @@ class ubx(object):
         gps_model.gps_send(6, 0x0, m_data)
 
     def send_set_speed(self, speed):
-        "UBX-CFG-PRT, set port"
+        """"UBX-CFG-PRT, set port"""
         port = opts['interface']
         # FIXME!  Determine and use current port as default
         if port is None:
@@ -3670,7 +3670,7 @@ class ubx(object):
         gps_model.gps_send(6, 0, m_data)
 
     def send_cfg_rst(self, reset_type):
-        "UBX-CFG-RST, reset"
+        """UBX-CFG-RST, reset"""
         # always do a hardware reset
         # if on USB, this will disconnect and reconnect, giving you
         # a new tty.
@@ -3680,12 +3680,12 @@ class ubx(object):
         gps_model.gps_send(6, 0x4, m_data)
 
     def send_cfg_tmode2(self):
-        "UBX-CFG-TMODE2, get time mode 2 configuration"
+        """UBX-CFG-TMODE2, get time mode 2 configuration"""
         m_data = bytearray(0)
         gps_model.gps_send(6, 0x3d, m_data)
 
     def send_cfg_tp5(self):
-        "UBX-CFG-TP5, get time0 decodes, timepulse 0 and 1"
+        """UBX-CFG-TP5, get time0 decodes, timepulse 0 and 1"""
         m_data = bytearray(0)
         gps_model.gps_send(6, 0x31, m_data)
         # and timepulse 1
@@ -3694,37 +3694,37 @@ class ubx(object):
         gps_model.gps_send(6, 0x31, m_data)
 
     def send_cfg_usb(self):
-        "UBX-CFG-USB, get USB configuration"
+        """UBX-CFG-USB, get USB configuration"""
         m_data = bytearray(0)
         gps_model.gps_send(6, 0x1b, m_data)
 
     def send_mon_comms(self):
-        "UBX-MON-COMMS Comm port information"
+        """UBX-MON-COMMS Comm port information"""
         m_data = bytearray(0)
         gps_model.gps_send(0x0a, 0x36, m_data)
 
     def send_mon_io(self):
-        "UBX-MON-IO poll I/O Subsystem Status"
+        """UBX-MON-IO poll I/O Subsystem Status"""
         m_data = bytearray(0)
         gps_model.gps_send(0x0a, 0x02, m_data)
 
     def send_mon_ver(self):
-        "UBX-MON-VER get versions"
+        """UBX-MON-VER get versions"""
         m_data = bytearray(0)
         gps_model.gps_send(0x0a, 0x04, m_data)
 
     def send_nav_posecef(self):
-        "UBX-NAV-POSECEF, poll ECEF position"
+        """UBX-NAV-POSECEF, poll ECEF position"""
         m_data = bytearray(0)
         gps_model.gps_send(1, 1, m_data)
 
     def send_nav_velecef(self):
-        "UBX-NAV-VELECEF, poll ECEF velocity decode"
+        """UBX-NAV-VELECEF, poll ECEF velocity decode"""
         m_data = bytearray(0)
         gps_model.gps_send(1, 0x11, m_data)
 
     def send_cfg_sbas(self):
-        "UBX-CFG-SBAS, poll SBAS settings"
+        """UBX-CFG-SBAS, poll SBAS settings"""
         m_data = bytearray(0)
         gps_model.gps_send(0x06, 0x16, m_data)
 
@@ -3782,17 +3782,17 @@ class ubx(object):
         gps_model.gps_send(0x06, 0x8a, m_data)
 
     def send_sec_uniqid(self):
-        "UBX-SEC-UNIQID poll UNique Chip ID"
+        """UBX-SEC-UNIQID poll UNique Chip ID"""
         m_data = bytearray(0)
         gps_model.gps_send(0x27, 0x03, m_data)
 
     def send_tim_svin(self):
-        "UBX-TIM-SVIN, get survey in data"
+        """UBX-TIM-SVIN, get survey in data"""
         m_data = bytearray(0)
         gps_model.gps_send(0x0d, 0x04, m_data)
 
     def send_tim_tp(self):
-        "UBX-TIM-TP, get time pulse timedata"
+        """UBX-TIM-TP, get time pulse timedata"""
         m_data = bytearray(0)
         gps_model.gps_send(0x0d, 0x01, m_data)
 
@@ -3924,7 +3924,7 @@ class gps_io(object):
     input_is_device = False
 
     def __init__(self):
-        "Initialize class"
+        """Initialize class"""
 
         Serial = serial
         Serial_v3 = Serial and Serial.VERSION.split('.')[0] >= '3'
@@ -4036,7 +4036,7 @@ class gps_io(object):
                 sys.exit(1)
 
     def read(self, read_opts):
-        "Read from device, until timeout or expected message"
+        """Read from device, until timeout or expected message"""
 
         # are we expecting a certain message?
         if gps_model.expect_statement_identifier:
@@ -4133,7 +4133,7 @@ class gps_io(object):
         return ret_code
 
     def write_gpsd(self, data):
-        "write data to gpsd daemon"
+        """write data to gpsd daemon"""
 
         # HEXDATA_MAX = 512, from gps.h, The max hex digits can write.
         # Input data is binary, converting to hex doubles its size.
@@ -4162,7 +4162,7 @@ gps_model = ubx()
 
 
 def usage():
-    "Ouput usage information, and exit"
+    """Ouput usage information, and exit"""
     print('usage: %s [-c C] [-f F] [-r] [-p P] [-s S] [-v V]\n'
           '               [-hV?] [-S S]\n'
           '       -c C          send raw command C (cls,id...) to GPS\n'
