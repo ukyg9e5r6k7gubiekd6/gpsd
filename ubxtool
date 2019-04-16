@@ -2265,7 +2265,7 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LllLL', buf, 0)
-        return (' iTOW:%d ms, clkB:%d ns clkD:%d ns/s tAcc:%d ns,'
+        return ('  iTOW:%d ms, clkB:%d ns clkD:%d ns/s tAcc:%d ns,'
                 'fAcc:%d ns/s' % u)
 
     def nav_dgps(self, buf):
@@ -2327,7 +2327,7 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllL', buf, 0)
-        return ' iTOW:%d ms, ecefX:%d cm Y:%d cm Z:%d cm\n pAcc:%d cm' % u
+        return '  iTOW:%d ms, ecefX:%d cm Y:%d cm Z:%d cm\n  pAcc:%d cm' % u
 
     def nav_pvt(self, buf):
         """UBX-NAV-PVT decode"""
@@ -2341,17 +2341,17 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LHBBBBBBLlBBBBllllLLlllllLLHHHH', buf, 0)
-        s = (' iTOW %d ms, time %d/%d/%d %2d:%2d:%2d valid %#x\n'
-             ' tAcc %d ns nano %d fixType %d flags %#x flags2 %#x\n'
-             ' numSV %d lon %d lat %d height %d\n'
-             ' hMSL %d hAcc %d vAcc %d\n'
-             ' velN %d velE %d velD %d gSpeed %d headMot %d\n'
-             ' sAcc %d headAcc %d pDOP %d reserved1 %d %d %d' % u)
+        s = ('  iTOW %d ms, time %d/%d/%d %2d:%2d:%2d valid %#x\n'
+             '  tAcc %d ns nano %d fixType %d flags %#x flags2 %#x\n'
+             '  numSV %d lon %d lat %d height %d\n'
+             '  hMSL %d hAcc %d vAcc %d\n'
+             '  velN %d velE %d velD %d gSpeed %d headMot %d\n'
+             '  sAcc %d headAcc %d pDOP %d reserved1 %d %d %d' % u)
 
         if 92 <= m_len:
             # version 15
             u = struct.unpack_from('<lhH', buf, 81)
-            s += ('\n headVeh %d magDec %d magAcc %u' % u)
+            s += ('\n  headVeh %d magDec %d magAcc %u' % u)
         return s
 
     def nav_sat(self, buf):
@@ -2364,16 +2364,16 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBB', buf, 0)
-        s = ' iTOW %d ms, version %d numSvs %d' % u
+        s = '  iTOW %d ms, version %d numSvs %d' % u
 
         m_len -= 8
         i = 0
         while 0 < m_len:
             u = struct.unpack_from('<BBBbhhL', buf, 8 + i * 12)
-            s += ('\n gnssd %d svid %3d cno %2d elev %3d azim %3d prRes %6d'
+            s += ('\n   gnssd %d svid %3d cno %2d elev %3d azim %3d prRes %6d'
                   ' flags %#x\n' % u)
             if 0 < u[6]:
-                s += '  '
+                s += '    '
                 s += 'qualityInd %u ' % (0x07 & u[6])
                 if 8 & u[6]:
                     s += 'svUsed '
@@ -2443,6 +2443,29 @@ class ubx(object):
 
         return s
 
+    def nav_sig(self, buf):
+        """UBX-NAV-SIG decode, Signal Information"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 8 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LBBH', buf, 0)
+        s = '  iTOW %u version %u numSigs %u reserved1 %u' % u
+
+        numSigs = u[2]
+        i = 0
+        while i < numSigs:
+            u = struct.unpack_from('<BBBBhBBBBHL', buf, 8 + (i * 16))
+            s += ('\n   gnssID %u svId %u sigId %u freqId %u prRes %d cno %u '
+                  'qualityInd %u\n'
+                  '    corrSource %u ionoModel %u sigFlags %#x reserved2 %u' %
+                  u)
+            i += 1
+        return s
+
     # u-blox TIME ONLY is same as Surveyed
     fix_types = ('None', 'Dead Reckoning', '2D', '3D', 'GPS+DR', 'Surveyed')
 
@@ -2488,8 +2511,8 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBBBLL', buf, 0)
-        return (' iTOW:%d ms, fix:%d flags:%#x fixstat:%#x flags2:%#x\n'
-                ' ttff:%d, msss:%d' % u)
+        return ('  iTOW:%d ms, fix:%d flags:%#x fixstat:%#x flags2:%#x\n'
+                '  ttff:%d, msss:%d' % u)
 
     def nav_svin(self, buf):
         """UBX-NAV-SVIN decode, Survey-in data"""
@@ -2501,10 +2524,10 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLLlllbbbBLLBB', buf, 0)
-        return (' version %u reserved1[%u %u %u] iTOW %u dur %u\n'
+        return ('  version %u reserved1[%u %u %u] iTOW %u dur %u\n'
                 '  meanX %d meanY %d meanZ %d\n'
                 '  meanXHP %d meanYHP %d meanZHP %d reserved2 %u meanAcc %u\n'
-                '  obs %u valid %u active %u\n' % u)
+                '  obs %u valid %u active %u' % u)
 
     def nav_svinfo(self, buf):
         """UBX-NAV-SVINFO decode"""
@@ -2743,7 +2766,7 @@ class ubx(object):
                0x39: {'str': 'GEOFENCE', 'name': 'UBX-NAV-GEOFENCE'},
                0x3B: {'str': 'SVIN', 'dec': nav_svin, 'name': 'UBX-NAV-SVIN'},
                0x3C: {'str': 'RELPOSNED', 'name': 'UBX-NAV-RELPOSNED'},
-               0x43: {'str': 'SIG', 'name': 'UBX-NAV-SIG'},
+               0x43: {'str': 'SIG', 'dec': nav_sig, 'name': 'UBX-NAV-SIG'},
                0x60: {'str': 'AOPSTATUS', 'name': 'UBX-NAV-AOPSTATUS'},
                0x61: {'str': 'EOE', 'dec': nav_eoe, 'name': 'UBX-NAV-EOE'},
                }
@@ -2953,8 +2976,8 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllLLBB', buf, 0)
-        s = (' dur %u meanX %d meanY %d meanZ %d\n'
-             '  meanV %u obs %u valid %u active %u' % u)
+        s = ('  dur %u meanX %d meanY %d meanZ %d meanV %u\n'
+             '  obs %u valid %u active %u' % u)
         return s
 
     def tim_tp(self, buf):
@@ -3718,6 +3741,11 @@ class ubx(object):
         m_data = bytearray(0)
         gps_model.gps_send(1, 1, m_data)
 
+    def send_nav_sig(self):
+        """UBX-NAV-SIG, poll Signal information"""
+        m_data = bytearray(0)
+        gps_model.gps_send(1, 0x43, m_data)
+
     def send_nav_velecef(self):
         """UBX-NAV-VELECEF, poll ECEF velocity decode"""
         m_data = bytearray(0)
@@ -3861,6 +3889,15 @@ class ubx(object):
         # UBX-CFG-NAVX5, poll Nav Engine Expert Settings
         "NAVX5": {"command": send_cfg_navx5,
                   "help": "UBX-CFG-NAVX5 poll Nav Engines Expert Settings"},
+        # UBX-NAV_SIG, poll Signal information
+        "NAV-SIG": {"command": send_nav_sig,
+                    "help": "UBX-NAV-SIG poll Signal Information"},
+        # UBX-NAV_POSECEF, poll ECEF position
+        "NAV-POSECEF": {"command": send_nav_posecef,
+                        "help": "UBX-NAV-POSECEF poll ECEF position"},
+        # UBX-NAV_VELECEF, poll ECEF velocity
+        "NAV-VELECEF": {"command": send_nav_velecef,
+                        "help": "UBX-NAV-VELECEF poll ECEF velocity"},
         # UBX-CFG-PMS, poll power management settings
         "PMS": {"command": send_cfg_pms,
                 "help": "UBX-CFG-PMS poll power management settings"},
