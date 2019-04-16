@@ -64,7 +64,7 @@ static sourcetype_t gpsd_classify(const char *path)
 #ifdef __linux__
 	/* Linux major device numbers live here
 	 *
-	 * https://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git/tree/Documentation/devices.txt
+         * https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/admin-guide/devices.txt
 	 *
 	 * Note: This code works because Linux major device numbers are
 	 * stable and architecture-independent.  It is *not* a good model
