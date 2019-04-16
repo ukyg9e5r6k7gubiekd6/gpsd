@@ -2990,6 +2990,20 @@ class ubx(object):
              '  obs %u valid %u active %u' % u)
         return s
 
+    def tim_tm2(self, buf):
+        """UBX-TIM-TP decode"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 28 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBHHHLLLLL', buf, 0)
+        s = ('  ch %u flags %#x count %u wnR %u wnF %u\n'
+             '  towMsR %u towSubMsR %u towMsF %u towSubMsF %u accEst %u\n' % u)
+        return s
+
     def tim_tp(self, buf):
         """UBX-TIM-TP decode"""
         m_len = len(buf)
@@ -3024,7 +3038,7 @@ class ubx(object):
         return s
 
     tim_ids = {1: {'str': 'TP', 'dec': tim_tp, 'name': 'UBX-TIM-TP'},
-               3: {'str': 'TM2', 'name': 'UBX-TIM-TM2'},
+               3: {'str': 'TM2', 'dec': tim_tm2, 'name': 'UBX-TIM-TM2'},
                4: {'str': 'SVIN', 'dec': tim_svin, 'name': 'UBX-TIM-SVIN'},
                6: {'str': 'VRFY', 'name': 'UBX-TIM-VRFY'},
                0x11: {'str': 'DOSC', 'name': 'UBX-TIM-DOSC'},
@@ -3833,6 +3847,11 @@ class ubx(object):
         m_data = bytearray(0)
         gps_model.gps_send(0x0d, 0x04, m_data)
 
+    def send_tim_tm2(self):
+        """UBX-TIM-TM2, get time mark data"""
+        m_data = bytearray(0)
+        gps_model.gps_send(0x0d, 0x03, m_data)
+
     def send_tim_tp(self):
         """UBX-TIM-TP, get time pulse timedata"""
         m_data = bytearray(0)
@@ -3938,6 +3957,9 @@ class ubx(object):
         # UBX-TIM-SVIN, get survey in data
         "SVIN": {"command": send_tim_svin,
                  "help": "UBX-TIM-SVIN get survey in data"},
+        # UBX-TIM-TM2, get time mark data
+        "TIM-TM2": {"command": send_tim_tm2,
+               "help": "UBX-TIM-TM2 get time mark data"},
         # UBX-TIM-TP, get time pulse timedata
         "TIM-TP": {"command": send_tim_tp,
                "help": "UBX-TIM-TP get time pulse timedata"},
