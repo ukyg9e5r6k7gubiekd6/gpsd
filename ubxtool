@@ -3631,11 +3631,6 @@ class ubx(object):
         m_data[11] = 1      # flags, unused
         gps_model.gps_send(6, 0x3e, m_data)
 
-    def send_cfg_gnss(self):
-        """UBX-CFG-GNSS, set Galileo config decode"""
-        m_data = bytearray(0)
-        gps_model.gps_send(6, 0x3e, m_data)
-
     def send_cfg_nav5_model(self):
         """UBX-CFG-NAV5, set dynamic platform model"""
 
@@ -3894,7 +3889,7 @@ class ubx(object):
         "CFG-ANT": {"command": send_poll, "opt": [0x06, 0x13],
                     "help": "UBX-CFG-ANT poll antenna config"},
         # UBX-CFG-GNSS poll gnss config
-        "CFG-GNSS": {"command": send_cfg_gnss,
+        "CFG-GNSS": {"command": send_poll, "opt": [0x06, 0x3e],
                      "help": "UBX-CFG-GNSS poll GNSS config"},
         # UBX-CFG-RST cold boot
         "COLDBOOT": {"command": send_cfg_rst,
