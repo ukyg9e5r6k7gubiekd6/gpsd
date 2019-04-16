@@ -1522,7 +1522,7 @@ class ubx(object):
             s += 'pdwnOnSCD '
         if u[0] & 0x10:
             s += 'recovery '
-        s += (')\n pinSwitch: %d, pinSCD: %d, pinOCD: %d reconfig: %d\n' %
+        s += (')\n pinSwitch: %d, pinSCD: %d, pinOCD: %d reconfig: %d' %
               (u[1] & 0x1f, (u[1] >> 5) & 0x1f, (u[1] >> 10) & 0x1f,
                u[1] >> 15))
         return s
@@ -3525,12 +3525,6 @@ class ubx(object):
         m_data = bytearray([0xd, 0x1, rate])
         gps_model.gps_send(6, 1, m_data)
 
-    def send_cfg_ant(self):
-        """UBX-CFG-ANT, Get Antenna Control Settings"""
-
-        m_data = bytearray(0)
-        gps_model.gps_send(6, 0x13, m_data)
-
     def send_cfg_cfg(self, save_clear):
         """UBX-CFG-CFG, save config"""
 
@@ -3897,8 +3891,8 @@ class ubx(object):
     }
     commands = {
         # UBX-CFG-ANT, poll antenna config decode
-        "ANT": {"command": send_cfg_ant,
-                "help": "UBX-CFG-ANT poll antenna config"},
+        "CFG-ANT": {"command": send_poll, "opt": [0x06, 0x13],
+                    "help": "UBX-CFG-ANT poll antenna config"},
         # UBX-CFG-GNSS poll gnss config
         "CFG-GNSS": {"command": send_cfg_gnss,
                      "help": "UBX-CFG-GNSS poll GNSS config"},
