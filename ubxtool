@@ -3513,15 +3513,17 @@ class ubx(object):
         # Save: save_clear = 0
         # Clear: save_clear = 1
 
-        # basic configs alays available to change:
+        # basic configs always available to change:
         # ioPort, msgConf, infMsg, navConf, rxmConf
         cfg1 = 0x1f
         # senConf, rinvConf, antConf, logConf
         cfg2 = 0x0f
 
+
         m_data = bytearray(13)
 
         # clear
+        # as of protver 27, any bit in clearMask clears all
         if 0 == save_clear:
             # saving
             m_data[0] = 0
@@ -3534,6 +3536,7 @@ class ubx(object):
         m_data[3] = 0       #
 
         # save
+        # as of protver 27, any bit in saveMask saves all
         if 0 == save_clear:
             # saving
             m_data[4] = cfg1
@@ -3546,6 +3549,7 @@ class ubx(object):
         m_data[7] = 0       #
 
         # load
+        # as of protver 27, any bit in loadMask loads all
         if False and 0 == save_clear:
             # saving
             m_data[8] = 0
