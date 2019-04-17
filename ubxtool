@@ -3708,11 +3708,6 @@ class ubx(object):
         m_data[1] = (reset_type >> 8) & 0xff
         gps_model.gps_send(6, 0x4, m_data)
 
-    def send_cfg_tmode2(self):
-        """UBX-CFG-TMODE2, get time mode 2 configuration"""
-        m_data = bytearray(0)
-        gps_model.gps_send(6, 0x3d, m_data)
-
     def send_cfg_tp5(self):
         """UBX-CFG-TP5, get time0 decodes, timepulse 0 and 1"""
         m_data = bytearray(0)
@@ -3894,6 +3889,9 @@ class ubx(object):
         # UBX-CFG-PRT, poll I/O port settings
         "CFG-PRT": {"command": send_cfg_prt,
                     "help": "UBX-CFG-PRT poll I/O port settings"},
+        # UBX-CFG-TMODE2, get time mode 2 config
+        "CFG-TMODE2": {"command": send_poll, "opt": [0x06, 0x3d],
+                       "help": "UBX-CFG-TMODE2 get time mode 2 config"},
         # UBX-CFG-SBAS, get SBAS settings
         "CFG-SBAS": {"command": send_cfg_sbas,
                      "help": "UBX-CFG-SBAS poll SBAS settings"},
@@ -3952,9 +3950,6 @@ class ubx(object):
         # UBX-TIM-TP, get time pulse timedata
         "TIM-TP": {"command": send_tim_tp,
                    "help": "UBX-TIM-TP get time pulse timedata"},
-        # UBX-CFG-TMODE2, get time mode 2 config
-        "TMODE2": {"command": send_cfg_tmode2,
-                   "help": "UBX-CFG-TMODE2 get time mode 2 config"},
         # UBX-CFG-RST warm boot
         "WARMBOOT": {"command": send_cfg_rst,
                      "help": "UBX-CFG-RST warmboot the GPS",
