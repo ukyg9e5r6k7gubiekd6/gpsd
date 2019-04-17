@@ -2754,8 +2754,8 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlHbbbbbB', buf, 0)
-        s = (' iTOW:%d ms, tAcc:%d ns nano:%d ns Time: %d/%d/%d %d:%d:%d\n'
-             ' valid:%#x (' % u)
+        s = ('  iTOW:%d tAcc:%d nano:%d Time: %d/%d/%d %d:%d:%d\n'
+             '  valid:%#x (' % u)
         if 0xf7 & u[9]:
             if 1 & u[9]:
                 s += 'validTOW '
@@ -2794,10 +2794,7 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllL', buf, 0)
-        return ('  iTOW:%d ms,'
-                ' ecefVX:%.2f m/s VY:%.2f m/s VZ:%.2f m/s vAcc:%.2f m/s' %
-                (u[0], u[1] / 100.0, u[2] / 100.0, u[3] / 100.0,
-                 u[4] / 100.0))
+        return '  iTOW:%d ecef: VX %.2f VY %.2f VZ %.2f vAcc:%.2f' % u
 
     def nav_velned(self, buf):
         """UBX-NAV-VELNED decode"""
@@ -2809,11 +2806,8 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllLLlLL', buf, 0)
-        return (' iTOW:%d ms,'
-                ' velN:%d cm/s velE:%d cm/s velD:%d cm/s speed:%d cm/s\n'
-                ' gspeed:%d cm/s heading:%f cm/s sAcc:%d cm/s cAcc:%d deg' %
-                (u[0], u[1], u[2], u[3], u[4], u[5], u[6] * 1e-5,
-                 u[7], u[8] * 1e-5))
+        return ('  iTOW %d vel: N %d E %d D %d speed %d\n'
+                '  gspeed %d heading %f sAcc %d cAcc %d' % u)
 
     nav_ids = {1: {'str': 'POSECEF', 'dec': nav_posecef,
                    'name': 'UBX-NAV-POSECEF'},
@@ -3992,9 +3986,15 @@ class ubx(object):
         # UBX-NAV-TIMELS
         "NAV-TIMELS": {"command": send_poll, "opt": [0x01, 0x26],
                        "help": "poll UBX-NAV-TIMELS Leap Second Info"},
+        # UBX-NAV-TIMEUTC
+        "NAV-TIMEUTC": {"command": send_poll, "opt": [0x01, 0x21],
+                        "help": "poll UBX-NAV-TIMEUTC UTC Time Solution"},
         # UBX-NAV-VELECEF
         "NAV-VELECEF": {"command": send_poll, "opt": [0x01, 0x11],
                         "help": "poll UBX-NAV-VELECEF ECEF velocity"},
+        # UBX-NAV-VELNED
+        "NAV-VELNED": {"command": send_poll, "opt": [0x01, 0x12],
+                       "help": "poll UBX-NAV-VELNED NED velocity"},
         # UBX-CFG-PMS
         "PMS": {"command": send_cfg_pms,
                 "help": "set UBX-CFG-PMS power management settings"},
