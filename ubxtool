@@ -3886,13 +3886,17 @@ class ubx(object):
                      "help": "UBX-CFG-NAV5 poll Nav Engines settings"},
         # UBX-CFG-NAVX5, poll Nav Engine Expert Settings
         "CFG-NAVX5": {"command": send_poll, "opt": [0x06, 0x23],
-                  "help": "UBX-CFG-NAVX5 poll Nav Engines Expert Settings"},
+                      "help": "UBX-CFG-NAVX5 poll Nav Engines "
+                      "Expert Settings"},
         # UBX-CFG-PMS, poll power management settings
         "CFG-PMS": {"command": send_cfg_pms,
-                "help": "UBX-CFG-PMS poll/set power management settings"},
+                    "help": "UBX-CFG-PMS poll/set power management settings"},
         # UBX-CFG-PRT, poll I/O port settings
         "CFG-PRT": {"command": send_cfg_prt,
-                "help": "UBX-CFG-PRT poll I/O port settings"},
+                    "help": "UBX-CFG-PRT poll I/O port settings"},
+        # UBX-CFG-SBAS, get SBAS settings
+        "CFG-SBAS": {"command": send_cfg_sbas,
+                     "help": "UBX-CFG-SBAS poll SBAS settings"},
         # UBX-CFG-RST cold boot
         "COLDBOOT": {"command": send_cfg_rst,
                      "help": "UBS-CFG-RST coldboot the GPS",
@@ -3933,9 +3937,6 @@ class ubx(object):
         "SAVE": {"command": send_cfg_cfg,
                  "help": "UBX-CFG-CFG save current config",
                  "opt": 0},
-        # UBX-CFG-SBAS, get SBAS settings
-        "SBAS": {"command": send_cfg_sbas,
-                 "help": "UBX-CFG-SBAS poll SBAS settings"},
         # UBX-CFG-SBAS, get SBAS settings
         "SEC-UNIQID": {"command": send_sec_uniqid,
                        "help": "UBX-SEC-UNIQID poll Unique chip ID"},
