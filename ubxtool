@@ -2361,17 +2361,45 @@ class ubx(object):
                 '  ecefHP:%d Y:%d Z:%d\n'
                 '  reserved 2 %u pAcc:%d cm' % u)
 
+    def nav_hpposllh(self, buf):
+        """UBX-NAV-HPPOSLLH decode"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 36 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBBBLllllbbbbLL', buf, 0)
+        return ('  version %u reserved1 %u %u %u iTOW:%u\n'
+                '  lon:%d lat:%d height:%d hMSL %d\n'
+                '  lonHp:%d latHp:%d heightHp:%d hMSLHp %d\n'
+                '  hAcc:%u vAcc:%u' % u)
+
     def nav_posecef(self, buf):
         """UBX-NAV-POSECEF decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
 
-        if 20 < m_len:
+        if 20 > m_len:
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllL', buf, 0)
-        return '  iTOW:%d ms, ecefX:%d cm Y:%d cm Z:%d cm\n  pAcc:%d cm' % u
+        return '  iTOW:%u ms, ecefX:%d cm Y:%d cm Z:%d cm\n  pAcc:%d cm' % u
+
+    def nav_posllh(self, buf):
+        """UBX-NAV-POSLLH decode"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 20 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LllllLL', buf, 0)
+        return ('  iTOW:%d lon:%d lat:%d height:%d\n'
+                '  hMSL:%d hAcc:%u vAcc:%u' % u)
 
     def nav_pvt(self, buf):
         """UBX-NAV-PVT decode"""
@@ -2523,10 +2551,10 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlhBBlllLlllLHBBBBB', buf, 0)
-        s = (' iTOW:%u ms, fTOW %u ns, week:%d gpsFix:%d flags:%#x\n'
-             ' ECEF X:%.3f Y:%.3f Z:%.3f pAcc:%.3f\n'
-             ' VECEF X:%.3f Y:%.3f Z:%.3f vAcc:%.3f\n'
-             ' pDOP:%.2f numSV:%d' %
+        s = ('  iTOW:%u ms, fTOW %u ns, week:%d gpsFix:%d flags:%#x\n'
+             '  ECEF X:%.3f Y:%.3f Z:%.3f pAcc:%.3f\n'
+             '  VECEF X:%.3f Y:%.3f Z:%.3f vAcc:%.3f\n'
+             '  pDOP:%.2f numSV:%d' %
              (u[0], u[1], u[2], u[3], u[4],
               u[5] / 100.0, u[6] / 100.0, u[7] / 100.0, u[8] / 100.0,
               u[9] / 100.0, u[10] / 100.0, u[11] / 100.0, u[12] / 100.0,
@@ -2688,7 +2716,7 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlhbBL', buf, 0)
-        s = (' iTOW:%u ms, fTOW:%u ns, week:%d leapS:%d valid:%#x tAcc:%d ns' %
+        s = ('  iTOW:%u fTOW:%u week:%d leapS:%d valid:%#x tAcc:%d' %
              u)
         if 0x07 & u[4]:
             s += '\n   valid: '
@@ -2773,7 +2801,8 @@ class ubx(object):
 
     nav_ids = {1: {'str': 'POSECEF', 'dec': nav_posecef,
                    'name': 'UBX-NAV-POSECEF'},
-               2: {'str': 'POSLLH', 'name': 'UBX-NAV-POSLLH'},
+               2: {'str': 'POSLLH', 'dec': nav_posllh,
+                   'name': 'UBX-NAV-POSLLH'},
                3: {'str': 'STATUS', 'dec': nav_status,
                    'name': 'UBX-NAV-STATUS'},
                0x4: {'str': 'DOP', 'dec': nav_dop, 'name': 'UBX-NAV-DOP'},
@@ -2788,7 +2817,8 @@ class ubx(object):
                       'name': 'UBX-NAV-VELNED'},
                0x13: {'str': 'HPPOSECEF', 'dec': nav_hpposecef,
                       'name': 'UBX-NAV-HPPOSECEF'},
-               0x14: {'str': 'HPPOSLLH', 'name': 'UBX-NAV-HPPOSLLH'},
+               0x14: {'str': 'HPPOSLLH', 'dec': nav_hpposllh,
+                      'name': 'UBX-NAV-HPPOSLLH'},
                0x20: {'str': 'TIMEGPS', 'dec': nav_timegps,
                       'name': 'UBX-NAV-TIMEGPS'},
                0x21: {'str': 'TIMEUTC', 'dec': nav_timeutc,
@@ -3912,13 +3942,19 @@ class ubx(object):
         # UBX-NAV-HPPOSECEF
         "NAV-HPPOSECEF": {"command": send_poll, "opt": [0x01, 0x13],
                           "help": "poll UBX-NAV-HPPOSECEF ECEF position"},
-        # UBX-NAV_SIG
+        # UBX-NAV-HPPOSLLH
+        "NAV-HPPOSLLH": {"command": send_poll, "opt": [0x01, 0x14],
+                         "help": "poll UBX-NAV-HPPOSECEF LLH position"},
+        # UBX-NAV-SIG
         "NAV-SIG": {"command": send_poll, "opt": [0x01, 0x43],
                     "help": "poll UBX-NAV-SIG Signal Information"},
-        # UBX-NAV_POSECEF
+        # UBX-NAV-POSECEF
         "NAV-POSECEF": {"command": send_poll, "opt": [0x01, 0x01],
                         "help": "poll UBX-NAV-POSECEF ECEF position"},
-        # UBX-NAV_VELECEF
+        # UBX-NAV-LLH
+        "NAV-POSLLH": {"command": send_poll, "opt": [0x01, 0x02],
+                       "help": "poll UBX-NAV-POSLLH LLH position"},
+        # UBX-NAV-VELECEF
         "NAV-VELECEF": {"command": send_poll, "opt": [0x01, 0x11],
                         "help": "poll UBX-NAV-VELECEF ECEF velocity"},
         # UBX-CFG-PMS
@@ -4245,11 +4281,11 @@ def usage():
           )
 
     for item in sorted(gps_model.able_commands.keys()):
-        print("    %-12s %s" % (item, gps_model.able_commands[item]["help"]))
+        print("    %-13s %s" % (item, gps_model.able_commands[item]["help"]))
 
     print('\nP can be one of:')
     for item in sorted(gps_model.commands.keys()):
-        print("    %-12s %s" % (item, gps_model.commands[item]["help"]))
+        print("    %-13s %s" % (item, gps_model.commands[item]["help"]))
     print('\nOptions can be placed in the UBXOPTS environment variable.\n'
           'UBXOPTS is processed before the CLI options.')
     sys.exit(0)
