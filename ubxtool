@@ -2728,6 +2728,22 @@ class ubx(object):
                 s += 'leapValid '
         return s
 
+    def nav_timels(self, buf):
+        """UBX-NAV-TIMELS decode"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 24 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LBBBBBbBbLHHBBBB', buf, 0)
+        s = ('  iTOW %u version %u reserved2 %u %u %u srcOfCurrLs %u\n'
+             '  currLs %u srcOfLsChange %u lsChange %u timeToLsEvent %u\n'
+             '  dateOfLsGpsWn %u dateOfLsGpsDn %u reserved2 %u %u %u\n'
+             '  valid %#x' % u)
+        return s
+
     def nav_timeutc(self, buf):
         """UBX-NAV-TIMEUTC decode"""
         m_len = len(buf)
@@ -2831,7 +2847,8 @@ class ubx(object):
                       'name': 'UBX-NAV-TIMEBDS'},
                0x25: {'str': 'TIMEGAL', 'dec': nav_timegal,
                       'name': 'UBX-NAV-TIMEGAL'},
-               0x26: {'str': 'TIMELS', 'name': 'UBX-NAV-TIMELS'},
+               0x26: {'str': 'TIMELS', 'dec': nav_timels,
+                      'name': 'UBX-NAV-TIMELS'},
                0x30: {'str': 'SVINFO', 'dec': nav_svinfo,
                       'name': 'UBX-NAV-SVINFO'},
                0x31: {'str': 'DGPS', 'dec': nav_dgps, 'name': 'UBX-NAV-DGPS'},
@@ -3969,6 +3986,12 @@ class ubx(object):
         # UBX-NAV-TIMEGLO
         "NAV-TIMEGLO": {"command": send_poll, "opt": [0x01, 0x23],
                         "help": "poll UBX-NAV-TIMEGLO GLO Time Solution"},
+        # UBX-NAV-TIMEGPS
+        "NAV-TIMEGPS": {"command": send_poll, "opt": [0x01, 0x20],
+                        "help": "poll UBX-NAV-TIMEGPS GPS Time Solution"},
+        # UBX-NAV-TIMELS
+        "NAV-TIMELS": {"command": send_poll, "opt": [0x01, 0x26],
+                       "help": "poll UBX-NAV-TIMELS Leap Second Info"},
         # UBX-NAV-VELECEF
         "NAV-VELECEF": {"command": send_poll, "opt": [0x01, 0x11],
                         "help": "poll UBX-NAV-VELECEF ECEF velocity"},
