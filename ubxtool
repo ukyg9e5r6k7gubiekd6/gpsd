@@ -3717,11 +3717,6 @@ class ubx(object):
         m_data[0] = 1
         gps_model.gps_send(6, 0x31, m_data)
 
-    def send_cfg_usb(self):
-        """UBX-CFG-USB, get USB configuration"""
-        m_data = bytearray(0)
-        gps_model.gps_send(6, 0x1b, m_data)
-
     def send_mon_comms(self):
         """UBX-MON-COMMS Comm port information"""
         m_data = bytearray(0)
@@ -3898,6 +3893,9 @@ class ubx(object):
         # UBX-CFG-TP5
         "CFG-TP5": {"command": send_cfg_tp5,
                     "help": "UBX-TIM-TP5 get time pulse decodes"},
+        # poll UBX-CFG-USB
+        "CFG-USB": {"command": send_poll, "opt": [0x06, 0x1b],
+                    "help": "UBX-CFG-USB get USB config"},
         # UBX-CFG-RST cold boot
         "COLDBOOT": {"command": send_cfg_rst,
                      "help": "UBS-CFG-RST coldboot the GPS",
@@ -3954,9 +3952,6 @@ class ubx(object):
         "WARMBOOT": {"command": send_cfg_rst,
                      "help": "UBX-CFG-RST warmboot the GPS",
                      "opt": 1},
-        # poll UBX-CFG-USB
-        "USB": {"command": send_cfg_usb,
-                "help": "UBX-CFG-USB get USB config"},
         # poll UBX-MON-VER
         "VER": {"command": send_mon_ver,
                 "help": "UBX-MON-VER get GPS version"},
