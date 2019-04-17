@@ -2357,9 +2357,9 @@ class ubx(object):
 
         u = struct.unpack_from('<BBBBLlllbbbbL', buf, 0)
         return ('  version %u reserved1 %u %u %u iTOW:%d\n'
-                '  ecefX:%d Y:%d Z:%d\n'
-                '  ecefHP:%d Y:%d Z:%d\n'
-                '  reserved 2 %u pAcc:%d cm' % u)
+                '  ecef: X %d Y %d Z %d\n'
+                '  ecefHP: X %d Y %d Z %d\n'
+                '  reserved2 %u pAcc:%d' % u)
 
     def nav_hpposllh(self, buf):
         """UBX-NAV-HPPOSLLH decode"""
@@ -2370,11 +2370,11 @@ class ubx(object):
         if 36 > m_len:
             return " Bad Length %s" % m_len
 
-        u = struct.unpack_from('<BBBBBLllllbbbbLL', buf, 0)
-        return ('  version %u reserved1 %u %u %u iTOW:%u\n'
-                '  lon:%d lat:%d height:%d hMSL %d\n'
-                '  lonHp:%d latHp:%d heightHp:%d hMSLHp %d\n'
-                '  hAcc:%u vAcc:%u' % u)
+        u = struct.unpack_from('<BBBBLllllbbbbLL', buf, 0)
+        return ('  version %u reserved1 %u %u %u iTOW %u\n'
+                '  lon %d lat %d height %d hMSL %d\n'
+                '  lonHp %d latHp %d heightHp %d hMSLHp %d\n'
+                '  hAcc %u vAcc %u' % u)
 
     def nav_posecef(self, buf):
         """UBX-NAV-POSECEF decode"""
