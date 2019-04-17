@@ -2858,6 +2858,20 @@ class ubx(object):
                0x61: {'str': 'EOE', 'dec': nav_eoe, 'name': 'UBX-NAV-EOE'},
                }
 
+    # used for RTCM3 rate config
+    rtcm_ids = {5: {'str': '1005'},
+                0x4a: {'str': '1074'},
+                0x4d: {'str': '1077'},
+                0x54: {'str': '1084'},
+                0x57: {'str': '1087'},
+                0x61: {'str': '1097'},
+                0x7c: {'str': '1124'},
+                0x7f: {'str': '1127'},
+                0xe6: {'str': '1230'},
+                0xfd: {'str': '4072-1'},
+                0xfe: {'str': '4072-0'},
+                }
+
     # used for NMEA rate config
     nmea_ids = {0: {'str': 'GGA'},
                 1: {'str': 'GLL'},
@@ -3144,6 +3158,7 @@ class ubx(object):
         0x27: {'str': 'SEC', 'ids': sec_ids},
         0x28: {'str': 'HNR'},
         0xf0: {'str': 'NMEA', 'ids': nmea_ids},
+        0xf5: {'str': 'RTCM', 'ids': rtcm_ids},
     }
 
     def class_id_s(self, m_class, m_id):
