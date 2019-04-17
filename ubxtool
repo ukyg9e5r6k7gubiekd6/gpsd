@@ -3804,16 +3804,6 @@ class ubx(object):
         """generic send poll request"""
         gps_model.gps_send(m_data[0], m_data[1], m_data[2:])
 
-    def send_sec_uniqid(self):
-        """UBX-SEC-UNIQID poll UNique Chip ID"""
-        m_data = bytearray(0)
-        gps_model.gps_send(0x27, 0x03, m_data)
-
-    def send_tim_svin(self):
-        """UBX-TIM-SVIN, get survey in data"""
-        m_data = bytearray(0)
-        gps_model.gps_send(0x0d, 0x04, m_data)
-
     able_commands = {
         # en/dis able BeiDou
         "BEIDOU": {"command": send_able_beidou,
@@ -3925,10 +3915,10 @@ class ubx(object):
                  "help": "UBX-CFG-CFG save current config",
                  "opt": 0},
         # UBX-CFG-SBAS, get SBAS settings
-        "SEC-UNIQID": {"command": send_sec_uniqid,
+        "SEC-UNIQID": {"command": send_poll, "opt": [0x27, 0x03],
                        "help": "UBX-SEC-UNIQID poll Unique chip ID"},
         # UBX-TIM-SVIN, get survey in data
-        "TIM-SVIN": {"command": send_tim_svin,
+        "TIM-SVIN": {"command": send_poll, "opt": [0x0d, 0x04],
                      "help": "UBX-TIM-SVIN get survey in data"},
         # UBX-TIM-TM2, get time mark data
         "TIM-TM2": {"command": send_poll, "opt": [0x0d, 0x03],
