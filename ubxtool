@@ -2652,8 +2652,8 @@ class ubx(object):
             return ".Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlhbBL', buf, 0)
-        s = (' iTOW:%d ms, SOW:%d s, fSOW:%d ns, week %d leapS:%d s\n'
-             ' Valid:%#x tAcc:%d ns' % u)
+        s = ('  iTOW:%d SOW:%d fSOW:%d week %d leapS:%d\n'
+             '  Valid:%#x tAcc:%d' % u)
         if 0x07 & u[5]:
             s += '\n   valid: '
             if 1 & u[5]:
@@ -2674,8 +2674,8 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlhbBL', buf, 0)
-        s = (' iTOW %d ms, galTOW %d s, fGalTow %d ns, galWno %d, leapS %d\n'
-             ' Valid:%#x, tAcc:%d ns' % u)
+        s = ('  iTOW %d galTOW %d fGalTow %d galWno %d leapS %d\n'
+             '  Valid:%#x, tAcc:%d' % u)
         if 0x07 & u[6]:
             s += '\n   valid: '
             if 1 & u[6]:
@@ -2696,8 +2696,8 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlhbBL', buf, 0)
-        s = (' iTOW %d ms, TOD %d s, fTOD %d ns, Nt %d days, N4 %d\n'
-             ' Valid:%#x, tAcc:%d ns' % u)
+        s = ('  iTOW %d ms, TOD %d s, fTOD %d ns, Nt %d days, N4 %d\n'
+             '  Valid:%#x, tAcc:%d ns' % u)
         if 0x03 & u[5]:
             s += '\n   valid: '
             if 1 & u[5]:
@@ -3960,6 +3960,15 @@ class ubx(object):
         # UBX-NAV-STATUS
         "NAV-STATUS": {"command": send_poll, "opt": [0x01, 0x03],
                        "help": "poll UBX-NAV-STATUS Receiver Nav Status"},
+        # UBX-NAV-TIMEBDS
+        "NAV-TIMEBDS": {"command": send_poll, "opt": [0x01, 0x24],
+                        "help": "poll UBX-NAV-TIMEBDS BDS Time Solution"},
+        # UBX-NAV-TIMEGAL
+        "NAV-TIMEGAL": {"command": send_poll, "opt": [0x01, 0x25],
+                        "help": "poll UBX-NAV-TIMEGAL Galileo Time Solution"},
+        # UBX-NAV-TIMEGLO
+        "NAV-TIMEGLO": {"command": send_poll, "opt": [0x01, 0x23],
+                        "help": "poll UBX-NAV-TIMEGLO GLO Time Solution"},
         # UBX-NAV-VELECEF
         "NAV-VELECEF": {"command": send_poll, "opt": [0x01, 0x11],
                         "help": "poll UBX-NAV-VELECEF ECEF velocity"},
