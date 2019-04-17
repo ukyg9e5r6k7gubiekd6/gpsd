@@ -2346,13 +2346,28 @@ class ubx(object):
             s += '\n  state %u reserved1 %u' % u
         return s
 
+    def nav_hpposecef(self, buf):
+        """UBX-NAV-POSECEF decode"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 28 < m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBBLlllbbbbL', buf, 0)
+        return ('  version %u reserved1 %u %u %u iTOW:%d\n'
+                '  ecefX:%d Y:%d Z:%d\n'
+                '  ecefHP:%d Y:%d Z:%d\n'
+                '  reserved 2 %u pAcc:%d cm' % u)
+
     def nav_posecef(self, buf):
         """UBX-NAV-POSECEF decode"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
 
-        if 20 != m_len:
+        if 20 < m_len:
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllL', buf, 0)
@@ -2771,7 +2786,8 @@ class ubx(object):
                       'name': 'UBX-NAV-VELECEF'},
                0x12: {'str': 'VELNED', 'dec': nav_velned,
                       'name': 'UBX-NAV-VELNED'},
-               0x13: {'str': 'HPPOSECEF', 'name': 'UBX-NAV-HPPOSECEF'},
+               0x13: {'str': 'HPPOSECEF', 'dec': nav_hpposecef,
+                      'name': 'UBX-NAV-HPPOSECEF'},
                0x14: {'str': 'HPPOSLLH', 'name': 'UBX-NAV-HPPOSLLH'},
                0x20: {'str': 'TIMEGPS', 'dec': nav_timegps,
                       'name': 'UBX-NAV-TIMEGPS'},
@@ -3893,6 +3909,9 @@ class ubx(object):
         # UBX-NAV-GEOFENCE
         "NAV-GEOFENCE": {"command": send_poll, "opt": [0x01, 0x39],
                          "help": "poll UBX-NAV-GEOFENCE Geofence status"},
+        # UBX-NAV-HPPOSECEF
+        "NAV-HPPOSECEF": {"command": send_poll, "opt": [0x01, 0x13],
+                          "help": "poll UBX-NAV-HPPOSECEF ECEF position"},
         # UBX-NAV_SIG
         "NAV-SIG": {"command": send_poll, "opt": [0x01, 0x43],
                     "help": "poll UBX-NAV-SIG Signal Information"},
