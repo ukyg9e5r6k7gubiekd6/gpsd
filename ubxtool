@@ -2312,8 +2312,8 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<Lhhhhhhh', buf, 0)
-        s = (' iTOW:%d ms, gDOP:%.2f pDOP:%.2f tDOP:%.2f vDOP:%.2f\n'
-             ' hDOP:%.2f nDOP:%.2f eDOP:%.2f' %
+        s = ('  iTOW:%d ms, gDOP:%.2f pDOP:%.2f tDOP:%.2f vDOP:%.2f\n'
+             '  hDOP:%.2f nDOP:%.2f eDOP:%.2f' %
              (u[0], u[1] / 100.0, u[2] / 100.0, u[3] / 100.0,
               u[4] / 100.0, u[5] / 100.0, u[6] / 100.0, u[7] / 100.0))
         return s
@@ -2326,6 +2326,25 @@ class ubx(object):
 
         u = struct.unpack_from('<L', buf, 0)
         return ' iTOW:%d ms' % u
+
+    def nav_geofence(self, buf):
+        """UBX-NAV-GEOFENCE decode"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 8 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LBBBB', buf, 0)
+        s = '  iTOW:%d version %u status %u numFences %u combState %u' % u
+
+        m_len -= 8
+        i = 0
+        while 1 < m_len:
+            u = struct.unpack_from('<BB', buf, 8 + (i * 2))
+            s += '\n  state %u reserved1 %u' % u
+        return s
 
     def nav_posecef(self, buf):
         """UBX-NAV-POSECEF decode"""
@@ -2716,7 +2735,7 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllL', buf, 0)
-        return (' iTOW:%d ms,'
+        return ('  iTOW:%d ms,'
                 ' ecefVX:%.2f m/s VY:%.2f m/s VZ:%.2f m/s vAcc:%.2f m/s' %
                 (u[0], u[1] / 100.0, u[2] / 100.0, u[3] / 100.0,
                  u[4] / 100.0))
@@ -2773,7 +2792,8 @@ class ubx(object):
                0x32: {'str': 'SBAS', 'dec': nav_sbas, 'name': 'UBX-NAV-SBAS'},
                0x34: {'str': 'ORB', 'name': 'UBX-NAV-ORB'},
                0x35: {'str': 'SAT', 'dec': nav_sat, 'name': 'UBX-NAV-SAT'},
-               0x39: {'str': 'GEOFENCE', 'name': 'UBX-NAV-GEOFENCE'},
+               0x39: {'str': 'GEOFENCE', 'dec': nav_geofence,
+                      'name': 'UBX-NAV-GEOFENCE'},
                0x3B: {'str': 'SVIN', 'dec': nav_svin, 'name': 'UBX-NAV-SVIN'},
                0x3C: {'str': 'RELPOSNED', 'name': 'UBX-NAV-RELPOSNED'},
                0x43: {'str': 'SIG', 'dec': nav_sig, 'name': 'UBX-NAV-SIG'},
@@ -3810,96 +3830,105 @@ class ubx(object):
                      "help": "Survey-in mode with TMODE2"},
     }
     commands = {
-        # UBX-CFG-ANT, poll antenna config decode
+        # UBX-CFG-ANT
         "CFG-ANT": {"command": send_poll, "opt": [0x06, 0x13],
                     "help": "poll UBX-CFG-ANT antenna config"},
-        # UBX-CFG-GNSS poll gnss config
+        # UBX-CFG-GNSS
         "CFG-GNSS": {"command": send_poll, "opt": [0x06, 0x3e],
                      "help": "poll UBX-CFG-GNSS GNSS config"},
-        # UBX-CFG-NAV5, poll Nav Engine Settings
+        # UBX-CFG-NAV5
         "CFG-NAV5": {"command": send_poll, "opt": [0x06, 0x24],
                      "help": "poll UBX-CFG-NAV5 Nav Engines settings"},
-        # UBX-CFG-NAVX5, poll Nav Engine Expert Settings
+        # UBX-CFG-NAVX5
         "CFG-NAVX5": {"command": send_poll, "opt": [0x06, 0x23],
                       "help": "poll UBX-CFG-NAVX5 Nav Expert Settings"},
-        # UBX-CFG-PMS, poll power management settings
+        # UBX-CFG-PMS
         "CFG-PMS": {"command": send_poll, "opt": [0x06, 0x86],
                     "help": "poll UBX-CFG-PMS power management settings"},
-        # UBX-CFG-PRT, poll I/O port settings
+        # UBX-CFG-PRT
         "CFG-PRT": {"command": send_cfg_prt,
                     "help": "poll UBX-CFG-PRT I/O port settings"},
-        # UBX-CFG-TMODE2, get time mode 2 config
+        # UBX-CFG-TMODE2
         "CFG-TMODE2": {"command": send_poll, "opt": [0x06, 0x3d],
                        "help": "poll UBX-CFG-TMODE2 time mode 2 config"},
-        # UBX-CFG-SBAS, get SBAS settings
+        # UBX-CFG-SBAS
         "CFG-SBAS": {"command": send_poll, "opt": [0x06, 0x16],
                      "help": "poll UBX-CFG-SBAS SBAS settings"},
         # UBX-CFG-TP5
         "CFG-TP5": {"command": send_cfg_tp5,
                     "help": "poll UBX-TIM-TP5 time pulse decodes"},
-        # poll UBX-CFG-USB
+        # UBX-CFG-USB
         "CFG-USB": {"command": send_poll, "opt": [0x06, 0x1b],
                     "help": "poll UBX-CFG-USB USB config"},
-        # UBX-CFG-RST cold boot
+        # UBX-CFG-RST
         "COLDBOOT": {"command": send_cfg_rst,
                      "help": "UBS-CFG-RST coldboot the GPS",
                      "opt": 0xfff},
-        # UBX-CFG-RST hot boot
+        # UBX-CFG-RST
         "HOTBOOT": {"command": send_cfg_rst,
                     "help": "UBX-CFG-RST hotboot the GPS",
                     "opt": 0},
-        # UBX-CFG-NAV5 set Dynamic Platform Model
+        # UBX-CFG-NAV5
         "MODEL": {"command": send_cfg_nav5_model,
                   "help": "set UBX-CFG-NAV5 Dynamic Platform Model"},
-        # poll UBX-MON-COMMS
+        # UBX-MON-COMMS
         "MON-COMMS": {"command": send_mon_comms,
                       "help": "poll UBX-MON-COMMS Comm port "
                       " information (27+)"},
-        # poll UBX-MON-IO
+        # UBX-MON-IO
         "MON-IO": {"command": send_poll, "opt": [0x0a, 0x02],
                    "help": "poll UBX-MON-IO I/O Subsystem Status"},
-        # poll UBX-MON-VER
+        # UBX-MON-VER
         "MON-VER": {"command": send_poll, "opt": [0x0a, 0x04],
                     "help": "poll UBX-MON-VER GPS version"},
-        # UBX-NAV-CLOCK, poll Clock Solution
+        # UBX-NAV-CLOCK
         "NAV-CLOCK": {"command": send_poll, "opt": [0x01, 0x22],
                       "help": "poll UBX-NAV-CLOCK Clock Solution"},
-        # UBX-NAV_SIG, poll Signal information
+        # UBX-NAV-DGPS
+        "NAV-DGPS": {"command": send_poll, "opt": [0x01, 0x31],
+                     "help": "poll UBX-NAV-DGPS DGPS Data Used for NAV"},
+        # UBX-NAV-DOP
+        "NAV-DOP": {"command": send_poll, "opt": [0x01, 0x04],
+                    "help": "poll UBX-NAV-DOP Dilution of Precision"},
+        # UBX-NAV-GEOFENCE
+        "NAV-GEOFENCE": {"command": send_poll, "opt": [0x01, 0x39],
+                         "help": "poll UBX-NAV-GEOFENCE Geofence status"},
+        # UBX-NAV_SIG
         "NAV-SIG": {"command": send_poll, "opt": [0x01, 0x43],
                     "help": "poll UBX-NAV-SIG Signal Information"},
-        # UBX-NAV_POSECEF, poll ECEF position
+        # UBX-NAV_POSECEF
         "NAV-POSECEF": {"command": send_poll, "opt": [0x01, 0x01],
                         "help": "poll UBX-NAV-POSECEF ECEF position"},
-        # UBX-NAV_VELECEF, poll ECEF velocity
+        # UBX-NAV_VELECEF
         "NAV-VELECEF": {"command": send_poll, "opt": [0x01, 0x11],
                         "help": "poll UBX-NAV-VELECEF ECEF velocity"},
-        # UBX-CFG-PMS, set power management settings
+        # UBX-CFG-PMS
         "PMS": {"command": send_cfg_pms,
                 "help": "set UBX-CFG-PMS power management settings"},
-        # UBX-RXM-RAWX poll raw measurement data
+        # UBX-RXM-RAWX
         "RXM-RAWX": {"command": send_poll, "opt": [0x02, 0x15],
                      "help": "poll UBX-RXM-RAWX raw measurement data"},
-        # UBX-CFG-CFG reset config
+        # UBX-CFG-CFG
         "RESET": {"command": send_cfg_cfg,
                   "help": "UBX-CFG-CFG reset config to defaults",
                   "opt": 1},
-        # UBX-CFG-CFG save config
+        # UBX-CFG-CFG
         "SAVE": {"command": send_cfg_cfg,
                  "help": "UBX-CFG-CFG save current config",
                  "opt": 0},
-        # UBX-CFG-SBAS, get SBAS settings
+        # UBX-CFG-SBAS
         "SEC-UNIQID": {"command": send_poll, "opt": [0x27, 0x03],
                        "help": "poll UBX-SEC-UNIQID Unique chip ID"},
-        # UBX-TIM-SVIN, get survey in data
+        # UBX-TIM-SVIN
         "TIM-SVIN": {"command": send_poll, "opt": [0x0d, 0x04],
                      "help": "poll UBX-TIM-SVIN survey in data"},
-        # UBX-TIM-TM2, get time mark data
+        # UBX-TIM-TM2
         "TIM-TM2": {"command": send_poll, "opt": [0x0d, 0x03],
                     "help": "poll UBX-TIM-TM2 time mark data"},
-        # UBX-TIM-TP, get time pulse timedata
+        # UBX-TIM-TP
         "TIM-TP": {"command": send_poll, "opt": [0x0d, 0x01],
                    "help": "poll UBX-TIM-TP time pulse timedata"},
-        # UBX-CFG-RST warm boot
+        # UBX-CFG-RST
         "WARMBOOT": {"command": send_cfg_rst,
                      "help": "UBX-CFG-RST warmboot the GPS",
                      "opt": 1},
