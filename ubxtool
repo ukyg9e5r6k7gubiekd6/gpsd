@@ -3866,6 +3866,9 @@ class ubx(object):
         # UBX-CFG-GNSS poll gnss config
         "CFG-GNSS": {"command": send_poll, "opt": [0x06, 0x3e],
                      "help": "UBX-CFG-GNSS poll GNSS config"},
+        # UBX-CFG-NAV5 set Dynamic Platform Model
+        "CFG-MODEL": {"command": send_cfg_nav5_model,
+                  "help": "UBX-CFG-NAV5 set Dynamic Platform Model"},
         # UBX-CFG-NAV5, poll Nav Engine Settings
         "CFG-NAV5": {"command": send_poll, "opt": [0x06, 0x24],
                      "help": "UBX-CFG-NAV5 poll Nav Engines settings"},
@@ -3905,9 +3908,6 @@ class ubx(object):
         # poll UBX-MON-IO
         "MON-IO": {"command": send_mon_io,
                    "help": "UBX-MON-IO get I/O Subsystem Status"},
-        # UBX-CFG-NAV5 set Dynamic Platform Model
-        "MODEL": {"command": send_cfg_nav5_model,
-                  "help": "UBX-CFG-NAV5 set Dynamic Platform Model"},
         # poll UBX-MON-VER
         "MON-VER": {"command": send_poll, "opt": [0x0a, 0x04],
                     "help": "UBX-MON-VER get GPS version"},
