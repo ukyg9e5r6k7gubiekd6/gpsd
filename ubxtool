@@ -3897,6 +3897,9 @@ class ubx(object):
         # UBX-CFG-SBAS, get SBAS settings
         "CFG-SBAS": {"command": send_cfg_sbas,
                      "help": "UBX-CFG-SBAS poll SBAS settings"},
+        # UBX-CFG-TP5
+        "CFG-TP5": {"command": send_cfg_tp5,
+                    "help": "UBX-TIM-TP5 get time pulse decodes"},
         # UBX-CFG-RST cold boot
         "COLDBOOT": {"command": send_cfg_rst,
                      "help": "UBS-CFG-RST coldboot the GPS",
@@ -3952,9 +3955,6 @@ class ubx(object):
         # UBX-CFG-TMODE2, get time mode 2 config
         "TMODE2": {"command": send_cfg_tmode2,
                    "help": "UBX-CFG-TMODE2 get time mode 2 config"},
-        # UBX-CFG-TP5, get time0 decodes
-        "TP5": {"command": send_cfg_tp5,
-                "help": "UBX-TIM-TP5 get time pulse decodes"},
         # UBX-CFG-RST warm boot
         "WARMBOOT": {"command": send_cfg_rst,
                      "help": "UBX-CFG-RST warmboot the GPS",
