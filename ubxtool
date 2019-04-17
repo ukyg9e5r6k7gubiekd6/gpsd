@@ -3727,11 +3727,6 @@ class ubx(object):
         m_data = bytearray(0)
         gps_model.gps_send(0x0a, 0x02, m_data)
 
-    def send_mon_ver(self):
-        """UBX-MON-VER get versions"""
-        m_data = bytearray(0)
-        gps_model.gps_send(0x0a, 0x04, m_data)
-
     def send_nav_posecef(self):
         """UBX-NAV-POSECEF, poll ECEF position"""
         m_data = bytearray(0)
@@ -3913,6 +3908,9 @@ class ubx(object):
         # UBX-CFG-NAV5 set Dynamic Platform Model
         "MODEL": {"command": send_cfg_nav5_model,
                   "help": "UBX-CFG-NAV5 set Dynamic Platform Model"},
+        # poll UBX-MON-VER
+        "MON-VER": {"command": send_poll, "opt": [0x0a, 0x04],
+                    "help": "UBX-MON-VER get GPS version"},
         # UBX-NAV-CLOCK, poll Clock Solution
         "NAV-CLOCK": {"command": send_poll, "opt": [0x01, 0x22],
                       "help": "UBX-NAV-CLOCK poll Clock Solution"},
@@ -3952,9 +3950,6 @@ class ubx(object):
         "WARMBOOT": {"command": send_cfg_rst,
                      "help": "UBX-CFG-RST warmboot the GPS",
                      "opt": 1},
-        # poll UBX-MON-VER
-        "VER": {"command": send_mon_ver,
-                "help": "UBX-MON-VER get GPS version"},
     }
     # end class ubx
 
