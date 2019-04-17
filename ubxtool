@@ -3650,13 +3650,8 @@ class ubx(object):
             m_data.extend([rate])
         gps_model.gps_send(6, 1, m_data)
 
-    def send_cfg_navx5(self):
-        """UBX-CFG-NAVX5, get Nav Engine Expert Settings"""
-        m_data = bytearray(0)
-        gps_model.gps_send(6, 0x23, m_data)
-
     def send_cfg_pms(self):
-        """UBX-CFG-PMS, Get Power Management Settings"""
+        """UBX-CFG-PMS, poll/set Power Management Settings"""
 
         if opts["mode"] is not None:
             m_data = bytearray(8)
@@ -3889,6 +3884,12 @@ class ubx(object):
         # UBX-CFG-NAV5, poll Nav Engine Settings
         "CFG-NAV5": {"command": send_poll, "opt": [0x06, 0x24],
                      "help": "UBX-CFG-NAV5 poll Nav Engines settings"},
+        # UBX-CFG-NAVX5, poll Nav Engine Expert Settings
+        "CFG-NAVX5": {"command": send_poll, "opt": [0x06, 0x23],
+                  "help": "UBX-CFG-NAVX5 poll Nav Engines Expert Settings"},
+        # UBX-CFG-PMS, poll power management settings
+        "CFG-PMS": {"command": send_cfg_pms,
+                "help": "UBX-CFG-PMS poll/set power management settings"},
         # UBX-CFG-RST cold boot
         "COLDBOOT": {"command": send_cfg_rst,
                      "help": "UBS-CFG-RST coldboot the GPS",
@@ -3906,9 +3907,6 @@ class ubx(object):
         # UBX-CFG-NAV5 set Dynamic Platform Model
         "MODEL": {"command": send_cfg_nav5_model,
                   "help": "UBX-CFG-NAV5 set Dynamic Platform Model"},
-        # UBX-CFG-NAVX5, poll Nav Engine Expert Settings
-        "NAVX5": {"command": send_cfg_navx5,
-                  "help": "UBX-CFG-NAVX5 poll Nav Engines Expert Settings"},
         # UBX-NAV-CLOCK, poll Clock Solution
         "NAV-CLOCK": {"command": send_poll, "opt": [0x01, 0x22],
                       "help": "UBX-NAV-CLOCK poll Clock Solution"},
@@ -3921,9 +3919,6 @@ class ubx(object):
         # UBX-NAV_VELECEF, poll ECEF velocity
         "NAV-VELECEF": {"command": send_nav_velecef,
                         "help": "UBX-NAV-VELECEF poll ECEF velocity"},
-        # UBX-CFG-PMS, poll power management settings
-        "PMS": {"command": send_cfg_pms,
-                "help": "UBX-CFG-PMS poll power management settings"},
         # UBX-CFG-PRT, poll I/O port settings
         "PRT": {"command": send_cfg_prt,
                 "help": "UBX-CFG-PRT poll I/O port settings"},
