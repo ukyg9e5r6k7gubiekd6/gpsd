@@ -3945,15 +3945,21 @@ class ubx(object):
         # UBX-NAV-HPPOSLLH
         "NAV-HPPOSLLH": {"command": send_poll, "opt": [0x01, 0x14],
                          "help": "poll UBX-NAV-HPPOSECEF LLH position"},
-        # UBX-NAV-SIG
-        "NAV-SIG": {"command": send_poll, "opt": [0x01, 0x43],
-                    "help": "poll UBX-NAV-SIG Signal Information"},
         # UBX-NAV-POSECEF
         "NAV-POSECEF": {"command": send_poll, "opt": [0x01, 0x01],
                         "help": "poll UBX-NAV-POSECEF ECEF position"},
-        # UBX-NAV-LLH
+        # UBX-NAV-POSLLH
         "NAV-POSLLH": {"command": send_poll, "opt": [0x01, 0x02],
                        "help": "poll UBX-NAV-POSLLH LLH position"},
+        # UBX-NAV-SAT
+        "NAV-SAT": {"command": send_poll, "opt": [0x01, 0x35],
+                    "help": "poll UBX-NAV-SAT Satellite Information"},
+        # UBX-NAV-SIG
+        "NAV-SIG": {"command": send_poll, "opt": [0x01, 0x43],
+                    "help": "poll UBX-NAV-SIG Signal Information"},
+        # UBX-NAV-STATUS
+        "NAV-STATUS": {"command": send_poll, "opt": [0x01, 0x03],
+                       "help": "poll UBX-NAV-STATUS Receiver Nav Status"},
         # UBX-NAV-VELECEF
         "NAV-VELECEF": {"command": send_poll, "opt": [0x01, 0x11],
                         "help": "poll UBX-NAV-VELECEF ECEF velocity"},
