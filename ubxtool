@@ -3316,11 +3316,6 @@ class ubx(object):
         header = b"\xb5\x62"
         return header + msg[:m_len + 4] + m_chk
 
-    def poll_rxm_rawx(self):
-        """Poll UBX-RXM-RAWX message"""
-        m_data = bytearray(0)
-        gps_model.gps_send(2, 0x15, m_data)
-
     def gps_send(self, m_class, m_id, m_data):
         """Build, and send, a message to GPS"""
         m_all = self.make_pkt(m_class, m_id, m_data)
@@ -3727,20 +3722,10 @@ class ubx(object):
         m_data = bytearray(0)
         gps_model.gps_send(0x0a, 0x02, m_data)
 
-    def send_nav_posecef(self):
-        """UBX-NAV-POSECEF, poll ECEF position"""
-        m_data = bytearray(0)
-        gps_model.gps_send(1, 1, m_data)
-
     def send_nav_sig(self):
         """UBX-NAV-SIG, poll Signal information"""
         m_data = bytearray(0)
         gps_model.gps_send(1, 0x43, m_data)
-
-    def send_nav_velecef(self):
-        """UBX-NAV-VELECEF, poll ECEF velocity decode"""
-        m_data = bytearray(0)
-        gps_model.gps_send(1, 0x11, m_data)
 
     def send_cfg_sbas(self):
         """UBX-CFG-SBAS, poll SBAS settings"""
@@ -3898,13 +3883,13 @@ class ubx(object):
         "NAV-SIG": {"command": send_nav_sig,
                     "help": "UBX-NAV-SIG poll Signal Information"},
         # UBX-NAV_POSECEF, poll ECEF position
-        "NAV-POSECEF": {"command": send_nav_posecef,
+        "NAV-POSECEF": {"command": send_poll, "opt": [0x01, 0x01],
                         "help": "UBX-NAV-POSECEF poll ECEF position"},
         # UBX-NAV_VELECEF, poll ECEF velocity
-        "NAV-VELECEF": {"command": send_nav_velecef,
+        "NAV-VELECEF": {"command": send_poll, "opt": [0x01, 0x11],
                         "help": "UBX-NAV-VELECEF poll ECEF velocity"},
         # UBX-RXM-RAWX poll raw measurement data
-        "RXM-RAWX": {"command": poll_rxm_rawx,
+        "RXM-RAWX": {"command": send_poll, "opt": [0x02, 0x15],
                      "help": "UBX-RXM-RAWX poll raw measurement data"},
         # UBX-CFG-CFG reset config
         "RESET": {"command": send_cfg_cfg,
