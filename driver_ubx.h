@@ -24,6 +24,7 @@ typedef enum {
     UBX_CLASS_SEC = 0x27,     /**< Security */
     UBX_CLASS_HNR = 0x28,     /**< High Rate Nav Results  */
     UBX_CLASS_NMEA = 0xf0,    /**< NMEA, for configuring */
+    UBX_CLASS_RTCM3 = 0xf5,   /**< RTCM3, for configuring */
 } ubx_classes_t;
 
 #define UBX_MSGID(cls_, id_) (((cls_)<<8)|(id_))
