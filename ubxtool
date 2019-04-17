@@ -3890,6 +3890,9 @@ class ubx(object):
         # UBX-CFG-PMS, poll power management settings
         "CFG-PMS": {"command": send_cfg_pms,
                 "help": "UBX-CFG-PMS poll/set power management settings"},
+        # UBX-CFG-PRT, poll I/O port settings
+        "CFG-PRT": {"command": send_cfg_prt,
+                "help": "UBX-CFG-PRT poll I/O port settings"},
         # UBX-CFG-RST cold boot
         "COLDBOOT": {"command": send_cfg_rst,
                      "help": "UBS-CFG-RST coldboot the GPS",
@@ -3919,9 +3922,6 @@ class ubx(object):
         # UBX-NAV_VELECEF, poll ECEF velocity
         "NAV-VELECEF": {"command": send_nav_velecef,
                         "help": "UBX-NAV-VELECEF poll ECEF velocity"},
-        # UBX-CFG-PRT, poll I/O port settings
-        "PRT": {"command": send_cfg_prt,
-                "help": "UBX-CFG-PRT poll I/O port settings"},
         # UBX-RXM-RAWX poll raw measurement data
         "RXM-RAWX": {"command": poll_rxm_rawx,
                      "help": "UBX-RXM-RAWX poll raw measurement data"},
