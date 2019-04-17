@@ -3814,16 +3814,6 @@ class ubx(object):
         m_data = bytearray(0)
         gps_model.gps_send(0x0d, 0x04, m_data)
 
-    def send_tim_tm2(self):
-        """UBX-TIM-TM2, get time mark data"""
-        m_data = bytearray(0)
-        gps_model.gps_send(0x0d, 0x03, m_data)
-
-    def send_tim_tp(self):
-        """UBX-TIM-TP, get time pulse timedata"""
-        m_data = bytearray(0)
-        gps_model.gps_send(0x0d, 0x01, m_data)
-
     able_commands = {
         # en/dis able BeiDou
         "BEIDOU": {"command": send_able_beidou,
@@ -3941,10 +3931,10 @@ class ubx(object):
         "TIM-SVIN": {"command": send_tim_svin,
                      "help": "UBX-TIM-SVIN get survey in data"},
         # UBX-TIM-TM2, get time mark data
-        "TIM-TM2": {"command": send_tim_tm2,
+        "TIM-TM2": {"command": send_poll, "opt": [0x0d, 0x03],
                     "help": "UBX-TIM-TM2 get time mark data"},
         # UBX-TIM-TP, get time pulse timedata
-        "TIM-TP": {"command": send_tim_tp,
+        "TIM-TP": {"command": send_poll, "opt": [0x0d, 0x01],
                    "help": "UBX-TIM-TP get time pulse timedata"},
         # UBX-CFG-RST warm boot
         "WARMBOOT": {"command": send_cfg_rst,
