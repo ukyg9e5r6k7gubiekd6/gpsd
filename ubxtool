@@ -3091,8 +3091,8 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlHbb', buf, 0)
-        s = (' towMS:%u ms, towSubMS:%u qErr:%d ps, week:%d\n'
-             ' flags:%#x refInfo:%#x\n   flags: ' % u)
+        s = ('  towMS %u towSubMS %u qErr %d week %d\n'
+             '  flags %#x refInfo %#x\n   flags  ' % u)
 
         if 0x01 & u[4]:
             s += "timeBase is UTC, "
