@@ -3245,6 +3245,14 @@ class ubx(object):
                     comment = "#"
                     continue
 
+                if 0xd3 == c:
+                    # RTCM3 Leader 1
+                    state = 'RTCM3_1'
+
+                    # start fresh
+                    comment = "#"
+                    continue
+
                 if (ord('\n') == c) or (ord('\r') == c):
                     # CR or LF, leftovers
                     return 1
@@ -3277,6 +3285,38 @@ class ubx(object):
                 else:
                     comment += chr(c)
                 continue
+
+            if 'RTCM3_1' == state:
+                # high 6 bits must be zero,
+                if 0 != (c & 0xfc):
+                    state = 'BASE'
+                else:
+                    # low 2 bits are MSB of a 10-bit length
+                    m_len = c << 8
+                    state = 'RTCM3_2'
+                    m_raw.extend([c])
+                continue;
+
+            if 'RTCM3_2' == state:
+                # 8 bits are LSB of a 10-bit length
+                m_len |= 0xff & c
+                # add 3 for checksum
+                m_len += 3
+                state = 'RTCM3_PAYLOAD'
+                m_raw.extend([c])
+                continue;
+
+            if 'RTCM3_PAYLOAD' == state:
+                m_len -= 1
+                m_raw.extend([c])
+                m_payload.extend([c])
+                if 0  == m_len:
+                    state = 'BASE'
+                    type = m_payload[0] << 4
+                    type |= 0x0f & (m_payload[1] >> 4)
+                    if VERB_DECODE <= opts['verbosity']:
+                        print("RTCM3 packet: type %d\n" % type);
+                continue;
 
             if ord('b') == c and 'HEADER1' == state:
                 # got header 2
