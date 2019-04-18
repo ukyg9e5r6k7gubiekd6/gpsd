@@ -1211,9 +1211,9 @@ static gps_mask_t processGSA(int count, char *field[],
 #undef GSA_TALKER
 }
 
+/* xxGSV -  GPS Satellites in View */
 static gps_mask_t processGSV(int count, char *field[],
 			     struct gps_device_t *session)
-/* GPS Satellites in View */
 {
 #define GSV_TALKER	field[0][1]
     /*
@@ -1327,15 +1327,25 @@ static gps_mask_t processGSV(int count, char *field[],
 	    gpsd_zero_satellites(&session->gpsdata);
 	}
 	session->nmea.last_gsv_talker = GSV_TALKER;
-	if (session->nmea.last_gsv_talker == 'L')
+	switch (GSV_TALKER) {
+	case 'L':
 	    session->nmea.seen_glgsv = true;
-	if (session->nmea.last_gsv_talker == 'D' ||
-            session->nmea.last_gsv_talker == 'B')
+	    break;
+	case 'D':
+	    /* FALLTHROUGH */
+	case 'B':
 	    session->nmea.seen_bdgsv = true;
-	if (session->nmea.last_gsv_talker == 'Z')
+	    break;
+	case 'Z':
 	    session->nmea.seen_qzss = true;
-	if (session->nmea.last_gsv_talker == 'A')
+	    break;
+	case 'A':
 	    session->nmea.seen_gagsv = true;
+	    break;
+	default:
+	    /* uh, what? */
+	    break;
+	}
     }
 
     for (fldnum = 4; fldnum < count / 4 * 4;) {
@@ -1351,6 +1361,11 @@ static gps_mask_t processGSV(int count, char *field[],
 	}
 	sp = &session->gpsdata.skyview[session->gpsdata.satellites_visible];
 	svid = atoi(field[fldnum++]);
+	if (0 == svid) {
+	    /* skip bogus fields */
+	    continue;
+	}
+	/* FIXME: this ignores possible NMEA 4.1 gnssid hint */
 	sp->PRN = (short)nmeaid_to_prn(field[0], svid, &sp->gnssid, &sp->svid);
 	sp->elevation = (short)atoi(field[fldnum++]);
 	sp->azimuth = (short)atoi(field[fldnum++]);
@@ -1368,9 +1383,20 @@ static gps_mask_t processGSV(int count, char *field[],
 	 * last sentence in a GPGSV set if the number of satellites is not
 	 * a multiple of 4.
 	 */
-	if (sp->PRN != 0)
-	    session->gpsdata.satellites_visible++;
+	session->gpsdata.satellites_visible++;
     }
+
+#if __UNUSED
+    /* debug code */
+    gpsd_log(&session->context->errout, LOG_ERROR,
+        "x%cGSV: vis %d gagsv %d bdgsv %d glgsv %d qzzss %d\n",
+	GSV_TALKER,
+	session->gpsdata.satellites_visible,
+	session->nmea.seen_gagsv,
+	session->nmea.seen_bdgsv,
+	session->nmea.seen_glgsv,
+	session->nmea.seen_qzss);
+#endif
 
     /*
      * Alas, we can't sanity check field counts when there are multiple sat
@@ -1425,6 +1451,7 @@ static gps_mask_t processGSV(int count, char *field[],
 	return ONLINE_SET;
 
     /* clear computed DOPs so they get recomputed. */
+    /* FIXME: this kills GPS reported dops... */
     session->gpsdata.dop.xdop = NAN;
     session->gpsdata.dop.ydop = NAN;
     session->gpsdata.dop.tdop = NAN;
