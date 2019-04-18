@@ -98,6 +98,8 @@ static void ntrip_str_parse(char *str, size_t len,
 	    hold->format = fmt_rtcm3_1;
 	else if (strcasecmp("RTCM 3.2", s) == 0)
 	    hold->format = fmt_rtcm3_2;
+	else if (strcasecmp("RTCM 3.3", s) == 0)
+	    hold->format = fmt_rtcm3_3;
 	else
 	    hold->format = fmt_unknown;
     }
@@ -234,7 +236,7 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 	    *eol = '\0';
 	    llen = (ssize_t) (eol - line);
 
-	    /* todo: parse headers */
+	    /* TODO: parse headers */
 
 	    /* parse STR */
 	    if (str_starts_with(line, NTRIP_STR)) {
@@ -242,21 +244,21 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 				(size_t) (llen - strlen(NTRIP_STR)),
 				&hold, &device->context->errout);
 		if (strcmp(device->ntrip.stream.mountpoint, hold.mountpoint) == 0) {
-		    /* todo: support for RTCM 3.0, SBAS (WAAS, EGNOS), ... */
+		    /* TODO: support for RTCM 3.0, SBAS (WAAS, EGNOS), ... */
 		    if (hold.format == fmt_unknown) {
 			gpsd_log(&device->context->errout, LOG_ERROR,
 				 "Ntrip stream %s format not supported\n",
 				 line);
 			return -1;
 		    }
-		    /* todo: support encryption and compression algorithms */
+		    /* TODO: support encryption and compression algorithms */
 		    if (hold.compr_encryp != cmp_enc_none) {
 			gpsd_log(&device->context->errout, LOG_ERROR,
 				 "Ntrip stream %s compression/encryption algorithm not supported\n",
 				 line);
 			return -1;
 		    }
-		    /* todo: support digest authentication */
+		    /* TODO: support digest authentication */
 		    if (hold.authentication != auth_none
 			    && hold.authentication != auth_basic) {
 			gpsd_log(&device->context->errout, LOG_ERROR,
@@ -277,13 +279,13 @@ static int ntrip_sourcetable_parse(struct gps_device_t *device)
 		    device->ntrip.stream.set = true;
 		    match = true;
 		}
-		/* todo: compare stream location to own location to
+		/* TODO: compare stream location to own location to
 		 * find nearest stream if user hasn't provided one */
 	    }
-	    /* todo: parse CAS */
+	    /* TODO: parse CAS */
 	    /* else if (str_starts_with(line, NTRIP_CAS)); */
 
-	    /* todo: parse NET */
+	    /* TODO: parse NET */
 	    /* else if (str_starts_with(line, NTRIP_NET)); */
 
 	    llen += strlen(NTRIP_BR);
@@ -357,7 +359,7 @@ static int ntrip_auth_encode(const struct ntrip_stream_t *stream,
 	    return -1;
 	(void)snprintf(buf, size - 1, "Authorization: Basic %s\r\n", authenc);
     } else {
-	/* todo: support digest authentication */
+	/* TODO: support digest authentication */
     }
     return 0;
 }
@@ -484,7 +486,7 @@ int ntrip_open(struct gps_device_t *device, char *caster)
 		*slash = '\0';
 		stream = slash + 1;
 	    } else {
-		/* todo: add autoconnect like in dgpsip.c */
+		/* TODO: add autoconnect like in dgpsip.c */
 		gpsd_log(&device->context->errout, LOG_ERROR,
 			 "can't extract Ntrip stream from %s\n",
 			 caster);
