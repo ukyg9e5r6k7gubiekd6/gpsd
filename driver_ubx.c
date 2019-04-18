@@ -612,7 +612,8 @@ ubx_msg_nav_dop(struct gps_device_t *session, unsigned char *buf,
 
 /**
  * End of Epoch
- * Not in u-blox 5
+ * Not in u-blox 5, 6 or 7
+ * Present in u-blox 8 and 9
  */
 static gps_mask_t
 ubx_msg_nav_eoe(struct gps_device_t *session, unsigned char *buf,
@@ -630,9 +631,10 @@ ubx_msg_nav_eoe(struct gps_device_t *session, unsigned char *buf,
     gpsd_log(&session->context->errout, LOG_DATA, "EOE: iTOW=%ld\n", iTOW);
     /* nothing really to new, but report data collected so far
      * and clear for next data set */
-    // return CLEAR_IS | REPORT_IS;
-    // return REPORT_IS | STATUS_SET;
-    /* strangely any mask return here makes things worse... */
+    /* return CLEAR_IS | REPORT_IS;
+     * return REPORT_IS | STATUS_SET;
+     * return REPORT_IS;
+     * strangely any mask return here makes things worse... */
     return 0;
 }
 

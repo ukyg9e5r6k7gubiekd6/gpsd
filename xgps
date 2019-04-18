@@ -1310,6 +1310,7 @@ if __name__ == "__main__":
         base = Base(deg_type=degreefmt, rotation=rotate, title=target)
         base.set_units(unit_system)
         try:
+            sys.stderr.write("xgps: host %s port %s\n" % (host, port))
             daemon = gps.gps(host=host,
                              port=port,
                              mode=(gps.WATCH_ENABLE | gps.WATCH_JSON |
