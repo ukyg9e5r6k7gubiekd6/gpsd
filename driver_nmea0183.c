@@ -1386,7 +1386,7 @@ static gps_mask_t processGSV(int count, char *field[],
 	session->gpsdata.satellites_visible++;
     }
 
-#if 1  /* FUCK */
+#if __UNUSED
     /* debug code */
     gpsd_log(&session->context->errout, LOG_ERROR,
         "x%cGSV: vis %d gagsv %d bdgsv %d glgsv %d qzss %d\n",
@@ -1450,7 +1450,7 @@ static gps_mask_t processGSV(int count, char *field[],
         && GSV_TALKER == 'P')
 	return ONLINE_SET;
 
-#if 1  /* FUCK */
+#if __UNUSED
     /* debug code */
     gpsd_log(&session->context->errout, LOG_ERROR,
         "x%cGSV: set skyview_time %.2f frac_time %.2f\n", GSV_TALKER,
