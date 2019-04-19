@@ -2192,7 +2192,7 @@ class ubx(object):
                 name = "%#x (UNK)" % u[0]
             if 0 < i:
                 s += "\n"
-            s += ('  Port: %u (%s)\n' % (u[1], name))
+            s += '  Port: %s\n' % name
             s += ('   txPending %u txBytes %u txUsage %u txPeakUsage %u\n'
                   '   rxPending %u rxBytes %u rxUsage %u rxPeakUsage %u\n'
                   '   overrunErrs %u msgs %u/%u/%u/%u reserved %x %x '

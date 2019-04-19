@@ -1386,10 +1386,10 @@ static gps_mask_t processGSV(int count, char *field[],
 	session->gpsdata.satellites_visible++;
     }
 
-#if __UNUSED
+#if 1  /* FUCK */
     /* debug code */
     gpsd_log(&session->context->errout, LOG_ERROR,
-        "x%cGSV: vis %d gagsv %d bdgsv %d glgsv %d qzzss %d\n",
+        "x%cGSV: vis %d gagsv %d bdgsv %d glgsv %d qzss %d\n",
 	GSV_TALKER,
 	session->gpsdata.satellites_visible,
 	session->nmea.seen_gagsv,
@@ -1449,6 +1449,14 @@ static gps_mask_t processGSV(int count, char *field[],
          || session->nmea.seen_qzss  || session->nmea.seen_gagsv)
         && GSV_TALKER == 'P')
 	return ONLINE_SET;
+
+#if 1  /* FUCK */
+    /* debug code */
+    gpsd_log(&session->context->errout, LOG_ERROR,
+        "x%cGSV: set skyview_time %.2f frac_time %.2f\n", GSV_TALKER,
+	session->gpsdata.skyview_time,
+	session->nmea.this_frac_time);
+#endif
 
     /* clear computed DOPs so they get recomputed. */
     /* FIXME: this kills GPS reported dops... */
