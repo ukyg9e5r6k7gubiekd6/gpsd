@@ -1270,6 +1270,10 @@ static gps_mask_t processGSV(int count, char *field[],
      * second cycle (usually 10 seconds from device connect) for it to
      * learn to expect BSDGV or GLGSV.
      *
+     * Some GPS (Garmin 17N) spread the xxGSV over several cycles.  So
+     * cycles, or cycle time, can not be used to determine start of
+     * xxGSV cycle.
+     *
      * NMEA 4.1 adds a signal-ID field just before the checksum. First
      * seen in May 2015 on a u-blox M8.
      */
@@ -1282,7 +1286,6 @@ static gps_mask_t processGSV(int count, char *field[],
 		 "malformed GPGSV - fieldcount %d <= 3\n",
 		 count);
 	gpsd_zero_satellites(&session->gpsdata);
-	session->gpsdata.satellites_visible = 0;
 	return ONLINE_SET;
     }
     /*
@@ -1306,7 +1309,6 @@ static gps_mask_t processGSV(int count, char *field[],
 	gpsd_log(&session->context->errout, LOG_WARN,
 		 "malformed GPGSV - fieldcount %d %% 4 != 0\n", count);
 	gpsd_zero_satellites(&session->gpsdata);
-	session->gpsdata.satellites_visible = 0;
 	return ONLINE_SET;
     }
 

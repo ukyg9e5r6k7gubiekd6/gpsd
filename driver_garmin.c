@@ -548,7 +548,6 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		 "Garmin: SAT Data Sz: %d\n", pkt_len);
 	sats = (cpo_sat_data *) buf;
 
-	session->gpsdata.satellites_visible = 0;
 	session->gpsdata.satellites_used = 0;
 	gpsd_zero_satellites(&session->gpsdata);
 	for (i = 0, j = 0; i < GARMIN_CHANNELS; i++, sats++) {
