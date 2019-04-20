@@ -935,9 +935,50 @@ static gps_mask_t processGST(int count, char *field[],
     return mask;
 }
 
+/* convert NMEA sigid to ublox sigid */
+static unsigned char nmea_sigid_to_ubx(unsigned char nmea_sigid)
+{
+    unsigned char ubx_sigid = 0;
+
+    switch (nmea_sigid) {
+    default:
+        /* FALLTHROUGH */
+    case 0:
+        /* missing, assume GPS */
+	ubx_sigid = 0;
+        break;
+    case 1:
+        /* L1 */
+	ubx_sigid = 0;
+        break;
+    case 2:
+        /* E5, could be 5 or 6. */
+	ubx_sigid = 5;
+        break;
+    case 3:
+        /* B2 or L2, could be 2 or 3. */
+	ubx_sigid = 2;
+        break;
+    case 5:
+        /* L2 */
+	ubx_sigid = 4;
+        break;
+    case 6:
+        /* L2CL */
+	ubx_sigid = 3;
+        break;
+    case 7:
+        /* E1, could be 0 or 1. */
+	ubx_sigid = 0;
+        break;
+    }
+
+    return ubx_sigid;
+}
+
+/* deal with range-mapping attempts to use IDs 1-32 by Beidou, etc. */
 static int nmeaid_to_prn(char *talker, int satnum, unsigned char *gnssid,
                          unsigned char *svid)
-/* deal with range-mapping attempts to use IDs 1-32 by Beidou, etc. */
 {
     /*
      * According to https://github.com/mvglasow/satstat/wiki/NMEA-IDs
@@ -1247,6 +1288,11 @@ static gps_mask_t processGSV(int count, char *field[],
      *   GP (GPS, SBAS, QZSS),
      *   QZ (QZSS).
      *
+     * As of April 2019:
+     *    no gpsd regressions have GNGSV
+     *    every xxGSV cycle starts with GPGSV
+     *    xxGSV cycles may be spread over several xxRMC cycles
+     *
      * GL may be (incorrectly) used when GSVs are mixed containing
      * GLONASS, GN may be (incorrectly) used when GSVs contain GLONASS
      * only.  Usage is inconsistent.
@@ -1275,19 +1321,28 @@ static gps_mask_t processGSV(int count, char *field[],
      * xxGSV cycle.
      *
      * NMEA 4.1 adds a signal-ID field just before the checksum. First
-     * seen in May 2015 on a u-blox M8.
+     * seen in May 2015 on a u-blox M8.  It can output 2 sets of GPGSV
+     * in one cycle, one for L1C and the other for L2C.
      */
 
     int n, fldnum;
-    int gnssid = 0;
+    unsigned char  nmea_sigid = 0;
+    unsigned char  ubx_sigid = 0;
 
     if (count <= 3) {
 	gpsd_log(&session->context->errout, LOG_WARN,
-		 "malformed GPGSV - fieldcount %d <= 3\n",
+		 "malformed xxGSV - fieldcount %d <= 3\n",
 		 count);
 	gpsd_zero_satellites(&session->gpsdata);
 	return ONLINE_SET;
     }
+    gpsd_log(&session->context->errout, LOG_PROG,
+	     "x%cGSV: part %s of %s, last_gsv_talker '%#x' "
+             " last_gsv_sigid %u\n",
+	     GSV_TALKER, field[2], field[1],
+	     session->nmea.last_gsv_talker,
+	     session->nmea.last_gsv_sigid);
+
     /*
      * This check used to be !=0, but we have loosen it a little to let by
      * NMEA 4.1 GSVs with an extra signal-ID field at the end.
@@ -1298,11 +1353,11 @@ static gps_mask_t processGSV(int count, char *field[],
 	break;
     case 1:
 	/* NMEA 4.10, get the signal ID */
-	gnssid = field[count - 1][0];
-        if (0 == gnssid) gnssid = '0';
+	nmea_sigid = atoi(field[count - 1]);
+        ubx_sigid = nmea_sigid_to_ubx(nmea_sigid);
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "GPGSV fieldcount %d %% 4 == 1, gnssid %c (%#x)\n", count,
-                 gnssid, gnssid);
+		 "GPGSV fieldcount %d %% 4 == 1, nmea_sigid %u ubx_sig %u\n",
+                 count, nmea_sigid, ubx_sigid);
 	break;
     default:
 	/* bad count */
@@ -1318,31 +1373,46 @@ static gps_mask_t processGSV(int count, char *field[],
 		 "malformed GPGSV - bad part\n");
 	gpsd_zero_satellites(&session->gpsdata);
 	return ONLINE_SET;
-    } else if (session->nmea.part == 1) {
+    }
+
+    if (session->nmea.part == 1) {
 	/*
 	 * might have gone from GPGSV to GLGSV/BDGSV/QZGSV,
 	 * in which case accumulate
-	 */
-	if (session->nmea.last_gsv_talker == '\0'
-            || GSV_TALKER == session->nmea.last_gsv_talker) {
-            /* FIXME: this is zeroing too often */
+         *
+         * NMEA 4.1 might have gone from GPGVS,sigid=x to GPGSV,sigid=y
+         *
+	 * session->nmea.last_gsv_talker is zero at cycle start
+         */
+	if (session->nmea.last_gsv_talker == '\0' ||
+            ('P' == GSV_TALKER &&
+             0 == ubx_sigid)) {
+	    gpsd_log(&session->context->errout, LOG_PROG,
+		     "x%cGSV: new part %d, last_gsv_talker '%#x', zeroing\n",
+                     GSV_TALKER,
+		     session->nmea.part,
+		     session->nmea.last_gsv_talker);
 	    gpsd_zero_satellites(&session->gpsdata);
 	}
 	session->nmea.last_gsv_talker = GSV_TALKER;
+	session->nmea.last_gsv_sigid = ubx_sigid; /* UNUSED */
 	switch (GSV_TALKER) {
+	case 'A':
+	    session->nmea.seen_gagsv = true;
+	    break;
+	case 'B':
+	    /* FALLTHROUGH */
+	case 'D':
+	    session->nmea.seen_bdgsv = true;
+	    break;
 	case 'L':
 	    session->nmea.seen_glgsv = true;
 	    break;
-	case 'D':
-	    /* FALLTHROUGH */
-	case 'B':
-	    session->nmea.seen_bdgsv = true;
+	case 'P':
+	    session->nmea.seen_gpgsv = true;
 	    break;
 	case 'Z':
 	    session->nmea.seen_qzss = true;
-	    break;
-	case 'A':
-	    session->nmea.seen_gagsv = true;
 	    break;
 	default:
 	    /* uh, what? */
@@ -1373,6 +1443,7 @@ static gps_mask_t processGSV(int count, char *field[],
 	sp->azimuth = (short)atoi(field[fldnum++]);
 	sp->ss = (float)atoi(field[fldnum++]);
 	sp->used = false;
+        sp->sigid = ubx_sigid;
 	if (sp->PRN > 0)
 	    for (n = 0; n < MAXCHANNELS; n++)
 		if (session->nmea.sats_used[n] == (unsigned short)sp->PRN) {
