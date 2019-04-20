@@ -510,6 +510,27 @@ error modeling than the covariance calculation.</para>
 	may be flagged used if the solution has corrections from them,
 	but not all drivers make this information available.)</entry>
 </row>
+<row>
+	<entry>gnssid</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>The GNSS ID, as defined by u-blox, not NMEA.  0=GPS,
+        2=Galileo, 3=Beidou, 5=QZSS, 6-GLONASS.</entry>
+</row>
+<row>
+	<entry>svid</entry>
+	<entry>no</entry>
+	<entry>numeric</entry>
+        <entry>The satellite ID within its constellation.  As defined
+        by u-blox, not NMEA).</entry>
+</row>
+<row>
+	<entry>sigid</entry>
+	<entry>no</entry>
+	<entry>numeric</entry>
+        <entry>The signal ID of this signal.  As defined by u-blox, not
+        NMEA. See u-blox doc for details.</entry>
+</row>
 </tbody>
 </tgroup>
 </table>

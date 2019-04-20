@@ -361,6 +361,11 @@ void json_sky_dump(const struct gps_data_t *datap,
                        datap->skyview[i].gnssid,
                        datap->skyview[i].svid);
                 }
+                if (0 != datap->skyview[i].sigid) {
+                    str_appendf(reply, replylen,
+                       ",\"sigid\":%d",
+                       datap->skyview[i].sigid);
+                }
                 (void)strlcat(reply, "},", replylen);
 	    }
 	}
