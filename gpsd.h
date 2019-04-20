@@ -54,12 +54,13 @@ extern "C" {
  * 3.12 OSC message added to repertoire.
  * 3.13 gnssid:svid added to SAT
  *      time added to ATT
- * 3.14 Added RAW message class.
+ * 3.19 Added RAW message class.
  *      Add cfg_stage and cfg_step, for initialization
  *      Add oldfix2 for better oldfix
  *      Make subtype longer
  *      Add ubx.protver, ubx.last_msgid and more to gps_device_t.ubx
  *      MAX_PACKET_LENGTH 516 -> 9216
+ *      Add stuff to gps_device_t.nmea for NMEA 4.1
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -569,11 +570,15 @@ struct gps_device_t {
 	bool latch_mode;
 	char last_gga_timestamp[16];
 	char last_gga_talker;
-	bool seen_glgsv;
+        /* GSV stuff */
 	bool seen_bdgsv;
-	bool seen_qzss;
 	bool seen_gagsv;
+	bool seen_glgsv;
+	bool seen_gpgsv;
+	bool seen_qzss;
 	char last_gsv_talker;
+	unsigned char last_gsv_sigid;           /* NMEA 4.1 */
+        /* GSA stuff */
 	bool seen_glgsa;
 	bool seen_gngsa;
 	bool seen_bdgsa;
