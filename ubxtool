@@ -546,6 +546,16 @@ class ubx(object):
          "Output rate of the RTCM-3X-TYPE1097 message on port UART2"),
         ("CFG-MSGOUT-RTCM_3X_TYPE1097_USB", 0x2091031b, "U1", 1, "",
          "Output rate of the RTCM-3X-TYPE1097 message on port USB"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1124_I2C", 0x2091036d, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1124 message on port I2C"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1124_SPI", 0x20910371, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1124 message on port SPI"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1124_UART1", 0x2091036e, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1124 message on port UART1"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1124_UART2", 0x2091036f, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1124 message on port UART2"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE1124_USB", 0x20910370, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE1124 message on port USB"),
         ("CFG-MSGOUT-RTCM_3X_TYPE1127_I2C", 0x209102d6, "U1", 1, "",
          "Output rate of the RTCM-3X-TYPE1127 message on port I2C"),
         ("CFG-MSGOUT-RTCM_3X_TYPE1127_SPI", 0x209102da, "U1", 1, "",
@@ -566,6 +576,21 @@ class ubx(object):
          "Output rate of the RTCM-3X-TYPE1230 message on port UART2"),
         ("CFG-MSGOUT-RTCM_3X_TYPE1230_USB", 0x20910306, "U1", 1, "",
          "Output rate of the RTCM-3X-TYPE1230 message on port USB"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE4072_0_I2C", 0x209102fe, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE4072, sub-type 0 message "
+         "on port I2C"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE4072_0_SPI", 0x20910302, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE4072, sub-type 0 message "
+         "on port SPI"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE4072_0_UART1", 0x209102ff, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE4072, sub-type 0 message "
+         "on port UART1"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE4072_0_UART2", 0x20910300, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE4072, sub-type 0 message "
+         "on port UART2"),
+        ("CFG-MSGOUT-RTCM_3X_TYPE4072_0_USB", 0x20910301, "U1", 1, "",
+         "Output rate of the RTCM-3X-TYPE4072, sub-type 0 message "
+         "on port USB"),
         ("CFG-MSGOUT-RTCM_3X_TYPE4072_1_I2C", 0x20910381, "U1", 1, "",
          "Output rate of the RTCM-3X-TYPE4072, sub-type 1 message on  "
          "port I2C"),
@@ -814,6 +839,16 @@ class ubx(object):
          "Output rate of the UBX-NAV-PVT message on port UART2"),
         ("CFG-MSGOUT-UBX_NAV_PVT_USB", 0x20910009, "U1", 1, "",
          "Output rate of the UBX-NAV-PVT message on port USB"),
+        ("CFG-MSGOUT-UBX_NAV_RELPOSNED_I2C", 0x2091008d, "U1", 1, "",
+         "Output rate of the UBX-NAV-RELPOSNED message on port I2C"),
+        ("CFG-MSGOUT-UBX_NAV_RELPOSNED_SPI", 0x20910091, "U1", 1, "",
+         "Output rate of the UBX-NAV-RELPOSNED message on port SPI"),
+        ("CFG-MSGOUT-UBX_NAV_RELPOSNED_UART1", 0x2091008e, "U1", 1, "",
+         "Output rate of the UBX-NAV-RELPOSNED message on port UART1"),
+        ("CFG-MSGOUT-UBX_NAV_RELPOSNED_UART2", 0x2091008f, "U1", 1, "",
+         "Output rate of the UBX-NAV-RELPOSNED message on port UART2"),
+        ("CFG-MSGOUT-UBX_NAV_RELPOSNED_USB", 0x20910090, "U1", 1, "",
+         "Output rate of the UBX-NAV-RELPOSNED message on port USB"),
         ("CFG-MSGOUT-UBX_NAV_SAT_I2C", 0x20910015, "U1", 1, "",
          "Output rate of the UBX-NAV-SAT message on port I2C"),
         ("CFG-MSGOUT-UBX_NAV_SAT_SPI", 0x20910019, "U1", 1, "",
@@ -1036,6 +1071,9 @@ class ubx(object):
          "Output rate of the UBX-TIM-VRFY message on port UART2"),
         ("CFG-MSGOUT-UBX_TIM_VRFY_USB", 0x20910095, "U1", 1, "",
          "Output rate of the UBX-TIM-VRFY message on port USB"),
+        # CFG-NAVHPG-
+        ("CFG-NAVHPG-DGNSSMODE", 0x20140011, "E1", 1, "",
+         "Differential corrections mode"),
         # CFG-NAVSPG-
         ("CFG-NAVSPG-FIXMODE", 0x20110011, "E1", 1, "",
          "Position fix mode"),
@@ -1159,6 +1197,10 @@ class ubx(object):
         ("CFG-ODO-COGMAXPOSACC", 0x20220022, "U1", 1, "",
          "Maximum acceptable position accuracy for computing low-speed  "
          "filtered course over ground"),
+        ("CFG-ODO-COGLPGAIN", 0x20220032, "", 1, "",
+         "Course over ground low-pass filter level (at speed < 8 m/s)"),
+        ("CFG-ODO-VELLPGAIN", 0x20220031. "U1", 1, "",
+         "Velocity low-pass filter level"),
         # CFG-RATE-
         ("CFG-RATE-MEAS", 0x30210001, "U2", 0.001, "s",
          "Nominal time between GNSS measurements"),
@@ -1241,6 +1283,7 @@ class ubx(object):
          "Flag to disable timeouting the interface after 1.5s"),
         ("CFG-SPI-ENABLED", 0x10640006, "L", 1, "",
          "Flag to indicate if the SPI interface should be enabled"),
+        # CFG-SPIINPROT-
         ("CFG-SPIINPROT-UBX", 0x10790001, "L", 1, "",
          "Flag to indicate if UBX should be an input protocol on SPI"),
         ("CFG-SPIINPROT-NMEA", 0x10790002, "L", 1, "",
@@ -1249,6 +1292,7 @@ class ubx(object):
          "Flag to indicate if RTCM2X should be an input protocol on SPI"),
         ("CFG-SPIINPROT-RTCM3X", 0x10790004, "L", 1, "",
          "Flag to indicate if RTCM3X should be an input protocol on SPI"),
+        # CFG-SPIOUTPROT-
         ("CFG-SPIOUTPROT-UBX", 0x107a0001, "L", 1, "",
          "Flag to indicate if UBX should be an output protocol on SPI"),
         ("CFG-SPIOUTPROT-NMEA", 0x107a0002, "L", 1, "",
@@ -1371,6 +1415,7 @@ class ubx(object):
          "Parity mode that should be used on UART1"),
         ("CFG-UART1-ENABLED", 0x10520005, "L", 1, "",
          "Flag to indicate if the UART1 should be enabled"),
+        # CFG-UART1INPROT
         ("CFG-UART1INPROT-UBX", 0x10730001, "L", 1, "",
          "Flag to indicate if UBX should be an input protocol on UART1"),
         ("CFG-UART1INPROT-NMEA", 0x10730002, "L", 1, "",
@@ -1379,6 +1424,7 @@ class ubx(object):
          "Flag to indicate if RTCM2X should be an input protocol on UART1"),
         ("CFG-UART1INPROT-RTCM3X", 0x10730004, "L", 1, "",
          "Flag to indicate if RTCM3X should be an input protocol on UART1"),
+        # CFG-UART1OUTPROT
         ("CFG-UART1OUTPROT-UBX", 0x10740001, "L", 1, "",
          "Flag to indicate if UBX should be an output protocol on UART1"),
         ("CFG-UART1OUTPROT-NMEA", 0x10740002, "L", 1, "",
@@ -1398,6 +1444,7 @@ class ubx(object):
          "Flag to indicate if the UART2 should be enabled"),
         ("CFG-UART2-REMAP", 0x10530006, "L", "1", "",
          "UART2 Remapping"),
+        # CFG-UART1INPROT
         ("CFG-UART2INPROT-UBX", 0x10750001, "L", 1, "",
          "Flag to indicate if UBX should be an input protocol on UART2"),
         ("CFG-UART2INPROT-NMEA", 0x10750002, "L", 1, "",
@@ -1406,6 +1453,7 @@ class ubx(object):
          "Flag to indicate if RTCM2X should be an input protocol on UART2"),
         ("CFG-UART2INPROT-RTCM3X", 0x10750004, "L", 1, "",
          "Flag to indicate if RTCM3X should be an input protocol on UART2"),
+        # CFG-UART1OUTPROT
         ("CFG-UART2OUTPROT-UBX", 0x10760001, "L", 1, "",
          "Flag to indicate if UBX should be an output protocol on UART2"),
         ("CFG-UART2OUTPROT-NMEA", 0x10760002, "L", 1, "",
@@ -1447,6 +1495,7 @@ class ubx(object):
          "Serial number string characters 16-23"),
         ("CFG-USB-SERIAL_NO_STR3", 0x50650018, "X8", 1, "",
          "Serial number string characters 24-31"),
+        # CFG-USB-INPROT
         ("CFG-USBINPROT-UBX", 0x10770001, "L", 1, "",
          "Flag to indicate if UBX should be an input protocol on USB"),
         ("CFG-USBINPROT-NMEA", 0x10770002, "L", 1, "",
@@ -1455,6 +1504,7 @@ class ubx(object):
          "Flag to indicate if RTCM2X should be an input protocol on USB"),
         ("CFG-USBINPROT-RTCM3X", 0x10770004, "L", 1, "",
          "Flag to indicate if RTCM3X should be an input protocol on USB"),
+        # CFG-USB-OUTPROT
         ("CFG-USBOUTPROT-UBX", 0x10780001, "L", 1, "",
          "Flag to indicate if UBX should be an output protocol on USB"),
         ("CFG-USBOUTPROT-NMEA", 0x10780002, "L", 1, "",
