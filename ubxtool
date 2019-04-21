@@ -712,6 +712,26 @@ class ubx(object):
          "Output rate of the UBX-NAV-GEOFENCE message on port UART2"),
         ("CFG-MSGOUT-UBX_NAV_GEOFENCE_USB", 0x209100a4, "U1", 1, "",
          "Output rate of the UBX-NAV- GEOFENCE message on port USB"),
+        ("CFG-MSGOUT-UBX_NAV_HPPOSECEF_I2C", 0x2091002e, "U1", 1, "",
+         "Output rate of the UBX-NAV-HPPOSECEF message on port I2C"),
+        ("CFG-MSGOUT-UBX_NAV_HPPOSECEF_SPI", 0x20910032, "U1", 1, "",
+         "Output rate of the UBX-NAV-HPPOSECEF message on port SPI"),
+        ("CFG-MSGOUT-UBX_NAV_HPPOSECEF_UART1", 0x2091002f, "U1", 1, "",
+         "Output rate of the UBX-NAV-HPPOSECEF message on port UART1"),
+        ("CFG-MSGOUT-UBX_NAV_HPPOSECEF_UART2", 0x20910030, "U1", 1, "",
+         "Output rate of the UBX-NAV-HPPOSECEF message on port UART2"),
+        ("CFG-MSGOUT-UBX_NAV_HPPOSECEF_USB", 0x20910031, "U1", 1, "",
+         "Output rate of the UBX-NAV-HPPOSECEF message on port USB"),
+        ("CFG-MSGOUT-UBX_NAV_HPPOSLLH_I2C", 0x20910033, "U1", 1, "",
+         "Output rate of the UBX-NAV-HPPOSLLH message on port I2C"),
+        ("CFG-MSGOUT-UBX_NAV_HPPOSLLH_SPI", 0x20910037, "U1", 1, "",
+         "Output rate of the UBX-NAV-HPPOSLLH message on port SPI"),
+        ("CFG-MSGOUT-UBX_NAV_HPPOSLLH_UART1", 0x20910034, "U1", 1, "",
+         "Output rate of the UBX-NAV-HPPOSLLH message on port UART1"),
+        ("CFG-MSGOUT-UBX_NAV_HPPOSLLH_UART2", 0x20910035, "U1", 1, "",
+         "Output rate of the UBX-NAV-HPPOSLLH message on port UART2"),
+        ("CFG-MSGOUT-UBX_NAV_HPPOSLLH_USB", 0x20910036, "U1", 1, "",
+         "Output rate of the UBX-NAV-HPPOSLLH message on port USB"),
         ("CFG-MSGOUT-UBX_NAV_ODO_I2C", 0x2091007e, "U1", 1, "",
          "Output rate of the UBX-NAV-ODO message on port I2C"),
         ("CFG-MSGOUT-UBX_NAV_ODO_SPI", 0x20910082, "U1", 1, "",
@@ -3295,7 +3315,7 @@ class ubx(object):
                     m_len = c << 8
                     state = 'RTCM3_2'
                     m_raw.extend([c])
-                continue;
+                continue
 
             if 'RTCM3_2' == state:
                 # 8 bits are LSB of a 10-bit length
@@ -3304,19 +3324,19 @@ class ubx(object):
                 m_len += 3
                 state = 'RTCM3_PAYLOAD'
                 m_raw.extend([c])
-                continue;
+                continue
 
             if 'RTCM3_PAYLOAD' == state:
                 m_len -= 1
                 m_raw.extend([c])
                 m_payload.extend([c])
-                if 0  == m_len:
+                if 0 == m_len:
                     state = 'BASE'
                     type = m_payload[0] << 4
                     type |= 0x0f & (m_payload[1] >> 4)
                     if VERB_DECODE <= opts['verbosity']:
-                        print("RTCM3 packet: type %d\n" % type);
-                continue;
+                        print("RTCM3 packet: type %d\n" % type)
+                continue
 
             if ord('b') == c and 'HEADER1' == state:
                 # got header 2
