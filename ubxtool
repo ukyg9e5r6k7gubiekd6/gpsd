@@ -1199,7 +1199,7 @@ class ubx(object):
          "filtered course over ground"),
         ("CFG-ODO-COGLPGAIN", 0x20220032, "", 1, "",
          "Course over ground low-pass filter level (at speed < 8 m/s)"),
-        ("CFG-ODO-VELLPGAIN", 0x20220031. "U1", 1, "",
+        ("CFG-ODO-VELLPGAIN", 0x20220031, "U1", 1, "",
          "Velocity low-pass filter level"),
         # CFG-RATE-
         ("CFG-RATE-MEAS", 0x30210001, "U2", 0.001, "s",
