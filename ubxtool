@@ -3995,7 +3995,7 @@ class ubx(object):
         # FIXME: does not handle value yet
         m_data = bytearray(size)
         m_data[0] = 0      # version, 0 = request, 1 = transaction
-        m_data[1] = 0      # RAM layer, 1=RAM, 2=BBR, 4=Flash
+        m_data[1] = 0x7    # RAM layer, 1=RAM, 2=BBR, 4=Flash
         m_data[4] = (key) & 0xff
         m_data[5] = (key >> 8) & 0xff
         m_data[6] = (key >> 16) & 0xff
