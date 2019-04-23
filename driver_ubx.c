@@ -360,11 +360,16 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     mask = 0;
 #define DATE_VALID	(UBX_SOL_VALID_WEEK | UBX_SOL_VALID_TIME)
     if ((flags & DATE_VALID) == DATE_VALID) {
-	unsigned short gw;
-	unsigned int tow;
-	tow = (unsigned int)getleu32(buf, 0);
-	gw = (unsigned short)getles16(buf, 8);
-	session->newdata.time = gpsd_gpstime_resolve(session, gw, tow / 1000.0);
+	unsigned short week;
+        uint32_t iTOW;      /* integer part of TOW in ms */
+        int32_t fTOW;      /* fractional part of TOW in ns */
+        double TOW;       /* complete TOW in seconds */
+
+	iTOW = getleu32(buf, 0);      /* GPS TOW in ms */
+	fTOW = getles32(buf, 4);      /* Fractional part of TOW */
+        TOW = (iTOW * 1e-3) + (fTOW * 1e-9);
+	week = (unsigned short)getles16(buf, 8);
+	session->newdata.time = gpsd_gpstime_resolve(session, week, TOW);
 	mask |= TIME_SET | NTPTIME_IS | GOODTIME_IS;
     }
 #undef DATE_VALID
@@ -426,7 +431,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 
     mask |= MODE_SET | STATUS_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "UBX_NAV_SOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f\n"
+	     "UBX-NAV-SOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f\n"
              "  speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
 	     session->newdata.time,
 	     session->newdata.latitude,
@@ -666,16 +671,16 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
     if ((valid & VALID_TIME) == VALID_TIME) {
 #undef VALID_TIME
         uint16_t week;
-        double iTOW;      /* integer part of TOW in ms */
-        double fTOW;      /* fractional part of TOW in ns */
+        uint32_t iTOW;    /* integer part of TOW in ms */
+        int32_t fTOW;     /* fractional part of TOW in ns */
         double TOW;       /* complete TOW in seconds */
         double tAcc;      /* Time Accuracy Estimate in ns */
 
-	iTOW = (double)getleu32(buf, 0);      /* GPS TOW in ms */
-	fTOW = (double)getles32(buf, 4);      /* Fractional part of TOW */
+	iTOW = getleu32(buf, 0);      /* GPS TOW in ms */
+	fTOW = getles32(buf, 4);      /* Fractional part of TOW */
+        TOW = (iTOW * 1e-3) + (fTOW * 1e-9);
 	week = getles16(buf, 8);
 	tAcc = (double)getleu32(buf, 12);     /* tAcc in ms */
-        TOW = (iTOW * 1e-3) + (fTOW * 1e-9);
 	session->newdata.time = gpsd_gpstime_resolve(session, week, TOW);
 	session->newdata.ept = tAcc * 1e-9;
 	mask |= (TIME_SET | NTPTIME_IS);
