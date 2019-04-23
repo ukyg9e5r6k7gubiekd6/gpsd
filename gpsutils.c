@@ -411,8 +411,10 @@ time_t mkgmtime(register struct tm * t)
     result += t->tm_min;
     result *= 60;
     result += t->tm_sec;
-    if (t->tm_isdst == 1)
-	result -= 3600;
+    /* this is UTC, no DST
+     * if (t->tm_isdst == 1)
+     * result -= 3600;
+     */
     return (result);
 }
 
