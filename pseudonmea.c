@@ -47,30 +47,45 @@ static char *f_str(double f, const char *fmt, char *buf)
     return buf;
 }
 
+/* convert UTC to time str (hh:mm:ss) and tm */
+static void utc_to_hhmmss(timestamp_t time, char *buf, ssize_t buf_sz,
+                          struct tm *tm)
+{
+    double integral;
+    double fractional;
+    time_t integral_time;
+    unsigned frac;
+
+    if (0 == isfinite(time)) {
+        buf[0] = '\0';
+        return;
+    }
+
+    /* round to 100ths */
+    fractional = modf(time + 0.005, &integral);
+    integral_time = (time_t)integral;
+    frac = (unsigned)(fractional * 100.0);
+
+    (void)gmtime_r(&integral_time, tm);
+
+    (void)snprintf(buf, buf_sz, "%02d%02d%02d.%02d",
+		   tm->tm_hour, tm->tm_min, tm->tm_sec, frac);
+    return;
+}
+
 /* Dump a $GPGGA.
  * looks like this is only called from net_ntrip.c
  */
 void gpsd_position_fix_dump(struct gps_device_t *session,
 			    char bufp[], size_t len)
 {
+    struct tm tm;
     char time_str[20];
     char lat_str[BUF_SZ];
     char lon_str[BUF_SZ];
 
-    if (0 != isfinite(session->gpsdata.fix.time)) {
-	struct tm tm;
-	double integral;
-	double fractional = modf(session->gpsdata.fix.time, &integral);
-	time_t integral_time = (time_t)integral;
+    utc_to_hhmmss(session->gpsdata.fix.time, time_str, sizeof(time_str), &tm);
 
-	(void)gmtime_r(&integral_time, &tm);
-
-	(void)snprintf(time_str, sizeof(time_str),
-		       "%02d%02d%05.2f",
-		       tm.tm_hour, tm.tm_min, tm.tm_sec + fractional);
-    } else {
-        time_str[0] = '\0';
-    }
     if (session->gpsdata.fix.mode > MODE_NO_FIX) {
 	(void)snprintf(bufp, len,
 		       "$GPGGA,%s,%s,%c,%s,%c,%d,%02d,",
@@ -115,25 +130,17 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
     char lon_str[BUF_SZ];
     char speed_str[BUF_SZ];
     char track_str[BUF_SZ];
+    struct tm tm;
 
-    if (0 != isfinite(session->gpsdata.fix.time)) {
-	struct tm tm;
-	double integral;
-	double fractional = modf(session->gpsdata.fix.time, &integral);
-	time_t integral_time = (time_t)integral;
-
-	(void)gmtime_r(&integral_time, &tm);
-
+    utc_to_hhmmss(session->gpsdata.fix.time, time_str, sizeof(time_str), &tm);
+    if ('\0' != time_str[0]) {
 	tm.tm_mon++;
 	tm.tm_year %= 100;
-	(void)snprintf(time_str, sizeof(time_str),
-		       "%02d%02d%05.2f",
-		       tm.tm_hour, tm.tm_min, tm.tm_sec + fractional);
+
 	(void)snprintf(time2_str, sizeof(time2_str),
 		       "%02d%02d%02d",
 		       tm.tm_mday, tm.tm_mon, tm.tm_year);
     } else {
-        time_str[0] = '\0';
         time2_str[0] = '\0';
     }
     (void)snprintf(bufp, len,
@@ -278,19 +285,12 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 	0 != isfinite(session->gpsdata.fix.epy) &&
 	0 != isfinite(session->gpsdata.fix.time)) {
 
+        struct tm tm;
 	char time_str[20];
 	char epv_str[BUF_SZ];
 
-	struct tm tm;
-	double integral;
-	double fractional = modf(session->gpsdata.fix.time, &integral);
-	time_t integral_time = (time_t)integral;
-
-	(void)gmtime_r(&integral_time, &tm);
-
-	(void)snprintf(time_str, sizeof(time_str),
-		       "%02d%02d%05.2f",
-		       tm.tm_hour, tm.tm_min, tm.tm_sec + fractional);
+	(void)utc_to_hhmmss(session->gpsdata.fix.time,
+                            time_str, sizeof(time_str), &tm);
 
 	bufp2 = bufp + strlen(bufp);
 	str_appendf(bufp, len,
@@ -307,30 +307,19 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
 static void gpsd_binary_time_dump(struct gps_device_t *session,
 				     char bufp[], size_t len)
 {
-    struct tm tm;
-    double integral;
-    time_t integral_time;
 
     if (MODE_NO_FIX < session->newdata.mode &&
         0 != isfinite(session->gpsdata.fix.time)) {
+	struct tm tm;
+	char time_str[20];
 
-	double fractional = modf(session->newdata.time, &integral);
-	integral_time = (time_t) integral;
-	(void)gmtime_r(&integral_time, &tm);
-	/*
-	 * We pin this report to the GMT/UTC timezone.  This may be technically
-	 * incorrect; our sources on ZDA suggest that it should report local
-	 * timezone. But no GPS we've ever seen actually does this, because it
-	 * would require embedding a location-to-TZ database in the receiver.
-	 * And even if we could do that, it would make our regression tests
-	 * break any time they were run in a timezone different from the one
-	 * where they were generated.
-	 */
+	utc_to_hhmmss(session->gpsdata.fix.time, time_str, sizeof(time_str),
+                      &tm);
+        /* There used to be confusion, but we now know NMEA times are UTC,
+         * when available. */
 	(void)snprintf(bufp, len,
-		       "$GPZDA,%02d%02d%05.2f,%02d,%02d,%04d,00,00",
-		       tm.tm_hour,
-		       tm.tm_min,
-		       (double)tm.tm_sec + fractional,
+		       "$GPZDA,%s,%02d,%02d,%04d,00,00",
+		       time_str,
 		       tm.tm_mday,
 		       tm.tm_mon + 1,
 		       tm.tm_year + 1900);
