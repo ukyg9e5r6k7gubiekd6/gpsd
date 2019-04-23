@@ -639,13 +639,13 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     time_accuracy = getub(buf, 22);
     time_source = getub(buf, 23);     /* unused */
 
+    memset(&unpacked_date, 0, sizeof(unpacked_date));
     unpacked_date.tm_year = (int)getbeu16(buf, 24) - 1900;
     unpacked_date.tm_mon = (int)getub(buf, 26) - 1;
     unpacked_date.tm_mday = (int)getub(buf, 27);
     unpacked_date.tm_hour = (int)getub(buf, 28);
     unpacked_date.tm_min = (int)getub(buf, 29);
     unpacked_date.tm_sec = (int)getbeu16(buf, 30) / 1000;
-    unpacked_date.tm_isdst = 0;
     session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date);
     /* add back in the fractional seconds */
     session->newdata.time += (timestamp_t)gps_tow_sub_ms / NS_IN_SEC;
@@ -1649,14 +1649,12 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 	 * Documentation of this field was corrected in the 1.6 version
 	 * of the protocol manual.
 	 */
+        memset(&unpacked_date, 0, sizeof(unpacked_date));
 	unpacked_date.tm_year = (int)getbeu16(buf, 11) - 1900;
 	unpacked_date.tm_mon = (int)getub(buf, 13) - 1;
 	unpacked_date.tm_mday = (int)getub(buf, 14);
 	unpacked_date.tm_hour = (int)getub(buf, 15);
 	unpacked_date.tm_min = (int)getub(buf, 16);
-	unpacked_date.tm_sec = 0;
-	unpacked_date.tm_isdst = 0;
-	unpacked_date.tm_wday = unpacked_date.tm_yday = 0;
 	subseconds = getbeu16(buf, 17) * 1e-3;
 	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + subseconds;
 	gpsd_log(&session->context->errout, LOG_PROG,
@@ -1781,14 +1779,12 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
 	if ( 3 <= session->gpsdata.satellites_visible ) {
 	    mask |= NTPTIME_IS;
 	}
+        memset(&unpacked_date, 0, sizeof(unpacked_date));
 	unpacked_date.tm_year = (int)getbeu16(buf, 26) - 1900;
 	unpacked_date.tm_mon = (int)getub(buf, 28) - 1;
 	unpacked_date.tm_mday = (int)getub(buf, 29);
 	unpacked_date.tm_hour = (int)getub(buf, 30);
 	unpacked_date.tm_min = (int)getub(buf, 31);
-	unpacked_date.tm_sec = 0;
-	unpacked_date.tm_isdst = 0;
-	unpacked_date.tm_wday = unpacked_date.tm_yday = 0;
 	subseconds = ((unsigned short)getbeu16(buf, 32)) * 1e-3;
 	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + subseconds;
 #ifdef TIMEHINT_ENABLE
@@ -1836,13 +1832,13 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session,
 	     getub(buf, 14));
     if (((int)getub(buf, 14) & 0x07) == 0x07) {	/* valid UTC time? */
 	struct tm unpacked_date;
+        memset(&unpacked_date, 0, sizeof(unpacked_date));
 	unpacked_date.tm_hour = (int)getub(buf, 1);
 	unpacked_date.tm_min = (int)getub(buf, 2);
 	unpacked_date.tm_sec = (int)getub(buf, 3);
 	unpacked_date.tm_mday = (int)getub(buf, 4);
 	unpacked_date.tm_mon = (int)getub(buf, 5) - 1;
 	unpacked_date.tm_year = (int)getbeu16(buf, 6) - 1900;
-	unpacked_date.tm_isdst = 0;
 	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date);
 	session->context->leap_seconds = (int)getbeu16(buf, 8);
 	session->context->valid |= LEAP_SECOND_VALID;
