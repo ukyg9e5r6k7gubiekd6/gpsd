@@ -190,6 +190,8 @@ ubx_msg_nav_hpposecef(struct gps_device_t *session, unsigned char *buf,
  /**
  * High Precision Geodetic Position Solution
  * UBX-NAV-HPPOSLLH, Class 1, ID x14
+ *
+ * No mode, so limited usefulness.
  */
 static gps_mask_t
 ubx_msg_nav_hpposllh(struct gps_device_t *session, unsigned char *buf,
@@ -212,6 +214,8 @@ ubx_msg_nav_hpposllh(struct gps_device_t *session, unsigned char *buf,
     session->newdata.eph = (double)(getleu32(buf, 28) / 10000.0);
     /* Vertical accuracy estimate in mm, unknown est type */
     session->newdata.epv = (double)(getleu32(buf, 32) / 10000.0);
+    gpsd_log(&session->context->errout, LOG_DATA,
+	"UBX-NAV-HPPOSECEF: version %d\n", version);
     return mask;
 }
 
@@ -628,21 +632,27 @@ static void ubx_msg_nav_timels(struct gps_device_t *session,
  /**
  * Geodetic position solution message
  * UBX-NAV-POSLLH, Class 1, ID 2
+ *
+ * No mode, so limited usefulness
  */
 static gps_mask_t
 ubx_msg_nav_posllh(struct gps_device_t *session, unsigned char *buf,
 		   size_t data_len UNUSED)
 {
+    gps_mask_t mask = 0;
+
     if (28 > data_len) {
 	gpsd_log(&session->context->errout, LOG_WARN,
 		 "Runt NAV-POSLLH message, payload len %zd", data_len);
 	return 0;
     }
 
-    gps_mask_t mask = ONLINE_SET | HERR_SET | VERR_SET;
+    mask = ONLINE_SET | HERR_SET | VERR_SET | LATLON_SET | ALTITUDE_SET;
 
     session->driver.ubx.iTOW = getles32(buf, 0);
-    /* FIXME: should also get time, lat/lon/alt */
+    session->newdata.longitude = 1e-7 * (int32_t)getles32(buf, 4);
+    session->newdata.latitude = 1e-7 * (int32_t)getles32(buf, 8);
+    session->newdata.altitude = 1e-3 * (int32_t)getles32(buf, 16);
     /* Horizontal accuracy estimate in mm, unknown type */
     session->newdata.eph = (double)(getleu32(buf, 20) / 1000.0);
     /* Vertical accuracy estimate in mm, unknown type */
