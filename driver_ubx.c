@@ -1817,16 +1817,11 @@ static void ubx_event_hook(struct gps_device_t *session, event_t event)
 	}
 #endif /* RECONFIGURE_ENABLE */
     } else if (event == event_deactivate) {
-	unsigned char msg[4] = {
-	    0x00, 0x00,		/* hotstart */
-	    0x01,		/* controlled software reset */
-	    0x00
-	};			/* reserved */
-
-	gpsd_log(&session->context->errout, LOG_DATA, "UBX revert\n");
-
-	/* Reverting all in one fast and reliable reset */
-	(void)ubx_write(session, 0x06, 0x04, msg, 4);	/* UBX-CFG-RST */
+        /* There used to be a hotstart/reset here.
+         * That caused u-blox USB to re-enumerate.
+         * Sometimes to a new device name.
+         * Bad.  Don't do that anymore...
+         */
     }
 }
 
