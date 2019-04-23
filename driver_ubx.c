@@ -362,7 +362,7 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
 
     session->newdata.longitude = 1e-7 * (int32_t)getles32(buf, 24);
     session->newdata.latitude = 1e-7 * (int32_t)getles32(buf, 28);
-    session->newdata.altitude = 1e-3 * (int32_t)getles32(buf, 32);
+    session->newdata.altitude = 1e-3 * (int32_t)getles32(buf, 36);
     session->newdata.speed = 1e-3 * (int32_t)getles32(buf, 60);
     session->newdata.track = 1e-5 * (int32_t)getles32(buf, 64);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET;
