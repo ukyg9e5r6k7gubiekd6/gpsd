@@ -1475,11 +1475,11 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
      * we get that data from the svinfo packet.
      */
     /* position/velocity is bytes 1-18 */
-    session->newdata.ecef.x = (double)getbes32(buf, 1) * 1.0,
-    session->newdata.ecef.y = (double)getbes32(buf, 5) * 1.0,
-    session->newdata.ecef.z = (double)getbes32(buf, 9) * 1.0,
-    session->newdata.ecef.vx = (double)getbes16(buf, 13) / 8.0,
-    session->newdata.ecef.vy = (double)getbes16(buf, 15) / 8.0,
+    session->newdata.ecef.x = (double)getbes32(buf, 1);
+    session->newdata.ecef.y = (double)getbes32(buf, 5);
+    session->newdata.ecef.z = (double)getbes32(buf, 9);
+    session->newdata.ecef.vx = (double)getbes16(buf, 13) / 8.0;
+    session->newdata.ecef.vy = (double)getbes16(buf, 15) / 8.0;
     session->newdata.ecef.vz = (double)getbes16(buf, 17) / 8.0;
 
     ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
