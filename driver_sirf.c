@@ -1462,8 +1462,10 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 				  unsigned char *buf, size_t len)
 {
     unsigned short navtype;
+    unsigned short nav_mode2;
     gps_mask_t mask = 0;
 
+    /* later versions are 47 bytes long */
     if (len < 41)
 	return 0;
 
@@ -1501,10 +1503,14 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
     if (session->newdata.mode == MODE_3D)
 	mask |= ALTITUDE_SET | CLIMB_SET;
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "SiRF: MND 0x02: Navtype = 0x%0x, Status = %d, mode = %d\n",
+	     "SiRF: MND 0x02: Navtype %#0x, Status %d mode %d\n",
 	     navtype, session->gpsdata.status, session->newdata.mode);
-    /* byte 20 is HDOP, see below */
-    /* byte 21 is "mode 2", not clear how to interpret that */
+    /* byte 20 is HDOP */
+    session->gpsdata.dop.hdop = (double)getub(buf, 20) / 5.0;
+    /* byte 21 is nav_mode2, not clear how to interpret that */
+    nav_mode2 = getub(buf, 21);
+
+    /* Gack.  Early SiRF scales TOW by 100, later by 1000 */
     session->newdata.time = gpsd_gpstime_resolve(session,
 	(unsigned short)getbes16(buf, 22), (double)getbeu32(buf, 24) * 1e-2);
 #ifdef TIMEHINT_ENABLE
@@ -1514,24 +1520,23 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 		 session->newdata.mode);
     } else {
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: NTPD valid time MID 0x02, seen=%#02x, time;%.2lf, "
-                 "leap:%d\n",
+		 "SiRF: NTPD valid time MID 0x02, seen %#02x, time %.3lf, "
+                 "leap:%d nav_mode2\n",
 		 session->driver.sirf.time_seen,
-		 session->newdata.time, session->context->leap_seconds);
+		 session->newdata.time, session->context->leap_seconds,
+                 nav_mode2);
     }
 #endif /* TIMEHINT_ENABLE */
-    /* fix quality data */
-    session->gpsdata.dop.hdop = (double)getub(buf, 20) / 5.0;
     /* clear computed DOPs so they get recomputed. */
     session->gpsdata.dop.tdop = NAN;
-    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | TRACK_SET | ECEF_SET
-            | VECEF_SET | SPEED_SET | STATUS_SET | MODE_SET | DOP_SET | USED_IS;
+    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | TRACK_SET | ECEF_SET |
+            VECEF_SET | SPEED_SET | STATUS_SET | MODE_SET | DOP_SET | USED_IS;
     if ( 3 <= session->gpsdata.satellites_visible ) {
 	mask |= NTPTIME_IS;
     }
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "SiRF: MND 0x02: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
-             "track=%.2f speed=%.2f mode=%d status=%d hdop=%.2f used=%d\n",
+	     "SiRF: MND 0x02: time %.2f lat %.2f lon %.2f alt %.2f "
+             "track %.2f speed %.2f mode %d status %d hdop %.2f used %d\n",
 	     session->newdata.time, session->newdata.latitude,
 	     session->newdata.longitude, session->newdata.altitude,
 	     session->newdata.track, session->newdata.speed,
