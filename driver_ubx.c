@@ -636,12 +636,7 @@ ubx_msg_nav_eoe(struct gps_device_t *session, unsigned char *buf,
     session->driver.ubx.iTOW = getles32(buf, 0);
     gpsd_log(&session->context->errout, LOG_DATA, "EOE: iTOW=%lld\n",
 	     (long long)session->driver.ubx.iTOW);
-    /* nothing really to new, but report data collected so far
-     * and clear for next data set */
-    /* return CLEAR_IS | REPORT_IS;
-     * return REPORT_IS | STATUS_SET;
-     * return REPORT_IS;
-     * strangely any mask return here makes things worse... */
+    /* nothing to report, but the iTOW for cycle ender is good */
     return 0;
 }
 
