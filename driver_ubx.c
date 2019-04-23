@@ -187,6 +187,34 @@ ubx_msg_nav_hpposecef(struct gps_device_t *session, unsigned char *buf,
     return mask;
 }
 
+ /**
+ * High Precision Geodetic Position Solution
+ * UBX-NAV-HPPOSLLH, Class 1, ID x14
+ */
+static gps_mask_t
+ubx_msg_nav_hpposllh(struct gps_device_t *session, unsigned char *buf,
+		   size_t data_len UNUSED)
+{
+    int version;
+
+    if (36 > data_len) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "Runt NAV-HPPOSLLH message, payload len %zd", data_len);
+	return 0;
+    }
+
+    gps_mask_t mask = ONLINE_SET | HERR_SET | VERR_SET;
+
+    version = getub(buf, 0);
+    session->driver.ubx.iTOW = getles32(buf, 4);
+    /* FIXME: should also get time, lat/lon/alt */
+    /* Horizontal accuracy estimate in mm, unknown est type */
+    session->newdata.eph = (double)(getleu32(buf, 28) / 10000.0);
+    /* Vertical accuracy estimate in mm, unknown est type */
+    session->newdata.epv = (double)(getleu32(buf, 32) / 10000.0);
+    return mask;
+}
+
 /*
  * Navigation Position ECEF message
  */
@@ -607,7 +635,7 @@ ubx_msg_nav_posllh(struct gps_device_t *session, unsigned char *buf,
 {
     if (28 > data_len) {
 	gpsd_log(&session->context->errout, LOG_WARN,
-		 "Runt RXM-POSLLH message, payload len %zd", data_len);
+		 "Runt NAV-POSLLH message, payload len %zd", data_len);
 	return 0;
     }
 
@@ -1435,6 +1463,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_NAV_HPPOSLLH:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX-NAV-HPPOSLLH\n");
+	mask = ubx_msg_nav_hpposllh(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_ODO:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX-NAV-ODO\n");
