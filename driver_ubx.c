@@ -166,18 +166,18 @@ ubx_msg_nav_hpposecef(struct gps_device_t *session, unsigned char *buf,
 
     version = getub(buf, 0);
     session->driver.ubx.iTOW = getleu32(buf, 4);
-    session->newdata.ecef.x = getles32(buf, 8) / 100.0;
-    session->newdata.ecef.y = getles32(buf, 12) / 100.0;
-    session->newdata.ecef.z = getles32(buf, 16) / 100.0;
-    /* now the correction factors */
-    session->newdata.ecef.x += getsb(buf, 20) / 10000.0;
-    session->newdata.ecef.y += getsb(buf, 21) / 10000.0;
-    session->newdata.ecef.z += getsb(buf, 22) / 10000.0;
-    session->newdata.ecef.pAcc = getleu32(buf, 24) / 10000.0;
+    session->newdata.ecef.x = ((getles32(buf, 8) +
+                                (getsb(buf, 20) * 1e-2)) * 1e-2);
+    session->newdata.ecef.y = ((getles32(buf, 12) +
+                                (getsb(buf, 21) * 1e-2)) * 1e-2);
+    session->newdata.ecef.z = ((getles32(buf, 16) +
+                                (getsb(buf, 22) * 1e-2)) * 1e-2);
+
+    session->newdata.ecef.pAcc = getleu32(buf, 24) * 1e-4;
     /* (long long) cast for 32-bit compat */
     gpsd_log(&session->context->errout, LOG_DATA,
-	"UBX-NAV-HPPOSECEF: version %d iTOW=%lld ECEF x=%.3f y=%.3f z=%.3f "
-        "pAcc=%.3f\n",
+	"UBX-NAV-HPPOSECEF: version %d iTOW=%lld ECEF x=%.4f y=%.4f z=%.4f "
+        "pAcc=%.4f\n",
         version,
 	(long long)session->driver.ubx.iTOW,
 	session->newdata.ecef.x,
@@ -198,24 +198,37 @@ ubx_msg_nav_hpposllh(struct gps_device_t *session, unsigned char *buf,
 		   size_t data_len UNUSED)
 {
     int version;
+    gps_mask_t mask = 0;
 
     if (36 > data_len) {
 	gpsd_log(&session->context->errout, LOG_WARN,
 		 "Runt NAV-HPPOSLLH message, payload len %zd", data_len);
-	return 0;
+	return mask;
     }
 
-    gps_mask_t mask = ONLINE_SET | HERR_SET | VERR_SET;
+    mask = ONLINE_SET | HERR_SET | VERR_SET | LATLON_SET | ALTITUDE_SET;
 
     version = getub(buf, 0);
     session->driver.ubx.iTOW = getles32(buf, 4);
-    /* FIXME: should also get time, lat/lon/alt */
-    /* Horizontal accuracy estimate in mm, unknown est type */
-    session->newdata.eph = (double)(getleu32(buf, 28) / 10000.0);
-    /* Vertical accuracy estimate in mm, unknown est type */
-    session->newdata.epv = (double)(getleu32(buf, 32) / 10000.0);
+    session->newdata.longitude = (1e-7 * (getles32(buf, 8) +
+        (getsb(buf, 24) * 1e-2)));
+    session->newdata.latitude = (1e-7 * (getles32(buf, 12) + \
+        (getsb(buf, 25) * 1e-2)));
+    session->newdata.altitude = (1e-3 * (getles32(buf, 20) + \
+        (getsb(buf, 27) * 1e-2)));
+
+    /* Horizontal accuracy estimate in .1 mm, unknown est type */
+    session->newdata.eph = getleu32(buf, 28) * 1e-4;
+    /* Vertical accuracy estimate in .1 mm, unknown est type */
+    session->newdata.epv = getleu32(buf, 32) * 1e-4;
+
     gpsd_log(&session->context->errout, LOG_DATA,
-	"UBX-NAV-HPPOSECEF: version %d\n", version);
+	"UBX-NAV-HPPOSLLH: version %d iTOW=%lld lat=%.4f lon=%.4f alt=%.4f\n",
+        version,
+	(long long)session->driver.ubx.iTOW,
+        session->newdata.latitude,
+        session->newdata.longitude,
+        session->newdata.altitude);
     return mask;
 }
 
@@ -224,7 +237,7 @@ ubx_msg_nav_hpposllh(struct gps_device_t *session, unsigned char *buf,
  */
 static gps_mask_t
 ubx_msg_nav_posecef(struct gps_device_t *session, unsigned char *buf,
-		size_t data_len)
+	            size_t data_len)
 {
     gps_mask_t mask = ECEF_SET;
 
@@ -235,10 +248,12 @@ ubx_msg_nav_posecef(struct gps_device_t *session, unsigned char *buf,
     }
 
     session->driver.ubx.iTOW = getleu32(buf, 0);
-    session->newdata.ecef.x = getles32(buf, 4) / 100.0;
-    session->newdata.ecef.y = getles32(buf, 8) / 100.0;
-    session->newdata.ecef.z = getles32(buf, 12) / 100.0;
-    session->newdata.ecef.pAcc = getleu32(buf, 16) / 100.0;
+    /* all in cm */
+    session->newdata.ecef.x = getles32(buf, 4) * 1e-2;
+    session->newdata.ecef.y = getles32(buf, 8) * 1e-2;
+    session->newdata.ecef.z = getles32(buf, 12) * 1e-2;
+    session->newdata.ecef.pAcc = getleu32(buf, 16) * 1e-2;
+
     /* (long long) cast for 32-bit compat */
     gpsd_log(&session->context->errout, LOG_DATA,
 	"UBX-NAV-POSECEF: iTOW=%lld ECEF x=%.2f y=%.2f z=%.2f pAcc=%.2f\n",
@@ -376,8 +391,9 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     /* let gpsd_error_model() do the rest */
 
     mask |= HERR_SET | SPEEDERR_SET | VERR_SET;
+
     gpsd_log(&session->context->errout, LOG_DATA,
-	 "NAV_PVT: flags=%02x time=%.2f lat=%.2f lon=%.2f alt=%.2f\n"
+	 "NAV-PVT: flags=%02x time=%.2f lat=%.2f lon=%.2f alt=%.2f\n"
          "  track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
 	 flags,
 	 session->newdata.time,
@@ -501,6 +517,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 	session->gpsdata.status = STATUS_DGPS_FIX;
 
     mask |= MODE_SET | STATUS_SET;
+
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "UBX-NAV-SOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f\n"
              "  speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
@@ -650,13 +667,23 @@ ubx_msg_nav_posllh(struct gps_device_t *session, unsigned char *buf,
     mask = ONLINE_SET | HERR_SET | VERR_SET | LATLON_SET | ALTITUDE_SET;
 
     session->driver.ubx.iTOW = getles32(buf, 0);
-    session->newdata.longitude = 1e-7 * (int32_t)getles32(buf, 4);
-    session->newdata.latitude = 1e-7 * (int32_t)getles32(buf, 8);
-    session->newdata.altitude = 1e-3 * (int32_t)getles32(buf, 16);
+    session->newdata.longitude = 1e-7 * getles32(buf, 4);
+    session->newdata.latitude = 1e-7 * getles32(buf, 8);
+    session->newdata.altitude = 1e-3 * getles32(buf, 16);
     /* Horizontal accuracy estimate in mm, unknown type */
-    session->newdata.eph = (double)(getleu32(buf, 20) / 1000.0);
+    session->newdata.eph = getleu32(buf, 20) * 1e-3;
     /* Vertical accuracy estimate in mm, unknown type */
-    session->newdata.epv = (double)(getleu32(buf, 24) / 1000.0);
+    session->newdata.epv = getleu32(buf, 24) * 1e-3;
+
+    gpsd_log(&session->context->errout, LOG_DATA,
+	"UBX-NAV-POSLLH: iTOW=%lld lat=%.3f lon=%.3f alt=%.3f "
+        "eph %.3f epv %.3f\n",
+	(long long)session->driver.ubx.iTOW,
+        session->newdata.latitude,
+        session->newdata.longitude,
+        session->newdata.altitude,
+	session->newdata.eph,
+	session->newdata.epv);
     return mask;
 }
 
@@ -2147,7 +2174,7 @@ const struct gps_type_t driver_ubx = {
     .flags	      = DRIVER_STICKY,	/* remember this */
     .trigger          = NULL,
     /* Number of satellite channels supported by the device */
-    .channels         = 50,    
+    .channels         = 50,
     .probe_detect     = NULL,           /* Startup-time device detector */
     /* Packet getter (using default routine) */
     .get_packet       = generic_get,
