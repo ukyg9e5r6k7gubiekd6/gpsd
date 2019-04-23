@@ -1,0 +1,73 @@
+GPSd on Android/AOSP:
+---------------------
+
+The files in this path, as well as the Android.bp in the path below,
+are used for building the GPSd client as a platform library for AOSP.
+
+Three components are currently implemented;
+Shared library, libgps (builds libgps.so)
+Static library, libgps_static
+Test client, gps_test (builds executable gps_test)
+
+
+Build instructions:
+-------------------
+
+1) clone gpsd into your Android build tree at;
+platform/external/gpsd
+
+2) initialize your build environment for your target device;
+cd platform/
+. build/envsetup.sh
+lunch
+
+3) build the component;
+m libgps
+or 
+m gps_test
+
+This will build the component and output it at;
+platform/out/target/product/<device name>/vendor/
+
+
+As a platform dependency:
+-------------------------
+
+You can add the components to your device's dependency list by adding
+it to the PRODUCT_PACKAGES variable in one of your device's makefiles.
+
+For example;
+PRODUCT_PACKAGES += libgps gps_test
+
+Following this, performing a full build for your device will
+incorporate the component(s) into the vendor partition image for
+your device.
+
+
+Running gps_test:
+-----------------
+gps_test is an extremely simple test client that continually prints
+fix and SV details to the console.
+
+It accepts one parameter, which is the IP address or hostname of
+a running instance of GPSd.
+
+
+Building other components using libgps:
+---------------------------------------
+gps_test is a good starting point for building other components using
+libgps. libgps can be added either as a shared object or static
+linked. For use as a shared object, add "libgps" to the list of
+shared_libs that your module depends on. For static, use
+"libgps_static" in the list of static_libs.
+
+
+Future work:
+------------
+I am currently in the process of writing a GNSS 1.1 HAL for Android
+based on libgps. Once this is working, I will move on to getting
+GPSd itself to build.
+
+
+Contact: Adam Serbinski <aserbinski@gmail.com>
+
