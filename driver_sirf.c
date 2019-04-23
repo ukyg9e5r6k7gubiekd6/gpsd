@@ -749,44 +749,44 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     if (session->context->errout.debug >= debug_base) {
         /* skip all the pushing and popping, unless needed */
 	gpsd_log(&session->context->errout, debug_base,
-	     "GPS Week %d, tow %d.%03d, time %ld.%09ld\n",
-	     gps_week, gps_tow, gps_tow_sub_ms, now.tv_sec, now.tv_nsec);
+	         "GPS Week %d, tow %d.%03d, time %ld.%09ld\n",
+	         gps_week, gps_tow, gps_tow_sub_ms, now.tv_sec, now.tv_nsec);
 	gpsd_log(&session->context->errout, debug_base,
-	     "UTC time %.9f leaps %u, datum %s\n",
-	     session->newdata.time, session->context->leap_seconds,
-	     session->newdata.datum);
+	         "UTC time %.9f leaps %u, datum %s\n",
+	         session->newdata.time, session->context->leap_seconds,
+	         session->newdata.datum);
 	gpsd_log(&session->context->errout, debug_base,
-             "solution_info %08x\n", solution_info);
+                 "solution_info %08x\n", solution_info);
 	gpsd_log(&session->context->errout, debug_base,
-	     "lat %.7f lon %.7f alte %d msl %.2f\n",
-	     session->newdata.latitude, session->newdata.longitude,
-             alt_ellips, session->newdata.altitude);
+	         "lat %.7f lon %.7f alte %d msl %.2f\n",
+	         session->newdata.latitude, session->newdata.longitude,
+                 alt_ellips, session->newdata.altitude);
 	gpsd_log(&session->context->errout, debug_base,
-	     "speed %.2f track %.2f climb %.2f heading_rate %d\n",
-	     session->newdata.speed, session->newdata.track,
-             session->newdata.climb, heading_rate);
+	         "speed %.2f track %.2f climb %.2f heading_rate %d\n",
+	         session->newdata.speed, session->newdata.track,
+                 session->newdata.climb, heading_rate);
 	gpsd_log(&session->context->errout, debug_base,
-             "time_bias %d time_accuracy %u, time_source %u\n",
-             time_bias, time_accuracy, time_source);
+                 "time_bias %d time_accuracy %u, time_source %u\n",
+                 time_bias, time_accuracy, time_source);
 	gpsd_log(&session->context->errout, debug_base,
-	     "distance_travel %u distance_travel_error %d\n",
-             distance_travel, distance_travel_error);
+	         "distance_travel %u distance_travel_error %d\n",
+                 distance_travel, distance_travel_error);
 	gpsd_log(&session->context->errout, debug_base,
-             "clk_bias %.2f clk_bias_error %u\n",
-             clk_bias / 100.0, clk_bias_error);
+                 "clk_bias %.2f clk_bias_error %u\n",
+                 clk_bias / 100.0, clk_bias_error);
 	gpsd_log(&session->context->errout, debug_base,
-             "clk_offset %d clk_offset_error %u\n",
-             clk_offset, clk_offset_error);
+                 "clk_offset %d clk_offset_error %u\n",
+                 clk_offset, clk_offset_error);
 	gpsd_log(&session->context->errout, debug_base,
-	     "ehpe %d epv %.2f eps %.2f epd %.2f num_svs_in_sol %u\n", ehpe,
-	     session->newdata.epv, session->newdata.eps, session->newdata.epd,
-             num_svs_in_sol);
+	         "ehpe %d epv %.2f eps %.2f epd %.2f num_svs_in_sol %u\n",
+                 ehpe, session->newdata.epv, session->newdata.eps,
+                 session->newdata.epd, num_svs_in_sol);
 	gpsd_log(&session->context->errout, debug_base,
-             "sv_list_1 %08x sv_list_2 %08x sv_list_3 %08x\n",
-             sv_list_1, sv_list_2, sv_list_3);
+                 "sv_list_1 %08x sv_list_2 %08x sv_list_3 %08x\n",
+                 sv_list_1, sv_list_2, sv_list_3);
 	gpsd_log(&session->context->errout, debug_base,
-             "sv_list_4 %08x sv_list_5 %08x add_info %08x\n",
-             sv_list_4, sv_list_5, additional_info);
+                 "sv_list_4 %08x sv_list_5 %08x add_info %08x\n",
+                 sv_list_4, sv_list_5, additional_info);
     }
 
     return mask;
@@ -1530,7 +1530,8 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 	mask |= NTPTIME_IS;
     }
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "SiRF: MND 0x02: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f mode=%d status=%d hdop=%.2f used=%d\n",
+	     "SiRF: MND 0x02: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
+             "track=%.2f speed=%.2f mode=%d status=%d hdop=%.2f used=%d\n",
 	     session->newdata.time, session->newdata.latitude,
 	     session->newdata.longitude, session->newdata.altitude,
 	     session->newdata.track, session->newdata.speed,
