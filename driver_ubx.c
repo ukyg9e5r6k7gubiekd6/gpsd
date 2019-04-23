@@ -363,7 +363,6 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 #define DATE_VALID	(UBX_SOL_VALID_WEEK | UBX_SOL_VALID_TIME)
     if ((flags & DATE_VALID) == DATE_VALID) {
         unsigned short week;
-        uint32_t iTOW;      /* integer part of TOW in ms */
         int32_t fTOW;      /* fractional part of TOW in ns */
         double TOW;       /* complete TOW in seconds */
 
@@ -1267,6 +1266,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	return 0;
 
     session->cycle_end_reliable = true;
+    session->driver.ubx.iTOW = -1;        /* set by decoder */
 
     /* extract message id and length */
     msgid = (buf[2] << 8) | buf[3];
@@ -1582,8 +1582,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
         mask |= REPORT_IS;
     }
     /* start of cycle ? */
-    if (TIME_SET & mask) {
-        timestamp_t difftime;
+    if ( -1 < session->driver.ubx.iTOW) {
         /* this sentence has a good time */
         /* debug
 	gpsd_log(&session->context->errout, LOG_ERROR,
@@ -1594,17 +1593,17 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 		 session->driver.ubx.last_time,
 		 session->driver.ubx.last_msgid);
          */
-        /* no more than 100Hz */
-	difftime = session->newdata.time - session->driver.ubx.last_time;
-	if ((0.01 < difftime) &&
+        /* iTOW is to ms, can go forward or backwards */
+	if ((session->driver.ubx.last_iTOW != session->driver.ubx.iTOW) &&
 	    (session->driver.ubx.end_msgid !=
              session->driver.ubx.last_msgid)) {
-            /* time advanced, new cycle ender */
+            /* time changed, new cycle ender */
 	    session->driver.ubx.end_msgid = session->driver.ubx.last_msgid;
+	    session->driver.ubx.last_iTOW = session->driver.ubx.iTOW;
             /* debug
 	    gpsd_log(&session->context->errout, LOG_ERROR,
-		     "UBX: new ender %x, difftime %.2f\n",
-		     session->driver.ubx.end_msgid, difftime);
+		     "UBX: new ender %x, iTOW %.2f\n",
+		     session->driver.ubx.end_msgid, iTOW);
              */
         }
 	session->driver.ubx.last_msgid = msgid;
