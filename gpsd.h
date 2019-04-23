@@ -712,6 +712,9 @@ struct gps_device_t {
 	    unsigned int last_msgid;            /* last class/ID */
             timestamp_t last_time;              /* time of last_msgid */
 	    unsigned int end_msgid;             /* cycle ender class/ID */
+            /* iTOW, and last_iTOW, in ms, used for cycle end detect. */
+            int64_t iTOW;
+            int64_t last_iTOW;
     	} ubx;
 #endif /* UBLOX_ENABLE */
 #ifdef NAVCOM_ENABLE
