@@ -12,9 +12,9 @@
 
 #include "gps.h"
 
-int main (int argc, char ** argv){
-struct gps_data_t gps_data;
-int gpsopen = -2;
+int main (int argc, char **argv) {
+    struct gps_data_t gps_data;
+    int gpsopen = -2;
 
     /* debug
      * FILE *fp = fopen("/data/bin/gpslog", "a+");
@@ -25,8 +25,8 @@ int gpsopen = -2;
 
     memset(&gps_data, 0, sizeof(gps_data));
 
-    while (1){
-	if (gpsopen < 0){
+    while (1) {
+	if (gpsopen < 0) {
 	    gpsopen = gps_open((argc == 1 ? "localhost" : argv[1]),
                                "2947", &gps_data);
 	    if (0 == gpsopen) {
@@ -46,7 +46,9 @@ int gpsopen = -2;
 		if (gps_data.status >= 1 && gps_data.fix.mode >= 2){
 		    printf("\nHave a fix: ");
 		    if (gps_data.fix.mode == 2)
-                        printf("2D\n"); else printf("3D\n");
+                        printf("2D\n");
+                    else
+                        printf("3D\n");
 
 		    printf("Latitude: %f\n", gps_data.fix.latitude);
 		    printf("Longitude: %f\n", gps_data.fix.longitude);
@@ -62,36 +64,36 @@ int gpsopen = -2;
 
 		printf("Satellites visible: %d\n",
                        gps_data.satellites_visible);
-		for (int i = 0; i < gps_data.satellites_visible; i++){
+		for (int i = 0; i < gps_data.satellites_visible; i++) {
 		    printf("SV type: ");
-		    switch (gps_data.skyview[i].gnssid){
-			case 0:
-				printf("GPS, ");
-				break;
-			case 1:
-				printf("SBAS, ");
-				break;
-			case 2:
-				printf("Galileo, ");
-				break;
-			case 3:
-				printf("Beidou, ");
-				break;
-			case 4:
-				printf("Unknown, ");
-				break;
-			case 5:
-				printf("QZSS, ");
-				break;
-			case 6:
-				printf("Glonass, ");
-				break;
+		    switch (gps_data.skyview[i].gnssid) {
+                    case 0:
+                            printf("GPS, ");
+                            break;
+                    case 1:
+                            printf("SBAS, ");
+                            break;
+                    case 2:
+                            printf("Galileo, ");
+                            break;
+                    case 3:
+                            printf("Beidou, ");
+                            break;
+                    case 4:
+                            printf("Unknown, ");
+                            break;
+                    case 5:
+                            printf("QZSS, ");
+                            break;
+                    case 6:
+                            printf("Glonass, ");
+                            break;
 		    }
 
 		    printf("SVID: %d, SNR: %d, Elevation: %d, "
                            "Azimuth: %d, Used: %d\n",
                             gps_data.skyview[i].svid,
-                            (int) gps_data.skyview[i].ss,
+                            (int)gps_data.skyview[i].ss,
                             gps_data.skyview[i].elevation,
                             gps_data.skyview[i].azimuth,
                             gps_data.skyview[i].used);
