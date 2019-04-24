@@ -3629,10 +3629,11 @@ class ubx(object):
                 m_data = bytearray([0x01, 0x30, 0])
                 gps_model.gps_send(6, 1, m_data)
 
-        # UBX-NAV-EOE, end of epoch.
-        # do not bother with EOE until gpsd works with it.
-        # m_data = bytearray([0x01, 0x61, rate])
-        # gps_model.gps_send(6, 1, m_data)
+        if 18 <= opts['protver']:
+            # first in u-blox 8
+            # UBX-NAV-EOE, end of epoch. Good cycle ender
+            m_data = bytearray([0x01, 0x61, rate])
+            gps_model.gps_send(6, 1, m_data)
 
     def send_able_ecef(self, able):
         """Enable ECEF messages"""
