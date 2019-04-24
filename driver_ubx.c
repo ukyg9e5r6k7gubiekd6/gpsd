@@ -737,6 +737,10 @@ ubx_msg_nav_eoe(struct gps_device_t *session, unsigned char *buf,
 	return 0;
     }
 
+    if (18 > session->driver.ubx.protver) {
+        /* this GPS is at least protver 18 */
+	session->driver.ubx.protver = 18;
+    }
     session->driver.ubx.iTOW = getles32(buf, 0);
     gpsd_log(&session->context->errout, LOG_DATA, "EOE: iTOW=%lld\n",
 	     (long long)session->driver.ubx.iTOW);
@@ -852,7 +856,7 @@ ubx_msg_nav_sat(struct gps_device_t *session, unsigned char *buf,
             PRN = svId;
             break;
         case 1:
-            /* SBAS, 120-158 mapes to 120-158 */
+            /* SBAS, 120-158 maps to 120-158 */
 	    if (120 > svId || 158 < svId) {
 		/* skip bad svId */
 		continue;
@@ -1977,6 +1981,12 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[2] = 0x00;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
 
+	/* UBX-NAV-EOE */
+	msg[0] = 0x01;		/* class */
+	msg[1] = 0x61;		/* msg id  = NAV-EOE */
+	msg[2] = 0x00;		/* rate */
+	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
 	/* try to improve the sentence mix. in particular by enabling ZDA */
 	msg[0] = 0xf0;		/* class */
 	msg[1] = 0x09;		/* msg id  = GBS */
@@ -2104,14 +2114,26 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	msg[1] = 0x01;		/* msg id  = UBX-NAV-POSECEF */
 	msg[2] = 0x01;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
 	msg[0] = 0x01;		/* class */
 	msg[1] = 0x11;		/* msg id  = UBX-NAV-VELECEF */
 	msg[2] = 0x01;		/* rate */
 	(void)ubx_write(session, 0x06u, 0x01, msg, 3);
+
         msg[0] = 0x01;  	/* class */
         msg[1] = 0x26;  	/* msg id  = UBX-NAV-TIMELS */
         msg[2] = 0xff;          /* about every 4 minutes if nav rate is 1Hz */
         (void)ubx_write(session, 0x06, 0x01, msg, 3);
+
+	if (18 <= session->driver.ubx.protver) {
+            /* first in u-blox 8 */
+	    /* UBX-NAV-EOE makes a good cycle ender */
+	    msg[0] = 0x01;		/* class */
+	    msg[1] = 0x61;		/* msg id  = NAV-EOE */
+	    msg[2] = 0x00;		/* rate */
+	    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
+        }
+
     }
 }
 
