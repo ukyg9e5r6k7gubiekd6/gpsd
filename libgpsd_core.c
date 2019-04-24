@@ -1548,7 +1548,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	if ((session->gpsdata.set & TIME_SET) != 0) {
 	    if (session->newdata.time > time(NULL) + (60 * 60 * 24 * 365))
 		gpsd_log(&session->context->errout, LOG_WARN,
-			 "date (%,3f) more than a year in the future!\n",
+			 "date (%.3f) more than a year in the future!\n",
 			 session->newdata.time);
 	    else if (session->newdata.time < 0)
 		gpsd_log(&session->context->errout, LOG_ERROR,
