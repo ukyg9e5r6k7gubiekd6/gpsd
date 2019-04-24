@@ -1,6 +1,9 @@
 /*
  * The Android build system is unable to make use of scons,
  * therefore this configuration file has to be prepopulated.
+ *
+ * This file is Copyright (c) 2019 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
  */
 
 #define VERSION "3.18.1"

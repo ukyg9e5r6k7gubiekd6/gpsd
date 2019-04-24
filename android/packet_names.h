@@ -1,3 +1,8 @@
+/*
+ * This file is Copyright (c) 2019 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
+ */
+
 /* edit packet_states.h to add new packet types. */
  "GROUND_STATE",	/* we don't know what packet type to expect */
 

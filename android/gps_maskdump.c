@@ -1,4 +1,9 @@
-/* This is the hand-written Android version, since Android cannot make use of scons */
+/* This is the hand-written Android version, since Android
+ * cannot make use of scons.
+ *
+ * This file is Copyright (c) 2019 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
+ */
 
 #include <stdio.h>
 

@@ -1,3 +1,8 @@
+/*
+ * This file is Copyright (c) 2019 by the GPSD project
+ * SPDX-License-Identifier: BSD-2-clause
+ */
+
 #include <stdlib.h>
 #include <time.h>
 #include <stdio.h>
