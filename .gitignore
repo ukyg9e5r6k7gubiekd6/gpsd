@@ -78,17 +78,12 @@ srec.html
 *.gcno
 # Built sources
 gps_maskdump.c
-!android/gps_maskdump.c
 gpsd_maskdump.c
 gpsd_config.h.in
 gpsd_config.h
-!android/gpsd_config.h
 packet_names.h
-!android/packet_names.h
 revision.h
-!android/revision.h
 timebase.h
-!android/timebase.h
 gpsd.spec
 MANIFEST
 .kdbgrc.*
