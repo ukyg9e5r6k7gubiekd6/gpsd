@@ -1980,8 +1980,10 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
 
     buf += 4;
     len -= 8;
+    /* cast for 32/64 bit compatiility */
     gpsd_log(&session->context->errout, LOG_RAW,
-	     "SiRF: Raw packet type %#02x len %d\n", buf[0], len);
+	     "SiRF: Raw packet type %#02x len %ld\n", buf[0],
+             (long)len);
     session->driver.sirf.lastid = buf[0];
 
     /* could change if the set of messages we enable does */
