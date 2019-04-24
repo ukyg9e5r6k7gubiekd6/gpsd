@@ -20,6 +20,27 @@ cc_binary {
 	]
 }
 
+cc_binary {
+	name: "gpsd",
+	vendor: true,
+	local_include_dirs: ["android"],
+	srcs: [
+		"dbusexport.c",
+		"gpsd.c",
+		"shmexport.c",
+		"timehint.c"
+	],
+	static_libs: [
+		"libgpsd",
+		"libgps_static",
+	],
+	cflags: [
+		"-Wno-unused-variable",
+		"-Wno-unused-parameter",
+		"-Wno-missing-field-initializers",
+	]
+}
+
 cc_library_shared {
 	name: "libgps",
 	vendor: true,
@@ -77,5 +98,61 @@ cc_library_static {
                 "-Wno-unused-variable",
                 "-Wno-unused-parameter",
                 "-Wno-missing-field-initializers",
+        ],
+}
+
+cc_library_static {
+        name: "libgpsd",
+        vendor: true,
+        local_include_dirs: ["android"],
+        export_include_dirs: ["."],
+        srcs: [
+               "bsd_base64.c",
+               "crc24q.c",
+               "driver_ais.c",
+               "driver_evermore.c",
+               "driver_garmin.c",
+               "driver_garmin_txt.c",
+               "driver_geostar.c",
+               "driver_greis.c",
+               "driver_greis_checksum.c",
+               "driver_italk.c",
+               "driver_navcom.c",
+               "driver_nmea0183.c",
+               "driver_nmea2000.c",
+               "driver_oncore.c",
+               "driver_rtcm2.c",
+               "driver_rtcm3.c",
+               "drivers.c",
+               "driver_sirf.c",
+               "driver_skytraq.c",
+               "driver_superstar2.c",
+               "driver_tsip.c",
+               "driver_ubx.c",
+               "driver_zodiac.c",
+               "geoid.c",
+               "gpsd_json.c",
+               "isgps.c",
+               "libgpsd_core.c",
+               "matrix.c",
+               "net_dgpsip.c",
+               "net_gnss_dispatch.c",
+               "net_ntrip.c",
+               "ntpshmread.c",
+               "ntpshmwrite.c",
+               "packet.c",
+               "ppsthread.c",
+               "pseudoais.c",
+               "pseudonmea.c",
+               "serial.c",
+               "subframe.c",
+               "timebase.c",
+               "timespec_str.c"
+        ],
+        cflags: [
+                "-Wno-unused-variable",
+                "-Wno-unused-parameter",
+                "-Wno-missing-field-initializers",
+                "-Wno-uninitialized"
         ],
 }
