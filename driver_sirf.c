@@ -756,6 +756,12 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
 	         session->newdata.time, session->context->leap_seconds,
 	         session->newdata.datum);
 	gpsd_log(&session->context->errout, debug_base,
+	         "packed: %02d%02d%02d %02d:%02d:%02d\n",
+	         unpacked_date.tm_mday, unpacked_date.tm_mon + 1,
+                 unpacked_date.tm_year % 100,
+	         unpacked_date.tm_hour, unpacked_date.tm_min,
+	         unpacked_date.tm_sec);
+	gpsd_log(&session->context->errout, debug_base,
                  "solution_info %08x\n", solution_info);
 	gpsd_log(&session->context->errout, debug_base,
 	         "lat %.7f lon %.7f alte %d msl %.2f\n",
@@ -1463,10 +1469,14 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 {
     unsigned short navtype;
     unsigned short nav_mode2;
+    unsigned short gps_week;
+    uint32_t iTOW;
+    timespec_t tow;
     gps_mask_t mask = 0;
+    timespec_t now = {0};
 
     /* later versions are 47 bytes long */
-    if (len < 41)
+    if (41 > len)
 	return 0;
 
     /*
@@ -1510,9 +1520,15 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
     /* byte 21 is nav_mode2, not clear how to interpret that */
     nav_mode2 = getub(buf, 21);
 
-    /* Gack.  Early SiRF scales TOW by 100, later by 1000 */
-    session->newdata.time = gpsd_gpstime_resolve(session,
-	(unsigned short)getbes16(buf, 22), (double)getbeu32(buf, 24) * 1e-2);
+    gps_week = getbes16(buf, 22);
+    iTOW = getbeu32(buf, 24);
+    /* Gack.  The doc says early SiRF scales iTOW by 100, later ones
+     * by 1000.  But that does not seem to be true in sirfstar V. */
+    tow.tv_sec = iTOW / 100;
+    tow.tv_nsec = (iTOW % 100) * 10000000;
+    now = gpsd_gpstime_resolv(session, gps_week, tow);
+    session->newdata.time = now.tv_sec + (now.tv_nsec * 1e-9);
+
 #ifdef TIMEHINT_ENABLE
     if (session->newdata.mode <= MODE_NO_FIX) {
 	gpsd_log(&session->context->errout, LOG_PROG,
@@ -1520,8 +1536,8 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 		 session->newdata.mode);
     } else {
 	gpsd_log(&session->context->errout, LOG_PROG,
-		 "SiRF: NTPD valid time MID 0x02, seen %#02x, time %.3lf, "
-                 "leap:%d nav_mode2\n",
+		 "SiRF: MID 0x02  NTPD valid time, seen %#02x, time %.3lf, "
+                 "leap:%d nav_mode2 %#x\n",
 		 session->driver.sirf.time_seen,
 		 session->newdata.time, session->context->leap_seconds,
                  nav_mode2);
@@ -1529,17 +1545,20 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 #endif /* TIMEHINT_ENABLE */
     /* clear computed DOPs so they get recomputed. */
     session->gpsdata.dop.tdop = NAN;
-    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | TRACK_SET | ECEF_SET |
-            VECEF_SET | SPEED_SET | STATUS_SET | MODE_SET | DOP_SET | USED_IS;
+    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | ECEF_SET |
+            VECEF_SET | STATUS_SET | MODE_SET | DOP_SET | USED_IS;
     if ( 3 <= session->gpsdata.satellites_visible ) {
 	mask |= NTPTIME_IS;
     }
+
+    gpsd_log(&session->context->errout, LOG_DATA,
+	     "SiRF: MND 0x02: gpsd_week %u iTOW %u\n",
+             gps_week, iTOW);
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "SiRF: MND 0x02: time %.2f lat %.2f lon %.2f alt %.2f "
-             "track %.2f speed %.2f mode %d status %d hdop %.2f used %d\n",
+	     "mode %d status %d hdop %.2f used %d\n",
 	     session->newdata.time, session->newdata.latitude,
 	     session->newdata.longitude, session->newdata.altitude,
-	     session->newdata.track, session->newdata.speed,
 	     session->newdata.mode, session->gpsdata.status,
 	     session->gpsdata.dop.hdop, session->gpsdata.satellites_used);
     return mask;
@@ -1962,7 +1981,7 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
     buf += 4;
     len -= 8;
     gpsd_log(&session->context->errout, LOG_RAW,
-	     "SiRF: Raw packet type %#02x\n", buf[0]);
+	     "SiRF: Raw packet type %#02x len %lu\n", buf[0], len);
     session->driver.sirf.lastid = buf[0];
 
     /* could change if the set of messages we enable does */
