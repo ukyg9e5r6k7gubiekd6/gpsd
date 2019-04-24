@@ -77,4 +77,3 @@
 #define UBLOX_ENABLE 1
 #define UDEVDIR "/lib/udev"
 #define USB_ENABLE 1
-

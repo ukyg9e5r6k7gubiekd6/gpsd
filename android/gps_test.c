@@ -11,8 +11,10 @@ int main (int argc, char ** argv){
 struct gps_data_t gps_data;
 int gpsopen = -2;
 
-    //FILE *fp = fopen("/data/bin/gpslog", "a+");
-    //gps_enable_debug(3, fp);
+    /* debug
+     * FILE *fp = fopen("/data/bin/gpslog", "a+");
+     * gps_enable_debug(3, fp);
+     */
 
     printf("Usage: gpsdtest [host]\n\n");
 
@@ -20,7 +22,9 @@ int gpsopen = -2;
 
     while (1){
 	if (gpsopen < 0){
-	    if ((gpsopen = gps_open((argc == 1 ? "localhost" : argv[1]), "2947", &gps_data)) == 0){
+	    gpsopen = gps_open((argc == 1 ? "localhost" : argv[1]),
+                               "2947", &gps_data);
+	    if (0 == gpsopen) {
 		printf("gps_open returned 0 (success)\n");
 		gps_stream(&gps_data, WATCH_ENABLE, NULL);
 	    } else {
@@ -36,7 +40,8 @@ int gpsopen = -2;
 	    if (gps_read (&gps_data, NULL, 0) != -1) {
 		if (gps_data.status >= 1 && gps_data.fix.mode >= 2){
 		    printf("\nHave a fix: ");
-		    if (gps_data.fix.mode == 2) printf("2D\n"); else printf("3D\n");
+		    if (gps_data.fix.mode == 2)
+                        printf("2D\n"); else printf("3D\n");
 
 		    printf("Latitude: %f\n", gps_data.fix.latitude);
 		    printf("Longitude: %f\n", gps_data.fix.longitude);
@@ -50,7 +55,8 @@ int gpsopen = -2;
 		    printf("V Accuracy: %f\n\n", gps_data.fix.epv);
 		}
 
-		printf("Satellites visible: %d\n", gps_data.satellites_visible);
+		printf("Satellites visible: %d\n",
+                       gps_data.satellites_visible);
 		for (int i = 0; i < gps_data.satellites_visible; i++){
 		    printf("SV type: ");
 		    switch (gps_data.skyview[i].gnssid){
@@ -77,12 +83,15 @@ int gpsopen = -2;
 				break;
 		    }
 
-		    printf("SVID: %d, SNR: %d, Elevation: %d, Azimuth: %d, Used: %d\n",
-				gps_data.skyview[i].svid,
-				(int) gps_data.skyview[i].ss,
-				gps_data.skyview[i].elevation,
-				gps_data.skyview[i].azimuth,
-				gps_data.skyview[i].used);
+		    printf("SVID: %d, SNR: %d, Elevation: %d, "
+                           "Azimuth: %d, Used: %d\n",
+                            gps_data.skyview[i].svid,
+                            (int) gps_data.skyview[i].ss,
+                            gps_data.skyview[i].elevation,
+                            gps_data.skyview[i].azimuth,
+                            gps_data.skyview[i].used);
 		}
 	    }
 	}
+    }
+}

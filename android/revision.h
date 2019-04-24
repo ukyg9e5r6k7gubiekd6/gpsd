@@ -1,1 +1,1 @@
-#define REVISION "android-no-rev"
+#define REVISION "android-3.19-dev"
