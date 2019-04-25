@@ -6,7 +6,6 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-#define VERSION "3.18.1"
 #define GPSD_URL "http://catb.org/gpsd"
 #define HAVE_LIBRT 1
 #define HAVE_LINUX_CAN_H 1

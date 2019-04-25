@@ -1,7 +1,6 @@
 cc_binary {
 	name: "gps_test",
 	vendor: true,
-	local_include_dirs: ["android"],
 	srcs: [
 		"android/gps_test.c"
 	],
@@ -23,7 +22,12 @@ cc_binary {
 cc_binary {
 	name: "gpsd",
 	vendor: true,
-	local_include_dirs: ["android"],
+	generated_headers: [
+		"gpsd_timebase_h",
+		"gpsd_revision_h",
+		"gpsd_config_h",
+		"gpsd_packet_names_h"
+	],
 	srcs: [
 		"dbusexport.c",
 		"gpsd.c",
@@ -44,13 +48,18 @@ cc_binary {
 cc_library_shared {
 	name: "libgps",
 	vendor: true,
-	local_include_dirs: ["android"],
 	export_include_dirs: ["."],
+	generated_headers: [
+		"gpsd_timebase_h",
+		"gpsd_revision_h",
+		"gpsd_config_h",
+		"gpsd_packet_names_h"
+	],
+	generated_sources: ["gps_maskdump_c"],
 	srcs: [
 		"bits.c",
 		"gpsdclient.c",
 		"gpsutils.c",
-		"android/gps_maskdump.c",
 		"hex.c",
 		"json.c",
 		"libgps_core.c",
@@ -74,13 +83,18 @@ cc_library_shared {
 cc_library_static {
         name: "libgps_static",
         vendor: true,
-        local_include_dirs: ["android"],
         export_include_dirs: ["."],
+	generated_headers: [
+		"gpsd_timebase_h",
+		"gpsd_revision_h",
+		"gpsd_config_h",
+		"gpsd_packet_names_h"
+	],
+	generated_sources: ["gps_maskdump_c"],
         srcs: [
                 "bits.c",
                 "gpsdclient.c",
                 "gpsutils.c",
-                "android/gps_maskdump.c",
                 "hex.c",
                 "json.c",
                 "libgps_core.c",
@@ -101,11 +115,71 @@ cc_library_static {
         ],
 }
 
+genrule {
+	name: "gpsd_packet_names_h",
+	cmd: "rm -f $(out); sed -e '/^ *\\([A-Z][A-Z0-9_]*\\)," +
+		"/s//   \"\\1\",/' < $(in) > $(out)",
+	srcs: ["packet_states.h"],
+	out: ["packet_names.h"]
+}
+
+genrule {
+	name: "gpsd_config_h",
+	cmd: "cat $(in)/android/gpsd_config.in > $(out);" +
+		"grep \"^gpsd_version\" $(in)/SConstruct | " +
+		"cut -d\\= -f2 | sed -e 's/^/#define VERSION/'" +
+		">> $(out)",
+	srcs: [""],
+	out: ["gpsd_config.h"]
+}
+
+genrule {
+	name: "gpsd_revision_h",
+	cmd: "grep \"^gpsd_version\" $(in) | cut -d\\= -f2 " +
+		"| sed -e 's/^/#define REVISION/' > $(out)",
+	srcs: ["SConstruct"],
+	out: ["revision.h"]
+}
+
+python_binary_host {
+	name: "leapsecond",
+	main: "leapsecond.py",
+	srcs: ["leapsecond.py"],
+}
+
+genrule {
+	name: "gpsd_timebase_h",
+	tools: ["leapsecond"],
+	cmd: "$(location leapsecond) -H $(in) > $(out)",
+	srcs: ["leapseconds.cache"],
+	out: ["timebase.h"]
+}
+
+python_binary_host {
+	name: "maskaudit",
+	main: "maskaudit.py",
+	srcs: ["maskaudit.py"]
+}
+
+genrule {
+	name: "gps_maskdump_c",
+	tools: ["maskaudit"],
+	cmd: "cp $(in)/gps.h ./; cp $(in)/gpsd.h ./;" +
+		" $(location maskaudit) -c > $(out)",
+	out: ["gps_maskdump.c"],
+	srcs: [""]
+}
+
 cc_library_static {
         name: "libgpsd",
         vendor: true,
-        local_include_dirs: ["android"],
         export_include_dirs: ["."],
+        generated_headers: [
+                "gpsd_timebase_h",
+                "gpsd_revision_h",
+                "gpsd_config_h",
+                "gpsd_packet_names_h"
+        ],
         srcs: [
                "bsd_base64.c",
                "crc24q.c",
