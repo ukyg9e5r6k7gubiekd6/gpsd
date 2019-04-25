@@ -347,6 +347,12 @@ timestamp_t gpsd_gpstime_resolve(struct gps_device_t *session,
 	++session->context->rollovers;
     }
 
+    if ((967 < week) && (2 == session->context->rollovers)) {
+        /* week 968 in GPS epoch 2, is 2038-01-18.
+         * This hits time_t rollover bug.
+         * Must be a regression from epoch 1 */
+	session->context->rollovers = 1;
+    }
     /*
      * This guard copes with both conventional GPS weeks and the "extended"
      * 15-or-16-bit version with no wraparound that appears in Zodiac
