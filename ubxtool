@@ -4487,6 +4487,12 @@ def usage():
         for item in sorted(gps_model.commands.keys()):
             print("    %-13s %s" % (item, gps_model.commands[item]["help"]))
         print('\n')
+        if VERB_DECODE < opts['verbosity']:
+            print('\nConfiguration items for -g, -x and -z can be one of:')
+            for item in sorted(gps_model.cfgs):
+                print("    %s\n"
+                      "        %s" % (item[0], item[5]))
+            print('\n')
 
     print('Options can be placed in the UBXOPTS environment variable.\n'
           'UBXOPTS is processed before the CLI options.')
