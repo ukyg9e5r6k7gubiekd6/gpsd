@@ -1,0 +1,5 @@
+service gpsd /vendor/bin/gpsd_wrapper
+    class main
+    user root
+    group root
+    oneshot

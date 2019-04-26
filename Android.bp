@@ -22,6 +22,7 @@ cc_binary {
 cc_binary {
 	name: "gpsd",
 	vendor: true,
+	required: ["gpsd_wrapper"],
 	generated_headers: [
 		"gpsd_timebase_h",
 		"gpsd_revision_h",
@@ -42,6 +43,17 @@ cc_binary {
 		"-Wno-unused-variable",
 		"-Wno-unused-parameter",
 		"-Wno-missing-field-initializers",
+	]
+}
+
+cc_binary {
+	name: "gpsd_wrapper",
+	vendor: true,
+	init_rc: ["android/gpsd.rc"],
+	srcs: ["android/gpsd_wrapper.c"],
+	shared_libs: [
+		"liblog",
+		"libcutils"
 	]
 }
 

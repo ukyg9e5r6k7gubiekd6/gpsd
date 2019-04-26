@@ -1,0 +1,6 @@
+# Hijack hostapd domain and attribute to gain network access
+hal_server_domain(hal_gnss_default, hal_wifi_hostapd);
+typeattribute hal_gnss_default hal_wifi_hostapd_server;
+
+net_domain(hal_gnss_default)
+allow hal_gnss_default hal_gnss_default:capability { net_raw };

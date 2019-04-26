@@ -1,0 +1,4 @@
+service gnss-gpsd /vendor/bin/hw/android.hardware.gnss@1.1-service.gpsd
+    class hal
+    user root
+    group system gps radio

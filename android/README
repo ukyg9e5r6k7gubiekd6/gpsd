@@ -4,10 +4,12 @@ GPSd on Android/AOSP:
 The files in this path, as well as the Android.bp in the path below,
 are used for building the GPSd client as a platform library for AOSP.
 
-Three components are currently implemented;
+Five components are currently implemented;
+gpsd executable,
 Shared library, libgps (builds libgps.so)
 Static library, libgps_static
 Test client, gps_test (builds executable gps_test)
+Android GNSS 1.1 HAL, (builds android.hardware.gnss@1.1-service.gpsd)
 
 
 Build instructions:
@@ -43,6 +45,12 @@ Following this, performing a full build for your device will
 incorporate the component(s) into the vendor partition image for
 your device.
 
+Note that for the HAL, you also have to include some additional
+components;
+PRODUCT_PACKAGES += android.hardware.gnss@1.1 \
+        android.hardware.gnss@1.1-impl \
+        android.hardware.gnss@1.1-service.gpsd
+
 
 Running gps_test:
 -----------------
@@ -62,11 +70,89 @@ shared_libs that your module depends on. For static, use
 "libgps_static" in the list of static_libs.
 
 
-Future work:
-------------
-I am currently in the process of writing a GNSS 1.1 HAL for Android
-based on libgps. Once this is working, I will move on to getting
-GPSd itself to build.
+GPSd:
+-----
+The only configuration needed for GPSd is to set a system property
+with the launch parameters to use. This should be appended to the
+PRODUCT_PROPERTY_OVERRIDES variable in an appropriate device specific
+makefile. This is a comma-separated list of parameters.
+
+For example (note that this is the default if unspecified);
+PRODUCT_PROPERTY_OVERRIDES += \
+	service.gpsd.parameters=-Nn,-D2,/dev/ttyACM0,/dev/ttyACM1
+
+
+GNSS 1.1 HAL for Android:
+-------------------------
+This is the part that wraps everything together on Android. It makes
+it possible for location services on Android to be fed location data
+by gpsd.
+
+The HAL is able to operate with or without gpsd running on the same
+device. By default, the HAL will look to localhost:2947 for gpsd,
+however, it is possible to change both the host and port by setting
+the system properties "service.gpsd.host" and "service.gpsd.port"
+to reflect the hostname or ip address of the gpsd host, and the
+port number it is listening on.
+
+The HAL also has a special automotive mode that can be activated
+by setting the system property "service.gpsd.automotive" to any
+value. When the automotive mode is activated, the HAL will feed
+the location services with the last known fix coordinates until
+the first valid fix has been received. If the fix is later lost,
+it will correctly NOT continue to feed a fix. The updated fix will
+be stored in persistent system properties every 30 seconds while
+there is a valid fix.
+
+The purpose of automotive mode is to make it possible to immediately
+input a destination into navigation software without having to wait
+for a valid fix. A valid fix can take minutes to establish, even with
+a clear view of the sky, but worse, a fix can even be impossible if
+the vehicle is parked underground or in any structure that
+effectively blocks the signals. The consequence is that without
+automotive mode, it would be necessary to drive the vehicle from
+its current location to somewhere with a clear view of the sky,
+and then wait potentially several minutes for a valid fix before
+being able to enter a destination. With automotive mode, it is
+possible to immediately enter a destination, and begin driving.
+Once a fix has been established, the navigation software will
+update to the current location on the route.
+
+Note that in addition to including the components, it is also
+necessary to make adjustments to the device's selinux policy in
+order for the HAL to properly interact with the network. A typical
+policy file will be provided.
+
+
+VERY IMPORTANT: SEPOLICY!
+-------------------------
+In the old days prior to Android 8, it was possible to achieve full
+system functionality by simply disabling selinux enforcement. This
+is no longer enough with Android 8+, since the init process does
+its own selinux checks before it will even attempt to launch a daemon.
+
+And not only this, but it is also very important to enforce a certain
+degree of security. As such, appropriate policy for the GPSd process
+and the GNSS HAL are included, however, it is necessary for it to be
+included in the device configuration.
+
+Add the following to an appropriate device specific makefile;
+BOARD_SEPOLICY_DIRS += external/gpsd/android/sepolicy
+
+
+Putting it all together:
+------------------------
+Adding the following to your device's makefile will build and install
+GPSd and its GNSS HAL:
+
+PRODUCT_PACKAGES += android.hardware.gnss@1.1 \
+        android.hardware.gnss@1.1-impl \
+        android.hardware.gnss@1.1-service.gpsd \
+        gpsd
+PRODUCT_PROPERTY_OVERRIDES += \
+	service.gpsd.parameters=-Nn,-G,/dev/ttyACM0
+BOARD_SEPOLICY_DIRS += external/gpsd/android/sepolicy
+DEVICE_MANIFEST_FILE += external/gpsd/android/manifest.xml
 
 
 Contact: Adam Serbinski <aserbinski@gmail.com>

@@ -1,0 +1,24 @@
+cc_binary {
+    name: "android.hardware.gnss@1.1-service.gpsd",
+    init_rc: ["android.hardware.gnss@1.1-service.gpsd.rc"],
+    relative_install_path: "hw",
+    vendor: true,
+    srcs: [
+        "Gnss.cpp",
+        "GnssConfiguration.cpp",
+        "GnssMeasurement.cpp",
+        "service.cpp",
+    ],
+    shared_libs: [
+        "libhidlbase",
+        "libhidltransport",
+        "libutils",
+        "liblog",
+        "libcutils",
+        "android.hardware.gnss@1.1",
+        "android.hardware.gnss@1.0",
+    ],
+    static_libs: [
+        "libgps_static"
+    ]
+}
