@@ -3958,7 +3958,9 @@ class ubx(object):
         """UBX-CFG-VALDEL, delete config items by key"""
         m_data = bytearray(4)
         m_data[0] = 0      # version, 0 = transactionless, 1 = transaction
-        m_data[1] = 2      # 2 = BBR, 4 = flash
+        m_data[1] = 6      # 2 = BBR, 4 = flash
+                           # can not delete RAM layer!
+                           # so options stay set until reset!
         for key in keys:
             k_data = bytearray(4)
             k_data[0] = (key) & 0xff
