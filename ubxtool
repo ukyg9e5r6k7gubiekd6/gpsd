@@ -83,7 +83,7 @@ opts = {
     # default input -f file
     'input_file_name': None,
     # default -g item
-    'get_item': None,
+    'get_item': [],
     # default forced wait? -W
     'input_forced_wait': False,
     # default port speed -s
@@ -3965,15 +3965,18 @@ class ubx(object):
         m_data[7] = (key >> 24) & 0xff
         gps_model.gps_send(0x06, 0x8c, m_data)
 
-    def send_cfg_valget(self, key):
+    def send_cfg_valget(self, keys):
         """UBX-CFG-VALGET, get config item"""
-        m_data = bytearray(8)
+        m_data = bytearray(4)
         m_data[0] = 0      # version, 0 = request, 1 = answer
         m_data[1] = 0      # RAM layer
-        m_data[4] = (key) & 0xff
-        m_data[5] = (key >> 8) & 0xff
-        m_data[6] = (key >> 16) & 0xff
-        m_data[7] = (key >> 24) & 0xff
+        for key in keys:
+            k_data = bytearray(4)
+            k_data[0] = (key) & 0xff
+            k_data[1] = (key >> 8) & 0xff
+            k_data[2] = (key >> 16) & 0xff
+            k_data[3] = (key >> 24) & 0xff
+            m_data.extend(k_data)
         gps_model.gps_send(0x06, 0x8b, m_data)
 
     def send_cfg_valset(self, item, val):
@@ -4527,7 +4530,7 @@ for (opt, val) in options:
     elif opt == '-f':
         opts['input_file_name'] = val
     elif opt == '-g':
-        opts['get_item'] = val
+        opts['get_item'].append(val)
     elif opt == '-h' or opt == '-?':
         opts['help'] = True
     elif opt == '-i':
@@ -4693,13 +4696,16 @@ try:
             exit(1)
 
     elif opts['get_item'] is not None:
-        item = gps_model.cfg_by_name(opts['get_item'])
-        if item:
-            gps_model.send_cfg_valget(item[1])
-        else:
-            sys.stderr.write('%s: ERROR: item %s unknown\n' %
-                             (PROG_NAME, opts['get_item']))
-            exit(1)
+        keys = []
+        for name in opts['get_item']:
+            item = gps_model.cfg_by_name(name)
+            if item:
+                keys.append(item[1])
+            else:
+                sys.stderr.write('%s: ERROR: item %s unknown\n' %
+                                 (PROG_NAME, name))
+                exit(1)
+        gps_model.send_cfg_valget(keys)
 
     elif opts['set_item'] is not None:
         (name, val) = opts['set_item'].split(',')
