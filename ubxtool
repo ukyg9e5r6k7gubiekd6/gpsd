@@ -112,7 +112,7 @@ opts = {
     # open port read only -r
     'read_only': False,
     # default -z item
-    'set_item': None,
+    'set_item': [],
     # speed to set GPS -S
     'set_speed': None,
     # target gpsd (server:port:device) to connect to
@@ -3957,10 +3957,11 @@ class ubx(object):
     def send_cfg_valdel(self, key):
         """UBX-CFG-VALDEL, delete config items by key"""
         m_data = bytearray(4)
-        m_data[0] = 0      # version, 0 = transactionless, 1 = transaction
-        m_data[1] = 6      # 2 = BBR, 4 = flash
-                           # can not delete RAM layer!
-                           # so options stay set until reset!
+        m_data[0] = 0       # version, 0 = transactionless, 1 = transaction
+        m_data[1] = 6       # 2 = BBR, 4 = flash
+        # can not delete RAM layer!
+        # so options stay set until reset!
+
         for key in keys:
             k_data = bytearray(4)
             k_data[0] = (key) & 0xff
@@ -3984,35 +3985,43 @@ class ubx(object):
             m_data.extend(k_data)
         gps_model.gps_send(0x06, 0x8b, m_data)
 
-    def send_cfg_valset(self, item, val):
-        """UBX-CFG-VALSET, set config item"""
+    def send_cfg_valset(self, nvs):
+        """UBX-CFG-VALSET, set config items by key/val pairs"""
 
-        size = 8
-        key = item[1]
-        val_type = item[2]
-
-        cfg_type = self.item_to_type(item)
-
-        size += cfg_type[0]
-        frmat = cfg_type[1]
-        flavor = cfg_type[2]
-        if 'u' == flavor:
-            val1 = int(val)
-        elif 'i' == flavor:
-            val1 = int(val)
-        elif 'f' == flavor:
-            val1 = float(val)
-
-        # FIXME: does not handle value yet
-        m_data = bytearray(size)
+        m_data = bytearray(4)
         m_data[0] = 0      # version, 0 = request, 1 = transaction
         m_data[1] = 0x7    # RAM layer, 1=RAM, 2=BBR, 4=Flash
-        m_data[4] = (key) & 0xff
-        m_data[5] = (key >> 8) & 0xff
-        m_data[6] = (key >> 16) & 0xff
-        m_data[7] = (key >> 24) & 0xff
 
-        struct.pack_into(frmat, m_data, 8, val1)
+        for nv in nvs:
+            size = 4
+            nv_split = nv.split(',')
+            name = nv_split[0]
+            val = nv_split[1]
+
+            item = gps_model.cfg_by_name(name)
+            key = item[1]
+            val_type = item[2]
+
+            cfg_type = self.item_to_type(item)
+
+            size = 4 + cfg_type[0]
+            frmat = cfg_type[1]
+            flavor = cfg_type[2]
+            if 'u' == flavor:
+                val1 = int(val)
+            elif 'i' == flavor:
+                val1 = int(val)
+            elif 'f' == flavor:
+                val1 = float(val)
+
+            kv_data = bytearray(size)
+            kv_data[0] = (key) & 0xff
+            kv_data[1] = (key >> 8) & 0xff
+            kv_data[2] = (key >> 16) & 0xff
+            kv_data[3] = (key >> 24) & 0xff
+
+            struct.pack_into(frmat, kv_data, 4, val1)
+            m_data.extend(kv_data)
         gps_model.gps_send(0x06, 0x8a, m_data)
 
     def send_poll(self, m_data):
@@ -4581,7 +4590,7 @@ for (opt, val) in options:
     elif opt == '-x':
         opts['del_item'].append(val)
     elif opt == '-z':
-        opts['set_item'] = val
+        opts['set_item'].append(val)
 
 if opts['help']:
         usage()
@@ -4691,7 +4700,7 @@ try:
             sys.stderr.write('%s: command %s\n' % (PROG_NAME, opts['command']))
         gps_model.gps_send(cmd_data[0], cmd_data[1], payload)
 
-    elif opts['del_item'] is not None:
+    elif opts['del_item']:
         keys = []
         for name in opts['del_item']:
             item = gps_model.cfg_by_name(name)
@@ -4703,7 +4712,7 @@ try:
                 exit(1)
         gps_model.send_cfg_valdel(keys)
 
-    elif opts['get_item'] is not None:
+    elif opts['get_item']:
         keys = []
         for name in opts['get_item']:
             item = gps_model.cfg_by_name(name)
@@ -4715,15 +4724,18 @@ try:
                 exit(1)
         gps_model.send_cfg_valget(keys)
 
-    elif opts['set_item'] is not None:
-        (name, val) = opts['set_item'].split(',')
-        item = gps_model.cfg_by_name(name)
-        if item:
-            gps_model.send_cfg_valset(item, val)
-        else:
-            sys.stderr.write('%s: ERROR: item %s unknown\n' %
-                             (PROG_NAME, opts['set_item']))
-            exit(1)
+    elif opts['set_item']:
+        nvs = []
+        for nv in opts['set_item']:
+            (name, val) = nv.split(',')
+            item = gps_model.cfg_by_name(name)
+            if item:
+                nvs.append(nv)
+            else:
+                sys.stderr.write('%s: ERROR: item %s unknown\n' %
+                                 (PROG_NAME, opts['set_item']))
+                exit(1)
+        gps_model.send_cfg_valset(nvs)
 
     exit_code = io_handle.read(opts)
 
