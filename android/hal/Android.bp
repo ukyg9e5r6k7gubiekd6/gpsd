@@ -20,5 +20,8 @@ cc_binary {
     ],
     static_libs: [
         "libgps_static"
+    ],
+    cflags: [
+        "-Wno-register"
     ]
 }
