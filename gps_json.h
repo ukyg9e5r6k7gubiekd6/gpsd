@@ -1,14 +1,15 @@
 /* gps_json.h - JSON handling for libgps and gpsd
  *
  * By Eric S. Raymond, 2009
- * This file is Copyright (c) 2010 by the GPSD project
+ * This file is Copyright (c) 2010-2019 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 
 #include "json.h"
 
 #define GPS_JSON_COMMAND_MAX	80
-#define GPS_JSON_RESPONSE_MAX	4096
+/* u-blox 9 can make really long JSON in "RAW" messages */
+#define GPS_JSON_RESPONSE_MAX	10240
 
 #ifdef __cplusplus
 extern "C" {
