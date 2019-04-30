@@ -49,11 +49,12 @@ extern "C" {
  *       Note: Some GPS call eph as epe, others call sep as epe
  *       Add gps_fix_t datum string, and qErr
  *       enlarge subtype to hold ZED-F9 string
+ *       MAXCHANNELS bumped from 120 to 140
  */
 #define GPSD_API_MAJOR_VERSION	8	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
 
-#define MAXCHANNELS	120	/* u-blox 9 tracks 140 signals */
+#define MAXCHANNELS	140	/* u-blox 9 tracks 140 signals */
 #define MAXUSERDEVS	4	/* max devices per user */
 #define GPS_PATH_MAX	128	/* for names like /dev/serial/by-id/... */
 
