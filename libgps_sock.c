@@ -253,16 +253,21 @@ int gps_sock_read(struct gps_data_t *gpsdata, char *message, int message_len)
     /* unpack the JSON message */
     status = gps_unpack(PRIVATE(gpsdata)->buffer, gpsdata);
 
+    /* why the 1? */
     response_length = eol - PRIVATE(gpsdata)->buffer + 1;
-    if (0 == (PRIVATE(gpsdata)->waiting - response_length)) {
-        /* no waiting data, clear the buffer, just in case */
+
+    /* calculate length of good data still in buffer */
+    PRIVATE(gpsdata)->waiting -= response_length;
+
+    if (1 > PRIVATE(gpsdata)->waiting) {
+        /* no waiting data, or overflow, clear the buffer, just in case */
         *PRIVATE(gpsdata)->buffer = '\0';
+        PRIVATE(gpsdata)->waiting = 0;
     } else {
 	memmove(PRIVATE(gpsdata)->buffer,
 		PRIVATE(gpsdata)->buffer + response_length,
-		PRIVATE(gpsdata)->waiting - response_length);
+		PRIVATE(gpsdata)->waiting);
     }
-    PRIVATE(gpsdata)->waiting -= response_length;
     gpsdata->set |= PACKET_SET;
 
     return (status == 0) ? (int)response_length : status;
