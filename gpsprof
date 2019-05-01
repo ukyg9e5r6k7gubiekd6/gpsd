@@ -392,6 +392,10 @@ class spaceplot(plotter):
         stat_lon = stats()
         stat_alt = stats()
         stat_used = stats()
+        # recentered stats
+        stat_lat_r = stats()
+        stat_lon_r = stats()
+        stat_alt_r = stats()
 
         sats_used = []
         for x in self.fixes:
@@ -401,7 +405,7 @@ class spaceplot(plotter):
 
         # calc sats used data: mean, min, max, sigma
         stat_used.min_max_mean(sats_used, 0)
-        stat_lat.moments(sats_used, 0)
+        stat_used.moments(sats_used, 0)
 
         # find min, max and mean of lat/lon
         stat_lat.min_max_mean(self.fixes, 0)
@@ -430,15 +434,18 @@ class spaceplot(plotter):
         self.recentered = [
             gps.MeterOffset(fix[:2], self.centroid) for fix in self.fixes]
 
+        stat_lat_r.min_max_mean(self.recentered, 0)
+        stat_lon_r.min_max_mean(self.recentered, 1)
         # compute sigma, skewness and kurtosis of lat/lon
-        stat_lat.moments(self.recentered, 0)
-        stat_lon.moments(self.recentered, 1)
+        stat_lat_r.moments(self.recentered, 0)
+        stat_lon_r.moments(self.recentered, 1)
 
         # CEP(50) calculated per RCC 261-00, Section 3.1.1
-        calc_cep = 0.5887 * (stat_lat.sigma + stat_lon.sigma)
+        calc_cep = 0.5887 * (stat_lat_r.sigma + stat_lon_r.sigma)
 
         # 2DRMS calculated per RCC 261-00, Section 3.1.4
-        calc_2drms = 2 * math.sqrt(stat_lat.sigma ** 2 + stat_lon.sigma ** 2)
+        calc_2drms = 2 * math.sqrt(stat_lat_r.sigma ** 2 +
+                                   stat_lon_r.sigma ** 2)
 
         # Compute measured CEP(50%)
         # same as median distance from centroid, 50% closer, 50% further
@@ -466,6 +473,7 @@ class spaceplot(plotter):
         alt_ep99 = gps.NaN
         dist_3d_max = 0.0
         alt_fixes = []
+        alt_fixes_r = []
         latlon_data = ""
         alt_data = ""
 
@@ -485,8 +493,17 @@ class spaceplot(plotter):
         if alt_fixes:
             # got altitude data
 
+            # Convert fixes to offsets from avg in meters
+            alt_data_centered = ""
+
             # find min, max and mean of altitude
             stat_alt.min_max_mean(alt_fixes, 0)
+            for alt in alt_fixes:
+                alt_fixes_r.append(alt - stat_alt.mean)
+                alt_data_centered += "%.6f\n" % (alt - stat_alt.mean)
+
+            stat_alt_r.min_max_mean(alt_fixes_r, 0)
+            stat_alt_r.moments(alt_fixes_r, 0)
 
             # centroid in ECEF
             self.centroid_ecef = wgs84_to_ecef([stat_lat.mean,
@@ -494,60 +511,49 @@ class spaceplot(plotter):
                                                 stat_alt.mean])
 
             # once more through the data, looking for 3D max
-            for i in range(len(self.fixes)):
-                fix_lla = self.fixes[i][:3]
+            for fix_lla in self.fixes:
                 if not math.isnan(fix_lla[2]):
                     fix_ecef = wgs84_to_ecef(fix_lla[:3])
                     dist3d = dist_3d(self.centroid_ecef, fix_ecef)
                     if dist_3d_max < dist3d:
                         dist_3d_max = dist3d
 
-            # Convert fixes to offsets from avg in meters
-            alt_centered = []
-            alt_data_centered = ""
-            alt_fixes.sort(key=lambda a: abs(a))
-            for i in alt_fixes:
-                alt_centered.append(i - stat_alt.mean)
-                alt_data_centered += "%.6f\n" % (i - stat_alt.mean)
-
             # Sort fixes by distance from average altitude
-            alt_centered.sort(key=lambda a: abs(a))
+            alt_fixes_r.sort(key=lambda a: abs(a))
             # so we can rank fixes for EPs
-            alt_ep = abs(alt_centered[int(len(alt_centered) * 0.50)])
-            alt_ep95 = abs(alt_centered[int(len(alt_centered) * 0.95)])
-            alt_ep99 = abs(alt_centered[int(len(alt_centered) * 0.99)])
-
-            stat_alt.moments(alt_centered, 0)
+            alt_ep = abs(alt_fixes_r[int(len(alt_fixes_r) * 0.50)])
+            alt_ep95 = abs(alt_fixes_r[int(len(alt_fixes_r) * 0.95)])
+            alt_ep99 = abs(alt_fixes_r[int(len(alt_fixes_r) * 0.99)])
 
             # HEP(50) calculated per RCC 261-00, Section 3.1.2
-            calc_hep = 0.6745 * stat_alt.sigma
+            calc_hep = 0.6745 * stat_alt_r.sigma
 
             # SEP(50) calculated per RCC 261-00, Section 3.1.3 (3)
-            calc_sep = 0.51 * (stat_lat.sigma +
-                               stat_lon.sigma +
-                               stat_alt.sigma)
+            calc_sep = 0.51 * (stat_lat_r.sigma +
+                               stat_lon_r.sigma +
+                               stat_alt_r.sigma)
 
             # MRSE calculated per RCC 261-00, Section 3.1.5
-            calc_mrse = math.sqrt(stat_lat.sigma ** 2 +
-                                  stat_lon.sigma ** 2 +
-                                  stat_alt.sigma ** 2)
+            calc_mrse = math.sqrt(stat_lat_r.sigma ** 2 +
+                                  stat_lon_r.sigma ** 2 +
+                                  stat_alt_r.sigma ** 2)
 
             fmt_lab11a = ('hep = %.3f meters\\n'
                           'sep = %.3f meters\\n'
                           'mrse = %.3f meters\\n'
                           ) % (calc_hep, calc_sep, calc_mrse)
 
-        if stat_lat.mean < 0.0:
-            latstring = "%.9fS" % -stat_lat.mean
+        if self.centroid[0] < 0.0:
+            latstring = "%.9fS" % -self.centroid[0]
         elif stat_lat.mean > 0.0:
-            latstring = "%.9fN" % stat_lat.mean
+            latstring = "%.9fN" % self.centroid[0]
         else:
             latstring = "0.0"
 
-        if stat_lon.mean < 0.0:
-            lonstring = "%.9fW" % -stat_lon.mean
+        if self.centroid[1] < 0.0:
+            lonstring = "%.9fW" % -self.centroid[1]
         elif stat_lon.mean > 0.0:
-            lonstring = "%.9fE" % stat_lon.mean
+            lonstring = "%.9fE" % self.centroid[1]
         else:
             lonstring = "0.0"
 
@@ -628,19 +634,19 @@ class spaceplot(plotter):
                 '%12d %12d %s sats"\n'
                 ) % ('{:>10.3f}'.format(lat_min_o),
                      '{:>10.3f}'.format(lat_max_o),
-                     '{:>10.3f}'.format(stat_lat.sigma),
-                     '{:>10.1f}'.format(stat_lat.skewness),
-                     '{:>10.1f}'.format(stat_lat.kurtosis),
+                     '{:>10.3f}'.format(stat_lat_r.sigma),
+                     '{:>10.1f}'.format(stat_lat_r.skewness),
+                     '{:>10.1f}'.format(stat_lat_r.kurtosis),
                      '{:>10.3f}'.format(lon_min_o),
                      '{:>10.3f}'.format(lon_max_o),
-                     '{:>10.3f}'.format(stat_lon.sigma),
-                     '{:>10.1f}'.format(stat_lon.skewness),
-                     '{:>10.1f}'.format(stat_lon.kurtosis),
-                     '{:>10.3f}'.format(stat_alt.min - stat_alt.mean),
-                     '{:>10.3f}'.format(stat_alt.max - stat_alt.mean),
-                     '{:>10.3f}'.format(stat_alt.sigma),
-                     '{:>10.1f}'.format(stat_alt.skewness),
-                     '{:>10.1f}'.format(stat_alt.kurtosis),
+                     '{:>10.3f}'.format(stat_lon_r.sigma),
+                     '{:>10.1f}'.format(stat_lon_r.skewness),
+                     '{:>10.1f}'.format(stat_lon_r.kurtosis),
+                     '{:>10.3f}'.format(stat_alt_r.min),
+                     '{:>10.3f}'.format(stat_alt_r.max),
+                     '{:>10.3f}'.format(stat_alt_r.sigma),
+                     '{:>10.1f}'.format(stat_alt_r.skewness),
+                     '{:>10.1f}'.format(stat_alt_r.kurtosis),
                      stat_used.min,
                      stat_used.max,
                      '{:>10.1f}'.format(stat_used.sigma))
@@ -652,8 +658,8 @@ class spaceplot(plotter):
                     '%s\\n'
                     '%s\\n'
                     '%s"\n'
-                    ) % ('{:>15.9f}'.format(stat_lat.min),
-                         '{:>15.9f}'.format(stat_lon.min),
+                    ) % ('{:>15.9f}'.format(stat_lat_r.min),
+                         '{:>15.9f}'.format(stat_lon_r.min),
                          '{:>15.3f}'.format(stat_alt.min))
 
             fmt += ('set label 16 at screen 0.75, screen 0.12 '
@@ -662,8 +668,8 @@ class spaceplot(plotter):
                     '%s\\n'
                     '%s\\n'
                     '%s"\n'
-                    ) % ('{:>15.9f}'.format(stat_lat.max),
-                         '{:>15.9f}'.format(stat_lon.max),
+                    ) % ('{:>15.9f}'.format(stat_lat_r.max),
+                         '{:>15.9f}'.format(stat_lon_r.max),
                          '{:>15.3f}'.format(stat_alt.max))
 
         if len(self.fixes) > 1000:
