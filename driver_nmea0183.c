@@ -1449,12 +1449,16 @@ static gps_mask_t processGSV(int count, char *field[],
 	sp->ss = (float)atoi(field[fldnum++]);
 	sp->used = false;
         sp->sigid = ubx_sigid;
-	if (sp->PRN > 0)
+
+        /* sadly NMEA 4.1 does not tell us which sigid (L1, L2) is
+         * used.  So if the ss is zero, do not mark used */
+	if (0 < sp->PRN && 0 < sp->ss) {
 	    for (n = 0; n < MAXCHANNELS; n++)
 		if (session->nmea.sats_used[n] == (unsigned short)sp->PRN) {
 		    sp->used = true;
 		    break;
 		}
+        }
 	/*
 	 * Incrementing this unconditionally falls afoul of chipsets like
 	 * the Motorola Oncore GT+ that emit empty fields at the end of the
