@@ -980,7 +980,8 @@ static unsigned char nmea_sigid_to_ubx(unsigned char nmea_sigid)
  * This is for NMEA versions up to and including 4.0.
  * Not for NMEA 4.10 and up
  */
-static int nmeaid_to_prn(char *talker, int satnum, unsigned char *ubx_gnssid,
+static int nmeaid_to_prn(char *talker, int nmea_satnum,
+                         unsigned char *ubx_gnssid,
                          unsigned char *ubx_svid)
 {
     /*
@@ -1013,21 +1014,21 @@ static int nmeaid_to_prn(char *talker, int satnum, unsigned char *ubx_gnssid,
      */
     *ubx_gnssid = 0;   /* default to ubx_gnssid is GPS */
     *ubx_svid = 0;     /* default to unnknown ubx_svid */
-    if (0 != satnum && 32 >= satnum) {
-        *ubx_svid = satnum;
+    if (0 != nmea_satnum && 32 >= nmea_satnum) {
+        *ubx_svid = nmea_satnum;
 	switch (talker[0]) {
         case 'G':
 	    if (talker[1] == 'A') {
 		/* Galileo */
-		satnum += 300; /* Used by u-blox at least */
+		nmea_satnum += 300; /* Used by u-blox at least */
 		*ubx_gnssid = 2;
 	    } else if (talker[1] == 'B') {
 		/* map Beidou IDs */
 		*ubx_gnssid = 3;
-		satnum += 200;
+		nmea_satnum += 200;
 	    } else if (talker[1] == 'L') {
 		/* GLONASS GL doesn't seem to do this, better safe than sorry */
-		satnum += 64;
+		nmea_satnum += 64;
 		*ubx_gnssid = 6;
 	    } else if (talker[1] == 'N') {
                 /* all of them, but only GPS is 0 < PRN < 33 */
@@ -1038,14 +1039,14 @@ static int nmeaid_to_prn(char *talker, int satnum, unsigned char *ubx_gnssid,
 	case 'B':
             if (talker[1] == 'D') {
 		/* map Beidou IDs */
-		satnum += 200;
+		nmea_satnum += 200;
 		*ubx_gnssid = 3;
             } /* else ?? */
             break;
 	case 'Q':
             if (talker[1] == 'Z') {
 		/* QZSS */
-		satnum += 192;
+		nmea_satnum += 192;
 		*ubx_gnssid = 5;
             } /* else ? */
             break;
@@ -1053,39 +1054,39 @@ static int nmeaid_to_prn(char *talker, int satnum, unsigned char *ubx_gnssid,
             /* huh? */
             break;
         }
-    } else if ( 33 <= satnum && 64 >= satnum) {
+    } else if ( 33 <= nmea_satnum && 64 >= nmea_satnum) {
         // NMEA-ID (33..64) to SBAS PRN 120-151.
         /* SBAS */
-	satnum += 87;
+	nmea_satnum += 87;
         *ubx_gnssid = 1;
-        *ubx_svid = satnum;
-    } else if (65 <= satnum && 96 >= satnum) {
+        *ubx_svid = nmea_satnum;
+    } else if (65 <= nmea_satnum && 96 >= nmea_satnum) {
         /* GLONASS */
         *ubx_gnssid = 6;
-        *ubx_svid = satnum - 64;
-    } else if (120 <= satnum && 158 >= satnum) {
+        *ubx_svid = nmea_satnum - 64;
+    } else if (120 <= nmea_satnum && 158 >= nmea_satnum) {
         /* SBAS */
         *ubx_gnssid = 1;
-        *ubx_svid = satnum;
-    } else if (173 <= satnum && 182 >= satnum) {
+        *ubx_svid = nmea_satnum;
+    } else if (173 <= nmea_satnum && 182 >= nmea_satnum) {
         /* IMES */
         *ubx_gnssid = 4;
-        *ubx_svid = satnum - 172;
-    } else if (193 <= satnum && 197 >= satnum) {
+        *ubx_svid = nmea_satnum - 172;
+    } else if (193 <= nmea_satnum && 197 >= nmea_satnum) {
         /* QZSS */
         *ubx_gnssid = 5;
-        *ubx_svid = satnum - 192;
-    } else if (301 <= satnum && 356 >= satnum) {
+        *ubx_svid = nmea_satnum - 192;
+    } else if (301 <= nmea_satnum && 356 >= nmea_satnum) {
         /* QZSS */
         *ubx_gnssid = 2;
-        *ubx_svid = satnum - 300;
-    } else if (401 <= satnum && 437 >= satnum) {
+        *ubx_svid = nmea_satnum - 300;
+    } else if (401 <= nmea_satnum && 437 >= nmea_satnum) {
         /* BeiDou */
         *ubx_gnssid = 3;
-        *ubx_svid = satnum - 400;
+        *ubx_svid = nmea_satnum - 400;
     }
 
-    return satnum;
+    return nmea_satnum;
 }
 
 static gps_mask_t processGSA(int count, char *field[],
