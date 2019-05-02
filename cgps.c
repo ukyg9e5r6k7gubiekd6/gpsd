@@ -451,7 +451,8 @@ static void windowsetup(void)
          *
          * Geostar GPS receivers compute USI this way:
          * GPS is USI 1 to 32, SBAS is 33 to 64, GLONASS is 65 to 96 */
-        (void)mvwaddstr(satellites, 1, 1, "    PRN  Elev   Azim   SNR  Use   ");
+        (void)mvwaddstr(satellites, 1, 1,
+                        "     PRN  Elev   Azim   SNR  Use  ");
         (void)wborder(satellites, 0, 0, 0, 0, 0, 0, 0, 0);
     }
 }
@@ -574,6 +575,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         for (sat_no = 0; sat_no < loop_end; sat_no++) {
             int column = 1;     /* column to write to */
             char *gnssid;
+            char sigid[2] = "";
 
             if ( 0 == gpsdata->skyview[sat_no].svid) {
                 gnssid = "  ";
@@ -604,12 +606,21 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
                     gnssid = "GL";  /* GLONASS */
                     break;
                 }
+                if (1 < gpsdata->skyview[sat_no].sigid &&
+                    8 > gpsdata->skyview[sat_no].sigid) {
+                    /* Do not display L1, or missing */
+                    /* max is 8 */
+                    sigid[0] = '0' + gpsdata->skyview[sat_no].sigid;
+                    sigid[1] = '\0';
+                }
             }
             (void)mvwaddstr(satellites, sat_no + 2, column, gnssid);
+            column += 2;
+            (void)mvwaddstr(satellites, sat_no + 2, column, sigid);
 
-            /* no GPS uses PRN 0, some use 255 for 'unknown'
-             * u-blox uses PRN  1-255, NMEA 4.0 uses 1-437 */
-            column += 3;
+            /* no GPS uses PRN 0, NMEA 4.0 here
+             * NMEA 4.0 uses 1-437 */
+            column += 2;
             (void)mvwaddstr(satellites, sat_no + 2, column,
                             int_to_str(gpsdata->skyview[sat_no].PRN,
                                        1, 438));
@@ -627,7 +638,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
                             int_to_str((int)round(gpsdata->skyview[sat_no].ss),
                                        0, 254));
             column += 6;
-            (void)mvwprintw(satellites, sat_no + 2, column, "  %c  ",
+            (void)mvwprintw(satellites, sat_no + 2, column, "  %c ",
                             gpsdata->skyview[sat_no].used ? 'Y' : 'N');
         }
 
