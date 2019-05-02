@@ -127,7 +127,7 @@ Return<bool> Gnss::start() {
                                  .longitudeDegrees = (double) gps_data.fix.longitude,
                                  .speedMetersPerSec = (float) gps_data.fix.speed,
                                  .bearingDegrees = (float) gps_data.fix.track,
-                                 .horizontalAccuracyMeters = (float) gps_data.fix.epy,
+                                 .horizontalAccuracyMeters = (float) gps_data.fix.eph,
                                  .speedAccuracyMetersPerSecond = (float) gps_data.fix.eps,
                                  .bearingAccuracyDegrees = (float) gps_data.fix.epd,
                                  .timestamp = (long) gps_data.fix.time
