@@ -50,6 +50,7 @@ extern "C" {
  *       Add gps_fix_t datum string, and qErr
  *       enlarge subtype to hold ZED-F9 string
  *       MAXCHANNELS bumped from 120 to 140
+ *       Try to make PRN be NMEA 2.x-4.0 compliant, not 4.10 or u-blox
  */
 #define GPSD_API_MAJOR_VERSION	8	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -1840,7 +1841,7 @@ struct satellite_t {
      * sadly there is no standard, but many different implementations of
      * how to code PRN
      */
-    short PRN;
+    short PRN;          /* PRN numbering per NMEA 2.x to 4.0, not 4.10 */
     short elevation;	/* elevation of satellite, -90 to 90 deg, -91 for n/a */
     short azimuth;	/* azimuth, 0 to 359 deg, -1 for n/a */
     /* gnssid:svid:sigid, as defined by u-blox 8/9:
