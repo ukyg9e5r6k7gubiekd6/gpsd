@@ -198,6 +198,8 @@ is associated with it. Some RS232 GPSes wait in a standby mode
 some cellphone and handheld embedded GPSes have similar behaviors.
 Accordingly, waiting for a watch request to open the device may save
 battery power. (This capability is rare in consumer-grade devices).
+You should use this option if you plan to use gpsd to provide reference
+clock information to ntpd through a memory-shared segment.
 </para>
 </listitem>
 </varlistentry>
