@@ -981,7 +981,7 @@ static unsigned char nmea_sigid_to_ubx(unsigned char nmea_sigid)
  * Not for NMEA 4.10 and up
  */
 static int nmeaid_to_prn(char *talker, int satnum, unsigned char *ubx_gnssid,
-                         unsigned char *svid)
+                         unsigned char *ubx_svid)
 {
     /*
      * According to https://github.com/mvglasow/satstat/wiki/NMEA-IDs
@@ -1012,9 +1012,9 @@ static int nmeaid_to_prn(char *talker, int satnum, unsigned char *ubx_gnssid,
      * rather than by PRN.
      */
     *ubx_gnssid = 0;   /* default to ubx_gnssid is GPS */
-    *svid = 0;     /* default to unnknown svid */
+    *ubx_svid = 0;     /* default to unnknown ubx_svid */
     if (0 != satnum && 32 >= satnum) {
-        *svid = satnum;
+        *ubx_svid = satnum;
 	switch (talker[0]) {
         case 'G':
 	    if (talker[1] == 'A') {
@@ -1058,31 +1058,31 @@ static int nmeaid_to_prn(char *talker, int satnum, unsigned char *ubx_gnssid,
         /* SBAS */
 	satnum += 87;
         *ubx_gnssid = 1;
-        *svid = satnum;
+        *ubx_svid = satnum;
     } else if (65 <= satnum && 96 >= satnum) {
         /* GLONASS */
         *ubx_gnssid = 6;
-        *svid = satnum - 64;
+        *ubx_svid = satnum - 64;
     } else if (120 <= satnum && 158 >= satnum) {
         /* SBAS */
         *ubx_gnssid = 1;
-        *svid = satnum;
+        *ubx_svid = satnum;
     } else if (173 <= satnum && 182 >= satnum) {
         /* IMES */
         *ubx_gnssid = 4;
-        *svid = satnum - 172;
+        *ubx_svid = satnum - 172;
     } else if (193 <= satnum && 197 >= satnum) {
         /* QZSS */
         *ubx_gnssid = 5;
-        *svid = satnum - 192;
+        *ubx_svid = satnum - 192;
     } else if (301 <= satnum && 356 >= satnum) {
         /* QZSS */
         *ubx_gnssid = 2;
-        *svid = satnum - 300;
+        *ubx_svid = satnum - 300;
     } else if (401 <= satnum && 437 >= satnum) {
         /* BeiDou */
         *ubx_gnssid = 3;
-        *svid = satnum - 400;
+        *ubx_svid = satnum - 400;
     }
 
     return satnum;
@@ -1209,14 +1209,14 @@ static gps_mask_t processGSA(int count, char *field[],
 	for (i = 0; i < count - 6; i++) {
 	    int prn;
             unsigned char ubx_gnssid;   /* UNUSED */
-            unsigned char svid;     /* UNUSED */
+            unsigned char ubx_svid;     /* UNUSED */
 
 	    /* skip empty fields, otherwise empty becomes prn=200 */
 	    if ( '\0' == field[i + 3][0] ) {
 		continue;
 	    }
 	    prn = nmeaid_to_prn(field[0], atoi(field[i + 3]), &ubx_gnssid,
-                                &svid);
+                                &ubx_svid);
 	    if (prn > 0) {
 		/* check first BEFORE over-writing memory */
 		if ( MAXCHANNELS <= session->gpsdata.satellites_used ) {
@@ -1426,7 +1426,7 @@ static gps_mask_t processGSV(int count, char *field[],
 
     for (fldnum = 4; fldnum < count / 4 * 4;) {
 	struct satellite_t *sp;
-        int svid;
+        int nmea_svid;
 
 	if (session->gpsdata.satellites_visible >= MAXCHANNELS) {
 	    gpsd_log(&session->context->errout, LOG_ERROR,
@@ -1436,13 +1436,13 @@ static gps_mask_t processGSV(int count, char *field[],
 	    break;
 	}
 	sp = &session->gpsdata.skyview[session->gpsdata.satellites_visible];
-	svid = atoi(field[fldnum++]);
-	if (0 == svid) {
+	nmea_svid = atoi(field[fldnum++]);
+	if (0 == nmea_svid) {
 	    /* skip bogus fields */
 	    continue;
 	}
 	/* FIXME: this ignores possible NMEA 4.1 nmea_gnssid hint */
-	sp->PRN = (short)nmeaid_to_prn(field[0], svid, &sp->gnssid,
+	sp->PRN = (short)nmeaid_to_prn(field[0], nmea_svid, &sp->gnssid,
                                        &sp->svid);
 	sp->elevation = (short)atoi(field[fldnum++]);
 	sp->azimuth = (short)atoi(field[fldnum++]);
