@@ -1125,7 +1125,8 @@ static gps_mask_t processGSA(int count, char *field[],
      * Not all documentation specifies the number of PRN fields, it
      * may be variable.  Most doc that specifies says 12 PRNs.
      *
-     * the CH-4701 outputs 24 PRNs!
+     * The Navior-24 CH-4701 outputs 30 fields, 24 PRNs!
+     * GPGSA,A,3,27,23,13,07,25,,,,,,,,,,,,,,,,,,,,07.9,06.0,05.2
      *
      * The Skytraq S2525F8-BD-RTK output both GPGSA and BDGSA in the
      * same cycle:
@@ -1144,7 +1145,8 @@ static gps_mask_t processGSA(int count, char *field[],
      * $GNGSA,A,3,75,86,87,,,,,,,,,,3.77,2.55,2.77*1C
      * seems like the first is GNSS and the second GLONASS
      *
-     * u-blox 9 outputs one per GNSS each cycle:
+     * u-blox 9 outputs one per GNSS on each cycle.  Note the
+     * extra last parameter which is NMEA gnssid
      * $GNGSA,A,3,13,16,21,15,10,29,27,20,,,,,1.05,0.64,0.83,1*03
      * $GNGSA,A,3,82,66,81,,,,,,,,,,1.05,0.64,0.83,2*0C
      * $GNGSA,A,3,07,12,33,,,,,,,,,,1.05,0.64,0.83,3*0A
@@ -1161,7 +1163,7 @@ static gps_mask_t processGSA(int count, char *field[],
      * it claims to be a valid sentence (A flag) when it isn't.
      * Alarmingly, it's possible this error may be generic to SiRFstarIII.
      */
-    if (count < 17) {
+    if (18 > count) {
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "xxGSA: malformed, setting ONLINE_SET only.\n");
 	mask = ONLINE_SET;
@@ -1182,14 +1184,26 @@ static gps_mask_t processGSA(int count, char *field[],
 	    mask = ONLINE_SET;
 	else
 	    mask = MODE_SET;
+
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "xxGSA sets mode %d\n", session->newdata.mode);
-	if (field[15][0] != '\0')
-	    session->gpsdata.dop.pdop = safe_atof(field[15]);
-	if (field[16][0] != '\0')
-	    session->gpsdata.dop.hdop = safe_atof(field[16]);
-	if (field[17][0] != '\0')
-	    session->gpsdata.dop.vdop = safe_atof(field[17]);
+
+	if (19 < count ) {
+	    gpsd_log(&session->context->errout, LOG_WARN,
+		     "xxGSA: count %d too long!\n", count);
+        } else {
+            /* Just ignore the last fields of the Navior CH-4701 */
+	    if (field[15][0] != '\0')
+		session->gpsdata.dop.pdop = safe_atof(field[15]);
+	    if (field[16][0] != '\0')
+		session->gpsdata.dop.hdop = safe_atof(field[16]);
+	    if (field[17][0] != '\0')
+		session->gpsdata.dop.vdop = safe_atof(field[17]);
+	    if (19 == count && '\0' != field[18][0]) {
+                /* get the NMEA 4.10 gnssid */
+		nmea_gnssid = atoi(field[18]);
+	    }
+        }
 	/*
 	 * might have gone from GPGSA to GLGSA/BDGSA
 	 * or GNGSA to GNGSA
@@ -1228,9 +1242,10 @@ static gps_mask_t processGSA(int count, char *field[],
                                 &ubx_gnssid, &ubx_svid);
 	    if (prn > 0) {
 		/* check first BEFORE over-writing memory */
-		if ( MAXCHANNELS <= session->gpsdata.satellites_used ) {
-		    /* this should never happen as xxGSA is limited to 12 */
-                    /* but it could happen with multiple GSA per cycle */
+		if (MAXCHANNELS <= session->gpsdata.satellites_used) {
+		    /* This should never happen as xxGSA is limited to 12,
+                     * except for the Navior-24 CH-4701.
+                     * But it could happen with multiple GSA per cycle */
 		    break;
 		}
 		session->nmea.sats_used[session->gpsdata.satellites_used++] =
@@ -2831,7 +2846,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{"GLL", 7,  false, processGLL},
 	{"GNS", 13, false, processGNS},
 	{"GRS", 0,  false, NULL},	/* ignore GNSS Range Residuals */
-	{"GSA", 17, false, processGSA},
+	{"GSA", 18, false, processGSA},
 	{"GST", 8,  false, processGST},
 	{"GSV", 0,  false, processGSV},
         /* ignore Heading, Deviation and Variation */
