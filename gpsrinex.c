@@ -798,11 +798,13 @@ static void usage(void)
           "     [-f filename]     out to filename\n"
           "                       gpsrinexYYYYDDDDHHMM.obs\n"
           "     [-h]              print this usage and exit\n"
-          "     [-i interval]     time between samples\n"
+          "     [-i interval]     time between samples, default: %d\n"
           "     [-n count]        number samples to collect, default: %d\n"
           "     [-V]              print version and exit\n"
+          "\n"
           "defaults to '%s -n %d -i %d localhost:2947'\n",
-          progname, sample_count, progname, sample_count, sample_interval);
+          progname, sample_interval, sample_count, progname, sample_count,
+          sample_interval);
     exit(EXIT_FAILURE);
 }
 
