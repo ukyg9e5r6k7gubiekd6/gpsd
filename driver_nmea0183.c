@@ -977,10 +977,17 @@ static unsigned char nmea_sigid_to_ubx(unsigned char nmea_sigid)
 }
 
 /* Deal with range-mapping attempts to use IDs 1-32 by Beidou, etc.
- * This is for NMEA versions up to and including 4.0.
- * Not for NMEA 4.10 and up
+ *
+ * See struct satellite_t in gps.h for ubx and nmea gnssid and svid mappings
+ *
+ * char *talker              -- NMEA talker string
+ * int nmea_satnum           -- NMEA satellite number (kinds tha PRN)
+ * int nmea_gnssid           -- NMEA 4.10 gnssid, if known, otherwise zero
+ * unsigned char *ubx_gnssid -- returned u-blox gnssid
+ * unsigned char *ubx_svid   -- returned u-blox gnssid
  */
 static int nmeaid_to_prn(char *talker, int nmea_satnum,
+                         int nmea_gnssid,
                          unsigned char *ubx_gnssid,
                          unsigned char *ubx_svid)
 {
@@ -1145,6 +1152,7 @@ static gps_mask_t processGSA(int count, char *field[],
      */
     gps_mask_t mask = ONLINE_SET;
     char last_last_gsa_talker = session->nmea.last_gsa_talker;
+    int nmea_gnssid = 0;
 
     /*
      * One chipset called the i.Trek M3 issues GPGSA lines that look like
@@ -1216,8 +1224,8 @@ static gps_mask_t processGSA(int count, char *field[],
 	    if ( '\0' == field[i + 3][0] ) {
 		continue;
 	    }
-	    prn = nmeaid_to_prn(field[0], atoi(field[i + 3]), &ubx_gnssid,
-                                &ubx_svid);
+	    prn = nmeaid_to_prn(field[0], atoi(field[i + 3]), nmea_gnssid,
+                                &ubx_gnssid, &ubx_svid);
 	    if (prn > 0) {
 		/* check first BEFORE over-writing memory */
 		if ( MAXCHANNELS <= session->gpsdata.satellites_used ) {
@@ -1332,6 +1340,7 @@ static gps_mask_t processGSV(int count, char *field[],
 
     int n, fldnum;
     unsigned char  nmea_sigid = 0;
+    int nmea_gnssid = 0;
     unsigned char  ubx_sigid = 0;
 
     if (count <= 3) {
@@ -1443,8 +1452,8 @@ static gps_mask_t processGSV(int count, char *field[],
 	    continue;
 	}
 	/* FIXME: this ignores possible NMEA 4.1 nmea_gnssid hint */
-	sp->PRN = (short)nmeaid_to_prn(field[0], nmea_svid, &sp->gnssid,
-                                       &sp->svid);
+	sp->PRN = (short)nmeaid_to_prn(field[0], nmea_svid, nmea_gnssid,
+                                       &sp->gnssid, &sp->svid);
 	sp->elevation = (short)atoi(field[fldnum++]);
 	sp->azimuth = (short)atoi(field[fldnum++]);
 	sp->ss = (float)atoi(field[fldnum++]);
