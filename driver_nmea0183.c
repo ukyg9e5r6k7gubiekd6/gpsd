@@ -801,7 +801,7 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	session->gpsdata.status = STATUS_NO_FIX;
 	session->newdata.mode = MODE_NO_FIX;
         gpsd_log(&session->context->errout, LOG_PROG,
-                 "xxGSA: latch mode\n");
+                 "xxGGA: latch mode\n");
     } else
 	(void)strlcpy(session->nmea.last_gga_timestamp, field[1],
 		      sizeof(session->nmea.last_gga_timestamp));
@@ -944,7 +944,7 @@ static unsigned char nmea_sigid_to_ubx(unsigned char nmea_sigid)
     default:
         /* FALLTHROUGH */
     case 0:
-        /* missing, assume GPS */
+        /* missing, assume GPS L1 */
 	ubx_sigid = 0;
         break;
     case 1:
@@ -981,10 +981,12 @@ static unsigned char nmea_sigid_to_ubx(unsigned char nmea_sigid)
  * See struct satellite_t in gps.h for ubx and nmea gnssid and svid mappings
  *
  * char *talker              -- NMEA talker string
- * int nmea_satnum           -- NMEA satellite number (kinds tha PRN)
+ * int nmea_satnum           -- NMEA (All ver) satellite number (kinda the PRN)
  * int nmea_gnssid           -- NMEA 4.10 gnssid, if known, otherwise zero
  * unsigned char *ubx_gnssid -- returned u-blox gnssid
  * unsigned char *ubx_svid   -- returned u-blox gnssid
+ *
+ * Return the NMEA 2.x to 4.0 extended PRN
  */
 static int nmeaid_to_prn(char *talker, int nmea_satnum,
                          int nmea_gnssid,
@@ -1019,23 +1021,94 @@ static int nmeaid_to_prn(char *talker, int nmea_satnum,
      * effect, they're recorded by the order in which they occur
      * rather than by PRN.
      */
+    int nmea2_prn = nmea_satnum;
+
     *ubx_gnssid = 0;   /* default to ubx_gnssid is GPS */
     *ubx_svid = 0;     /* default to unnknown ubx_svid */
-    if (0 != nmea_satnum && 32 >= nmea_satnum) {
+
+    if (1 > nmea_satnum) {
+        /* uh, oh... */
+        nmea2_prn = 0;
+    } else if (0 < nmea_gnssid) {
+	/* this switch handles case where nmea_gnssid is known */
+	switch (nmea_gnssid) {
+	default:
+	    /* x = IMES                Not defined by NMEA 4.10 */
+	    /* FALLTHROUGH */
+	case 0:
+	    /* none given, ignore */
+	    nmea2_prn = 0;
+	    break;
+	case 1:
+	    if (33 > nmea_satnum) {
+		/* 1 = GPS       1-32 */
+		*ubx_gnssid = 0;
+		*ubx_svid = nmea_satnum;
+	    } else if (65 > nmea_satnum) {
+		/* 1 = SBAS      33-64 */
+		*ubx_gnssid = 1;
+		*ubx_svid = 87 + nmea_satnum;
+	    } else if (152 > nmea_satnum) {
+		/* Huh? */
+		*ubx_gnssid = 0;
+		*ubx_svid = 0;
+		nmea2_prn = 0;
+	    } else if (158 > nmea_satnum) {
+		/* 1 = SBAS      152-158 */
+		*ubx_gnssid = 1;
+		*ubx_svid = nmea_satnum;
+	    } else if (193 > nmea_satnum) {
+		/* Huh? */
+		*ubx_gnssid = 0;
+		*ubx_svid = 0;
+		nmea2_prn = 0;
+	    } else if (198 > nmea_satnum) {
+		/* 1 = QZSS      193-197 */
+		*ubx_gnssid = 3;
+		*ubx_svid = nmea_satnum - 192;
+	    } else {
+		/* Huh? */
+		*ubx_gnssid = 0;
+		*ubx_svid = 0;
+		nmea2_prn = 0;
+	    }
+	    break;
+	case 2:
+	    /*  2 = GLONASS   65-96, nul */
+	    *ubx_gnssid = 6;
+	    *ubx_svid = nmea_satnum;
+            break;
+	case 3:
+	    /*  3 = Galileo   1-36 */
+	    *ubx_gnssid = 2;
+	    *ubx_svid = nmea_satnum;
+	    nmea2_prn = 300 + nmea_satnum;
+	    break;
+	case 4:
+	    /*  4 - BeiDou    1-37 */
+	    *ubx_gnssid = 3;
+	    *ubx_svid = nmea_satnum;
+	    nmea2_prn = 300 + nmea_satnum;
+	    break;
+	}
+
+    /* left with NMEA 2.x to NMEA 4.0 satnums
+     * use talker ID to disambiguate */
+    } else if (32 >= nmea_satnum) {
         *ubx_svid = nmea_satnum;
 	switch (talker[0]) {
         case 'G':
 	    if (talker[1] == 'A') {
 		/* Galileo */
-		nmea_satnum += 300; /* Used by u-blox at least */
+		nmea2_prn = 300 + nmea_satnum;
 		*ubx_gnssid = 2;
 	    } else if (talker[1] == 'B') {
-		/* map Beidou IDs */
+		/* map Beidou IDs 1..37 to 401..437 */
 		*ubx_gnssid = 3;
-		nmea_satnum += 200;
+		nmea2_prn = 400 + nmea_satnum;
 	    } else if (talker[1] == 'L') {
 		/* GLONASS GL doesn't seem to do this, better safe than sorry */
-		nmea_satnum += 64;
+		nmea2_prn = 64 + nmea_satnum;
 		*ubx_gnssid = 6;
 	    } else if (talker[1] == 'N') {
                 /* all of them, but only GPS is 0 < PRN < 33 */
@@ -1046,14 +1119,14 @@ static int nmeaid_to_prn(char *talker, int nmea_satnum,
 	case 'B':
             if (talker[1] == 'D') {
 		/* map Beidou IDs */
-		nmea_satnum += 200;
+		nmea2_prn = 400 + nmea_satnum;
 		*ubx_gnssid = 3;
             } /* else ?? */
             break;
 	case 'Q':
             if (talker[1] == 'Z') {
 		/* QZSS */
-		nmea_satnum += 192;
+		nmea2_prn = 192 + nmea_satnum;
 		*ubx_gnssid = 5;
             } /* else ? */
             break;
@@ -1061,39 +1134,79 @@ static int nmeaid_to_prn(char *talker, int nmea_satnum,
             /* huh? */
             break;
         }
-    } else if ( 33 <= nmea_satnum && 64 >= nmea_satnum) {
+    } else if (64 >= nmea_satnum) {
         // NMEA-ID (33..64) to SBAS PRN 120-151.
         /* SBAS */
-	nmea_satnum += 87;
         *ubx_gnssid = 1;
-        *ubx_svid = nmea_satnum;
-    } else if (65 <= nmea_satnum && 96 >= nmea_satnum) {
-        /* GLONASS */
+        *ubx_svid = 87 + nmea_satnum;
+    } else if (96 >= nmea_satnum) {
+        /* GLONASS 65..96  */
         *ubx_gnssid = 6;
         *ubx_svid = nmea_satnum - 64;
-    } else if (120 <= nmea_satnum && 158 >= nmea_satnum) {
-        /* SBAS */
+    } else if (120 > nmea_satnum) {
+	/* Huh? */
+	*ubx_gnssid = 0;
+	*ubx_svid = 0;
+	nmea2_prn = 0;
+    } else if (158 >= nmea_satnum) {
+        /* SBAS 120..158 */
         *ubx_gnssid = 1;
         *ubx_svid = nmea_satnum;
-    } else if (173 <= nmea_satnum && 182 >= nmea_satnum) {
-        /* IMES */
+    } else if (173 > nmea_satnum) {
+	/* Huh? */
+	*ubx_gnssid = 0;
+	*ubx_svid = 0;
+	nmea2_prn = 0;
+    } else if (182 >= nmea_satnum) {
+        /* IMES 173..182 */
         *ubx_gnssid = 4;
         *ubx_svid = nmea_satnum - 172;
-    } else if (193 <= nmea_satnum && 197 >= nmea_satnum) {
-        /* QZSS */
+    } else if (193 > nmea_satnum) {
+	/* Huh? */
+	*ubx_gnssid = 0;
+	*ubx_svid = 0;
+	nmea2_prn = 0;
+    } else if (197 >= nmea_satnum) {
+        /* QZSS 193..197 */
         *ubx_gnssid = 5;
         *ubx_svid = nmea_satnum - 192;
-    } else if (301 <= nmea_satnum && 356 >= nmea_satnum) {
-        /* QZSS */
+    } else if (201 > nmea_satnum) {
+	/* Huh? */
+	*ubx_gnssid = 0;
+	*ubx_svid = 0;
+	nmea2_prn = 0;
+    } else if (237 >= nmea_satnum) {
+        /* BeiDou, non-standard, some SiRF put BeiDou 201-237 */
+        /* $GBGSV,2,2,05,209,07,033,*62 */
+        *ubx_gnssid = 3;
+        *ubx_svid = nmea_satnum - 200;
+	nmea2_prn += 200;           /* move up to 400 where NMEA 2.x wants it. */
+    } else if (301 > nmea_satnum) {
+	/* Huh? */
+	*ubx_gnssid = 0;
+	*ubx_svid = 0;
+	nmea2_prn = 0;
+    } else if (356 >= nmea_satnum) {
+        /* QZSS 301..356 */
         *ubx_gnssid = 2;
         *ubx_svid = nmea_satnum - 300;
-    } else if (401 <= nmea_satnum && 437 >= nmea_satnum) {
+    } else if (401 > nmea_satnum) {
+	/* Huh? */
+	*ubx_gnssid = 0;
+	*ubx_svid = 0;
+	nmea2_prn = 0;
+    } else if (437 >= nmea_satnum) {
         /* BeiDou */
         *ubx_gnssid = 3;
         *ubx_svid = nmea_satnum - 400;
+    } else {
+	/* greater than 437 Huh? */
+	*ubx_gnssid = 0;
+	*ubx_svid = 0;
+	nmea2_prn = 0;
     }
 
-    return nmea_satnum;
+    return nmea2_prn;
 }
 
 static gps_mask_t processGSA(int count, char *field[],
@@ -1146,15 +1259,19 @@ static gps_mask_t processGSA(int count, char *field[],
      * seems like the first is GNSS and the second GLONASS
      *
      * u-blox 9 outputs one per GNSS on each cycle.  Note the
-     * extra last parameter which is NMEA gnssid
+     * extra last parameter which is NMEA gnssid:
      * $GNGSA,A,3,13,16,21,15,10,29,27,20,,,,,1.05,0.64,0.83,1*03
      * $GNGSA,A,3,82,66,81,,,,,,,,,,1.05,0.64,0.83,2*0C
      * $GNGSA,A,3,07,12,33,,,,,,,,,,1.05,0.64,0.83,3*0A
      * $GNGSA,A,3,13,12,22,19,08,21,,,,,,,1.05,0.64,0.83,4*0B
+     * Also note the NMEA 4.0 GLONASS PRN (82) in an NMEA 4.1
+     * sentence.
      */
     gps_mask_t mask = ONLINE_SET;
     char last_last_gsa_talker = session->nmea.last_gsa_talker;
     int nmea_gnssid = 0;
+    int nmea_sigid = 0;
+    int ubx_sigid = 0;
 
     /*
      * One chipset called the i.Trek M3 issues GPGSA lines that look like
@@ -1200,8 +1317,10 @@ static gps_mask_t processGSA(int count, char *field[],
 	    if (field[17][0] != '\0')
 		session->gpsdata.dop.vdop = safe_atof(field[17]);
 	    if (19 == count && '\0' != field[18][0]) {
-                /* get the NMEA 4.10 gnssid */
-		nmea_gnssid = atoi(field[18]);
+                /* get the NMEA 4.10 sigid */
+		nmea_sigid = atoi(field[18]);
+                /* FIXME: ubx_sigid not used yet */
+		ubx_sigid = nmea_sigid_to_ubx(nmea_sigid);
 	    }
         }
 	/*
@@ -1231,15 +1350,28 @@ static gps_mask_t processGSA(int count, char *field[],
 	/* the magic 6 here counts the tag, two mode fields, and DOP fields */
 	for (i = 0; i < count - 6; i++) {
 	    int prn;
+            int nmea_satnum;
             unsigned char ubx_gnssid;   /* UNUSED */
             unsigned char ubx_svid;     /* UNUSED */
 
 	    /* skip empty fields, otherwise empty becomes prn=200 */
-	    if ( '\0' == field[i + 3][0] ) {
+            nmea_satnum = atoi(field[i + 3]);
+	    if (1 > nmea_satnum) {
 		continue;
 	    }
-	    prn = nmeaid_to_prn(field[0], atoi(field[i + 3]), nmea_gnssid,
+	    prn = nmeaid_to_prn(field[0], nmea_satnum, nmea_gnssid,
                                 &ubx_gnssid, &ubx_svid);
+
+#ifdef __UNUSED__
+            /* debug */
+	    gpsd_log(&session->context->errout, LOG_ERROR,
+		     "%s nmeaid_to_prn: nmea_gnssid %d nmea_satnum %d ubx_gnssid %d "
+                     "ubx_svid %d nmea2_prn %d\n", field[0],
+		     nmea_gnssid, nmea_satnum, ubx_gnssid, ubx_svid, prn);
+	    gpsd_log(&session->context->errout, LOG_ERROR,
+                     "%s count %d\n", field[0], count);
+#endif  /*  __UNUSED__ */
+
 	    if (prn > 0) {
 		/* check first BEFORE over-writing memory */
 		if (MAXCHANNELS <= session->gpsdata.satellites_used) {
@@ -1254,12 +1386,13 @@ static gps_mask_t processGSA(int count, char *field[],
 	}
 	mask |= DOP_SET | USED_IS;
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "xxGSA: mode=%d used=%d pdop=%.2f hdop=%.2f vdop=%.2f\n",
+		 "xxGSA: mode=%d used=%d pdop=%.2f hdop=%.2f vdop=%.2f "
+                 "ubx_sigid %d\n",
 		 session->newdata.mode,
 		 session->gpsdata.satellites_used,
 		 session->gpsdata.dop.pdop,
 		 session->gpsdata.dop.hdop,
-		 session->gpsdata.dop.vdop);
+		 session->gpsdata.dop.vdop, ubx_sigid);
     }
     /* assumes GLGSA or BDGSA, if present, is emitted  directly
      * after the GPGSA*/
@@ -1384,9 +1517,6 @@ static gps_mask_t processGSV(int count, char *field[],
 	/* NMEA 4.10, get the signal ID */
 	nmea_sigid = atoi(field[count - 1]);
         ubx_sigid = nmea_sigid_to_ubx(nmea_sigid);
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "GPGSV fieldcount %d %% 4 == 1, nmea_sigid %u ubx_sig %u\n",
-                 count, nmea_sigid, ubx_sigid);
 	break;
     default:
 	/* bad count */
@@ -1455,7 +1585,7 @@ static gps_mask_t processGSV(int count, char *field[],
 
 	if (session->gpsdata.satellites_visible >= MAXCHANNELS) {
 	    gpsd_log(&session->context->errout, LOG_ERROR,
-		     "internal error - too many satellites [%d]!\n",
+		     "xxGSV: internal error - too many satellites [%d]!\n",
 		     session->gpsdata.satellites_visible);
 	    gpsd_zero_satellites(&session->gpsdata);
 	    break;
@@ -1466,9 +1596,18 @@ static gps_mask_t processGSV(int count, char *field[],
 	    /* skip bogus fields */
 	    continue;
 	}
-	/* FIXME: this ignores possible NMEA 4.1 nmea_gnssid hint */
+	/* FIXME: this ignores possible NMEA 4.1 Signal ID hint */
 	sp->PRN = (short)nmeaid_to_prn(field[0], nmea_svid, nmea_gnssid,
                                        &sp->gnssid, &sp->svid);
+
+#ifdef __UNUSED__
+	/* debug */
+	gpsd_log(&session->context->errout, LOG_ERROR,
+		 "%s nmeaid_to_prn: nmea_gnssid %d nmea_satnum %d "
+                 "ubx_gnssid %d ubx_svid %d nmea2_prn %d\n", field[0],
+		 nmea_gnssid, nmea_svid, sp->gnssid, sp->svid, sp->PRN);
+#endif  /* __UNUSED__ */
+
 	sp->elevation = (short)atoi(field[fldnum++]);
 	sp->azimuth = (short)atoi(field[fldnum++]);
 	sp->ss = (float)atoi(field[fldnum++]);
