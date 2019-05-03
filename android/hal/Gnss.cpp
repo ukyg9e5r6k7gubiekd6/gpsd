@@ -122,7 +122,6 @@ Return<bool> Gnss::start() {
                                  V1_0::GnssLocationFlags::HAS_BEARING_ACCURACY;
 
                         location = {
-                                 .gnssLocationFlags = flags,
                                  .latitudeDegrees = (double) gps_data.fix.latitude,
                                  .longitudeDegrees = (double) gps_data.fix.longitude,
                                  .speedMetersPerSec = (float) gps_data.fix.speed,
@@ -140,6 +139,8 @@ Return<bool> Gnss::start() {
                             location.altitudeMeters = gps_data.fix.altitude;
                             location.verticalAccuracyMeters = gps_data.fix.epv;
                         }
+
+			location.gnssLocationFlags = flags;
 
                         this->reportLocation(location);
                     } else if (is_automotive && last_recorded_fix == 0){
