@@ -184,6 +184,12 @@ Return<bool> Gnss::start() {
 
 			svStatus.gnssSvList[i].svFlag = 0;
                         if (gps_data.skyview[i].used == 1) svStatus.gnssSvList[i].svFlag |= GnssSvFlags::USED_IN_FIX;
+
+                        if (gps_data.skyview[i].elevation > -91 && gps_data.skyview[i].azimuth > -1){
+                            svStatus.gnssSvList[i].svFlag |= GnssSvFlags::HAS_ALMANAC_DATA;
+                            if (gps_data.skyview[i].ss > 0)
+                                svStatus.gnssSvList[i].svFlag |= GnssSvFlags::HAS_EPHEMERIS_DATA;
+                        }
                     }
                     this->reportSvStatus(svStatus);
                 }
