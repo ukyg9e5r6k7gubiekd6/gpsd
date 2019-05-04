@@ -91,6 +91,168 @@ static gps_mask_t ubx_msg_tim_tp(struct gps_device_t *session,
 static void ubx_mode(struct gps_device_t *session, int mode);
 #endif /* RECONFIGURE_ENABLE */
 
+/* make up an NMEA 4.0 (extended) PRN based on gnssId:svId,
+ * using Appendix A from * u-blox ZED-F9P Interface Description
+ *
+ * Return PRN, or zero for error
+ */
+static short ubx2_to_prn(int gnssId, int svId)
+{
+    short nmea_PRN;
+
+    if (1 > svId) {
+	/* skip 0 svId */
+	return 0;
+    }
+
+    switch (gnssId) {
+    case 0:
+	/* GPS, 1-32 maps to 1-32 */
+	if (32 < svId) {
+	    /* skip bad svId */
+	    return 0;
+	}
+	nmea_PRN = svId;
+	break;
+    case 1:
+	/* SBAS, 120..151, 152..158 maps to 33..64, 152..158 */
+	if (120 > svId) {
+	    /* Huh? */
+            return 0;
+        } else if (151 >= svId) {
+	    nmea_PRN = svId - 87;
+	} else if (158 >= svId) {
+	    nmea_PRN = svId;
+	} else {
+	    /* Huh? */
+	    return 0;
+	}
+	break;
+    case 2:
+        /* Galileo, 1..36 ->  301-336 */
+        /* Galileo, 211..246 ->  301-336 */
+	if (36 >= svId) {
+	    nmea_PRN = svId + 300;
+	} else if (211 > svId) {
+	    /* skip bad svId */
+	    return 0;
+	} else if (246 >= svId) {
+	    nmea_PRN = svId + 90;
+	} else {
+	    /* skip bad svId */
+	    return 0;
+        }
+        break;
+    case 3:
+	/* BeiDou, 1..37 -> to 401-437 */
+	/* BeiDou, 159..163,33..64 -> to 401-437 */
+	if (37 >= svId) {
+	    nmea_PRN = svId + 400;
+	} else {
+	    /* skip bad svId */
+	    return 0;
+	}
+	break;
+    case 4:
+	/* IMES, 1-10 -> to 173-182, per u-blox 8/NMEA 4.0 extended */
+	if (10 < svId) {
+	    /* skip bad svId */
+	    return 0;
+	}
+	nmea_PRN = svId + 172;
+	break;
+    case 5:
+	/* QZSS, 1-5 maps to 193-197 */
+        /* ZED-F9T also see 198 and 199 */
+	if (7 < svId) {
+	    /* skip bad svId */
+	    return 0;
+	}
+	nmea_PRN = svId + 192;
+	break;
+    case 6:
+	/* GLONASS, 1-32 maps to 65-96 */
+	if (32 < svId) {
+	    /* skip bad svId */
+	    /* 255 == tracked, but unidentified, skip */
+	    return 0;
+	}
+	nmea_PRN = svId + 64;
+	break;
+    default:
+	/* Huh? */
+	return 0;
+    }
+
+    return nmea_PRN;
+}
+
+/* Convert a ubx PRN to an NMEA 4.0 (extended) PRN and ubx gnssid, svid
+ *
+ * return 0 on fail
+ */
+static short ubx_to_prn(int ubx_PRN, unsigned char *gnssId,
+                        unsigned char *svId)
+{
+    *gnssId = 0;
+    *svId = 0;
+
+    if (1 > ubx_PRN) {
+	/* skip 0 PRN */
+	return 0;
+    } else if (32 >= ubx_PRN) {
+	/* GPS 1..32 -> 1..32 */
+	*gnssId = 0;
+	*svId = ubx_PRN;
+    } else if (64 >= ubx_PRN) {
+	/* BeiDou, 159..163,33..64 -> 1..5,6..37 */
+	*gnssId = 3;
+	*svId = ubx_PRN - 27;
+    } else if (96 >= ubx_PRN) {
+	/* GLONASS 65..96 -> 1..32 */
+	*gnssId = 6;
+	*svId = ubx_PRN - 64;
+    } else if (120 > ubx_PRN) {
+        /* Huh? */
+        return 0;
+    } else if (158 >= ubx_PRN) {
+	/* SBAS 120..158 -> 120..158 */
+	*gnssId = 1;
+	*svId = ubx_PRN;
+    } else if (163 >= ubx_PRN) {
+	/* BeiDou, 159..163 -> 1..5 */
+	*gnssId = 3;
+	*svId = ubx_PRN - 158;
+    } else if (173 > ubx_PRN) {
+        /* Huh? */
+        return 0;
+    } else if (182 >= ubx_PRN) {
+	/* IMES 173..182 -> 1..5, in u-blox 8, bot u-blox 9 */
+	*gnssId = 4;
+	*svId = ubx_PRN - 172;
+    } else if (193 > ubx_PRN) {
+        /* Huh? */
+        return 0;
+    } else if (199 >= ubx_PRN) {
+	/* QZSS 193..197 -> 1..5 */
+        /* ZED-F9T also see 198 and 199 */
+	*gnssId = 5;
+	*svId = ubx_PRN - 192;
+    } else if (211 > ubx_PRN) {
+        /* Huh? */
+        return 0;
+    } else if (246 >= ubx_PRN) {
+	/* Galileo 211..246 -> 1..36 */
+	*gnssId = 2;
+	*svId = ubx_PRN - 210;
+    } else {
+	/* greater than 246
+         * GLONASS (255), unused, or other unknown */
+	return 0;
+    }
+    return ubx2_to_prn(*gnssId, *svId);
+}
+
 /**
  * Receiver/Software Version
  * UBX-MON-VER
@@ -832,96 +994,32 @@ ubx_msg_nav_sat(struct gps_device_t *session, unsigned char *buf,
     nsv = 0;
     for (i = st = 0; i < nchan; i++) {
 	unsigned int off = 8 + 12 * i;
-        short PRN = 0;
+        short nmea_PRN = 0;
         unsigned char gnssId = getub(buf, off + 0);
         short svId = (short)getub(buf, off + 1);
         unsigned char cno = getub(buf, off + 2);
 	uint32_t flags = getleu32(buf, off + 8);
 	bool used = (bool)(flags  & 0x08);
 
-	if (0 == svId) {
-            /* skip 0 svId */
-	    continue;
-        }
+	nmea_PRN = ubx2_to_prn(gnssId, svId);
 
-        /* make up a PRN based on gnssId:svId, using Appendix A from
-         * u-blox 8 / u-blox M8 Receiver Description - Manual */
-        switch (gnssId) {
-        case 0:
-            /* GPS, 1-32 maps to 1-32 */
-	    if (32 < svId) {
-		/* skip bad svId */
-		continue;
-	    }
-            PRN = svId;
-            break;
-        case 1:
-            /* SBAS, 120-158 maps to 120-158 */
-	    if (120 > svId || 158 < svId) {
-		/* skip bad svId */
-		continue;
-	    }
-            PRN = svId;
-            break;
-        case 2:
-            /* Galileo, 1-36 maps to 211-246 */
-	    if (36 < svId) {
-		/* skip bad svId */
-		continue;
-	    }
-            PRN = svId + 210;
-            break;
-        case 3:
-            /* BeiDou, 1-37 maps to 159-163,33-64 */
-	    if (6 > svId) {
-                /* 1-5 maps to 159-163 */
-		PRN = svId + 158;
-	    } else if (37 < svId) {
-		/* skip bad svId */
-		continue;
-	    } else {
-		/* 6-37 maps to 33-64 */
-		PRN = svId + 27;
-            }
-            break;
-        case 4:
-            /* IMES, 1-10 maps to 173-182 */
-	    if (10 < svId) {
-		/* skip bad svId */
-		continue;
-	    }
-            PRN = svId + 172;
-            break;
-        case 5:
-            /* QZSS, 1-5 maps to 193-197 */
-	    if (5 < svId) {
-		/* skip bad svId */
-		continue;
-	    }
-            PRN = svId + 192;
-            break;
-        case 6:
-            /* GLONASS, 1-32 maps to 65-96 */
-	    if (32 < svId) {
-		/* skip bad svId */
-                /* 255 == tracked, but unidentified, skip */
-		continue;
-	    }
-            PRN = svId + 64;
-            break;
-        default:
-            /* Huh? */
-            continue;
-        }
+#ifdef __UNUSED
+        /* debug */
+	gpsd_log(&session->context->errout, LOG_ERROR,
+                 "NAV-SAT gnssid %d, svid %d nmea_PRN %d\n",
+                 gnssId, svId, nmea_PRN);
+#endif /* __UNUSED */
+
 	session->gpsdata.skyview[st].gnssid = gnssId;
 	session->gpsdata.skyview[st].svid = svId;
-	session->gpsdata.skyview[st].PRN = PRN;
+	session->gpsdata.skyview[st].PRN = nmea_PRN;
 
 	session->gpsdata.skyview[st].ss = (float)cno;
 	session->gpsdata.skyview[st].elevation = (short)getsb(buf, off + 3);
 	session->gpsdata.skyview[st].azimuth = (short)getles16(buf, off + 4);
 	session->gpsdata.skyview[st].used = used;
-	if (used || PRN == (short)session->driver.ubx.sbas_in_use) {
+        /* sbas_in_use is not same as used */
+	if (used) {
 	    nsv++;
 	    session->gpsdata.skyview[st].used = true;
 	}
@@ -969,57 +1067,36 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
     nsv = 0;
     for (i = st = 0; i < nchan; i++) {
 	unsigned int off = 8 + 12 * i;
-        short PRN = (short)getub(buf, off + 1);
+        short nmea_PRN;
+        short ubx_PRN = (short)getub(buf, off + 1);
         unsigned char snr = getub(buf, off + 4);
 	bool used = (bool)(getub(buf, off + 2) & 0x01);
 
-        /* fit into gnssid:svid */
-	if (0 == PRN) {
-            /* skip 0 PRN */
+        nmea_PRN = ubx_to_prn(ubx_PRN,
+                              &session->gpsdata.skyview[st].gnssid,
+                              &session->gpsdata.skyview[st].svid);
+
+#ifdef __UNUSED
+        /* debug */
+	gpsd_log(&session->context->errout, LOG_ERROR,
+                 "NAV-SVINFO ubx_prn %d gnssid %d, svid %d nmea_PRN %d\n",
+                 ubx_PRN,
+                 session->gpsdata.skyview[st].gnssid,
+                 session->gpsdata.skyview[st].svid, nmea_PRN);
+#endif /* __UNUSED */
+	if (1 > nmea_PRN) {
+            /* skip bad PRN */
 	    continue;
-        } else if ((1 <= PRN) && (32 >= PRN)) {
-            /* GPS */
-            session->gpsdata.skyview[st].gnssid = 0;
-            session->gpsdata.skyview[st].svid = PRN;
-        } else if ((33 <= PRN) && (64 >= PRN)) {
-            /* BeiDou */
-            session->gpsdata.skyview[st].gnssid = 3;
-            session->gpsdata.skyview[st].svid = PRN - 158;
-        } else if ((65 <= PRN) && (96 >= PRN)) {
-            /* GLONASS */
-            session->gpsdata.skyview[st].gnssid = 6;
-            session->gpsdata.skyview[st].svid = PRN - 64;
-        } else if ((120 <= PRN) && (158 >= PRN)) {
-            /* SBAS */
-            session->gpsdata.skyview[st].gnssid = 1;
-            session->gpsdata.skyview[st].svid = PRN;
-        } else if ((159 <= PRN) && (163 >= PRN)) {
-            /* BeiDou, again */
-            session->gpsdata.skyview[st].gnssid = 3;
-            session->gpsdata.skyview[st].svid = PRN - 126;
-        } else if ((173 <= PRN) && (182 >= PRN)) {
-            /* IMES */
-            session->gpsdata.skyview[st].gnssid = 4;
-            session->gpsdata.skyview[st].svid = PRN - 172;
-        } else if ((193 <= PRN) && (197 >= PRN)) {
-            /* QZSS */
-            session->gpsdata.skyview[st].gnssid = 5;
-            session->gpsdata.skyview[st].svid = PRN - 192;
-        } else if ((211 <= PRN) && (246 >= PRN)) {
-            /* Galileo */
-            session->gpsdata.skyview[st].gnssid = 2;
-            session->gpsdata.skyview[st].svid = PRN - 210;
-        } else if (255 == PRN) {
-            /* GLONASS, again, unused, untracked */
-            continue;
         }
-	session->gpsdata.skyview[st].PRN = PRN;
+	session->gpsdata.skyview[st].PRN = nmea_PRN;
 
 	session->gpsdata.skyview[st].ss = (float)snr;
 	session->gpsdata.skyview[st].elevation = (short)getsb(buf, off + 5);
 	session->gpsdata.skyview[st].azimuth = (short)getles16(buf, off + 6);
 	session->gpsdata.skyview[st].used = used;
-	if (used || PRN == (short)session->driver.ubx.sbas_in_use) {
+        /* sbas_in_use is not same as used */
+	if (used) {
+            /* not really 'used', just integrity data from there */
 	    nsv++;
 	    session->gpsdata.skyview[st].used = true;
 	}
@@ -1078,6 +1155,10 @@ static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf,
                          size_t data_len)
 {
     unsigned int i, nsv;
+    short ubx_PRN;
+    short nmea_PRN;
+    unsigned char gnssid = 0;
+    unsigned char svid = 0;
 
     if (12 > data_len) {
 	gpsd_log(&session->context->errout, LOG_WARN,
@@ -1102,7 +1183,15 @@ static void ubx_msg_sbas(struct gps_device_t *session, unsigned char *buf,
      * corrections indicated
      */
 
-    session->driver.ubx.sbas_in_use = (unsigned char)getub(buf, 4);
+    ubx_PRN = getub(buf, 4);
+    nmea_PRN = ubx_to_prn(ubx_PRN, &gnssid, &svid);
+#ifdef __UNUSED
+    /* debug */
+    gpsd_log(&session->context->errout, LOG_ERROR,
+	     "NAV-SBAS ubx_prn %d gnssid %d, svid %d nmea_PRN %d\n",
+	     ubx_PRN, gnssid, svid, nmea_PRN);
+#endif /* __UNUSED */
+    session->driver.ubx.sbas_in_use = nmea_PRN;
 }
 
 /*
