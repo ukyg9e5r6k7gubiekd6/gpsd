@@ -1851,14 +1851,14 @@ struct satellite_t {
      *  2 = Galileo   1-36
      *  3 - BeiDou    1-37
      *  4 = IMES      1-10
-     *  5 = QZSS      1-5
+     *  5 = QZSS      1-5       Undocumented u-blox goes to 7
      *  6 = GLONASS   1-32, 255
      *  x = IRNSS    1-11       Not defined by u-blox:
      *
      * gnssid:svid:sigid, as defined by NMEA 4.10, NOT USED HERE!
      *  1 = GPS       1-32
      *  1 = SBAS      33-64, 152-158
-     *  1 = QZSS      193-197
+     *  1 = QZSS      193-197  Undocuemtned u-blox goes to 199
      *  2 = GLONASS   1-32, nul
      *  3 = Galileo   1-36
      *  4 - BeiDou    1-37
