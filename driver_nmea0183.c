@@ -1003,7 +1003,7 @@ static int nmeaid_to_prn(char *talker, int nmea_satnum,
      *   65..96: GLONASS
      *   152..158: Various SBAS systems (EGNOS, WAAS, SDCM, GAGAN, MSAS)
      *   173..182: IMES
-     *   193..197: QZSS
+     *   193..197: QZSS   (undocumented u-blox goes to 199)
      *   201..235: Beidou (not NMEA, not u-blox?)
      *   301..336: Galileo
      *   401..437: Beidou
@@ -1062,8 +1062,9 @@ static int nmeaid_to_prn(char *talker, int nmea_satnum,
 		*ubx_gnssid = 0;
 		*ubx_svid = 0;
 		nmea2_prn = 0;
-	    } else if (198 > nmea_satnum) {
+	    } else if (200 > nmea_satnum) {
 		/* 1 = QZSS      193-197 */
+                /* undocumented u-blox goes to 199 */
 		*ubx_gnssid = 3;
 		*ubx_svid = nmea_satnum - 192;
 	    } else {
@@ -1168,6 +1169,7 @@ static int nmeaid_to_prn(char *talker, int nmea_satnum,
 	nmea2_prn = 0;
     } else if (197 >= nmea_satnum) {
         /* QZSS 193..197 */
+	/* undocumented u-blox goes to 199 */
         *ubx_gnssid = 5;
         *ubx_svid = nmea_satnum - 192;
     } else if (201 > nmea_satnum) {
@@ -1187,7 +1189,7 @@ static int nmeaid_to_prn(char *talker, int nmea_satnum,
 	*ubx_svid = 0;
 	nmea2_prn = 0;
     } else if (356 >= nmea_satnum) {
-        /* QZSS 301..356 */
+        /* Galileo 301..356 */
         *ubx_gnssid = 2;
         *ubx_svid = nmea_satnum - 300;
     } else if (401 > nmea_satnum) {
