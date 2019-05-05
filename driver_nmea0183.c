@@ -602,7 +602,7 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
      * 10: -26.294      Geoid separation in meters
      * 11: 6.0          Age of differential corrections, in seconds
      * 12: 0138         Differential reference station ID
-     * 13: S            Navigation status
+     * 13: S            NMEA 4.1+ Navigation status
      *                   S = Safe
      *                   C = Caution
      *                   U = Unsafe
@@ -1231,7 +1231,7 @@ static gps_mask_t processGSA(int count, char *field[],
      * 15   = PDOP
      * 16   = HDOP
      * 17   = VDOP
-     * 18   - NMEA defined, u-blox extended, GNSS System ID, NMEA 4.10+
+     * 18   - NMEA 4.1+ GNSS System ID, u-blox extended
      *             1 = GPS L1C/A, L2CL, L2CM
      *             2 = GLONASS L1 OF, L2 OF
      *             3 = Galileo E1C, E1B, E5 bl, E5 bQ
@@ -1422,16 +1422,18 @@ static gps_mask_t processGSV(int count, char *field[],
 #define GSV_TALKER	field[0][1]
     /*
      * GSV,2,1,08,01,40,083,46,02,17,308,41,12,07,344,39,14,22,228,45*75
-     * 2           Number of sentences for full data
-     * 1           Sentence 1 of 2
-     * 08          Total number of satellites in view
-     * 01          Satellite PRN number
-     * 40          Elevation, degrees
-     * 083         Azimuth, degrees
-     * 46          Signal-to-noise ratio in decibels
+     *  1) 2           Number of sentences for full data
+     *  2) 1           Sentence 1 of 2
+     *  3) 08          Total number of satellites in view
+     *  4) 01          Satellite PRN number
+     *  5) 40          Elevation, degrees
+     *  6) 083         Azimuth, degrees
+     *  7) 46          Signal-to-noise ratio in decibels
      * <repeat for up to 4 satellites per sentence>
+     *   )             NMEA 4.1 signalId
+     *   )             checksum
      *
-     * NMEA 4.10:
+     * NMEA 4.1+:
      * $GAGSV,3,1,09,02,00,179,,04,09,321,,07,11,134,11,11,10,227,,7*7F
      * after the satellite block, before the checksum, new field:
      * 7           NMEA Signal ID
@@ -2102,15 +2104,17 @@ static gps_mask_t processGBS(int c UNUSED, char *field[],
 {
     /*
      * $GPGBS,082941.00,2.4,1.5,3.9,25,,-43.7,27.5*65
-     * 1) UTC time of the fix associated with this sentence (hhmmss.ss)
-     * 2) Expected error in latitude (meters)
-     * 3) Expected error in longitude (meters)
-     * 4) Expected error in altitude (meters)
-     * 5) PRN of most likely failed satellite
-     * 6) Probability of missed detection for most likely failed satellite
-     * 7) Estimate of bias in meters on most likely failed satellite
-     * 8) Standard deviation of bias estimate
-     * 9) Checksum
+     *  1) UTC time of the fix associated with this sentence (hhmmss.ss)
+     *  2) Expected error in latitude (meters)
+     *  3) Expected error in longitude (meters)
+     *  4) Expected error in altitude (meters)
+     *  5) PRN of most likely failed satellite
+     *  6) Probability of missed detection for most likely failed satellite
+     *  7) Estimate of bias in meters on most likely failed satellite
+     *  8) Standard deviation of bias estimate
+     *  9) NMEA 4.1 GNSS ID
+     * 10) NMEA 4.1 Signal ID
+     *     Checksum
      *
      * Fields 2, 3 and 4 are one standard deviation.
      */
