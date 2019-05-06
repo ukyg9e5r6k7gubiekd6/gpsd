@@ -3073,7 +3073,7 @@ class ubx(object):
         while 0 < m_len:
             u = struct.unpack_from('<ddfBBBBHBBBBB', buf, 16 + i * 32)
             s += ('\n  prmes %.3f cpMes %.3f doMes %f\n'
-                  '   gnssID %u svId %u %u freqId %u locktime %u cno %u\n'
+                  '   gnssID %u svId %u sigId %u freqId %u locktime %u cno %u\n'
                   '   prStdev %u, cpStdev %u doStdev %u trkStat %u' % u)
             m_len -= 32
             i += 1
