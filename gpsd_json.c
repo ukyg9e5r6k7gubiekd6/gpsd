@@ -348,6 +348,13 @@ void json_sky_dump(const struct gps_data_t *datap,
 	(void)strlcat(reply, "\"satellites\":[", replylen);
 	for (i = 0; i < reported; i++) {
 	    if (datap->skyview[i].PRN) {
+                if (-90 > datap->skyview[i].elevation ||
+                    90 < datap->skyview[i].elevation ||
+                    0 > datap->skyview[i].azimuth ||
+                    360 < datap->skyview[i].azimuth) {
+                   /* do not report PRN w/o valid elevation and azimuth */
+                   continue;
+                }
 		str_appendf(reply, replylen,
                    "{\"PRN\":%d,\"el\":%d,\"az\":%d,\"ss\":%.0f,\"used\":%s",
                    datap->skyview[i].PRN,
