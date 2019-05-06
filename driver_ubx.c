@@ -1254,6 +1254,8 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
         double doMes = getlef32((const char *)buf, off + 32);
         uint8_t gnssId = getub(buf, off + 36);
         uint8_t svId = getub(buf, off + 37);
+        /* reserved in u-blox 8, sigId in u-blox 9 */
+        uint8_t sigId = getub(buf, off + 38);
         /* GLONASS frequency slot */
         uint8_t freqId = getub(buf, off + 39);
         /* carrier phase locktime in ms, max 64500ms */
@@ -1271,33 +1273,109 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
          */
         uint8_t trkStat = getub(buf, off + 46);
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "%u:%u:%u prMes %f cpMes %f doMes %f locktime %u\n"
+		 "%u:%u:%u freqId %u prMes %f cpMes %f doMes %f locktime %u\n"
 		 "cno %u prStdev %u cpStdev %u doStdev %u rtkStat %u\n",
-		 gnssId, svId, freqId, prMes, cpMes, doMes, locktime,
+		 gnssId, svId, sigId, freqId, prMes, cpMes, doMes, locktime,
 		 cno, prStdev, cpStdev, doStdev, trkStat);
 
 	session->gpsdata.raw.meas[i].gnssid = gnssId;
+	session->gpsdata.raw.meas[i].sigid = sigId;
+
+        /* some of these are guesses as the u-blox codes to not match RINEX coded */
         switch (gnssId) {
         case 0:       /* GPS */
-        case 5:       /* QZSS */
-            obs_code = "L1C";       /* u-blox calls this L1C/A */
+	    switch (gnssId) {
+            default:
+                /* let PPP figure it out */
+                /* FALLTHROUGH */
+	    case 0:       /* L1C/A */
+		obs_code = "L1C";
+		break;
+	    case 3:       /* L2CL */
+		obs_code = "L1L";
+		break;
+	    case 4:       /* L2CM */
+		obs_code = "L1M";
+		break;
+            }
             break;
         case 1:       /* SBAS */
+            /* sigId added on protVer 27, and SBAS gone in protVer 27
+             * so must be L1C/A */
             svId -= 100;            /* adjust for RINEX 3 svid */
+            /* all SBAS are L1C? */
             obs_code = "L1C";       /* u-blox calls this L1C/A */
             break;
         case 2:       /* GALILEO */
-            obs_code = "L1B";       /* u-blox calls this E1OS */
+	    switch (gnssId) {
+            default:
+                /* let PPP figure it out */
+                /* FALLTHROUGH */
+	    case 0:       /*  */
+		obs_code = "L1C";       /* u-blox calls this E1OS or E1C */
+                break;
+	    case 1:       /*  */
+		obs_code = "L1B";       /* u-blox calls this E1B */
+                break;
+	    case 5:       /*  */
+		obs_code = "L7I";       /* u-blox calls this E5bl */
+                break;
+	    case 6:       /*  */
+		obs_code = "L7Q";       /* u-blox calls this E5bQ */
+                break;
+            }
             break;
         case 3:       /* BeiDou */
-            obs_code = "L2I";       /* u-blox calls this B1I */
+	    switch (gnssId) {
+            default:
+                /* let PPP figure it out */
+                /* FALLTHROUGH */
+	    case 0:       /*  */
+		obs_code = "L2Q";       /* u-blox calls this B1I D1 */
+                break;
+	    case 1:       /*  */
+		obs_code = "L2I";       /* u-blox calls this B1I D2 */
+                break;
+	    case 2:       /*  */
+		obs_code = "L7Q";       /* u-blox calls this B2I D1 */
+                break;
+	    case 3:       /*  */
+		obs_code = "L7I";       /* u-blox calls this B2I D2 */
+                break;
+            }
             break;
         default:      /* huh? */
         case 4:       /* IMES.  really? */
             obs_code = "";       /* u-blox calls this L1 */
             break;
+        case 5:       /* QZSS */
+	    switch (gnssId) {
+            default:
+                /* let PPP figure it out */
+                /* FALLTHROUGH */
+	    case 0:       /*  */
+		obs_code = "L1C";       /* u-blox calls this L1C/A */
+                break;
+	    case 4:       /*  */
+		obs_code = "L1C";       /* u-blox calls this L2CM */
+                break;
+	    case 5:       /*  */
+		obs_code = "L1C";       /* u-blox calls this L2CL*/
+                break;
+            }
+            break;
         case 6:       /* GLONASS */
-            obs_code = "L1C";       /* u-blox calls this L1OF */
+	    switch (gnssId) {
+            default:
+                /* let PPP figure it out */
+                /* FALLTHROUGH */
+	    case 0:       /*  */
+		obs_code = "L1C";       /* u-blox calls this L1OF */
+                break;
+	    case 2:       /*  */
+		obs_code = "L2C";       /* u-blox calls this L2OF */
+                break;
+            }
             break;
         }
         (void)strlcpy(session->gpsdata.raw.meas[i].obs_code, obs_code,
