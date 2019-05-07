@@ -1292,10 +1292,10 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 		obs_code = "L1C";
 		break;
 	    case 3:       /* L2CL */
-		obs_code = "L1L";
+		obs_code = "L2L";
 		break;
 	    case 4:       /* L2CM */
-		obs_code = "L1M";
+		obs_code = "L2M";
 		break;
             }
             break;
