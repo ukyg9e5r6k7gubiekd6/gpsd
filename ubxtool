@@ -2635,7 +2635,7 @@ class ubx(object):
         i = 0
         while i < numSigs:
             u = struct.unpack_from('<BBBBhBBBBHL', buf, 8 + (i * 16))
-            s += ('\n   gnssID %u svId %u sigId %u freqId %u prRes %d cno %u '
+            s += ('\n   gnssId %u svId %u sigId %u freqId %u prRes %d cno %u '
                   'qualityInd %u\n'
                   '    corrSource %u ionoModel %u sigFlags %#x reserved2 %u' %
                   u)
@@ -3017,7 +3017,7 @@ class ubx(object):
         i = 0
         while 0 < m_len:
             u = struct.unpack_from('<BBBBllHHLBBH', buf, 44 + i * 24)
-            s += ('\n  gnssID %u svId %u cNo %u mpathIndic %u DopplerMS %d\n'
+            s += ('\n  gnssId %u svId %u cNo %u mpathIndic %u DopplerMS %d\n'
                   '    dopplerHz %d wholeChips %u fracChips %u codephase %u\n'
                   '    intCodePhase %u pseudoRangeRMSErr %u reserved5 %u' % u)
             m_len -= 24
@@ -3073,7 +3073,7 @@ class ubx(object):
         while 0 < m_len:
             u = struct.unpack_from('<ddfBBBBHBBBBB', buf, 16 + i * 32)
             s += ('\n  prmes %.3f cpMes %.3f doMes %f\n'
-                  '   gnssID %u svId %u sigId %u freqId %u locktime %u cno %u\n'
+                  '   gnssId %u svId %u sigId %u freqId %u locktime %u cno %u\n'
                   '   prStdev %u, cpStdev %u doStdev %u trkStat %u' % u)
             m_len -= 32
             i += 1
