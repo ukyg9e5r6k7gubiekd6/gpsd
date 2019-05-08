@@ -3070,14 +3070,14 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<lhBB', buf, 0)
-        s = ' iTOW:%d ms weeks:%d numSV:%u res1 %u' % u
+        s = ' iTOW %d weeks %d numSV %u res1 %u' % u
 
         m_len -= 8
         i = 0
         while 0 < m_len:
             u = struct.unpack_from('<ddfBbbB', buf, 8 + i * 24)
-            s += ('\n  cpMes:%f prMes:%f doMes:%f sv:%d mesQI:%d\n'
-                  '     eno:%d lli:%d' % u)
+            s += ('\n  cpMes %f prMes %f doMes %f sv %d mesQI %d\n'
+                  '     eno %d lli %d' % u)
             m_len -= 24
             i += 1
 
@@ -3110,7 +3110,7 @@ class ubx(object):
             s += ('\n  prmes %.3f cpMes %.3f doMes %f\n'
                   '   gnssId %u svId %u sigId %u freqId %u locktime %u '
                   'cno %u\n'
-                  '   prStdev %u, cpStdev %u doStdev %u trkStat %u' % u)
+                  '   prStdev %u cpStdev %u doStdev %u trkStat %u' % u)
 
             if VERB_DECODE < opts['verbosity']:
                 s += '\n      (%s)' % self.gnss_s(u[3], u[4], u[5])
@@ -3168,7 +3168,7 @@ class ubx(object):
         i = 0
         while 0 < m_len:
             u = struct.unpack_from('<BBhbB', buf, 8 + i * 6)
-            s += '\n  svid:%3d svFlag:%#x azim:%3d elev:% 3d age:%3d' % u
+            s += '\n  svid %3d svFlag %#x azim %3d elev % 3d age %3d' % u
             m_len -= 6
             i += 1
 
