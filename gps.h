@@ -1871,6 +1871,7 @@ struct satellite_t {
     unsigned char svid;
     /* sigid as defined by u-blox 9, and used here
      * GPS:      0 = L1C/A, 3 = L2 CL, 4 = L2 CM
+     * SBAS:     0 = L1C/A, ? = L5I
      * Galileo:  0 = E1 C,  1 = E1 B,  5 = E5 bl, 6 = E5 bQ
      * BeiDou:   0 = B1I D1, 1 = B1I D2, 2 = B2I D1, 3 = B2I D2
      * QZSS:     0 = L1C/A, 4 = L2 CM, 5 = L2 CL
