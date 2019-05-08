@@ -1281,21 +1281,22 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 	session->gpsdata.raw.meas[i].gnssid = gnssId;
 	session->gpsdata.raw.meas[i].sigid = sigId;
 
-        /* some of these are guesses as the u-blox codes to not match RINEX coded */
+        /* some of these are GUESSES as the u-blox codes do not
+         * match RINEX codes */
         switch (gnssId) {
         case 0:       /* GPS */
-	    switch (gnssId) {
+	    switch (sigId) {
             default:
                 /* let PPP figure it out */
                 /* FALLTHROUGH */
 	    case 0:       /* L1C/A */
 		obs_code = "L1C";
 		break;
-	    case 3:       /* L2CL */
-		obs_code = "L2L";
+	    case 3:       /* L2 CL */
+		obs_code = "L2C";
 		break;
-	    case 4:       /* L2CM */
-		obs_code = "L2M";
+	    case 4:       /* L2 CM */
+		obs_code = "L2X";
 		break;
             }
             break;
@@ -1303,11 +1304,20 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
             /* sigId added on protVer 27, and SBAS gone in protVer 27
              * so must be L1C/A */
             svId -= 100;            /* adjust for RINEX 3 svid */
-            /* all SBAS are L1C? */
+
+            /* SBAS can do L5I, but the code? */
+	    switch (sigId) {
+            default:
+                /* let PPP figure it out */
+                /* FALLTHROUGH */
+	    case 0:       /* L1C/A */
+		obs_code = "L1C";
+		break;
+            }
             obs_code = "L1C";       /* u-blox calls this L1C/A */
             break;
         case 2:       /* GALILEO */
-	    switch (gnssId) {
+	    switch (sigId) {
             default:
                 /* let PPP figure it out */
                 /* FALLTHROUGH */
@@ -1326,7 +1336,7 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
             }
             break;
         case 3:       /* BeiDou */
-	    switch (gnssId) {
+	    switch (sigId) {
             default:
                 /* let PPP figure it out */
                 /* FALLTHROUGH */
@@ -1349,7 +1359,7 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
             obs_code = "";       /* u-blox calls this L1 */
             break;
         case 5:       /* QZSS */
-	    switch (gnssId) {
+	    switch (sigId) {
             default:
                 /* let PPP figure it out */
                 /* FALLTHROUGH */
@@ -1357,15 +1367,15 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
 		obs_code = "L1C";       /* u-blox calls this L1C/A */
                 break;
 	    case 4:       /*  */
-		obs_code = "L1C";       /* u-blox calls this L2CM */
+		obs_code = "L2S";       /* u-blox calls this L2CM */
                 break;
 	    case 5:       /*  */
-		obs_code = "L1C";       /* u-blox calls this L2CL*/
+		obs_code = "L2L";       /* u-blox calls this L2CL*/
                 break;
             }
             break;
         case 6:       /* GLONASS */
-	    switch (gnssId) {
+	    switch (sigId) {
             default:
                 /* let PPP figure it out */
                 /* FALLTHROUGH */
