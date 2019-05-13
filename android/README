@@ -152,7 +152,6 @@ PRODUCT_PACKAGES += android.hardware.gnss@1.1 \
 PRODUCT_PROPERTY_OVERRIDES += \
 	service.gpsd.parameters=-Nn,-G,/dev/ttyACM0
 BOARD_SEPOLICY_DIRS += external/gpsd/android/sepolicy
-DEVICE_MANIFEST_FILE += external/gpsd/android/manifest.xml
 
 
 Contact: Adam Serbinski <aserbinski@gmail.com>

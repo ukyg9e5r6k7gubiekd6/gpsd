@@ -1,5 +1,7 @@
 cc_binary {
     name: "android.hardware.gnss@1.1-service.gpsd",
+    overrides: ["android.hardware.gnss@1.0-impl"],
+    vintf_fragments: ["android.hardware.gnss@1.1-service.gpsd.xml"],
     init_rc: ["android.hardware.gnss@1.1-service.gpsd.rc"],
     relative_install_path: "hw",
     vendor: true,
