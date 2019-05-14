@@ -764,8 +764,7 @@ static void conditionally_log_fix(struct gps_data_t *gpsdata)
     /* mostly we don't care if 2D or 3D fix, let the post processor
      * decide */
 
-    if ((MODE_2D < gpsdata->fix.mode) &&
-        (LATLON_SET & gpsdata->set)) {
+    if (MODE_2D < gpsdata->fix.mode) {
         /* got a good 3D fix */
         if (isfinite(gpsdata->fix.ecef.x) &&
             isfinite(gpsdata->fix.ecef.y) &&
