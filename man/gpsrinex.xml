@@ -109,15 +109,18 @@ ubxtool -d NMEA
 ubxtool -e BINARY
 </programlisting></para>
     <para>The NEO-M8N will only reliably output raw measurements
-when only the GPS and QZSS constellations are enabled.
+when only the GPS and QZSS constellations are enabled.  If your PPP
+service can use GLONASS, then enable that as well.  Be sure to 
+disable, before enable, so as not to momentarily have too many
+constellations selected.
 <application>ubxtool</application>, as recommended by u-blox, enables
 the QZSS constellation in tandem with GPS.  Disable all constellations,
 except GPS (and QZSS):
 
 <programlisting>
-ubxtool -d GLONASS
 ubxtool -d BEIDOU
 ubxtool -d GALILEO
+ubxtool -d GLONASS
 ubxtool -d SBAS
 ubxtool -e GPS
 </programlisting></para>

@@ -22,6 +22,8 @@
  *    # ubxtool -d SBAS
  *    # ubxtool -e RAWX
  *
+ * If you have a u-blox 9 then enable GLONASS as well.
+ *
  * After collecting the default number of observations, gpsrinex will
  * create the RINEX .obs file and exit.  Upload this file to an
  * offline processing service to get cm accuracy.
