@@ -196,7 +196,7 @@ static void obs_cnt_inc(unsigned char gnssid, unsigned char svid,
     /* yeah, slow and ugly, linear search. */
     for (i = 0; i < MAXCNT; i++) {
         if (0 == obs_cnt[i].svid) {
-            /* end of list, not found, so add this item */
+            /* end of list, not found, so add this gnssid:svid */
             obs_cnt[i].gnssid = gnssid;
             obs_cnt[i].svid = svid;
             obs_cnt[i].obs_cnts[obs_code] = 1;
@@ -573,6 +573,9 @@ static void print_raw(struct gps_data_t *gpsdata)
     struct tm *tmp_now;
     int nsat = 0;
     int i;
+    unsigned char last_gnssid = 0;
+    unsigned char last_svid = 0;
+
 
     if ((last_mtime.tv_sec + (time_t)sample_interval) >
         gpsdata->raw.mtime.tv_sec) {
@@ -584,19 +587,37 @@ static void print_raw(struct gps_data_t *gpsdata)
         return;
     }
 
-    /* go through list twice, first just to get a count */
+    /* RINEX 3 wants records in each epoch sorted by gnssid.
+     * To look nice: sort by gnssid and svid
+     * To work nice, sort by gnssid, svid and sigid.
+     * Each sigid is one record in RAW, but all sigid is one
+     * record in RINEX
+     */
+    qsort(gpsdata->raw.meas, MAXCHANNELS, sizeof(gpsdata->raw.meas[0]),
+          compare_meas);
+
+    /* go through list twice, first just to get a count, needed for epoch header */
     for (i = 0; i < MAXCHANNELS; i++) {
         if (0 == gpsdata->raw.meas[i].svid) {
+            /* bad svid */
             continue;
         }
         if (4 == gpsdata->raw.meas[i].gnssid) {
             /* skip IMES */
             continue;
         }
-        if (6 < gpsdata->raw.meas[i].gnssid) {
+        if (GNSSID_CNT <= gpsdata->raw.meas[i].gnssid) {
             /* invalid gnssid */
             continue;
         }
+        /* prevent separate sigid from double counting gnssid:svid */
+        if ((last_gnssid == gpsdata->raw.meas[i].gnssid) &&
+            (last_svid == gpsdata->raw.meas[i].svid)) {
+            /* duplicate sat */
+            continue;
+        }
+        last_gnssid = gpsdata->raw.meas[i].gnssid;
+        last_svid = gpsdata->raw.meas[i].svid;
         nsat++;
     }
     if (0 >= nsat) {
@@ -621,14 +642,6 @@ static void print_raw(struct gps_data_t *gpsdata)
          tmp_now->tm_sec,
          (long)(last_mtime.tv_nsec / 100), nsat);
 
-    /* RINEX 3 wants records in each epoch sorted by gnssid.
-     * To look nice: sort by gnssid and svid
-     * To work nice, sort by gnssid, svid and sigid.
-     * Each sigid is one record in RAW, but all sigid is one
-     * record in RINEX
-     */
-    qsort(gpsdata->raw.meas, MAXCHANNELS, sizeof(gpsdata->raw.meas[0]),
-          compare_meas);
     for (i = 0; i < MAXCHANNELS; i++) {
         char gnssid;
         char svid;
