@@ -102,7 +102,7 @@ static timespec_t start_time = {0};      /* report gen time, UTC */
 static timespec_t first_mtime = {0};     /* GPS time, not UTC */
 static timespec_t last_mtime = {0};      /* GPS time, not UTC */
 
-/* total count of observations by gnssid [0-6]
+/* total count of observations by u-blox gnssid [0-6]
  *  0 = GPS       RINEX G
  *  1 = SBAS      RINEX S
  *  2 = Galileo   RINEX E
@@ -110,7 +110,7 @@ static timespec_t last_mtime = {0};      /* GPS time, not UTC */
  *  4 = IMES      not supported by RINEX
  *  5 = QZSS      RINEX J
  *  6 = GLONASS   RINEX R
- *      IRNSS     RINEX I
+ *  7 = IRNSS     RINEX I
  *
  * RINEX 3 observation codes [1]:
  * C1C  L1 C/A Pseudorange
@@ -151,25 +151,27 @@ static int debug = 0;               /* debug level */
 static struct gps_data_t gpsdata;
 static FILE *log_file;
 
-/* convert a gnssid to the RINEX 3 constellation code
+/* convert a u-blox/gpsd gnssid to the RINEX 3 constellation code
  * see [1] Section 3.5
  */
 static char gnssid2rinex(int gnssid)
 {
     switch (gnssid) {
-    case 0:     /* 0 = GPS */
+    case GNSSID_GPS:      /* 0 = GPS */
         return 'G';
-    case 1:     /* 1 = SBAS */
+    case GNSSID_SBAS:     /* 1 = SBAS */
         return 'S';
-    case 2:     /* 2 = Galileo */
+    case GNSSID_GAL:      /* 2 = Galileo */
         return 'E';
-    case 3:     /* 3 = BeiDou */
+    case GNSSID_BD:       /* 3 = BeiDou */
         return 'C';
-    case 4:     /* 4 = IMES - unsupported */
+    case GNSSID_IMES:     /* 4 = IMES - unsupported */
         return 'X';
-    case 5:     /* 5 = QZSS */
+    case GNSSID_QZSS:     /* 5 = QZSS */
         return 'J';
-    case 6:     /* 6 = GLONASS */
+    case GNSSID_GLO:      /* 6 = GLONASS */
+        return 'R';
+    case GNSSID_IRNSS:    /* 7 = IRNSS */
         return 'R';
     default:    /* Huh? */
         return 'x';
@@ -324,37 +326,37 @@ static void print_rinex_header(void)
     if (0 < prn_count[GNSSID_GPS]) {
         /* GPS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(0), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
+             gnssid2rinex(GNSSID_GPS), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[GNSSID_SBAS]) {
         /* SBAS, L1 and L5 only */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(1), 3, "C1C", "L1C", "D1C", "", "", "",
+             gnssid2rinex(GNSSID_SBAS), 3, "C1C", "L1C", "D1C", "", "", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[GNSSID_GAL]) {
         /* GALILEO, E1, E5 aand E6 only  */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(2), 3, "C1C", "L1C", "D1C", "", "", "",
+             gnssid2rinex(GNSSID_GAL), 3, "C1C", "L1C", "D1C", "", "", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[GNSSID_BD]) {
         /* BeiDou, BDS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(3), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
+             gnssid2rinex(GNSSID_BD), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[GNSSID_QZSS]) {
         /* QZSS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(5), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
+             gnssid2rinex(GNSSID_QZSS), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[GNSSID_GLO]) {
         /* GLONASS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(6), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
+             gnssid2rinex(GNSSID_GLO), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
 
@@ -376,7 +378,7 @@ static void print_rinex_header(void)
             continue;
         }
         switch (obs_cnt[i].gnssid) {
-        case 0:
+        case GNSSID_GPS:
             /* GPS */
 	    (void)fprintf(log_file,"   %c%02d%6u%6u%6u%6u%6u%24s%-20s\n",
 			  gnssid2rinex(obs_cnt[i].gnssid), obs_cnt[i].svid,
@@ -387,10 +389,10 @@ static void print_rinex_header(void)
 			  obs_cnt[i].obs_cnts[L2C],
 			  "", "PRN / # OF OBS");
             break;
-        case 1:
+        case GNSSID_SBAS:
             /* SBAS */
             /* FALLTHROUGH */
-        case 2:
+        case GNSSID_GAL:
             /* GALILEO */
             /* FALLTHROUGH */
         default:
