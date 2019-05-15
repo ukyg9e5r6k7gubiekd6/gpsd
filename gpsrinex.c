@@ -372,7 +372,7 @@ static void print_rinex_header(void)
             cnt += obs_cnt[i].obs_cnts[j];
         }
         if (0 > cnt) {
-            /* no  counts for this sat */
+            /* no counts for this sat */
             continue;
         }
         switch (obs_cnt[i].gnssid) {
@@ -620,7 +620,11 @@ static void print_raw(struct gps_data_t *gpsdata)
          (long)(last_mtime.tv_nsec / 100), nsat);
 
     /* RINEX 3 wants records in each epoch sorted by gnssid.
-     * To look nice: sort by gnssid and svid */
+     * To look nice: sort by gnssid and svid
+     * To work nice, sort by gnssid, svid and sigid.
+     * Each sigid is one record in RAW, but all sigid is one
+     * record in RINEX
+     */
     qsort(gpsdata->raw.meas, MAXCHANNELS, sizeof(gpsdata->raw.meas[0]),
           compare_meas);
     for (i = 0; i < MAXCHANNELS; i++) {
@@ -691,6 +695,7 @@ static void print_raw(struct gps_data_t *gpsdata)
             gpsdata->raw.meas[i].lli |= 2;
         }
 
+        /* L1C */
         if (0 != isfinite(gpsdata->raw.meas[i].pseudorange)) {
             obs_cnt_inc(gpsdata->raw.meas[i].gnssid, gpsdata->raw.meas[i].svid,
                         C1C);
@@ -706,6 +711,7 @@ static void print_raw(struct gps_data_t *gpsdata)
                         D1C);
         }
 
+        /* Broken.  c2c and l2c never implemented... */
         if (0 != isfinite(gpsdata->raw.meas[i].c2c)) {
             obs_cnt_inc(gpsdata->raw.meas[i].gnssid, gpsdata->raw.meas[i].svid,
                         C2C);
@@ -718,11 +724,13 @@ static void print_raw(struct gps_data_t *gpsdata)
 
         /* line no longer must be 80 chars in RINEX 3 */
         (void)fprintf(tmp_file,"%c%02d", gnssid, svid);
+        /* L1C */
         (void)fputs(fmt_obs(gpsdata->raw.meas[i].pseudorange, 0, snr),
                     tmp_file);
         (void)fputs(fmt_obs(gpsdata->raw.meas[i].carrierphase,
                             gpsdata->raw.meas[i].lli, 0), tmp_file);
         (void)fputs(fmt_obs(gpsdata->raw.meas[i].doppler, 0, 0), tmp_file);
+        /* Broken.  c2c and l2c never implemented... */
         (void)fputs(fmt_obs(gpsdata->raw.meas[i].c2c, 0, 0), tmp_file);
         (void)fputs(fmt_obs(gpsdata->raw.meas[i].l2c, 0, 0), tmp_file);
         (void)fputs("\n", tmp_file);
