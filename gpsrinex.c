@@ -279,7 +279,7 @@ static void print_rinex_header(void)
     struct tm *first_time;
     struct tm *last_time;
     int cnt;                     /* number of obs for one sat */
-    int prn_count[7] = {0};   /* count of PRN per gnssid */
+    int prn_count[GNSSID_CNT] = {0};   /* count of PRN per gnssid */
 
     if ( 3 < debug) {
         (void)fprintf(stderr,"doing header\n");
@@ -314,44 +314,44 @@ static void print_rinex_header(void)
 
     /* get PRN stats */
     qsort(obs_cnt, MAXCNT, sizeof(struct obs_cnt_t), compare_obs_cnt);
-    for (i = 0; i < 7; i++ ) {
+    for (i = 0; i < GNSSID_CNT; i++ ) {
         prn_count[i] = obs_cnt_prns(i);
     }
     /* CSRS-PPP needs C1C, L1C or C1C, L1C, D1C
      * CSRS-PPP refuses files with L1C first
      * convbin wants C1C, L1C, D1C
      * for some reason gfzrnx_lx wants C1C, D1C, L1C, not C1C, L1C, D1C */
-    if (0 < prn_count[0]) {
+    if (0 < prn_count[GNSSID_GPS]) {
         /* GPS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
              gnssid2rinex(0), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
-    if (0 < prn_count[1]) {
+    if (0 < prn_count[GNSSID_SBAS]) {
         /* SBAS, L1 and L5 only */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
              gnssid2rinex(1), 3, "C1C", "L1C", "D1C", "", "", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
-    if (0 < prn_count[2]) {
+    if (0 < prn_count[GNSSID_GAL]) {
         /* GALILEO, E1, E5 aand E6 only  */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
              gnssid2rinex(2), 3, "C1C", "L1C", "D1C", "", "", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
-    if (0 < prn_count[3]) {
+    if (0 < prn_count[GNSSID_BD]) {
         /* BeiDou, BDS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
              gnssid2rinex(3), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
-    if (0 < prn_count[5]) {
+    if (0 < prn_count[GNSSID_QZSS]) {
         /* QZSS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
              gnssid2rinex(5), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
              "", "", "", "SYS / # / OBS TYPES");
     }
-    if (0 < prn_count[6]) {
+    if (0 < prn_count[GNSSID_GLO]) {
         /* GLONASS */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
              gnssid2rinex(6), 5, "C1C", "L1C", "D1C", "C2C", "L2C", "",
@@ -432,38 +432,38 @@ static void print_rinex_header(void)
          (long)(last_mtime.tv_nsec / 100),
          "GPS", "",
          "TIME OF LAST OBS");
-    if (0 < prn_count[0]) {
+    if (0 < prn_count[GNSSID_GPS]) {
         /* GPS */
         (void)fprintf(log_file, "%-60s%-20s\n",
              "G L1C", "SYS / PHASE SHIFT");
         (void)fprintf(log_file, "%-60s%-20s\n",
              "G L2C", "SYS / PHASE SHIFT");
     }
-    if (0 < prn_count[1]) {
+    if (0 < prn_count[GNSSID_SBAS]) {
         /* SBAS, L1 and L5 only */
         (void)fprintf(log_file, "%-60s%-20s\n",
              "S L1C", "SYS / PHASE SHIFT");
     }
-    if (0 < prn_count[2]) {
+    if (0 < prn_count[GNSSID_GAL]) {
         /* GALILEO, E1, E5 and E6 */
         (void)fprintf(log_file, "%-60s%-20s\n",
              "E L1C", "SYS / PHASE SHIFT");
     }
-    if (0 < prn_count[3]) {
+    if (0 < prn_count[GNSSID_BD]) {
         /* BeiDou */
         (void)fprintf(log_file, "%-60s%-20s\n",
              "B L1C", "SYS / PHASE SHIFT");
         (void)fprintf(log_file, "%-60s%-20s\n",
              "B L2C", "SYS / PHASE SHIFT");
     }
-    if (0 < prn_count[5]) {
+    if (0 < prn_count[GNSSID_QZSS]) {
         /* QZSS */
         (void)fprintf(log_file, "%-60s%-20s\n",
              "J L1C", "SYS / PHASE SHIFT");
         (void)fprintf(log_file, "%-60s%-20s\n",
              "J L2C", "SYS / PHASE SHIFT");
     }
-    if (0 < prn_count[6]) {
+    if (0 < prn_count[GNSSID_GLO]) {
         /* GLONASS */
         (void)fprintf(log_file, "%-60s%-20s\n",
              "R L1I", "SYS / PHASE SHIFT");
