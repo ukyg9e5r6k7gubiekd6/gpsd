@@ -213,9 +213,9 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 	{"az",	   t_short,   STRUCTOBJECT(struct satellite_t, azimuth)},
 	{"ss",	   t_real,    STRUCTOBJECT(struct satellite_t, ss)},
 	{"used",   t_boolean, STRUCTOBJECT(struct satellite_t, used)},
-	{"gnssid", t_ushort,  STRUCTOBJECT(struct satellite_t, gnssid)},
-	{"svid",   t_ushort,  STRUCTOBJECT(struct satellite_t, svid)},
-	{"sigid",  t_ushort,  STRUCTOBJECT(struct satellite_t, sigid)},
+	{"gnssid", t_ubyte,   STRUCTOBJECT(struct satellite_t, gnssid)},
+	{"svid",   t_ubyte,   STRUCTOBJECT(struct satellite_t, svid)},
+	{"sigid",  t_ubyte,   STRUCTOBJECT(struct satellite_t, sigid)},
 	/* *INDENT-ON* */
 	{NULL},
     };
