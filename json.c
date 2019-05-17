@@ -117,6 +117,12 @@ static char *json_target_address(const struct json_attr_t *cursor,
     if (parent == NULL || parent->element_type != t_structobject) {
 	/* ordinary case - use the address in the cursor structure */
 	switch (cursor->type) {
+	case t_byte:
+	    targetaddr = (char *)&cursor->addr.byte[offset];
+	    break;
+	case t_ubyte:
+	    targetaddr = (char *)&cursor->addr.ubyte[offset];
+	    break;
 	case t_ignore:
 	    targetaddr = NULL;
 	    break;
@@ -195,6 +201,12 @@ static int json_internal_read_object(const char *cp,
 	    lptr = json_target_address(cursor, parent, offset);
 	    if (lptr != NULL)
 		switch (cursor->type) {
+		case t_byte:
+		    lptr[0] = cursor->dflt.byte;
+		    break;
+		case t_ubyte:
+		    lptr[0] = cursor->dflt.ubyte;
+		    break;
 		case t_integer:
 		    memcpy(lptr, &cursor->dflt.integer, sizeof(int));
 		    break;
@@ -482,6 +494,18 @@ static int json_internal_read_object(const char *cp,
 	    lptr = json_target_address(cursor, parent, offset);
 	    if (lptr != NULL)
 		switch (cursor->type) {
+		case t_byte:
+                    {
+			int tmp = atoi(valbuf);
+			lptr[0] = (char)tmp;
+                    }
+		    break;
+		case t_ubyte:
+                    {
+			int tmp = atoi(valbuf);
+			lptr[0] = (unsigned char)tmp;
+                    }
+		    break;
 		case t_integer:
 		    {
 			int tmp = atoi(valbuf);
@@ -659,6 +683,21 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 	    break;
 	case t_uinteger:
 	    arr->arr.uintegers.store[offset] = (unsigned int)strtoul(cp,
+                                                                     &ep, 0);
+	    if (ep == cp)
+		return JSON_ERR_BADNUM;
+	    else
+		cp = ep;
+	    break;
+	case t_byte:
+	    arr->arr.bytes.store[offset] = (char)strtol(cp, &ep, 0);
+	    if (ep == cp)
+		return JSON_ERR_BADNUM;
+	    else
+		cp = ep;
+	    break;
+	case t_ubyte:
+	    arr->arr.ubytes.store[offset] = (unsigned char)strtoul(cp,
                                                                      &ep, 0);
 	    if (ep == cp)
 		return JSON_ERR_BADNUM;
