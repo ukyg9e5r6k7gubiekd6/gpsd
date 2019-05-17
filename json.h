@@ -42,6 +42,12 @@ struct json_array_t {
 	} strings;
 	struct {
 	    int *store;
+	} bytes;
+	struct {
+	    unsigned int *store;
+	} ubytes;
+	struct {
+	    int *store;
 	} integers;
 	struct {
 	    unsigned int *store;
