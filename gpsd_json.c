@@ -768,19 +768,25 @@ void json_raw_dump(const struct gps_data_t *gpsdata,
 
     for (i = 0; i < MAXCHANNELS; i++) {
         bool comma = false;
-        if (0 == gpsdata->raw.meas[i].svid) {
+        if (0 == gpsdata->raw.meas[i].svid ||
+            255 == gpsdata->raw.meas[i].svid) {
+            /* skip empty and GLONASS 255 */
             continue;
         }
         str_appendf(reply, replylen,
-                    "{\"gnssid\":%u,\"svid\":%u,\"snr\":%u,\"freqid\":%u,"
+                    "{\"gnssid\":%u,\"svid\":%u,\"snr\":%u,"
                     "\"obs\":\"%s\",\"lli\":%1u,\"locktime\":%u",
                     gpsdata->raw.meas[i].gnssid, gpsdata->raw.meas[i].svid,
-                    gpsdata->raw.meas[i].snr, gpsdata->raw.meas[i].freqid,
+                    gpsdata->raw.meas[i].snr,
                     gpsdata->raw.meas[i].obs_code, gpsdata->raw.meas[i].lli,
                     gpsdata->raw.meas[i].locktime);
         if (0 < gpsdata->raw.meas[i].sigid) {
 	    str_appendf(reply, replylen, ",\"sigid\":%u",
 			gpsdata->raw.meas[i].sigid);
+        }
+        if (GNSSID_GLO == gpsdata->raw.meas[i].gnssid) {
+	    str_appendf(reply, replylen, ",\"freqid\":%u",
+			gpsdata->raw.meas[i].freqid);
         }
         comma = true;
 
