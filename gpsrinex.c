@@ -323,7 +323,7 @@ static void print_rinex_header(void)
     (void)fprintf(log_file, "%-20s%-20s%-20s%-20s\n",
                   "Unknown", "Unknown", "", "OBSERVER / AGENCY");
     (void)fprintf(log_file, "%-20s%-20s%-20s%-20s\n",
-                  "", "", "", "REC # / TYPE / VERS");
+                  "0", "UNKNOWN", "0", "REC # / TYPE / VERS");
     (void)fprintf(log_file, "%-20s%-20s%-20s%-20s\n",
                   "0", "UNKNOWN EXT     NONE", "" , "ANT # / TYPE");
     if (isfinite(ecefx) &&
