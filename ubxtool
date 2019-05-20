@@ -2374,6 +2374,32 @@ class ubx(object):
 
         return s
 
+    def mon_hw3(self, buf):
+        """UBX-MON-HW3 decode"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 22 > m_len:
+            return " Bad Length %s" % m_len
+
+        # at least protver 27
+        if 27 > opts['protver']:
+            opts['protver'] = 27
+
+        u = struct.unpack_from('<BBB', buf, 0)
+        s = ('   version %u nPins %u flags %#x' % u)
+        nPins = u[1]
+        substr = buf[3:12]
+        substr = substr.split(gps.polybytes('\0'))[0]
+        s += ' hwVersion %s' % gps.polystr(substr)
+
+        for i in range(22, 22 + (nPins * 6), 6):
+            u = struct.unpack_from('<HHBB', buf, i)
+            s += ('\n   pinId %4u pinMask %#5x VP %3u reserved2 %u' % u)
+
+        return s
+
     def mon_io(self, buf):
         """UBX-MON-IO decode"""
         m_len = len(buf)
@@ -2406,10 +2432,10 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         substr = buf.split(gps.polybytes('\0'))[0]
-        s = ' swVersion: %s\n' % gps.polystr(substr)
+        s = ' swVersion %s\n' % gps.polystr(substr)
         substr = buf[30:39]
         substr = substr.split(gps.polybytes('\0'))[0]
-        s += ' hwVersion: %s' % gps.polystr(substr)
+        s += ' hwVersion %s' % gps.polystr(substr)
         # extensions??
         num_ext = int((m_len - 40) / 30)
         i = 0
@@ -2434,7 +2460,7 @@ class ubx(object):
                0x2e: {'str': 'SMGR', 'name': 'UBX-MON-SMGR'},
                0x36: {'str': 'COMMS', 'dec': mon_comms,
                       'name': 'UBX-MON-COMMS'},
-               0x37: {'str': 'HW3', 'name': 'UBX-MON-HW3'},
+               0x37: {'str': 'HW3', 'dec': mon_hw3, 'name': 'UBX-MON-HW3'},
                0x38: {'str': 'RF', 'name': 'UBX-MON-RF'},
                }
 
@@ -4189,6 +4215,9 @@ class ubx(object):
         # UBX-MON-HW2
         "MON-HW2": {"command": send_poll, "opt": [0x0a, 0x0b],
                     "help": "poll UBX-MON-HW2 Exended Hardware Status"},
+        # UBX-MON-HW3
+        "MON-HW3": {"command": send_poll, "opt": [0x0a, 0x37],
+                    "help": "poll UBX-MON-HW3 HW I/O pin infromation"},
         # UBX-MON-IO
         "MON-IO": {"command": send_poll, "opt": [0x0a, 0x02],
                    "help": "poll UBX-MON-IO I/O Subsystem Status"},
