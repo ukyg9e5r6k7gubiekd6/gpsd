@@ -9,18 +9,20 @@ V0.99, Nov 2018
 This document is a guide getting high accuracy static positions from
 your GPS using Precise Point Positioning (PPP). The rare few that have a
 GPS that output raw measurement data for L1 and L2 can achieve absolute
-accuracy of around 3 cm. The lucky owners of an L1 GPS that outputs raw
-measurements can get about 0.5 m. The majority will only be able to get
-somewhat better than 1.5 m using simple averaging.
+accuracy of around 3 cm.  The u-blox ZED-F9P and ZED-F9T can be better
+than 1 cm. The lucky owners of an L1 GPS that outputs raw measurements
+can get about 0.5 m. The majority will only be able to get somewhat
+better than 1.5 m using simple averaging.
 
 Patience is required.  For best results 6 to 24 hours of data is
 required.  Post processing time may double that.
 
-This document is not about getting high precision dynamic positions
-from your GPS.  That requires Real Time Kinematic (RTK) which will
-not be discussed here.  RTK users will still want to read this document.
-The RTK Best practice is to determine the position of the base using
-PPP before sending the RTK data from the base to its rovers.
+This document is not about getting high precision dynamic positions from
+your GPS.  This is about static Post Processed Positions (PPP).  High
+precision dynamic positions requires Real Time Kinematic (RTK) which
+will not be discussed here.  RTK users will still want to read this
+document.  The RTK Best practice is to determine the position of the
+base using PPP before sending the RTK data from the base to its rovers.
 
 == Requirements ==
 
@@ -40,11 +42,12 @@ measurement data that GPS understands. Currently that limits you to a
 Javad GPS that support the GREIS language, or a u-blox GPS that support
 the UBX-RXM-RAWX messages.
 
-u-blox GPS known to support UBX-RXM-RAW are: -M8T and -M8F.
+u-blox GPS known to support UBX-RXM-RAW are: -M8T,-M8F, ZED-F9P and
+ZED-F9T.
 
 For advanced PPP (3 cm) you will need a GPS that outputs L1 and L2 raw
 measurement data that GPS understands. Currently that limits you to a
-Javad GPS that support the GREIS language.
+Javad GPS that support the GREIS language or the u-blox 9 series.
 
 Finally, patience is required.
 
@@ -183,6 +186,11 @@ There is one online service that is free to all (requires registration),
 accepts L1 only raw data, and accepts RINEX 3 files: Natural Resoruces
 Canada (NRCAN).  Their tool is at https://webapp.geod.nrcan.gc.ca/geod/tools-outils/ppp.php
 
+Trimble has a free to all (requires registration) service that requires
+L1 and L2 observations in RINEX 3.
+  Their
+tool is at: https://trimblertx.com/Home.aspx
+
 == PPP Configuration ==
 
 Before you can collect raw data from you GPS, you must configure it to
@@ -214,7 +222,7 @@ $ ubxtool -d NMEA
 $ ubxtool -e BINARY
 ...................................
 
-Disable all constellations, except GPS (and QZSS):
+To start simple, disable all constellations, except GPS (and QZSS):
 
 ...................................
 $ ubxtool -d GLONASS
@@ -224,8 +232,9 @@ $ ubxtool -d SBAS
 $ ubxtool -e GPS
 ...................................
 
-Verify that only GPS and QZSS are enabled.  Otherwise the u-blox will
-not output raw measurement data.
+Verify that only GPS and QZSS are enabled.  Otherwise the u-blox 8 will
+not output raw measurement data.  You may enable the other constellations
+with a u-blox 9, but support for non-GPS in PPP services is limited.
 
 ...................................
 $ ubxtool -p GNSS
@@ -325,8 +334,9 @@ data from the GPS:
 
 Configuration complete. Collect 24 hours of samples at 30 second
 intervals, save the raw data as RINEX 3 format in the file _today.obs_.
-Collecting data at a rate faster than 30 second intervals will degrade
-your results. Start the long process:
+Collecting data at a rate faster than 30 second intervals may degrade
+your results.  Trimble will average data to 10 second intervals if
+the data rate is faster than 10 seconds. Start the long process:
 
 ...................................
 $ gpsrinex -i 30 -n 86400 -f today.obs
@@ -342,6 +352,18 @@ ultimate question of life, the universe, and everything.
 
 == Post Process the Raw Data ==
 
+More waiting.  Before you can post process your data, the PPP service
+must be ready for it.  Depending on the service it can take from 10 to
+60 minutes before you can upload your new data.  For best results you
+should wait 2 weeks.
+
+The following two services are known to work with _gpsrinex_. CSRS-PPP
+will accept L1 only data, trimble RTX requires L1 and L2 data.  Try
+both, with the same data set, if you can.  That will show you that their
+sigma's are "optimistic".
+
+=== CSRS-PPP ===
+
 After _gpsrinex_ is complete, you need to login to CSRS-PPP and 
 upload the RINEX 3 file.  After login you will be taken to the upload
 page.  Enter your email address, so the results can be emailed to you.
@@ -353,7 +375,13 @@ push "Submit to PPP".
 All done, except for more waiting.  You will receive an email from NRCAN
 maybe within minutes, maybe up to 36 hours later, with a link to a file
 called: full_output.zip.  Unzip, and Voila!  Inside is a PDF file with
-your precise position.
+your precise position, and other goodies.
+
+=== Trimble RTX ===
+
+Before uploading today.obs to Trimble you will need to change the _.obs_
+extention to _.YYo_, where YY is the 2-digit year.  Then proceed as
+above with CSRS-PPP.
 
 == References ==
 
@@ -366,14 +394,18 @@ https://confluence.qps.nl/qinsy/en/world-geodetic-system-1984-wgs84-29855173.htm
 Information on vertical datums:
 https://www.nrcan.gc.ca/earth-sciences/geomatics/geodetic-reference-systems/9054#_Toc372901506
 
-One service known to work with obsrinex output is CSRS-PPP at NRCAN:
+One service known to work with gpsrinex output is CSRS-PPP at NRCAN:
 https://webapp.geod.nrcan.gc.ca/geod/tools-outils/ppp.php
+
+Another service known to work with gpsrinex output is Trimble RTX
+from Trimble.  They require dual frequency (L1 and L2) raw data:
+https://trimblertx.com/Home.aspx
 
 OPUS requires L1/L2 frequency observation files, and has limited geographic
 coverage:
 https://www.ngs.noaa.gov/OPUS/
 
-The curious can find the RINEX 3.03 format described here:
-ftp://igs.org/pub/data/format/rinex303_update1.pdf
+The curious can find the RINEX 3.04 format described here:
+ftp://ftp.igs.org/pub/data/format/rinex304.pdf
 
 // vim: set syntax=asciidoc:
