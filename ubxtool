@@ -1595,19 +1595,19 @@ class ubx(object):
 
     id_map = {
         0: {"name": "GPS",
-             "sig": {0: "L1C/A", 3: "L2 CL", 4: "L2 CM"}},
+            "sig": {0: "L1C/A", 3: "L2 CL", 4: "L2 CM"}},
         1: {"name": "SBAS",
-             "sig": {0: "L1C/A", 3: "L2 CL", 4: "L2 CM"}},
+            "sig": {0: "L1C/A", 3: "L2 CL", 4: "L2 CM"}},
         2: {"name": "Galileo",
-             "sig": {0: "E1C", 1: "E1 B", 5: "E5 bl", 6: "E5 bQ"}},
+            "sig": {0: "E1C", 1: "E1 B", 5: "E5 bl", 6: "E5 bQ"}},
         3: {"name": "BeiDou",
-             "sig": {0: "B1I D1", 1: "B1I D2", 2: "B2I D1", 3: "B2I D2"}},
+            "sig": {0: "B1I D1", 1: "B1I D2", 2: "B2I D1", 3: "B2I D2"}},
         4: {"name": "IMES",
-             "sig": {0: "L1C/A", 3: "L2 CL", 4: "L2 CM"}},
+            "sig": {0: "L1C/A", 3: "L2 CL", 4: "L2 CM"}},
         5: {"name": "QZSS",
-             "sig": {0: "L1C/A", 4: "L2 CM", 5: "L2 CL"}},
+            "sig": {0: "L1C/A", 4: "L2 CM", 5: "L2 CL"}},
         6: {"name": "GLONASS",
-             "sig": {0: "L1 OF", 2: "L2 OF"}},
+            "sig": {0: "L1 OF", 2: "L2 OF"}},
     }
 
     def gnss_s(self, gnssId, svId, sigId):
@@ -1619,10 +1619,12 @@ class ubx(object):
             if "name" not in self.id_map[gnssId]:
                 s = "%d PRN %d sigId %d" % (gnssId, svId, sigId)
             elif sigId not in self.id_map[gnssId]["sig"]:
-                s = "%s PRN %d sigId %d" % (self.id_map[gnssId]["name"], svId, sigId)
+                s = ("%s PRN %d sigId %d" %
+                     (self.id_map[gnssId]["name"], svId, sigId))
             else:
-                s = "%s PRN %d sigId %s" % (self.id_map[gnssId]["name"], svId,
-                                            self.id_map[gnssId]["sig"][sigId])
+                s = ("%s PRN %d sigId %s" %
+                     (self.id_map[gnssId]["name"], svId,
+                      self.id_map[gnssId]["sig"][sigId]))
         else:
             s = "%d PRN %d sigId %d" % (gnssId, svId, sigId)
 
@@ -4211,7 +4213,7 @@ class ubx(object):
                       " information (27+)"},
         # UBX-MON-HW
         "MON-HW": {"command": send_poll, "opt": [0x0a, 0x09],
-                    "help": "poll UBX-MON-HW Hardware Status"},
+                   "help": "poll UBX-MON-HW Hardware Status"},
         # UBX-MON-HW2
         "MON-HW2": {"command": send_poll, "opt": [0x0a, 0x0b],
                     "help": "poll UBX-MON-HW2 Exended Hardware Status"},
