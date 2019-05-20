@@ -2340,6 +2340,40 @@ class ubx(object):
             i += 1
         return s
 
+    def mon_hw(self, buf):
+        """UBX-MON-HW decode"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 60 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LLLLHHBBBBLBBBBBBBBBBBBBBBBBBBBLLL', buf, 0)
+        s = ('   pinSel %#x pinBank %#x pinDir %#x pinVal %#x noisePerRMS %u\n'
+             '   ageCnt %u aStatus %u aPower %u flags %#x reserved1 %u\n'
+             '   usedMask %#x\n'
+             '   VP %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n'
+             '   jamInd %u reserved2 %u %u pinIrq %#x pullH %#x pullL %#x' % u)
+
+        return s
+
+    def mon_hw2(self, buf):
+        """UBX-MON-HW2 decode"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 28 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<bBbBBBBBLLLLL', buf, 0)
+        s = ('   ofsI %d magI %u ofsQ %d magQ %u cfgSource %u\n'
+             '   reserved0 %u %u %u lowLevCfg %d reserved1 %u %u\n'
+             '   postStatus %u reserved2 %u' % u)
+
+        return s
+
     def mon_io(self, buf):
         """UBX-MON-IO decode"""
         m_len = len(buf)
@@ -2392,8 +2426,8 @@ class ubx(object):
                6: {'str': 'MSGPP', 'name': 'UBX-MON-MSGPP'},
                7: {'str': 'RXBUF', 'name': 'UBX-MON-RXBUF'},
                8: {'str': 'TXBUF', 'name': 'UBX-MON-TXBUF'},
-               9: {'str': 'HW', 'name': 'UBX-MON-HW'},
-               0x0b: {'str': 'HW2', 'name': 'UBX-MON-HW2'},
+               9: {'str': 'HW', 'dec': mon_hw, 'name': 'UBX-MON-HW'},
+               0x0b: {'str': 'HW2', 'dec': mon_hw2, 'name': 'UBX-MON-HW2'},
                0x21: {'str': 'RXR', 'name': 'UBX-MON-RXR'},
                0x27: {'str': 'PATCH', 'name': 'UBX-MON-PATCH'},
                0x28: {'str': 'GNSS', 'name': 'UBX-MON-GNSS'},
@@ -4149,6 +4183,12 @@ class ubx(object):
         "MON-COMMS": {"command": send_mon_comms,
                       "help": "poll UBX-MON-COMMS Comm port "
                       " information (27+)"},
+        # UBX-MON-HW
+        "MON-HW": {"command": send_poll, "opt": [0x0a, 0x09],
+                    "help": "poll UBX-MON-HW Hardware Status"},
+        # UBX-MON-HW2
+        "MON-HW2": {"command": send_poll, "opt": [0x0a, 0x0b],
+                    "help": "poll UBX-MON-HW2 Exended Hardware Status"},
         # UBX-MON-IO
         "MON-IO": {"command": send_poll, "opt": [0x0a, 0x02],
                    "help": "poll UBX-MON-IO I/O Subsystem Status"},
