@@ -1000,6 +1000,7 @@ ubx_msg_nav_sat(struct gps_device_t *session, unsigned char *buf,
         unsigned char cno = getub(buf, off + 2);
 	uint32_t flags = getleu32(buf, off + 8);
 	bool used = (bool)(flags  & 0x08);
+        /* Notice NO sigid! */
 
 	nmea_PRN = ubx2_to_prn(gnssId, svId);
 
