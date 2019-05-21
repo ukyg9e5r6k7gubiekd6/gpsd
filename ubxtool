@@ -125,8 +125,7 @@ opts = {
 
 
 def flag_s(flag, descs):
-    """Decode flag using dec, return a string.
-Ignores unknown bits."""
+    """Decode flag using descsc, return a string.  Ignores unknown bits."""
 
     s = ''
     for key, value in sorted(descs.items()):
@@ -135,6 +134,16 @@ Ignores unknown bits."""
             s += ' '
 
     return s.strip()
+
+def index_s(index, descs):
+    """Decode flag using descs, return a string.  Otherwise Unk"""
+
+    if index in descs:
+        s = descs[index]
+    else:
+        s = 'Unk'
+
+    return s
 
 
 class ubx(object):
@@ -2102,7 +2111,7 @@ class ubx(object):
         s = ' version %u layer %#x transaction %#x reserved %u\n' % u
         s += ('  layers (%s) transaction (%s)' %
               (flag_s(u[1], self.cfg_valdel_layers),
-               flag_s(u[2], self.cfg_valxxx_trans)))
+               index_s(u[2], self.cfg_valxxx_trans)))
 
         m_len -= 4
         i = 0
@@ -2125,7 +2134,7 @@ class ubx(object):
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = ' version %u layer %u reserved %u,%u\n' % u
-        s += '  layers (%s)' % flag_s(u[1], self.cfg_valget_layers)
+        s += '  layers (%s)' % index_s(u[1], self.cfg_valget_layers)
 
         m_len -= 4
         i = 0
@@ -2177,7 +2186,7 @@ class ubx(object):
         s = ' version %u layer %#x transaction %#x reserved %u\n' % u
         s += ('  layers (%s) transacion (%s)' %
               (flag_s(u[1], self.cfg_valdel_layers),
-               flag_s(u[2], self.cfg_valxxx_trans)))
+               index_s(u[2], self.cfg_valxxx_trans)))
 
         # duplicated in cfg_valset()
         m_len -= 4
