@@ -135,6 +135,7 @@ def flag_s(flag, descs):
 
     return s.strip()
 
+
 def index_s(index, descs):
     """Decode flag using descs, return a string.  Otherwise Unk"""
 
@@ -1723,7 +1724,7 @@ class ubx(object):
             u = struct.unpack_from('<LLLB', buf, 0)
 
         s = (' clearMask: %#x (%s)\n' %
-              (u[0], flag_s(u[0], self.cfg_cfg_mask)))
+             (u[0], flag_s(u[0], self.cfg_cfg_mask)))
         s += (' saveMask: %#x (%s)\n' %
               (u[1], flag_s(u[1], self.cfg_cfg_mask)))
         s += (' loadMask: %#x (%s)\n' %
@@ -1731,7 +1732,7 @@ class ubx(object):
 
         if 13 <= m_len:
             s += (' deviceMask: %#x (%s)\n' %
-              (u[3], flag_s(u[3], self.cfg_cfg_dev)))
+                  (u[3], flag_s(u[3], self.cfg_cfg_dev)))
 
         return s
 
@@ -3212,8 +3213,28 @@ class ubx(object):
 
         return s
 
+    cnav_msgids = {
+        10: "Ephemeris 1",
+        11: "Ephemeris 2",
+        12: "Reduced Almanac",
+        13: "Clock Differential Correction",
+        14: "Ephemeris Differential Correction",
+        15: "Text",
+        30: "Clock, IONO & Group Delay",
+        31: "Clock & Reduced Almanac",
+        32: "Clock & EOP",
+        33: "Clock & UTC",
+        34: "Clock & Differential Correction",
+        35: "Clock & GGTO",
+        36: "Clock & Text",
+        37: "Clock & Midi Almanac",
+        }
+
     def rxm_sfrbx(self, buf):
         """UBX-RXM-SFRBX decode, Broadcast Navigation Data Subframe"""
+
+        # The way u-blox packs the subfram data is perverse, and
+        # undocuemnted.
         m_len = len(buf)
 
         if 8 > m_len:
@@ -3233,24 +3254,45 @@ class ubx(object):
 
             if 0 == u[0]:
                 # GPS
-                preamble = words[0] >> 24;
+                preamble = words[0] >> 24
                 if 0x8b == preamble:
                     # CNAV
-                    s += ("\n  CNAV: preamble %#x PRN %u" %
-                          (preamble, (words[0] >> 18) & 0x3f))
+                    msgid = (words[0] >> 12) & 0x3f
+                    s += ("\n  CNAV: preamble %#x PRN %u msgid %d (%s)\n" %
+                          (preamble, (words[0] >> 18) & 0x3f,
+                           msgid, index_s(msgid, self.cnav_msgids)))
+
                 else:
                     # LNAV-U
-                    preamble = words[0] >> 26;
+                    preamble = words[0] >> 26
                     subframe = (words[1] >> 8) & 0x07
                     s += ("\n  LNAV-U: preamble %#x TLM %#x ISF %u" %
                           (preamble, (words[0] >> 8) & 0xffff,
                            1 if (words[0] & 0x40) else 0))
 
-                    s += ("\n  TOW %u AF %u ASF %u Subframe %u\n" %
+                    s += ("\n  TOW %u AF %u ASF %u Subframe %u" %
                           (words[1] >> 13,
-                            1 if (words[0] & 0x1000) else 0,
-                            1 if (words[0] & 0x800) else 0,
-                            subframe))
+                           1 if (words[0] & 0x1000) else 0,
+                           1 if (words[0] & 0x800) else 0,
+                           subframe))
+
+                    if 1 == subframe:
+                        s += ("\n   WN %u\n" %
+                              (words[2] >> 20))
+                    elif 2 == subframe:
+                        s += ("\n   IODE %u\n" %
+                              (words[2] >> 22))
+                    elif 3 == subframe:
+                        s += ("\n   Cic %u\n" %
+                              (words[2] >> 14))
+                    elif 4 == subframe:
+                        s += ("\n   dataid %u svid %u\n" %
+                              (words[2] >> 28,
+                               (words[2] >> 22) & 0x3f))
+                    elif 5 == subframe:
+                        s += ("\n   dataid %u svid %u\n" %
+                              (words[2] >> 28,
+                               (words[2] >> 22) & 0x3f))
 
         return s
 
