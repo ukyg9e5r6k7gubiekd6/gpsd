@@ -3264,14 +3264,14 @@ class ubx(object):
 
                 else:
                     # LNAV-L
-                    preamble = words[0] >> 26
+                    preamble = words[0] >> 22
                     subframe = (words[1] >> 8) & 0x07
                     s += ("\n  LNAV-L: preamble %#x TLM %#x ISF %u" %
                           (preamble, (words[0] >> 8) & 0xffff,
                            1 if (words[0] & 0x40) else 0))
 
                     s += ("\n  TOW %u AF %u ASF %u Subframe %u" %
-                          (words[1] >> 13,
+                          ((words[1] >> 13) * 6,
                            1 if (words[0] & 0x1000) else 0,
                            1 if (words[0] & 0x800) else 0,
                            subframe))
