@@ -3263,10 +3263,10 @@ class ubx(object):
                            msgid, index_s(msgid, self.cnav_msgids)))
 
                 else:
-                    # LNAV-U
+                    # LNAV-L
                     preamble = words[0] >> 26
                     subframe = (words[1] >> 8) & 0x07
-                    s += ("\n  LNAV-U: preamble %#x TLM %#x ISF %u" %
+                    s += ("\n  LNAV-L: preamble %#x TLM %#x ISF %u" %
                           (preamble, (words[0] >> 8) & 0xffff,
                            1 if (words[0] & 0x40) else 0))
 
