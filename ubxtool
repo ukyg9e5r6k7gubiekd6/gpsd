@@ -124,6 +124,19 @@ opts = {
 }
 
 
+def flag_s(flag, descs):
+    """Decode flag using dec, return a string.
+Ignores unknown bits."""
+
+    s = ''
+    for key, value in sorted(descs.items()):
+        if key == (key & flag):
+            s += value
+            s += ' '
+
+    return s.strip()
+
+
 class ubx(object):
     """class to hold u-blox stuff"""
 
@@ -2342,6 +2355,36 @@ class ubx(object):
             i += 1
         return s
 
+    mon_gnss_supported_bits = {
+        1: "GPS",
+        2: "Glonass",
+        4: "Beidou",
+        8: "Galileo",
+        }
+
+    def mon_gnss(self, buf):
+        """UBX-MON-GNSS decode"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 8 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBBBBBB', buf, 0)
+        s = ('   version %u supported %#x defaultGnss %#x enabled %#x\n'
+             '   simultaneous %u reserved1 %u %u %u' % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ('\n     supported (%s)'
+                  '\n     defaultGnss (%s)'
+                  '\n     enabled (%s)' %
+                  (flag_s(u[1], self.mon_gnss_supported_bits),
+                   flag_s(u[2], self.mon_gnss_supported_bits),
+                   flag_s(u[3], self.mon_gnss_supported_bits)))
+
+        return s
+
     def mon_hw(self, buf):
         """UBX-MON-HW decode"""
         m_len = len(buf)
@@ -2458,7 +2501,7 @@ class ubx(object):
                0x0b: {'str': 'HW2', 'dec': mon_hw2, 'name': 'UBX-MON-HW2'},
                0x21: {'str': 'RXR', 'name': 'UBX-MON-RXR'},
                0x27: {'str': 'PATCH', 'name': 'UBX-MON-PATCH'},
-               0x28: {'str': 'GNSS', 'name': 'UBX-MON-GNSS'},
+               0x28: {'str': 'GNSS', 'dec': mon_gnss, 'name': 'UBX-MON-GNSS'},
                0x2e: {'str': 'SMGR', 'name': 'UBX-MON-SMGR'},
                0x36: {'str': 'COMMS', 'dec': mon_comms,
                       'name': 'UBX-MON-COMMS'},
@@ -4211,6 +4254,9 @@ class ubx(object):
         "MON-COMMS": {"command": send_mon_comms,
                       "help": "poll UBX-MON-COMMS Comm port "
                       " information (27+)"},
+        # UBX-MON-GNSS
+        "MON-GNSS": {"command": send_poll, "opt": [0x0a, 0x28],
+                     "help": "poll UBX-MON-GNSS major GNSS selection"},
         # UBX-MON-HW
         "MON-HW": {"command": send_poll, "opt": [0x0a, 0x09],
                    "help": "poll UBX-MON-HW Hardware Status"},
