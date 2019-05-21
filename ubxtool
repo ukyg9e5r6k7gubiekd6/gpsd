@@ -3214,9 +3214,35 @@ class ubx(object):
         s = (' gnssId %u svId %3u reserved1 %u freqId %u numWords %u\n'
              '  reserved2 %u version %u reserved3 %u\n' % u)
         s += '    dwrd'
-        for i in range(8, m_len - 1, 4):
-            u = struct.unpack_from('<L', buf, i)
-            s += " %08x" % u
+        words = ()
+        for i in range(8, 8 + (u[4] * 4), 4):
+            u1 = struct.unpack_from('<L', buf, i)
+            s += " %08x" % u1
+            words += (u1[0],)
+
+        if VERB_DECODE <= opts['verbosity']:
+
+            if 0 == u[0]:
+                # GPS
+                print("pre %x %x\n" % (words[0], words[0] >> 2))
+                preamble = words[0] >> 24;
+                if 0x8b == preamble:
+                    # CNAV
+                    s += ("\n  CNAV: preamble %#x PRN %u" %
+                          (preamble, (words[0] >> 18) & 0x3f))
+                else:
+                    # LNAV-U
+                    preamble = words[0] >> 26;
+                    subframe = (words[1] >> 8) & 0x07
+                    s += ("\n  LNAV-U: preamble %#x TLM %#x ISF %u" %
+                          (preamble, (words[0] >> 8) & 0xffff,
+                           1 if (words[0] & 0x40) else 0))
+
+                    s += ("\n  TOW %u AF %u ASF %u Subframe %u\n" %
+                          (words[1] >> 13,
+                            1 if (words[0] & 0x1000) else 0,
+                            1 if (words[0] & 0x800) else 0,
+                            subframe))
 
         return s
 
