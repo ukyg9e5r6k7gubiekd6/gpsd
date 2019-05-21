@@ -3224,7 +3224,6 @@ class ubx(object):
 
             if 0 == u[0]:
                 # GPS
-                print("pre %x %x\n" % (words[0], words[0] >> 2))
                 preamble = words[0] >> 24;
                 if 0x8b == preamble:
                     # CNAV
