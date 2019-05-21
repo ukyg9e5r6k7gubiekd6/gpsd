@@ -1877,6 +1877,17 @@ class ubx(object):
 
         return s
 
+    cfg_prt_flags = {
+        0x2: 'extendedTxTimeout',
+        }
+
+    cfg_prt_proto = {
+        0x1: 'UBX',
+        0x2: 'NMEA',
+        0x4: 'RTCM2',
+        0x20: 'RTCM3',
+        }
+
     def cfg_prt(self, buf):
         """UBX-CFG-PRT decode"""
 
@@ -1897,49 +1908,31 @@ class ubx(object):
 
         u = struct.unpack_from('<BBHLLHHHH', buf, 0)
 
-        s = [' PortID: %s reserved1: %u txReady: %#x' % (idstr, u[1], u[2])]
-        s.append({1: '  mode: %#x baudRate: %u',
-                  2: '  mode: %#x baudRate: %u',
-                  3: '  reserved2: [%u %u]',
-                  4: '  mode: %#x reserved2: %u',
-                  0: '  mode: %#x reserved2: %u',
+        s = [' PortID %s reserved1 %u txReady %#x' % (idstr, u[1], u[2])]
+        s.append({1: '  mode %#x baudRate %u',
+                  2: '  mode %#x baudRate %u',
+                  3: '  reserved2 [%u %u]',
+                  4: '  mode %#x reserved2 %u',
+                  0: '  mode %#x reserved2 %u',
                   }.get(portid, '  ???: %u,%u') % tuple(u[3:5]))
-        s.append('  inProtoMask: %#x  outProtoMask: %#x' % tuple(u[5:7]))
-        s.append({1: '  flags: %#x reserved2: %u',
-                  2: '  flags: %#x reserved2: %u',
-                  3: '  reserved3: %u reserved4: %u',
-                  4: '  flags: %#x reserved3: %u',
-                  0: '  flags: %#x reserved3: %u',
-                  }.get(portid, '  ???: %u,%u') % tuple(u[7:]))
+        s.append('  inProtoMask %#x outProtoMask %#x' % tuple(u[5:7]))
+        s.append({1: '  flags %#x reserved2 %u',
+                  2: '  flags %#x reserved2 %u',
+                  3: '  reserved3 %u reserved4 %u',
+                  4: '  flags %#x reserved3 %u',
+                  0: '  flags %#x reserved3 %u',
+                  }.get(portid, '  ??? %u,%u') % tuple(u[7:]))
 
         if portid == 0:
-            s.append('    slaveAddr: %#x' % (u[3] >> 1 & 0x7F))
+            s.append('    slaveAddr %#x' % (u[3] >> 1 & 0x7F))
 
-        dec = []
-        if u[5] & 0x1:
-            dec.append('UBX')
-        if u[5] & 0x2:
-            dec.append('NMEA')
-        if u[5] & 0x4:
-            dec.append('RTCM2')
-        if u[5] & 0x20:
-            dec.append('RTCM3')
-        s.append('    inProtoMask: %s' % ' '.join(dec))
-
-        dec = []
-        if u[6] & 0x1:
-            dec.append('UBX')
-        if u[6] & 0x2:
-            dec.append('NMEA')
-        if u[6] & 0x20:
-            dec.append('RTCM3')
-        s.append('    outProtoMask: %s' % ' '.join(dec))
+        s.append('    inProtoMask (%s)\n'
+                 '    outProtoMask (%s)' %
+                 (flag_s(u[5], self.cfg_prt_proto),
+                  flag_s(u[6], self.cfg_prt_proto)))
 
         if portid in set([1, 2, 4, 0]):
-            dec = []
-            if u[7] & 0x2:
-                dec.append('extendedTxTimeout')
-            s.append('    flags: %s' % ' '.join(dec))
+            s.append('    flags (%s)' % flag_s(u[7], self.cfg_prt_flags))
 
         return '\n'.join(s)
 
