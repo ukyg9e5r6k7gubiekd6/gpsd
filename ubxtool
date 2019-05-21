@@ -2069,43 +2069,25 @@ class ubx(object):
         s += ' serialNumber: %s' % gps.polystr(buf[76:107])
         return s
 
-    @staticmethod
-    def _layers(byte):
-        """decode layers byte"""
+    cfg_valdel_layers = {
+        1: 'ram',
+        2: 'bbr',
+        4: 'flash',
+        }
 
-        # what a messy bitmap...
-        s = ''
-        if 0x07 == byte:
-            s = 'Default'
-        elif 0 == byte:
-            s = 'RAM'
-        elif 0x07 & byte:
-            if 1 & byte:
-                s += 'RAM '
-            if 2 & byte:
-                s += 'BBR '
-            if 4 & byte:
-                s += 'FLASH '
-        else:
-            s = 'Unk'
+    cfg_valget_layers = {
+        0: 'ram',
+        1: 'bbr',
+        2: 'flash',
+        7: 'default',
+        }
 
-        return s.strip()
-
-    @staticmethod
-    def _transaction(byte):
-        """Decode transaction byte"""
-        if 0 == byte:
-            s = "Transactionless"
-        elif 1 == byte:
-            s = "(Re)start Transaction"
-        elif 2 == byte:
-            s = "Continue Transaction"
-        elif 3 == byte:
-            s = "Apply and end Transaction"
-        else:
-            s = "Unkown"
-
-        return s
+    cfg_valxxx_trans = {
+        0: "Transactionless",
+        1: "(Re)start Transaction",
+        2: "Continue Transaction",
+        3: "Apply and end Transaction",
+        }
 
     def cfg_valdel(self, buf):
         """"UBX-CFG-VALDEL decode, Delete configuration items"""
@@ -2117,9 +2099,10 @@ class ubx(object):
         # this is a poll options, so does not set min protver
 
         u = struct.unpack_from('<BBBB', buf, 0)
-        s = ' version: %u layer: %#x transaction %#x reserved: %u\n' % u
-        s += '  layers: %s, %s' % (self._layers(u[1]),
-                                   self._transaction(u[2]))
+        s = ' version %u layer %#x transaction %#x reserved %u\n' % u
+        s += ('  layers (%s) transaction (%s)' %
+              (flag_s(u[1], self.cfg_valdel_layers),
+               flag_s(u[2], self.cfg_valxxx_trans)))
 
         m_len -= 4
         i = 0
@@ -2141,8 +2124,8 @@ class ubx(object):
             return "Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBB', buf, 0)
-        s = ' version: %u layer: %#x reserved: %u,%u\n' % u
-        s += '  layers: %s' % self._layers(u[1])
+        s = ' version %u layer %u reserved %u,%u\n' % u
+        s += '  layers (%s)' % flag_s(u[1], self.cfg_valget_layers)
 
         m_len -= 4
         i = 0
@@ -2152,7 +2135,7 @@ class ubx(object):
             while 0 < m_len:
                 u = struct.unpack_from('<L', buf, 4 + i * 4)
                 item = self.cfg_by_key(u[0])
-                s += ('\n    item: %s/%#x' % (item[0], u[0]))
+                s += ('\n    item %s/%#x' % (item[0], u[0]))
                 m_len -= 4
                 i += 1
         else:
@@ -2175,7 +2158,7 @@ class ubx(object):
                 frmat = cfg_type[1]
                 flavor = cfg_type[2]
                 v = struct.unpack_from(frmat, buf, i)
-                s += ('\n    item: %s/%#x val: %s' % (item[0], u[0], v[0]))
+                s += ('\n    item %s/%#x val %s' % (item[0], u[0], v[0]))
                 m_len -= size
                 i += size
 
@@ -2191,9 +2174,10 @@ class ubx(object):
         # this is a poll option, so does not set min protver
 
         u = struct.unpack_from('<BBBB', buf, 0)
-        s = ' version: %u layer: %#x transaction %#x reserved: %u\n' % u
-        s += '  layers: %s, %s' % (self._layers(u[1]),
-                                   self._transaction(u[2]))
+        s = ' version %u layer %#x transaction %#x reserved %u\n' % u
+        s += ('  layers (%s) transacion (%s)' %
+              (flag_s(u[1], self.cfg_valdel_layers),
+               flag_s(u[2], self.cfg_valxxx_trans)))
 
         # duplicated in cfg_valset()
         m_len -= 4
@@ -2209,7 +2193,7 @@ class ubx(object):
             frmat = cfg_type[1]
             flavor = cfg_type[2]
             v = struct.unpack_from(frmat, buf, i)
-            s += ('\n    item: %s/%#x val: %s' % (item[0], u[0], v[0]))
+            s += ('\n    item %s/%#x val %s' % (item[0], u[0], v[0]))
             m_len -= size
             i += size
         return s
