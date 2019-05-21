@@ -2286,12 +2286,13 @@ class ubx(object):
     # UBX-LOG- ???
     # UBX-MGA- ???
 
-    def _protId(self, id):
-        """Convert protId to string"""
-        protId = {0: "UBX", 1: "NMEA", 2: "RTCM2", 5: "RTCM3", 255: "None"}
-        if id in protId:
-            return protId[id]
-        return "Unk"
+    mon_comms_prot = {
+        0: "UBX",
+        1: "NMEA",
+        2: "RTCM2",
+        5: "RTCM3",
+        255: "None",
+        }
 
     def mon_comms(self, buf):
         """UBX-MON-COMMS decode"""
@@ -2306,16 +2307,15 @@ class ubx(object):
         s = ('version %u nPorts %u txErrors %#x reserved1 %u\n'
              'protIds %#x/%x/%x/%x' % u)
         s += (' (%s/%s/%s/%s)\n' %
-              (self._protId(u[4]), self._protId(u[5]),
-               self._protId(u[6]), self._protId(u[7])))
+              (index_s(u[4], self.mon_comms_prot),
+               index_s(u[5], self.mon_comms_prot),
+               index_s(u[6], self.mon_comms_prot),
+               index_s(u[7], self.mon_comms_prot)))
 
         i = 0
         while m_len > (8 + (i * 40)):
             u = struct.unpack_from('<HHLBBHLBBHHHHHLLL', buf, (8 + (i * 40)))
-            if u[0] in self.port_ids1:
-                name = "%#x (%s)" % (u[0], self.port_ids1[u[0]])
-            else:
-                name = "%#x (UNK)" % u[0]
+            name = "%#x (%s)" % (u[0], index_s(u[0], self.port_ids1))
             if 0 < i:
                 s += "\n"
             s += '  Port: %s\n' % name
