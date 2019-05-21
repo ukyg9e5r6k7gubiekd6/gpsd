@@ -1682,32 +1682,25 @@ class ubx(object):
 
         return s
 
-    def cfg_cfg_mask(self, mask):
-        """decode Mask in UBX-CFG-CFG, return string"""
-        s = ''
-        if mask & 0x1:
-            s += 'ioPort '
-        if mask & 0x2:
-            s += 'msgConf '
-        if mask & 0x4:
-            s += 'infMsg '
-        if mask & 0x8:
-            s += 'navConf '
-        if mask & 0x10:
-            s += 'rxmConf '
-        if mask & 0x100:
-            # not on M8030
-            s += 'senConf '
-        if mask & 0x200:
-            s += 'rinvConf '
-        if mask & 0x400:
-            s += 'antConf '
-        if mask & 0x800:
-            s += 'logConf '
-        if mask & 0x1000:
-            s += 'ftsConf '
+    cfg_cfg_mask = {
+        0x1: 'ioPort',
+        0x2: 'msgConf',
+        0x4: 'infMsg',
+        0x8: 'navConf',
+        0x10: 'rxmConf',
+        0x100: 'senConf',        # not on M8030
+        0x200: 'rinvConf',
+        0x400: 'antConf',
+        0x800: 'logConf',
+        0x1000: 'ftsConf',
+        }
 
-        return s
+    cfg_cfg_dev = {
+        0x1: 'devBBR',
+        0x2: 'devFlash',
+        0x4: 'devEEPROM',
+        0x10: 'devSpiFlash',
+        }
 
     def cfg_cfg(self, buf):
         """UBX-CFG-CFG decode"""
@@ -1720,24 +1713,16 @@ class ubx(object):
         else:
             u = struct.unpack_from('<LLLB', buf, 0)
 
-        s = ' clearMask: %#x (%s)\n' % (u[0], self.cfg_cfg_mask(u[0]))
+        s = (' clearMask: %#x (%s)\n' %
+              (u[0], flag_s(u[0], self.cfg_cfg_mask)))
         s += (' saveMask: %#x (%s)\n' %
-              (u[1], self.cfg_cfg_mask(u[1])))
+              (u[1], flag_s(u[1], self.cfg_cfg_mask)))
         s += (' loadMask: %#x (%s)\n' %
-              (u[2], self.cfg_cfg_mask(u[2])))
+              (u[2], flag_s(u[2], self.cfg_cfg_mask)))
 
         if 13 <= m_len:
-            bit_str = ''
-            if u[3] & 0x1:
-                bit_str += 'devBBR '
-            if u[3] & 0x2:
-                bit_str += 'devFlash '
-            if u[3] & 0x4:
-                bit_str += 'devEEPROM '
-            if u[3] & 0x10:
-                bit_str += 'devSpiFlash '
-
-            s += (' deviceMask: %#x (%s)\n' % (u[3], bit_str))
+            s += (' deviceMask: %#x (%s)\n' %
+              (u[3], flag_s(u[3], self.cfg_cfg_dev)))
 
         return s
 
