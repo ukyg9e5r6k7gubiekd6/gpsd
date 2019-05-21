@@ -1655,6 +1655,14 @@ class ubx(object):
     ack_ids = {0: {'str': 'NAK', 'dec': ack_ack, 'name': 'UBX-ACK-NAK'},
                1: {'str': 'ACK', 'dec': ack_ack, 'name': 'UBX-ACK-ACK'}}
 
+    cfg_ant_pins = {
+        1: 'svcs',
+        2: 'scd',
+        4: 'ocd',
+        8: 'pdwnOnSCD',
+        0x10: 'recovery',
+        }
+
     def cfg_ant(self, buf):
         """UBX-CFG-ANT decode"""
         m_len = len(buf)
@@ -1665,20 +1673,13 @@ class ubx(object):
             return "Bad Length %s" % m_len
 
         u = struct.unpack_from('<HH', buf, 0)
-        s = ' flags: %#x pins: %#x (' % u
-        if u[0] & 0x1:
-            s += 'svcs '
-        if u[0] & 0x2:
-            s += 'scd '
-        if u[0] & 0x4:
-            s += 'ocd '
-        if u[0] & 0x8:
-            s += 'pdwnOnSCD '
-        if u[0] & 0x10:
-            s += 'recovery '
-        s += (')\n pinSwitch: %d, pinSCD: %d, pinOCD: %d reconfig: %d' %
+        s = ' flags %#x pins %#x ' % u
+        s += ('pinSwitch %d pinSCD %d pinOCD %d reconfig %d' %
               (u[1] & 0x1f, (u[1] >> 5) & 0x1f, (u[1] >> 10) & 0x1f,
                u[1] >> 15))
+        if VERB_DECODE <= opts['verbosity']:
+            s += ('\n      flags (%s)' % flag_s(u[0], self.cfg_ant_pins))
+
         return s
 
     def cfg_cfg_mask(self, mask):
