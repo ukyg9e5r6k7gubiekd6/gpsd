@@ -3319,6 +3319,13 @@ class ubx(object):
         15: "Unk",
         }
 
+    codes_on_l2 = {
+        0: "Invalid",
+        1: "P-code ON",
+        2: "C/A-code ON",
+        3: "Invalid",
+        }
+
     def rxm_sfrbx(self, buf):
         """UBX-RXM-SFRBX decode, Broadcast Navigation Data Subframe"""
 
@@ -3367,11 +3374,15 @@ class ubx(object):
 
                     if 1 == subframe:
                         ura = (words[2] >> 14) & 0x0f
-                        s += ("\n   WN %u C/A on L2 %u URA %u (%s) SVH %#x\n" %
+                        c_on_l2 = (words[2] >> 18) & 0x03
+                        iodc = ((((words[2] >> 6) & 0x03) << 8) +
+                                (words[7] >> 24) & 0xff)
+                        s += ("\n   WN %u Codes on L2 %u (%s) URA %u (%s) "
+                              "SVH %#04x IODC %u\n" %
                               (words[2] >> 20,
-                               (words[2] >> 18) & 0x03,
+                               c_on_l2, index_s(c_on_l2, self.codes_on_l2),
                                ura, index_s(ura, self.ura_meters),
-                               (words[2] >> 8) & 0x3f))
+                               (words[2] >> 8) & 0x3f, iodc))
 
                     elif 2 == subframe:
                         s += ("\n   IODE %u\n" %
@@ -3382,7 +3393,7 @@ class ubx(object):
                               (words[2] >> 14))
 
                     elif 4 == subframe:
-                        # all data in subfraaem 4 is "reserved",
+                        # all data in subframe 4 is "reserved",
                         # except for pages 13, 18, 15
                         # as of 2018, dataid is always 1.
                         svid = (words[2] >> 22) & 0x3f
