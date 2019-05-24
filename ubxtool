@@ -124,8 +124,46 @@ opts = {
 }
 
 
+# I'd like to use pypy module bitstring or bitarray, but
+# people complain when non stock python modules are used here.
+def unpack_s16(word, pos):
+    """Grab a signed two bytes from offset pos of word"""
+
+    bytes = bytearray(2)
+    bytes[0] = (word >> pos) & 0xff
+    bytes[1] = (word >> (pos + 8)) & 0xff
+    u = struct.unpack_from('<h', bytes, 0)
+    return u[0]
+
+
+def unpack_s22(word, pos):
+    """Grab a signed 22 bits from offset pos of word"""
+
+    bytes = bytearray(4)
+    bytes[0] = (word >> pos) & 0xff
+    bytes[1] = (word >> (pos + 8)) & 0xff
+    bytes[2] = (word >> (pos + 16)) & 0x3f
+    bytes[3] = 0
+    if 0x20 & bytes[2]:
+        # extend the sign
+        bytes[2] |= 0xc0
+        bytes[3] = 0xff
+
+    u = struct.unpack_from('<l', bytes, 0)
+    return u[0]
+
+
+def unpack_s8(word, pos):
+    """Grab a signed byte from offset pos of word"""
+
+    bytes = bytearray(1)
+    bytes[0] = (word >> pos) & 0xff
+    u = struct.unpack_from('<b', bytes, 0)
+    return u[0]
+
+
 def flag_s(flag, descs):
-    """Decode flag using descsc, return a string.  Ignores unknown bits."""
+    """Decode flag using descs, return a string.  Ignores unknown bits."""
 
     s = ''
     for key, value in sorted(descs.items()):
@@ -3330,7 +3368,7 @@ class ubx(object):
         """UBX-RXM-SFRBX decode, Broadcast Navigation Data Subframe"""
 
         # The way u-blox packs the subfram data is perverse, and
-        # undocuemnted.
+        # undocuemnted.  Even more perverse than native subframes.
         m_len = len(buf)
 
         if 8 > m_len:
@@ -3373,16 +3411,25 @@ class ubx(object):
                            subframe))
 
                     if 1 == subframe:
+                        # not well validated decode, possibly wrong...
                         ura = (words[2] >> 14) & 0x0f
                         c_on_l2 = (words[2] >> 18) & 0x03
                         iodc = ((((words[2] >> 6) & 0x03) << 8) +
                                 (words[7] >> 24) & 0xff)
                         s += ("\n   WN %u Codes on L2 %u (%s) URA %u (%s) "
-                              "SVH %#04x IODC %u\n" %
+                              "SVH %#04x IODC %u" %
                               (words[2] >> 20,
                                c_on_l2, index_s(c_on_l2, self.codes_on_l2),
                                ura, index_s(ura, self.ura_meters),
                                (words[2] >> 8) & 0x3f, iodc))
+                        s += ("\n   L2 P DF %u TGD %e tOC %u\n"
+                              "   af2 %e af1 %e af0 %e" %
+                              (words[2] >> 29,
+                               unpack_s8(words[6], 6) * (2 ** -31),
+                               ((words[7] >> 6) & 0x0ffff) * 16,
+                               unpack_s8(words[8], 22) * (2 ** -55),
+                               unpack_s16(words[8], 6) * (2 ** -43),
+                               unpack_s22(words[9], 8) * (2 ** -31)))
 
                     elif 2 == subframe:
                         s += ("\n   IODE %u\n" %
