@@ -136,6 +136,16 @@ def unpack_s16(word, pos):
     return u[0]
 
 
+def unpack_u16(word, pos):
+    """Grab a unsigned two bytes from offset pos of word"""
+
+    bytes = bytearray(2)
+    bytes[0] = (word >> pos) & 0xff
+    bytes[1] = (word >> (pos + 8)) & 0xff
+    u = struct.unpack_from('<H', bytes, 0)
+    return u[0]
+
+
 def unpack_s22(word, pos):
     """Grab a signed 22 bits from offset pos of word"""
 
@@ -159,6 +169,15 @@ def unpack_s8(word, pos):
     bytes = bytearray(1)
     bytes[0] = (word >> pos) & 0xff
     u = struct.unpack_from('<b', bytes, 0)
+    return u[0]
+
+
+def unpack_u8(word, pos):
+    """Grab an unsigned byte from offset pos of word"""
+
+    bytes = bytearray(1)
+    bytes[0] = (word >> pos) & 0xff
+    u = struct.unpack_from('<B', bytes, 0)
     return u[0]
 
 
@@ -3255,11 +3274,27 @@ class ubx(object):
     # and subframe 4, pages 2 to 5, and 7 to 10
     def almanac(self, words):
         """Decode GPS Almanac"""
+
+        # Note: not really tested!
+
+        # e = Eccentricity
+        # toa = Almanac reference time
+        # deltan = Mean Motion Difference From Computed Value
+        # Omegadot = Rate of Right Ascension
+        # sqrtA = Square Root of the Semi-Major Axis
+        # deltai
+        # Omega0 = Longitude of Ascending Node of Orbit Plane at Weekly Epoch
+        # omega = Argument of Perigee
+        # M0 = Mean Anomaly at Reference Time
+        # af0
+        # af1
         s = "    Almanac"
-        # s += ("\n   dataid %u svid %u theta %d\n" %
-        #       (words[2] >> 28,
-        #        (words[2] >> 22) & 0x3f),
-        #        (words[2] >> 6 & 0xff))
+        s += ("\n    e %e toa %u deltai %e Omegadot %e SVH x%x\n" %
+              (unpack_u16(words[2], 6) * (2 ** -21),
+               unpack_u8(words[3], 22) * (2 ** 12),
+               unpack_s16(words[3], 6) * (2 ** -19),
+               unpack_s16(words[4], 14) * (2 ** -38),
+               unpack_u8(words[4], 6)))
         return s
 
     cnav_msgids = {
@@ -3405,7 +3440,7 @@ class ubx(object):
                            1 if (words[0] & 0x40) else 0))
 
                     s += ("\n  TOW %u AF %u ASF %u Subframe %u" %
-                          ((words[1] >> 13) * 6,
+                          (unpack_u8(words[1], 13) * 6,
                            1 if (words[0] & 0x1000) else 0,
                            1 if (words[0] & 0x800) else 0,
                            subframe))
@@ -3422,22 +3457,53 @@ class ubx(object):
                                c_on_l2, index_s(c_on_l2, self.codes_on_l2),
                                ura, index_s(ura, self.ura_meters),
                                (words[2] >> 8) & 0x3f, iodc))
+                        # tOC = Clock Data Reference Time of Week
                         s += ("\n   L2 P DF %u TGD %e tOC %u\n"
                               "   af2 %e af1 %e af0 %e" %
                               (words[2] >> 29,
                                unpack_s8(words[6], 6) * (2 ** -31),
-                               ((words[7] >> 6) & 0x0ffff) * 16,
+                               unpack_u16(words[7], 6) * 16,
                                unpack_s8(words[8], 22) * (2 ** -55),
                                unpack_s16(words[8], 6) * (2 ** -43),
                                unpack_s22(words[9], 8) * (2 ** -31)))
 
                     elif 2 == subframe:
-                        s += ("\n   IODE %u\n" %
-                              (words[2] >> 22))
+                        # not well validated decode, possibly wrong...
+                        # IODE = Issue of Data (Ephemeris)
+                        # Crs = Amplitude of the Sine Harmonic Correction
+                        #       Term to the Orbit Radius
+                        # deltan = Mean Motion Difference From Computed Value
+                        # Cuc = Amplitude of the Cosine Harmonic Correction
+                        #       Term to the Argument of Latitude
+                        # Cus = Amplitude of the Sine Harmonic Correction Term
+                        #       to the Argument of Latitude
+                        # tOE = Reference Time Ephemeris
+                        s += ("\n   IODE %u Crs %f deltan %f"
+                              "\n   Cuc %f Cus %f tOE %u" %
+                              (unpack_u8(words[2], 22),
+                               unpack_s16(words[2], 6) * (2 ** -5),
+                               unpack_s16(words[3], 14) * (2 ** -43),
+                               unpack_s16(words[5], 14) * (2 ** -29),
+                               unpack_s16(words[7], 14) * (2 ** -29),
+                               unpack_u16(words[9], 14) * 16))
 
                     elif 3 == subframe:
-                        s += ("\n   Cic %u\n" %
-                              (words[2] >> 14))
+                        # not well validated decode, possibly wrong...
+                        # Cic = Amplitude of the Cosine Harmonic Correction
+                        #       Term to the Angle of Inclination
+                        # Cis = Amplitude of the Sine Harmonic Correction
+                        #       Term to the Orbit Radius
+                        # Crc = Amplitude of the Cosine Harmonic Correction
+                        #       Term to the Orbit Radius
+                        # IODE = Issue of Data (Ephemeris)
+                        # IODT = Rate of Inclination Angle
+                        s += ("\n   Cic %f Cis %f Crc %f"
+                              "\n   IDOE %u IDOT %u" %
+                              (unpack_s16(words[2], 14) * (2 ** -29),
+                               unpack_s16(words[4], 14) * (2 ** -29),
+                               unpack_s16(words[6], 14) * (2 ** -29),
+                               unpack_u8(words[9], 22),
+                               unpack_u16(words[9], 8) & 0x3fff))
 
                     elif 4 == subframe:
                         # all data in subframe 4 is "reserved",
