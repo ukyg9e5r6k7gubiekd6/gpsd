@@ -217,6 +217,19 @@ def unpack_u24(word, pos):
     return u[0]
 
 
+def unpack_s32s(word, word1):
+    """Grab an signed 32 bits from weird split word, word1"""
+
+    bytes = bytearray(4)
+    bytes[0] = (word >> 6) & 0xff
+    bytes[1] = (word >> 14) & 0xff
+    bytes[2] = (word >> 22) & 0xff
+    bytes[3] = (word1 >> 6) & 0xff
+
+    u = struct.unpack_from('<L', bytes, 0)
+    return u[0]
+
+
 def unpack_s8(word, pos):
     """Grab a signed byte from offset pos of word"""
 
@@ -3555,21 +3568,33 @@ class ubx(object):
 
                     elif 3 == subframe:
                         # not well validated decode, possibly wrong...
+                        # [1] Figure 20-1 Sheet 3, Table 20-II, Table 20-III
                         # Cic = Amplitude of the Cosine Harmonic Correction
                         #       Term to the Angle of Inclination
+                        # Omega0 = Longitude of Ascending Node of Orbit
+                        #          Plane at Weekly Epoch
                         # Cis = Amplitude of the Sine Harmonic Correction
                         #       Term to the Orbit Radius
+                        # i0 = Inclination Angle at Reference Time
                         # Crc = Amplitude of the Cosine Harmonic Correction
                         #       Term to the Orbit Radius
+                        # omega = Argument of Perigee
+                        # Omegadot = Rate of Right Ascension
                         # IODE = Issue of Data (Ephemeris)
                         # IODT = Rate of Inclination Angle
-                        s += ("\n   Cic %f Cis %f Crc %f"
-                              "\n   IDOE %u IDOT %u" %
+                        s += ("\n   Cic %e Omega0 %e Cis %e i0 %s"
+                              "\n   Crc %e omega %e   Omegadot %e"
+                              "\n   IDOE %u IDOT %e" %
                               (unpack_s16(words[2], 14) * (2 ** -29),
+                               unpack_s32s(words[3], words[2]) * (2 ** -31),
                                unpack_s16(words[4], 14) * (2 ** -29),
-                               unpack_s16(words[6], 14) * (2 ** -29),
+                               unpack_s32s(words[5], words[4]) * (2 ** -31),
+                               unpack_s16(words[6], 14) * (2 ** -5),
+                               unpack_s32s(words[7], words[6]) * (2 ** -31),
+                               unpack_s24(words[8], 6) * (2 ** -43),
                                unpack_u8(words[9], 22),
-                               unpack_u16(words[9], 8) & 0x3fff))
+                               # FIXME 14 bit!
+                               unpack_u16(words[9], 8) * (2 ** -43)))
 
                     elif 4 == subframe:
                         # all data in subframe 4 is "reserved",
