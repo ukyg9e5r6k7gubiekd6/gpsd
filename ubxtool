@@ -4265,6 +4265,19 @@ class ubx(object):
         """dis/enable SBAS"""
         gps_model.send_cfg_gnss1(1, able)
 
+    def send_able_sfrbx(self, able):
+        """dis/enable UBX-RXM-SFRB/SFRBX"""
+
+        rate = 1 if able else 0
+        if 15 > opts['protver']:
+            # u-blox 7 or earlier, use SFRB
+            sid = 0x11
+        else:
+            # u-blox 8 or later, use SFRBX
+            sid = 0x13
+        m_data = bytearray([0x2, sid, rate])
+        gps_model.gps_send(6, 1, m_data)
+
     def send_able_tmode2(self, able):
         """SURVEYIN, UBX-CFG-TMODE2, set time mode 2 config"""
 
@@ -4607,6 +4620,9 @@ class ubx(object):
         # en/dis able SBAS
         "SBAS": {"command": send_able_sbas,
                  "help": "SBAS"},
+        # en/dis able SFRB/SFRBX
+        "SFRBX": {"command": send_able_sfrbx,
+                 "help": "SFRB/SFRBX subframes"},
         # en/dis able TP time pulse message
         "TP": {"command": send_able_tp,
                "help": "TP Time Pulse message"},
