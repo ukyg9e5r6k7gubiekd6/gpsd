@@ -4255,10 +4255,16 @@ class ubx(object):
         gps_model.gps_send(6, 1, m_data)
 
     def send_able_rawx(self, able):
-        """dis/enable UBX-RXM-RAWX"""
+        """dis/enable UBX-RXM-RAW/RAWXX"""
 
         rate = 1 if able else 0
-        m_data = bytearray([0x2, 0x15, rate])
+        if 15 > opts['protver']:
+            # u-blox 7 or earlier, use RAW
+            sid = 0x10
+        else:
+            # u-blox 8 or later, use RAWX
+            sid = 0x15
+        m_data = bytearray([0x2, sid, rate])
         gps_model.gps_send(6, 1, m_data)
 
     def send_able_sbas(self, able):
@@ -4614,9 +4620,9 @@ class ubx(object):
         # en/dis able basic NMEA messages
         "NMEA": {"command": send_able_nmea,
                  "help": "basic NMEA messages"},
-        # en/dis able RAWX
+        # en/dis able RAW/RAWX
         "RAWX": {"command": send_able_rawx,
-                 "help": "RAWX measurements"},
+                 "help": "RAW/RAWX measurements"},
         # en/dis able SBAS
         "SBAS": {"command": send_able_sbas,
                  "help": "SBAS"},
