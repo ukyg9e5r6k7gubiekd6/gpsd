@@ -151,6 +151,19 @@ def unpack_s11s(word):
     return unpack_s11(newword, 0)
 
 
+def unpack_s14(word, pos):
+    """Grab a signed 14 bits from offset pos of word"""
+
+    bytes = bytearray(2)
+    bytes[0] = (word >> pos) & 0xff
+    bytes[1] = (word >> (pos + 8)) & 0x3f
+    if 0x20 & bytes[1]:
+        # extend the sign
+        bytes[1] |= 0xc0
+    u = struct.unpack_from('<h', bytes, 0)
+    return u[0]
+
+
 def unpack_s16(word, pos):
     """Grab a signed two bytes from offset pos of word"""
 
@@ -219,6 +232,19 @@ def unpack_u24(word, pos):
 
 def unpack_s32s(word, word1):
     """Grab an signed 32 bits from weird split word, word1"""
+
+    bytes = bytearray(4)
+    bytes[0] = (word >> 6) & 0xff
+    bytes[1] = (word >> 14) & 0xff
+    bytes[2] = (word >> 22) & 0xff
+    bytes[3] = (word1 >> 6) & 0xff
+
+    u = struct.unpack_from('<l', bytes, 0)
+    return u[0]
+
+
+def unpack_u32s(word, word1):
+    """Grab an unsigned 32 bits from weird split word, word1"""
 
     bytes = bytearray(4)
     bytes[0] = (word >> 6) & 0xff
@@ -3339,18 +3365,18 @@ class ubx(object):
 
     # decode GPS subframe 5, pages 1 to 24,
     # and subframe 4, pages 2 to 5, and 7 to 10
-    # [1] Section 20.3.3.5, Figure 20-1 Sheet 4, and Table 20-VI.
     def almanac(self, words):
         """Decode GPS Almanac"""
 
         # Note: not really tested!  What to test against?
+        # [1] Section 20.3.3.5, Figure 20-1 Sheet 4, and Table 20-VI.
 
         # e = Eccentricity
         # toa = Almanac reference time
-        # Deltan = Mean Motion Difference From Computed Value
+        # deltai =
         # Omegadot = Rate of Right Ascension
+        # SVH = SV Health
         # sqrtA = Square Root of the Semi-Major Axis
-        # deltai
         # Omega0 = Longitude of Ascending Node of Orbit Plane at Weekly Epoch
         # omega = Argument of Perigee
         # M0 = Mean Anomaly at Reference Time
@@ -3365,11 +3391,11 @@ class ubx(object):
                unpack_s16(words[3], 6) * (2 ** -19),
                unpack_s16(words[4], 14) * (2 ** -38),
                unpack_u8(words[4], 6),
-               unpack_u24(words[5], 6) * (2 ** -11),
+               unpack_u24(words[5], 6) * (2 ** -11),     # sqrtA
                unpack_s24(words[6], 6) * (2 ** -23),
                unpack_s24(words[7], 6) * (2 ** -23),
-               unpack_s24(words[8], 6) * (2 ** -23),
-               unpack_s11s(words[9]) * (2 ** -38),
+               unpack_s24(words[8], 6) * (2 ** -23),     # M0
+               unpack_s11s(words[9]) * (2 ** -20),
                unpack_s11(words[9], 11) * (2 ** -38)))
         return s
 
@@ -3526,9 +3552,16 @@ class ubx(object):
 
                     if 1 == subframe:
                         # not well validated decode, possibly wrong...
+                        # [1] Figure 20-1 Sheet 1, Table 20-I
+                        # WN = GPS week number
+                        # TGD = Group Delay Differential
+                        # tOC = Time of Clock
+                        # af0 = SV Clock Bias Correction Coefficient
+                        # af1 = SV Clock Drift Correction Coefficient
+                        # af2 = Drift Rate Correction Coefficient
                         ura = (words[2] >> 14) & 0x0f
                         c_on_l2 = (words[2] >> 18) & 0x03
-                        iodc = ((((words[2] >> 6) & 0x03) << 8) +
+                        iodc = ((((words[2] >> 6) & 0x03) << 8) |
                                 (words[7] >> 24) & 0xff)
                         s += ("\n   WN %u Codes on L2 %u (%s) URA %u (%s) "
                               "SVH %#04x IODC %u" %
@@ -3539,7 +3572,7 @@ class ubx(object):
                         # tOC = Clock Data Reference Time of Week
                         s += ("\n   L2 P DF %u TGD %e tOC %u\n"
                               "   af2 %e af1 %e af0 %e" %
-                              (words[2] >> 29,
+                              ((words[2] >> 29) & 0x03,
                                unpack_s8(words[6], 6) * (2 ** -31),
                                unpack_u16(words[7], 6) * 16,
                                unpack_s8(words[8], 22) * (2 ** -55),
@@ -3548,22 +3581,30 @@ class ubx(object):
 
                     elif 2 == subframe:
                         # not well validated decode, possibly wrong...
+                        # [1] Figure 20-1 Sheet 1, Tables 20-II and 20-III
                         # IODE = Issue of Data (Ephemeris)
                         # Crs = Amplitude of the Sine Harmonic Correction
                         #       Term to the Orbit Radius
-                        # deltan = Mean Motion Difference From Computed Value
+                        # Deltan = Mean Motion Difference From Computed Value
+                        # M0 = Mean Anomaly at Reference Time
                         # Cuc = Amplitude of the Cosine Harmonic Correction
                         #       Term to the Argument of Latitude
+                        # e = Eccentricity
                         # Cus = Amplitude of the Sine Harmonic Correction Term
                         #       to the Argument of Latitude
+                        # sqrtA = Square Root of the Semi-Major Axis
                         # tOE = Reference Time Ephemeris
-                        s += ("\n   IODE %u Crs %f deltan %f"
-                              "\n   Cuc %f Cus %f tOE %u" %
+                        s += ("\n   IODE %u Crs %e Deltan %e M0 %e"
+                              "\n   Cuc %e e %e Cus %e sqrtA %f tOE %u" %
                               (unpack_u8(words[2], 22),
                                unpack_s16(words[2], 6) * (2 ** -5),
                                unpack_s16(words[3], 14) * (2 ** -43),
+                               # M0
+                               unpack_s32s(words[4], words[3]) * (2 ** -31),
                                unpack_s16(words[5], 14) * (2 ** -29),
+                               unpack_u32s(words[6], words[5]) * (2 ** -33),
                                unpack_s16(words[7], 14) * (2 ** -29),
+                               unpack_u32s(words[8], words[7]) * (2 ** -19),
                                unpack_u16(words[9], 14) * 16))
 
                     elif 3 == subframe:
@@ -3582,19 +3623,20 @@ class ubx(object):
                         # Omegadot = Rate of Right Ascension
                         # IODE = Issue of Data (Ephemeris)
                         # IODT = Rate of Inclination Angle
-                        s += ("\n   Cic %e Omega0 %e Cis %e i0 %s"
-                              "\n   Crc %e omega %e   Omegadot %e"
+                        s += ("\n   Cic %e Omega0 %e Cis %e i0 %e"
+                              "\n   Crc %e omega %e Omegadot %e"
                               "\n   IDOE %u IDOT %e" %
                               (unpack_s16(words[2], 14) * (2 ** -29),
                                unpack_s32s(words[3], words[2]) * (2 ** -31),
                                unpack_s16(words[4], 14) * (2 ** -29),
                                unpack_s32s(words[5], words[4]) * (2 ** -31),
+                               # Crc
                                unpack_s16(words[6], 14) * (2 ** -5),
                                unpack_s32s(words[7], words[6]) * (2 ** -31),
+                               # Omegadot
                                unpack_s24(words[8], 6) * (2 ** -43),
                                unpack_u8(words[9], 22),
-                               # FIXME 14 bit!
-                               unpack_u16(words[9], 8) * (2 ** -43)))
+                               unpack_s14(words[9], 8) * (2 ** -43)))
 
                     elif 4 == subframe:
                         # all data in subframe 4 is "reserved",
