@@ -5,7 +5,7 @@ init_daemon_domain(gpsd)
 net_domain(gpsd)
 
 allow gpsd gpsd:capability { net_raw };
-allow gpsd console_device:chr_file rw_file_perms;
+allow gpsd serial_device:chr_file rw_file_perms;
 
 # The following are needed by logwrapper to get gpsd's output
 # to Android's logs.
@@ -14,3 +14,4 @@ allow gpsd shell_exec:file { execute execute_no_trans read open getattr };
 allow gpsd vendor_file:file { execute execute_no_trans read open getattr };
 allow gpsd devpts:chr_file { read write open getattr };
 allow gpsd gpsd_exec:file { execute execute_no_trans read open getattr };
+allow gpsd vendor_shell_exec:file { execute execute_no_trans read open getattr };

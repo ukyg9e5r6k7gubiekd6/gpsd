@@ -4,3 +4,4 @@ typeattribute hal_gnss_default hal_wifi_hostapd_server;
 
 net_domain(hal_gnss_default)
 allow hal_gnss_default hal_gnss_default:capability { net_raw };
+allow hal_gnss_default property_socket:sock_file { write };
