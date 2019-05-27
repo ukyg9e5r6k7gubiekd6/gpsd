@@ -210,12 +210,13 @@ second and the following subframe broadcast.
 
 GPS date and time are subject to a rollover problem in the 10-bit week
 number counter, which will re-zero every 1024 weeks (roughly every 19.6
-years). The last rollover (and the first since GPS went live in 1980)
-was in Aug-1999; the next will fall in Apr-2019.  The new "CNAV" data
+years). The first rollover since GPS went live in 1980 was in Aug-1999,
+followed by Apr-2019, the next will be in Nov-2038 (the 32-bit and POSIX
+issues will probably be more important by then).  The new "CNAV" data
 format extends the week number to 13 bits, with the first rollover
 occurring in Jan-2137, but this is only used with some newly added GPS
 signals, and is unlikely to be usable in most consumer-grade receivers
-prior to the 2019 rollover.
+currently.
 
 For accurate time reporting, therefore, a GPS requires a supplemental
 time references sufficient to identify the current rollover period,
@@ -1240,6 +1241,17 @@ Field Number:
 18. Checksum
 
 Example: $GNGSA,A,3,80,71,73,79,69,,,,,,,,1.83,1.09,1.47*17
+
+Note: NMEA 4.1+ systems (in particular u-blox 9) emit an extra field
+just before the checksum.
+
+-----------------------------------------------
+1 = GPS L1C/A, L2CL, L2CM
+2 = GLONASS L1 OF, L2 OF
+3 = Galileo E1C, E1B, E5 bl, E5 bQ
+4 = BeiDou B1I D1, B1I D2, B2I D1, B2I D12
+-----------------------------------------------
+
 
 === GSV - Satellites in view ===
 

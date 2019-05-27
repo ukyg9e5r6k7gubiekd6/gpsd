@@ -1211,8 +1211,8 @@ and bite on various future dates. </p>
   rollover, which happens either every 1024 weeks (roughly 19.6 years)
   or every 8192 weeks (roughly 157 years), depending on whether your
   receiver can decode a 10-bit or 13-bit GPS week field.  At the time of
-  this writing the last 0 week was in 1999, the next 10-bit wraparound
-  will be in 2019, and the next 13-bit wraparound will be in 2137.</li>
+  this writing the last 0 week was in 2019, the next 10-bit wraparound
+  will be in 2038, and the next 13-bit wraparound will be in 2137.</li>
 
   <li>NMEA delivers only two-digit years.</li>
 
@@ -1241,7 +1241,7 @@ satellites earlier than Block III, which are currently (July 2016) not
 expected to begin to launch earlier than September 2016.  Given that it
 takes years to launch a full constellation of satellites, it's highly
 unlikely that CNAV data with "operational" status will be available to
-common civilian receivers in time for the April 2019 10-bit rollover.</p>
+common civilian receivers for some years yet.</p>
 
 <p>For these reasons, GPSD needs the host computer's system clock to
 be accurate to within one second.</p>
