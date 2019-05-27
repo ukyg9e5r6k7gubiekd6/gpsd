@@ -2600,12 +2600,33 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         s = ''
-        for i in range(1, 6):
+        for i in range(1, 7):
             u = struct.unpack_from('<HHHHHHHH', buf, 0)
             s += "msg%u %u %u %u %u %u %u %u %u\n" % ((i,) + u)
 
         u = struct.unpack_from('<LLLLLL', buf, 0)
         s += "skipped %u %u %u %u %u %u" % u
+        return s
+
+    def mon_rxbuf(self, buf):
+        """UBX-MON-RXBUF decode"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 24 > m_len:
+            return " Bad Length %s" % m_len
+
+        rxbuf_name = {
+           1: "pending",
+           2: "usage",
+           3: "peakUsage",
+           }
+
+        s = ''
+        for i in range(1, 4):
+            u = struct.unpack_from('<HHHHHH', buf, 0)
+            s += rxbuf_name[i] + " %u %u %u %u %u %u\n" % u
         return s
 
     def mon_ver(self, buf):
@@ -2636,7 +2657,7 @@ class ubx(object):
     mon_ids = {2: {'str': 'IO', 'dec': mon_io, 'name': 'UBX-MON-IO'},
                4: {'str': 'VER', 'dec': mon_ver, 'name': 'UBX-MON-VER'},
                6: {'str': 'MSGPP', 'dec': mon_msgpp, 'name': 'UBX-MON-MSGPP'},
-               7: {'str': 'RXBUF', 'name': 'UBX-MON-RXBUF'},
+               7: {'str': 'RXBUF', 'dec': mon_rxbuf, 'name': 'UBX-MON-RXBUF'},
                8: {'str': 'TXBUF', 'name': 'UBX-MON-TXBUF'},
                9: {'str': 'HW', 'dec': mon_hw, 'name': 'UBX-MON-HW'},
                0x0b: {'str': 'HW2', 'dec': mon_hw2, 'name': 'UBX-MON-HW2'},
@@ -4688,7 +4709,7 @@ class ubx(object):
                  "help": "SBAS"},
         # en/dis able SFRB/SFRBX
         "SFRBX": {"command": send_able_sfrbx,
-                 "help": "SFRB/SFRBX subframes"},
+                  "help": "SFRB/SFRBX subframes"},
         # en/dis able TP time pulse message
         "TP": {"command": send_able_tp,
                "help": "TP Time Pulse message"},
@@ -4759,8 +4780,11 @@ class ubx(object):
                    "help": "poll UBX-MON-IO I/O Subsystem Status"},
         # UBX-MON-MSGPP
         "MON-MSGPP": {"command": send_poll, "opt": [0x0a, 0x06],
-                    "help": "poll UBX-MON-MSGPP Message Parese and "
-                            "Process Status"},
+                      "help": "poll UBX-MON-MSGPP Message Parese and "
+                              "Process Status"},
+        # UBX-MON-RXBUF
+        "MON-RXBUF": {"command": send_poll, "opt": [0x0a, 0x07],
+                      "help": "poll UBX-MON-RXBUF Receiver Buffer Status"},
         # UBX-MON-VER
         "MON-VER": {"command": send_poll, "opt": [0x0a, 0x04],
                     "help": "poll UBX-MON-VER GPS version"},
