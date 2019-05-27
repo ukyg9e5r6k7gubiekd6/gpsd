@@ -2629,6 +2629,19 @@ class ubx(object):
             s += rxbuf_name[i] + " %u %u %u %u %u %u\n" % u
         return s
 
+    def mon_rxr(self, buf):
+        """UBX-MON-RXBUF decode, Receiver Status Information"""
+        m_len = len(buf)
+
+        if 1 > m_len:
+            return " Bad Length %s" % m_len
+
+        if 1 & buf[0]:
+            s = "awake"
+        else:
+            s = "not awake"
+        return s
+
     def mon_ver(self, buf):
         """UBX-MON-VER decode"""
         m_len = len(buf)
@@ -2661,7 +2674,7 @@ class ubx(object):
                8: {'str': 'TXBUF', 'name': 'UBX-MON-TXBUF'},
                9: {'str': 'HW', 'dec': mon_hw, 'name': 'UBX-MON-HW'},
                0x0b: {'str': 'HW2', 'dec': mon_hw2, 'name': 'UBX-MON-HW2'},
-               0x21: {'str': 'RXR', 'name': 'UBX-MON-RXR'},
+               0x21: {'str': 'RXR', 'dec': mon_rxr, 'name': 'UBX-MON-RXR'},
                0x27: {'str': 'PATCH', 'name': 'UBX-MON-PATCH'},
                0x28: {'str': 'GNSS', 'dec': mon_gnss, 'name': 'UBX-MON-GNSS'},
                0x2e: {'str': 'SMGR', 'name': 'UBX-MON-SMGR'},
