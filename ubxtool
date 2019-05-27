@@ -2602,10 +2602,10 @@ class ubx(object):
         s = ''
         for i in range(1, 7):
             u = struct.unpack_from('<HHHHHHHH', buf, 0)
-            s += "msg%u %u %u %u %u %u %u %u %u\n" % ((i,) + u)
+            s += " msg%u    %u %u %u %u %u %u %u %u\n" % ((i,) + u)
 
         u = struct.unpack_from('<LLLLLL', buf, 0)
-        s += "skipped %u %u %u %u %u %u" % u
+        s += " skipped %u %u %u %u %u %u" % u
         return s
 
     def mon_rxbuf(self, buf):
@@ -2618,15 +2618,15 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         rxbuf_name = {
-           1: "pending",
-           2: "usage",
-           3: "peakUsage",
+           1: " pending   ",
+           2: " usage     ",
+           3: " peakUsage ",
            }
 
         s = ''
         for i in range(1, 4):
             u = struct.unpack_from('<HHHHHH', buf, 0)
-            s += rxbuf_name[i] + " %u %u %u %u %u %u\n" % u
+            s += rxbuf_name[i] + "%u %u %u %u %u %u\n" % u
         return s
 
     def mon_rxr(self, buf):
@@ -2637,9 +2637,30 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         if 1 & buf[0]:
-            s = "awake"
+            s = " awake"
         else:
-            s = "not awake"
+            s = " not awake"
+        return s
+
+    def mon_txbuf(self, buf):
+        """UBX-MON-TXBUF decode, Transmitter Buffer Status"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 28 > m_len:
+            return " Bad Length %s" % m_len
+
+        rxbuf_name = {
+           1: " pending   ",
+           2: " usage     ",
+           3: " peakUsage ",
+           }
+
+        s = ''
+        for i in range(1, 4):
+            u = struct.unpack_from('<HHHHHH', buf, 0)
+            s += rxbuf_name[i] + "%u %u %u %u %u %u\n" % u
         return s
 
     def mon_ver(self, buf):
@@ -2671,7 +2692,7 @@ class ubx(object):
                4: {'str': 'VER', 'dec': mon_ver, 'name': 'UBX-MON-VER'},
                6: {'str': 'MSGPP', 'dec': mon_msgpp, 'name': 'UBX-MON-MSGPP'},
                7: {'str': 'RXBUF', 'dec': mon_rxbuf, 'name': 'UBX-MON-RXBUF'},
-               8: {'str': 'TXBUF', 'name': 'UBX-MON-TXBUF'},
+               8: {'str': 'TXBUF', 'dec': mon_txbuf, 'name': 'UBX-MON-TXBUF'},
                9: {'str': 'HW', 'dec': mon_hw, 'name': 'UBX-MON-HW'},
                0x0b: {'str': 'HW2', 'dec': mon_hw2, 'name': 'UBX-MON-HW2'},
                0x21: {'str': 'RXR', 'dec': mon_rxr, 'name': 'UBX-MON-RXR'},
@@ -4798,6 +4819,9 @@ class ubx(object):
         # UBX-MON-RXBUF
         "MON-RXBUF": {"command": send_poll, "opt": [0x0a, 0x07],
                       "help": "poll UBX-MON-RXBUF Receiver Buffer Status"},
+        # UBX-MON-TXBUF
+        "MON-TXBUF": {"command": send_poll, "opt": [0x0a, 0x08],
+                      "help": "poll UBX-MON-TXBUF Transmitter Buffer Status"},
         # UBX-MON-VER
         "MON-VER": {"command": send_poll, "opt": [0x0a, 0x04],
                     "help": "poll UBX-MON-VER GPS version"},
