@@ -2590,6 +2590,24 @@ class ubx(object):
             i += 1
         return s
 
+    def mon_msgpp(self, buf):
+        """UBX-MON-MSGPP decode"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 120 > m_len:
+            return " Bad Length %s" % m_len
+
+        s = ''
+        for i in range(1, 6):
+            u = struct.unpack_from('<HHHHHHHH', buf, 0)
+            s += "msg%u %u %u %u %u %u %u %u %u\n" % ((i,) + u)
+
+        u = struct.unpack_from('<LLLLLL', buf, 0)
+        s += "skipped %u %u %u %u %u %u" % u
+        return s
+
     def mon_ver(self, buf):
         """UBX-MON-VER decode"""
         m_len = len(buf)
@@ -2617,7 +2635,7 @@ class ubx(object):
 
     mon_ids = {2: {'str': 'IO', 'dec': mon_io, 'name': 'UBX-MON-IO'},
                4: {'str': 'VER', 'dec': mon_ver, 'name': 'UBX-MON-VER'},
-               6: {'str': 'MSGPP', 'name': 'UBX-MON-MSGPP'},
+               6: {'str': 'MSGPP', 'dec': mon_msgpp, 'name': 'UBX-MON-MSGPP'},
                7: {'str': 'RXBUF', 'name': 'UBX-MON-RXBUF'},
                8: {'str': 'TXBUF', 'name': 'UBX-MON-TXBUF'},
                9: {'str': 'HW', 'dec': mon_hw, 'name': 'UBX-MON-HW'},
@@ -4739,6 +4757,10 @@ class ubx(object):
         # UBX-MON-IO
         "MON-IO": {"command": send_poll, "opt": [0x0a, 0x02],
                    "help": "poll UBX-MON-IO I/O Subsystem Status"},
+        # UBX-MON-MSGPP
+        "MON-MSGPP": {"command": send_poll, "opt": [0x0a, 0x06],
+                    "help": "poll UBX-MON-MSGPP Message Parese and "
+                            "Process Status"},
         # UBX-MON-VER
         "MON-VER": {"command": send_poll, "opt": [0x0a, 0x04],
                     "help": "poll UBX-MON-VER GPS version"},
