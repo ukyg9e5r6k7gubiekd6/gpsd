@@ -2166,6 +2166,15 @@ class ubx(object):
                    index_s(u[5], self.cfg_odo_profile)))
         return s
 
+    cfg_pms_values = {0: "Full power",
+                      1: "Balanced",
+                      2: "Interval",
+                      3: "Aggresive with 1Hz",
+                      4: "Aggresive with 2Hz",
+                      5: "Aggresive with 4Hz",
+                      0xff: "Invalid"
+                      }
+
     def cfg_pms(self, buf):
         """UBX-CFG-PMS decode, Power Mode Setup"""
 
@@ -2176,19 +2185,12 @@ class ubx(object):
         if 8 > m_len:
             return "Bad Length %s" % m_len
 
-        values = {0: "Full power",
-                  1: "Balanced",
-                  2: "Interval",
-                  3: "Aggresive with 1Hz",
-                  4: "Aggresive with 2Hz",
-                  5: "Aggresive with 4Hz",
-                  0xff: "Invalid"
-                  }
         u = struct.unpack_from('<BBHHBB', buf, 0)
-        s = (' version: %u powerSetupValue: %u'
-             ' period: %u onTime: %#x reserved1: [%u %u]' % u)
-        if u[0] in values:
-            s += "\n   powerSetupValue: %s" % values[u[0]]
+        s = (' version %u powerSetupValue %u'
+             ' period %u onTime %#x reserved1 %u %u' % u)
+        if VERB_DECODE <= opts['verbosity']:
+            s += ('\n  powerSetupValue (%s)' %
+                  index_s(u[0], self.cfg_pms_values))
 
         return s
 
