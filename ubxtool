@@ -3677,6 +3677,11 @@ class ubx(object):
 
         return s
 
+    rxm_rawx_recs = {
+        1: "leapSec",
+        2: "clkReset",
+        }
+
     def rxm_rawx(self, buf):
         """UBX-RXM-RAWX decode"""
         m_len = len(buf)
@@ -3690,12 +3695,8 @@ class ubx(object):
         u = struct.unpack_from('<dHbBBBBB', buf, 0)
         s = (' rcvTow %.3f week %u leapS %d numMeas %u recStat %#x'
              ' version %u\n'
-             ' reserved1[2] %#x %#x\n recStat: ' % u)
-        if 0x3 & u[4]:
-            if 1 & u[4]:
-                s += 'leapSec '
-            if 2 & u[4]:
-                s += 'clkReset '
+             ' reserved1[2] %#x %#x\n  recStat (' % u)
+        s += flag_s(u[4], self.rxm_rawx_recs) + ')'
 
         m_len -= 16
         i = 0
