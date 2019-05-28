@@ -3713,6 +3713,29 @@ class ubx(object):
             i += 1
         return s
 
+    def rxm_rlm(self, buf):
+        """UBX-RXM-RLM decode, Galileo SAR RLM report"""
+        m_len = len(buf)
+
+        if 16 > m_len:
+            return " Bad Length %s" % m_len
+
+        # common to Short-RLM and Long-RLM report
+        u = struct.unpack_from('<BBBBLLB', buf, 0)
+        s = (" version %u type %u svId %u reserved1 %u beacon x%x %x "
+             " message %u" % u)
+        if 16 == m_len:
+            # Short-RLM report
+            u = struct.unpack_from('<BBB', buf, 13)
+            s += "\n params %u %u reserved2 %u" % u
+        elif 28 == m_len:
+            # Long-RLM report
+            u = struct.unpack_from('<BBBBBBBBBBBBBBB', buf, 13)
+            s += ("\n params %u %u %u %u %u %u %u %u %u %u %u %u"
+                  "\n reserved2 %u %u %u" % u)
+
+        return s
+
     def rxm_rtcm(self, buf):
         """UBX-RXM-RTCM decode, RTCM Input Status"""
         m_len = len(buf)
@@ -4118,7 +4141,7 @@ class ubx(object):
                0x20: {'str': 'SVSI', 'dec': rxm_svsi, 'name': 'UBX-RXM-SVSI'},
                0x32: {'str': 'RTCM', 'dec': rxm_rtcm, 'name': 'UBX-RXM-RTCM'},
                0x41: {'str': 'PMREQ', 'name': 'UBX-RXM-PMREQ'},
-               0x59: {'str': 'RLM', 'name': 'UBX-RXM-RLM'},
+               0x59: {'str': 'RLM', 'dec': rxm_rlm, 'name': 'UBX-RXM-RLM'},
                0x61: {'str': 'IMES', 'name': 'UBX-RXM-IMES'},
                }
 
