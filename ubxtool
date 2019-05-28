@@ -2119,6 +2119,29 @@ class ubx(object):
 
         return '\n'.join(s)
 
+    cfg_rate_system = {
+        0: "UTC",
+        1: "GPS",
+        2: "GLONASS",
+        3: "BeiDou",
+        4: "Galileo",
+        }
+
+    def cfg_rate(self, buf):
+        """UBX-CFG-RATE decode, Navigation/Measurement Rate Settings"""
+
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 6 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<HHH', buf, 0)
+        s = (" measRate %u navRate %u timeRef %u (%s)" %
+             (u + (index_s(u[2], self.cfg_rate_system),)))
+        return s
+
     def cfg_rst(self, buf):
         """"UBX-CFG-RST decode, Reset Receiver"""
 
@@ -2386,7 +2409,7 @@ class ubx(object):
                2: {'str': 'INF', 'dec': cfg_inf, 'name': 'UBX-CFG-INF'},
                4: {'str': 'RST', 'dec': cfg_rst, 'name': 'UBX-CFG-RST'},
                6: {'str': 'DAT', 'name': 'UBX-CFG-DAT'},
-               8: {'str': 'RATE', 'name': 'UBX-CFG-RATE'},
+               8: {'str': 'RATE', 'dec': cfg_rate, 'name': 'UBX-CFG-RATE'},
                9: {'str': 'CFG', 'dec': cfg_cfg, 'name': 'UBX-CFG-CFG'},
                0x11: {'str': 'RXM', 'name': 'UBX-CFG-RXM'},
                0x13: {'str': 'ANT', 'dec': cfg_ant, 'name': 'UBX-CFG-ANT'},
@@ -4896,6 +4919,10 @@ class ubx(object):
         # UBX-CFG-PRT
         "CFG-PRT": {"command": send_cfg_prt,
                     "help": "poll UBX-CFG-PRT I/O port settings"},
+        # UBX-CFG-RATE
+        "CFG-RATE": {"command": send_poll, "opt": [0x06, 0x08],
+                     "help": "poll UBX-CFG-RATE Navigation/Measurement "
+                             "Rate Settings"},
         # UBX-CFG-TMODE2
         "CFG-TMODE2": {"command": send_poll, "opt": [0x06, 0x3d],
                        "help": "poll UBX-CFG-TMODE2 time mode 2 config"},
