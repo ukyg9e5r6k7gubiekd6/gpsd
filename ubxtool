@@ -1892,7 +1892,7 @@ class ubx(object):
         if 0 == m_len:
             return "Poll request"
 
-        if m_len < 4:
+        if 4 > m_len:
             return "Bad Length %d" % m_len
 
         u = struct.unpack_from('<BBBB', buf, 0)
@@ -1950,6 +1950,29 @@ class ubx(object):
                 s += ' enabled'
 
             i += 1
+        return s
+
+    cfg_inf_protid = {
+        0: "UBX",
+        1: "NMEA",
+        }
+
+    def cfg_inf(self, buf):
+        """UBX-CFG-INF decode, Poll configuration for one protocol"""
+        m_len = len(buf)
+        if 1 == m_len:
+            return ("Poll request: %s" %
+                    index_s(buf[0], self.cfg_inf_protid))
+
+        if 10 < m_len:
+            return "Bad Length %d" % m_len
+
+        u = struct.unpack_from('<BBBBBBBBBB', buf, 0)
+        s = (" protocolId %u reserved1 %u %u %u\n"
+             " infMsgMask %u %u %u %u %u %u" % u)
+        if VERB_DECODE <= opts['verbosity']:
+            s += ('\n   protocolId (%s)' %
+                  index_s(buf[0], self.cfg_inf_protid))
         return s
 
     def cfg_nav5(self, buf):
@@ -2360,7 +2383,7 @@ class ubx(object):
 
     cfg_ids = {0: {'str': 'PRT', 'dec': cfg_prt, 'name': 'UBX-CFG-PRT'},
                1: {'str': 'MSG', 'dec': cfg_msg, 'name': 'UBX-CFG-MSG'},
-               2: {'str': 'INF', 'name': 'UBX-CFG-INF'},
+               2: {'str': 'INF', 'dec': cfg_inf, 'name': 'UBX-CFG-INF'},
                4: {'str': 'RST', 'dec': cfg_rst, 'name': 'UBX-CFG-RST'},
                6: {'str': 'DAT', 'name': 'UBX-CFG-DAT'},
                8: {'str': 'RATE', 'name': 'UBX-CFG-RATE'},
@@ -4637,6 +4660,16 @@ class ubx(object):
         m_data[11] = 1      # flags, unused
         gps_model.gps_send(6, 0x3e, m_data)
 
+    def poll_cfg_inf(self):
+        """UBX-CFG-INF, poll"""
+
+        m_data = bytearray(1)
+        m_data[0] = 0        # UBX
+        gps_model.gps_send(6, 0x02, m_data)
+
+        m_data[0] = 1        # NMEA
+        gps_model.gps_send(6, 0x02, m_data)
+
     def send_cfg_nav5_model(self):
         """UBX-CFG-NAV5, set dynamic platform model"""
 
@@ -4847,6 +4880,10 @@ class ubx(object):
         # UBX-CFG-GNSS
         "CFG-GNSS": {"command": send_poll, "opt": [0x06, 0x3e],
                      "help": "poll UBX-CFG-GNSS GNSS config"},
+        # UBX-CFG-INF
+        "CFG-INF": {"command": poll_cfg_inf,
+                    "help": "poll UBX-CFG-INF Information Message "
+                            "Configuration"},
         # UBX-CFG-NAV5
         "CFG-NAV5": {"command": send_poll, "opt": [0x06, 0x24],
                      "help": "poll UBX-CFG-NAV5 Nav Engines settings"},
