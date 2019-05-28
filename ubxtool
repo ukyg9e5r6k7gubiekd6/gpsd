@@ -2344,6 +2344,23 @@ class ubx(object):
         return (' mode: %#x usage: %#x maxSBAS: %u scanMode2: %#x'
                 ' scanMode1: %#x' % u)
 
+    def cfg_smgr(self, buf):
+        """UBX-CFG-SMGR decode, Synchronization manager configuration"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 20 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBHHBBHHHHL', buf, 0)
+        s = (" version %u minGNSSFix %u maxFreqChangeRate %u "
+             "maxPhaseCorrR %u\n"
+             " reserved1 %u %u freqTolerance %u timeTolerance %u "
+             "messageCfg x%x\n"
+             " maxSlewRate %u flags x%x" % u)
+        return s
+
     def cfg_tmode2(self, buf):
         """UBX-CFG-TMODE2 decode, Time Mode Settings 2"""
         m_len = len(buf)
@@ -2590,7 +2607,7 @@ class ubx(object):
                0x5c: {'str': 'HNR', 'name': 'UBX-CFG-HNR'},
                0x60: {'str': 'ESRC', 'name': 'UBX-CFG-ESRC'},
                0x61: {'str': 'DOSC', 'name': 'UBX-CFG-OSC'},
-               0x62: {'str': 'SMGR', 'name': 'UBX-CFG-SMGR'},
+               0x62: {'str': 'SMGR', 'dec': cfg_smgr, 'name': 'UBX-CFG-SMGR'},
                0x69: {'str': 'GEOFENCE', 'name': 'UBX-CFG-GEOFENCE'},
                0x70: {'str': 'DGNSS', 'dec': cfg_dgnss,
                       'name': 'UBX-CFG-DGNSS'},
@@ -2864,27 +2881,6 @@ class ubx(object):
                        index_s(u[3], self.mon_rf_antpwr)))
         return s
 
-    def mon_rxbuf(self, buf):
-        """UBX-MON-RXBUF decode"""
-        m_len = len(buf)
-        if 0 == m_len:
-            return " Poll request"
-
-        if 24 > m_len:
-            return " Bad Length %s" % m_len
-
-        rxbuf_name = {
-           1: " pending   ",
-           2: " usage     ",
-           3: " peakUsage ",
-           }
-
-        s = ''
-        for i in range(1, 4):
-            u = struct.unpack_from('<HHHHHH', buf, 0)
-            s += rxbuf_name[i] + "%u %u %u %u %u %u\n" % u
-        return s
-
     mon_patch_act = {
         1: "Active"
         }
@@ -2921,6 +2917,27 @@ class ubx(object):
 
         return s
 
+    def mon_rxbuf(self, buf):
+        """UBX-MON-RXBUF decode"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 24 > m_len:
+            return " Bad Length %s" % m_len
+
+        rxbuf_name = {
+           1: " pending   ",
+           2: " usage     ",
+           3: " peakUsage ",
+           }
+
+        s = ''
+        for i in range(1, 4):
+            u = struct.unpack_from('<HHHHHH', buf, 0)
+            s += rxbuf_name[i] + "%u %u %u %u %u %u\n" % u
+        return s
+
     def mon_rxr(self, buf):
         """UBX-MON-RXBUF decode, Receiver Status Information"""
         m_len = len(buf)
@@ -2932,6 +2949,22 @@ class ubx(object):
             s = " awake"
         else:
             s = " not awake"
+        return s
+
+    def mon_smgr(self, buf):
+        """UBX-MON-SMGR decode, Synchronization manager status"""
+
+        m_len = len(buf)
+
+        if 0 == m_len:
+            return " Poll request"
+
+        if 16 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBBLHHBBBB', buf, 0)
+        s = (" version %u reserved1 %u %u %u iTOW %u intOsc x%x extOsc x%x\n"
+             " discOsc %u gnss x%x extInt0 x%x extInt1 %x%x" % u)
         return s
 
     def mon_txbuf(self, buf):
@@ -2991,7 +3024,7 @@ class ubx(object):
                0x27: {'str': 'PATCH', 'dec': mon_patch,
                       'name': 'UBX-MON-PATCH'},
                0x28: {'str': 'GNSS', 'dec': mon_gnss, 'name': 'UBX-MON-GNSS'},
-               0x2e: {'str': 'SMGR', 'name': 'UBX-MON-SMGR'},
+               0x2e: {'str': 'SMGR', 'dec': mon_smgr, 'name': 'UBX-MON-SMGR'},
                0x36: {'str': 'COMMS', 'dec': mon_comms,
                       'name': 'UBX-MON-COMMS'},
                0x37: {'str': 'HW3', 'dec': mon_hw3, 'name': 'UBX-MON-HW3'},
@@ -5132,6 +5165,10 @@ class ubx(object):
         # UBX-CFG-SBAS
         "CFG-SBAS": {"command": send_poll, "opt": [0x06, 0x16],
                      "help": "poll UBX-CFG-SBAS SBAS settings"},
+        # UBX-CFG-SMGR
+        "CFG-SMGR": {"command": send_poll, "opt": [0x06, 0x62],
+                     "help": "poll UBX-CFG-SMGR Synchronization manager "
+                     " configuration"},
         # UBX-CFG-TMODE2
         "CFG-TMODE2": {"command": send_poll, "opt": [0x06, 0x3d],
                        "help": "poll UBX-CFG-TMODE2 time mode 2 config"},
@@ -5184,6 +5221,10 @@ class ubx(object):
         # UBX-MON-RXBUF
         "MON-RXBUF": {"command": send_poll, "opt": [0x0a, 0x07],
                       "help": "poll UBX-MON-RXBUF Receiver Buffer Status"},
+        # UBX-MON-SMGR
+        "MON-SMGR": {"command": send_poll, "opt": [0x0a, 0x2e],
+                     "help": "poll UBX-MON-SMGR Synchronization manager "
+                     "configuration"},
         # UBX-MON-TXBUF
         "MON-TXBUF": {"command": send_poll, "opt": [0x0a, 0x08],
                       "help": "poll UBX-MON-TXBUF Transmitter Buffer Status"},
