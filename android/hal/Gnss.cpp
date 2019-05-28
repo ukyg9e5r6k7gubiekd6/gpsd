@@ -144,6 +144,7 @@ Return<bool> Gnss::start() {
 
                         this->reportLocation(location);
                     } else if (is_automotive && last_recorded_fix == 0){
+                        location.timestamp = (long) time(NULL);
                         this->reportLocation(location);
                     }
 
