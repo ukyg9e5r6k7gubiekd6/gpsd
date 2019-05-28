@@ -2629,6 +2629,42 @@ class ubx(object):
             s += rxbuf_name[i] + "%u %u %u %u %u %u\n" % u
         return s
 
+    mon_patch_act = {
+        1: "Active"
+        }
+    mon_patch_loc = {
+        0: "eFuse",
+        2: "ROM",
+        4: "BBR",
+        6: "File System",
+        }
+
+    def mon_patch(self, buf):
+        """UBX-MON-PATCH decode, Output information about installed patches."""
+
+        m_len = len(buf)
+
+        if 0 == m_len:
+            return " Poll request"
+
+        if 4 > m_len:
+            return " Bad Length %s" % m_len
+
+        # first seen in protver 15
+        u = struct.unpack_from('<HH', buf, 0)
+        s = " version %u nEntries %u" % u
+
+        for i in range(0, u[1]):
+            u = struct.unpack_from('<LLLL', buf, 0)
+            s = (" patchInfo x%x comparatorNumber %u patchAddress %u "
+                 "patchData %u" % u)
+            if VERB_DECODE <= opts['verbosity']:
+                s += ('\n  patchInfo (%s, %s)' %
+                      (flag_s(u[0] & 0x01, self.mon_patch_act),
+                       index_s(u[0] & 0x06, self.mon_patch_loc)))
+
+        return s
+
     def mon_rxr(self, buf):
         """UBX-MON-RXBUF decode, Receiver Status Information"""
         m_len = len(buf)
@@ -2696,7 +2732,8 @@ class ubx(object):
                9: {'str': 'HW', 'dec': mon_hw, 'name': 'UBX-MON-HW'},
                0x0b: {'str': 'HW2', 'dec': mon_hw2, 'name': 'UBX-MON-HW2'},
                0x21: {'str': 'RXR', 'dec': mon_rxr, 'name': 'UBX-MON-RXR'},
-               0x27: {'str': 'PATCH', 'name': 'UBX-MON-PATCH'},
+               0x27: {'str': 'PATCH', 'dec': mon_patch,
+                      'name': 'UBX-MON-PATCH'},
                0x28: {'str': 'GNSS', 'dec': mon_gnss, 'name': 'UBX-MON-GNSS'},
                0x2e: {'str': 'SMGR', 'name': 'UBX-MON-SMGR'},
                0x36: {'str': 'COMMS', 'dec': mon_comms,
@@ -4816,6 +4853,9 @@ class ubx(object):
         "MON-MSGPP": {"command": send_poll, "opt": [0x0a, 0x06],
                       "help": "poll UBX-MON-MSGPP Message Parese and "
                               "Process Status"},
+        # UBX-MON-PATCH
+        "MON-PATCH": {"command": send_poll, "opt": [0x0a, 0x27],
+                      "help": "poll UBX-MON-PATCH Info on Installed Patches"},
         # UBX-MON-RXBUF
         "MON-RXBUF": {"command": send_poll, "opt": [0x0a, 0x07],
                       "help": "poll UBX-MON-RXBUF Receiver Buffer Status"},
