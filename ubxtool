@@ -5679,7 +5679,13 @@ for (opt, val) in options:
     elif opt == '-r':
         opts['read_only'] = True
     elif opt == '-s':
-        opts['input_speed'] = int(val)
+        try:
+            opts['input_speed'] = int(val)
+        except ValueError:
+            sys.stderr.write('%s: -s invalid speed %s\n' %
+                             (PROG_NAME, val))
+            sys.exit(1)
+
         if opts['input_speed'] not in gps_model.speeds:
             sys.stderr.write('%s: -s invalid speed %s\n' %
                              (PROG_NAME, opts['input_speed']))
