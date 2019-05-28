@@ -2608,6 +2608,58 @@ class ubx(object):
         s += " skipped %u %u %u %u %u %u" % u
         return s
 
+    mon_rf_jamming = {
+        0: "Unk",
+        1: "OK",
+        2: "Warning",
+        3: "Critical",
+        }
+
+    mon_rf_antstat = {
+        0: "Init",
+        1: "Unk",
+        2: "OK",
+        3: "Short",
+        4: "Open",
+        }
+
+    mon_rf_antpwr = {
+        0: "Off",
+        1: "On",
+        2: "Unk",
+        }
+
+    def mon_rf(self, buf):
+        """UBX-MON-RF decode, RF Information"""
+
+        # first seen in protver 27
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 4 > m_len:
+            return " Bad Length %s" % m_len
+
+        # at least protver 27
+        if 27 > opts['protver']:
+            opts['protver'] = 27
+
+        u = struct.unpack_from('<BBBB', buf, 0)
+        s = ' version %u nBlocks %u reserved1 %u %u' % u
+        for i in range(0, u[1]):
+            u = struct.unpack_from('<BBBBLBBBBHHBbBbBBBB', buf, 4 + (24 * i))
+            s += ("\n   blockId %u flags x%x antStatus %u antPower %u "
+                  "postStatus %u reserved2 %u %u %u %u"
+                  "\n    noisePerMS %u agcCnt %u jamInd %u ofsI %d magI %u "
+                  "ofsQ %d magQ %u"
+                  "\n    reserved3 %u %u %u" % u)
+            if VERB_DECODE <= opts['verbosity']:
+                s += ('\n     jammingState (%s) antStatus (%s) antPower (%s)' %
+                      (index_s(u[1] & 0x03, self.mon_rf_jamming),
+                       index_s(u[2], self.mon_rf_antstat),
+                       index_s(u[3], self.mon_rf_antpwr)))
+        return s
+
     def mon_rxbuf(self, buf):
         """UBX-MON-RXBUF decode"""
         m_len = len(buf)
@@ -2739,7 +2791,7 @@ class ubx(object):
                0x36: {'str': 'COMMS', 'dec': mon_comms,
                       'name': 'UBX-MON-COMMS'},
                0x37: {'str': 'HW3', 'dec': mon_hw3, 'name': 'UBX-MON-HW3'},
-               0x38: {'str': 'RF', 'name': 'UBX-MON-RF'},
+               0x38: {'str': 'RF', 'dec': mon_rf, 'name': 'UBX-MON-RF'},
                }
 
     def nav_clock(self, buf):
@@ -4856,6 +4908,9 @@ class ubx(object):
         # UBX-MON-PATCH
         "MON-PATCH": {"command": send_poll, "opt": [0x0a, 0x27],
                       "help": "poll UBX-MON-PATCH Info on Installed Patches"},
+        # UBX-MON-RF
+        "MON-RF": {"command": send_poll, "opt": [0x0a, 0x38],
+                   "help": "poll UBX-MON-RF RF Information"},
         # UBX-MON-RXBUF
         "MON-RXBUF": {"command": send_poll, "opt": [0x0a, 0x07],
                       "help": "poll UBX-MON-RXBUF Receiver Buffer Status"},
