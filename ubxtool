@@ -2255,6 +2255,29 @@ class ubx(object):
              (u + (index_s(u[2], self.cfg_rate_system),)))
         return s
 
+    cfg_rinv_flags = {
+        1: "dump",
+        2: "binary",
+        }
+
+    def cfg_rinv(self, buf):
+        """UBX-CFG-RINV decode, Contents of Remote Inventory"""
+
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        u = struct.unpack_from('<B', buf, 0)
+        s = (" flags x%x (%s) data:" %
+             (u + (flag_s(u[0], self.cfg_rinv_flags),)))
+        for i in range(0, m_len - 1):
+            if 0 == (i % 8):
+                s += "\n   "
+            u = struct.unpack_from('<B', buf, i + 1)
+            s += " %3u" % u
+
+        return s
+
     def cfg_rst(self, buf):
         """"UBX-CFG-RST decode, Reset Receiver"""
 
@@ -2534,7 +2557,7 @@ class ubx(object):
                       'name': 'UBX-CFG-NAVX5'},
                0x24: {'str': 'NAV5', 'dec': cfg_nav5, 'name': 'UBX-CFG-NAV5'},
                0x31: {'str': 'TP5', 'dec': cfg_tp5, 'name': 'UBX-CFG-TP5'},
-               0x34: {'str': 'RINV', 'name': 'UBX-CFG-RINV'},
+               0x34: {'str': 'RINV', 'dec': cfg_rinv, 'name': 'UBX-CFG-RINV'},
                0x39: {'str': 'ITFM', 'name': 'UBX-CFG-ITFM'},
                0x3b: {'str': 'PM2', 'name': 'UBX-CFG-PM2'},
                0x3d: {'str': 'TMODE2', 'dec': cfg_tmode2,
@@ -5044,6 +5067,9 @@ class ubx(object):
         "CFG-RATE": {"command": send_poll, "opt": [0x06, 0x08],
                      "help": "poll UBX-CFG-RATE Navigation/Measurement "
                              "Rate Settings"},
+        # UBX-CFG-RINV
+        "CFG-RINV": {"command": send_poll, "opt": [0x06, 0x34],
+                     "help": "poll UBX-CFG-RINV Contents of Remote Inventory"},
         # UBX-CFG-SBAS
         "CFG-SBAS": {"command": send_poll, "opt": [0x06, 0x16],
                      "help": "poll UBX-CFG-SBAS SBAS settings"},
