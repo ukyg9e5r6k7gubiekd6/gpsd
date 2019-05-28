@@ -2112,6 +2112,41 @@ class ubx(object):
                    index_s(u[7], self.cfg_nmea_gtid)))
         return s
 
+    cfg_odo_flags = {
+        1: "useODO",
+        2: "useCOG",
+        4: "useLPVel",
+        8: "useLPCog",
+        }
+
+    cfg_odo_profile = {
+        0: "Running",
+        1: "Cycling",
+        2: "Swimming",
+        3: "Car",
+        4: "Custom",
+        }
+
+    def cfg_odo(self, buf):
+        """UBX-CFG-ODO decode, Odometer, Low-speed COG Engine Settings"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 20 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBBBBBBBBBBBBBBBBBB', buf, 0)
+        s = (" version %u reserved1 %u %u %u flags x%x odoCfg x%x\n"
+             " reserved2 %u %u %u %u %u %u\n"
+             " cagMaxSpeed %u cogMaxPosAcc %u reserved3 %u %u\n"
+             " velLpGain %u cogLpGain %u reserved4 %u %u" % u)
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   flags (%s) odoCfg (%s)" %
+                  (flag_s(u[4], self.cfg_odo_flags),
+                   index_s(u[5], self.cfg_odo_profile)))
+        return s
+
     def cfg_pms(self, buf):
         """UBX-CFG-PMS decode, Power Mode Setup"""
 
@@ -2494,7 +2529,7 @@ class ubx(object):
                0x16: {'str': 'SBAS', 'dec': cfg_sbas, 'name': 'UBX-CFG-SBAS'},
                0x17: {'str': 'NMEA', 'dec': cfg_nmea, 'name': 'UBX-CFG-NMEA'},
                0x1b: {'str': 'USB', 'dec': cfg_usb, 'name': 'UBX-CFG-USB'},
-               0x1e: {'str': 'ODO', 'name': 'UBX-CFG-ODO'},
+               0x1e: {'str': 'ODO', 'dec': cfg_odo, 'name': 'UBX-CFG-ODO'},
                0x23: {'str': 'NAVX5', 'dec': cfg_navx5,
                       'name': 'UBX-CFG-NAVX5'},
                0x24: {'str': 'NAV5', 'dec': cfg_nav5, 'name': 'UBX-CFG-NAV5'},
@@ -4995,6 +5030,10 @@ class ubx(object):
         "CFG-NMEA": {"command": send_poll, "opt": [0x06, 0x17],
                      "help": "poll UBX-CFG-NMEA Extended NMEA protocol "
                              "configuration V1"},
+        # UBX-CFG-ODO
+        "CFG-ODO": {"command": send_poll, "opt": [0x06, 0x1e],
+                    "help": "poll UBX-CFG-ODO Odometer, Low-speed COG "
+                            "Engine Settings"},
         # UBX-CFG-PMS
         "CFG-PMS": {"command": send_poll, "opt": [0x06, 0x86],
                     "help": "poll UBX-CFG-PMS power management settings"},
