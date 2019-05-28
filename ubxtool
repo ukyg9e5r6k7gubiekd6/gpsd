@@ -1886,6 +1886,25 @@ class ubx(object):
 
         return s
 
+    cfg_dgnss_mode = {
+        2: "RTK Float",
+        3: "RTK Fixed",
+        }
+
+    def cfg_dgnss(self, buf):
+        """UBX-CFG-DGNSS decode, DGNSS configuration"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return "Poll request"
+
+        if 4 > m_len:
+            return "Bad Length %d" % m_len
+
+        u = struct.unpack_from('<BBBB', buf, 0)
+        s = (" dgnssMode %u (%s) reserved1 %u %u %u" % u
+             (u[0], index_s(u[0], self.cfg_dgnss_mode), u[1], u[2], u[3]))
+        return s
+
     def cfg_gnss(self, buf):
         """UBX-CFG-GNSS decode"""
         m_len = len(buf)
@@ -2571,7 +2590,8 @@ class ubx(object):
                0x61: {'str': 'DOSC', 'name': 'UBX-CFG-OSC'},
                0x62: {'str': 'SMGR', 'name': 'UBX-CFG-SMGR'},
                0x69: {'str': 'GEOFENCE', 'name': 'UBX-CFG-GEOFENCE'},
-               0x70: {'str': 'DGNSS', 'name': 'UBX-CFG-DGNSS'},
+               0x70: {'str': 'DGNSS', 'dec': cfg_dgnss,
+                      'name': 'UBX-CFG-DGNSS'},
                0x71: {'str': 'TMODE3', 'name': 'UBX-CFG-TMODE3'},
                0x84: {'str': 'FIXSEED', 'name': 'UBX-CFG-FIXSEED'},
                0x85: {'str': 'DYNSEED', 'name': 'UBX-CFG-DYNSEED'},
