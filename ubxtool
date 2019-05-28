@@ -2034,6 +2034,84 @@ class ubx(object):
              (self.class_id_s(u[0], u[1]), u[2], u[3], u[4], u[5], u[6], u[7]))
         return s
 
+    cfg_nmea_filter = {
+        1: "posFilt",
+        2: "mskPosFilt",
+        4: "timeFilt",
+        8: "dateFilt",
+        0x10: "gpsOnlyFilter",
+        0x20: "trackFilt",
+        }
+
+    cfg_nmea_ver = {
+        0x11: "2.1",
+        0x23: "2,3",
+        0x40: "4.0",
+        0x41: "4.10",
+        }
+
+    cfg_nmea_flags = {
+        1: "compat",
+        2: "consider",
+        4: "limit82",
+        8: "highPrec",
+        }
+
+    cfg_nmea_svn = {
+        0: "Strict",
+        1: "Extended",
+        }
+
+    cfg_nmea_mtid = {
+        0: "Default",
+        1: "GP",
+        2: "GL",
+        3: "GN",
+        4: "GA",
+        5: "GB",
+        }
+
+    cfg_nmea_gtid = {
+        0: "GNSS Specific",
+        1: "Main",
+        }
+
+    cfg_nmea_gnssfilt = {
+        1: "gps",
+        2: "sbas",
+        0x10: "qzss",
+        0x20: "glonass",
+        0x40: "beidou",
+        }
+
+    def cfg_nmea(self, buf):
+        """UBX-CFG-NMEA decode, Extended NMEA protocol configuration V1"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 20 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBBLBBBBBBBBBBBB', buf, 0)
+        s = (" filter x%x nmeaVersion x%x numSv %u flags x%x "
+             "gnssToFilter x%x\n"
+             " svNumbering %u mainTalkerId %u gsvTalkerId %u version %u\n"
+             " bdsTalkerId %u %u reserved1 %u %u %u %u %u %u" % u)
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n  filter (%s) NMEA Version (%s) numSv (%s) flags (%s)"
+                  "\n  gnssToFilter (%s) svNumbering (%s) mainTalkerId (%s)"
+                  "\n  gsvTalkerId (%s)" %
+                  (flag_s(u[0], self.cfg_nmea_filter),
+                   index_s(u[1], self.cfg_nmea_ver),
+                   u[2] if 0 != u[2] else "Unlimited",
+                   flag_s(u[3], self.cfg_nmea_flags),
+                   flag_s(u[4], self.cfg_nmea_gnssfilt),
+                   index_s(u[5], self.cfg_nmea_svn),
+                   index_s(u[6], self.cfg_nmea_mtid),
+                   index_s(u[7], self.cfg_nmea_gtid)))
+        return s
+
     def cfg_pms(self, buf):
         """UBX-CFG-PMS decode, Power Mode Setup"""
 
@@ -2414,7 +2492,7 @@ class ubx(object):
                0x11: {'str': 'RXM', 'name': 'UBX-CFG-RXM'},
                0x13: {'str': 'ANT', 'dec': cfg_ant, 'name': 'UBX-CFG-ANT'},
                0x16: {'str': 'SBAS', 'dec': cfg_sbas, 'name': 'UBX-CFG-SBAS'},
-               0x17: {'str': 'NMEA', 'name': 'UBX-CFG-NMEA'},
+               0x17: {'str': 'NMEA', 'dec': cfg_nmea, 'name': 'UBX-CFG-NMEA'},
                0x1b: {'str': 'USB', 'dec': cfg_usb, 'name': 'UBX-CFG-USB'},
                0x1e: {'str': 'ODO', 'name': 'UBX-CFG-ODO'},
                0x23: {'str': 'NAVX5', 'dec': cfg_navx5,
@@ -4913,6 +4991,10 @@ class ubx(object):
         # UBX-CFG-NAVX5
         "CFG-NAVX5": {"command": send_poll, "opt": [0x06, 0x23],
                       "help": "poll UBX-CFG-NAVX5 Nav Expert Settings"},
+        # UBX-CFG-NMEA
+        "CFG-NMEA": {"command": send_poll, "opt": [0x06, 0x17],
+                     "help": "poll UBX-CFG-NMEA Extended NMEA protocol "
+                             "configuration V1"},
         # UBX-CFG-PMS
         "CFG-PMS": {"command": send_poll, "opt": [0x06, 0x86],
                     "help": "poll UBX-CFG-PMS power management settings"},
@@ -4923,12 +5005,12 @@ class ubx(object):
         "CFG-RATE": {"command": send_poll, "opt": [0x06, 0x08],
                      "help": "poll UBX-CFG-RATE Navigation/Measurement "
                              "Rate Settings"},
-        # UBX-CFG-TMODE2
-        "CFG-TMODE2": {"command": send_poll, "opt": [0x06, 0x3d],
-                       "help": "poll UBX-CFG-TMODE2 time mode 2 config"},
         # UBX-CFG-SBAS
         "CFG-SBAS": {"command": send_poll, "opt": [0x06, 0x16],
                      "help": "poll UBX-CFG-SBAS SBAS settings"},
+        # UBX-CFG-TMODE2
+        "CFG-TMODE2": {"command": send_poll, "opt": [0x06, 0x3d],
+                       "help": "poll UBX-CFG-TMODE2 time mode 2 config"},
         # UBX-CFG-TP5
         "CFG-TP5": {"command": send_cfg_tp5,
                     "help": "poll UBX-TIM-TP5 time pulse decodes"},
