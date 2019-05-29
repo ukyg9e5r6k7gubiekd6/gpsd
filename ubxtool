@@ -3141,10 +3141,8 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<Lhhhhhhh', buf, 0)
-        s = ('  iTOW:%d ms, gDOP:%.2f pDOP:%.2f tDOP:%.2f vDOP:%.2f\n'
-             '  hDOP:%.2f nDOP:%.2f eDOP:%.2f' %
-             (u[0], u[1] / 100.0, u[2] / 100.0, u[3] / 100.0,
-              u[4] / 100.0, u[5] / 100.0, u[6] / 100.0, u[7] / 100.0))
+        s = ('  iTOW %u gDOP %u pDOP %u tDOP %u vDOP %u\n'
+             '  hDOP %u nDOP %u eDOP %u' % u)
         return s
 
     def nav_eoe(self, buf):
@@ -3154,7 +3152,7 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<L', buf, 0)
-        return ' iTOW:%d ms' % u
+        return ' iTOW %d' % u
 
     def nav_geofence(self, buf):
         """UBX-NAV-GEOFENCE decode"""
