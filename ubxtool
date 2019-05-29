@@ -2376,6 +2376,24 @@ class ubx(object):
              '  fixeedPosAcc %u svinMinDur %u svinAccLimit %u' % u)
         return s
 
+    cfg_tp5_flags = {
+        1: "Active",
+        2: "lockGnssFreq",
+        4: "lockedOtherSet",
+        8: "isFreq",
+        0x10: "isLength",
+        0x20: "alignToTow",
+        0x40: "RisingEdge",
+        }
+
+    cfg_tp5_grid = {
+        0: 'UTC',
+        1: 'GPS',
+        2: 'Glonass',
+        3: 'BeiDou',
+        4: 'Galileo',
+        }
+
     def cfg_tp5(self, buf):
         """UBX-CFG-TP5 decode, Time Pulse Parameters"""
         m_len = len(buf)
@@ -2388,39 +2406,19 @@ class ubx(object):
         if 32 > m_len:
             return " Bad Length %s" % m_len
 
-        u = struct.unpack_from('<BBBBhhLLLLlL', buf, 0)
-        s = ('tpIdx: %u, version: %u reserved1: [%u %u]\n'
-             ' antCableDelay: %d rfGroupDelay %d freqPeriod: %u '
-             'freqPeriodLock: %u\n'
-             ' pulseLenRatio: %u pulseLenRatioLock %u userConfigDelay: %d\n'
-             'Flags: %#x\n  ' % u)
+        u = struct.unpack_from('<BBHhhLLLLlL', buf, 0)
+        s = ("tpIdx %u version %u reserved1 %u\n"
+             " antCableDelay %d rfGroupDelay %d freqPeriod %u "
+             "freqPeriodLock %u\n"
+             " pulseLenRatio %u pulseLenRatioLock %u userConfigDelay %d\n"
+             " Flags %#x" % u)
 
-        if 0x01 & u[10]:
-            s += 'active, '
-        else:
-            s += 'inactive, '
-        if 0x02 & u[10]:
-            s += 'lockGnsFreq, '
-        if 0x04 & u[10]:
-            s += 'lockedOtherSet, '
-        if 0x08 & u[10]:
-            s += 'is frequency, '
-        else:
-            s += 'is period, '
-        if 0x10 & u[10]:
-            s += 'is pulse length\n  '
-        else:
-            s += 'is duty cycle\n  '
-        if 0x20 & u[10]:
-            s += 'alignToTow, '
-        if 0x40 & u[10]:
-            s += 'rising, '
-        else:
-            s += 'falling, '
-        gridToGps = (u[10] >> 7) & 0x0f
-        gridToGpsDec = ('UTC', 'GPS', 'Glonass', 'BeiDou', 'Galileo')
-        syncMode = (u[10] >> 11) & 0x03
-        s += "gridToGps %s, syncMode %d " % (gridToGpsDec[gridToGps], syncMode)
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   Flags (%s)"
+                  "\n   gridToGps (%s) syncMode %d" %
+                  (flag_s(u[10] & 0x7f, self.cfg_tp5_flags),
+                   index_s((u[10] >> 7) & 0x0f, self.cfg_tp5_grid),
+                   (u[10] >> 11) & 0x03))
 
         return s
 
@@ -4745,6 +4743,45 @@ class ubx(object):
         m_data = bytearray([0x2, sid, rate])
         gps_model.gps_send(6, 1, m_data)
 
+    def send_able_pps(self, able):
+        """dis/enable PPS, using UBX-CFG-TP5"""
+
+        m_data = bytearray(32)
+        m_data[0] = 0         # tpIdx
+        m_data[1] = 1         # version
+        m_data[2] = 0         # reserved
+        m_data[3] = 0         # reserved
+        m_data[4] = 2         # antCableDelay
+        m_data[5] = 0         # antCableDelay
+        m_data[6] = 0         # rfGroupDelay
+        m_data[7] = 0         # rfGroupDelay
+        m_data[8] = 0x40      # freqPeriod
+        m_data[9] = 0x42      # freqPeriod
+        m_data[10] = 0x0f     # freqPeriod
+        m_data[11] = 0        # freqPeriod
+        m_data[12] = 0x40     # freqPeriodLock
+        m_data[13] = 0x42     # freqPeriodLock
+        m_data[14] = 0x0f     # freqPeriodLock
+        m_data[15] = 0        # freqPeriodLock
+        m_data[16] = 0        # pulseLenRatio
+        m_data[17] = 0        # pulseLenRatio
+        m_data[18] = 0        # pulseLenRatio
+        m_data[19] = 0        # pulseLenRatio
+        m_data[20] = 0xa0     # pulseLenRatioLock
+        m_data[21] = 0x86     # pulseLenRatioLock
+        m_data[22] = 0x1      # pulseLenRatioLock
+        m_data[23] = 0        # pulseLenRatioLock
+        m_data[24] = 0        # userConfigDelay
+        m_data[25] = 0        # userConfigDelay
+        m_data[26] = 0        # userConfigDelay
+        m_data[27] = 0        # userConfigDelay
+        m_data[28] = 0x77     # flags
+        m_data[29] = 0        # flags
+        m_data[30] = 0        # flags
+        m_data[31] = 0        # flags
+
+        gps_model.gps_send(6, 0x31, m_data)
+
     def send_able_sbas(self, able):
         """dis/enable SBAS"""
         gps_model.send_cfg_gnss1(1, able)
@@ -5111,6 +5148,9 @@ class ubx(object):
         # en/dis able RAW/RAWX
         "RAWX": {"command": send_able_rawx,
                  "help": "RAW/RAWX measurements"},
+        # en/dis able PPS
+        "PPS": {"command": send_able_pps,
+                "help": "PPS on TIMPULSE"},
         # en/dis able SBAS
         "SBAS": {"command": send_able_sbas,
                  "help": "SBAS"},
