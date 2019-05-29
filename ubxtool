@@ -5297,6 +5297,9 @@ class ubx(object):
         # UBX-NAV-SAT
         "NAV-SAT": {"command": send_poll, "opt": [0x01, 0x35],
                     "help": "poll UBX-NAV-SAT Satellite Information"},
+        # UBX-NAV-SBAS
+        "NAV-SBAS": {"command": send_poll, "opt": [0x01, 0x32],
+                     "help": "poll UBX-NAV-SBAS SBAS Status Data"},
         # UBX-NAV-SIG
         "NAV-SIG": {"command": send_poll, "opt": [0x01, 0x43],
                     "help": "poll UBX-NAV-SIG Signal Information"},
