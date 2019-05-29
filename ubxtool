@@ -4529,11 +4529,10 @@ class ubx(object):
                                              (self.class_id_s(m_class, m_id),
                                               m_len, x_payload))
 
-                if VERB_INFO < opts['verbosity']:
+                if VERB_INFO <= opts['verbosity']:
                     print("%s, len: %#x" %
                           (self.class_id_s(m_class, m_id), m_len))
-                    if VERB_RAW < opts['verbosity']:
-                        print("payload: %s" % x_payload)
+                    print("payload: %s" % x_payload)
                 print("%s\n" % s_payload)
                 return consumed
 
