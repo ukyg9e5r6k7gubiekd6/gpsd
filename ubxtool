@@ -3225,8 +3225,8 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LllllLL', buf, 0)
-        return ('  iTOW:%d lon:%d lat:%d height:%d\n'
-                '  hMSL:%d hAcc:%u vAcc:%u' % u)
+        return ('  iTOW %u lon %d lat %d height %d\n'
+                '  hMSL %d hAcc %u vAcc %u' % u)
 
     nav_pvt_valid = {
         1: "validDate",
