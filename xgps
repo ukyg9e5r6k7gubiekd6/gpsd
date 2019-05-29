@@ -451,6 +451,16 @@ class SkyView(Gtk.DrawingArea):
                 # Bad elevation, skip.  Allow just below horizon
                 continue
 
+            # The Navika-100 reports el/az of 0/0 for SBAS satellites,
+            # causing them to appear inappropriately at the "north point".
+            # Although this value isn't technically illegal (and hence not
+            # filtered above), excluding this one specific case has a very
+            # low probability of excluding legitimate cases, while avoiding
+            # the improper display in this case.
+            # Note that this only excludes them from the map, not the list.
+            if sat.az == 0 and sat.el == 0:
+                continue
+
             (x, y) = self.pol2cart(sat.az, sat.el)
             # colorize by signal to noise ratio
             # RINEX 3 uses 9 steps: 1 to 9.  Corresponding to
