@@ -3310,6 +3310,29 @@ class ubx(object):
 
         return s
 
+    nav_sbas_mode = {
+        0: "Disabled",
+        1: "Enabled Integrity",
+        2: "Enabled Testmode",
+        }
+
+    # sometimes U1 or I1
+    nav_sbas_sys = {
+        0: "WAAS",
+        1: "EGNOS",
+        2: "MSAS",
+        3: "GAGAN",
+        4: "SDCM",      # per ICAO Annex 10, v1, Table B-27
+        16: "GPS",
+        }
+
+    nav_sbas_service = {
+        1: "Ranging",
+        2: "Corrections",
+        4: "Integrity",
+        8: "Testmode",
+        }
+
     def nav_sbas(self, buf):
         """UBX-NAV-SBAS decode"""
         m_len = len(buf)
@@ -3320,25 +3343,26 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBbBb', buf, 0)
-        s = (' iTOW:%d ms, geo:%u mode:%#x, sys:%#x service:%#x cnt:%d' % u)
+        s = (' iTOW %d geo %u mode x%x sys x%x service x%x cnt %d' % u)
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n    mode (%s) sys (%s)"
+                  "\n    service (%s)" %
+                  (index_s(u[2], self.nav_sbas_mode),
+                   index_s(u[3], self.nav_sbas_sys),
+                   flag_s(u[4], self.nav_sbas_service)))
 
         m_len -= 12
         i = 0
         while 0 < m_len:
-            u = struct.unpack_from('<BBBBBBhhh', buf, 12 + (i * 12))
-            s += ('\n  svid %3d flags %#4x udre:%#2x svSys:%3d syService:%2d'
-                  ' prc:%3d ic:%3d' %
-                  (u[0], u[1], u[2], u[3], u[4], u[6], u[8]))
-            if 0x0f & u[4]:
-                s += '\n   svService: '
-                if 1 & u[4]:
-                    s += 'Ranging '
-                if 2 & u[4]:
-                    s += 'Corrections '
-                if 4 & u[4]:
-                    s += 'Integrity '
-                if 8 & u[4]:
-                    s += 'Testmode'
+            u = struct.unpack_from('<BBBBBBhHh', buf, 12 + (i * 12))
+            s += ("\n  svid %3d flags x%04x udre x%02x svSys %3d svService %2d"
+                  " reserved2 %u"
+                  "\n   prc %3d reserved3 %u ic %3d" % u)
+            if VERB_DECODE <= opts['verbosity']:
+                # where are flags and udre defined??
+                s += ("\n   svSys (%s) svService (%s)" %
+                      (index_s(u[3], self.nav_sbas_sys),
+                       flag_s(u[4], self.nav_sbas_service)))
             m_len -= 12
             i += 1
 
