@@ -4320,7 +4320,7 @@ class ubx(object):
         return s
 
     def tim_tm2(self, buf):
-        """UBX-TIM-TP decode"""
+        """UBX-TIM-TM2 decode, Time mark data"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -4334,7 +4334,7 @@ class ubx(object):
         return s
 
     def tim_tp(self, buf):
-        """UBX-TIM-TP decode"""
+        """UBX-TIM-TP decode, Time Pulse Timedata"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
