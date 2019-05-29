@@ -3572,8 +3572,33 @@ class ubx(object):
                   (flag_s(u[4], self.nav_time_valid)))
         return s
 
+    nav_timels_src = {
+        0: "Default",
+        1: "GPS/GLONASS derived",
+        2: "GPS",
+        3: "SBAS",
+        4: "BeiDou",
+        5: "Galileo",
+        6: "Aided data",
+        7: "Configured",
+        }
+
+    nav_timels_src1 = {
+        0: "None",
+        2: "GPS",
+        3: "SBAS",
+        4: "BeiDou",
+        5: "Galileo",
+        6: "GLONASS",
+        }
+
+    nav_timels_valid = {
+        1: "validCurrLs",
+        2: "validTimeToLsEvent",
+        }
+
     def nav_timels(self, buf):
-        """UBX-NAV-TIMELS decode"""
+        """UBX-NAV-TIMELS decode, Leap second event information"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -3581,11 +3606,17 @@ class ubx(object):
         if 24 > m_len:
             return " Bad Length %s" % m_len
 
-        u = struct.unpack_from('<LBBBBBbBbLHHBBBB', buf, 0)
+        u = struct.unpack_from('<LBBBBBbBblHHBBBB', buf, 0)
         s = ('  iTOW %u version %u reserved2 %u %u %u srcOfCurrLs %u\n'
-             '  currLs %u srcOfLsChange %u lsChange %u timeToLsEvent %u\n'
+             '  currLs %d srcOfLsChange %u lsChange %d timeToLsEvent %d\n'
              '  dateOfLsGpsWn %u dateOfLsGpsDn %u reserved2 %u %u %u\n'
-             '  valid %#x' % u)
+             '  valid x%x' % u)
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   srcOfCurrLs (%s) srcOfLsChange (%s)"
+                  "\n   valid (%s)" %
+                  (index_s(u[5], self.nav_timels_src),
+                   index_s(u[7], self.nav_timels_src1),
+                   flag_s(u[15], self.nav_timels_valid)))
         return s
 
     def nav_timeutc(self, buf):
