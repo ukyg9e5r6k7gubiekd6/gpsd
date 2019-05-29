@@ -3495,6 +3495,12 @@ class ubx(object):
 
         return s
 
+    nav_time_valid = {
+        1: "towValid",
+        2: "weekValid",
+        4: "leapValid",
+        }
+
     def nav_timebds(self, buf):
         """UBX-NAV-TIMEBDS decode"""
         m_len = len(buf)
@@ -3505,16 +3511,12 @@ class ubx(object):
             return ".Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlhbBL', buf, 0)
-        s = ('  iTOW:%d SOW:%d fSOW:%d week %d leapS:%d\n'
-             '  Valid:%#x tAcc:%d' % u)
-        if 0x07 & u[5]:
-            s += '\n   valid: '
-            if 1 & u[5]:
-                s += 'towValid '
-            if 2 & u[5]:
-                s += 'weekValid '
-            if 4 & u[5]:
-                s += 'leapValid '
+        s = ("  iTOW %d SOW %d fSOW %d week %d leapS %d\n"
+             "  Valid %#x tAcc %d" % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   valid (%s)" %
+                  (flag_s(u[5], self.nav_time_valid)))
         return s
 
     def nav_timegal(self, buf):
@@ -3527,16 +3529,12 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlhbBL', buf, 0)
-        s = ('  iTOW %d galTOW %d fGalTow %d galWno %d leapS %d\n'
-             '  Valid:%#x, tAcc:%d' % u)
-        if 0x07 & u[6]:
-            s += '\n   valid: '
-            if 1 & u[6]:
-                s += 'towValid '
-            if 2 & u[6]:
-                s += 'weekValid '
-            if 4 & u[6]:
-                s += 'leapValid '
+        s = ("  iTOW %d galTOW %d fGalTow %d galWno %d leapS %d\n"
+             "  Valid x%x, tAcc %d" % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   valid (%s)" %
+                  (flag_s(u[5], self.nav_time_valid)))
         return s
 
     def nav_timeglo(self, buf):
@@ -3549,14 +3547,12 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlhbBL', buf, 0)
-        s = ('  iTOW %d ms, TOD %d s, fTOD %d ns, Nt %d days, N4 %d\n'
-             '  Valid:%#x, tAcc:%d ns' % u)
-        if 0x03 & u[5]:
-            s += '\n   valid: '
-            if 1 & u[5]:
-                s += 'todValid '
-            if 2 & u[5]:
-                s += 'dateValid '
+        s = ("  iTOW %d TOD %d fTOD %d Nt %d  N4 %d\n"
+             "  Valid x%x tAcc %d" % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   valid (%s)" %
+                  (flag_s(u[5], self.nav_time_valid)))
         return s
 
     def nav_timegps(self, buf):
@@ -3569,16 +3565,11 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlhbBL', buf, 0)
-        s = ('  iTOW:%u fTOW:%u week:%d leapS:%d valid:%#x tAcc:%d' %
-             u)
-        if 0x07 & u[4]:
-            s += '\n   valid: '
-            if 1 & u[4]:
-                s += 'towValid '
-            if 2 & u[4]:
-                s += 'weekValid '
-            if 4 & u[4]:
-                s += 'leapValid '
+        s = "  iTOW %u fTOW %u week %d leapS %d valid x%x tAcc %d" % u
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   valid (%s)" %
+                  (flag_s(u[4], self.nav_time_valid)))
         return s
 
     def nav_timels(self, buf):
