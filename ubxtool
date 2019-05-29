@@ -2331,6 +2331,62 @@ class ubx(object):
 
         return s
 
+    cfg_sbas_mode = {
+        1: "enabled",
+        2: "test",
+        }
+
+    cfg_sbas_usage = {
+        1: "range",
+        2: "diffCorr",
+        3: "integrity",
+        }
+
+    cfg_sbas_scanmode1 = {
+        1: "PRN120",
+        2: "PRN121",
+        4: "PRN122",
+        8: "PRN123",
+        0x10: "PRN124",
+        0x20: "PRN125",
+        0x40: "PRN126",
+        0x80: "PRN127",
+        0x100: "PRN128",
+        0x200: "PRN129",
+        0x400: "PRN130",
+        0x800: "PRN131",
+        0x1000: "PRN132",
+        0x2000: "PRN133",
+        0x4000: "PRN134",
+        0x8000: "PRN135",
+        0x10000: "PRN136",
+        0x20000: "PRN137",
+        0x40000: "PRN138",
+        0x80000: "PRN139",
+        0x100000: "PRN140",
+        0x200000: "PRN141",
+        0x400000: "PRN142",
+        0x800000: "PRN143",
+        0x1000000: "PRN144",
+        0x2000000: "PRN145",
+        0x4000000: "PRN146",
+        0x8000000: "PRN147",
+        0x10000000: "PRN148",
+        0x20000000: "PRN149",
+        0x40000000: "PRN150",
+        0x80000000: "PRN151",
+        }
+
+    cfg_sbas_scanmode2 = {
+        1: "PRN152",
+        2: "PRN153",
+        4: "PRN154",
+        8: "PRN155",
+        0x10: "PRN156",
+        0x20: "PRN157",
+        0x40: "PRN158",
+        }
+
     def cfg_sbas(self, buf):
         """UBX-CFG-SBAS decode"""
         m_len = len(buf)
@@ -2341,8 +2397,17 @@ class ubx(object):
             return "Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBL', buf, 0)
-        return (' mode: %#x usage: %#x maxSBAS: %u scanMode2: %#x'
-                ' scanMode1: %#x' % u)
+        s = (" mode x%x usage x%x maxSBAS %u scanMode2 x%x"
+             " scanMode1: x%x" % u)
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   mode (%s) usage (%s) scanmode2 (%s)"
+                  "\n   scanmode1 (%s)" %
+                  (flag_s(u[0], self.cfg_sbas_mode),
+                   flag_s(u[1], self.cfg_sbas_usage),
+                   flag_s(u[3], self.cfg_sbas_scanmode2),
+                   flag_s(u[4], self.cfg_sbas_scanmode1)))
+
+        return s
 
     def cfg_smgr(self, buf):
         """UBX-CFG-SMGR decode, Synchronization manager configuration"""
