@@ -3185,10 +3185,10 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLlllbbbbL', buf, 0)
-        return ('  version %u reserved1 %u %u %u iTOW:%d\n'
+        return ('  version %u reserved1 %u %u %u iTOW %u\n'
                 '  ecef: X %d Y %d Z %d\n'
                 '  ecefHP: X %d Y %d Z %d\n'
-                '  reserved2 %u pAcc:%d' % u)
+                '  reserved2 %u pAcc %u' % u)
 
     def nav_hpposllh(self, buf):
         """UBX-NAV-HPPOSLLH decode"""
@@ -3215,7 +3215,7 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllL', buf, 0)
-        return '  iTOW:%u ms, ecefX:%d cm Y:%d cm Z:%d cm\n  pAcc:%d cm' % u
+        return '  iTOW %u ecefX %d Y %d Z %d pAcc %u' % u
 
     def nav_posllh(self, buf):
         """UBX-NAV-POSLLH decode"""
@@ -3262,6 +3262,7 @@ class ubx(object):
         5: "Inactive",
         }
 
+    # protver 27+
     nav_pvt_carr = {
         0: "None",
         1: "Floating",
