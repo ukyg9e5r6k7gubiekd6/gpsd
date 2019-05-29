@@ -3712,7 +3712,7 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllL', buf, 0)
-        return '  iTOW:%d ecef: VX %.2f VY %.2f VZ %.2f vAcc:%.2f' % u
+        return '  iTOW %d ecef: VX %d VY %d VZ %d vAcc:%u' % u
 
     def nav_velned(self, buf):
         """UBX-NAV-VELNED decode"""
@@ -3724,8 +3724,8 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllLLlLL', buf, 0)
-        return ('  iTOW %d vel: N %d E %d D %d speed %d\n'
-                '  gspeed %d heading %f sAcc %d cAcc %d' % u)
+        return ('  iTOW %u vel: N %d E %d D %d speed %u\n'
+                '  gspeed %u heading %d sAcc %u cAcc %u' % u)
 
     nav_ids = {1: {'str': 'POSECEF', 'dec': nav_posecef,
                    'name': 'UBX-NAV-POSECEF'},
