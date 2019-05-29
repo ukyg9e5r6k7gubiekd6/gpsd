@@ -3619,6 +3619,23 @@ class ubx(object):
                    flag_s(u[15], self.nav_timels_valid)))
         return s
 
+    nav_timeutc_valid = {
+        1: "validTOW",
+        2: "validWKN",
+        4: "validUTC",
+        }
+
+    nav_timeutc_std = {
+            0: "N/A",
+            1: "CRL",
+            2: "NIST",
+            3: "USNO",
+            4: "BIPM",
+            5: "tbd",
+            6: "SU",
+            7: "NTSC",
+        }
+
     def nav_timeutc(self, buf):
         """UBX-NAV-TIMEUTC decode"""
         m_len = len(buf)
@@ -3629,34 +3646,13 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlHbbbbbB', buf, 0)
-        s = ('  iTOW:%d tAcc:%d nano:%d Time: %d/%d/%d %d:%d:%d\n'
-             '  valid:%#x (' % u)
-        if 0xf7 & u[9]:
-            if 1 & u[9]:
-                s += 'validTOW '
-            if 2 & u[9]:
-                s += 'validWKN '
-            if 4 & u[9]:
-                s += 'validUTC '
-            utcStandard = u[9] >> 4
-            s += "utcStandard: "
-            if 1 == utcStandard:
-                s += 'CRL'
-            elif 2 == utcStandard:
-                s += 'NIST'
-            elif 3 == utcStandard:
-                s += 'USNO'
-            elif 4 == utcStandard:
-                s += 'BIPM'
-            elif 5 == utcStandard:
-                s += 'tbd'
-            elif 6 == utcStandard:
-                s += 'SU'
-            elif 7 == utcStandard:
-                s += 'NTSC'
-            else:
-                s += 'n/a'
-        s += ')'
+        s = ("  iTOW %d tAcc %d nano %d Time  %d/%d/%d %d:%d:%d\n"
+             "  valid x%x" % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   valid (%s) utcStandard (%s)" %
+                  (flag_s(u[9], self.nav_timeutc_valid),
+                   index_s(u[9] >> 4, self.nav_timeutc_std)))
         return s
 
     def nav_velecef(self, buf):
