@@ -3392,10 +3392,26 @@ class ubx(object):
         return s
 
     # u-blox TIME ONLY is same as Surveyed
-    fix_types = ('None', 'Dead Reckoning', '2D', '3D', 'GPS+DR', 'Surveyed')
+    nav_sol_gpsFix = {
+        0: 'None',
+        1: 'Dead Reckoning',
+        2: '2D',
+        4: '3D',
+        5: 'GPS+DR',
+        6: 'Surveyed',
+        }
+
+    nav_sol_flags = {
+        1: "GPSfixOK",
+        2: "DiffSoln",
+        4: "WKNSET",
+        8: "TOWSET",
+        }
 
     def nav_sol(self, buf):
-        """UBX-NAV-SOL decode deprecated by u-blox"""
+        """UBX-NAV-SOL decode, Navigation Solution Information"""
+
+        #  deprecated by u-blox
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -3403,27 +3419,17 @@ class ubx(object):
         if 52 > m_len:
             return " Bad Length %s" % m_len
 
-        u = struct.unpack_from('<LlhBBlllLlllLHBBBBB', buf, 0)
-        s = ('  iTOW:%u ms, fTOW %u ns, week:%d gpsFix:%d flags:%#x\n'
-             '  ECEF X:%.3f Y:%.3f Z:%.3f pAcc:%.3f\n'
-             '  VECEF X:%.3f Y:%.3f Z:%.3f vAcc:%.3f\n'
-             '  pDOP:%.2f numSV:%d' %
-             (u[0], u[1], u[2], u[3], u[4],
-              u[5] / 100.0, u[6] / 100.0, u[7] / 100.0, u[8] / 100.0,
-              u[9] / 100.0, u[10] / 100.0, u[11] / 100.0, u[12] / 100.0,
-              u[13] / 100.0, u[15]))
-        if u[3] < len(self.fix_types):
-            s += '\n   gpsFix: ' + self.fix_types[u[3]]
-        if 0x0f & u[4]:
-            s += '\n   flags: '
-            if 1 & u[4]:
-                s += 'GPSfixOK '
-            if 2 & u[4]:
-                s += 'DiffSoln '
-            if 4 & u[4]:
-                s += 'WKNSET '
-            if 8 & u[4]:
-                s += 'TOWSET'
+        u = struct.unpack_from('<LlhBBlllLlllLHBBL', buf, 0)
+        s = ('  iTOW %u fTOW %d week %d gpsFix %u flags x%x\n'
+             '  ECEF X %d Y %d Z %d pAcc %u\n'
+             '  VECEF X %d Y %d Z %d sAcc %u\n'
+             '  pDOP %u reserved1 %u numSV %u reserved2 %u' % u)
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   gpsfix (%s)"
+                  "\n   flags (%s)" %
+                  (index_s(u[3], self.nav_sol_gpsFix),
+                   flag_s(u[4], self.nav_sol_flags)))
+
         return s
 
     def nav_status(self, buf):
@@ -5410,6 +5416,10 @@ class ubx(object):
         # UBX-NAV-SIG
         "NAV-SIG": {"command": send_poll, "opt": [0x01, 0x43],
                     "help": "poll UBX-NAV-SIG Signal Information"},
+        # UBX-NAV-SOL
+        "NAV-SOL": {"command": send_poll, "opt": [0x01, 0x06],
+                    "help": "poll UBX-NAV-SOL Navigation Solution "
+                    "Information"},
         # UBX-NAV-STATUS
         "NAV-STATUS": {"command": send_poll, "opt": [0x01, 0x03],
                        "help": "poll UBX-NAV-STATUS Receiver Nav Status"},
