@@ -3230,8 +3230,46 @@ class ubx(object):
         return ('  iTOW:%d lon:%d lat:%d height:%d\n'
                 '  hMSL:%d hAcc:%u vAcc:%u' % u)
 
+    nav_pvt_valid = {
+        1: "validDate",
+        2: "ValidTime",
+        4: "fullyResolved",
+        8: "validMag",      # protver 27
+        }
+
+    # u-blox TIME ONLY is same as Surveyed
+    nav_pvt_fixType = {
+        0: 'None',
+        1: 'Dead Reckoning',
+        2: '2D',
+        3: '3D',
+        4: 'GPS+DR',
+        5: 'Surveyed',
+        }
+
+    nav_pvt_flags = {
+        1: "gnssFixOK",
+        2: "diffSoln",
+        0x20: "headVehValid",
+        }
+
+    nav_pvt_psm = {
+        0: "n/a",
+        1: "Enabled",
+        2: "Acquisition",
+        3: "Tracking",
+        4: "Power Optimized Tracking",
+        5: "Inactive",
+        }
+
+    nav_pvt_carr = {
+        0: "None",
+        1: "Floating",
+        2: "Fixed",
+        }
+
     def nav_pvt(self, buf):
-        """UBX-NAV-PVT decode"""
+        """UBX-NAV-PVT decode, Navigation Position Velocity Time Solution"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -3241,18 +3279,30 @@ class ubx(object):
         if 84 > m_len:
             return " Bad Length %s" % m_len
 
+        # flags2 is protver 27
         u = struct.unpack_from('<LHBBBBBBLlBBBBllllLLlllllLLHHHH', buf, 0)
-        s = ('  iTOW %d ms, time %d/%d/%d %2d:%2d:%2d valid %#x\n'
-             '  tAcc %d ns nano %d fixType %d flags %#x flags2 %#x\n'
-             '  numSV %d lon %d lat %d height %d\n'
-             '  hMSL %d hAcc %d vAcc %d\n'
+        s = ('  iTOW %u time %u/%u/%u %2u:%2u:%2u valid x%x\n'
+             '  tAcc %u nano %d fixType %u flags x%x flags2 x%x\n'
+             '  numSV %u lon %d lat %d height %d\n'
+             '  hMSL %d hAcc %u vAcc %u\n'
              '  velN %d velE %d velD %d gSpeed %d headMot %d\n'
-             '  sAcc %d headAcc %d pDOP %d reserved1 %d %d %d' % u)
+             '  sAcc %u headAcc %u pDOP %u reserved1 %u %u %u' % u)
 
         if 92 <= m_len:
             # version 15
-            u = struct.unpack_from('<lhH', buf, 81)
-            s += ('\n  headVeh %d magDec %d magAcc %u' % u)
+            u1 = struct.unpack_from('<lhH', buf, 81)
+            s += ('\n  headVeh %d magDec %d magAcc %u' % u1)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n    valid (%s) fixType (%s)"
+                  "\n    flags (%s)"
+                  "\n    psmState (%s)"
+                  "\n    carrSoln (%s)" %
+                  (flag_s(u[7], self.nav_pvt_valid),
+                   index_s(u[10], self.nav_pvt_fixType),
+                   flag_s(u[11], self.nav_pvt_flags),
+                   index_s((u[11] >> 2) & 0x0f, self.nav_pvt_psm),
+                   index_s((u[11] >> 6) & 0x04, self.nav_pvt_carr)))
         return s
 
     def nav_sat(self, buf):
@@ -3391,16 +3441,6 @@ class ubx(object):
             i += 1
         return s
 
-    # u-blox TIME ONLY is same as Surveyed
-    nav_sol_gpsFix = {
-        0: 'None',
-        1: 'Dead Reckoning',
-        2: '2D',
-        4: '3D',
-        5: 'GPS+DR',
-        6: 'Surveyed',
-        }
-
     nav_sol_flags = {
         1: "GPSfixOK",
         2: "DiffSoln",
@@ -3427,7 +3467,7 @@ class ubx(object):
         if VERB_DECODE <= opts['verbosity']:
             s += ("\n   gpsfix (%s)"
                   "\n   flags (%s)" %
-                  (index_s(u[3], self.nav_sol_gpsFix),
+                  (index_s(u[3], self.nav_pvt_fixType),
                    flag_s(u[4], self.nav_sol_flags)))
 
         return s
@@ -5407,6 +5447,10 @@ class ubx(object):
         # UBX-NAV-POSLLH
         "NAV-POSLLH": {"command": send_poll, "opt": [0x01, 0x02],
                        "help": "poll UBX-NAV-POSLLH LLH position"},
+        # UBX-NAV-PVT
+        "NAV-PVT": {"command": send_poll, "opt": [0x01, 0x07],
+                    "help": "poll UBX-NAV-PVT Navigation Position Velocity "
+                    "Time Solution"},
         # UBX-NAV-SAT
         "NAV-SAT": {"command": send_poll, "opt": [0x01, 0x35],
                     "help": "poll UBX-NAV-SAT Satellite Information"},
