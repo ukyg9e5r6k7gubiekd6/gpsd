@@ -3,10 +3,8 @@ image: alpine:latest
 pages:
   stage: deploy
   script:
-  - apk update && apk add python xmlto asciidoc scons && scons www
-  - mkdir .public
-  - cp -r www/*.html .public
-  - mv .public public
+  - apk update && apk add python xmlto asciidoc scons
+  - scons website
   - find public -type f -regex '.*\.\(htm\|html\|txt\|text\|js\|css\)$' -exec gzip -f -k {} \;
   - ls -lR public
   artifacts:

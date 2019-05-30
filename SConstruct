@@ -87,8 +87,7 @@ tipwidget = '<p><a href="https://www.patreon.com/esr">' \
             'Donate here to support continuing development.</a></p>'
 usermail = "gpsd-users@lists.nongnu.org"
 webform = "http://www.thyrsus.com/cgi-bin/gps_report.cgi"
-website = "http://catb.org/gpsd"
-webupload = "login.ibiblio.org:/public/html/catb/gpsd"
+website = "https://gpsd.gitlab.io/gpsd/"
 # Hosting information ends here
 
 # gpsd needs Scons version at least 2.3
@@ -2467,10 +2466,10 @@ def validation_list(target, source, env):
 
 Utility("validation-list", [www], validation_list)
 
-# How to update the website
+# How to update the website.  Assumes a logal GitLab pages setup.
 upload_web = Utility("website", [www],
-                     ['rsync --exclude="*.in" -avz www/ ' + webupload,
-                      'scp -q README TODO NEWS ' + webupload,
+                     ['rsync --exclude="*.in" -avz www/ pages',
+                      'cp README TODO NEWS pages',
                       'chmod ug+w,a+x www/gps_report.cgi',
                       'scp -q www/gps_report.cgi ' + cgiupload +
                       "gps_report.cgi"])
