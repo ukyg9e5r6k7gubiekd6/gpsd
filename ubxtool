@@ -3304,6 +3304,49 @@ class ubx(object):
                    index_s((u[11] >> 6) & 0x04, self.nav_pvt_carr)))
         return s
 
+    nav_sat_qual = {
+        0: "None",
+        1: "Searching",
+        2: "Acquired",
+        3: "Detected",
+        4: "Code and time locked",
+        5: "Code, carrier and time locked",
+        6: "Code, carrier and time locked",
+        7: "Code, carrier and time locked",
+        }
+
+    nav_sat_health = {
+        1: "Healthy",
+        2: "Unhealthy",
+        }
+
+    nav_sat_orbit = {
+        0: "None",
+        1: "Ephemeris",
+        2: "Almanac",
+        3: "AssistNow Offline",
+        4: "AssistNow Autonomous",
+        5: "Other",
+        6: "Other",
+        7: "Other",
+        }
+
+    nav_sat_flags = {
+        8: "svUsed",
+        0x40: "diffCorr",
+        0x80: "smoothed",
+        0x800: "ephAvail",
+        0x1000: "almAvail",
+        0x2000: "anoAvail",
+        0x4000: "aopAvail",
+        0x10000: "sbasCorrUsed",
+        0x20000: "rtcmCorrUsed",
+        0x40000: "slasCorrUsed",
+        0x100000: "prCorrUsed",
+        0x200000: "crCorrUsed",
+        0x400000: "doCorrUsed",
+        }
+
     def nav_sat(self, buf):
         """UBX-NAV-SAT decode"""
         m_len = len(buf)
@@ -3313,49 +3356,21 @@ class ubx(object):
         if 8 > m_len:
             return " Bad Length %s" % m_len
 
-        u = struct.unpack_from('<LBB', buf, 0)
-        s = '  iTOW %d ms, version %d numSvs %d' % u
+        u = struct.unpack_from('<LBBBB', buf, 0)
+        s = '  iTOW %u version %u numSvs %u reserved1 %u %u' % u
 
-        m_len -= 8
-        i = 0
-        while 0 < m_len:
-            u = struct.unpack_from('<BBBbhhL', buf, 8 + i * 12)
-            s += ('\n   gnssd %d svid %3d cno %2d elev %3d azim %3d prRes %6d'
-                  ' flags %#x\n' % u)
-            if 0 < u[6]:
-                s += '    '
-                s += 'qualityInd %u ' % (0x07 & u[6])
-                if 8 & u[6]:
-                    s += 'svUsed '
-                s += 'health %u ' % (0x03 & (u[6] >> 4))
-                if 0x40 & u[6]:
-                    s += 'diffCorr '
-                if 0x80 & u[6]:
-                    s += 'smoothed '
-                s += 'orbitSource %u ' % (0x07 & (u[6] >> 8))
-                if 0x800 & u[6]:
-                    s += 'ephAvail '
-                if 0x1000 & u[6]:
-                    s += 'almAvail '
-                if 0x2000 & u[6]:
-                    s += 'anoAvail '
-                if 0x4000 & u[6]:
-                    s += 'aopAvail '
-
-                if 0x730000 & u[6]:
-                    s += '\n'
-                    if 0x10000 & u[6]:
-                        s += 'sbasCorrused '
-                    if 0x20000 & u[6]:
-                        s += 'rtcmCorrused '
-                    if 0x1000000 & u[6]:
-                        s += 'prCorrused '
-                    if 0x2000000 & u[6]:
-                        s += 'crCorrused '
-                    if 0x4000000 & u[6]:
-                        s += 'doCorrused '
-            m_len -= 12
-            i += 1
+        for i in range(0, u[2]):
+            u = struct.unpack_from('<BBBbhhL', buf, 8 + (i * 12))
+            s += ('\n   gnssId %u svid %3u cno %2u elev %3d azim %3d prRes %6d'
+                  ' flags x%x' % u)
+            if VERB_DECODE <= opts['verbosity']:
+                s += ("\n     flags (%s)"
+                      "\n     qualityInd x%x (%s) health (%s)"
+                      "\n     orbitSource (%s)" %
+                      (flag_s(u[6], self.nav_sat_flags),
+                       u[6] & 7, index_s(u[6] & 7, self.nav_sat_qual),
+                       index_s((u[6] >> 4) & 3, self.nav_sat_health),
+                       index_s((u[6] >> 8) & 7, self.nav_sat_orbit)))
 
         return s
 
