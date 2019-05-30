@@ -3087,8 +3087,7 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LllLL', buf, 0)
-        return ('  iTOW:%d ms, clkB:%d ns clkD:%d ns/s tAcc:%d ns,'
-                'fAcc:%d ns/s' % u)
+        return '  iTOW %u clkB %d clkD %d tAcc %u fAcc %u' % u
 
     nav_dgps_status = {
         0: "None",
