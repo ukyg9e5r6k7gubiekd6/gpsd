@@ -1833,8 +1833,8 @@ class ubx(object):
             return "Bad Length %s" % m_len
 
         u = struct.unpack_from('<HH', buf, 0)
-        s = ' flags %#x pins %#x ' % u
-        s += ('pinSwitch %d pinSCD %d pinOCD %d reconfig %d' %
+        s = ' flags x%x pins x%x ' % u
+        s += ('pinSwitch %u pinSCD %u pinOCD %u reconfig %u' %
               (u[1] & 0x1f, (u[1] >> 5) & 0x1f, (u[1] >> 10) & 0x1f,
                u[1] >> 15))
         if VERB_DECODE <= opts['verbosity']:
