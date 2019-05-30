@@ -4,7 +4,7 @@ pages:
   stage: deploy
   script:
   - apk update && apk add python xmlto asciidoc scons rsync
-  - scons website
+  - mkdir .pages; WEBSITE=.public scons website=.pages website; mv .public public
   - find public -type f -regex '.*\.\(htm\|html\|txt\|text\|js\|css\)$' -exec gzip -f -k {} \;
   - ls -lR public
   artifacts:

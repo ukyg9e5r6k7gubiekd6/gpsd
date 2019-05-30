@@ -2466,10 +2466,10 @@ def validation_list(target, source, env):
 Utility("validation-list", [www], validation_list)
 
 # How to update the website.  Assumes a logal GitLab pages setup.
+# See .gitlab-ci.yml
 upload_web = Utility("website", [www],
-                     ['rsync --exclude="*.in" -avz www/ pages',
-                      'cp README TODO NEWS pages',
-                      'chmod ug+w,a+x pages/gps_report.cgi'])
+                     ['rsync --exclude="*.in" -avz www/ ' + os.environ.get('WEBSITE', '.public'),
+                      'cp README TODO NEWS pages ' + os.environ.get('WEBSITE', '.public')])
 
 # When the URL declarations change, so must the generated web pages
 for fn in glob.glob("www/*.in"):
