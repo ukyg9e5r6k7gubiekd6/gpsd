@@ -1905,8 +1905,27 @@ class ubx(object):
              (u[0], index_s(u[0], self.cfg_dgnss_mode), u[1], u[2], u[3]))
         return s
 
+    # signals defined in protver 27+
+    # signals used in protver 15+
+    # top byte used, but not defined
+    cfg_gnss_sig = {
+        0: {0x010000: "L1C/A",    # GPS
+            0x100000: "L2C"},
+        1: {0x010000: "L1C/A"},   # SBAS
+        2: {0x010000: "E1",       # Galileo
+            0x200000: "E5b"},
+        3: {0x010000: "B1I",      # BeiDou
+            0x100000: "B2I"},
+        4: {0x010000: "L1"},      # IMES
+        5: {0x010000: "L1C/A",    # QZSS
+            0x040000: "L2S",
+            0x100000: "L2C"},
+        6: {0x010000: "L1",       # GLONASS
+            0x100000: "L2"},
+        }
+
     def cfg_gnss(self, buf):
-        """UBX-CFG-GNSS decode"""
+        """UBX-CFG-GNSS decode, GNSS system configuration"""
         m_len = len(buf)
         if 0 == m_len:
             return "Poll request"
@@ -1915,60 +1934,24 @@ class ubx(object):
             return "Bad Length %d" % m_len
 
         u = struct.unpack_from('<BBBB', buf, 0)
-        s = " Ver: %u ChHw; %d ChUse: %d, Blocks: %d" % u
-        num_blocks = u[3]
-        i = 0
-        while i < num_blocks:
-            u = struct.unpack_from('<BBBBBBBB', buf, 4 + (i * 8))
-            sat = u[0]
-            if u[0] in self.gnss_id:
-                s_sat = self.gnss_id[u[0]]
-            else:
-                s_sat = u[0]
-            s += ("\n gnssId: %s TrkCh: %d maxTrCh: %d reserved: %d"
-                  " Flags: %#02x %02x %02x %02x" %
-                  (s_sat, u[1], u[2], u[3], u[7], u[6], u[5], u[4]))
-            s += '\n  '
-            if sat in (0, 1):
-                # gps, sbas
-                if u[6] & 0x1:
-                    s += '  L1C/A'
-                if u[6] & 0x10:
-                    s += '  L2C'
-            if 2 == sat:
-                # Galileo
-                if u[6] & 0x1:
-                    s += '  E1'    # formerly E1OS
-                if u[6] & 0x20:
-                    s += '  E5b'
-            if 3 == sat:
-                # BeiDou
-                if u[6] & 0x1:
-                    s += '  B1I'
-                if u[6] & 0x10:
-                    s += '  B2I'
-            if 4 == sat:
-                # IMES
-                if u[6] & 0x1:
-                    s += '  L1'
-            if 5 == sat:
-                # QZSS
-                if u[6] & 0x1:
-                    s += '  L1C/A'
-                if u[6] & 0x4:
-                    s += '  L1S'
-                if u[6] & 0x10:
-                    s += '  L2C'
-            if 6 == sat:
-                # Glonass
-                if u[6] & 0x1:
-                    s += '  L1'    # formerly L1OF
-                if u[6] & 0x10:
-                    s += '  L2'
-            if u[4] & 0x01:
-                s += ' enabled'
+        s = " msgVer %u  numTrkChHw %u numTrkChUse %u numConfigBlocks %u" % u
 
-            i += 1
+        for i in range(0, u[3]):
+            u = struct.unpack_from('<BBBBL', buf, 4 + (i * 8))
+            sat = u[0]
+            s += ("\n  gnssId %u TrkCh %2u maxTrCh %2u reserved %u "
+                  "Flags x%08x\n" % u)
+
+            if 7 > sat:
+                s += ("   %s %s " %
+                      (index_s(sat, self.gnss_id),
+                       flag_s(u[4], self.cfg_gnss_sig[sat])))
+            else:
+                s += "Unk "
+
+            if u[4] & 0x01:
+                s += 'enabled'
+
         return s
 
     cfg_inf_protid = {
@@ -3398,7 +3381,9 @@ class ubx(object):
         }
 
     def nav_sbas(self, buf):
-        """UBX-NAV-SBAS decode"""
+        """UBX-NAV-SBAS decode, SBAS Status Data"""
+
+        # undocuemnted, but present in protver 27+
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -3407,7 +3392,8 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBbBBBBB', buf, 0)
-        s = (' iTOW %d geo %u mode x%x sys x%x service x%x cnt %u reserved0 %u %u %u' % u)
+        s = (" iTOW %d geo %u mode x%x sys %d service x%x cnt %u "
+             "reserved0 %u %u %u" % u)
         if VERB_DECODE <= opts['verbosity']:
             s += ("\n    mode (%s) sys (%s)"
                   "\n    service (%s)" %
