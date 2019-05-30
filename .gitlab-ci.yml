@@ -3,7 +3,7 @@ image: alpine:latest
 pages:
   stage: deploy
   script:
-  - apk update && apk add python xmlto asciidoc scons rsync scp
+  - apk update && apk add python xmlto asciidoc scons rsync
   - scons website
   - find public -type f -regex '.*\.\(htm\|html\|txt\|text\|js\|css\)$' -exec gzip -f -k {} \;
   - ls -lR public
