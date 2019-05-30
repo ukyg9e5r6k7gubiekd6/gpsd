@@ -2469,7 +2469,7 @@ Utility("validation-list", [www], validation_list)
 # See .gitlab-ci.yml
 upload_web = Utility("website", [www],
                      ['rsync --exclude="*.in" -avz www/ ' + os.environ.get('WEBSITE', '.public'),
-                      'cp README TODO NEWS pages ' + os.environ.get('WEBSITE', '.public')])
+                      'cp README TODO NEWS ' + os.environ.get('WEBSITE', '.public')])
 
 # When the URL declarations change, so must the generated web pages
 for fn in glob.glob("www/*.in"):
