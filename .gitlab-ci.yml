@@ -3,7 +3,7 @@ image: alpine:latest
 pages:
   stage: deploy
   script:
-  - apk update && apk add python xmlto asciidoc scons && scons webpages
+  - apk update && apk add python xmlto asciidoc scons && scons www
   - mkdir .public
   - cp -r www/*.html .public
   - mv .public public
