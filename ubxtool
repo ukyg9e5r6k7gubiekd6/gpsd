@@ -1977,6 +1977,47 @@ class ubx(object):
                   index_s(buf[0], self.cfg_inf_protid))
         return s
 
+    utc_std = {
+            0: "Default",
+            1: "CRL",
+            2: "NIST",
+            3: "USNO",
+            4: "BIPM",
+            5: "tbd",
+            6: "SU",
+            7: "NTSC",
+        }
+
+    cfg_nav5_dyn = {
+        0: "Portable",
+        2: "Stationary",
+        3: "Pedestrian",
+        4: "Automotive",
+        5: "Sea",
+        6: "Airborne with <1g Acceleration",
+        7: "Airborne with <2g Acceleration",
+        8: "Airborne with <4g Acceleration",
+        }
+
+    cfg_nav5_fix = {
+        1: "2D only",
+        2: "3D only",
+        3: "Auto 2D/3D",
+        }
+
+    cfg_nav5_mask = {
+        1: "dyn",
+        2: "minEl",
+        4: "posFixMode",
+        8: "drLim",
+        0x10: "posMask",
+        0x20: "timeMask",
+        0x40: "staticHoldMask",
+        0x80: "dgpsMask",
+        0x100: "cnoThreshold",
+        0x400: "utc",
+        }
+
     def cfg_nav5(self, buf):
         """UBX-CFG-NAV5 nav Engine Settings"""
         m_len = len(buf)
@@ -1986,12 +2027,19 @@ class ubx(object):
         if 36 > m_len:
             return "Bad Length %s" % m_len
 
-        u = struct.unpack_from('<HBBlLbBHHHHbbbbHHbBBBBB', buf, 0)
+        u = struct.unpack_from('<HBBlLbBHHHHbbbbHHbBL', buf, 0)
         s = (' mask %#x dynModel %u fixmode %d fixedAlt %d FixedAltVar %u\n'
              ' minElev %d drLimit %u pDop %u tDop %u pAcc %u tAcc %u\n'
              ' staticHoldThresh %u dgpsTimeOut %u cnoThreshNumSVs %u\n'
              ' cnoThresh %u res %u staticHoldMaxDist %u utcStandard %u\n'
-             ' reserved %x %x %x %x %x' % u)
+             ' reserved x%x %x' % u)
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   dynModel (%s) fixMode (%s) utcStandard (%s)"
+                  "\n   mask (%s)" %
+                  (index_s(u[1], self.cfg_nav5_dyn),
+                   index_s(u[2], self.cfg_nav5_fix),
+                   index_s(u[17] >> 4, self.utc_std),
+                   flag_s(u[0] >> 4, self.cfg_nav5_mask)))
         return s
 
     def cfg_navx5(self, buf):
@@ -3674,17 +3722,6 @@ class ubx(object):
         4: "validUTC",
         }
 
-    nav_timeutc_std = {
-            0: "N/A",
-            1: "CRL",
-            2: "NIST",
-            3: "USNO",
-            4: "BIPM",
-            5: "tbd",
-            6: "SU",
-            7: "NTSC",
-        }
-
     def nav_timeutc(self, buf):
         """UBX-NAV-TIMEUTC decode"""
         m_len = len(buf)
@@ -3701,7 +3738,7 @@ class ubx(object):
         if VERB_DECODE <= opts['verbosity']:
             s += ("\n   valid (%s) utcStandard (%s)" %
                   (flag_s(u[9], self.nav_timeutc_valid),
-                   index_s(u[9] >> 4, self.nav_timeutc_std)))
+                   index_s(u[9] >> 4, self.utc_std)))
         return s
 
     def nav_velecef(self, buf):
