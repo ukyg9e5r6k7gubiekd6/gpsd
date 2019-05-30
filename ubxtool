@@ -2042,9 +2042,29 @@ class ubx(object):
                    flag_s(u[0] >> 4, self.cfg_nav5_mask)))
         return s
 
-    def cfg_navx5(self, buf):
-        """UBX-CFG-NAVX5 decode"""
+    cfg_navx5_mask1 = {
+        4: "minMax",
+        8: "minCno",
+        0x40: "initial3dfix",
+        0x200: "wknRoll",
+        0x400: "ackAid",
+        0x2000: "ppp",
+        0x4000: "aop",
+        }
 
+    cfg_navx5_mask2 = {
+        0x40: "adr",
+        0x80: "sigAttenComp",
+        }
+
+    cfg_navx5_aop = {
+        1: "useAOP",
+        }
+
+    def cfg_navx5(self, buf):
+        """UBX-CFG-NAVX5 decode, Navigation Engine Expert Settings"""
+
+        # deprecated protver 23+
         # length == 20 case seems broken?
         m_len = len(buf)
         if 0 == m_len:
@@ -2054,14 +2074,24 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<HHLHBBBBBHBH', buf, 0)
-        s = (' version %u mask1 %#x mask2 %#x minSVs %d maxSVs %d minCNO %u\n'
-             ' iniFix3D %u ackAiding %u wknRollover %u' %
-             (u[0], u[1], u[2], u[4], u[5], u[6], u[8], u[10], u[11]))
+        s = (" version %u mask1 x%x mask2 x%x reserved1 %u minSVs %u "
+             "maxSVs %u minCNO %u\n"
+             " reserved2 %u iniFix3D %u reserved3 %u  ackAiding %u wknRollover %u" % u)
 
+        # length == 40 in protver 27
         if 40 <= m_len:
-            u = struct.unpack_from('<BBHHLHBB', buf, 20)
-            s += ('\n usePPP %d aopCfg %d aopOrbMaxErr %u useAdr %u' %
-                  (u[0], u[1], u[3], u[7]))
+            u1 = struct.unpack_from('<BBHHLHBB', buf, 20)
+            s += ("\n sigAttenCompMode %u reserved456 %u %u %u usePPP %u "
+                  "aopCfg %u reserved7 %u"
+                  "\n aopOrbMaxErr %u reserved89 %u %u %u useAdr %u" % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   mask1 (%s)"
+                  "\n   mask2 (%s) aopCfg (%s)" %
+                  (flag_s(u[1], self.cfg_navx5_mask1),
+                   flag_s(u[2], self.cfg_navx5_mask2),
+                   flag_s(u1[5], self.cfg_navx5_aop)))
+
         return s
 
     def cfg_msg(self, buf):
