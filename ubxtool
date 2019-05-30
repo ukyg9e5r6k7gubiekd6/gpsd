@@ -3406,8 +3406,8 @@ class ubx(object):
         if 12 > m_len:
             return " Bad Length %s" % m_len
 
-        u = struct.unpack_from('<LBBbBb', buf, 0)
-        s = (' iTOW %d geo %u mode x%x sys x%x service x%x cnt %d' % u)
+        u = struct.unpack_from('<LBBbBBBBB', buf, 0)
+        s = (' iTOW %d geo %u mode x%x sys x%x service x%x cnt %u reserved0 %u %u %u' % u)
         if VERB_DECODE <= opts['verbosity']:
             s += ("\n    mode (%s) sys (%s)"
                   "\n    service (%s)" %
@@ -3415,9 +3415,7 @@ class ubx(object):
                    index_s(u[3], self.nav_sbas_sys),
                    flag_s(u[4], self.nav_sbas_service)))
 
-        m_len -= 12
-        i = 0
-        while 0 < m_len:
+        for i in range(0, u[5]):
             u = struct.unpack_from('<BBBBBBhHh', buf, 12 + (i * 12))
             s += ("\n  svid %3d flags x%04x udre x%02x svSys %3d svService %2d"
                   " reserved2 %u"
@@ -3427,8 +3425,6 @@ class ubx(object):
                 s += ("\n   svSys (%s) svService (%s)" %
                       (index_s(u[3], self.nav_sbas_sys),
                        flag_s(u[4], self.nav_sbas_service)))
-            m_len -= 12
-            i += 1
 
         return s
 
