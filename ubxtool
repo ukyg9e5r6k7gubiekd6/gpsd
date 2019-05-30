@@ -3090,8 +3090,15 @@ class ubx(object):
         return ('  iTOW:%d ms, clkB:%d ns clkD:%d ns/s tAcc:%d ns,'
                 'fAcc:%d ns/s' % u)
 
+    nav_dgps_status = {
+        0: "None",
+        1: "PR+PRR correction",
+        }
+
     def nav_dgps(self, buf):
         """UBX-NAV-DGPS decode, DGPS Data used for NAV"""
+
+        # not present in protver 27+
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -3099,18 +3106,19 @@ class ubx(object):
         if 16 > m_len:
             return " Bad Length %s" % m_len
 
-        u = struct.unpack_from('<LlhhBBBB', buf, 0)
-        s = (' iTOW:%d ms, age:%d ms, baseID:%d basehealth:%d numCh:%d\n'
-             ' status:%#x reserved1[%u %u]' % u)
+        u = struct.unpack_from('<LlhhBBH', buf, 0)
+        s = (' iTOW %u age %d baseID %d basehealth %d numCh %u\n'
+             ' status x%x reserved1 %u' % u)
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n  status (%s)" %
+                  index_s(u[5], self.nav_dgps_status))
 
-        m_len -= 16
-        i = 0
-        while 0 < m_len:
+        for i in range(0, u[4]):
             u = struct.unpack_from('<BbHff', buf, 16 + i * 12)
-            # dunno how to do R4
-            s += ('\n  svid %3u flags %#4x ageC:%d ms prc:%f prcc:%f' % u)
-            m_len -= 12
-            i += 1
+            s += ('\n  svid %3u flags x%2x ageC %u prc %f prcc %f' % u)
+            if VERB_DECODE <= opts['verbosity']:
+                s += ("\n   channel %u dgps %u" %
+                      (u[1] & 0x0f, (u[1] >> 4) & 1))
 
         return s
 
