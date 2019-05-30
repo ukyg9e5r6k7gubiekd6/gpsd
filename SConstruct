@@ -1770,7 +1770,6 @@ def substituter(target, source, env):
         ('@VERSION@',    gpsd_version),
         ('@WEBFORM@',    webform),
         ('@WEBSITE@',    website),
-        ('@WEBUPLOAD@',  webupload),
     )
 
     sfp = open(str(source[0]))
