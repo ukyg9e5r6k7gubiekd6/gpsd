@@ -3466,6 +3466,19 @@ class ubx(object):
                 '  lonHp %d latHp %d heightHp %d hMSLHp %d\n'
                 '  hAcc %u vAcc %u' % u)
 
+    def nav_odo(self, buf):
+        """UBX-NAV-ODO decode, Odometer Solution"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 20 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBBLLLL', buf, 0)
+        return ("  version %u reserved1 %u %u %u iTOW %u\n"
+                "  distance %u totalDistance %u distanceStd %u" % u)
+
     def nav_posecef(self, buf):
         """UBX-NAV-POSECEF decode"""
         m_len = len(buf)
@@ -4038,7 +4051,7 @@ class ubx(object):
                0x5: {'str': 'ATT', 'dec': nav_att, 'name': 'UBX-NAV-ATT'},
                0x6: {'str': 'SOL', 'dec': nav_sol, 'name': 'UBX-NAV-SOL'},
                0x7: {'str': 'PVT', 'dec': nav_pvt, 'name': 'UBX-NAV-PVT'},
-               0x9: {'str': 'ODO', 'name': 'UBX-NAV-ODO'},
+               0x9: {'str': 'ODO', 'dec': nav_odo, 'name': 'UBX-NAV-ODO'},
                0x10: {'str': 'RESETODO', 'name': 'UBX-NAV-RESETODO'},
                0x11: {'str': 'VELECEF', 'dec': nav_velecef,
                       'name': 'UBX-NAV-VELECEF'},
@@ -5726,7 +5739,7 @@ class ubx(object):
                           "Autonomous Status"},
         # UBX-NAV-ATT
         "NAV-ATT": {"command": send_poll, "opt": [0x1, 0x5],
-                          "help": "poll UBX-NAV-ATT Attitude Solution"},
+                    "help": "poll UBX-NAV-ATT Attitude Solution"},
         # UBX-NAV-CLOCK
         "NAV-CLOCK": {"command": send_poll, "opt": [0x01, 0x22],
                       "help": "poll UBX-NAV-CLOCK Clock Solution"},
@@ -5745,6 +5758,9 @@ class ubx(object):
         # UBX-NAV-HPPOSLLH
         "NAV-HPPOSLLH": {"command": send_poll, "opt": [0x01, 0x14],
                          "help": "poll UBX-NAV-HPPOSECEF LLH position"},
+        # UBX-NAV-ODO
+        "NAV-ODO": {"command": send_poll, "opt": [0x01, 0x09],
+                    "help": "poll UBX-NAV-ODO Odometer Solution"},
         # UBX-NAV-POSECEF
         "NAV-POSECEF": {"command": send_poll, "opt": [0x01, 0x01],
                         "help": "poll UBX-NAV-POSECEF ECEF position"},
