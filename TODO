@@ -32,40 +32,40 @@ We got this bug report from "Michael J. Tubby B.Sc. MIET"
 <mike.tubby@thorcom.co.uk>:
 
 -------------------------------------------------------------------------
-I think the issue is that we're trying to version control several things: 
+I think the issue is that we're trying to version control several things:
 
-1. GPSD itself, e.g. 'release' 3.17 which has a major of '3' and a minor of '17' 
+1. GPSD itself, e.g. 'release' 3.17 which has a major of '3' and a minor of '17'
 
 2. GPSD's most recent version, e.g. major '3' and minor '12' since
 nothing external has changed between 3.12 and 3.17
 
-3. The JSON protcol interface level - which may also be 3.12 (or 
-something different) 
+3. The JSON protcol interface level - which may also be 3.12 (or
+something different)
 
-4. the libgps API version, which appears to be 6.1 
-Perhaps version_t needs to be bumped from: 
+4. the libgps API version, which appears to be 6.1
+Perhaps version_t needs to be bumped from:
 
-struct version_t { 
-    char release[64];                   /* external version */ 
-    char rev[64];                       /* internal revision ID */ 
-    int proto_major, proto_minor;       /* API major and minor versions */ 
-    char remote[GPS_PATH_MAX];          /* could be from a remote device */ 
-}; 
+struct version_t {
+    char release[64];                   /* external version */
+    char rev[64];                       /* internal revision ID */
+    int proto_major, proto_minor;       /* API major and minor versions */
+    char remote[GPS_PATH_MAX];          /* could be from a remote device */
+};
 
-to: 
+to:
 
-struct version_t { 
-    char release[64];                   /* external version */ 
-    char rev[64];                       /* internal revision ID */ 
-    int release_major, release_minor,   /* release as two part integers */ 
-    int proto_major, proto_minor;       /* JSON protocol major and 
-minor versions */ 
-    int api_major, api_minor;           /* API (libgps) major and minor 
-versions */ 
-    char remote[GPS_PATH_MAX];          /* could be from a remote device */ 
-}; 
+struct version_t {
+    char release[64];                   /* external version */
+    char rev[64];                       /* internal revision ID */
+    int release_major, release_minor,   /* release as two part integers */
+    int proto_major, proto_minor;       /* JSON protocol major and
+minor versions */
+    int api_major, api_minor;           /* API (libgps) major and minor
+versions */
+    char remote[GPS_PATH_MAX];          /* could be from a remote device */
+};
 
-then we'd have everything and it could be testable programmatically. 
+then we'd have everything and it could be testable programmatically.
 -------------------------------------------------------------------------
 
 In gps_data_t, save PPS precision; this will require creating a pps struct.
