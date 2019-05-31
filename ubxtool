@@ -322,7 +322,7 @@ class ubx(object):
                6: 'GLONASS'}
 
     # Names for portID values in UBX-CFG-PRT, UBX-MON-IO, etc.
-    port_ids = {0: 'DDC',  # The inappropriate name for i2c used in the spec
+    port_ids = {0: 'DDC',  # The license free name for i2c used in the spec
                 1: 'UART1',
                 2: 'UART2',
                 3: 'USB',
@@ -3009,25 +3009,20 @@ class ubx(object):
         return s
 
     def mon_io(self, buf):
-        """UBX-MON-IO decode"""
+        """UBX-MON-IO decode, I/O Subsystem Status"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
 
-        i = 0
         s = ''
-        while m_len > (i * 20):
-            u = struct.unpack_from('<LLHHHHL', buf, i * 20)
+        for i in range(0, int(m_len / 20)):
             if 0 < i:
                 s += "\n"
-            if i in self.port_ids:
-                name = self.port_ids[i]
-            else:
-                name = "Unk"
-            s += ('  Port: %u (%s)\n' % (i, name))
+
+            u = struct.unpack_from('<LLHHHHL', buf, i * 20)
+            s += ('  Port: %u (%s)\n' % (i, index_s(i, self.port_ids)))
             s += ('   rxBytes %u txBytes %u parityErrs %u framingErrs %u\n'
                   '   overrunErrs %u breakCond %u reserved %u' % u)
-            i += 1
         return s
 
     def mon_msgpp(self, buf):
