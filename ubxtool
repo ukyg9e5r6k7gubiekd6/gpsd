@@ -2881,7 +2881,7 @@ class ubx(object):
         }
 
     def mon_gnss(self, buf):
-        """UBX-MON-GNSS decode"""
+        """UBX-MON-GNSS decode, Information message major GNSS selection"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2921,8 +2921,15 @@ class ubx(object):
 
         return s
 
+    mon_hw2_cfgSource = {
+        102: "flash image",
+        111: "OTP",
+        112: "config pins",
+        114: "ROM",
+        }
+
     def mon_hw2(self, buf):
-        """UBX-MON-HW2 decode"""
+        """UBX-MON-HW2 decode, Extended Hardware Status"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2934,6 +2941,10 @@ class ubx(object):
         s = ('   ofsI %d magI %u ofsQ %d magQ %u cfgSource %u\n'
              '   reserved0 %u %u %u lowLevCfg %d reserved1 %u %u\n'
              '   postStatus %u reserved2 %u' % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ('\n     cfgSource (%s)' %
+                  (index_s(u[4], self.mon_hw2_cfgSource)))
 
         return s
 
