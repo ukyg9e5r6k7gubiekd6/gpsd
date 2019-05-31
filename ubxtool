@@ -286,13 +286,13 @@ def flag_s(flag, descs):
     return s.strip()
 
 
-def index_s(index, descs):
+def index_s(index, descs, nf="Unk"):
     """Decode flag using descs, return a string.  Otherwise Unk"""
 
     if index in descs:
         s = descs[index]
     else:
-        s = 'Unk'
+        s = nf
 
     return s
 
@@ -2367,6 +2367,19 @@ class ubx(object):
         0xffff: "Cold Start",
         }
 
+    cfg_rst_navBbr1 = {
+        1: "eph",
+        2: "alm",
+        4: "health",
+        8: "klob",
+        0x10: "pos",
+        0x20: "clkd",
+        0x40: "osc",
+        0x80: "utc",
+        0x100: "rtc",
+        0x8000: "aop",
+        }
+
     cfg_rst_resetMode = {
         0: "Hardware reset",
         1: "Software reset",
@@ -2377,7 +2390,7 @@ class ubx(object):
         }
 
     def cfg_rst(self, buf):
-        """"UBX-CFG-RST decode, Reset Receiver"""
+        """"UBX-CFG-RST decode, Reset Receiver/Clear Backup Data Structures"""
 
         m_len = len(buf)
 
@@ -2388,9 +2401,15 @@ class ubx(object):
         s = ' navBbrmask x%x resetMode %u reserved %u' % u
 
         if VERB_DECODE <= opts['verbosity']:
-            s += ('\n      navBbrMask (%s) resetMode (%s)' %
-                  (flag_s(u[0], self.cfg_rst_navBbr),
-                   flag_s(u[1], self.cfg_rst_resetMode)))
+            # fun, two different ways to decode...
+            s1 = index_s(u[0], self.cfg_rst_navBbr, nf="")
+            if 0 == len(s1):
+                s1 = flag_s(u[0], self.cfg_rst_navBbr1)
+
+            s += ("\n   resetMode (%s)"
+                  "\n   navBbrMask (%s)" %
+                  (index_s(u[1], self.cfg_rst_resetMode),
+                   s1))
 
         return s
 
@@ -2472,6 +2491,13 @@ class ubx(object):
 
         return s
 
+    cfg_smgr_messageCfg = {
+        1: "measInternal",
+        2: "measGNSS",
+        4: "measEXTINT0",
+        8: "measEXTINT1",
+        }
+
     def cfg_smgr(self, buf):
         """UBX-CFG-SMGR decode, Synchronization manager configuration"""
         m_len = len(buf)
@@ -2487,6 +2513,11 @@ class ubx(object):
              " reserved1 %u %u freqTolerance %u timeTolerance %u "
              "messageCfg x%x\n"
              " maxSlewRate %u flags x%x" % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   messageCfg (%s)"
+                  (flag_s(u[7], self.cfg_smgr_messageCfg)))
+
         return s
 
     def cfg_tmode2(self, buf):
@@ -5288,9 +5319,9 @@ class ubx(object):
 
     def send_cfg_rst(self, reset_type):
         """UBX-CFG-RST, reset"""
-        # always do a hardware reset
-        # if on USB, this will disconnect and reconnect, giving you
-        # a new tty.
+        # Always do a hardware reset
+        # If on native USB: both Hardware reset (0) and Software reset (1)
+        # will disconnect and reconnect, giving you a new /dev/tty.
         m_data = bytearray(4)
         m_data[0] = reset_type & 0xff
         m_data[1] = (reset_type >> 8) & 0xff
@@ -5482,7 +5513,7 @@ class ubx(object):
         # UBX-CFG-RST
         "COLDBOOT": {"command": send_cfg_rst,
                      "help": "UBS-CFG-RST coldboot the GPS",
-                     "opt": 0xfff},
+                     "opt": 0xffff},
         # UBX-CFG-RST
         "HOTBOOT": {"command": send_cfg_rst,
                     "help": "UBX-CFG-RST hotboot the GPS",
