@@ -1790,16 +1790,16 @@ class ubx(object):
 
         if gnssId in self.id_map:
             if "name" not in self.id_map[gnssId]:
-                s = "%d PRN %d sigId %d" % (gnssId, svId, sigId)
+                s = "%d:%d:%d" % (gnssId, svId, sigId)
             elif sigId not in self.id_map[gnssId]["sig"]:
-                s = ("%s PRN %d sigId %d" %
+                s = ("%s:%d:%d" %
                      (self.id_map[gnssId]["name"], svId, sigId))
             else:
-                s = ("%s PRN %d sigId %s" %
+                s = ("%s:%d:%s" %
                      (self.id_map[gnssId]["name"], svId,
                       self.id_map[gnssId]["sig"][sigId]))
         else:
-            s = "%d PRN %d sigId %d" % (gnssId, svId, sigId)
+            s = "%d:%d:%d" % (gnssId, svId, sigId)
 
         return s
 
@@ -2076,7 +2076,8 @@ class ubx(object):
         u = struct.unpack_from('<HHLHBBBBBHBH', buf, 0)
         s = (" version %u mask1 x%x mask2 x%x reserved1 %u minSVs %u "
              "maxSVs %u minCNO %u\n"
-             " reserved2 %u iniFix3D %u reserved3 %u  ackAiding %u wknRollover %u" % u)
+             " reserved2 %u iniFix3D %u reserved3 %u  ackAiding %u\n"
+             "wknRollover %u" % u)
 
         # length == 40 in protver 27
         if 40 <= m_len:
@@ -3372,7 +3373,7 @@ class ubx(object):
                    index_s((u[11] >> 6) & 0x04, self.nav_pvt_carr)))
         return s
 
-    nav_sat_qual = {
+    qualityInd = {
         0: "None",
         1: "Searching",
         2: "Acquired",
@@ -3383,7 +3384,7 @@ class ubx(object):
         7: "Code, carrier and time locked",
         }
 
-    nav_sat_health = {
+    health = {
         1: "Healthy",
         2: "Unhealthy",
         }
@@ -3436,8 +3437,8 @@ class ubx(object):
                       "\n     qualityInd x%x (%s) health (%s)"
                       "\n     orbitSource (%s)" %
                       (flag_s(u[6], self.nav_sat_flags),
-                       u[6] & 7, index_s(u[6] & 7, self.nav_sat_qual),
-                       index_s((u[6] >> 4) & 3, self.nav_sat_health),
+                       u[6] & 7, index_s(u[6] & 7, self.qualityInd),
+                       index_s((u[6] >> 4) & 3, self.health),
                        index_s((u[6] >> 8) & 7, self.nav_sat_orbit)))
 
         return s
@@ -3499,6 +3500,34 @@ class ubx(object):
 
         return s
 
+    nav_sig_corrSource = {
+        0: "None",
+        1: "SBAS",
+        2: "BeiDou",
+        3: "RTCM2",
+        4: "RTCM3 OSR",
+        5: "RTCM3 SSR",
+        6: "QZSS SLAS",
+        }
+
+    nav_sig_ionoModel = {
+        0: "None",
+        1: "Klobuchar over GPS",
+        2: "SBAS",
+        3: "Klobuchar over BeiDou",
+        8: "Dual Frequency obs",
+        }
+
+    nav_sig_sigFlags = {
+        4: "prSmoothed",
+        8: "prUsed",
+        0x10: "crUsed",
+        0x20: "doUsed",
+        0x40: "prCorrUsed",
+        0x80: "crCorrUsed",
+        0x100: "doCorrUsed",
+        }
+
     def nav_sig(self, buf):
         """UBX-NAV-SIG decode, Signal Information"""
         m_len = len(buf)
@@ -3511,15 +3540,24 @@ class ubx(object):
         u = struct.unpack_from('<LBBH', buf, 0)
         s = '  iTOW %u version %u numSigs %u reserved1 %u' % u
 
-        numSigs = u[2]
-        i = 0
-        while i < numSigs:
+        for i in range(0, u[2]):
             u = struct.unpack_from('<BBBBhBBBBHL', buf, 8 + (i * 16))
             s += ('\n   gnssId %u svId %u sigId %u freqId %u prRes %d cno %u '
                   'qualityInd %u\n'
                   '    corrSource %u ionoModel %u sigFlags %#x reserved2 %u' %
                   u)
-            i += 1
+
+            if VERB_DECODE <= opts['verbosity']:
+                s += ("\n      (%s) corrSource (%s)"
+                      "\n      qualityInd (%s)"
+                      "\n      ionoModel (%s) health (%s)"
+                      "\n      sigFlags (%s)" %
+                      (self.gnss_s(u[0], u[1], u[2]),
+                       index_s(u[7], self.nav_sig_corrSource),
+                       index_s(u[6], self.qualityInd),
+                       index_s(u[8], self.nav_sig_ionoModel),
+                       index_s(u[9] & 3, self.health),
+                       flag_s(u[9], self.nav_sig_sigFlags)))
         return s
 
     nav_sol_flags = {
