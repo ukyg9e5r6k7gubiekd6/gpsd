@@ -4072,6 +4072,7 @@ class ubx(object):
                       'name': 'UBX-NAV-GEOFENCE'},
                0x3B: {'str': 'SVIN', 'dec': nav_svin, 'name': 'UBX-NAV-SVIN'},
                0x3C: {'str': 'RELPOSNED', 'name': 'UBX-NAV-RELPOSNED'},
+               0x42: {'str': 'SLAS', 'name': 'UBX-NAV-SLAS'},
                0x43: {'str': 'SIG', 'dec': nav_sig, 'name': 'UBX-NAV-SIG'},
                0x60: {'str': 'AOPSTATUS', 'dec': nav_aopstatus,
                       'name': 'UBX-NAV-AOPSTATUS'},
