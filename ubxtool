@@ -1979,6 +1979,42 @@ class ubx(object):
                   index_s(buf[0], self.cfg_inf_protid))
         return s
 
+    cfg_itfm_config = {
+        0x80000000: "enable",
+        }
+
+    cfg_itfm_config2 = {
+        0x4000: "enable2",
+        }
+
+    cfg_itfm_ant = {
+        1: "passive",
+        2: "active",
+        }
+
+    def cfg_itfm(self, buf):
+        """UBX-CFG-ITFM decode, Jamming/Interference Monitor configuration"""
+
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 8 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LL', buf, 0)
+        s = " config x%x config2 x%x" % u
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   config (%s) bbThreshold %u cwThreshold %u "
+                  "algorithmBits x%x"
+                  "\n   config2 (%s) generalBits x%x antSetting (%s)" %
+                  (flag_s(buf[0], self.cfg_itfm_config),
+                   u[0] & 0x0f, (u[0] >> 4) & 0x1f, (u[0] >> 9) & 0x1fffff,
+                   flag_s(buf[1], self.cfg_itfm_config2),
+                   u[1] & 0x0fff,
+                   index_s((u[1] >> 12) & 3, self.cfg_itfm_config2)))
+        return s
+
     utc_std = {
             0: "Default",
             1: "CRL",
@@ -2793,7 +2829,7 @@ class ubx(object):
                0x24: {'str': 'NAV5', 'dec': cfg_nav5, 'name': 'UBX-CFG-NAV5'},
                0x31: {'str': 'TP5', 'dec': cfg_tp5, 'name': 'UBX-CFG-TP5'},
                0x34: {'str': 'RINV', 'dec': cfg_rinv, 'name': 'UBX-CFG-RINV'},
-               0x39: {'str': 'ITFM', 'name': 'UBX-CFG-ITFM'},
+               0x39: {'str': 'ITFM', 'dec': cfg_itfm, 'name': 'UBX-CFG-ITFM'},
                0x3b: {'str': 'PM2', 'name': 'UBX-CFG-PM2'},
                0x3d: {'str': 'TMODE2', 'dec': cfg_tmode2,
                       'name': 'UBX-CFG-TMODE2'},
@@ -5831,6 +5867,10 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         "CFG-INF": {"command": poll_cfg_inf,
                     "help": "poll UBX-CFG-INF Information Message "
                             "Configuration"},
+        # UBX-CFG-ITFM
+        "CFG-ITFM": {"command": send_poll, "opt": [0x06, 0x39],
+                     "help": "poll UBX-CFG-RXM Jamming/Interference "
+                     "Monitor configuration"},
         # UBX-CFG-NAV5
         "CFG-NAV5": {"command": send_poll, "opt": [0x06, 0x24],
                      "help": "poll UBX-CFG-NAV5 Nav Engines settings"},
