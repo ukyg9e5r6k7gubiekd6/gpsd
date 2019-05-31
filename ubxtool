@@ -2972,8 +2972,14 @@ class ubx(object):
 
         return s
 
+    mon_hw3_flags = {
+        1: "rtcCalib",
+        2: "safeBoot",
+        4: "xtgalAbsent",
+        }
+
     def mon_hw3(self, buf):
-        """UBX-MON-HW3 decode"""
+        """UBX-MON-HW3 decode, HW I/O pin information"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2986,11 +2992,15 @@ class ubx(object):
             opts['protver'] = 27
 
         u = struct.unpack_from('<BBB', buf, 0)
-        s = ('   version %u nPins %u flags %#x' % u)
+        s = '   version %u nPins %u flags x%x' % u
         nPins = u[1]
         substr = buf[3:12]
         substr = substr.split(gps.polybytes('\0'))[0]
         s += ' hwVersion %s' % gps.polystr(substr)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ('\n     flags (%s)' %
+                  (index_s(u[2], self.mon_hw3_flags)))
 
         for i in range(22, 22 + (nPins * 6), 6):
             u = struct.unpack_from('<HHBB', buf, i)
