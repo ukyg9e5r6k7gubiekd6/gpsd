@@ -2515,10 +2515,21 @@ class ubx(object):
              " maxSlewRate %u flags x%x" % u)
 
         if VERB_DECODE <= opts['verbosity']:
-            s += ("\n   messageCfg (%s)"
+            s += ("\n   messageCfg (%s)" %
                   (flag_s(u[7], self.cfg_smgr_messageCfg)))
 
         return s
+
+    cfg_tmode2_timeMode = {
+        0: "Disabled",
+        1: "Survey In",
+        2: "Fixed Mode",
+        }
+
+    cfg_tmode2_flags = {
+        1: "lla",
+        2: "altInv",
+        }
 
     def cfg_tmode2(self, buf):
         """UBX-CFG-TMODE2 decode, Time Mode Settings 2"""
@@ -2531,8 +2542,14 @@ class ubx(object):
 
         u = struct.unpack_from('<BBHlllLLL', buf, 0)
         s = (' timeMode: %u reserved1: %u  usage: %#x\n'
-             '  ecefXOrLat: %d ecefYOrLon: %d ecefZOrLon: %d\n'
-             '  fixeedPosAcc %u svinMinDur %u svinAccLimit %u' % u)
+             ' ecefXOrLat: %d ecefYOrLon: %d ecefZOrLon: %d\n'
+             ' fixeedPosAcc %u svinMinDur %u svinAccLimit %u' % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   timeMode (%s) flags (%s)" %
+                  (index_s(u[0], self.cfg_tmode2_timeMode),
+                   flag_s(u[2], self.cfg_tmode2_flags)))
+
         return s
 
     cfg_tp5_flags = {
