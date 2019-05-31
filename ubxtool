@@ -1805,6 +1805,8 @@ class ubx(object):
 
     def ack_ack(self, buf):
         """UBX-ACK-ACK decode"""
+
+        # NOTE: Not all messages to u-blox GPS are ACKed...
         m_len = len(buf)
         if 2 > m_len:
             return "Bad Length %s" % m_len
