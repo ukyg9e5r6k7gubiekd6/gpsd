@@ -2903,8 +2903,25 @@ class ubx(object):
 
         return s
 
+    mon_hw_flags = {
+        1: "rtcCalib",
+        2: "safeBoot",
+        }
+
+    mon_hw_aPower = {
+        0: "Off",
+        1: "On",
+        }
+
+    jammingState = {
+        0: "Unk",
+        1: "OK",
+        2: "Warning",
+        3: "Critical",
+        }
+
     def mon_hw(self, buf):
-        """UBX-MON-HW decode"""
+        """UBX-MON-HW decode, Hardware Status"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2913,12 +2930,19 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLLLHHBBBBLBBBBBBBBBBBBBBBBBBBBLLL', buf, 0)
-        s = ('   pinSel %#x pinBank %#x pinDir %#x pinVal %#x noisePerRMS %u\n'
-             '   ageCnt %u aStatus %u aPower %u flags %#x reserved1 %u\n'
-             '   usedMask %#x\n'
-             '   VP %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n'
-             '   jamInd %u reserved2 %u %u pinIrq %#x pullH %#x pullL %#x' % u)
+        s = ('  pinSel %#x pinBank %#x pinDir %#x pinVal %#x noisePerRMS %u\n'
+             '  ageCnt %u aStatus %u aPower %u flags %#x reserved1 %u\n'
+             '  usedMask %#x\n'
+             '  VP %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u %u\n'
+             '  jamInd %u reserved2 %u %u pinIrq %#x pullH %#x pullL %#x' % u)
 
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n    aStatus (%s) aPower (%s) flags (%s) "
+                  "jammingState (%s)" %
+                  (index_s(u[6], self.mon_rf_antstat),
+                   index_s(u[7], self.mon_hw_aPower),
+                   index_s(u[8], self.mon_hw_flags),
+                   index_s((u[6] >> 2) & 0x03, self.jammingState)))
         return s
 
     mon_hw2_cfgSource = {
@@ -3014,13 +3038,6 @@ class ubx(object):
         s += " skipped %u %u %u %u %u %u" % u
         return s
 
-    mon_rf_jamming = {
-        0: "Unk",
-        1: "OK",
-        2: "Warning",
-        3: "Critical",
-        }
-
     mon_rf_antstat = {
         0: "Init",
         1: "Unk",
@@ -3061,7 +3078,7 @@ class ubx(object):
                   "\n    reserved3 %u %u %u" % u)
             if VERB_DECODE <= opts['verbosity']:
                 s += ('\n     jammingState (%s) antStatus (%s) antPower (%s)' %
-                      (index_s(u[1] & 0x03, self.mon_rf_jamming),
+                      (index_s(u[1] & 0x03, self.jammingState),
                        index_s(u[2], self.mon_rf_antstat),
                        index_s(u[3], self.mon_rf_antpwr)))
         return s
