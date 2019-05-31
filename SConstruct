@@ -1937,7 +1937,7 @@ if env['python']:
     # Bletch.  We don't really want to suppress W0231 E0602 E0611 E1123,
     # but Python 3 syntax confuses a pylint running under Python 2.
     checkable = python_progs[:]
-    # Theres's an internal error in astroid that requires we disable some
+    # There's an internal error in astroid that requires we disable some
     # auditing. This is irritating as hell but there's no help for it short
     # of an upstream fix.
     if env['xgps']:
