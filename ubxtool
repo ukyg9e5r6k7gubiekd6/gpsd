@@ -2405,7 +2405,7 @@ class ubx(object):
         if VERB_DECODE <= opts['verbosity']:
             # fun, two different ways to decode...
             s1 = index_s(u[0], self.cfg_rst_navBbr, nf="")
-            if 0 == len(s1):
+            if not s1:
                 s1 = flag_s(u[0], self.cfg_rst_navBbr1)
 
             s += ("\n   resetMode (%s)"
@@ -3479,6 +3479,78 @@ class ubx(object):
         return ("  version %u reserved1 %u %u %u iTOW %u\n"
                 "  distance %u totalDistance %u distanceStd %u" % u)
 
+    nav_orb_almUsability = {
+            0: "Unusable",
+            30: "> 30 days",
+            31: "Unknown",
+        }
+
+    nav_orb_ephUsability = {
+            0: "Unusable",
+            30: "> 450 mins",
+            31: "Unknown",
+        }
+
+    nav_orb_ephSource = {
+            0: "not available",
+            1: "GNSS transmission",
+            2: "external aiding",
+        }
+
+    nav_orb_type = {
+            0: "not available",
+            1: "Assist now offline data",
+            2: "Assist now autonomous data",
+        }
+
+    def nav_orb(self, buf):
+        """UBX-NAV-ORB decode, GNSS Orbit Database Info"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 8 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LBBH', buf, 0)
+        s = "  iTOW %u version %u numSv %u reserved1 %u" % u
+
+        for i in range(0, u[2]):
+            u = struct.unpack_from('<BBBBBB', buf, 8 + (i * 6))
+            s += ("\n   gnssId %u svId %3u svFlag x%02x eph x%02x alm x%02x "
+                  "otherOrb x%x" % u)
+            if VERB_DECODE <= opts['verbosity']:
+                eph = int(u[3] & 0x1f)
+                s1 = index_s(eph, self.nav_orb_ephUsability, nf="")
+                if not s1:
+                    s1 = "%d to %d mins" % ((eph - 1) * 15, eph * 15)
+
+                alm = int(u[4] & 0x1f)
+                s2 = index_s(alm, self.nav_orb_almUsability, nf="")
+                if not s2:
+                    s2 = "%d to %d days" % (alm - 1, alm)
+
+                other = int(u[5] & 0x1f)
+                s3 = index_s(other, self.nav_orb_almUsability, nf="")
+                if not s3:
+                    s3 = "%d to %d days" % (other - 1, other)
+
+                s += ("\n    (%s:%u) health (%s) visibility (%s)"
+                      "\n     ephUsability (%s) ephSource (%s)"
+                      "\n     almUsability (%s) almSource (%s)"
+                      "\n     anoAopUsability (%s) type (%s)" %
+                      (index_s(u[0], self.gnss_id), u[1],
+                       index_s(u[2] & 3, self.health),
+                       index_s((u[2] >> 2) & 3, self.visibility),
+                       s1,
+                       index_s(u[3] >> 5, self.nav_orb_ephSource, nf="other"),
+                       s2,
+                       index_s(u[4] >> 5, self.nav_orb_ephSource, nf="other"),
+                       s3,
+                       index_s(u[5] >> 5, self.nav_orb_type, nf="other")))
+
+        return s
+
     def nav_posecef(self, buf):
         """UBX-NAV-POSECEF decode"""
         m_len = len(buf)
@@ -3594,6 +3666,12 @@ class ubx(object):
     health = {
         1: "Healthy",
         2: "Unhealthy",
+        }
+
+    visibility = {
+        1: "below horizon",
+        2: "above horizon",
+        3: "above elevation mask",
         }
 
     nav_sat_orbit = {
@@ -4079,7 +4157,7 @@ class ubx(object):
                       'name': 'UBX-NAV-SVINFO'},
                0x31: {'str': 'DGPS', 'dec': nav_dgps, 'name': 'UBX-NAV-DGPS'},
                0x32: {'str': 'SBAS', 'dec': nav_sbas, 'name': 'UBX-NAV-SBAS'},
-               0x34: {'str': 'ORB', 'name': 'UBX-NAV-ORB'},
+               0x34: {'str': 'ORB', 'dec': nav_orb, 'name': 'UBX-NAV-ORB'},
                0x35: {'str': 'SAT', 'dec': nav_sat, 'name': 'UBX-NAV-SAT'},
                0x39: {'str': 'GEOFENCE', 'dec': nav_geofence,
                       'name': 'UBX-NAV-GEOFENCE'},
@@ -5761,6 +5839,9 @@ class ubx(object):
         # UBX-NAV-ODO
         "NAV-ODO": {"command": send_poll, "opt": [0x01, 0x09],
                     "help": "poll UBX-NAV-ODO Odometer Solution"},
+        # UBX-NAV-ORB
+        "NAV-ORB": {"command": send_poll, "opt": [0x01, 0x34],
+                    "help": "poll UBX-NAV-ORB GNSS Orbit Database Info"},
         # UBX-NAV-POSECEF
         "NAV-POSECEF": {"command": send_poll, "opt": [0x01, 0x01],
                         "help": "poll UBX-NAV-POSECEF ECEF position"},
