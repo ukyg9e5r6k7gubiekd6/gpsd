@@ -2856,7 +2856,7 @@ class ubx(object):
         }
 
     def mon_comms(self, buf):
-        """UBX-MON-COMMS decode"""
+        """UBX-MON-COMMS decode, Comm port information"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2864,8 +2864,12 @@ class ubx(object):
         if 8 > m_len:
             return " Bad Length %s" % m_len
 
+        # at least protver 27
+        if 27 > opts['protver']:
+            opts['protver'] = 27
+
         u = struct.unpack_from('<BBBBBBBB', buf, 0)
-        s = ('version %u nPorts %u txErrors %#x reserved1 %u\n'
+        s = ('version %u nPorts %u txErrors x%x reserved1 %u\n'
              'protIds %#x/%x/%x/%x' % u)
         s += (' (%s/%s/%s/%s)\n' %
               (index_s(u[4], self.mon_comms_prot),
@@ -2873,8 +2877,15 @@ class ubx(object):
                index_s(u[6], self.mon_comms_prot),
                index_s(u[7], self.mon_comms_prot)))
 
-        i = 0
-        while m_len > (8 + (i * 40)):
+        if VERB_DECODE <= opts['verbosity']:
+            errors = {
+               0x40: "mem",
+               0x80: "alloc",
+               }
+
+            s += "     txErrors (%s)\n" % (flag_s(u[2], errors))
+
+        for i in range(0, u[1]):
             u = struct.unpack_from('<HHLBBHLBBHHHHHLLL', buf, (8 + (i * 40)))
             name = "%#x (%s)" % (u[0], index_s(u[0], self.port_ids1))
             if 0 < i:
@@ -2885,7 +2896,6 @@ class ubx(object):
                   '   overrunErrs %u msgs %u/%u/%u/%u reserved %x %x '
                   'skipped %u'
                   % u[1:])
-            i += 1
         return s
 
     mon_gnss_supported_bits = {
@@ -5447,11 +5457,6 @@ class ubx(object):
         m_data[0] = 1
         gps_model.gps_send(6, 0x31, m_data)
 
-    def send_mon_comms(self):
-        """UBX-MON-COMMS Comm port information"""
-        m_data = bytearray(0)
-        gps_model.gps_send(0x0a, 0x36, m_data)
-
     def send_cfg_valdel(self, key):
         """UBX-CFG-VALDEL, delete config items by key"""
         m_data = bytearray(4)
@@ -5637,9 +5642,9 @@ class ubx(object):
                       "help": "poll UBX-MON-BATCH Data batching "
                       "buffer status"},
         # UBX-MON-COMMS
-        "MON-COMMS": {"command": send_mon_comms,
+        "MON-COMMS": {"command": send_poll, "opt": [0x0a, 0x36],
                       "help": "poll UBX-MON-COMMS Comm port "
-                      " information (27+)"},
+                      "information"},
         # UBX-MON-GNSS
         "MON-GNSS": {"command": send_poll, "opt": [0x0a, 0x28],
                      "help": "poll UBX-MON-GNSS major GNSS selection"},
