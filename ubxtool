@@ -3043,6 +3043,42 @@ class ubx(object):
         s += " skipped %u %u %u %u %u %u" % u
         return s
 
+    mon_patch_act = {
+        1: "Active"
+        }
+    mon_patch_loc = {
+        0: "eFuse",
+        2: "ROM",
+        4: "BBR",
+        6: "File System",
+        }
+
+    def mon_patch(self, buf):
+        """UBX-MON-PATCH decode, Output information about installed patches."""
+
+        m_len = len(buf)
+
+        if 0 == m_len:
+            return " Poll request"
+
+        if 4 > m_len:
+            return " Bad Length %s" % m_len
+
+        # first seen in protver 15
+        u = struct.unpack_from('<HH', buf, 0)
+        s = " version %u nEntries %u" % u
+
+        for i in range(0, u[1]):
+            u = struct.unpack_from('<LLLL', buf, 0)
+            s = (" patchInfo x%x comparatorNumber %u patchAddress %u "
+                 "patchData %u" % u)
+            if VERB_DECODE <= opts['verbosity']:
+                s += ('\n  patchInfo (%s, %s)' %
+                      (flag_s(u[0] & 0x01, self.mon_patch_act),
+                       index_s(u[0] & 0x06, self.mon_patch_loc)))
+
+        return s
+
     mon_rf_antstat = {
         0: "Init",
         1: "Unk",
@@ -3086,42 +3122,6 @@ class ubx(object):
                       (index_s(u[1] & 0x03, self.jammingState),
                        index_s(u[2], self.mon_rf_antstat),
                        index_s(u[3], self.mon_rf_antpwr)))
-        return s
-
-    mon_patch_act = {
-        1: "Active"
-        }
-    mon_patch_loc = {
-        0: "eFuse",
-        2: "ROM",
-        4: "BBR",
-        6: "File System",
-        }
-
-    def mon_patch(self, buf):
-        """UBX-MON-PATCH decode, Output information about installed patches."""
-
-        m_len = len(buf)
-
-        if 0 == m_len:
-            return " Poll request"
-
-        if 4 > m_len:
-            return " Bad Length %s" % m_len
-
-        # first seen in protver 15
-        u = struct.unpack_from('<HH', buf, 0)
-        s = " version %u nEntries %u" % u
-
-        for i in range(0, u[1]):
-            u = struct.unpack_from('<LLLL', buf, 0)
-            s = (" patchInfo x%x comparatorNumber %u patchAddress %u "
-                 "patchData %u" % u)
-            if VERB_DECODE <= opts['verbosity']:
-                s += ('\n  patchInfo (%s, %s)' %
-                      (flag_s(u[0] & 0x01, self.mon_patch_act),
-                       index_s(u[0] & 0x06, self.mon_patch_loc)))
-
         return s
 
     def mon_rxbuf(self, buf):
