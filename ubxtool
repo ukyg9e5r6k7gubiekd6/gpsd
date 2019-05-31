@@ -3026,7 +3026,7 @@ class ubx(object):
         return s
 
     def mon_msgpp(self, buf):
-        """UBX-MON-MSGPP decode"""
+        """UBX-MON-MSGPP decode, Message Parse and Process Status"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
