@@ -2415,6 +2415,27 @@ class ubx(object):
 
         return s
 
+    cfg_rxm_lpMode = {
+        0: "Continuous Mode",
+        1: "Power Save Mode",
+        4: "Continuous Mode",
+        }
+
+    def cfg_rxm(self, buf):
+        """UBX-CFG-RXM decode, Navigation/Measurement"""
+
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 2 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BB', buf, 0)
+        s = (" reserved1 %u lpMode %u (%s)" %
+             (u + (index_s(u[1], self.cfg_rxm_lpMode),)))
+        return s
+
     cfg_sbas_mode = {
         1: "enabled",
         2: "test",
@@ -2761,7 +2782,7 @@ class ubx(object):
                6: {'str': 'DAT', 'name': 'UBX-CFG-DAT'},
                8: {'str': 'RATE', 'dec': cfg_rate, 'name': 'UBX-CFG-RATE'},
                9: {'str': 'CFG', 'dec': cfg_cfg, 'name': 'UBX-CFG-CFG'},
-               0x11: {'str': 'RXM', 'name': 'UBX-CFG-RXM'},
+               0x11: {'str': 'RXM', 'dec': cfg_rxm, 'name': 'UBX-CFG-RXM'},
                0x13: {'str': 'ANT', 'dec': cfg_ant, 'name': 'UBX-CFG-ANT'},
                0x16: {'str': 'SBAS', 'dec': cfg_sbas, 'name': 'UBX-CFG-SBAS'},
                0x17: {'str': 'NMEA', 'dec': cfg_nmea, 'name': 'UBX-CFG-NMEA'},
@@ -5837,6 +5858,9 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         # UBX-CFG-RINV
         "CFG-RINV": {"command": send_poll, "opt": [0x06, 0x34],
                      "help": "poll UBX-CFG-RINV Contents of Remote Inventory"},
+        # UBX-CFG-RXM
+        "CFG-RXM": {"command": send_poll, "opt": [0x06, 0x11],
+                    "help": "poll UBX-CFG-RXM RXM configuration"},
         # UBX-CFG-SBAS
         "CFG-SBAS": {"command": send_poll, "opt": [0x06, 0x16],
                      "help": "poll UBX-CFG-SBAS SBAS settings"},
