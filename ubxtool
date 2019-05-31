@@ -3246,7 +3246,7 @@ class ubx(object):
         return s
 
     def mon_ver(self, buf):
-        """UBX-MON-VER decode"""
+        """UBX-MON-VER decode, Poll Receiver/Software Version"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -3255,19 +3255,19 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         substr = buf.split(gps.polybytes('\0'))[0]
-        s = ' swVersion %s\n' % gps.polystr(substr)
-        substr = buf[30:39]
-        substr = substr.split(gps.polybytes('\0'))[0]
-        s += ' hwVersion %s' % gps.polystr(substr)
+        substr1 = buf[30:39]
+        substr1 = substr1.split(gps.polybytes('\0'))[0]
+        s = (" swVersion %s\n"
+             " hwVersion %s" %
+             (gps.polystr(substr), gps.polystr(substr1)))
+
         # extensions??
         num_ext = int((m_len - 40) / 30)
-        i = 0
-        while i < num_ext:
+        for i in range(0, num_ext):
             loc = 40 + (i * 30)
             substr = buf[loc:]
             substr = substr.split(gps.polybytes('\0'))[0]
-            s += '\n extension: %s' % gps.polystr(substr)
-            i += 1
+            s += '\n extension %s' % gps.polystr(substr)
         return s
 
     mon_ids = {2: {'str': 'IO', 'dec': mon_io, 'name': 'UBX-MON-IO'},
