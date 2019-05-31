@@ -2832,6 +2832,21 @@ class ubx(object):
     # UBX-LOG- ???
     # UBX-MGA- ???
 
+    def mon_batch(self, buf):
+        """UBX-MON-BATCH decode, Data batching buffer status"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 12 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBBHHHH', buf, 0)
+        s = ("   version %u reserved1 %u %u %u fillLevel %u\n"
+             "   dropsAll %u dropsSinceMon %u nextMsgCnt %u" % u)
+
+        return s
+
     mon_comms_prot = {
         0: "UBX",
         1: "NMEA",
@@ -3282,6 +3297,8 @@ class ubx(object):
                       'name': 'UBX-MON-PATCH'},
                0x28: {'str': 'GNSS', 'dec': mon_gnss, 'name': 'UBX-MON-GNSS'},
                0x2e: {'str': 'SMGR', 'dec': mon_smgr, 'name': 'UBX-MON-SMGR'},
+               0x32: {'str': 'BATCH', 'dec': mon_batch,
+                      'name': 'UBX-MON-BATCH'},
                0x36: {'str': 'COMMS', 'dec': mon_comms,
                       'name': 'UBX-MON-COMMS'},
                0x37: {'str': 'HW3', 'dec': mon_hw3, 'name': 'UBX-MON-HW3'},
@@ -5615,6 +5632,10 @@ class ubx(object):
         # UBX-CFG-NAV5
         "MODEL": {"command": send_cfg_nav5_model,
                   "help": "set UBX-CFG-NAV5 Dynamic Platform Model"},
+        # UBX-MON-BATCH
+        "MON-BATCH": {"command": send_poll, "opt": [0x0a, 0x32],
+                      "help": "poll UBX-MON-BATCH Data batching "
+                      "buffer status"},
         # UBX-MON-COMMS
         "MON-COMMS": {"command": send_mon_comms,
                       "help": "poll UBX-MON-COMMS Comm port "
