@@ -758,6 +758,9 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 	case STATUS_GNSSDR:
             mod = "+DR ";
 	    break;
+	case STATUS_TIME:
+            mod = "FIXED ";
+	    break;
 	default:
 	    /* ignore: */
 	    mod = "";
