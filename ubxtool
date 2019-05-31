@@ -3453,12 +3453,12 @@ class ubx(object):
         return s
 
     def nav_hpposecef(self, buf):
-        """UBX-NAV-POSECEF decode"""
+        """UBX-NAV-POSECEF decode, High Precision Position Solution in ECEF"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
 
-        if 28 < m_len:
+        if 28 > m_len:
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLlllbbbbL', buf, 0)
@@ -3468,7 +3468,7 @@ class ubx(object):
                 '  reserved2 %u pAcc %u' % u)
 
     def nav_hpposllh(self, buf):
-        """UBX-NAV-HPPOSLLH decode"""
+        """UBX-NAV-HPPOSLLH decode, HP Geodetic Position Solution"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -3568,7 +3568,7 @@ class ubx(object):
         return s
 
     def nav_posecef(self, buf):
-        """UBX-NAV-POSECEF decode"""
+        """UBX-NAV-POSECEF decode, Position Solution in ECEF"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -3580,7 +3580,7 @@ class ubx(object):
         return '  iTOW %u ecefX %d Y %d Z %d pAcc %u' % u
 
     def nav_posllh(self, buf):
-        """UBX-NAV-POSLLH decode"""
+        """UBX-NAV-POSLLH decode, Geodetic Position Solution"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -3613,6 +3613,12 @@ class ubx(object):
         1: "gnssFixOK",
         2: "diffSoln",
         0x20: "headVehValid",
+        }
+
+    nav_pvt_flags2 = {
+        0x20: "confirmedAvai",
+        0x40: "confirmedDate",
+        0x80: "confirmedTime",
         }
 
     nav_pvt_psm = {
@@ -3658,12 +3664,13 @@ class ubx(object):
 
         if VERB_DECODE <= opts['verbosity']:
             s += ("\n    valid (%s) fixType (%s)"
-                  "\n    flags (%s)"
+                  "\n    flags (%s) flags2 (%s)"
                   "\n    psmState (%s)"
                   "\n    carrSoln (%s)" %
                   (flag_s(u[7], self.nav_pvt_valid),
                    index_s(u[10], self.nav_pvt_fixType),
                    flag_s(u[11], self.nav_pvt_flags),
+                   flag_s(u[12], self.nav_pvt_flags2),
                    index_s((u[11] >> 2) & 0x0f, self.nav_pvt_psm),
                    index_s((u[11] >> 6) & 0x04, self.nav_pvt_carr)))
         return s
