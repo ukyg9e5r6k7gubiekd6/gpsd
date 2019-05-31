@@ -3316,7 +3316,7 @@ class ubx(object):
                }
 
     def nav_aopstatus(self, buf):
-        """UBX-NAV-AOPStATUS decode, AssistNow Autonomous Status"""
+        """UBX-NAV-AOPSTATUS decode, AssistNow Autonomous Status"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -3329,6 +3329,22 @@ class ubx(object):
         if VERB_DECODE <= opts['verbosity']:
             aopCfg = {1: "useAOP"}
             s += "\n   aopCfg (%s)" % flag_s(u[1], aopCfg)
+
+        return s
+
+    def nav_att(self, buf):
+        """UBX-NAV-ATT decode, Attitude Solution"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 32 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LBHBlllLLL', buf, 0)
+        s = ("  iTOW %u version %u reserved1 %u %u\n"
+             "  roll %d pitch %d heading %d\n"
+             "  accRoll %d accPitch %d accHeading %d" % u)
 
         return s
 
@@ -4017,7 +4033,7 @@ class ubx(object):
                3: {'str': 'STATUS', 'dec': nav_status,
                    'name': 'UBX-NAV-STATUS'},
                0x4: {'str': 'DOP', 'dec': nav_dop, 'name': 'UBX-NAV-DOP'},
-               0x5: {'str': 'ATT', 'name': 'UBX-NAV-ATT'},
+               0x5: {'str': 'ATT', 'dec': nav_att, 'name': 'UBX-NAV-ATT'},
                0x6: {'str': 'SOL', 'dec': nav_sol, 'name': 'UBX-NAV-SOL'},
                0x7: {'str': 'PVT', 'dec': nav_pvt, 'name': 'UBX-NAV-PVT'},
                0x9: {'str': 'ODO', 'name': 'UBX-NAV-ODO'},
@@ -5705,6 +5721,9 @@ class ubx(object):
         "NAV-AOPSTATUS": {"command": send_poll, "opt": [0x01, 0x60],
                           "help": "poll UBX-NAV-AOPSTATUS AssistNow "
                           "Autonomous Status"},
+        # UBX-NAV-ATT
+        "NAV-ATT": {"command": send_poll, "opt": [0x1, 0x5],
+                          "help": "poll UBX-NAV-ATT Attitude Solution"},
         # UBX-NAV-CLOCK
         "NAV-CLOCK": {"command": send_poll, "opt": [0x01, 0x22],
                       "help": "poll UBX-NAV-CLOCK Clock Solution"},
