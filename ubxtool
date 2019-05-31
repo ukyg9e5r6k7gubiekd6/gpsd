@@ -3166,6 +3166,27 @@ class ubx(object):
 
         return s
 
+    mon_smgr_OscState = {
+        0: "autonomous operation",
+        1: "calibration ongoing",
+        2: "oscillator steered by host",
+        3: "idle state",
+        }
+
+    mon_smgr_Osc = {
+        0x10: "OscCalib",
+        0x20: "OscDisc",
+        }
+
+    mon_smgr_discSrc = {
+        0: "internal oscillator",
+        1: "GNSS",
+        2: "EXTINT0",
+        3: "EXTINT1",
+        4: "internal oscillator measured by host",
+        5: "external oscillator measured by host",
+        }
+
     def mon_smgr(self, buf):
         """UBX-MON-SMGR decode, Synchronization manager status"""
 
@@ -3180,6 +3201,15 @@ class ubx(object):
         u = struct.unpack_from('<BBBBLHHBBBB', buf, 0)
         s = (" version %u reserved1 %u %u %u iTOW %u intOsc x%x extOsc x%x\n"
              " discOsc %u gnss x%x extInt0 x%x extInt1 %x%x" % u)
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n  intOsc (%s) intOscState (%s)"
+                  "\n  extOsc(%s) extoscState (%s)"
+                  "\n  flags (%s)" %
+                  (flag_s(u[3], self.mon_smgr_Osc),
+                   index_s(u[3] & 0x0f, self.mon_smgr_OscState),
+                   flag_s(u[4], self.mon_smgr_Osc),
+                   index_s(u[4] & 0x0f, self.mon_smgr_OscState),
+                   index_s(u[5], self.mon_smgr_discSrc)))
         return s
 
     def mon_txbuf(self, buf):
