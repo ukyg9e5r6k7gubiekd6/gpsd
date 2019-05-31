@@ -3415,10 +3415,20 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<L', buf, 0)
-        return ' iTOW %d' % u
+        return ' iTOW %u' % u
+
+    nav_geofence_state = {
+        1: "Inside",
+        2: "Outside",
+        }
+
+    nav_geofence_status = {
+        0: "n/a",
+        1: "Active",
+        }
 
     def nav_geofence(self, buf):
-        """UBX-NAV-GEOFENCE decode"""
+        """UBX-NAV-GEOFENCE decode, Geofencing status"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -3427,13 +3437,19 @@ class ubx(object):
             return " Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBBB', buf, 0)
-        s = '  iTOW:%d version %u status %u numFences %u combState %u' % u
+        s = '  iTOW:%u version %u status %u numFences %u combState %u' % u
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n    status (%s) combState (%s)" %
+                  (index_s(u[2], self.nav_geofence_status),
+                   index_s(u[4], self.nav_geofence_state)))
 
-        m_len -= 8
-        i = 0
-        while 1 < m_len:
+        for i in range(0, u[3]):
             u = struct.unpack_from('<BB', buf, 8 + (i * 2))
             s += '\n  state %u reserved1 %u' % u
+            if VERB_DECODE <= opts['verbosity']:
+                s += ("\n    state (%s)" %
+                      (index_s(u[0], self.nav_geofence_state)))
+
         return s
 
     def nav_hpposecef(self, buf):
