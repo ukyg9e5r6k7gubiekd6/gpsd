@@ -3315,6 +3315,23 @@ class ubx(object):
                0x38: {'str': 'RF', 'dec': mon_rf, 'name': 'UBX-MON-RF'},
                }
 
+    def nav_aopstatus(self, buf):
+        """UBX-NAV-AOPStATUS decode, AssistNow Autonomous Status"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 16 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LBBLLH', buf, 0)
+        s = '  iTOW %u aopCfg %u status %u reserved1 %u %u %u' % u
+        if VERB_DECODE <= opts['verbosity']:
+            aopCfg = {1: "useAOP"}
+            s += "\n   aopCfg (%s)" % flag_s(u[1], aopCfg)
+
+        return s
+
     def nav_clock(self, buf):
         """UBX-NAV-CLOCK decode, Clock Solution"""
         m_len = len(buf)
@@ -4038,7 +4055,8 @@ class ubx(object):
                0x3B: {'str': 'SVIN', 'dec': nav_svin, 'name': 'UBX-NAV-SVIN'},
                0x3C: {'str': 'RELPOSNED', 'name': 'UBX-NAV-RELPOSNED'},
                0x43: {'str': 'SIG', 'dec': nav_sig, 'name': 'UBX-NAV-SIG'},
-               0x60: {'str': 'AOPSTATUS', 'name': 'UBX-NAV-AOPSTATUS'},
+               0x60: {'str': 'AOPSTATUS', 'dec': nav_aopstatus,
+                      'name': 'UBX-NAV-AOPSTATUS'},
                0x61: {'str': 'EOE', 'dec': nav_eoe, 'name': 'UBX-NAV-EOE'},
                }
 
@@ -5683,6 +5701,10 @@ class ubx(object):
         # UBX-MON-VER
         "MON-VER": {"command": send_poll, "opt": [0x0a, 0x04],
                     "help": "poll UBX-MON-VER GPS version"},
+        # UBX-NAV-AOPSTATUS
+        "NAV-AOPSTATUS": {"command": send_poll, "opt": [0x01, 0x60],
+                          "help": "poll UBX-NAV-AOPSTATUS AssistNow "
+                          "Autonomous Status"},
         # UBX-NAV-CLOCK
         "NAV-CLOCK": {"command": send_poll, "opt": [0x01, 0x22],
                       "help": "poll UBX-NAV-CLOCK Clock Solution"},
