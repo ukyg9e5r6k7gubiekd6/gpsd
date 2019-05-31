@@ -3631,7 +3631,7 @@ class ubx(object):
         }
 
     # protver 27+
-    nav_pvt_carr = {
+    carrSoln = {
         0: "None",
         1: "Floating",
         2: "Fixed",
@@ -3672,7 +3672,42 @@ class ubx(object):
                    flag_s(u[11], self.nav_pvt_flags),
                    flag_s(u[12], self.nav_pvt_flags2),
                    index_s((u[11] >> 2) & 0x0f, self.nav_pvt_psm),
-                   index_s((u[11] >> 6) & 0x04, self.nav_pvt_carr)))
+                   index_s((u[11] >> 6) & 0x03, self.carrSoln)))
+        return s
+
+    nav_relposned_flags = {
+        1: "gnssFixOK",
+        2: "diffSoln",
+        4: "relPosValid",
+        0x20: "isMoving",
+        0x40: "refPosMiss",
+        0x80: "refObsMiss",
+        0x100: "relPosHeadingValid",
+        }
+
+    def nav_relposned(self, buf):
+        """\
+UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
+
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 64 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBHLlllllLbbbbLLLLLLL', buf, 0)
+        s = ('  version %u reserved1 %u refStationId %u iTOW %u\n'
+             '  relPosN %d relPosE %d relPosD %d\n'
+             '  relLength %d relHeading %d reserved2 %u\n'
+             '  relPosHPN %d relPosHPE %d relPosHPD %d relPosHPLength %d\n'
+             '  accN %u accE %u accD %u accLength %u accHeading %u\n'
+             '  reserved3 %u flags x%x' % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n    flags (%s) carrSoln (%s)" %
+                  (flag_s(u[21], self.nav_relposned_flags),
+                   index_s((u[21] >> 3) & 0x03, self.carrSoln)))
         return s
 
     qualityInd = {
@@ -4185,7 +4220,8 @@ class ubx(object):
                0x39: {'str': 'GEOFENCE', 'dec': nav_geofence,
                       'name': 'UBX-NAV-GEOFENCE'},
                0x3B: {'str': 'SVIN', 'dec': nav_svin, 'name': 'UBX-NAV-SVIN'},
-               0x3C: {'str': 'RELPOSNED', 'name': 'UBX-NAV-RELPOSNED'},
+               0x3C: {'str': 'RELPOSNED', 'dec': nav_relposned,
+                      'name': 'UBX-NAV-RELPOSNED'},
                0x42: {'str': 'SLAS', 'name': 'UBX-NAV-SLAS'},
                0x43: {'str': 'SIG', 'dec': nav_sig, 'name': 'UBX-NAV-SIG'},
                0x60: {'str': 'AOPSTATUS', 'dec': nav_aopstatus,
@@ -5875,6 +5911,10 @@ class ubx(object):
         "NAV-PVT": {"command": send_poll, "opt": [0x01, 0x07],
                     "help": "poll UBX-NAV-PVT Navigation Position Velocity "
                     "Time Solution"},
+        # UBX-NAV-RELPOSNED
+        "NAV-RELPOSNED": {"command": send_poll, "opt": [0x01, 0x3c],
+                          "help": "poll UBX-NAV-RELPOSNED Relative "
+                          "Positioning Information in NED frame"},
         # UBX-NAV-SAT
         "NAV-SAT": {"command": send_poll, "opt": [0x01, 0x35],
                     "help": "poll UBX-NAV-SAT Satellite Information"},
