@@ -3125,7 +3125,7 @@ class ubx(object):
         return s
 
     def mon_rxbuf(self, buf):
-        """UBX-MON-RXBUF decode"""
+        """UBX-MON-RXBUF decode, Receiver Buffer Status"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -3145,17 +3145,25 @@ class ubx(object):
             s += rxbuf_name[i] + "%u %u %u %u %u %u\n" % u
         return s
 
+    mon_rxr_flags = {
+        1: "Awake",
+        }
+
     def mon_rxr(self, buf):
         """UBX-MON-RXBUF decode, Receiver Status Information"""
+
+        # No way to poll
         m_len = len(buf)
 
         if 1 > m_len:
             return " Bad Length %s" % m_len
 
-        if 1 & buf[0]:
-            s = " awake"
-        else:
-            s = " not awake"
+        u = struct.unpack_from('<B', buf, 0)
+        s = "  flags: x%x" % u
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n  flags (%s)" %
+                  index_s(u[0], self.mon_rxr_flags))
+
         return s
 
     def mon_smgr(self, buf):
