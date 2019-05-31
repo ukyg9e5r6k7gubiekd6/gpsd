@@ -1810,7 +1810,7 @@ class ubx(object):
             return "Bad Length %s" % m_len
 
         u = struct.unpack_from('<BB', buf, 0)
-        return ' ACK to: %s' % self.class_id_s(u[0], u[1])
+        return ' ACK to %s' % self.class_id_s(u[0], u[1])
 
     ack_ids = {0: {'str': 'NAK', 'dec': ack_ack, 'name': 'UBX-ACK-NAK'},
                1: {'str': 'ACK', 'dec': ack_ack, 'name': 'UBX-ACK-ACK'}}
@@ -2542,8 +2542,8 @@ class ubx(object):
 
         u = struct.unpack_from('<BBHlllLLL', buf, 0)
         s = (' timeMode: %u reserved1: %u  usage: %#x\n'
-             ' ecefXOrLat: %d ecefYOrLon: %d ecefZOrLon: %d\n'
-             ' fixeedPosAcc %u svinMinDur %u svinAccLimit %u' % u)
+             ' ecefXOrLat: %d ecefYOrLon: %d ecefZOrAlt: %d\n'
+             ' fixedPosAcc %u svinMinDur %u svinAccLimit %u' % u)
 
         if VERB_DECODE <= opts['verbosity']:
             s += ("\n   timeMode (%s) flags (%s)" %
@@ -4604,24 +4604,18 @@ class ubx(object):
 
     def class_id_s(self, m_class, m_id):
         """Return class and ID numbers as a string."""
-        s = 'Class: '
-        if m_class not in self.classes:
-            s += '%#x ID: %#x' % (m_class, m_id)
-            return s
 
-        if 'str' in self.classes[m_class]:
-            s_class = self.classes[m_class]['str']
-            s += '%s(%#x) ' % (s_class, m_class)
-        else:
-            s += '%#x ' % (m_class)
+        s = 'Class x%x' % (m_class)
+        if (((m_class in self.classes and
+              'str' in self.classes[m_class]))):
+            s += ' (%s)' % (self.classes[m_class]['str'])
 
-        if (('ids' in self.classes[m_class] and
-             m_id in self.classes[m_class]['ids'] and
-             'str' in self.classes[m_class]['ids'][m_id])):
-            s_id = self.classes[m_class]['ids'][m_id]['str']
-            s += 'ID: %s(%#x)' % (s_id, m_id)
-        else:
-            s += 'ID: %#x' % (m_id)
+        s += ' ID x%x' % (m_id)
+        if (((m_class in self.classes and
+              'ids' in self.classes[m_class] and
+              m_id in self.classes[m_class]['ids'] and
+              'str' in self.classes[m_class]['ids'][m_id]))):
+            s += ' (%s)' % (self.classes[m_class]['ids'][m_id]['str'])
 
         return s
 
