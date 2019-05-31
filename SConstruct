@@ -65,22 +65,20 @@ libgps_version_age = 0
 # Each variable foo has a corresponding @FOO@ expanded in .in files.
 # There are no project-dependent URLs or references to the hosting site
 # anywhere else in the distribution; preserve this property!
-admin = "https://savannah.nongnu.org/project/admin/?group=gpsd"
 annmail = "gpsd-announce@nongnu.org"
-browserepo = "http://git.savannah.gnu.org/cgit/gpsd.git"
-bugtracker = "https://savannah.nongnu.org/bugs/?group=gpsd"
+bugtracker = "https://gitlab.com/gpsd/gpsd/issues"
 cgiupload = "root@thyrsus.com:/var/www/cgi-bin/"
-clonerepo = "https://savannah.nongnu.org/git/?group=gpsd"
+clonerepo = "git@gitlab.com:gpsd/gpsd.git"
 devmail = "gpsd-dev@lists.nongnu.org"
 download = "http://download-mirror.savannah.gnu.org/releases/gpsd/"
 formserver = "www@thyrsus.com"
 gitrepo = "git@gitlab.com:gpsd/gpsd.git"
 ircchan = "irc://chat.freenode.net/#gpsd"
 mailman = "https://lists.nongnu.org/mailman/listinfo/"
-mainpage = "https://savannah.nongnu.org/projects/gpsd/"
+mainpage = "https://gitlab.com/gpsd/gpsd"
 scpupload = "garyemiller@dl.sv.nongnu.org:/releases/gpsd/"
-sitename = "Savannah"
-sitesearch = "catb.org"
+sitename = "GitLab"
+sitesearch = "gitlab.com"
 tiplink = "<a href='https://www.patreon.com/esr'>" \
           "leave a remittance at Patreon</a>"
 tipwidget = '<p><a href="https://www.patreon.com/esr">' \
@@ -1741,9 +1739,7 @@ else:
 # but it doesn't seem to work in scons 1.20
 def substituter(target, source, env):
     substmap = (
-        ('@ADMIN@',      admin),
         ('@ANNOUNCE@',   annmail),
-        ('@BROWSEREPO@', browserepo),
         ('@BUGTRACKER@', bugtracker),
         ('@CGIUPLOAD@',  cgiupload),
         ('@CLONEREPO@',  clonerepo),
