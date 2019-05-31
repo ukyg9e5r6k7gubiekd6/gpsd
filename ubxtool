@@ -3913,6 +3913,35 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
                        flag_s(u[9], self.nav_sig_sigFlags)))
         return s
 
+    nav_slas_flags = {
+        1: "gmsAvailable",
+        2: "qzssSvAvailable",
+        4: "testMode",
+        }
+
+    def nav_slas(self, buf):
+        """UBX-NAV-SLAS decode, QZSS L1S SLAS Status Data"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 20 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LBBBBllBBBB', buf, 0)
+        s = ('  iTOW %u version %u reserved1 %u %u %u'
+             '  gmsLon %d gmsLon %d gmsCode %u qzssSvId %u'
+             '  serviceFlags x%x cnt %d' % u)
+
+        for i in range(0, u[8]):
+            u = struct.unpack_from('<BBLh', buf, 20 + (i * 8))
+            s += '\n   gnssId %u svId %u reserved23 %u prc %d ' % u
+
+            if VERB_DECODE <= opts['verbosity']:
+                s += ("\n     flags (%s)" %
+                      (flag_s(u[3], self.nav_slas_flags)))
+        return s
+
     nav_sol_flags = {
         1: "GPSfixOK",
         2: "DiffSoln",
@@ -4233,7 +4262,7 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
                0x3B: {'str': 'SVIN', 'dec': nav_svin, 'name': 'UBX-NAV-SVIN'},
                0x3C: {'str': 'RELPOSNED', 'dec': nav_relposned,
                       'name': 'UBX-NAV-RELPOSNED'},
-               0x42: {'str': 'SLAS', 'name': 'UBX-NAV-SLAS'},
+               0x42: {'str': 'SLAS', 'dec': nav_slas, 'name': 'UBX-NAV-SLAS'},
                0x43: {'str': 'SIG', 'dec': nav_sig, 'name': 'UBX-NAV-SIG'},
                0x60: {'str': 'AOPSTATUS', 'dec': nav_aopstatus,
                       'name': 'UBX-NAV-AOPSTATUS'},
@@ -5938,6 +5967,9 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         # UBX-NAV-SIG
         "NAV-SIG": {"command": send_poll, "opt": [0x01, 0x43],
                     "help": "poll UBX-NAV-SIG Signal Information"},
+        # UBX-NAV-SLAS
+        "NAV-SLAS": {"command": send_poll, "opt": [0x01, 0x42],
+                     "help": "poll UBX-NAV-SLAS QZSS L1S SLAS Status Data"},
         # UBX-NAV-SOL
         "NAV-SOL": {"command": send_poll, "opt": [0x01, 0x06],
                     "help": "poll UBX-NAV-SOL Navigation Solution "
