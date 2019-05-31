@@ -3227,10 +3227,22 @@ class ubx(object):
            3: " peakUsage ",
            }
 
+        errors = {
+           0x40: "mem",
+           0x80: "alloc",
+           }
+
         s = ''
         for i in range(1, 4):
             u = struct.unpack_from('<HHHHHH', buf, 0)
             s += rxbuf_name[i] + "%u %u %u %u %u %u\n" % u
+
+        u = struct.unpack_from('<BBBB', buf, 24)
+        s += " tUsage %u tPeakUsage %u errors x%x reserved1 %u" % u
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n  errors (%s) limit (%u)" %
+                  (flag_s(u[2], errors), u[2] & 0x3f))
+
         return s
 
     def mon_ver(self, buf):
