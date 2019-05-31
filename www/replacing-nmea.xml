@@ -518,9 +518,3 @@ of these should be difficult to derive.</para>
 
 </sect1>
 </article>
-
-<!--
-Local Variables:
-compile-command: "xmlto xhtml-nochunks replacing-nmea.xml"
-End:
--->

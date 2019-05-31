@@ -739,9 +739,3 @@ for the GPS data.</para>
 </sect2>
 </sect1>
 </article>
-
-<!--
-Local Variables:
-compile-command: "xmlto xhtml-nochunks performance.xml"
-End:
--->
