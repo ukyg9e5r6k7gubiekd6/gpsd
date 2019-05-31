@@ -2361,6 +2361,21 @@ class ubx(object):
 
         return s
 
+    cfg_rst_navBbr = {
+        0: "Hot Start",
+        1: "Warm Start",
+        0xffff: "Cold Start",
+        }
+
+    cfg_rst_resetMode = {
+        0: "Hardware reset",
+        1: "Software reset",
+        2: "Software reset (GNSS only)",
+        4: "Hardware reset, after shutdown",
+        8: "Controled GNSS stop",
+        9: "Controled GNSS start",
+        }
+
     def cfg_rst(self, buf):
         """"UBX-CFG-RST decode, Reset Receiver"""
 
@@ -2369,27 +2384,13 @@ class ubx(object):
         if 4 > m_len:
             return "Bad Length %s" % m_len
 
-        bbrvalues = {0: "Hot Start",
-                     1: "Warm Start",
-                     0xffff: "Cold Start",
-                     }
-        mode = {0: "Hardware reset",
-                1: "Software reset",
-                2: "Software reset (GNSS only)",
-                4: "Hardware reset, after shutdown",
-                8: "Controled GNSS stop",
-                9: "Controled GNSS start",
-                }
         u = struct.unpack_from('<HBB', buf, 0)
-        s = ' navBbrmask: %#x resetMode: %u reserved: %u\n' % u
-        if u[0] in bbrvalues:
-            s += "   %s, " % bbrvalues[u[0]]
-        else:
-            s += "   Other, "
-        if u[1] in mode:
-            s += mode[u[1]]
-        else:
-            s += "Other"
+        s = ' navBbrmask x%x resetMode %u reserved %u' % u
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ('\n      navBbrMask (%s) resetMode (%s)' %
+                  (flag_s(u[0], self.cfg_rst_navBbr),
+                   flag_s(u[1], self.cfg_rst_resetMode)))
 
         return s
 
