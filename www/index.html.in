@@ -1,5 +1,4 @@
-<!DOCTYPE HTML>
-<html>
+<!doctype html>
 <!-- @MASTER@ -->
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
@@ -217,6 +216,7 @@ version) rather than the latest released stable version.</p>
 <dt><a
 href="@DOWNLOAD@">Releases</a></dt>
 <dd>Where to get release tarballs</dd>
+</dl>
 
 <p>If you are using a Debian-based distribution (including Ubuntu) you
 can probably install <code>gpsd</code> through your regular package
