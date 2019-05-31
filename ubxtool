@@ -3710,6 +3710,16 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
                    index_s((u[21] >> 3) & 0x03, self.carrSoln)))
         return s
 
+    def nav_resetodo(self, buf):
+        """UBX-NAV-RESETODO decode, reset odometer"""
+
+        m_len = len(buf)
+        if 0 == m_len:
+            s = " reset request"
+        else:
+            s = " unexpected data"
+        return s
+
     qualityInd = {
         0: "None",
         1: "Searching",
@@ -4188,7 +4198,8 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
                0x6: {'str': 'SOL', 'dec': nav_sol, 'name': 'UBX-NAV-SOL'},
                0x7: {'str': 'PVT', 'dec': nav_pvt, 'name': 'UBX-NAV-PVT'},
                0x9: {'str': 'ODO', 'dec': nav_odo, 'name': 'UBX-NAV-ODO'},
-               0x10: {'str': 'RESETODO', 'name': 'UBX-NAV-RESETODO'},
+               0x10: {'str': 'RESETODO', 'dec': nav_resetodo,
+                      'name': 'UBX-NAV-RESETODO'},
                0x11: {'str': 'VELECEF', 'dec': nav_velecef,
                       'name': 'UBX-NAV-VELECEF'},
                0x12: {'str': 'VELNED', 'dec': nav_velned,
@@ -5915,6 +5926,9 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         "NAV-RELPOSNED": {"command": send_poll, "opt": [0x01, 0x3c],
                           "help": "poll UBX-NAV-RELPOSNED Relative "
                           "Positioning Information in NED frame"},
+        # UBX-NAV-RESETODO
+        "NAV-RESETODO": {"command": send_poll, "opt": [0x01, 0x10],
+                         "help": "UBX-NAV-RESETODO Reset odometer"},
         # UBX-NAV-SAT
         "NAV-SAT": {"command": send_poll, "opt": [0x01, 0x35],
                     "help": "poll UBX-NAV-SAT Satellite Information"},
