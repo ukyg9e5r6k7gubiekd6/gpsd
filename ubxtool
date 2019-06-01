@@ -3002,6 +3002,14 @@ class ubx(object):
                       'name': 'UBX-CFG-VALDEL'},
                }
 
+    # UBX-ESF-
+    # only with ADR or UDR products
+    esf_ids = {0x02: {'str': 'MEAS', 'name': "UBX-ESF-MEAS"},
+               0x03: {'str': 'RAW', 'name': "UBX-ESF-RAW"},
+               0x10: {'str': 'STATUS', 'name': "UBX-ESF-STATUS"},
+               0x15: {'str': 'INS', 'name': "UBX-ESF-INS"},
+               }
+
     def inf_debug(self, buf):
         """UBX-INF-DEBUG decode"""
         return ' Debug: ' + gps.polystr(buf)
@@ -5161,7 +5169,7 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         0x0A: {'str': 'MON', 'ids': mon_ids},
         0x0B: {'str': 'ATD'},
         0x0D: {'str': 'TIM', 'ids': tim_ids},
-        0x10: {'str': 'ESF'},
+        0x10: {'str': 'ESF', 'ids': esf_ids},
         0x13: {'str': 'MGA', 'ids': mga_ids},
         0x21: {'str': 'LOG', 'ids': log_ids},
         0x27: {'str': 'SEC', 'ids': sec_ids},
