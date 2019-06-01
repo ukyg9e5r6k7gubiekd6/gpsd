@@ -274,7 +274,7 @@ not expect to ever ship valid information for this field.</para>
 
 <para>The first field of every SGPS report sentence is a full
 timestamp in the format of the <ulink
-url='https://web.archive.org/web/20150919174330/http://www.w3.org/TR/1998/NOTE-datetime-19980827'>W3C 
+url='https://web.archive.org/web/20150919174330/https://www.w3.org/TR/1998/NOTE-datetime-19980827'>W3C 
 profile of ISO 8601</ulink>, with the timezone required to be 
 Zulu (UTC) time.</para>
 
