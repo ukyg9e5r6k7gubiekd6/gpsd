@@ -448,7 +448,7 @@ href="http://redhog.github.com/agpsd/">agpsd</a>,
 a gpsd replication and logging daemon with support for KML.</p>
 
 <p>You can find Debian-unstable packages
-<a href='http://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
+<a href='https://packages.debian.org/unstable/misc/gpsd'>here</a>.</p>
 
 <p><code>gpsd</code> is carried in the OpenBSD ports tree.</p>
 

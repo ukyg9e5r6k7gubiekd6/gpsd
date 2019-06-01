@@ -15,4 +15,4 @@ services:
   - docker
 
 script:
-  - wget -O- http://build-in-debian.bzed.at/script.sh | sh -
+  - wget -O- https://build-in-debian.bzed.at/script.sh | sh -

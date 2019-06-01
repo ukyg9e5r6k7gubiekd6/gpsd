@@ -273,7 +273,7 @@ and testing gpsd:
 You need scons at 2.3.0 or higher to build.
 If your scons is less than 2.3.0 you will need to get a newer scons
 from wheezy-backport.  Partial instructions are detailed here:
-http://backports.debian.org/Instructions/
+https://backports.debian.org/Instructions/
 
 Basically you need to add this line to /etc/apt/sources.list:
 

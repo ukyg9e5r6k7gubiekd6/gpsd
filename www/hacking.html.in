@@ -1709,7 +1709,7 @@ and Coverity warnings and fix them.</p></dd>
 <dd><p>If it doesn't pass regressions, it isn't ready to ship.  Run
 <code>scons releasecheck</code> and watch for errors on a
 representative selection of <a
-href="http://db.debian.org/machines.cgi">porterboxes</a>.</p>
+href="https://db.debian.org/machines.cgi">porterboxes</a>.</p>
 
 <p>Warning! Whenever the default leap second changes in timebase.h the
 GPS tests will break (times one second off) and the testloads will
