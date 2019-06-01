@@ -3050,7 +3050,18 @@ class ubx(object):
                0x11: {'str': 'BATCH', 'name': "UBX-LOG-BATCH"},
                }
 
-    # UBX-MGA- ???
+    # UBX-MGA-
+    mga_ids = {0x00: {'str': 'GPS', 'name': "UBX-MGA-GPS"},
+               0x02: {'str': 'GAL', 'name': "UBX-MGA-GAL"},
+               0x03: {'str': 'BDS', 'name': "UBX-MGA-BDS"},
+               0x05: {'str': 'QZSS', 'name': "UBX-MGA-QZSS"},
+               0x06: {'str': 'GLO', 'name': "UBX-MGA-GLO"},
+               0x20: {'str': 'ANO', 'name': "UBX-MGA-ANO"},
+               0x21: {'str': 'FLASH', 'name': "UBX-MGA-FLASH"},
+               0x40: {'str': 'INI', 'name': "UBX-MGA-INI"},
+               0x60: {'str': 'ACK', 'name': "UBX-MGA-ACK"},
+               0x80: {'str': 'DBD', 'name': "UBX-MGA-DBD"},
+               }
 
     def mon_batch(self, buf):
         """UBX-MON-BATCH decode, Data batching buffer status"""
@@ -5149,7 +5160,7 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         0x0B: {'str': 'ATD'},
         0x0D: {'str': 'TIM', 'ids': tim_ids},
         0x10: {'str': 'ESF'},
-        0x13: {'str': 'MGA'},
+        0x13: {'str': 'MGA', 'ids': mga_ids},
         0x21: {'str': 'LOG', 'ids': log_ids},
         0x27: {'str': 'SEC', 'ids': sec_ids},
         0x28: {'str': 'HNR'},
