@@ -9,6 +9,9 @@ Some hints for people building binary packages are in packaging/readme.txt.
 
 == Quick start ==
 
+You can download the most recent development snapshot from:
+https://gitlab.com/gpsd/gpsd/tree/master
+
 You can download the lastest gpsd tarball from:
 http://download.savannah.gnu.org/releases/gpsd/
 
