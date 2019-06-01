@@ -3010,6 +3010,12 @@ class ubx(object):
                0x15: {'str': 'INS', 'name': "UBX-ESF-INS"},
                }
 
+    # UBX-HNR-
+    # only with ADR or UDR products
+    hnr_ids = {0x00: {'str': 'PVT', 'name': "UBX-HNR-PVT"},
+               0x02: {'str': 'INS', 'name': "UBX-HNR-INS"},
+               }
+
     def inf_debug(self, buf):
         """UBX-INF-DEBUG decode"""
         return ' Debug: ' + gps.polystr(buf)
@@ -5173,7 +5179,7 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         0x13: {'str': 'MGA', 'ids': mga_ids},
         0x21: {'str': 'LOG', 'ids': log_ids},
         0x27: {'str': 'SEC', 'ids': sec_ids},
-        0x28: {'str': 'HNR'},
+        0x28: {'str': 'HNR', 'ids': hnr_ids},
         0xf0: {'str': 'NMEA', 'ids': nmea_ids},
         0xf5: {'str': 'RTCM', 'ids': rtcm_ids},
     }
