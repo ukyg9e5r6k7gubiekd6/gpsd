@@ -2373,7 +2373,7 @@ class ubx(object):
         }
 
     def cfg_prt(self, buf):
-        """UBX-CFG-PRT decode"""
+        """UBX-CFG-PRT decode, Port Configuration """
 
         m_len = len(buf)
         if 0 == m_len:
@@ -2596,7 +2596,7 @@ class ubx(object):
         }
 
     def cfg_sbas(self, buf):
-        """UBX-CFG-SBAS decode"""
+        """UBX-CFG-SBAS decode, SBAS Configuration"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -2725,7 +2725,7 @@ class ubx(object):
         return s
 
     def cfg_usb(self, buf):
-        """UBX-CFG-USB decode"""
+        """UBX-CFG-USB decode, USB Configuration"""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
