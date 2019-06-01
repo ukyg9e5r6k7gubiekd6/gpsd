@@ -1841,12 +1841,31 @@ class ubx(object):
 
         return s
 
+    def aid_aop(self, buf):
+        """UBX-AID-AOP decode, AssistNow Autonomous data"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request all"
+
+        if 1 == m_len:
+            return " Poll request svid %u" % buf[0]
+
+        # length 2 is undocumented...
+        if 2 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BB', buf, 0)
+        s = ' gnssid %u svid %u' % u
+        # FIXME: dump the rest...
+
+        return s
+
     # All UBX-AID messages are deprecated; use UBX-MGA messages instead
     aid_ids = {0x01: {'str': 'INI', 'name': 'UBX-AID-INI'},
                0x02: {'str': 'HUI', 'name': 'UBX-AID-HUI'},
                0x30: {'str': 'ALM', 'dec': aid_alm, 'name': 'UBX-AID-ALM'},
                0x31: {'str': 'EPH', 'name': 'UBX-AID-EPH'},
-               0x33: {'str': 'AOP', 'name': 'UBX-AID-AOP'},
+               0x33: {'str': 'AOP', 'dec': aid_aop, 'name': 'UBX-AID-AOP'},
                }
 
     cfg_ant_pins = {
@@ -6080,6 +6099,10 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         # UBX-AID-ALM
         "AID-ALM": {"command": send_poll, "opt": [0x0b, 0x30],
                     "help": "poll UBX-AID-ALM Poll GPS Aiding Almanac Data"},
+        # UBX-AID-AOP
+        "AID-AOP": {"command": send_poll, "opt": [0x0b, 0x33],
+                    "help": "poll UBX-AID-AOP Poll Poll AssistNow "
+                    "Autonomous data"},
         # UBX-CFG-ANT
         "CFG-ANT": {"command": send_poll, "opt": [0x06, 0x13],
                     "help": "poll UBX-CFG-ANT antenna config"},
