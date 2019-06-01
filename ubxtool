@@ -1814,8 +1814,18 @@ class ubx(object):
         u = struct.unpack_from('<BB', buf, 0)
         return ' ACK to %s' % self.class_id_s(u[0], u[1])
 
+    # UBX-ACK-
     ack_ids = {0: {'str': 'NAK', 'dec': ack_ack, 'name': 'UBX-ACK-NAK'},
                1: {'str': 'ACK', 'dec': ack_ack, 'name': 'UBX-ACK-ACK'}}
+
+    # UBX-AID-
+    # All UBX-AID messages are deprecated; use UBX-MGA messages instead
+    aid_ids = {0x01: {'str': 'INI', 'name': 'UBX-AID-INI'},
+               0x02: {'str': 'HUI', 'name': 'UBX-AID-HUI'},
+               0x30: {'str': 'ALM', 'name': 'UBX-AID-ALM'},
+               0x31: {'str': 'EPH', 'name': 'UBX-AID-EPH'},
+               0x33: {'str': 'AOP', 'name': 'UBX-AID-AOP'},
+               }
 
     cfg_ant_pins = {
         1: 'svcs',
