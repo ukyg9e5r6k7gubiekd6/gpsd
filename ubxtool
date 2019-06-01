@@ -2420,6 +2420,24 @@ class ubx(object):
 
         return '\n'.join(s)
 
+    cfg_pwr_state = {
+        0x52554E20: "GNSS running",
+        0x53544F50: "GNSS stopped",
+        0x42434B50: "Software Backup",
+        }
+
+    def cfg_pwr(self, buf):
+        """UBX-CFG-PWR decode, Put receiver in a defined power state"""
+
+        m_len = len(buf)
+        if 8 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBL', buf, 0)
+        s = (" version %u reserved %u %u state %u" %
+             (u + (index_s(u[0], self.cfg_pwr_state),)))
+        return s
+
     cfg_rate_system = {
         0: "UTC",
         1: "GPS",
@@ -2903,7 +2921,7 @@ class ubx(object):
                0x3e: {'str': 'GNSS', 'dec': cfg_gnss, 'name': 'UBX-CFG-GNSS'},
                0x47: {'str': 'LOGFILTER', 'name': 'UBX-CFG-LOGFILTER'},
                0x53: {'str': 'TXSLOT', 'name': 'UBX-CFG-TXSLOT'},
-               0x57: {'str': 'PWR', 'name': 'UBX-CFG-PWR'},
+               0x57: {'str': 'PWR', 'dec': cfg_pwr, 'name': 'UBX-CFG-PWR'},
                0x5c: {'str': 'HNR', 'name': 'UBX-CFG-HNR'},
                0x60: {'str': 'ESRC', 'name': 'UBX-CFG-ESRC'},
                0x61: {'str': 'DOSC', 'name': 'UBX-CFG-OSC'},
