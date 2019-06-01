@@ -5147,7 +5147,9 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
                0x17: {'str': 'HOC', 'name': 'UBX-TIM-HOC'},
                }
 
-    # UBX-UPD- ??
+    # UBX-UPD-
+    upd_ids = {0x14: {'str': 'SOS', 'name': "UBX-UPD-SOS"},
+               }
 
     classes = {
         0x01: {'str': 'NAV', 'ids': nav_ids},
@@ -5155,7 +5157,7 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         0x04: {'str': 'INF', 'ids': inf_ids},
         0x05: {'str': 'ACK', 'ids': ack_ids},
         0x06: {'str': 'CFG', 'ids': cfg_ids},
-        0x09: {'str': 'UPD'},
+        0x09: {'str': 'UPD', 'ids': upd_ids},
         0x0A: {'str': 'MON', 'ids': mon_ids},
         0x0B: {'str': 'ATD'},
         0x0D: {'str': 'TIM', 'ids': tim_ids},
