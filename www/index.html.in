@@ -140,7 +140,7 @@ presently use <code>gpsd</code> include
 <a href="http://icculus.org/obdgpslogger/">obdgpslogger</a>,
 <a href="http://www.virtualroadside.com/geoHist/">geohist</a>,
 <a href="https://wiki.openstreetmap.org/wiki/JOSM/Plugins/LiveGPS">LiveGPS</a>,
-<a href="http://www.freedesktop.org/wiki/Software/GeoClue">geoclue</a>,
+<a href="https://www.freedesktop.org/wiki/Software/GeoClue">geoclue</a>,
 <a href="http://www.qlandkarte.org/">qlandkartegt</a>,
 <a href="http://gpredict.oz9aec.net/">gpredict</a>,
 <a href="https://opencpn.org/">OpenCPN</a>,
@@ -456,7 +456,7 @@ a gpsd replication and logging daemon with support for KML.</p>
 aiming to build a freely available, world-wide streetmap.</p>
 
 <p>Freedesktop.org is hosting a project called <a
-href="http://www.freedesktop.org/wiki/Software/GeoClue/">geoclue</a>
+href="https://www.freedesktop.org/wiki/Software/GeoClue/">geoclue</a>
 that aims to provide a location service layer for all D-Bus-using
 applications. It can use <code>gpsd</code> as a source for location
 info.</p>
@@ -497,11 +497,11 @@ Design, nor the Glatt Plagiarism Self-Detection Program.</p>
 <div style="text-align: center;">
 <div style="text-align: left; margin: 1em auto; width: 50%;">
 <!-- SiteSearch Google -->
-<form method="get" action="http://www.google.com/custom">
+<form method="get" action="https://www.google.com/custom">
 <table style="background-color:white;border: 0;">
 <tr><td style="vertical-align:top;text-align:left">
-<a href="http://www.google.com/">
-<img src="http://www.google.com/logos/Logo_25wht.gif" alt="Google"></a>
+<a href="https://www.google.com/">
+<img src="https://www.google.com/logos/Logo_25wht.gif" alt="Google"></a>
 </td>
 <td>
 <input type="hidden" name="domains" value="@SITESEARCH@">

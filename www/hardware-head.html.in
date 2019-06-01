@@ -70,11 +70,11 @@
 <span>Search for hardware information here:</span>
 
 <!-- SiteSearch Google -->
-<form method="get" action="http://www.google.com/custom">
+<form method="get" action="https://www.google.com/custom">
 <table style="border: 0">
 <tr><td style="vertical-align:top;text-align:left">
-<a href="http://www.google.com/">
-<img src="http://www.google.com/logos/Logo_25wht.gif" style='border:0px' alt="Google"></a>
+<a href="https://www.google.com/">
+<img src="https://www.google.com/logos/Logo_25wht.gif" style='border:0px' alt="Google"></a>
 </td>
 <td>
 <input type="hidden" name="domains" value="@SITESEARCH@">
