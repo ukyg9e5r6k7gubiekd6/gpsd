@@ -1956,6 +1956,17 @@ class ubx(object):
 
         return s
 
+    def cfg_hnr(self, buf):
+        """UBX-CFG-HNR decode, High Navigation Rate Settings"""
+
+        m_len = len(buf)
+        if 4 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBb', buf, 0)
+        s = " highNavRate %u reserved %u %u" % u
+        return s
+
     cfg_inf_protid = {
         0: "UBX",
         1: "NMEA",
@@ -2433,8 +2444,8 @@ class ubx(object):
         if 8 > m_len:
             return "Bad Length %s" % m_len
 
-        u = struct.unpack_from('<BBBL', buf, 0)
-        s = (" version %u reserved %u %u state %u" %
+        u = struct.unpack_from('<BBBBL', buf, 0)
+        s = (" version %u reserved %u %u %u state %u" %
              (u + (index_s(u[0], self.cfg_pwr_state),)))
         return s
 
@@ -2922,7 +2933,7 @@ class ubx(object):
                0x47: {'str': 'LOGFILTER', 'name': 'UBX-CFG-LOGFILTER'},
                0x53: {'str': 'TXSLOT', 'name': 'UBX-CFG-TXSLOT'},
                0x57: {'str': 'PWR', 'dec': cfg_pwr, 'name': 'UBX-CFG-PWR'},
-               0x5c: {'str': 'HNR', 'name': 'UBX-CFG-HNR'},
+               0x5c: {'str': 'HNR', 'dec': cfg_hnr, 'name': 'UBX-CFG-HNR'},
                0x60: {'str': 'ESRC', 'name': 'UBX-CFG-ESRC'},
                0x61: {'str': 'DOSC', 'name': 'UBX-CFG-OSC'},
                0x62: {'str': 'SMGR', 'dec': cfg_smgr, 'name': 'UBX-CFG-SMGR'},
@@ -5948,6 +5959,9 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         # UBX-CFG-GNSS
         "CFG-GNSS": {"command": send_poll, "opt": [0x06, 0x3e],
                      "help": "poll UBX-CFG-GNSS GNSS config"},
+        # UBX-CFG-HNR
+        "CFG-HNR": {"command": send_poll, "opt": [0x06, 0x5c],
+                    "help": "poll UBX-CFG-HNR High Navigation Rate Settings"},
         # UBX-CFG-INF
         "CFG-INF": {"command": poll_cfg_inf,
                     "help": "poll UBX-CFG-INF Information Message "
