@@ -315,13 +315,13 @@ Time and Frequency Bulletin NISTIR 5082-10]
 - [[[ACTS2]]] http://tycho.usno.navy.mil/modem_time.html[USNO Master
 Clock via Modem]
 
-- [[[RADIO]]] http://en.wikipedia.org/wiki/Radio_clock[Radio clock]
+- [[[RADIO]]] https://en.wikipedia.org/wiki/Radio_clock[Radio clock]
 
 - [[[HARCC]]] http://tf.nist.gov/general/pdf/2429.pdf[How Accurate is a Radio Controlled Clock?]
 
 - [[[JUNGHANS]]] http://www.leapsecond.com/pages/Junghans/[Junghans Solar WWVB watch]
 
-- [[[PTP]]] http://en.wikipedia.org/wiki/Precision_Time_Protocol[PTP]
+- [[[PTP]]] https://en.wikipedia.org/wiki/Precision_Time_Protocol[PTP]
 
 - [[[GPSD-HOWTO]]] link:gpsd-time-service-howto.html[GPSD Time Service HOWTO]
 

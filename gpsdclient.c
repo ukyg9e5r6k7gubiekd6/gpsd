@@ -268,7 +268,7 @@ char *maidenhead(double n, double e)
 {
     /*
      * Specification at
-     * http://en.wikipedia.org/wiki/Maidenhead_Locator_System
+     * https://en.wikipedia.org/wiki/Maidenhead_Locator_System
      *
      * There's a fair amount of slop in how Maidenhead converters operate
      * that can make it look like this one is wrong.

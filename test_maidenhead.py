@@ -3,7 +3,7 @@
 # Test grid locator conversion.
 #
 # Midenhead specification at
-#       http://en.wikipedia.org/wiki/Maidenhead_Locator_System
+#       https://en.wikipedia.org/wiki/Maidenhead_Locator_System
 # Test conversions generated using
 #       http://f6fvy.free.fr/qthLocator/
 

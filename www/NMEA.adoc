@@ -2660,7 +2660,7 @@ Described in <<MALTESE>>, actually a Maltese government document.
 
 - [[[PPS]]]
     "Pulse per second"
-    http://en.wikipedia.org/wiki/Pulse_per_second
+    https://en.wikipedia.org/wiki/Pulse_per_second
 
 - [[[MALTESE]]]
   "Procurement of a Fixed-Wing Maritime Patrol Aircraft"
