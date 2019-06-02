@@ -3177,6 +3177,22 @@ class ubx(object):
                }
 
     # UBX-MGA-
+    def mga_dbd(self, buf):
+        """UBX-MGA-DBD- decode, Navigation Database Dump Entry"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        # max 172
+        if 12 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LLL', buf, 0)
+        s = ' reserved1 %u %u %u' % u
+        # plus some anonymous data...
+
+        return s
+
     mga_ids = {0x00: {'str': 'GPS', 'name': "UBX-MGA-GPS"},
                0x02: {'str': 'GAL', 'name': "UBX-MGA-GAL"},
                0x03: {'str': 'BDS', 'name': "UBX-MGA-BDS"},
@@ -3186,7 +3202,7 @@ class ubx(object):
                0x21: {'str': 'FLASH', 'name': "UBX-MGA-FLASH"},
                0x40: {'str': 'INI', 'name': "UBX-MGA-INI"},
                0x60: {'str': 'ACK', 'name': "UBX-MGA-ACK"},
-               0x80: {'str': 'DBD', 'name': "UBX-MGA-DBD"},
+               0x80: {'str': 'DBD', 'dec': mga_dbd, 'name': "UBX-MGA-DBD"},
                }
 
     def mon_batch(self, buf):
@@ -6264,6 +6280,9 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         # UBX-CFG-NAV5
         "MODEL": {"command": send_cfg_nav5_model,
                   "help": "set UBX-CFG-NAV5 Dynamic Platform Model"},
+        # UBX-MGA-DBD
+        "MGA-DBD": {"command": send_poll, "opt": [0x13, 0x80],
+                    "help": "poll UBX-MGA-DBD Poll the Navigation Database"},
         # UBX-MON-BATCH
         "MON-BATCH": {"command": send_poll, "opt": [0x0a, 0x32],
                       "help": "poll UBX-MON-BATCH Data batching "
