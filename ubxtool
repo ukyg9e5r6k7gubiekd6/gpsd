@@ -1904,8 +1904,25 @@ class ubx(object):
 
         return s
 
+    def aid_ini(self, buf):
+        """UBX-AID-INI decode, Aiding position, time, frequency, clock drift"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 48 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<lllLHHLlLLlLL', buf, 0)
+        s = (' ecefXOrLat %d ecefYOrLon %d ecefZOrAlt %d posAcc %u'
+             '\n tmCfg x%x wnoOrDate %u towOrTime %u towNs %d'
+             '\n tAccMs %u tAccNs %u clkDOrFreq %d clkDAccOrFreqAcc %u'
+             '\n flags x%x' % u)
+
+        return s
+
     # All UBX-AID messages are deprecated; use UBX-MGA messages instead
-    aid_ids = {0x01: {'str': 'INI', 'name': 'UBX-AID-INI'},
+    aid_ids = {0x01: {'str': 'INI', 'dec': aid_ini, 'name': 'UBX-AID-INI'},
                0x02: {'str': 'HUI', 'dec': aid_hui, 'name': 'UBX-AID-HUI'},
                0x30: {'str': 'ALM', 'dec': aid_alm, 'name': 'UBX-AID-ALM'},
                0x31: {'str': 'EPH', 'dec': aid_eph, 'name': 'UBX-AID-EPH'},
@@ -6153,6 +6170,10 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         # UBX-AID-HUI
         "AID-HUI": {"command": send_poll, "opt": [0x0b, 0x02],
                     "help": "poll UBX-AID-HUI Poll GPS Health, UTC, Iono"},
+        # UBX-AID-INI
+        "AID-INI": {"command": send_poll, "opt": [0x0b, 0x01],
+                    "help": "poll UBX-AID-INI Poll Aiding position, time, "
+                    "frequency, clock drift"},
         # UBX-CFG-ANT
         "CFG-ANT": {"command": send_poll, "opt": [0x06, 0x13],
                     "help": "poll UBX-CFG-ANT antenna config"},
