@@ -4676,6 +4676,27 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
                 0x45: {'str': 'GAQ'},
                 }
 
+    def rxm_imes(self, buf):
+        """UBX-RXM-IMES decode, Indoor Messaging System Information"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 4 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBH', buf, 0)
+        s = ' numTx %u version %u reserved1 %u' % u
+
+        for i in range(0, u[0]):
+            u = struct.unpack_from('<BBHBBHlLLLllLLL', buf, 4 + (i * 44))
+            s += ('\n  reserved %u txId %u reserved3 %u %u cno %u reserved4 %u'
+                  '\n doppler %d position1_1 x%x position1_2 x%x'
+                  '\n position2_1 x%x lat %d lon %d shortIdFrame x%x'
+                  '\n mediumIdLSB %u mediumId_2 x%x' % u)
+
+        return s
+
     def rxm_measx(self, buf):
         """UBX-RXM-RAW decode"""
         m_len = len(buf)
@@ -5192,7 +5213,7 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
                0x32: {'str': 'RTCM', 'dec': rxm_rtcm, 'name': 'UBX-RXM-RTCM'},
                0x41: {'str': 'PMREQ', 'name': 'UBX-RXM-PMREQ'},
                0x59: {'str': 'RLM', 'dec': rxm_rlm, 'name': 'UBX-RXM-RLM'},
-               0x61: {'str': 'IMES', 'name': 'UBX-RXM-IMES'},
+               0x61: {'str': 'IMES', 'dec': rxm_imes, 'name': 'UBX-RXM-IMES'},
                }
 
     # UBX-SEC-
@@ -6423,6 +6444,10 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         # UBX-CFG-PMS
         "PMS": {"command": send_cfg_pms,
                 "help": "set UBX-CFG-PMS power management settings"},
+        # UBX-RXM-IMES
+        "RXM-IMES": {"command": send_poll, "opt": [0x02, 0x61],
+                     "help": "poll UBX-RXM-IMES Indoor Messaging System "
+                     "Information"},
         # UBX-RXM-RAWX
         "RXM-RAWX": {"command": send_poll, "opt": [0x02, 0x15],
                      "help": "poll UBX-RXM-RAWX raw measurement data"},
