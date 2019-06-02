@@ -1776,7 +1776,7 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[CHRONYDEFAULT]]] https://lists.fedoraproject.org/pipermail/devel/2010-May/135679.html
 
-- [[[HARDWARE]]] http://catb.org/gpsd/hardware.html[Compatible Hardware]
+- [[[HARDWARE]]] https://gpsd.gitlab.io/gpsd/hardware.html[Compatible Hardware]
 
 - [[[UBLOX-TIMING]]] http://www.u-blox.com/images/downloads/Product_Docs/Timing_AppNote_%28GPS.G6-X-11007%29.pdf[GPS-based timing considerations with u-blox 6 receivers]
 

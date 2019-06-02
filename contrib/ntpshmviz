@@ -131,7 +131,7 @@ Options:
 
 Report ntpshmviz bugs to Keane Wolter, daemoneye2@gmail.com
                       or gpsd-users@nongnu.org
-gpsd homepage: www.catb.org/gpsd/
+gpsd homepage: https://gpsd.gitlab.io/gpsd/
 """)
             sys.exit()
 

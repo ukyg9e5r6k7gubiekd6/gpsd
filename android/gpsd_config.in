@@ -6,7 +6,7 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-#define GPSD_URL "http://catb.org/gpsd"
+#define GPSD_URL "https://gpsd.gitlab.io/gpsd"
 #define HAVE_LIBRT 1
 #define HAVE_LINUX_CAN_H 1
 #define HAVE_STDATOMIC_H 1
