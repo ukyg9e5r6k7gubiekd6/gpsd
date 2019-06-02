@@ -125,7 +125,7 @@ time radio, an 'MSF' receiver uses the British national time radio,
 and a 'JJY' receiver uses the Japanese national time radio. Some time
 receivers (especially those made for the European market) can use
 multiple stations. A useful table of national time radio stations is
-at <<SPECTRUMWIKI>>.
+at <<WIKISOURCE>>.
 
 Devices described as "GPS clocks" (or more technically as "GPS
 Disciplined Oscillators" or GPSDOs) are conditioned by the 1PPS output
@@ -304,7 +304,7 @@ Time and Frequency Bulletin NISTIR 5082-10]
 
 - [[[WWVBMAP]]] http://tf.nist.gov/stations/wwvbcoverage.htm[WWVB Coverage Area]
 
-- [[[SPECTRUMWIKI]]] http://www.spectrumwiki.com/wiki/DisplayEntry.aspx?DisplyId=51[Low Frequency Time Signals]
+- [[[WIKISOURCE]]] https://en.wikipedia.org/wiki/Radio_clock[Radio Clock]
 
 - [[[IS-GPS-200G]]] http://www.gps.gov/technical/icwg/IS-GPS-200G.pdf[IS-GPS-200G]
 
