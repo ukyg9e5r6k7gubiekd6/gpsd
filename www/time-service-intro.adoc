@@ -76,7 +76,7 @@ directly by the NIST (National Institute of Standards and Technology)
 master civil time standard.  Propagation delay to U.S. receivers
 varies but is constant by location and no more than 20 ms; being
 fixed, this can be easily compensated out. The jitter added to NIST
-time by the WWVB transmission system is about 6 ns <<WWVBPRECISION>>,
+time by the WWVB transmission system is about 6 ns,
 for a total jitter relative to UTC of about 26 ns at the
 transmitter. Atmospheric conditions and signal-processing jitter in
 the receiver may degrade this considerably, to the tune of 10-100ns
@@ -289,7 +289,7 @@ server using GPSD and an inexpensive GPS at <<GPSD-HOWTO>>.
 
 [bibliography]
 
-- [[[PCI3]]] https://www.pcisecuritystandards.org/documents/PCI_DSS_v3.pdf[Requirements and Security Assessment
+- [[[PCI3]]] https://www.pcisecuritystandards.org/documents/PCI_DSS_v3-2-1.pdf[Requirements and Security Assessment
 Procedures]
 
 - [[[FINRA_14-47]]]
@@ -297,18 +297,15 @@ http://www.finra.org/sites/default/files/notice_doc_file_ref/Notice_Regulatory_1
 
 - [[[RFC-5905]]] http://www.ietf.org/rfc/rfc5905.txt[Network Time Protocol Version 4: Protocol and Algorithms Specification]
 
-- [[[WWVBPRECION]]] http://tf.nist.gov/timefreq/pubs/bulletin/pdf/1999OCT_TF_BULLETIN.pdf[NIST
-Time and Frequency Bulletin NISTIR 5082-10]
-
 - [[[BIPM-T]]] ftp://ftp2.bipm.org/pub/tai/publication/cirt/[See latest Circular T from BIPM]
 
 - [[[WWVBMAP]]] http://tf.nist.gov/stations/wwvbcoverage.htm[WWVB Coverage Area]
 
 - [[[WIKISOURCE]]] https://en.wikipedia.org/wiki/Radio_clock[Radio Clock]
 
-- [[[IS-GPS-200G]]] http://www.gps.gov/technical/icwg/IS-GPS-200G.pdf[IS-GPS-200G]
+- [[[IS-GPS-200G]]] https://www.gps.gov/technical/icwg/IS-GPS-200G.pdf[IS-GPS-200G]
 
-- [[[TIMESCALE]] http://www.nist.gov/pml/div688/grp50/nistusno.cfm[NIST Time Scale Data Archive]
+- [[[TIMESCALE]]] https://www.nist.gov/pml/time-and-frequency-division/atomic-standards/nist-usno[NIST Time Scale Data Archive]
 
 - [[[ACTS1]]] http://www.nist.gov/pml/div688/grp40/acts.cfm[NIST Automated Computer Time Service (ACTS)]
 
@@ -347,5 +344,8 @@ v1.4, 2015-07-11::
 
 v1.5, 2015-12-10::
       Fix typo in WWVB delay figure and date of modulation change.
+
+v1.6, 2019-06-02::
+      Fix linkrot, and link to https where possible.
 
 //end
