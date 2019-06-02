@@ -1860,11 +1860,55 @@ class ubx(object):
 
         return s
 
+    def aid_eph(self, buf):
+        """UBX-AID-EPH decode, GPS Aiding Ephemeris Data"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request all"
+
+        if 1 == m_len:
+            return " Poll request svid %u" % buf[0]
+
+        if 8 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LL', buf, 0)
+        s = ' svid %u how x%x ' % u
+
+        if 0 != u[1] and 8 < m_len and 104 >= m_len:
+            u = struct.unpack_from('<LLLLLLLLLLLLLLLLLLLLLLLL', buf, 8)
+            s += ('\n sf1d %08x %08x %08x %08x'
+                  '\n      %08x %08x %08x %08x'
+                  '\n sf2d %08x %08x %08x %08x'
+                  '\n      %08x %08x %08x %08x'
+                  '\n sf3d %08x %08x %08x %08x'
+                  '\n      %08x %08x %08x %08x' % u)
+
+        return s
+
+    def aid_hui(self, buf):
+        """UBX-AID-HUI decode, GPS Heatlh, UTC, Ionosphere"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request all"
+
+        if 72 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LddlhhhhhhffffffffL', buf, 0)
+        s = (' health x%x utcAo %e utcA1 %e utcTOW %d'
+             '\n utcWNT %d utcLS %d utcWNF %d utcDN %d utcLSF %d utcSpare %d'
+             '\n klobA0 %e klobA1 %e klobA2 %e'
+             '\n klobA3 %e klobB0 %e klobB1 %e'
+             '\n klobB2 %e klobB3 %e flags x%x' % u)
+
+        return s
+
     # All UBX-AID messages are deprecated; use UBX-MGA messages instead
     aid_ids = {0x01: {'str': 'INI', 'name': 'UBX-AID-INI'},
-               0x02: {'str': 'HUI', 'name': 'UBX-AID-HUI'},
+               0x02: {'str': 'HUI', 'dec': aid_hui, 'name': 'UBX-AID-HUI'},
                0x30: {'str': 'ALM', 'dec': aid_alm, 'name': 'UBX-AID-ALM'},
-               0x31: {'str': 'EPH', 'name': 'UBX-AID-EPH'},
+               0x31: {'str': 'EPH', 'dec': aid_eph, 'name': 'UBX-AID-EPH'},
                0x33: {'str': 'AOP', 'dec': aid_aop, 'name': 'UBX-AID-AOP'},
                }
 
@@ -6103,6 +6147,12 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         "AID-AOP": {"command": send_poll, "opt": [0x0b, 0x33],
                     "help": "poll UBX-AID-AOP Poll Poll AssistNow "
                     "Autonomous data"},
+        # UBX-AID-EPH
+        "AID-EPH": {"command": send_poll, "opt": [0x0b, 0x31],
+                    "help": "poll UBX-AID-EPH Poll GPS Aiding Ephemeris Data"},
+        # UBX-AID-HUI
+        "AID-HUI": {"command": send_poll, "opt": [0x0b, 0x02],
+                    "help": "poll UBX-AID-HUI Poll GPS Health, UTC, Iono"},
         # UBX-CFG-ANT
         "CFG-ANT": {"command": send_poll, "opt": [0x06, 0x13],
                     "help": "poll UBX-CFG-ANT antenna config"},
