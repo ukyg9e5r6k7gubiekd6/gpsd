@@ -5298,10 +5298,33 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
             s += "RAIM ??"
         return s
 
+    tim_vrfy_flags = {
+        0: "no time aiding done",
+        2: "source was RTC",
+        3: "source was AID-IN",
+        }
+
+    def tim_vrfy(self, buf):
+        """UBX-TIM-VRFY decode, Sourced Time Verification"""
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 20 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<llllHBB', buf, 0)
+        s = ('  itow %d frac %d deltaMs %d deltaMs %d\n'
+             '  wno %u flags x%x reserved1 %u' % u)
+        if VERB_DECODE <= opts['verbosity']:
+            s += ('\n   flags (%s)' %
+                  index_s(u[5] & 3, self.tim_vrfy_flags))
+        return s
+
     tim_ids = {1: {'str': 'TP', 'dec': tim_tp, 'name': 'UBX-TIM-TP'},
                3: {'str': 'TM2', 'dec': tim_tm2, 'name': 'UBX-TIM-TM2'},
                4: {'str': 'SVIN', 'dec': tim_svin, 'name': 'UBX-TIM-SVIN'},
-               6: {'str': 'VRFY', 'name': 'UBX-TIM-VRFY'},
+               6: {'str': 'VRFY', 'dec': tim_vrfy,'name': 'UBX-TIM-VRFY'},
                0x11: {'str': 'DOSC', 'name': 'UBX-TIM-DOSC'},
                0x12: {'str': 'TOS', 'name': 'UBX-TIM-TOS'},
                0x13: {'str': 'SMEAS', 'name': 'UBX-TIM-SMEAS'},
@@ -6471,6 +6494,9 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         # UBX-TIM-TP
         "TIM-TP": {"command": send_poll, "opt": [0x0d, 0x01],
                    "help": "poll UBX-TIM-TP time pulse timedata"},
+        # UBX-TIM-VRFY
+        "TIM-VRFY": {"command": send_poll, "opt": [0x0d, 0x06],
+                     "help": "poll UBX-TIM-VRFY Sourced Time Verification"},
         # UBX-CFG-RST
         "WARMBOOT": {"command": send_cfg_rst,
                      "help": "UBX-CFG-RST warmboot the GPS",
