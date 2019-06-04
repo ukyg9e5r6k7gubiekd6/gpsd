@@ -125,8 +125,8 @@ defaults['armored_sample_content'] = base64.b64encode(output_sample_content)
 
 print '''\
 <!DOCTYPE HTML>
-<html>
-<head>
+<html lang="en">
+<head lang="en">
    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
    <meta name="Author" content="Eric S. Raymond">
    <meta name="Description" content="Report the GPSD compatibility of your GPS.">
