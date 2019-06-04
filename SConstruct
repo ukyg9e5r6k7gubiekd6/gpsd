@@ -77,8 +77,8 @@ ircchan = "irc://chat.freenode.net/#gpsd"
 mailman = "https://lists.nongnu.org/mailman/listinfo/"
 mainpage = "https://gitlab.com/gpsd/gpsd"
 scpupload = "garyemiller@dl.sv.nongnu.org:/releases/gpsd/"
-sitename = "GitLab"
-sitesearch = "gitlab.com"
+sitename = "GPSD"
+sitesearch = "gpsd.io"
 tiplink = "<a href='https://www.patreon.com/esr'>" \
           "leave a remittance at Patreon</a>"
 tipwidget = '<p><a href="https://www.patreon.com/esr">' \
