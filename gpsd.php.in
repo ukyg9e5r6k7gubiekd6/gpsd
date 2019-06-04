@@ -573,11 +573,9 @@ EOB;
 function gen_gmap_head() {
 global $gmap_key;
 return <<<EOT
-<script src="//maps.googleapis.com/maps/api/js?sensor=false"
-        type="text/javascript">
-</script>
+<script src="//maps.googleapis.com/maps/api/js?sensor=false"/>
 
-<script type="text/javascript">
+<script>
  <!--
     function Load() {
       var map = new google.maps.Map(
@@ -603,8 +601,8 @@ EOT;
 function gen_osm_head() {
 global $GPS;
 return <<<EOT
-<script src="http://openlayers.org/api/OpenLayers.js" type="text/javascript"></script>
-<script type="text/javascript">
+<script src="http://openlayers.org/api/OpenLayers.js" />
+<script>
     <!--
 function Load() {
 	document.getElementById("map").firstChild.data = "";

@@ -194,7 +194,7 @@ class SatTracks(gps):
 \t\t\t\t\t<p>Your browser needs HTML5 &lt;canvas> support to display
  the satellite view correctly.</p>
 \t\t\t\t</canvas>
-\t\t\t\t<script type='text/javascript'>draw_satview();</script>
+\t\t\t\t<script>draw_satview();</script>
 \t\t\t</td>
 \t\t</tr>
 \t</table>
