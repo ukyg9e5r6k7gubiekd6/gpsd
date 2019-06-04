@@ -166,7 +166,7 @@ baud rate and GPS/AIS type by looking at the data stream.</p>
 <p><code>gpsd</code> is high-quality, carefully-audited code; see
 our <a href="reliability.html">notes on reliability engineering</a>. In
 January 2010, the GPSD project <a
-href="http://thedailywtf.com/Articles/Bad-Code-Offsets-Open-Web-Innovation.asp">won</a>
+href="https://thedailywtf.com/Articles/Bad-Code-Offsets-Open-Web-Innovation">won</a>
 the first Good Code Grant from the Alliance for Code Excellence.</p>
 
 <p>Statistics about the code volume, commit history, and contributors
