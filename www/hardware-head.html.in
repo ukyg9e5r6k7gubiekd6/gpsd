@@ -44,7 +44,7 @@
     <script src="https://www.openhub.net/p/3944/widgets/project_thin_badge.js"></script>
 
     <hr>
-    <script type="text/javascript"><!--
+    <script><!--
     google_ad_client = "pub-1458586455084261";
     google_ad_width = 160;
     google_ad_height = 600;
