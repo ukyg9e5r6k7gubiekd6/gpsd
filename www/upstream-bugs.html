@@ -193,7 +193,7 @@ reconfigure your GPS; this will avoid both problems.</p>
 <p>Michael R. Davis reports "If you read from the device at the wrong
 rate (e.g. cat /dev/xxx) it will lock up.  On openwrt it required a
 hard reboot." Details <a
-href='http://marc.info/?l=gpsd-dev&amp;m=115940539029940&amp;w=2'>here</a>. This
+href='https://marc.info/?l=gpsd-dev&amp;m=115940539029940&amp;w=2'>here</a>. This
 bug was reported in 2006 with an old kernel version and may since have
 been fixed.</p>
 
@@ -209,7 +209,7 @@ There is a call to pthread create in libgpsd_core.c::link_activate():
 created fine and pthread_create() returns right away.  If this is
 called when gpsd is in the background then the thread is created fine,
 but it may return!  That freezes the main loop of gpsd. There is a <a
-href="http://marc.info/?l=gpsd-dev&amp;m=120124952704634&amp;w=2">workaround</a>,
+href="https://marc.info/?l=gpsd-dev&amp;m=120124952704634&amp;w=2">workaround</a>,
 but the nature of the workaround only makes their bug more
 mysterious.</p>
 
@@ -233,7 +233,7 @@ or elsewhere in Technologic's cross-development toolchain.</p>
 invoked on unplug of a USB receiver, because the kernel never actually
 generates a remove event when closing an open serial device.
 Apparently this is a <a
-href="http://www.linuxquestions.org/questions/programming-9/udev-not-called-to-remove-open-usb-serial-device-585603/">well-known
+href="https://www.linuxquestions.org/questions/programming-9/udev-not-called-to-remove-open-usb-serial-device-585603/">well-known
 bug</a> that will <a href="http://lkml.indiana.edu/hypermail/linux/kernel/0907.2/01845.html">not be easily fixed</a>.</p>
 
 <h1>Open Toolchain Bugs</h1>
@@ -301,7 +301,7 @@ They will be removed as they become sufficiently ancient.</p>
 
 <h2 id="startup">Distro-dependent problems with gpsd startup</h2>
 
-<p>See <a href='http://bugs.gentoo.org/show_bug.cgi?id=132288'>this
+<p>See <a href='https://bugs.gentoo.org/show_bug.cgi?id=132288'>this
 Gentoo bug</a>.  This shows up on other distributions as well, but
 not under Fedora Core.  The Gentoo problem can be fixed by creating a
 /var/run/usb directory; this fix may apply to other distributions as
@@ -385,7 +385,7 @@ before filing a bug report.</p>
 <p>Building <code>xgpsspeed</code> will fail under MacOS 10.5.6
 because the X SDK libraries and include files are not installed to the
 canonical places.  This was <a
-href="http://openradar.appspot.com/6498632">filed as a bug</a> with
+href="https://openradar.appspot.com/6498632">filed as a bug</a> with
 Apple and is reported fixed.</p>
 
 <hr>
