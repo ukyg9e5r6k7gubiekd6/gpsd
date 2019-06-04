@@ -536,7 +536,7 @@ Web
 </div>
 
 <hr>
-<script src="datestamp.js" />
+<script src="datestamp.js"></script>
 </div>
 </body>
 </html>

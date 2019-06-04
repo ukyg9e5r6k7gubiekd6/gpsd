@@ -1748,7 +1748,7 @@ href='https://github.com/bzed/pkg-gpsd'>Debian
 build controls</a></p>
 
 <hr>
-<script src="datestamp.js" />
+<script src="datestamp.js"></script>
 </div>
 </body>
 </html>
