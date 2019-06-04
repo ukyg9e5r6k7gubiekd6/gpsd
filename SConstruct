@@ -961,7 +961,8 @@ else:
     manbuilder = htmlbuilder = None
     if config.env['manbuild']:
         if config.CheckXsltproc():
-            build = "xsltproc --output $TARGET --nonet %s $SOURCE"
+            build = ("xsltproc --encoding UTF-8 --output $TARGET"
+                     " --nonet %s $SOURCE")
             htmlbuilder = build % docbook_html_uri
             manbuilder = build % docbook_man_uri
         elif WhereIs("xmlto"):
