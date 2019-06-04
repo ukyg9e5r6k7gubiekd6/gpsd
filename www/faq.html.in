@@ -464,7 +464,9 @@ far more helpful to us and will get your bug fixed faster, so we'll
 describe that procedure here.</p>
 
 <ol>
-<li><p>Follow <a href='@CLONEREPO@'>these instructions</a> to clone
+<li><p>Follow <a
+ href='https://help.github.com/en/articles/cloning-a-repository'
+>these instructions</a> to clone
 a copy of the source repository.</p></li>
 
 <li><p>Use <a
