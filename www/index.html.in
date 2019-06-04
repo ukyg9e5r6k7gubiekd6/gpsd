@@ -332,7 +332,7 @@ href="irc://irc.freenode.net#gpsd">channel #gpsd at irc.freenode.net</a>.</p>
 <h1 id='white_papers'>White Papers</h1>
 
 <dl>
-<dt><a href="http://www.aosabook.org/en/gpsd.html">GPSD</a></dt>
+<dt><a href="https://www.aosabook.org/en/gpsd.html">GPSD</a></dt>
 <dd>An in-depth essay on the architecture and practices of GPSD,
 published in <cite>The Architecture of Open Source, Volume 2</cite>.</dd>
 
@@ -442,7 +442,7 @@ href="https://code.google.com/p/qtgpsc/">Qt-based client</a>, basically
 <code>xgps</code> with a Qt look and feel.</p>
 
 <p>Egil M&#246;ller has written <a
-href="http://redhog.github.com/agpsd/">agpsd</a>,
+href="https://redhog.github.com/agpsd/">agpsd</a>,
 a gpsd replication and logging daemon with support for KML.</p>
 
 <p>You can find Debian-unstable packages
@@ -470,7 +470,9 @@ you are curious.</p>
 <p>There was a project called <code>gps3d</code> that ships a gpsd
 with similar goals to ours, but which appears to be an independent
 development. There haven't been any releases since early 2002.  Their
-website has been down: http://www.mgix.com/gps3d/</p>
+website is archived at
+<a href="https://web.archive.org/web/20080209221923/http://www.mgix.com/gps3d/">
+the Internet Archive</a>.</p>
 
 <p>There is a <code>gpsd</code>-like hack hosted under <a
 href='http://www5.musatcha.com/musatcha/computers/software/gpsd/'>Microsoft
