@@ -1772,15 +1772,15 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[MACX-1]]] https://www.etsy.com/listing/280336400/navisys-gr-601w-u-blox-6-macx-1-usb-gnss[Navisys GR-601W u-blox-6 "Macx-1" USB GPS receiver]
 
-- [[[CHRONY-COMPARE]]] http://chrony.tuxfamily.org/manual.html#Comparison-with-ntpd[ntpd (comparison with chrony)]
+- [[[CHRONY-COMPARE]]] https://chrony.tuxfamily.org/manual.html#Comparison-with-ntpd[ntpd (comparison with chrony)]
 
 - [[[CHRONYDEFAULT]]] https://lists.fedoraproject.org/pipermail/devel/2010-May/135679.html
 
 - [[[HARDWARE]]] https://gpsd.gitlab.io/gpsd/hardware.html[Compatible Hardware]
 
-- [[[UBLOX-TIMING]]] http://www.u-blox.com/images/downloads/Product_Docs/Timing_AppNote_%28GPS.G6-X-11007%29.pdf[GPS-based timing considerations with u-blox 6 receivers]
+- [[[UBLOX-TIMING]]] https://www.u-blox.com/sites/default/files/products/documents/Timing_AppNote_(GPS.G6-X-11007).pdf[GPS-based timing considerations with u-blox 6 receivers]
 
-- [[[RPI]]] http://www.satsignal.eu/ntp/Raspberry-Pi-NTP.html[The Raspberry Pi as a Stratum-1 NTP Server]
+- [[[RPI]]] https://www.satsignal.eu/ntp/Raspberry-Pi-NTP.html[The Raspberry Pi as a Stratum-1 NTP Server]
 
 - [[[NTP.ORG]]] http://www.ntp.org/[Home of the Network Time Protocol project]
 
@@ -1790,9 +1790,9 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[CVE-2009-3563]]] https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2009-3563
 
-- [[[CHRONY]]] http://chrony.tuxfamily.org/[Chrony Home]
+- [[[CHRONY]]] https://chrony.tuxfamily.org/[Chrony Home]
 
-- [[[CHRONY-MAN]]] http://chrony.tuxfamily.org/manual.html
+- [[[CHRONY-MAN]]] https://chrony.tuxfamily.org/manual.html
 
 - [[[ADEV-PLOT]]] http://www.leapsecond.com/pages/adev-avg/[Allan deviation and Averaging]
 
@@ -1802,11 +1802,11 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[JOIN-POOL]]] https://www.pool.ntp.org/en/join.html[How do I join pool.ntp.org?]
 
-- [[[ANDY-POST]]] http://lists.gnu.org/archive/html/gpsd-dev/2013-10/msg00152.html[Clarifications needed for the time-service HOWTO]
+- [[[ANDY-POST]]] https://lists.gnu.org/archive/html/gpsd-dev/2013-10/msg00152.html[Clarifications needed for the time-service HOWTO]
 
-- [[[NTP-MONOPT]]] http://www.eecis.udel.edu/~mills/ntp/html/monopt.html[NTP Monitoring]
+- [[[NTP-MONOPT]]] https://www.eecis.udel.edu/~mills/ntp/html/monopt.html[NTP Monitoring]
 
-- [[[GPSD-LIST]]]http://lists.gnu.org/archive/html/gpsd-dev/[gpsd-dev Archives]
+- [[[GPSD-LIST]]]https://lists.gnu.org/archive/html/gpsd-dev/[gpsd-dev Archives]
 
 - [[[PTP]]] https://www.nist.gov/el/isd/ieee/ieee1588[PTP]
 
@@ -1814,7 +1814,7 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 
 - [[[EEE]]] https://en.wikipedia.org/wiki/Energy-Efficient_Ethernet[Energy-Efficient Ethernet]
 
-- [[[LVC]]] http://www.rjsystems.nl/en/2100-ntpd-garmin-gps-18-lvc-gpsd.php
+- [[[LVC]]] https://www.rjsystems.nl/en/2100-ntpd-garmin-gps-18-lvc-gpsd.php
 
 == Changelog ==
 
@@ -1858,19 +1858,22 @@ by Jaap Winius <jwinius@rjsystems.nl>.
     Add Macx-1 link.
     Add sections on ARP and temperature problems
 
-2.7 June 2016
+2.7 June 2016::
     Add section on avoiding power saving.
 
-2.8 July 2016
+2.8 July 2016::
     Mention required version of gpsd
     Fix Typos.
 
-2.9 August 2016
+2.9 August 2016::
     Fix typos.
 
-2.10 September 2016
+2.10 September 2016::
     Mention ntpviz
     Recommend minpoll=maxpoll=0 for PPS refclocks
     Recommend NTPsec.
+
+2.11 June 2019::
+    Check all links, and update to https where possible
 
 // end
