@@ -278,6 +278,7 @@ by clients connecting to the unix or tcp socket. In case you need
 gpsd to run always, you'll need to configure systemd to start it.
 One way would be to create <code>/etc/systemd/system/gpsd.service</code>
 with the following content:
+</p>
 <pre>
 [Unit]
 Description=GPS (Global Positioning System) Daemon
@@ -294,6 +295,7 @@ ExecStart=/usr/sbin/gpsd -N $GPSD_OPTIONS $DEVICES
 WantedBy=multi-user.target
 Also=gpsd.socket
 </pre>
+<p>
 To ask systemd to reload its config run
 <code>systemctl daemon-reload; systemctl reenable gpsd.service</code>.
 Instead of using the EnvironmentFile(s) you could just edit the command
@@ -333,9 +335,9 @@ e.g. <code>90no.recommendations</code>:</p>
 <pre>APT::Install-Recommends &quot;false&quot;;
 </pre>
 
-Other client packages may not be so lenient, but you can use the tool
-<b>equivs</b> to create an empty fake package which provides gpsd.</p>
-
+<p>Other client packages may not be so lenient, but you can use the
+tool <b>equivs</b> to create an empty fake package which provides
+gpsd.</p>
 
 <h2>Red Hat</h2>
 
