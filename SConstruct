@@ -2419,6 +2419,7 @@ htmlpages = Split('''
     www/gpscat.html
     www/gpsctl.html
     www/gpsdctl.html
+    www/gpsinit.html
     www/gpsdecode.html
     www/gpsd.html
     www/gpsd_json.html
