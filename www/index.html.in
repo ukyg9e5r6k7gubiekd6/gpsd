@@ -76,18 +76,22 @@
 <tr>
 <td>
 <script
-src="https://www.openhub.net/p/3944/widgets/project_basic_stats.js" />
+src="https://www.openhub.net/p/3944/widgets/project_basic_stats.js">
+</script>
 </td>
 <td>
-<script src="https://www.openhub.net/p/3944/widgets/project_factoids.js" />
+<script src="https://www.openhub.net/p/3944/widgets/project_factoids.js">
+</script>
 </td>
 </tr>
 <tr>
 <td>
-<script src="https://www.openhub.net/p/3944/widgets/project_languages.js" />
+<script src="https://www.openhub.net/p/3944/widgets/project_languages.js">
+</script>
 </td>
 <td>
-<script src="https://www.openhub.net/p/3944/widgets/project_cocomo.js" />
+<script src="https://www.openhub.net/p/3944/widgets/project_cocomo.js">
+</script>
 </td>
 </tr>
 </table>
