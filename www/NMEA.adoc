@@ -268,12 +268,12 @@ software must cope.
 
 .FAA Mode Indicator
 |================================================================
-|A | Autonomous mode 
-|D | Differential mode 
-|E | Estimated (dead reckoning) mode 
-|M | Manual input mode 
-|S | Simulator mode 
-|N | Data not valid 
+|A | Autonomous mode
+|D | Differential mode
+|E | Estimated (dead reckoning) mode
+|M | Manual input mode
+|S | Simulator mode
+|N | Data not valid
 |================================================================
 
 == Talker IDs ==

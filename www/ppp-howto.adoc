@@ -2,7 +2,7 @@
 :description: This document is a guide getting high accuracy from your GPS using Precise Point Positioning (PPP).
 :keywords: Precise Point Positioning, PPP, GPSD, GPS
 Gary E. Miller <gem@rellim.com>
-V0.99, Nov 2018 
+V0.99, Nov 2018
 
 == Introduction ==
 
@@ -59,7 +59,7 @@ the Circular Error of Probability (CEP) will be determined.
 
 CEP, also known as the CEP(50), is the radius of a circle, centered on
 the mean, whose boundary includes 50% of the GPS positions.  You probably
-do not want to base any navigation or surveying on a 50% probability. 
+do not want to base any navigation or surveying on a 50% probability.
 
 More interesting is the CEP(95) which includes 95% of the measurements.
 
@@ -364,7 +364,7 @@ sigma's are "optimistic".
 
 === CSRS-PPP ===
 
-After _gpsrinex_ is complete, you need to login to CSRS-PPP and 
+After _gpsrinex_ is complete, you need to login to CSRS-PPP and
 upload the RINEX 3 file.  After login you will be taken to the upload
 page.  Enter your email address, so the results can be emailed to you.
 

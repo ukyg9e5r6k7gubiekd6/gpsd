@@ -10,10 +10,10 @@ function date_ddmmmyyyy(date)
   var m = date.getMonth() + 1;
   var y = date.getFullYear();
 
-  // could use splitString() here 
-  // but the following method is 
+  // could use splitString() here
+  // but the following method is
   // more compatible
-  var mmm = 
+  var mmm =
     ( 1==m)?'Jan':( 2==m)?'Feb':(3==m)?'Mar':
     ( 4==m)?'Apr':( 5==m)?'May':(6==m)?'Jun':
     ( 7==m)?'Jul':( 8==m)?'Aug':(9==m)?'Sep':
@@ -25,7 +25,7 @@ function date_ddmmmyyyy(date)
 
 
 //
-// get last modified date of the 
+// get last modified date of the
 // current document.
 //
 function date_lastmodified()
@@ -48,7 +48,7 @@ function date_lastmodified()
 // finally display the last modified date
 // as DD-MMM-YYYY
 //
-document.writeln( 
+document.writeln(
   "Last modified on: " + date_lastmodified() );
 
 // End

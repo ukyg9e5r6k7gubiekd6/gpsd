@@ -81,7 +81,7 @@ for a total jitter relative to UTC of about 26 ns at the
 transmitter. Atmospheric conditions and signal-processing jitter in
 the receiver may degrade this considerably, to the tune of 10-100ns
 - however some of that is fixed delay that can be compensated out by
-knowing your distance from the transmitter. Accuracy is better at night. 
+knowing your distance from the transmitter. Accuracy is better at night.
 
 National time authorities may also offer a digital time reference via
 landline phone; the U.S.'s has two, supported by NIST and the U.S.

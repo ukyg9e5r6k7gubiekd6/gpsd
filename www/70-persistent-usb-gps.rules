@@ -4,7 +4,7 @@
 # ## udev facility.
 #
 # ##  See the file   gpsd.rules   in the source for updated rules
-# 
+#
 # Author: Fulup Ar Foll
 # Date:   26-jun-09
 # Object: make sure GPS dev (ex: /dev/gps-usb) dont change name on sleep/wakeup
@@ -19,7 +19,7 @@
 #            - static   ==> SYMLINK="gps-usb"                /dev/gps-usb
 #            - custom   ==> RUN+="/usr/local/bin/myscript"   /dev/any-thingk-you-want
 #
-# DEFAULT CONFIG: you can use this file "as it is", you should then see a /dev/gps-pci* 
+# DEFAULT CONFIG: you can use this file "as it is", you should then see a /dev/gps-pci*
 # that will be created for any of the serial/usb you hot-plug. The name is fixed but
 # depend on the USB port you use. As a result the name is fixed until you keep the same socket.
 #
@@ -45,6 +45,6 @@
 # -----------------------------------------------------------------------------------------
 SUBSYSTEM=="tty", SYSFS{idVendor}=="?*", SYSFS{idProduct}=="?*", SYMLINK="gps-$env{ID_PATH}"
 
-# Well known device may get a static device name 
+# Well known device may get a static device name
 # -----------------------------------------------------------------------
 SUBSYSTEM=="tty", SYSFS{idVendor}=="10c4", SYSFS{idProduct}=="ea60", SYMLINK="gps-usb"
