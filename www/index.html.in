@@ -22,7 +22,8 @@
 </div>
 
 <div id="Menu">
-    <img src="gpsd-logo-small.png" alt="Small gpsd Logo"><br>
+    <img src="gpsd-logo-small.png" alt="Small gpsd Logo" height="126"
+    width="105"><br>
     Home<br>
     <div>
     <a href="#news">News</a><br>
