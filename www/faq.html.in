@@ -964,7 +964,7 @@ same sorts of computation that more capable GPSes use.</p>
 <p>The <code>gpsd</code> package provides two ways for C code to get
 data from a GPS or AIS receiver.  Both go through the libgps.a library,
 which supports two sets of entry points. The <a
-href="libgpsd.html">low-level interface</a> talks directly to the GPS.
+href="libgps.html">low-level interface</a> talks directly to the GPS.
 The <a href="libgps.html">high-level interface</a> communicates with
 an instance of <code>gpsd</code>, which uses its own copy of libgps.a
 to talk to the device.</p>
