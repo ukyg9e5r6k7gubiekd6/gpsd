@@ -551,8 +551,8 @@ def CheckXsltproc(context):
     </refentry>
 ''')
     ofp.close()
-    probe = ("xsltproc --output man/foo.1 --nonet --noout '%s' "
-             "man/xmltest.xml" % (docbook_man_uri,))
+    probe = ("xsltproc --encoding UTF-8 --output man/foo.1 --nonet "
+             "--noout '%s' man/xmltest.xml" % (docbook_man_uri,))
     ret = context.TryAction(probe)[0]
     os.remove("man/xmltest.xml")
     if os.path.exists("man/foo.1"):
@@ -663,6 +663,8 @@ env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
 
 # from scons 3.0.5, any changes to env after this, until after
 # config.Finish(), will be lost.  Use config.env until then.
+
+# CheckXsltproc works, but result is incorrectly saved as "no"
 config = Configure(env, custom_tests={
     'CheckPKG': CheckPKG,
     'CheckXsltproc': CheckXsltproc,
