@@ -2426,12 +2426,12 @@ htmlpages = Split('''
     www/gpscat.html
     www/gpsctl.html
     www/gpsdctl.html
-    www/gpsinit.html
     www/gpsdecode.html
     www/gpsd.html
     www/gpsd_json.html
     www/gpsfake.html
     www/gps.html
+    www/gpsinit.html
     www/gpsmon.html
     www/gpspipe.html
     www/gpsprof.html
@@ -2446,7 +2446,9 @@ htmlpages = Split('''
     www/ppscheck.html
     www/replacing-nmea.html
     www/srec.html
+    www/ubxtool.html
     www/writing-a-driver.html
+    www/zerk.html
     ''')
 
 webpages = htmlpages + asciidocs + list(map(lambda f: f[:-3],
