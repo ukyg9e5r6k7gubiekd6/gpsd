@@ -504,7 +504,7 @@ Design, nor the Glatt Plagiarism Self-Detection Program.</p>
 <table style="background-color:white;border: 0;">
 <tr><td style="vertical-align:top;text-align:left">
 <a href="https://www.google.com/">
-<img src="https://www.google.com/logos/Logo_25wht.gif" alt="Google"></a>
+<img src="https://www.google.com/logos/Logo_25wht.gif" alt="Google" height=32 width=75></a>
 </td>
 <td>
 <input type="hidden" name="domains" value="@SITESEARCH@">

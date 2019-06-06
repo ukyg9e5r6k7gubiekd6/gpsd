@@ -73,7 +73,7 @@
 <table style="border: 0">
 <tr><td style="vertical-align:top;text-align:left">
 <a href="https://www.google.com/">
-<img src="https://www.google.com/logos/Logo_25wht.gif" style='border:0px' alt="Google"></a>
+<img src="https://www.google.com/logos/Logo_25wht.gif" style='border:0px' alt="Google" height=32 width=75></a>
 </td>
 <td>
 <input type="hidden" name="domains" value="@SITESEARCH@">
