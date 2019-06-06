@@ -109,7 +109,8 @@ config.log
 .sconf_temp
 .scons-option-cache
 stamp-python
-# Documentation
+# Documentation/Web
+.public
 doc/explanation.html
 www/AIVDM.html
 www/client-howto.html
@@ -117,9 +118,9 @@ www/faq.html
 www/gps2udp.html
 www/gpscat.html
 www/gpsctl.html
+www/gpsdctl.html
 www/gpsdecode.html
 www/gpsd.html
-www/gpsdctl.html
 www/gpsd-time-service-howto.html
 www/gpsfake.html
 www/gps.html
@@ -150,8 +151,10 @@ www/pydoc
 www/replacing-nmea.html
 www/srec.html
 www/time-service-intro.html
+www/ubxtool.html
 www/.upload-stamp
 www/writing-a-driver.html
+www/zerk.html
 # Controls for the flock tester
 devtools/.flocktest.ini
 # QT stuff
