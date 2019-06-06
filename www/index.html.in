@@ -299,7 +299,7 @@ into a RINEX 3 file.</dd>
 <dt><a href="ntpshmmon.html">ntpshmmon.1</a></dt>
 <dd>Monitor the NTP shared-memory segments created by GPSD.</dd>
 
-<dt><a href="ubxtool.html">zerk.1</a></dt>
+<dt><a href="ubxtool.html">ubxtool.1</a></dt>
 <dd>Configure and ommunicate with u-blox GPS from the command line.</dd>
 
 <dt><a href="zerk.html">zerk.1</a></dt>
