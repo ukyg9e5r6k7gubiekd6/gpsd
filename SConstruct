@@ -75,7 +75,7 @@ formserver = "www@thyrsus.com"
 gitrepo = "git@gitlab.com:gpsd/gpsd.git"
 ircchan = "irc://chat.freenode.net/#gpsd"
 mailman = "https://lists.nongnu.org/mailman/listinfo/"
-mainpage = "https://gitlab.com/gpsd/gpsd"
+mainpage = "https://gpsd.io"
 scpupload = "garyemiller@dl.sv.nongnu.org:/releases/gpsd/"
 sitename = "GPSD"
 sitesearch = "gpsd.io"
@@ -85,7 +85,7 @@ tipwidget = '<p><a href="https://www.patreon.com/esr">' \
             'Donate here to support continuing development.</a></p>'
 usermail = "gpsd-users@lists.nongnu.org"
 webform = "http://www.thyrsus.com/cgi-bin/gps_report.cgi"
-website = "https://gpsd.gitlab.io/gpsd/"
+website = "https://gpsd.io/"
 # Hosting information ends here
 
 # gpsd needs Scons version at least 2.3
