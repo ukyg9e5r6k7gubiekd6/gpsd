@@ -259,7 +259,9 @@ latest stable version.</p>
 <dd>The <code>gpsd</code> daemon.</dd>
 
 <dt><a href="gps.html">gps.1</a></dt>
-<dd>The <code>gpsd</code> test clients.</dd>
+<dd>The <code>gpsd</code> sample clients. <code>cgps</code> using
+ncurses. <code>xgps</code> for X. <code>lcdgps</code> for use on 4x40
+LCD. <code>gegps</code> for use with Google Earth.</dd>
 
 <dt><a href="gps2udp.html">gps2udp.1</a></dt>
 <dd>Feed the take from <code>gpsd</code> to one or more aggregation
@@ -297,11 +299,20 @@ into a RINEX 3 file.</dd>
 <dt><a href="ntpshmmon.html">ntpshmmon.1</a></dt>
 <dd>Monitor the NTP shared-memory segments created by GPSD.</dd>
 
+<dt><a href="ubxtool.html">zerk.1</a></dt>
+<dd>Configure and ommunicate with u-blox GPS from the command line.</dd>
+
+<dt><a href="zerk.html">zerk.1</a></dt>
+<dd>An all purpose GREIS fitting. A command line tool for JAVAD GPS.</dd>
+
 <dt><a href="libgps.html">libgps.3</a></dt>
 <dd>An interface library that manages communication with the daemon.</dd>
 
 <dt><a href="libgpsmm.html">libgpsmm.3</a></dt>
 <dd>C++ class wrapper for the libgps C binding.</dd>
+
+<dt><a href="libQgpsmm.html">libgpsmm.3</a></dt>
+<dd>Qt wrapper for the libgps C binding.</dd>
 
 <dt><a href="gpsd_json.html">gpsd.5</a></dt> <dd>The request/response
 protocol of the <code>gpsd</code> daemon.</dd>
