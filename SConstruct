@@ -645,7 +645,7 @@ def GetPythonValue(context, name, imp, expr, brief=False):
             value = ''
             announce('Python command "%s" failed - disabling Python.\n'
                      'Python components will NOT be installed' %
-		     command[2])
+                     command[2])
             env['python'] = False
     context.Result('failed' if status else 'ok' if brief else value)
     return value
@@ -875,7 +875,7 @@ else:
                 "syslog",
                 "termios",
                 "winsock2"
-               ):
+                ):
         if config.CheckHeader(hdr + ".h"):
             confdefs.append("#define HAVE_%s_H 1\n"
                             % hdr.replace("/", "_").upper())
@@ -979,11 +979,11 @@ else:
     if manbuilder:
         # 18.2. Attaching a Builder to a Construction Environment
         # this gets lost on scons 3.0.5
-        config.env.Append(BUILDERS = {"Man" : Builder(action=manbuilder,
-                                                      src_suffix=".xml")})
-        config.env.Append(BUILDERS = {"HTML" : Builder(action=htmlbuilder,
-                                                       src_suffix=".xml",
-                                                       suffix=".html")})
+        config.env.Append(BUILDERS={"Man": Builder(action=manbuilder,
+                                                   src_suffix=".xml")})
+        config.env.Append(BUILDERS={"HTML": Builder(action=htmlbuilder,
+                                                    src_suffix=".xml",
+                                                    suffix=".html")})
 
     # Determine if Qt network libraries are present, and
     # if not, force qt to off
@@ -1361,8 +1361,8 @@ gpspipe = env.Program('gpspipe', ['gpspipe.c'],
                       LIBS=['gps_static'],
                       parse_flags=gpsflags)
 gpsrinex = env.Program('gpsrinex', ['gpsrinex.c'],
-                      LIBS=['gps_static'],
-                      parse_flags=gpsflags)
+                       LIBS=['gps_static'],
+                       parse_flags=gpsflags)
 gps2udp = env.Program('gps2udp', ['gps2udp.c'],
                       LIBS=['gps_static'],
                       parse_flags=gpsflags)
@@ -1633,7 +1633,8 @@ Platform: UNKNOWN
     python_targets = python_built_extensions + [python_egg_info]
 
 
-env.Command(target="packet_names.h", source="packet_states.h", action="""
+env.Command(target="packet_names.h", source="packet_states.h",
+            action="""
     rm -f $TARGET &&\
     sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   \"\\1\",/' <$SOURCE >$TARGET &&\
     chmod a-w $TARGET""")
@@ -1654,7 +1655,9 @@ env.AlwaysBuild(timebase)
 
 env.Textfile(target="gpsd_config.h", source=confdefs)
 
-env.Command(target="gps_maskdump.c", source=["maskaudit.py", "gps.h", "gpsd.h"], action='''
+env.Command(target="gps_maskdump.c",
+            source=["maskaudit.py", "gps.h", "gpsd.h"],
+            action='''
     rm -f $TARGET &&\
         $SC_PYTHON $SOURCE -c $SRCDIR >$TARGET &&\
         chmod a-w $TARGET''')
@@ -2239,7 +2242,8 @@ Utility('aivdm-makeregress', [gpsdecode], [
 packet_regress = UtilityWithHerald(
     'Testing detection of invalid packets...',
     'packet-regress', [test_packet], [
-        '$SRCDIR/tests/test_packet | diff -u $SRCDIR/test/packet.test.chk -', ])
+        '$SRCDIR/tests/test_packet | '
+        ' diff -u $SRCDIR/test/packet.test.chk -', ])
 
 # Rebuild the packet-getter regression test
 Utility('packet-makeregress', [test_packet], [
@@ -2274,7 +2278,7 @@ else:
             ' $SRCDIR/test/clientlib/*.log', ])
     # Unit-test the bitfield extractor
     misc_regress = Utility('misc-regress', [], [
-	'$SRCDIR/test_misc.py'
+        '$SRCDIR/test_misc.py'
     ])
 
 
@@ -2395,14 +2399,14 @@ Utility('shmclean', [], ["ipcrm  -M 0x4e545030;"
 # asciidoc documents
 if env.WhereIs('asciidoc'):
     adocfiles = ['AIVDM',
-                'client-howto',
-                'gpsd-time-service-howto',
-                'NMEA',
-                'ppp-howto',
-                'protocol-evolution',
-                'protocol-transition',
-                'time-service-intro',
-                ]
+                 'client-howto',
+                 'gpsd-time-service-howto',
+                 'NMEA',
+                 'ppp-howto',
+                 'protocol-evolution',
+                 'protocol-transition',
+                 'time-service-intro',
+                 ]
     asciidocs = ["www/" + stem + ".html" for stem in adocfiles] \
         + ["www/installation.html"]
     for stem in adocfiles:
@@ -2468,8 +2472,10 @@ Utility("validation-list", [www], validation_list)
 # How to update the website.  Assumes a logal GitLab pages setup.
 # See .gitlab-ci.yml
 upload_web = Utility("website", [www],
-                     ['rsync --exclude="*.in" -avz www/ ' + os.environ.get('WEBSITE', '.public'),
-                      'cp README TODO NEWS ' + os.environ.get('WEBSITE', '.public')])
+                     ['rsync --exclude="*.in" -avz www/ ' +
+                      os.environ.get('WEBSITE', '.public'),
+                      'cp README TODO NEWS ' +
+                      os.environ.get('WEBSITE', '.public')])
 
 # When the URL declarations change, so must the generated web pages
 for fn in glob.glob("www/*.in"):
