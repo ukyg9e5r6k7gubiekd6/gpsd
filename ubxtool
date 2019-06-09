@@ -5324,7 +5324,7 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
     tim_ids = {1: {'str': 'TP', 'dec': tim_tp, 'name': 'UBX-TIM-TP'},
                3: {'str': 'TM2', 'dec': tim_tm2, 'name': 'UBX-TIM-TM2'},
                4: {'str': 'SVIN', 'dec': tim_svin, 'name': 'UBX-TIM-SVIN'},
-               6: {'str': 'VRFY', 'dec': tim_vrfy,'name': 'UBX-TIM-VRFY'},
+               6: {'str': 'VRFY', 'dec': tim_vrfy, 'name': 'UBX-TIM-VRFY'},
                0x11: {'str': 'DOSC', 'name': 'UBX-TIM-DOSC'},
                0x12: {'str': 'TOS', 'name': 'UBX-TIM-TOS'},
                0x13: {'str': 'SMEAS', 'name': 'UBX-TIM-SMEAS'},
@@ -6471,6 +6471,10 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         "RXM-IMES": {"command": send_poll, "opt": [0x02, 0x61],
                      "help": "poll UBX-RXM-IMES Indoor Messaging System "
                      "Information"},
+        # UBX-RXM-MEASX
+        "RXM-MEASX": {"command": send_poll, "opt": [0x02, 0x14],
+                      "help": "poll UBX-RXM-MEASX Satellite Measurements "
+                      " for RRLP"},
         # UBX-RXM-RAWX
         "RXM-RAWX": {"command": send_poll, "opt": [0x02, 0x15],
                      "help": "poll UBX-RXM-RAWX raw measurement data"},
