@@ -2540,8 +2540,8 @@ class ubx(object):
     cfg_prt_proto = {
         0x1: 'UBX',
         0x2: 'NMEA',
-        0x4: 'RTCM2',
-        0x20: 'RTCM3',
+        0x4: 'RTCM2',    # not in u-blox 5
+        0x20: 'RTCM3',   # not in u-blox 5
         }
 
     def cfg_prt(self, buf):
@@ -5714,6 +5714,9 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
     def send_able_binary(self, able):
         """dis/enable basic binary messages"""
 
+        # FIXME: does not change UBX-CFG-PRT outProtoMask for current port.
+        # Workarouund: gpsctl -b
+
         rate = 1 if able else 0
 
         # UBX-NAV-DOP
@@ -5801,6 +5804,8 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
     def send_able_nmea(self, able):
         """dis/enable basic NMEA messages"""
 
+        # FIXME: does not change UBX-CFG-PRT outProtoMask for current port.
+        # Workarouund: gpsctl -n
         rate = 1 if able else 0
 
         # xxGBS
