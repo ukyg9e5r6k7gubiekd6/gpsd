@@ -1962,10 +1962,10 @@ class ubx(object):
         0x4: 'infMsg',
         0x8: 'navConf',
         0x10: 'rxmConf',
-        0x100: 'senConf',        # not on M8030
+        0x100: 'senConf',        # not on M8030, sfdrConf in u-blox 5
         0x200: 'rinvConf',
         0x400: 'antConf',
-        0x800: 'logConf',
+        0x800: 'logConf',        # not in u-blox 5
         0x1000: 'ftsConf',
         }
 
@@ -5906,17 +5906,17 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         # Clear: save_clear = 1
 
         # basic configs always available to change:
-        # ioPort, msgConf, infMsg, navConf, rxmConf
+        # ioPort = 1, msgConf = 2, infMsg = 4, navConf = 8, rxmConf =0x10
         cfg1 = 0x1f
-        # senConf, rinvConf, antConf, logConf
+        # senConf = 1, rinvConf = 2, antConf = 4, logConf = 8, ftsConf = 0x10
         cfg2 = 0x0f
 
         m_data = bytearray(13)
 
-        # clear
+        # clear mask
         # as of protver 27, any bit in clearMask clears all
         if 0 == save_clear:
-            # saving
+            # saving, so do not clear
             m_data[0] = 0
             m_data[1] = 0
         else:
@@ -5926,20 +5926,20 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         m_data[2] = 0       #
         m_data[3] = 0       #
 
-        # save
+        # save mask
         # as of protver 27, any bit in saveMask saves all
         if 0 == save_clear:
             # saving
             m_data[4] = cfg1
             m_data[5] = cfg2
         else:
-            # clearing
+            # clearing, so do not save
             m_data[4] = 0
             m_data[5] = 0
         m_data[6] = 0       #
         m_data[7] = 0       #
 
-        # load
+        # load mask
         # as of protver 27, any bit in loadMask loads all
         if False and 0 == save_clear:
             # saving
@@ -5953,7 +5953,8 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         m_data[11] = 0      #
 
         # deviceMask, where to save it, try all options
-        m_data[12] = 0x17      # devBBR, devFLASH devEEPROM, devSpiFlash
+        # devBBR = 1, devFLASH = 2, devEEPROM = 4, devSpiFlash = 0x10
+        m_data[12] = 0x17
 
         gps_model.gps_send(6, 0x9, m_data)
 
