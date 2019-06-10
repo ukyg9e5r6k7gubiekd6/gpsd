@@ -2022,8 +2022,10 @@ static void ubx_cfg_prt(struct gps_device_t *session,
      * When this is called from gpsd, the initial probe for UBX should
      * have picked up the device's port number from the CFG_PRT response.
      */
-    if (session->driver.ubx.port_id != 0)
+    /* FIXME!  Bad test, port_id == 0 is valid too.  DDC (I2X) = port 0 */
+    if (session->driver.ubx.port_id != 0) {
 	buf[0] = session->driver.ubx.port_id;
+    }
     /*
      * This default can be hit if we haven't sent a CFG_PRT query yet,
      * which can happen in gpsmon because it doesn't autoprobe.
@@ -2041,12 +2043,15 @@ static void ubx_cfg_prt(struct gps_device_t *session,
      *
      * This logic will fail on any USB u-blox device that presents
      * as an ordinary USB serial device (/dev/USB*) and actually
-     * has port ID 3 the way it ought to.
+     * has port ID 3 the way it "ought" to.
      */
-    else if (strstr(session->gpsdata.dev.path, "/ACM") != NULL)
+    else if (strstr(session->gpsdata.dev.path, "/ACM") != NULL) {
+        /* using the built in USB port */
 	session->driver.ubx.port_id = buf[0] = USB_ID;
-    else
+    } else {
+        /* A guess.  Could be UART2, or SPI, or DDC port */
 	session->driver.ubx.port_id = buf[0] = USART1_ID;
+    }
 
     putle32(buf, 8, speed);
 
@@ -2081,6 +2086,7 @@ static void ubx_cfg_prt(struct gps_device_t *session,
     usart_mode |= (1<<4);	/* reserved1 Antaris 4 compatibility bit */
     usart_mode |= (1<<7);	/* high bit of charLen */
 
+    /* u-blox 5+ binary only supports 8N1 */
     switch (parity) {
     case (int)'E':
     case 2:
@@ -2103,8 +2109,10 @@ static void ubx_cfg_prt(struct gps_device_t *session,
     putle32(buf, 4, usart_mode);
 
     /* enable all input protocols by default */
+    /* FIXME!  RTCM3 needs to be set too */
     buf[12] = NMEA_PROTOCOL_MASK | UBX_PROTOCOL_MASK | RTCM_PROTOCOL_MASK;
 
+    /* FIXME?  RTCM/RTCM3 needs to be set too? */
     buf[outProtoMask] = (mode == MODE_NMEA
                          ? NMEA_PROTOCOL_MASK : UBX_PROTOCOL_MASK);
     (void)ubx_write(session, 0x06u, 0x00, buf, sizeof(buf));
@@ -2311,7 +2319,6 @@ static void ubx_cfg_prt(struct gps_device_t *session,
 	    msg[2] = 0x00;		/* rate */
 	    (void)ubx_write(session, 0x06u, 0x01, msg, 3);
         }
-
     }
 }
 
