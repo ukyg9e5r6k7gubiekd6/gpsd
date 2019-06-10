@@ -3,9 +3,9 @@
 
    COMMENT_BODY,	/* pound comment for a test load */
    COMMENT_RECOGNIZED,	/* comment recognized */
+   NMEA_DOLLAR,		/* we've seen first character of NMEA leader */
 
 #ifdef NMEA0183_ENABLE
-   NMEA_DOLLAR,		/* we've seen first character of NMEA leader */
    NMEA_BANG,		/* we've seen first character of an AIS message '!' */
    NMEA_PUB_LEAD,	/* seen second character of NMEA G leader */
    NMEA_VENDOR_LEAD,	/* seen second character of NMEA P leader */
