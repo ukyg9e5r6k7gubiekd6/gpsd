@@ -3087,9 +3087,9 @@ class ubx(object):
                9: {'str': 'CFG', 'dec': cfg_cfg, 'name': 'UBX-CFG-CFG'},
                # Antaris 4, deprecated in u-blox 5/6, gone in 7
                0x0e: {'str': 'FXM', 'name': 'UBX-CFG-FXM'},
-               # u-blox 5, 6, 7
+               # u-blox 5, 6, 7, 8
                0x11: {'str': 'RXM', 'dec': cfg_rxm, 'name': 'UBX-CFG-RXM'},
-               # in u-blox 6.  Not in 5 or 7
+               # in u-blox 6.  Not in 5- or 7+
                0x12: {'str': 'EKF', 'name': 'UBX-CFG-EKF'},
                # in u-blox 5+
                0x13: {'str': 'ANT', 'dec': cfg_ant, 'name': 'UBX-CFG-ANT'},
@@ -3101,7 +3101,7 @@ class ubx(object):
                0x1b: {'str': 'USB', 'dec': cfg_usb, 'name': 'UBX-CFG-USB'},
                # u-blox 5 and 6.  Not in u-blox 7+
                0x1d: {'str': 'TMODE', 'name': 'UBX-CFG-TMODE'},
-               # not in u-blox 7-
+               # in u-blox 8+. Not in u-blox 7-
                0x1e: {'str': 'ODO', 'dec': cfg_odo, 'name': 'UBX-CFG-ODO'},
                # in u-blox 5, 6, not in u-blox 7+
                0x22: {'str': 'NVS', 'name': 'UBX-CFG-NVS'},
@@ -3122,40 +3122,40 @@ class ubx(object):
                0x39: {'str': 'ITFM', 'dec': cfg_itfm, 'name': 'UBX-CFG-ITFM'},
                # in u-blox 6+.  Not in u-blox 5-
                0x3b: {'str': 'PM2', 'dec': cfg_pm2, 'name': 'UBX-CFG-PM2'},
-               # in u-blox 6+.  Not in u-blox 5-
+               # in u-blox 6 and 7.  Not in u-blox 5- or 8+
                0x3d: {'str': 'TMODE2', 'dec': cfg_tmode2,
                       'name': 'UBX-CFG-TMODE2'},
-               # in u-blox 7.  Not in u-blox 6-
+               # in u-blox 7+  Not in u-blox 6-
                0x3e: {'str': 'GNSS', 'dec': cfg_gnss, 'name': 'UBX-CFG-GNSS'},
-               # in u-blox 7.  Not in u-blox 6-
+               # in u-blox 7+  Not in u-blox 6-
                0x47: {'str': 'LOGFILTER', 'name': 'UBX-CFG-LOGFILTER'},
-               # Not in u-blox 7-
+               # Not in u-blox 8-
                0x53: {'str': 'TXSLOT', 'name': 'UBX-CFG-TXSLOT'},
                # Not in u-blox 7-
                0x57: {'str': 'PWR', 'dec': cfg_pwr, 'name': 'UBX-CFG-PWR'},
-               # Not in u-blox 7-
+               # Not in u-blox 8-
                0x5c: {'str': 'HNR', 'dec': cfg_hnr, 'name': 'UBX-CFG-HNR'},
                # Not in u-blox 7-
                0x60: {'str': 'ESRC', 'dec': cfg_esrc, 'name': 'UBX-CFG-ESRC'},
-               # Not in u-blox 7-
+               # Not in u-blox 8-
                0x61: {'str': 'DOSC', 'dec': cfg_dosc, 'name': 'UBX-CFG-DOSC'},
-               # Not in u-blox 7-
+               # Not in u-blox 8-
                0x62: {'str': 'SMGR', 'dec': cfg_smgr, 'name': 'UBX-CFG-SMGR'},
-               # Not in u-blox 7-
+               # Not in u-blox 8-
                0x69: {'str': 'GEOFENCE', 'dec': cfg_geofence,
                       'name': 'UBX-CFG-GEOFENCE'},
-               # Not in u-blox 7-
+               # Not in u-blox 8-
                0x70: {'str': 'DGNSS', 'dec': cfg_dgnss,
                       'name': 'UBX-CFG-DGNSS'},
-               # Not in u-blox 7-
+               # Not in u-blox 8-
                0x71: {'str': 'TMODE3', 'name': 'UBX-CFG-TMODE3'},
-               # Not in u-blox 7-
+               # Not in u-blox 8-
                0x84: {'str': 'FIXSEED', 'name': 'UBX-CFG-FIXSEED'},
-               # Not in u-blox 7-
+               # Not in u-blox 8-
                0x85: {'str': 'DYNSEED', 'name': 'UBX-CFG-DYNSEED'},
-               # Not in u-blox 7-
+               # Not in u-blox 8-
                0x86: {'str': 'PMS', 'dec': cfg_pms, 'name': 'UBX-CFG-PMS'},
-               # in u-blox 9.
+               # in u-blox 9
                0x8a: {'str': 'VALSET', 'dec': cfg_valset,
                       'name': 'UBX-CFG-VALSET'},
                # in u-blox 9
