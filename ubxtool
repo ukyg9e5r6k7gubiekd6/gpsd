@@ -1966,7 +1966,7 @@ class ubx(object):
         0x200: 'rinvConf',
         0x400: 'antConf',
         0x800: 'logConf',        # not in u-blox 5
-        0x1000: 'ftsConf',
+        0x1000: 'ftsConf',       # protVer 16+
         }
 
     cfg_cfg_dev = {
