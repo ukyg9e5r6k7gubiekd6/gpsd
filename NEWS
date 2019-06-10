@@ -11,6 +11,8 @@
   Preliminary u-blox 9 support.
   Add qErr in gps_data_t to store PPS quantization error.
   Add Android (AOSP) support
+  Improved multi gnss and multi signal support.
+  NMEA 4.10 multi gnss multi signal support.
 
 3.18.1: 2018-10-19 (Gary E. Miller <gem@rellim.com>)
   Fix some installation issues.
