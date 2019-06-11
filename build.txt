@@ -136,8 +136,8 @@ On Gentoo systems those packages are named:
 |dev-python/pycairo
 |============================================================================
 
-The ubxtool and zerk clients will only be installed if this Python
-extension is installed:
+The ubxtool and zerk clients will only be usable in direct-serial mode
+if this Python extension is installed:
 
 |============================================================================
 |pyserial           | Python Serial Port extension
