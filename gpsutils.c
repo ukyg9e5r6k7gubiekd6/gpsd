@@ -75,8 +75,8 @@ double safe_atof(const char *string)
 
     bool sign, expSign = false;
     double fraction, dblExp, *d;
-    register const char *p;
-    register int c;
+    const char *p;
+    int c;
     int exp = 0;		/* Exponent read from "EX" field. */
     int fracExp = 0;		/* Exponent that derives from the fractional
 				 * part.  Under normal circumstatnces, it is
@@ -389,10 +389,10 @@ timestamp_t timestamp(void)
  * This differs from mktime() from libc.
  * mktime() takes struct tm as localtime.
  */
-time_t mkgmtime(register struct tm * t)
+time_t mkgmtime(struct tm * t)
 {
-    register int year;
-    register time_t result;
+    int year;
+    time_t result;
     static const int cumdays[MONTHSPERYEAR] =
 	{ 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334 };
 
