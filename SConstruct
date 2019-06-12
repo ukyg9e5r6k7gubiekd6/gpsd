@@ -893,8 +893,7 @@ else:
             confdefs.append("/* #undef HAVE_%s */\n" % f.upper())
 
     if config.CheckHeader(["sys/types.h", "sys/time.h", "sys/timepps.h"]):
-        # this gets lost on scons 3.0.5
-        config.env.MergeFlags("-DHAVE_SYS_TIMEPPS_H=1")
+        confdefs.append("#define HAVE_SYS_TIMEPPS_H 1\n")
         kpps = True
     else:
         kpps = False
@@ -2725,3 +2724,4 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
 # Local Variables:
 # mode:python
 # End:
+# vim: set expandtab shiftwidth=4

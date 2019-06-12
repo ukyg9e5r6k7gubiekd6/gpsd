@@ -1,7 +1,7 @@
 /*
  * ppsthread.c - manage PPS watcher threads
  *
- * To enable KPPS, this file needs to be compiled with -DHAVE_SYS_TIMEPPS_H
+ * To enable KPPS, this file needs to be compiled with HAVE_SYS_TIMEPPS_H
  *
  * If you are not good at threads do not touch this file!
  * For example: errno is thread safe; strerror() is not.
@@ -46,9 +46,11 @@
  *
  * You cannot do PPS math with doubles
  *
- * This file is Copyright (c)2013-2018 by the GPSD project
+ * This file is Copyright (c)2013-2019 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
+
+#include "gpsd_config.h"
 
 #include <string.h>
 #include <stdio.h>
