@@ -720,6 +720,9 @@ else:
             libs += ' --static'
         return ['!%s --cflags %s %s' % (env['PKG_CONFIG'], libs, pkg)]
 
+    if sys.platform.startswith('freebsd'):
+        confdefs.append("#define __BSD_VISIBLE 1\n")
+
     # The actual distinction here is whether the platform has ncurses in the
     # base system or not. If it does, pkg-config is not likely to tell us
     # anything useful. FreeBSD does, Linux doesn't. Most likely other BSDs
