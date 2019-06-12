@@ -394,11 +394,21 @@ is <<CHRONYDEFAULT>>. If you don't already know enough about time
 service to have a preference, the functional differences between them
 are unlikely to be significant to you; flip a coin.
 
-If you choose ntpd, it's best to go with the NTPsec version rather than
-legacy ntpd.  (As of June 2018 NTPsec is not yet available in binary
-package form on all common distributions. You may have to build it
-from source.) NTPsec shares some maintainers with GPSD, and has some
-significant improvements in security and performance.
+=== NTPSec ===
+If you choose the ntpd option, it's best to go with the NTPsec version
+rather than legacy ntpd.  NTPsec shares some maintainers with GPSD,
+and has some significant improvements in security and performance.
+
+As of June 2019, NTPsec is available as a package in:
+
+* OpenSUSE
+* Debian (and variants like Ubuntu and Raspbian)
+* Alpine
+* archlinux
+
+If it is not available as a package, you can build it from source,
+<<GITLAB-SOURCE>>, it is not especially difficult.
+
 
 == Choice of Hardware ==
 
@@ -1821,6 +1831,8 @@ by Jaap Winius <jwinius@rjsystems.nl>.
 - [[[EEE]]] https://en.wikipedia.org/wiki/Energy-Efficient_Ethernet[Energy-Efficient Ethernet]
 
 - [[[LVC]]] https://www.rjsystems.nl/en/2100-ntpd-garmin-gps-18-lvc-gpsd.php
+
+- [[[GITLAB-SOURCE]]] https://gitlab.com/NTPsec/ntpsec[NTPSec source on Gitlab]
 
 == Changelog ==
 
