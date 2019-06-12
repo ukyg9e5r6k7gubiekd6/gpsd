@@ -2,7 +2,7 @@
 :description: How to set up an NTP Stratum 1 server using GPSD.
 :keywords: time, GPSD, NTP, time, precision, 1PPS, PPS, stratum, jitter
 Gary E. Miller <gem@rellim.com>, Eric S. Raymond <esr@thyrsus.com>
-v2.10, Sep 2016
+v2.11, June 2018
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website.
@@ -18,7 +18,7 @@ Here is the quick-start sequence. The rest of this document goes
 into more detail about the steps.
 
 1. Ensure that gpsd and either ntpd or chronyd are installed on your
-   system. (Both gpsd and ntpd are preinstalled in many stock Linux
+   system. (Both gpsd and ntpd are pre-installed in many stock Linux
    distributions; chronyd is normally not.) You don't have to choose
    which to use yet if you have easy access to both, but knowing which
    alternatives are readily available to you is a good place to start.
@@ -313,7 +313,7 @@ When gpsd is built with timeservice=yes:
     immediately on startup.
 
 2.  Forces the building of ntpshmmon, cgps and gpsmon.  Those program would
-    be built by default anyway, unless gpsdclients=n0.
+    be built by default anyway, unless gpsdclients=no.
 
 3.  The configure will fail if pps is not available.
 
@@ -345,7 +345,7 @@ CONFIG_PPS_CLIENT_LDISC=y
 -----------------------------------------------------------------------------
 
 Some embedded systems, like the Raspberry Pi, detect PPS on a GPIO
-line instead of an a serial port line.  For those systems you will
+line instead of on a serial port line.  For those systems you will
 also need these two lines:
 
 -----------------------------------------------------------------------------
@@ -377,7 +377,7 @@ You will need to have either ntpd or chrony installed. If you are
 running a Unix variant with a package system, the packages will
 probably be named 'ntp' (or 'ntpsec') and either 'chrony' or 'chronyd'.
 
-Between ntp and chrony, ntp is the older and more popular choice -
+Between ntpd and chrony, ntpd is the older and more popular choice -
 thus, the one with the best-established peer community if you need
 help in unusual situations.  On the other hand, chrony has a
 reputation for being easier to set up and configure, and is better in
@@ -394,10 +394,10 @@ is <<CHRONYDEFAULT>>. If you don't already know enough about time
 service to have a preference, the functional differences between them
 are unlikely to be significant to you; flip a coin.
 
-If you choose ntpd, it's best to go with the NTPsec version rather
-than legacy ntpd.  (As of September 2016 NTPsec is not yet generally
-available in binary package form. You will have to build it from
-source.) NTPsec shares some maintainers with GPSD, and has some
+If you choose ntpd, it's best to go with the NTPsec version rather than
+legacy ntpd.  (As of June 2018 NTPsec is not yet available in binary
+package form on all common distributions. You may have to build it
+from source.) NTPsec shares some maintainers with GPSD, and has some
 significant improvements in security and performance.
 
 == Choice of Hardware ==
@@ -426,7 +426,7 @@ like the GPS-18 you may even have to make your own cables) but it can
 deliver three orders of magnitude better accuracy and repeatability -
 enough to meet prevailing standards for a public Stratum 1 server.
 
-Among newer receiver designs the authors found the the u-blox line of
+Among newer receiver designs the authors found the u-blox line of
 receivers used in the GR-[678]01W to be particularly good.  Very
 detailed information on its timing performance can be found at
 <<UBLOX-TIMING>>. One of us (Raymond) has recent experience with an
@@ -863,7 +863,7 @@ Also note that after cold-starting ntpd it will calibrate for up to 15
 minutes before it starts adjusting the clock. Because the frequency
 error estimate ("drift") that NTP uses isn't right when you first
 start NTP, there will be a phase error that persists while the
-frequency is estimated.  So if your clock is a litle slow, then it
+frequency is estimated.  So if your clock is a little slow, then it
 will keep getting behind, and the positive offset will cause NTP to
 adjust the phase forward and also increase the frequency offset error.
 After a day or so or maybe less the frequency estimate will be very
@@ -976,7 +976,7 @@ $ su - (or sudo -s )
 -----------------------------------------------------------------------------
 
 After you have verified with cgps that your GPS receiver has a good 3D
-lock you can check that gpsd is outputing good time by running ntpshmmon.
+lock you can check that gpsd is outputting good time by running ntpshmmon.
 
 -----------------------------------------------------------------------------
 # ntpshmmon
@@ -1098,7 +1098,7 @@ factors are.
 === ARP is the sound of your server choking ===
 
 By default ntpd and chronyd poll remote servers every 64 seconds.  This
-is an unfortuneate choice.  Linux by default only keeps an ARP table
+is an unfortunate choice.  Linux by default only keeps an ARP table
 entry for 60 seconds, anytime thereafter it may be flushed.
 
 If the ARP table has flushed the entry for a remote peer or server then
@@ -1144,7 +1144,7 @@ For ARM, be sure NO_HZ is off:
 nohz=off
 -----------------------------------------------------------------------------
 
-You will also need to select the 'performance' CPU governor to keep ypur
+You will also need to select the 'performance' CPU governor to keep your
 CPU set to the maximum speed for continuous usage.  How you see and set
 your governor will be distribution specific.  The easiest way it to
 recompile your kernel to only provide the performance governor.
@@ -1289,7 +1289,7 @@ This prints the average offset.
 
 Recall that magic pseudo-IP address 127.127.28.0 identifies unit 0 of
 the ntpd shared-memory driver (NTP0); 127.127.28.1 identifies unit
-1(NTP1).  Unit 0 is used for in-band message timestamps (IMT) and unit
+1 (NTP1).  Unit 0 is used for in-band message timestamps (IMT) and unit
 1 for the (more accurate, when available) time derived from combining
 IMT with the out-of-band PPS synchronization pulse.  Splitting these
 notifications allows ntpd to use its normal heuristics to weight them.
@@ -1428,13 +1428,19 @@ the offset between the 1PPS time and the GPS time.
 If, for example, your estimate of the offset is -0.32s, your time1 fudge
 value will be '0.32'.  Note the change of sign.
 
-=== Pollling Interval ===
+=== Polling Interval ===
 
 ntpd seems to better use a PPS refclock when the polling interval is
 as small as possible.  The ntpd default minpoll is 6, and can be set to
 as low as 4.  NTPsec versions 0.9.5 and above of ntpd allow you to
-set minpoll and maxpoll as low as 0.  Changing minpoll from 4 to 0 may
-reduce your PPS jitter by over a factor of 4.
+set minpoll and maxpoll as low as 0.  Changing minpoll from 4 to 3, 2, 1
+or maybe even a,0 may reduce your PPS jitter by over a factor of 4.
+
+It change may require several hours for ntpd to converge with the new
+settings.  Use ntpviz to find the best poll interval for your system.
+
+The value that yields the lowest jitter may not be the one that yields
+the best Local Clock Frequency Offset.
 
 -----------------------------------------------------------------------------
 server 127.127.28.1 minpoll 0 maxpoll 0 prefer
@@ -1685,8 +1691,8 @@ Your NIC may have more features, and your driver may support them for
 better results.
 
 In the software timestamping above the ptp4l program took care of all steps to
-determine the slave offset from the master and feeding that to a a SHM for
-ntpd or chronyd to use.o
+determine the slave offset from the master and feeding that to a SHM for
+ntpd or chronyd to use.
 
 In hardware timestamping mode ptp4l will continue to perform most of
 the work.  An additional program, phc2sys, will take over the duties of
