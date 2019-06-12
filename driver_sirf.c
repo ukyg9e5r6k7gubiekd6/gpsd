@@ -746,11 +746,14 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
 
     mask |= REPORT_IS; /* send it */
 
+    /* skip all the debug pushing and popping, unless needed */
     if (session->context->errout.debug >= debug_base) {
-        /* skip all the pushing and popping, unless needed */
+        /* coerce time_t to long to placate older OS, like 32-bit FreeBSD,
+         * where time_t is int */
 	gpsd_log(&session->context->errout, debug_base,
 	         "GPS Week %d, tow %d.%03d, time %ld.%09ld\n",
-	         gps_week, gps_tow, gps_tow_sub_ms, now.tv_sec, now.tv_nsec);
+	         gps_week, gps_tow, gps_tow_sub_ms,
+                 (long)now.tv_sec, now.tv_nsec);
 	gpsd_log(&session->context->errout, debug_base,
 	         "UTC time %.9f leaps %u, datum %s\n",
 	         session->newdata.time, session->context->leap_seconds,
@@ -854,11 +857,15 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
     num_of_sats = getub(buf, 17);
     /* got time now */
     mask |= TIME_SET;
+
+    /* skip all the debug pushing and popping, unless needed */
     if (session->context->errout.debug >= LOG_IO) {
-        /* skip all the pushing and popping, unless needed */
+        /* coerce time_t to long to placate older OS, like 32-bit FreeBSD,
+         * where time_t is int */
 	gpsd_log(&session->context->errout, LOG_IO,
              "GPS Week %d, tow %d.%03d, time %ld.%09ld\n",
-	     gps_week, gps_tow, gps_tow_sub_ms, now.tv_sec, now.tv_nsec);
+	     gps_week, gps_tow, gps_tow_sub_ms,
+             (long)now.tv_sec, now.tv_nsec);
 	gpsd_log(&session->context->errout, LOG_IO,
 	     "Time bias: %u ns, accuracy %#02x, source %u, "
 	     "msg_info %#02x, sats %u\n",
@@ -1201,11 +1208,18 @@ static gps_mask_t sirf_msg_tcxo(struct gps_device_t *session,
         gps_tow_ns.tv_nsec = (gps_tow % 100) * 10000000LL;
         now = gpsd_gpstime_resolv(session, gps_week, gps_tow_ns);
 	session->newdata.time = now.tv_sec + (now.tv_nsec * 1e-9);
-        (void)snprintf(output, sizeof(output),
-                       ", GPS Week %d, tow %d, time %ld, time_status %d "
-                       "ClockOffset %d, Temp %.1f",
-                       gps_week, gps_tow, now.tv_sec, time_status,
-                       clock_offset, temp * 0.54902);
+
+	/* skip all the debug pushing and popping, unless needed */
+	if (session->context->errout.debug >= LOG_PROG) {
+	    /* coerce time_t to long to placate older OS, like 32-bit FreeBSD,
+	     * where time_t is int */
+	    (void)snprintf(output, sizeof(output),
+			   ", GPS Week %d, tow %d, time %ld, time_status %d "
+			   "ClockOffset %d, Temp %.1f",
+			   gps_week, gps_tow, (long)now.tv_sec, time_status,
+			   clock_offset, temp * 0.54902);
+        }
+
         if (7 == (time_status & 7)) {
 	    mask |= TIME_SET;
         }
