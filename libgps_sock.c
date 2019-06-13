@@ -6,21 +6,19 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <fcntl.h>
-#include <string.h>
+#include <assert.h>
 #include <ctype.h>
 #include <errno.h>
-#include <math.h>
+#include <fcntl.h>
 #include <locale.h>
-#include <assert.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include "gpsd_config.h"
-#include "timespec.h"      /* for NS_IN_SEC */
+#include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/select.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <unistd.h>
 
 #ifndef USE_QT
@@ -38,6 +36,7 @@
 #include "gpsd.h"
 #include "libgps.h"
 #include "strfuncs.h"
+#include "timespec.h"      /* for NS_IN_SEC */
 #ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
 
