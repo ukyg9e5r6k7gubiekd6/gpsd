@@ -5,22 +5,22 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <string.h>
-#include <fcntl.h>
 #include <errno.h>
-#include <unistd.h>
-#include <sys/socket.h>
+#include <fcntl.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ioctl.h>
 #include <sys/param.h>		/* defines BSD */
+#include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 #ifdef __linux__
 #include <sys/sysmacros.h>	/* defines major() */
 #endif	/* __linux__ */
 
-#include "gpsd_config.h"
 #ifdef ENABLE_BLUEZ
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/hci.h>
