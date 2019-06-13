@@ -6,13 +6,6 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-#ifdef __linux__
-/* FreeBSD chokes on this */
-/* nice() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
-/* Ubuntu isfinite() needs _XOPEN_SOURCE, 600 means X/Open 2004 */
-#define _XOPEN_SOURCE 600
-#endif /* __linux__ */
-
 #include "gpsd_config.h"  /* must be before all includes */
 
 #include <arpa/inet.h>     /* for htons() and friends */
@@ -33,10 +26,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <syslog.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/un.h>
-#include <syslog.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -46,8 +39,6 @@
 #ifndef INADDR_ANY
 #include <netinet/in.h>
 #endif /* INADDR_ANY */
-
-#include "gpsd_config.h"
 
 #include "gpsd.h"
 #include "gps_json.h"         /* needs gpsd.h */
