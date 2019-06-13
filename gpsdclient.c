@@ -7,14 +7,13 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
+#include <assert.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>   /* for strcasecmp() */
-#include <math.h>
-#include <assert.h>
 
-#include "gpsd_config.h"
 #include "gps.h"
 #include "gpsdclient.h"
 #include "os_compat.h"
