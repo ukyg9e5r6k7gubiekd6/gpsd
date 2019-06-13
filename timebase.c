@@ -193,6 +193,8 @@ SPDX-License-Identifier: BSD-2-clause
 /* putenv() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
 #define _XOPEN_SOURCE 500
 
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
