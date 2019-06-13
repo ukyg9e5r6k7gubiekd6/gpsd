@@ -5,9 +5,6 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-/* sys/ipc.h needs _XOPEN_SOURCE, 500 means X/Open 1995 */
-#define _XOPEN_SOURCE 500
-
 #include "gpsd_config.h"  /* must be before all includes */
 
 #include <string.h>
