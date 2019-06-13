@@ -11,9 +11,6 @@
 /* nice() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
 /* Ubuntu isfinite() needs _XOPEN_SOURCE, 600 means X/Open 2004 */
 #define _XOPEN_SOURCE 600
-/* setgroups() needs _DEFAULT_SOURCE or _BSD_SOURCE (glibc-dependent) */
-#define _DEFAULT_SOURCE
-#define _BSD_SOURCE
 #endif /* __linux__ */
 
 #include "gpsd_config.h"  /* must be before all includes */

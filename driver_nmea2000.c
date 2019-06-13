@@ -6,7 +6,6 @@
  */
 
 /* need this for strnlen() and struct ifreq */
-#define _DEFAULT_SOURCE
 
 #include "gpsd_config.h"  /* must be before all includes */
 

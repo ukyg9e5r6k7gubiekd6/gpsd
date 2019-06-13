@@ -703,6 +703,8 @@ else:
     # needed for isfinite(), pselect(), etc.
     posix = "2001112L"
     confdefs.append('#define _POSIX_C_SOURCE %s\n' % posix)
+    # for daemon(), cfmakeraw(), strsep() and setgroups()
+    confdefs.append('#define _DEFAULT_SOURCE 1\n')
     # for sys/un.h
     confdefs.append('#define __USE_MISC\n')
     if sys.platform.startswith('darwin'):

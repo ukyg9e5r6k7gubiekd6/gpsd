@@ -3,9 +3,6 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-/* cfmakeraw() needs _DEFAULT_SOURCE */
-#define _DEFAULT_SOURCE
-
 #include "gpsd_config.h"  /* must be before all includes */
 
 #include <sys/types.h>
