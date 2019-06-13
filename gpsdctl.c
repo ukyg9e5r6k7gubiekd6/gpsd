@@ -7,16 +7,16 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <string.h>
+#include <assert.h>
 #include <fcntl.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <syslog.h>
+#include <sys/socket.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <syslog.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <assert.h>
-#include <sys/socket.h>
 
 #include "gpsd.h"
 

@@ -61,12 +61,6 @@
  *
  */
 
-#ifndef _XOPEN_SOURCE
-/* need >= 500 for strdup() */
-/* OpenBSD needs >= 600 for isfinite() */
-#define _XOPEN_SOURCE 600
-#endif
-
 #include "gpsd_config.h"  /* must be before all includes */
 
 #include <stdio.h>

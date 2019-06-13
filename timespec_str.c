@@ -7,8 +7,6 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-#define _XOPEN_SOURCE 600
-
 #include "gpsd_config.h"  /* must be before all includes */
 
 #include <stdio.h>

@@ -702,24 +702,53 @@ else:
 
     # needed for isfinite(), pselect(), etc.
     posix = "2001112L"
-    confdefs.append('#define _POSIX_C_SOURCE %s\n' % posix)
+    confdefs.append('#if !defined(_POSIX_C_SOURCE)')
+    confdefs.append('#define _POSIX_C_SOURCE %s' % posix)
+    confdefs.append('#endif\n')
     # for daemon(), cfmakeraw(), strsep() and setgroups()
-    confdefs.append('#define _DEFAULT_SOURCE 1\n')
+    confdefs.append('#if !defined(_DEFAULT_SOURCE)')
+    confdefs.append('#define _DEFAULT_SOURCE 1')
+    confdefs.append('#endif\n')
     # for sys/un.h
+    confdefs.append('#if !defined(__USE_MISC)')
     confdefs.append('#define __USE_MISC\n')
+    confdefs.append('#endif\n')
+
+    # FreeBSD is reported to choke on _XOPEN_SOURCE
+    if not sys.platform.startswith('freebsd'):
+        # 500 means X/Open 1995
+        # getsid(), isascii(), nice(), putenv(), strdup(), sys/ipc.h need 500
+        # 600 means X/Open 2004
+        # Ubuntu and OpenBSD isfinite() needs 600
+        # 700 means X/Open 2008
+        # Python.h wants 700
+        confdefs.append('#if !defined(_XOPEN_SOURCE)')
+        confdefs.append('#define _XOPEN_SOURCE 700')
+        confdefs.append('#endif\n')
+
     if sys.platform.startswith('darwin'):
         # vsnprintf() needs __DARWIN_C_LEVEL >= 200112L
         # snprintf() needs __DARWIN_C_LEVEL >= 200112L
+        confdefs.append('#if !defined(__DARWIN_C_LEVEL)')
         confdefs.append('#define __DARWIN_C_LEVEL _POSIX_C_SOURCE\n')
+        confdefs.append('#endif\n')
         # strlcpy() needs __DARWIN_C_SOURCE
+        confdefs.append('#if !defined(_DAARWIN_C_SOURCE)')
         confdefs.append('#define _DARWIN_C_SOURCE 1\n')
+        confdefs.append('#endif\n')
     elif sys.platform.startswith('freebsd'):
         # required to define u_int in sys/time.h
+        confdefs.append('#if !defined(_BSD_SOURCE)')
         confdefs.append("#define _BSD_SOURCE 1\n")
+        confdefs.append('#endif\n')
         # required to get strlcpy(), and more, from string.h
+        confdefs.append('#if !defined(__BSD_VISIBLE)')
         confdefs.append("#define __BSD_VISIBLE 1\n")
+        confdefs.append('#endif\n')
     elif sys.platform.startswith('netbsd'):
+        confdefs.append('#if !defined(_NEBSD_SOURCE)')
         confdefs.append("#define _NETBSD_SOURCE 1\n")
+        confdefs.append('#endif\n')
 
 
     cxx = config.CheckCXX()

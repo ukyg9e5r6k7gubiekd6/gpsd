@@ -5,7 +5,6 @@
  *
  * Some of this was swiped from the NTPD distribution.
  */
-#define _XOPEN_SOURCE 600
 
 #include "gpsd_config.h"  /* must be before all includes */
 

@@ -14,12 +14,6 @@ PERMISSIONS
 
 ***************************************************************************/
 
-#ifdef __linux__
-/* FreeBSD chokes on this */
-/* isascii() needs _XOPEN_SOURCE, 500 means X/Open 1995 */
-#define _XOPEN_SOURCE 500
-#endif /* __linux__ */
-
 #include "gpsd_config.h"  /* must be before all includes */
 
 #include <stdio.h>
