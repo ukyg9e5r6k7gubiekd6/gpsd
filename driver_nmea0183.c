@@ -142,7 +142,7 @@ static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
     int mon;
     int mday;
     int year;
-    int i;
+    unsigned i;    /* NetBSD complains about signed array index */
 
     if (NULL == ddmmyy) {
         return 1;
