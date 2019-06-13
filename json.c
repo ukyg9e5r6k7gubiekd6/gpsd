@@ -189,7 +189,7 @@ static int json_internal_read_object(const char *cp,
     bool value_quoted = false;
     char uescape[5];		/* enough space for 4 hex digits and a NUL */
     const struct json_attr_t *cursor;
-    int substatus, n, maxlen = 0;
+    int substatus, maxlen = 0;
     unsigned int u;
     const struct json_enum_t *mp;
     char *lptr;
@@ -401,16 +401,21 @@ static int json_internal_read_object(const char *cp,
 		*pval++ = '\t';
 		break;
 	    case 'u':
-                cp++;                   /* skip the 'u' */
-		for (n = 0; n < 4 && isxdigit(*cp); n++)
-		    uescape[n] = *cp++;
-                uescape[n] = '\0';      /* terminate */
-		--cp;
-                /* ECMA-404 says JSON \u must have 4 hex digits */
-		if ((4 != n) || (1 != sscanf(uescape, "%4x", &u))) {
-		    return JSON_ERR_BADSTRING;
+                {
+                    unsigned n;
+
+		    cp++;                   /* skip the 'u' */
+		    for (n = 0; n < 4 && isxdigit(*cp); n++)
+			uescape[n] = *cp++;
+		    uescape[n] = '\0';      /* terminate */
+		    --cp;
+		    /* ECMA-404 says JSON \u must have 4 hex digits */
+		    if ((4 != n) || (1 != sscanf(uescape, "%4x", &u))) {
+			return JSON_ERR_BADSTRING;
+		    }
+                    /* truncate values above 0xff */
+		    *pval++ = (unsigned char)u;
                 }
-		*pval++ = (unsigned char)u;  /* truncate values above 0xff */
 		break;
 	    default:		/* handles double quote and solidus */
 		*pval++ = *cp;
