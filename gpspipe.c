@@ -32,25 +32,25 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
-#include <time.h>               /* for time_t */
-#ifdef HAVE_TERMIOS_H
-#include <termios.h>
-#endif /* HAVE_TERMIOS_H */
+#include <sys/select.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/select.h>
+#include <time.h>               /* for time_t */
+#include <unistd.h>
+
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif /* HAVE_SYS_SOCKET_H */
+#ifdef HAVE_TERMIOS_H
+#include <termios.h>
+#endif /* HAVE_TERMIOS_H */
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif /* HAVE_WINSOCK2_H */
-#include <unistd.h>
 
 #include "gpsd.h"
 
-#include "gpsd_config.h"
 #include "gpsdclient.h"
 #include "revision.h"
 
