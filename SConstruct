@@ -714,17 +714,15 @@ else:
     confdefs.append('#define __USE_MISC\n')
     confdefs.append('#endif\n')
 
-    # FreeBSD is reported to choke on _XOPEN_SOURCE
-    if not sys.platform.startswith('freebsd'):
-        # 500 means X/Open 1995
-        # getsid(), isascii(), nice(), putenv(), strdup(), sys/ipc.h need 500
-        # 600 means X/Open 2004
-        # Ubuntu and OpenBSD isfinite() needs 600
-        # 700 means X/Open 2008
-        # Python.h wants 700
-        confdefs.append('#if !defined(_XOPEN_SOURCE)')
-        confdefs.append('#define _XOPEN_SOURCE 700')
-        confdefs.append('#endif\n')
+    # 500 means X/Open 1995
+    # getsid(), isascii(), nice(), putenv(), strdup(), sys/ipc.h need 500
+    # 600 means X/Open 2004
+    # Ubuntu and OpenBSD isfinite() needs 600
+    # 700 means X/Open 2008
+    # Python.h wants 700
+    confdefs.append('#if !defined(_XOPEN_SOURCE)')
+    confdefs.append('#define _XOPEN_SOURCE 700')
+    confdefs.append('#endif\n')
 
     if sys.platform.startswith('darwin'):
         # vsnprintf() needs __DARWIN_C_LEVEL >= 200112L
