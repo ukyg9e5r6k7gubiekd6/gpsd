@@ -706,9 +706,9 @@ else:
     if sys.platform.startswith('darwin'):
         # vsnprintf() needs __DARWIN_C_LEVEL >= 200112L
         # snprintf() needs __DARWIN_C_LEVEL >= 200112L
-	confdefs.append('#define __DARWIN_C_LEVEL %s\n' % posix)
+        confdefs.append('#define __DARWIN_C_LEVEL %s\n' % posix)
         # strlcpy() needs __DARWIN_C_SOURCE
-	confdefs.append('#define _DARWIN_C_SOURCE 1\n')
+        confdefs.append('#define _DARWIN_C_SOURCE 1\n')
 
     cxx = config.CheckCXX()
     if not cxx and config.env["libgpsmm"]:
