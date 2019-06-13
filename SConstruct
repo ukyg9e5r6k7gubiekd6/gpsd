@@ -701,9 +701,9 @@ else:
     confdefs.append('#define GPSD_URL "%s"\n' % website)
 
     # needed for isfinite(), pselect(), etc.
-    posix = "2001112L"
+    posix = ""
     confdefs.append('#if !defined(_POSIX_C_SOURCE)')
-    confdefs.append('#define _POSIX_C_SOURCE %s' % posix)
+    confdefs.append('#define _POSIX_C_SOURCE 2001112L')
     confdefs.append('#endif\n')
     # for daemon(), cfmakeraw(), strsep() and setgroups()
     confdefs.append('#if !defined(_DEFAULT_SOURCE)')
