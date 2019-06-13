@@ -10,14 +10,6 @@
  * http://pubs.opengroup.org/onlinepubs/9699919799/functions/V2_chap02.html#tag_15_02_01_02 */
 #define _XOPEN_SOURCE 600
 
-#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L
-/* pselect() needs  _POSIX_C_SOURCE >= 200112L */
-#define  _POSIX_C_SOURCE 200112L
-#endif
-
-/* strlcpy() needs _DARWIN_C_SOURCE */
-#define _DARWIN_C_SOURCE
-
 #include "gpsd_config.h"  /* must be before all includes */
 
 #include <ctype.h>

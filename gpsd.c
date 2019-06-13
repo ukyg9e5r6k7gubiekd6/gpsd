@@ -16,11 +16,6 @@
 #define _BSD_SOURCE
 #endif /* __linux__ */
 
-/* vsnprintf() needs __DARWIN_C_LEVEL >= 200112L */
-#define __DARWIN_C_LEVEL 200112L
-/* strlcpy() needs _DARWIN_C_SOURCE */
-#define _DARWIN_C_SOURCE
-
 #include "gpsd_config.h"  /* must be before all includes */
 
 #include <arpa/inet.h>     /* for htons() and friends */

@@ -37,6 +37,8 @@
 
 #define CLIMB 3
 
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <netdb.h>
 #ifndef AF_UNSPEC
 #include <sys/types.h>

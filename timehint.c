@@ -14,10 +14,7 @@
 #define _XOPEN_SOURCE 500
 #endif /* __linux__ */
 
-/* snprintf() needs __DARWIN_C_LEVEL >= 200112L */
-#define __DARWIN_C_LEVEL 200112L
-/* snprintf() needs _DARWIN_C_SOURCE */
-#define _DARWIN_C_SOURCE
+#include "gpsd_config.h"  /* must be before all includes */
 
 #include <string.h>
 #include <libgen.h>

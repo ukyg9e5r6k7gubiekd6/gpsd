@@ -33,16 +33,16 @@
 #define  _POSIX_C_SOURCE 200112L
 #endif /* __linux__ */
 
-#include <time.h>               /* for time_t */
-#include "gpsd_config.h"
+#include "gpsd_config.h"  /* must be before all includes */
 
+#include <errno.h>
+#include <fcntl.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <errno.h>
 #include <string.h>
 #include <strings.h>
-#include <fcntl.h>
+#include <time.h>               /* for time_t */
 #ifdef HAVE_TERMIOS_H
 #include <termios.h>
 #endif /* HAVE_TERMIOS_H */

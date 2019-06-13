@@ -22,8 +22,6 @@
 #define  _POSIX_C_SOURCE 200112L
 #endif /* __linux__ */
 
-#define __DARWIN_C_LEVEL 900000L
-
 #include "gpsd_config.h"  /* must be before all includes */
 
 #include <time.h>

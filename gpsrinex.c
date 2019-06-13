@@ -61,19 +61,13 @@
  *
  */
 
-#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L
-/* isfinite() needs _POSIX_C_SOURCE >= 200112L
- * isnan(+Inf) is false, isfinite(+Inf) is false
- * use isfinite() to make sure a float is valid
- */
-#define _POSIX_C_SOURCE 200112L
-#endif
-
 #ifndef _XOPEN_SOURCE
 /* need >= 500 for strdup() */
 /* OpenBSD needs >= 600 for isfinite() */
 #define _XOPEN_SOURCE 600
 #endif
+
+#include "gpsd_config.h"  /* must be before all includes */
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -88,7 +82,6 @@
 #include <unistd.h>
 
 #include "gps.h"
-#include "gpsd_config.h"
 #include "gpsdclient.h"
 #include "revision.h"
 #include "os_compat.h"

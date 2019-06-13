@@ -466,9 +466,6 @@ if 'CCFLAGS' not in os.environ:
 # We are C99, tell the world
 # env.Append(CFLAGS=['-D_ISOC99_SOURCE'])
 
-# We are POSIX 2001, tell the world
-# env.Append(CFLAGS=['-D_POSIX_C_SOURCE=200112L'])
-
 # Cross-development
 
 devenv = (("ADDR2LINE", "addr2line"),
@@ -702,6 +699,16 @@ else:
     confdefs.append('#define VERSION "%s"\n' % gpsd_version)
 
     confdefs.append('#define GPSD_URL "%s"\n' % website)
+
+    # needed for isfinite(), pselect(), etc.
+    posix = "2001112L"
+    confdefs.append('#define _POSIX_C_SOURCE %s\n' % posix)
+    if sys.platform.startswith('darwin'):
+        # vsnprintf() needs __DARWIN_C_LEVEL >= 200112L
+        # snprintf() needs __DARWIN_C_LEVEL >= 200112L
+	confdefs.append('#define __DARWIN_C_LEVEL %s\n' % posix)
+        # strlcpy() needs __DARWIN_C_SOURCE
+	confdefs.append('#define _DARWIN_C_SOURCE 1\n')
 
     cxx = config.CheckCXX()
     if not cxx and config.env["libgpsmm"]:

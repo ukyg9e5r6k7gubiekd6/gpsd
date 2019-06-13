@@ -41,6 +41,8 @@
  * IF IBM IS APPRISED OF THE POSSIBILITY OF SUCH DAMAGES.
  */
 
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <stdlib.h>
 #include <sys/types.h>
 #include <ctype.h>

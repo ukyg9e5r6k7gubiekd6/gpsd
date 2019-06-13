@@ -13,6 +13,8 @@ PERMISSIONS
 
 ***************************************************************************/
 
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <stdio.h>
 #include <math.h>
 #include <string.h>

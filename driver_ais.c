@@ -22,9 +22,6 @@
 #define _XOPEN_SOURCE 500
 #endif /* __linux__ */
 
-/* strlcpy() needs _DARWIN_C_SOURCE */
-#define _DARWIN_C_SOURCE
-
 #include "gpsd_config.h"  /* must be before all includes */
 
 #include <stdlib.h>

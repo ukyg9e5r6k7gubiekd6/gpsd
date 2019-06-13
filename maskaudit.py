@@ -121,6 +121,8 @@ if __name__ == '__main__':
  * Try to write guards so it is only called at higher log levels.
  */
 
+#include \"gpsd_config.h\"  /* must be before all includes */
+
 #include <stdio.h>
 #include <string.h>
 

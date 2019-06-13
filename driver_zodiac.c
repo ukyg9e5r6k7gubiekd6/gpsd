@@ -10,11 +10,7 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L
-/* round() needs  _POSIX_C_SOURCE >= 200112L */
-#define  _POSIX_C_SOURCE 200112L
-#endif
-
+#include "gpsd_config.h"  /* must be before all includes */
 
 #include <stdio.h>
 #include <stdbool.h>

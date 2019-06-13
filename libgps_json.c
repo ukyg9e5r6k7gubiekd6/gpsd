@@ -14,13 +14,12 @@ PERMISSIONS
 
 ***************************************************************************/
 
-#if !defined(_POSIX_C_SOURCE) || _POSIX_C_SOURCE < 200112L
 /* isfinite() needs _POSIX_C_SOURCE >= 200112L
  * isnan(+Inf) is false, isfinite(+Inf) is false
  * use isfinite() to make sure a float is valid
  */
-#define _POSIX_C_SOURCE 200112L
-#endif
+
+#include "gpsd_config.h"  /* must be before all includes */
 
 #include <stdbool.h>
 #include <math.h>

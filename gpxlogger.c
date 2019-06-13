@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -16,7 +18,6 @@
 #include <unistd.h>
 
 #include "gps.h"
-#include "gpsd_config.h"
 #include "gpsdclient.h"
 #include "revision.h"
 #include "os_compat.h"

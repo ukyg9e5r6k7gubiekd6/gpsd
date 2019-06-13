@@ -89,6 +89,8 @@
 /* Minimum xsize to display 3rd window with DOPs, etc. */
 #define MIN_ERRWIN_SIZE 100
 
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -101,7 +103,6 @@
 #include <unistd.h>
 #include <ctype.h>
 
-#include "gpsd_config.h"
 #include "gps.h"
 #include "gps_json.h"   /* for GPS_JSON_RESPONSE_MAX */
 #include "compiler.h"   /* for UNUSED */
