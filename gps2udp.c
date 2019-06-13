@@ -14,27 +14,25 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <time.h>
-#include "gpsd_config.h"
-
+#include <arpa/inet.h>
+#include <assert.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <netdb.h>
+#include <netinet/in.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <errno.h>
 #include <string.h>
 #include <strings.h>
-#include <fcntl.h>
-#include <termios.h>
-#include <assert.h>
+#include <sys/select.h>
+#include <sys/socket.h>
+#include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/select.h>
+#include <termios.h>
+#include <time.h>
 #include <unistd.h>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <netdb.h>
 
 #include "gpsd.h"
 #include "gpsdclient.h"
