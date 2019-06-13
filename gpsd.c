@@ -21,6 +21,8 @@
 /* strlcpy() needs _DARWIN_C_SOURCE */
 #define _DARWIN_C_SOURCE
 
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <arpa/inet.h>     /* for htons() and friends */
 #include <assert.h>
 #include <ctype.h>

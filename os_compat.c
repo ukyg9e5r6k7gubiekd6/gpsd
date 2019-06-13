@@ -13,7 +13,9 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-#include "os_compat.h"	/* Includes gpsd_config.h */
+#include "gpsd_config.h"  /* must be before all includes */
+
+#include "os_compat.h"
 
 #ifndef HAVE_CLOCK_GETTIME
 

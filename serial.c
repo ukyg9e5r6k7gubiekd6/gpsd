@@ -6,6 +6,8 @@
 /* cfmakeraw() needs _DEFAULT_SOURCE */
 #define _DEFAULT_SOURCE
 
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>

@@ -10,6 +10,8 @@
 /* for vsnprintf() FreeBSD wants __ISO_C_VISIBLE >= 1999 */
 #define __ISO_C_VISIBLE 1999
 
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <stdio.h>
 #include <string.h>
 #include <math.h>

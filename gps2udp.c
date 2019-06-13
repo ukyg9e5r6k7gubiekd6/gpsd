@@ -24,6 +24,8 @@
 
 #define __DARWIN_C_LEVEL 900000L
 
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <time.h>
 #include "gpsd_config.h"
 

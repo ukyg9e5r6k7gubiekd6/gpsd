@@ -18,7 +18,7 @@
 /* strlcpy() needs _DARWIN_C_SOURCE */
 #define _DARWIN_C_SOURCE
 
-#include "gpsd_config.h"
+#include "gpsd_config.h"  /* must be before all includes */
 
 #include <ctype.h>
 #include <errno.h>

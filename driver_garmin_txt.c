@@ -107,6 +107,8 @@ invalid data.
 ***************************************************/
 
 
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <stdlib.h>
 #include <stdbool.h>
 #include <math.h>
