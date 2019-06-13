@@ -674,6 +674,8 @@ config = Configure(env, custom_tests={
     'CheckHeaderDefines': CheckHeaderDefines,
     'GetPythonValue': GetPythonValue})
 
+announce("This system is: %s" % sys.platform)
+
 if cleaning or helping:
     dbusflags = []
     rtlibs = []
