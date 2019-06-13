@@ -5,20 +5,16 @@
  *
  */
 
-/* sys/ipc.h needs _XOPEN_SOURCE, 500 means X/Open 1995 */
-#define _XOPEN_SOURCE 500
-
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <stdio.h>
-#include <string.h>     /* for memset() */
-#include <stdlib.h>
 #include <getopt.h>
 #include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>     /* for memset() */
 #include <unistd.h>
 
 #include "gps.h"	/* for safe_atof() */
-#include "gpsd_config.h"
 #include "ntpshm.h"
 #include "revision.h"
 #include "timespec.h"
