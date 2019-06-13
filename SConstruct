@@ -703,6 +703,8 @@ else:
     # needed for isfinite(), pselect(), etc.
     posix = "2001112L"
     confdefs.append('#define _POSIX_C_SOURCE %s\n' % posix)
+    # for sys/un.h
+    confdefs.append('#define __USE_MISC\n')
     if sys.platform.startswith('darwin'):
         # vsnprintf() needs __DARWIN_C_LEVEL >= 200112L
         # snprintf() needs __DARWIN_C_LEVEL >= 200112L

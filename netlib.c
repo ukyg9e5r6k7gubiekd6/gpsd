@@ -5,6 +5,8 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
+#define _DEFAULT_SOURCE 1
+
 #include <string.h>
 #include <fcntl.h>
 #ifdef HAVE_NETDB_H
