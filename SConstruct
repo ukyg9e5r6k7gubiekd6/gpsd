@@ -721,6 +721,7 @@ else:
         return ['!%s --cflags %s %s' % (env['PKG_CONFIG'], libs, pkg)]
 
     if sys.platform.startswith('freebsd'):
+        # required to get strlcpy(), and more, from string.h
         confdefs.append("#define __BSD_VISIBLE 1\n")
 
     # The actual distinction here is whether the platform has ncurses in the
