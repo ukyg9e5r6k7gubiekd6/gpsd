@@ -89,8 +89,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "gpsd_config.h"
-
 #if defined(HAVE_LIBUSB)
 #include <libusb.h>
 #endif
