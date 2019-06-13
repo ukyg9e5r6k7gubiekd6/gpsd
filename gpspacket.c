@@ -11,6 +11,9 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
+/* Python.h insists on setting _POSIX_C_SOURCE */
+#undef _POSIX_C_SOURCE
+
 #include <Python.h>
 
 #include <stdio.h>
