@@ -723,6 +723,8 @@ else:
         return ['!%s --cflags %s %s' % (env['PKG_CONFIG'], libs, pkg)]
 
     if sys.platform.startswith('freebsd'):
+        # required to define u_int in sys/time.h
+        confdefs.append("#define _BSD_SOURCE 1\n")
         # required to get strlcpy(), and more, from string.h
         confdefs.append("#define __BSD_VISIBLE 1\n")
 
