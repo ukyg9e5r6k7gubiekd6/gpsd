@@ -9,12 +9,13 @@
  * This file is Copyright (c) 2004-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <X11/IntrinsicP.h>
 #include <X11/StringDefs.h>
 #include <TachometerP.h>
 #include <math.h>
 
-#include "gpsd_config.h"
 #include "gps.h"
 
 #define D2R  0.0174532925199432957692369076848861271	/* radians = pi/180 */

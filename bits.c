@@ -10,6 +10,8 @@
  * The sbits() function assumes twos-complement arithmetic. ubits()
  * and sbits() assume no padding in integers.
  */
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <assert.h>
 #include <stdint.h>
 #include <stdbool.h>

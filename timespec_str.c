@@ -9,6 +9,8 @@
 
 #define _XOPEN_SOURCE 600
 
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <stdio.h>
 #include <time.h>
 #include <sys/time.h>

@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <limits.h>
 
 #include "driver_greis.h"

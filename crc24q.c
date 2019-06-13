@@ -26,6 +26,9 @@
  * This file is Copyright (c) 2008-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
+
+#include "gpsd_config.h"  /* must be before all includes */
+
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
