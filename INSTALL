@@ -428,7 +428,9 @@ want to access the development source.
 
 gpsd currently will NOT build, install or run on CentOS.
 
-Install the gcc compiler and tools.
+Install the gcc compiler and tools.  Install EPEL.
+
+Note: there is no EPEL for i386.
 
 Use their yum command to install git if you
 want to access the development source.
@@ -436,6 +438,8 @@ want to access the development source.
 --------------------------------------------------------------
 # yum group install "Development Tools" 
 # yum install git
+# yum install \
+   https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
 # git clone ssh://git@gitlab.com/gpsd/gpsd.git
 # cd gpsd
 --------------------------------------------------------------
