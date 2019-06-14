@@ -16,11 +16,11 @@ PERMISSIONS
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <stdio.h>
-#include <math.h>
 #include <assert.h>
-#include <string.h>
 #include <ctype.h>
+#include <math.h>
+#include <stdio.h>
+#include <string.h>       /* for strcat(), strlcpy() */
 
 #include "gpsd.h"
 #include "bits.h"
