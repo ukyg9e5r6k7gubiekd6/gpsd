@@ -9,13 +9,13 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
+#include <ctype.h>
+#include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
+#include <string.h>       /* for strlcpy() */
 #include <strings.h>
-#include <math.h>
-#include <ctype.h>
 #include <unistd.h>
 
 #include "gpsd.h"
