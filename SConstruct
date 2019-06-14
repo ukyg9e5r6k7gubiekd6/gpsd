@@ -741,15 +741,14 @@ else:
         confdefs.append('#define _GNU_SOURCE 1')
         confdefs.append('#endif\n')
     elif sys.platform.startswith('darwin'):
-        # vsnprintf() needs __DARWIN_C_LEVEL >= 200112L
-        # snprintf() needs __DARWIN_C_LEVEL >= 200112L
-        confdefs.append('#if !defined(__DARWIN_C_LEVEL)')
-        confdefs.append('#define __DARWIN_C_LEVEL _POSIX_C_SOURCE\n')
-        confdefs.append('#endif\n')
-        # strlcpy() needs __DARWIN_C_SOURCE
-        confdefs.append('#if !defined(_DAARWIN_C_SOURCE)')
+        # strlcpy() and SIGWINCH need _DARWIN_C_SOURCE
+        confdefs.append('#if !defined(_DARWIN_C_SOURCE)')
         confdefs.append('#define _DARWIN_C_SOURCE 1\n')
         confdefs.append('#endif\n')
+        # vsnprintf() needs __DARWIN_C_LEVEL >= 200112L
+        # snprintf() needs __DARWIN_C_LEVEL >= 200112L
+        # _DARWIN_C_SOURCE forces __DARWIN_C_LEVEL to 900000L
+        # see <sys/cdefs.h>
     elif sys.platform.startswith('freebsd'):
         # required to define u_int in sys/time.h
         confdefs.append('#if !defined(_BSD_SOURCE)')
