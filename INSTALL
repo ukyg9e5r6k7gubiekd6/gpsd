@@ -408,3 +408,19 @@ https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/
 
 You will need to dig deeper to make the PPS work, here is a good reference:
 http://www.satsignal.eu/ntp/Raspberry-Pi-NTP.html
+
+== Special Notes for FreeBSD Installation ==
+
+gpsd will build, install and run on FreeBSD.
+
+Use their pkg command to install scons, and optionally git if you
+want to access the development source.
+
+--------------------------------------------------------------
+# pkg install scons
+# pkg install git
+# clone ssh://git@gitlab.com/gpsd/gpsd.git
+# cd gpsd
+# scons --config=force && scons install
+--------------------------------------------------------------
+
