@@ -719,12 +719,17 @@ else:
     # 600 means X/Open 2004
     # Ubuntu and OpenBSD isfinite() needs 600
     # 700 means X/Open 2008
-    # Python.h wants 700
+    # Python.h wants 600 or 700
     confdefs.append('#if !defined(_XOPEN_SOURCE)')
     confdefs.append('#define _XOPEN_SOURCE 700')
     confdefs.append('#endif\n')
 
-    if sys.platform.startswith('darwin'):
+    if sys.platform.startswith('linux'):
+        # for cfmakeraw(), strsep(), etc. on CentOS 7
+        confdefs.append('#if !defined(_BSD_SOURCE)')
+        confdefs.append('#define _BSD_SOURCE')
+        confdefs.append('#endif\n')
+    elif sys.platform.startswith('darwin'):
         # vsnprintf() needs __DARWIN_C_LEVEL >= 200112L
         # snprintf() needs __DARWIN_C_LEVEL >= 200112L
         confdefs.append('#if !defined(__DARWIN_C_LEVEL)')
