@@ -424,14 +424,17 @@ want to access the development source.
 # scons --config=force && scons install
 --------------------------------------------------------------
 
-== Special Notes for CentOS Installation ==
+== Special Notes for CentOS 8 Installation ==
 
 gpsd currently will NOT build, install or run on CentOS.
+
+Install the gcc compiler and tools.
 
 Use their yum command to install git if you
 want to access the development source.
 
 --------------------------------------------------------------
+# yum group install "Development Tools" 
 # yum install git
 # git clone ssh://git@gitlab.com/gpsd/gpsd.git
 # cd gpsd
