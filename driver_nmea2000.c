@@ -9,28 +9,29 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
+#if defined(NMEA2000_ENABLE)
+
+#include <ctype.h>
+#include <fcntl.h>
+#include <linux/can.h>
+#include <linux/can/raw.h>
+#include <math.h>
+#include <net/if.h>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
-#include <stdarg.h>
-#include <ctype.h>
-#include <time.h>
-#include <math.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <sys/socket.h>
 #include <sys/ioctl.h>
-#include <net/if.h>
+#include <sys/socket.h>
+#include <time.h>
+#include <unistd.h>
 
 #include "gpsd.h"
 #include "libgps.h"
-#if defined(NMEA2000_ENABLE)
 #include "driver_nmea2000.h"
 #include "bits.h"
 
-#include <linux/can.h>
-#include <linux/can/raw.h>
 
 #define LOG_FILE 1
 #define NMEA2000_NETS 4
@@ -1738,4 +1739,8 @@ const struct gps_type_t driver_nmea2000 = {
 
 /* end */
 
+#else   /* of  defined(NMEA2000_ENABLE) */
+/* dummy variable to some old linkers do not commplain about empty
+ * object file */
+int nmea2000_dummy = 1;
 #endif /* of  defined(NMEA2000_ENABLE) */
