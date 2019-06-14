@@ -729,6 +729,7 @@ else:
     if sys.platform.startswith('linux'):
         # for cfmakeraw(), strsep(), etc. on CentOS 7
         # glibc 2.19 and before
+        # sets __USE_MISC
         confdefs.append('#if !defined(_BSD_SOURCE)')
         confdefs.append('#define _BSD_SOURCE')
         confdefs.append('#endif\n')
