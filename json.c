@@ -405,7 +405,8 @@ static int json_internal_read_object(const char *cp,
                     unsigned n;
 
 		    cp++;                   /* skip the 'u' */
-		    for (n = 0; n < 4 && isxdigit(*cp); n++)
+                    /* NetBSD 6 wants the cast */
+		    for (n = 0; n < 4 && isxdigit((int)*cp); n++)
 			uescape[n] = *cp++;
 		    uescape[n] = '\0';      /* terminate */
 		    --cp;

@@ -148,7 +148,8 @@ static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
         return 1;
     }
     for (i = 0; i < 6; i++) {
-        if (0 == isdigit(ddmmyy[i])) {
+        /* NetBSD 6 wants the cast */
+        if (0 == isdigit((int)ddmmyy[i])) {
             /* catches NUL and non-digits */
             /* Telit HE910 can set year to "-1" (1999 - 2000) */
 	    gpsd_log(&session->context->errout, LOG_WARN,
@@ -216,7 +217,8 @@ static int merge_hhmmss(char *hhmmss, struct gps_device_t *session)
         return 1;
     }
     for (i = 0; i < 6; i++) {
-        if (0 == isdigit(hhmmss[i])) {
+        /* NetBSD 6 wants the cast */
+        if (0 == isdigit((int)hhmmss[i])) {
             /* catches NUL and non-digits */
 	    gpsd_log(&session->context->errout, LOG_WARN,
 		     "merge_hhmmss(%s), malformed time\n",  hhmmss);
@@ -232,7 +234,8 @@ static int merge_hhmmss(char *hhmmss, struct gps_device_t *session)
     session->nmea.date.tm_sec = DD(hhmmss + 4);
 
     if ('.' == hhmmss[6] &&
-        0 != isdigit(hhmmss[7])) {
+        /* NetBSD 6 wants the cast */
+        0 != isdigit((int)hhmmss[7])) {
 	i = atoi(hhmmss + 7);
         sublen = strlen(hhmmss + 7);
 	session->nmea.subseconds = i / pow(10.0, sublen);
