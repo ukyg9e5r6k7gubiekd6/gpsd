@@ -39,22 +39,23 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <netdb.h>
+#include <arpa/inet.h>
+#include <errno.h>
+#include <math.h>
+#include <netdb.h>        /* for gethostbyname() */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+
 #ifndef AF_UNSPEC
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #endif /* AF_UNSPEC */
 #ifndef INADDR_ANY
 #include <netinet/in.h>
 #endif /* INADDR_ANY */
-#include <arpa/inet.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <errno.h>
-#include <stdio.h>
 
 #include "gps.h"
 #include "gpsdclient.h"
