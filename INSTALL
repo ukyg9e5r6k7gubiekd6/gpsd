@@ -433,7 +433,7 @@ want to access the development source.
 
 --------------------------------------------------------------
 # yum install git
-# clone ssh://git@gitlab.com/gpsd/gpsd.git
+# git clone ssh://git@gitlab.com/gpsd/gpsd.git
 # cd gpsd
 --------------------------------------------------------------
 
