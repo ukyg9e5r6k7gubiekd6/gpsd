@@ -706,8 +706,10 @@ else:
     confdefs.append('#define _POSIX_C_SOURCE 2001112L')
     confdefs.append('#endif\n')
     # for daemon(), cfmakeraw(), strsep() and setgroups()
+    # on glibc 2.19+
+    # may also be added by pkg_config
     confdefs.append('#if !defined(_DEFAULT_SOURCE)')
-    confdefs.append('#define _DEFAULT_SOURCE 1')
+    confdefs.append('#define _DEFAULT_SOURCE')
     confdefs.append('#endif\n')
     # for sys/un.h
     confdefs.append('#if !defined(__USE_MISC)')
@@ -726,6 +728,7 @@ else:
 
     if sys.platform.startswith('linux'):
         # for cfmakeraw(), strsep(), etc. on CentOS 7
+        # glibc 2.19 and before
         confdefs.append('#if !defined(_BSD_SOURCE)')
         confdefs.append('#define _BSD_SOURCE')
         confdefs.append('#endif\n')
