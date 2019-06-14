@@ -5,8 +5,6 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-/* need this for strnlen() and struct ifreq */
-
 #include "gpsd_config.h"  /* must be before all includes */
 
 #if defined(NMEA2000_ENABLE)

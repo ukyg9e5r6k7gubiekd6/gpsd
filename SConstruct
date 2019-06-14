@@ -701,9 +701,10 @@ else:
     confdefs.append('#define GPSD_URL "%s"\n' % website)
 
     # needed for isfinite(), pselect(), etc.
-    posix = ""
+    # for strnlen() before glibc 2.10
+    # glibc 2.10+ needs 200908L (or XOPEN 700+) for strnlen()
     confdefs.append('#if !defined(_POSIX_C_SOURCE)')
-    confdefs.append('#define _POSIX_C_SOURCE 2001112L')
+    confdefs.append('#define _POSIX_C_SOURCE 200809L')
     confdefs.append('#endif\n')
     # for daemon(), cfmakeraw(), strsep() and setgroups()
     # on glibc 2.19+
@@ -721,6 +722,7 @@ else:
     # 600 means X/Open 2004
     # Ubuntu and OpenBSD isfinite() needs 600
     # 700 means X/Open 2008
+    # glibc 2.10+ needs 700+ for strnlen()
     # Python.h wants 600 or 700
     confdefs.append('#if !defined(_XOPEN_SOURCE)')
     confdefs.append('#define _XOPEN_SOURCE 700')
@@ -732,6 +734,11 @@ else:
         # sets __USE_MISC
         confdefs.append('#if !defined(_BSD_SOURCE)')
         confdefs.append('#define _BSD_SOURCE')
+        confdefs.append('#endif\n')
+	# for strnlen() and struct ifreq
+        # glibc before 2.10
+        confdefs.append('#if !defined(_GNU_SOURCE)')
+        confdefs.append('#define _GNU_SOURCE 1')
         confdefs.append('#endif\n')
     elif sys.platform.startswith('darwin'):
         # vsnprintf() needs __DARWIN_C_LEVEL >= 200112L
