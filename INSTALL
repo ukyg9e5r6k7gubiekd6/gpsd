@@ -419,8 +419,23 @@ want to access the development source.
 --------------------------------------------------------------
 # pkg install scons
 # pkg install git
-# clone ssh://git@gitlab.com/gpsd/gpsd.git
+# git clone ssh://git@gitlab.com/gpsd/gpsd.git
 # cd gpsd
 # scons --config=force && scons install
 --------------------------------------------------------------
+
+== Special Notes for CentOS Installation ==
+
+gpsd currently will NOT build, install or run on CentOS.
+
+Use their yum command to install git if you
+want to access the development source.
+
+--------------------------------------------------------------
+# yum install git
+# clone ssh://git@gitlab.com/gpsd/gpsd.git
+# cd gpsd
+--------------------------------------------------------------
+
+Past that, I am lost....
 
