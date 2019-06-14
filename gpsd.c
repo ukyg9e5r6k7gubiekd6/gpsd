@@ -8,12 +8,12 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <arpa/inet.h>     /* for htons() and friends */
+#include <arpa/inet.h>    /* for htons() and friends */
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <grp.h>
+#include <grp.h>          /* for setgroups() */
 #include <math.h>
 #include <netdb.h>
 #include <pthread.h>
@@ -22,16 +22,17 @@
 #include <signal.h>
 #include <stdarg.h>
 #include <stdbool.h>
-#include <stdint.h>		/* for uint32_t, etc. */
+#include <stdint.h>	  /* for uint32_t, etc. */
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <string.h>       /* for strlcat(), strcpy(), etc. */
 #include <syslog.h>
+#include <sys/param.h>    /* for setgroups() */
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/un.h>
 #include <time.h>
-#include <unistd.h>
+#include <unistd.h>       /* for setgroups() */
 
 #ifndef AF_UNSPEC
 #include <sys/socket.h>
