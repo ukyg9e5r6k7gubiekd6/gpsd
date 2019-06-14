@@ -424,7 +424,7 @@ want to access the development source.
 # scons --config=force && scons install
 --------------------------------------------------------------
 
-== Special Notes for CentOS 8 Installation ==
+== Special Notes for CentOS 7 Installation ==
 
 gpsd currently will NOT build, install or run on CentOS.
 
