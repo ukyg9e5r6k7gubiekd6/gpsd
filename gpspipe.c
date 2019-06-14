@@ -43,7 +43,7 @@
 #include <sys/socket.h>
 #endif /* HAVE_SYS_SOCKET_H */
 #ifdef HAVE_TERMIOS_H
-#include <termios.h>
+#include <termios.h>            /* for cfmakeraw() on some OS */
 #endif /* HAVE_TERMIOS_H */
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
