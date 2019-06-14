@@ -7,17 +7,17 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
+#include <assert.h>
+#include <errno.h>
+#include <signal.h>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <stdarg.h>
-#include <errno.h>
-#include <assert.h>
-#include <signal.h>
-#include <time.h>
-#include <sys/time.h>
+#include <string.h>       /* for strlcat() and strlcpy() */
 #include <sys/select.h>
+#include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "gpsd.h"
