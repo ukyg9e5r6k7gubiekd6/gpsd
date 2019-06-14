@@ -823,6 +823,14 @@ else:
         confdefs.append("/* #undef HAVE_LIBRT */\n")
         rtlibs = []
 
+    # FreeBSD uses -lthr for pthreads
+    if config.CheckLib('libthr'):
+        confdefs.append("#define HAVE_LIBTHR 1\n")
+        # System library - no special flags
+        rtlibs += ["-lthr"]
+    else:
+        confdefs.append("/* #undef HAVE_LIBTHR */\n")
+
     if config.env['dbus_export'] and config.CheckPKG('dbus-1'):
         confdefs.append("#define HAVE_DBUS 1\n")
         dbusflags = pkg_config("dbus-1")
