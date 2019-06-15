@@ -426,13 +426,13 @@ want to access the development source.
 
 == Special Notes for CentOS 7 Installation ==
 
-gpsd currently will NOT build, install or run on CentOS.
+gpsd currently will build, install and run on CentOS 7.
 
 Install the gcc compiler and tools.  Install EPEL.
 
 Note: there is no EPEL for i386.
 
-Use their yum command to install git if you
+Use the yum command to install git if you
 want to access the development source.
 
 --------------------------------------------------------------
@@ -440,9 +440,13 @@ want to access the development source.
 # yum install git
 # yum install \
    https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm
-# git clone ssh://git@gitlab.com/gpsd/gpsd.git
+# yum install scons
+# yum install python-devel
+# yum install ncurses-devel
+# yum install pps-tools-devel
+# git clone https://gitlab.com/gpsd/gpsd.git
 # cd gpsd
+# scons
 --------------------------------------------------------------
 
-Past that, I am lost....
 
