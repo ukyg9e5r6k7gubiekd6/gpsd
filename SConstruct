@@ -735,7 +735,7 @@ else:
         confdefs.append('#if !defined(_BSD_SOURCE)')
         confdefs.append('#define _BSD_SOURCE')
         confdefs.append('#endif\n')
-	# for strnlen() and struct ifreq
+        # for strnlen() and struct ifreq
         # glibc before 2.10
         confdefs.append('#if !defined(_GNU_SOURCE)')
         confdefs.append('#define _GNU_SOURCE 1')
@@ -749,8 +749,8 @@ else:
         # snprintf() needs __DARWIN_C_LEVEL >= 200112L
         # _DARWIN_C_SOURCE forces __DARWIN_C_LEVEL to 900000L
         # see <sys/cdefs.h>
-    elif sys.platform.startswith('freebsd') or
-         sys.platform.startswith('openbsd'):
+    elif (sys.platform.startswith('freebsd') or
+          sys.platform.startswith('openbsd')):
         # required to define u_int in sys/time.h
         confdefs.append('#if !defined(_BSD_SOURCE)')
         confdefs.append("#define _BSD_SOURCE 1\n")
@@ -763,7 +763,6 @@ else:
         confdefs.append('#if !defined(_NEBSD_SOURCE)')
         confdefs.append("#define _NETBSD_SOURCE 1\n")
         confdefs.append('#endif\n')
-
 
     cxx = config.CheckCXX()
     if not cxx and config.env["libgpsmm"]:
@@ -1705,7 +1704,7 @@ Platform: UNKNOWN
 env.Command(target="packet_names.h", source="packet_states.h",
             action="""
     rm -f $TARGET &&\
-    sed -e '/^ *\([A-Z][A-Z0-9_]*\),/s//   \"\\1\",/' <$SOURCE >$TARGET &&\
+    sed -e '/^ *\\([A-Z][A-Z0-9_]*\\),/s//   \"\\1\",/' <$SOURCE >$TARGET &&\
     chmod a-w $TARGET""")
 
 # timebase.h - always built in order to include current GPS week
