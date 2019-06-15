@@ -749,7 +749,8 @@ else:
         # snprintf() needs __DARWIN_C_LEVEL >= 200112L
         # _DARWIN_C_SOURCE forces __DARWIN_C_LEVEL to 900000L
         # see <sys/cdefs.h>
-    elif sys.platform.startswith('freebsd'):
+    elif sys.platform.startswith('freebsd') or
+         sys.platform.startswith('openbsd'):
         # required to define u_int in sys/time.h
         confdefs.append('#if !defined(_BSD_SOURCE)')
         confdefs.append("#define _BSD_SOURCE 1\n")
