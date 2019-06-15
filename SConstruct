@@ -703,6 +703,8 @@ else:
     # needed for isfinite(), pselect(), etc.
     # for strnlen() before glibc 2.10
     # glibc 2.10+ needs 200908L (or XOPEN 700+) for strnlen()
+    # on newer glibc _DEFAULT_SOURCE resets _POSIX_C_SOURCE
+    # we set it just in case
     confdefs.append('#if !defined(_POSIX_C_SOURCE)')
     confdefs.append('#define _POSIX_C_SOURCE 200809L')
     confdefs.append('#endif\n')
@@ -712,10 +714,9 @@ else:
     confdefs.append('#if !defined(_DEFAULT_SOURCE)')
     confdefs.append('#define _DEFAULT_SOURCE')
     confdefs.append('#endif\n')
-    # for sys/un.h
-    confdefs.append('#if !defined(__USE_MISC)')
-    confdefs.append('#define __USE_MISC\n')
-    confdefs.append('#endif\n')
+
+    # sys/un.h, and more, needs __USE_MISC
+    # __USE_MISC is set by _DEFAULT_SOURCE or _BSD_SOURCE
 
     # 500 means X/Open 1995
     # getsid(), isascii(), nice(), putenv(), strdup(), sys/ipc.h need 500
@@ -736,7 +737,7 @@ else:
         confdefs.append('#define _BSD_SOURCE')
         confdefs.append('#endif\n')
         # for strnlen() and struct ifreq
-        # glibc before 2.10
+        # glibc before 2.10, deprecated in 2.10+
         confdefs.append('#if !defined(_GNU_SOURCE)')
         confdefs.append('#define _GNU_SOURCE 1')
         confdefs.append('#endif\n')
