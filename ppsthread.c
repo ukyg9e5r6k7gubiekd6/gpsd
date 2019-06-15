@@ -255,7 +255,7 @@ static int init_kernel_pps(struct inner_context_t *inner_context)
 	/* Note: this ioctl() requires root, and device is a tty */
 	if ( 0 > ioctl(pps_thread->devicefd, TIOCSETD, &ldisc)) {
 	    char errbuf[BUFSIZ] = "unknown error";
-	    strerror_r(errno, errbuf, sizeof(errbuf));
+	    (void)strerror_r(errno, errbuf, sizeof(errbuf));
 	    pps_thread->log_hook(pps_thread, THREAD_INF,
 				 "KPPS:%s cannot set PPS line discipline %s\n",
 				 pps_thread->devicename, errbuf);
