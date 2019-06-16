@@ -761,7 +761,7 @@ else:
         confdefs.append("#define __BSD_VISIBLE 1\n")
         confdefs.append('#endif\n')
     elif sys.platform.startswith('netbsd'):
-        confdefs.append('#if !defined(_NEBSD_SOURCE)')
+        confdefs.append('#if !defined(_NETBSD_SOURCE)')
         confdefs.append("#define _NETBSD_SOURCE 1\n")
         confdefs.append('#endif\n')
 
