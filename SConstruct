@@ -463,9 +463,6 @@ if 'CCFLAGS' not in os.environ:
     else:
         env.Append(CCFLAGS=['-O2'])
 
-# We are C99, tell the world
-# env.Append(CFLAGS=['-D_ISOC99_SOURCE'])
-
 # Cross-development
 
 devenv = (("ADDR2LINE", "addr2line"),
