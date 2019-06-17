@@ -167,15 +167,13 @@ try to compute the value from the skyview.</para>
 	<entry>numeric</entry>
         <entry>Estimated climb error in meters per second. Present
         if consecutive 3D fixes.</entry>
-        </entry>
 </row>
 <row>
 	<entry>epd</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Estimated track (direction) error in degrees. Present if
-        sonsecutive 2D fixes.</entry>
-        </entry>
+        consecutive 2D fixes.</entry>
 </row>
 <row>
 	<entry>eph</entry>
