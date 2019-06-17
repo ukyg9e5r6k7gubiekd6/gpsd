@@ -9,7 +9,7 @@ SPDX-License-Identifier: BSD-2-clause
 <!ENTITY gpsdsock	 "/var/run/gpsd.sock">
 ]>
 <refentry id='gpsd_json.5'>
-<refentryinfo><date>23 Mar 2019</date></refentryinfo>
+<refentryinfo><date>23 June 2019</date></refentryinfo>
 <refmeta>
 <refentrytitle>gpsd_json</refentrytitle>
 <manvolnum>5</manvolnum>
@@ -91,6 +91,14 @@ before optional fields that may be absent when there is no fix. Error
 estimates will be emitted after the fix components they're associated with.
 Others may be reported or not depending on the fix quality.</para>
 
+<para>All error estimates (epc, epd, epe, eph, ept, epv, epx, epy)
+are assumed to be 95% confidence, may also be 50%, one sigma, or two
+sigma confidence.  Many GPS do not specify a confidence level.  No
+GPS specifies how the value is calculated.  Use error estimates with
+caution, and only as relative "goodness" indicators.  If the GPS reports
+a value to gpsd, then gpsd will report that value.  Otherwise gpsd will
+try to compute the value from the skyview.</para>
+
 <table frame="all" pgwide="0"><title>TPV object</title>
 <tgroup cols="3" align="left" colsep="1" rowsep="1">
 <thead>
@@ -158,8 +166,7 @@ Others may be reported or not depending on the fix quality.</para>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Estimated climb error in meters per second. Present
-        if consecutive 3D fixes.
-        Assumed to be 95% confidence, but many GPS do not specify.
+        if consecutive 3D fixes.</entry>
         </entry>
 </row>
 <row>
@@ -167,8 +174,7 @@ Others may be reported or not depending on the fix quality.</para>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Estimated track (direction) error in degrees. Present if
-        sonsecutive 2D fixes.
-        Assumed to be 95% confidence, but many GPS do not specify.
+        sonsecutive 2D fixes.</entry>
         </entry>
 </row>
 <row>
@@ -178,24 +184,21 @@ Others may be reported or not depending on the fix quality.</para>
         <entry>Estimated horizontal Position (2D) Error in meters.
         Also known as Estimated Position Error (epe). Present
         if mode is 2D or 3D and DOPs can be calculated from the satellite
-        view. Assumed to be 95% confidence, but many GPS do not specify.
-        </entry>
+        view.</entry>
+</row>
+<row>
+	<entry>eps</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Estimated speed error in meters per second.  Present
+        for consecutive 2D or 3D fixes.</entry>
 </row>
 <row>
 	<entry>ept</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Estimated timestamp error (%f, seconds, 95% confidence).
+        <entry>Estimated timestamp error in seconds.
         Present if time is present.</entry>
-</row>
-<row>
-	<entry>epv</entry>
-	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Estimated vertical error in meters. Present
-        if mode is 3 and DOPs can be calculated from the satellite
-        view. Assumed to be 95% confidence, but many GPS do not specify.
-        </entry>
 </row>
 <row>
 	<entry>epx</entry>
@@ -203,8 +206,7 @@ Others may be reported or not depending on the fix quality.</para>
 	<entry>numeric</entry>
         <entry>Longitude error estimate in meters. Present
         if mode is 2D or 3D and DOPs can be calculated from the satellite
-        view. Assumed to be 95% confidence, but many GPS do not specify.
-        </entry>
+        view.</entry>
 </row>
 <row>
 	<entry>epy</entry>
@@ -212,8 +214,7 @@ Others may be reported or not depending on the fix quality.</para>
 	<entry>numeric</entry>
         <entry>Latitude error estimate in meters. Present
         if mode is 2 or 3 and DOPs can be calculated from the satellite
-        view. Assumed to be 95% confidence, but many GPS do not specify.
-        </entry>
+        view.</entry>
 </row>
 <row>
 	<entry>epv</entry>
@@ -221,17 +222,7 @@ Others may be reported or not depending on the fix quality.</para>
 	<entry>numeric</entry>
         <entry>Estimated vertical error in meters. Present
         if mode is 3 and DOPs can be calculated from the satellite
-        view. Assumed to be 95% confidence, but many GPS do not specify.
-        </entry>
-</row>
-<row>
-	<entry>eps</entry>
-	<entry>No</entry>
-	<entry>numeric</entry>
-        <entry>Estimated speed error in meters per second.  Present
-        for consecutive 2D or 3D fixes.
-        Assumed to be 95% confidence, but many GPS do not specify.
-        </entry>
+        view.</entry>
 </row>
 <row>
 	<entry>lat</entry>
