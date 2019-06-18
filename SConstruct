@@ -1903,6 +1903,13 @@ if tiocmiwait:
     })
 
 all_manpages = list(base_manpages.keys())
+# for some reason these don't get cleaned. Probably due to being python
+other_manpages = [
+                  "man/gegps.1",
+                  "man/xgps.1",
+                  "man/xgpsspeed.1",
+                  ]
+
 if python_manpages:
     all_manpages += list(python_manpages.keys())
 
@@ -2658,7 +2665,7 @@ Utility('udev-test', '', ['$SRCDIR/gpsd -N -n -F /var/run/gpsd.sock -D 5', ])
 # Dummy target for cleaning misc files
 clean_misc = env.Alias('clean-misc')
 # Since manpage targets are disabled in clean mode, we cover them here
-env.Clean(clean_misc, all_manpages)
+env.Clean(clean_misc, all_manpages + other_manpages)
 # Clean compiled Python
 env.Clean(clean_misc,
           glob.glob('*.pyc') + glob.glob('gps/*.pyc') + ['gps/__pycache__'])
