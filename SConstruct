@@ -2739,6 +2739,8 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
 
     # How to build a tarball.
     # some OS (FreeBSD) set $TAR to gtar
+    # this fails on osX as their tar does not support --transform
+    # on osX install gnutar and use it instead
     dist = env.Command('dist', distfiles, [
         '@${TAR} --transform "s:^:gpsd-${VERSION}/:S" '
         ' -czf gpsd-${VERSION}.tar.gz $SOURCES',
