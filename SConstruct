@@ -58,6 +58,9 @@ gpsd_version = "3.19-dev"
 libgps_version_current = 25
 libgps_version_revision = 0
 libgps_version_age = 0
+libgps_version_soname = libgps_version_current - libgps_version_age
+libgps_version = "%d.%d.%d" % (libgps_version_soname, libgps_version_age,
+                               libgps_version_revision)
 
 # Release identification ends here
 
@@ -673,16 +676,17 @@ config = Configure(env, custom_tests={
 # Use print, rather than announce, so we see it in -s mode.
 print("This system is: %s" % sys.platform)
 
+gpslib_flags = []
 if cleaning or helping:
-    dbusflags = []
-    rtlibs = []
-    usbflags = []
     bluezflags = []
-    ncurseslibs = []
     confdefs = []
-    manbuilder = False
+    dbusflags = []
     htmlbuilder = False
+    manbuilder = False
+    ncurseslibs = []
+    rtlibs = []
     tiocmiwait = True  # For cleaning, which works on any OS
+    usbflags = []
 else:
 
     # OS X aliases gcc to clang
@@ -749,6 +753,9 @@ else:
         # snprintf() needs __DARWIN_C_LEVEL >= 200112L
         # _DARWIN_C_SOURCE forces __DARWIN_C_LEVEL to 900000L
         # see <sys/cdefs.h>
+        gpslib_flags = ["-Wl,-current_version,%s" % libgps_version,
+                        "-Wl,-compatibility_version,%s" % libgps_version]
+
     elif (sys.platform.startswith('freebsd') or
           sys.platform.startswith('openbsd')):
         # required to define u_int in sys/time.h
@@ -1231,10 +1238,6 @@ if env['coveraging'] and env['python_coverage'] and not (cleaning or helping):
 
 # Two shared libraries provide most of the code for the C programs
 
-libgps_version_soname = libgps_version_current - libgps_version_age
-libgps_version = "%d.%d.%d" % (libgps_version_soname, libgps_version_age,
-                               libgps_version_revision)
-
 libgps_sources = [
     "ais_json.c",
     "bits.c",
@@ -1337,7 +1340,7 @@ compiled_gpslib = Library(env=env,
                           target="gps",
                           sources=libgps_sources,
                           version=libgps_version,
-                          parse_flags=rtlibs)
+                          parse_flags=rtlibs + gpslib_flags)
 env.Clean(compiled_gpslib, "gps_maskdump.c")
 
 static_gpslib = env.StaticLibrary("gps_static",
