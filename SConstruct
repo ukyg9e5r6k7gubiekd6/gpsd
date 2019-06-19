@@ -2738,8 +2738,9 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     env.Clean(zip, ["gpsd-${VERSION}.zip", "packaging/rpm/gpsd.spec"])
 
     # How to build a tarball.
+    # some OS (FreeBSD) set $TAR to gtar
     dist = env.Command('dist', distfiles, [
-        '@tar --transform "s:^:gpsd-${VERSION}/:S" '
+        '@${TAR} --transform "s:^:gpsd-${VERSION}/:S" '
         ' -czf gpsd-${VERSION}.tar.gz $SOURCES',
         '@ls -l gpsd-${VERSION}.tar.gz',
     ])
@@ -2750,7 +2751,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
 
     # Make sure build-from-tarball works.
     testbuild = Utility('testbuild', [dist], [
-        'tar -xzvf gpsd-${VERSION}.tar.gz',
+        '${TAR} -xzvf gpsd-${VERSION}.tar.gz',
         'cd gpsd-${VERSION}; scons',
         'rm -fr gpsd-${VERSION}',
     ])
