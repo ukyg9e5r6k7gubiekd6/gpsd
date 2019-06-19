@@ -753,6 +753,8 @@ else:
         # snprintf() needs __DARWIN_C_LEVEL >= 200112L
         # _DARWIN_C_SOURCE forces __DARWIN_C_LEVEL to 900000L
         # see <sys/cdefs.h>
+
+        # set internal lib versions at link time.
         gpslib_flags = ["-Wl,-current_version,%s" % libgps_version,
                         "-Wl,-compatibility_version,%s" % libgps_version]
 
@@ -1238,6 +1240,7 @@ if env['coveraging'] and env['python_coverage'] and not (cleaning or helping):
 
 # Two shared libraries provide most of the code for the C programs
 
+# gpsd client library
 libgps_sources = [
     "ais_json.c",
     "bits.c",
@@ -1261,6 +1264,7 @@ libgps_sources = [
 if env['libgpsmm']:
     libgps_sources.append("libgpsmm.cpp")
 
+# gpsd server library
 libgpsd_sources = [
     "bsd_base64.c",
     "crc24q.c",
@@ -1330,8 +1334,11 @@ else:
                                  SHLIBVERSION=version)
 
     def LibraryInstall(env, libdir, sources, version):
+	# FIXME: osX lib name s/b ibgps.VV.dylib
+        # where VV is libgps_version_current
         inst = env.InstallVersionedLib(libdir, sources, SHLIBVERSION=version)
         if env["osx_lib_tool"]:
+            # FIXME: broken with $DESTDIR
             toolcmd = '%s -id $TARGET $TARGET' % env["osx_lib_tool"]
             env.AddPostAction(inst, toolcmd)
         return inst
