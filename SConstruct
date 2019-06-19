@@ -2720,6 +2720,9 @@ env.Command('TAGS', sources, ['etags ' + " ".join(sources)])
 
 if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     distfiles = _getoutput(r"git ls-files | grep -v '^www/'").split()
+    # for some reason distfiles is now a mix of byte strings and char strings
+    distfiles = [polystr(d) for d in distfiles]
+
     if ".gitignore" in distfiles:
         distfiles.remove(".gitignore")
     distfiles += generated_sources
