@@ -183,16 +183,19 @@ GPSD Time Service HOWTO in the distribution or on the web.
 
 == Special Notes for OS X Installation ==
 
-gpsd will build, install and run on OS X.  The easiest way to do so is
-to first install the MacPorts package.  Follow their install procedure
-at: http://www.macports.org/install.php
+gpsd will build, install and run on OS X (osX).  The easiest way to
+do so is to first install the MacPorts package.  Follow their install
+procedure at: http://www.macports.org/install.php
 
-Then use their port command to install scons, and optionally git if you
-want to access the development source.
+Then use their port command to install scons.  Optionally git if you
+want to access the development source.  Optionally install libxslt and
+xmlto to build the documentation.
 
 --------------------------------------------------------------
 # port install scons
 # port install git
+# port install libxslt
+# port install xmlto
 --------------------------------------------------------------
 
 While running gpsd, or scons check, you may run out of shared memory
