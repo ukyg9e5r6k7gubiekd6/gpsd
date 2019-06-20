@@ -50,7 +50,7 @@ import time
 
 from gps import *
 
-gps_version = '3.19-dev'
+gps_version = '3.19~dev'
 if gps.__version__ != gps_version:
     sys.stderr.write("webgps.py: ERROR: need gps module version %s, got %s\n" %
                      (gps_version, gps.__version__))

@@ -26,7 +26,7 @@ __author__ = "Niccolo Rigacci"
 __copyright__ = "Copyright 2018 Niccolo Rigacci <niccolo@rigacci.org>"
 __license__ = "BSD-2-clause"
 __email__ = "niccolo@rigacci.org"
-__version__ = "3.19-dev"
+__version__ = "3.19~dev"
 
 
 # ------------------------------------------------------------------------
