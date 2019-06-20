@@ -287,19 +287,24 @@ for (name, default, help) in pathopts:
 # Environment creation
 #
 import_env = (
+    # Variables used by programs invoked during the build
     "DISPLAY",         # Required for dia to run under scons
     "GROUPS",          # Required by gpg
     "HOME",            # Required by gpg
     "LOGNAME",         # LOGNAME is required for the flocktest production.
-    "MACOSX_DEPLOYMENT_TARGET",  # Required by MacOSX 10.4 and probably earlier
     'PATH',            # Required for ccache and Coverity scan-build
-    # Pass more environment variables to pkg-config (required for crossbuilds)
+    'CCACHE_DIR',      # Required for ccache
+    'CCACHE_RECACHE',  # Required for ccache (probably there are more)
+    # pkg-config (required for crossbuilds at least, and probably pkgsrc)
     'PKG_CONFIG_LIBDIR',
-    'PKG_CONFIG_PATH',  # Set .pc file directory in a crossbuild
-    # Pass more environment variables to pkg-config (required for crossbuilds)
+    'PKG_CONFIG_PATH',
     'PKG_CONFIG_SYSROOT_DIR',
-    'STAGING_DIR',     # Required by the OpenWRT and CeroWrt builds.
-    'STAGING_PREFIX',  # Required by the OpenWRT and CeroWrt builds.
+    # Variables for specific packaging/build systems
+    "MACOSX_DEPLOYMENT_TARGET", # MacOSX 10.4 (and probably earlier)
+    'STAGING_DIR',     		# OpenWRT and CeroWrt
+    'STAGING_PREFIX',  		# OpenWRT and CeroWrt
+    'CWRAPPERS_CONFIG_DIR',	# pkgsrc
+    # Variables used in testing
     'WRITE_PAD',       # So we can test WRITE_PAD values on the fly.
 )
 
