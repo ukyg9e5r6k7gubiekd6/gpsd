@@ -58,8 +58,7 @@ gpsd_version = "3.19-dev"
 libgps_version_current = 25
 libgps_version_revision = 0
 libgps_version_age = 0
-libgps_version_soname = libgps_version_current - libgps_version_age
-libgps_version = "%d.%d.%d" % (libgps_version_soname, libgps_version_age,
+libgps_version = "%d.%d.%d" % (libgps_version_current, libgps_version_age,
                                libgps_version_revision)
 
 # Release identification ends here
