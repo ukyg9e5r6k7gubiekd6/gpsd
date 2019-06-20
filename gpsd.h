@@ -1045,13 +1045,20 @@ PRINTF_FUNC(3, 4) void gpsd_log(const struct gpsd_errout_t *, const int, const c
 
 #define NITEMS(x) ((int) (sizeof(x) / sizeof(x[0]) + COMPILE_CHECK_IS_ARRAY(x)))
 
-/* Ugh - required for build on Solaris */
+/*
+ * C99 requires NAN to be defined if the implementation supports quiet
+ * NANs.  At one point, it seems Solaris did not define NAN; it is not
+ * clear if this is still true.
+ */
 #ifndef NAN
 #define NAN (0.0f/0.0f)
 #endif
 
-/* Cygwin, in addition to NAN, doesn't have cfmakeraw */
-#if defined(__CYGWIN__)
+#if defined(__CYGWIN__) || defined(__sun)
+/*
+ * POSIX does not specify cfmakeraw, but it is pretty common.  We
+ * provide an implementation in serial.c for systems that lack it.
+ */
 void cfmakeraw(struct termios *);
 #endif /* defined(__CYGWIN__) */
 

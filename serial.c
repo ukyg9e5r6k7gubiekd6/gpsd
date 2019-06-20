@@ -172,8 +172,11 @@ void gpsd_tty_init(struct gps_device_t *session)
     session->reawake = (time_t)0;
 }
 
-#if defined(__CYGWIN__)
-/* Workaround for Cygwin, which is missing cfmakeraw */
+#if defined(__CYGWIN__) || defined(__sun)
+/*
+ * Local implementation of cfmakeraw (which is not specified by
+ * POSIX; see matching declaration in gpsd.h).
+ */
 /* Pasted from man page; added in serial.c arbitrarily */
 void cfmakeraw(struct termios *termios_p)
 {
