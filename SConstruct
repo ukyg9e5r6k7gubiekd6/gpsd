@@ -708,6 +708,7 @@ else:
 
     confdefs.append('#define GPSD_URL "%s"\n' % website)
 
+    # \todo Move these into an if block only on systems with glibc.
     # needed for isfinite(), pselect(), etc.
     # for strnlen() before glibc 2.10
     # glibc 2.10+ needs 200908L (or XOPEN 700+) for strnlen()
@@ -723,9 +724,13 @@ else:
     confdefs.append('#define _DEFAULT_SOURCE')
     confdefs.append('#endif\n')
 
+    # \todo This comment appears to be about Linux; clarify.
     # sys/un.h, and more, needs __USE_MISC
     # __USE_MISC is set by _DEFAULT_SOURCE or _BSD_SOURCE
 
+    # \todo Many of these are now specified by POSIX.  Check if
+    # defining _XOPEN_SOURCE is necessary, and limit to systems where
+    # it is.
     # 500 means X/Open 1995
     # getsid(), isascii(), nice(), putenv(), strdup(), sys/ipc.h need 500
     # 600 means X/Open 2004
@@ -762,7 +767,6 @@ else:
         # set internal lib versions at link time.
         gpslib_flags = ["-Wl,-current_version,%s" % libgps_version,
                         "-Wl,-compatibility_version,%s" % libgps_version]
-
     elif (sys.platform.startswith('freebsd') or
           sys.platform.startswith('openbsd')):
         # required to define u_int in sys/time.h
@@ -774,6 +778,8 @@ else:
         confdefs.append("#define __BSD_VISIBLE 1\n")
         confdefs.append('#endif\n')
     elif sys.platform.startswith('netbsd'):
+        # required because _XOPEN_SOURCE above restricts visibility of
+        # all things not defined by XOPEN
         confdefs.append('#if !defined(_NETBSD_SOURCE)')
         confdefs.append("#define _NETBSD_SOURCE 1\n")
         confdefs.append('#endif\n')
