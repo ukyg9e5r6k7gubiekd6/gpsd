@@ -3,7 +3,7 @@
 # Important targets:
 #
 # build      - build the software (default)
-# dist       - make distribution tarball
+# dist       - make distribution tarball (requires GNU tar)
 # install    - install programs, libraries, and manual pages
 # uninstall  - undo an install
 #
@@ -2759,9 +2759,11 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     env.Clean(zip, ["gpsd-${VERSION}.zip", "packaging/rpm/gpsd.spec"])
 
     # How to build a tarball.
-    # some OS (FreeBSD) set $TAR to gtar
-    # this fails on osX as their tar does not support --transform
-    # on osX install gnutar and use it instead
+    # The command assume the non-portable GNU tar extension
+    # "--transform", and will thus fail if ${TAR} is not GNU tar.
+    # scons in theory has code to cope with this, but in practice this
+    # is not working.  On BSD-derived systems, install GNU tar and
+    # pass TAR=gtar in the environment.
     dist = env.Command('dist', distfiles, [
         '@${TAR} --transform "s:^:gpsd-${VERSION}/:S" '
         ' -czf gpsd-${VERSION}.tar.gz $SOURCES',
