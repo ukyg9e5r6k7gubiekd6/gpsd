@@ -724,8 +724,7 @@ else:
     confdefs.append('#define _DEFAULT_SOURCE')
     confdefs.append('#endif\n')
 
-    # TODO: This comment appears to be about glibc; clarify.
-    # sys/un.h, and more, needs __USE_MISC
+    # sys/un.h, and more, needs __USE_MISC with glibc and osX
     # __USE_MISC is set by _DEFAULT_SOURCE or _BSD_SOURCE
 
     # TODO: Many of these are now specified by POSIX.  Check if
