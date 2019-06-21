@@ -52,6 +52,8 @@ from leapsecond import conditional_leapsecond_fetch
 
 # Release identification begins here
 # Keep in sync with gps/__init__.py
+# There are about 15 files with copies of the version number; make
+# sure to update all of them.
 gpsd_version = "3.19~dev"
 
 # client library version
