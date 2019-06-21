@@ -313,10 +313,10 @@ import_env = (
     'PKG_CONFIG_PATH',
     'PKG_CONFIG_SYSROOT_DIR',
     # Variables for specific packaging/build systems
-    "MACOSX_DEPLOYMENT_TARGET", # MacOSX 10.4 (and probably earlier)
-    'STAGING_DIR',     		# OpenWRT and CeroWrt
-    'STAGING_PREFIX',  		# OpenWRT and CeroWrt
-    'CWRAPPERS_CONFIG_DIR',	# pkgsrc
+    "MACOSX_DEPLOYMENT_TARGET",  # MacOSX 10.4 (and probably earlier)
+    'STAGING_DIR',               # OpenWRT and CeroWrt
+    'STAGING_PREFIX',            # OpenWRT and CeroWrt
+    'CWRAPPERS_CONFIG_DIR',      # pkgsrc
     # Variables used in testing
     'WRITE_PAD',       # So we can test WRITE_PAD values on the fly.
 )
@@ -1356,7 +1356,7 @@ else:
                                  SHLIBVERSION=version)
 
     def LibraryInstall(env, libdir, sources, version):
-	# FIXME: osX lib name s/b ibgps.VV.dylib
+        # FIXME: osX lib name s/b ibgps.VV.dylib
         # where VV is libgps_version_current
         inst = env.InstallVersionedLib(libdir, sources, SHLIBVERSION=version)
         if env["osx_lib_tool"]:
