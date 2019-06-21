@@ -694,7 +694,7 @@ config = Configure(env, custom_tests={
 # Use print, rather than announce, so we see it in -s mode.
 print("This system is: %s" % sys.platform)
 
-gpslib_flags = []
+libgps_flags = []
 if cleaning or helping:
     bluezflags = []
     confdefs = []
@@ -777,7 +777,7 @@ else:
         # see <sys/cdefs.h>
 
         # set internal lib versions at link time.
-        gpslib_flags = ["-Wl,-current_version,%s" % libgps_version,
+        libgps_flags = ["-Wl,-current_version,%s" % libgps_version,
                         "-Wl,-compatibility_version,%s" % libgps_version]
     elif (sys.platform.startswith('freebsd') or
           sys.platform.startswith('openbsd')):
@@ -1365,14 +1365,14 @@ else:
             env.AddPostAction(inst, toolcmd)
         return inst
 
-compiled_gpslib = Library(env=env,
-                          target="gps",
-                          sources=libgps_sources,
-                          version=libgps_version,
-                          parse_flags=rtlibs + gpslib_flags)
-env.Clean(compiled_gpslib, "gps_maskdump.c")
+libgps_shared = Library(env=env,
+                        target="gps",
+                        sources=libgps_sources,
+                        version=libgps_version,
+                        parse_flags=rtlibs + libgps_flags)
+env.Clean(libgps_shared, "gps_maskdump.c")
 
-static_gpslib = env.StaticLibrary("gps_static",
+libgps_static = env.StaticLibrary("gps_static",
                                   [env.StaticObject(s)
                                    for s in libgps_sources], rtlibs)
 
@@ -1382,7 +1382,7 @@ static_gpsdlib = env.StaticLibrary(
             for s in libgpsd_sources],
     parse_flags=usbflags + bluezflags)
 
-libraries = [compiled_gpslib]
+libraries = [libgps_shared]
 
 # Only attempt to create the qt library if we have shared turned on
 # otherwise we have a mismash of objects in library
@@ -1990,7 +1990,7 @@ headerinstall = [env.Install(installdir('includedir'), x)
 binaryinstall = []
 binaryinstall.append(env.Install(installdir('sbindir'), sbin_binaries))
 binaryinstall.append(env.Install(installdir('bindir'), bin_binaries))
-binaryinstall.append(LibraryInstall(env, installdir('libdir'), compiled_gpslib,
+binaryinstall.append(LibraryInstall(env, installdir('libdir'), libgps_shared,
                                     libgps_version))
 # Work around a minor bug in InstallSharedLib() link handling
 env.AddPreAction(binaryinstall, 'rm -f %s/libgps.*' % (installdir('libdir'), ))
