@@ -50,19 +50,31 @@ import SCons
 
 from leapsecond import conditional_leapsecond_fetch
 
-# Release identification begins here
+# Release identification begins here.
+#
+# Actual releases follow the normal X.Y or X.Y.Z scheme.  The version
+# number in git between releases has the form X.Y~dev, when it is
+# expected that X.Y will be the next actual release.  As an example,
+# when 3.18.1 is the last release, and 3.19 is the expected next
+# release, the version in git will be 3.19~dev.  Note that ~ is used,
+# because there is some precedent, ~ is an allowed version number in
+# the Debian version rules, and it does not cause confusion with
+# whether - separates components of the package name, separates the
+# name from the version, or separates version componnents.
+#
 # Keep in sync with gps/__init__.py
 # There are about 15 files with copies of the version number; make
 # sure to update all of them.
+#
+# package version
 gpsd_version = "3.19~dev"
-
 # client library version
 libgps_version_current = 25
 libgps_version_revision = 0
 libgps_version_age = 0
 libgps_version = "%d.%d.%d" % (libgps_version_current, libgps_version_age,
                                libgps_version_revision)
-
+#
 # Release identification ends here
 
 # Hosting information (mainly used for templating web pages) begins here
