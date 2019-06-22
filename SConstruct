@@ -2658,9 +2658,6 @@ if env['systemd']:
 
     env.AlwaysBuild(systemd_uninstall)
     env.Precious(systemd_uninstall)
-
-
-if env['systemd']:
     hotplug_wrapper_install = []
 else:
     hotplug_wrapper_install = [
