@@ -375,7 +375,7 @@ static void oncore_update(void)
 	if (utc_offset != (unsigned char)0)
 	    (void)mvwprintw(Bowin, 2, 2, "GPS%+4d", utc_offset);
 	else
-	    (void)mvwprintw(Bowin, 2, 2, "unknown", utc_offset);
+	    (void)mvwprintw(Bowin, 2, 2, "unknown");
     }
 
 	monitor_log("Bo =");
