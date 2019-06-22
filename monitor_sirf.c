@@ -374,12 +374,15 @@ static void sirf_update(void)
 	break;
 
     case 0x07:			/* Response - Clock Status Data */
-	display(mid7win, 1, 5, "%2d", getub(buf, 7));	/* SVs */
-	display(mid7win, 1, 16, "%lu", getbeu32(buf, 8));	/* Clock ppstimes */
-	display(mid7win, 1, 29, "%lu", getbeu32(buf, 12));	/* Clock Bias */
-	display(mid7win, 2, 11, "%lu", getbeu32(buf, 16));	/* Estimated Time */
-	monitor_log("CSD 0x07=");
-	break;
+        display(mid7win, 1, 5, "%2d", getub(buf, 7));	/* SVs */
+        /* Clock ppstimes */
+        display(mid7win, 1, 16, "%u", (unsigned)getbeu32(buf, 8));
+        display(mid7win, 1, 29, "%u", (unsigned)getbeu32(buf, 12));
+        /* Clock Bias */
+        display(mid7win, 2, 11, "%u", (unsigned)getbeu32(buf, 16));
+        /* Estimated Time */
+        monitor_log("CSD 0x07=");
+        break;
 
     case 0x08:			/* 50 BPS data */
 	ch = (int)getub(buf, 1);
