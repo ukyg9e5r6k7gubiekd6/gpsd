@@ -778,7 +778,9 @@ else:
 
         # set internal lib versions at link time.
         libgps_flags = ["-Wl,-current_version,%s" % libgps_version,
-                        "-Wl,-compatibility_version,%s" % libgps_version]
+                        "-Wl,-compatibility_version,%s" % libgps_version,
+                        "-Wl,-install_name,%s/$TARGET" %
+                        installdir('libdir', add_destdir=False)]
     elif (sys.platform.startswith('freebsd') or
           sys.platform.startswith('openbsd')):
         # required to define u_int in sys/time.h
@@ -1122,15 +1124,6 @@ else:
 # OSX needs to set the ID for installed shared libraries.  See if this is OSX
 # and whether we have the tool.
 
-if sys.platform.startswith('darwin'):
-    try:
-        config.env["osx_lib_tool"] = config.CheckProg('install_name_tool')
-    except AttributeError:
-        # Just assume it's there if old SCons
-        config.env["osx_lib_tool"] = 'install_name_tool'
-else:
-    config.env["osx_lib_tool"] = None
-
 # Set up configuration for target Python
 
 PYTHON_LIBDIR_CALL = 'sysconfig.get_python_lib()'
@@ -1356,13 +1349,9 @@ else:
                                  SHLIBVERSION=version)
 
     def LibraryInstall(env, libdir, sources, version):
-        # FIXME: osX lib name s/b ibgps.VV.dylib
+        # note: osX lib name s/b libgps.VV.dylib
         # where VV is libgps_version_current
         inst = env.InstallVersionedLib(libdir, sources, SHLIBVERSION=version)
-        if env["osx_lib_tool"]:
-            # FIXME: broken with $DESTDIR
-            toolcmd = '%s -id $TARGET $TARGET' % env["osx_lib_tool"]
-            env.AddPostAction(inst, toolcmd)
         return inst
 
 libgps_shared = Library(env=env,
