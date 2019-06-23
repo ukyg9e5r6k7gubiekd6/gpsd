@@ -190,8 +190,8 @@ http://qt.nokia.com/doc/4.6/platform-specific.html for platform
 specific building documentation
 
 For working with DBUS, you'll need the DBUS development
-headers and libraries installed.  Under Debian/Ubuntu these
-are the packages libdbus-1-dev and libdbus-glib-1-dev.
+headers and libraries installed.  Under Debian/Ubuntu this
+is the package libdbus-1-dev.
 
 Under Ubuntu, the ncurses package you want is libncurses5-dev.  Under
 Fedora, it's ncurses-devel.  Depending on how your distribution
