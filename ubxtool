@@ -6827,7 +6827,7 @@ def usage():
           '       -e E          enable E\n'
           '       -f F          open F as file/device\n'
           '                     default: %s\n'
-          '       -g G          get config item G\n'
+          '       -g I          get config item I\n'
           '       -h            print help, increase -v for extra help\n'
           '       -i P          port (interface ) for UBX-CFG-PRT\n'
           '       -m M          optional mode to -p P\n'
@@ -6845,8 +6845,8 @@ def usage():
           '       -V            print version\n'
           '       -v V          Set verbosity level to V, 0 to 4\n'
           '                     default: %s\n'
-          '       -x X          delete config item X\n'
-          '       -z Z,z        set config item Z to z\n'
+          '       -x I          delete config item I\n'
+          '       -z I,v        set config item I to v\n'
           '       -?            print help\n'
           '\n' %
           (PROG_NAME, opts['input_file_name'],
