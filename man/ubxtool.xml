@@ -8,7 +8,7 @@ BSD terms apply: see the file COPYING in the distribution root for details.
    "http://www.oasis-open.org/docbook/xml/4.1.2/docbookx.dtd">
 <refentry id='ubxtool.1'>
  <refentryinfo>
-  <date>24 Sep 2018</date>
+  <date>26 Jun 2019</date>
  </refentryinfo>
  <refmeta>
   <refentrytitle>ubxtool</refentrytitle>
@@ -24,16 +24,13 @@ BSD terms apply: see the file COPYING in the distribution root for details.
   <cmdsynopsis>
    <command>ubxtool</command>
    <arg choice='opt'>-? </arg>
-   <arg choice='opt'>-c <replaceable>command</replaceable>
-   </arg>
-   <arg choice='opt'>-d <replaceable>disable</replaceable>
-   </arg>
-   <arg choice='opt'>-e <replaceable>enable</replaceable>
-   </arg>
-   <arg choice='opt'>-f <replaceable>file/device</replaceable>
-   </arg>
+   <arg choice='opt'>-c <replaceable>command</replaceable> </arg>
+   <arg choice='opt'>-d <replaceable>disable</replaceable> </arg>
+   <arg choice='opt'>-e <replaceable>enable</replaceable> </arg>
+   <arg choice='opt'>-f <replaceable>file/device</replaceable> </arg>
+   <arg choice='opt'>-g <replaceable>item</replaceable> </arg>
    <arg choice='opt'>-h </arg>
-   <arg choice='opt'>-i <replaceable>interface</replaceable></arg>
+   <arg choice='opt'>-i <replaceable>port</replaceable></arg>
    <arg choice='opt'>-m <replaceable>mode</replaceable></arg>
    <arg choice='opt'>-P <replaceable>protver</replaceable></arg>
    <arg choice='opt'>-p <replaceable>preset</replaceable></arg>
@@ -44,6 +41,8 @@ BSD terms apply: see the file COPYING in the distribution root for details.
    <arg choice='opt'>-V </arg>
    <arg choice='opt'>-v <replaceable>verbosity</replaceable></arg>
    <arg choice='opt'>-w <replaceable>wait</replaceable></arg>
+   <arg choice='opt'>-x <replaceable>item</replaceable> </arg>
+   <arg choice='opt'>-z <replaceable>item,val</replaceable> </arg>
    <arg choice='opt'>[server[:port[:device]]]</arg>
   </cmdsynopsis>
  </refsynopsisdiv>
