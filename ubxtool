@@ -93,14 +93,14 @@ opts = {
     'input_speed': 9600,
     # default input wait time -w in seconds
     'input_wait': 2.0,
-    # interface for port-related commands
-    'interface': None,
     # optional mode to -p P
     'mode': None,
     # the name of an OAF file, extension .jpo
     'oaf_name': None,
     # poll command -p
     'poll': None,
+    # port for port-related commands
+    'port': None,
     # protocol version for sent commands
     # u-blox 5, firmware 4 to 6 is protver 10 to 12
     # u-blox 6, firmware 6 to 7 is protver 12 to 13
@@ -6107,7 +6107,7 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
 
     def send_cfg_prt(self):
         """UBX-CFG-PRT, get I/O Port settings"""
-        port = opts['interface']
+        port = opts['port']
         if port is None:
             m_data = bytearray()
         else:
@@ -6116,7 +6116,7 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
 
     def send_set_speed(self, speed):
         """"UBX-CFG-PRT, set port"""
-        port = opts['interface']
+        port = opts['port']
         # FIXME!  Determine and use current port as default
         if port is None:
             port = 1  # Default to port 1 (UART/UART_1)
@@ -6829,7 +6829,7 @@ def usage():
           '                     default: %s\n'
           '       -g G          get config item G\n'
           '       -h            print help, increase -v for extra help\n'
-          '       -i I          interface (port) for UBX-CFG-PRT\n'
+          '       -i P          port (interface ) for UBX-CFG-PRT\n'
           '       -m M          optional mode to -p P\n'
           '       -P P          Protocol version for sending commands\n'
           '                     default: %s\n'
@@ -6910,7 +6910,7 @@ for (opt, val) in options:
         opts['help'] = True
     elif opt == '-i':
         valnum = gps_model.port_id_map.get(val.upper())
-        opts['interface'] = valnum if valnum is not None else int(val)
+        opts['port'] = valnum if valnum is not None else int(val)
     elif opt == '-m':
         opts['mode'] = int(val)
     elif opt == '-P':
