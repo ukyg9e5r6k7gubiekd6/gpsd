@@ -6820,8 +6820,9 @@ gps_model = ubx()
 
 def usage():
     """Ouput usage information, and exit"""
-    print('usage: %s [-c C] [-f F] [-r] [-p P] [-s S] [-v V]\n'
-          '               [-hV?] [-S S]\n'
+    print('usage: %s [OPTION] ... [[server[:port[:device]]]]\n\n'
+          '   Options:\n'
+          '       -?            print help, increase -v for extra help\n'
           '       -c C          send raw command C (cls,id...) to GPS\n'
           '       -d D          disable D\n'
           '       -e E          enable E\n'
@@ -6842,7 +6843,7 @@ def usage():
           '                     default: %s bps\n'
           '       -V            print version\n'
           '       -v V          Set verbosity level to V, 0 to 4\n'
-          '                     default: %s\n'
+          '                     default: %d\n'
           '       -w W          wait time W before exiting\n'
           '                     default: %s seconds\n'
           '       -x I          delete config item I\n'
