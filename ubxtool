@@ -6834,7 +6834,7 @@ def usage():
           '       -m M          optional mode to -p P\n'
           '       -P P          Protocol version for sending commands\n'
           '                     default: %s\n'
-          '       -p P          send a prepackaged query P to GPS\n'
+          '       -p P          send a preset query P to GPS\n'
           '       -R R          save raw data from GPS in file R\n'
           '                     default: %s\n'
           '       -r            open file/device read only\n'
