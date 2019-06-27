@@ -186,6 +186,13 @@ Requires the pyserial module.
     </listitem>
    </varlistentry>
    <varlistentry>
+    <term>-g ITEM</term>
+    <listitem>
+     <para>Get the value of ITEM from the GPS.  See the section on
+     CONFIGURATION ITEMS</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
     <term>-h</term>
     <listitem>
      <para>Makes <application>ubxtool</application> print
@@ -193,9 +200,9 @@ a usage message and exit.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
-    <term>-i interface</term>
+    <term>-i port</term>
     <listitem>
-     <para>Specifies interface (port) for port-related commands.
+     <para>Specifies port (interface) for port-related commands.
 </para>
     </listitem>
    </varlistentry>
@@ -209,35 +216,23 @@ a usage message and exit.</para>
    <varlistentry>
     <term>-P protver</term>
     <listitem>
-     <para>Sets the protocol version to use for sending commands.  Minimum
-10 (ublox 5).  Maximum 27 (u-blox 9)
-</para>
+     <para>Sets the protocol version to use for sending commands.
+Minimum 10 (ublox 5).  Maximum 29 (u-blox 9).  Use <application>"ubxtool
+-p MON-VER"</application> to see the version your GPS supports. </para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>-p PRESET</term>
     <listitem>
      <para>Send a preset command the GPS.  Accepts one parameter, PRESET,
-the name of the command to send.  <application>ubxtool</application> will exit
-after the GPS acknowledges the command, unless the -W is given.
+the name of the command to send.  Only the common PRESETS are shown here.
+To see the full list run <application>ubxtool -h -v 2</application>.
 </para>
      <variablelist>
-      <varlistentry>
-       <term>ANT</term>
-       <listitem>
-        <para>Poll the antenna configuration (UBX-CFG-ANT).</para>
-       </listitem>
-      </varlistentry>
       <varlistentry>
        <term>COLDBOOT</term>
        <listitem>
         <para>Coldboot the GPS (UBX-CFG-RST).</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>GNSS</term>
-       <listitem>
-        <para>Poll the enabled constellations (UBX-CFG-GNSS).</para>
        </listitem>
       </varlistentry>
       <varlistentry>
@@ -254,39 +249,9 @@ after the GPS acknowledges the command, unless the -W is given.
        </listitem>
       </varlistentry>
       <varlistentry>
-       <term>NAV5</term>
-       <listitem>
-        <para>Poll the Nav Engines Settings (UBX-CFG-NAV5).</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>NAVX5</term>
-       <listitem>
-        <para>Poll the Nav Engines Expert Settings (UBX-CFG-NAVX5).</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
        <term>PMS</term>
        <listitem>
-        <para>Poll power management settings (UBX-CFG-PMS).</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>PRT</term>
-       <listitem>
-        <para>Poll I/O port settings (UBX-CFG-PRT).</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>RESET</term>
-       <listitem>
-        <para>Reset config to defaults (UBX-CFG-CFG).</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>RXM-RAWX</term>
-       <listitem>
-        <para>Poll UBX-RXM-RAWX message.</para>
+        <para>Set power management settings (UBX-CFG-PMS).</para>
        </listitem>
       </varlistentry>
       <varlistentry>
@@ -302,43 +267,7 @@ after the GPS acknowledges the command, unless the -W is given.
        </listitem>
       </varlistentry>
       <varlistentry>
-       <term>SBAS</term>
-       <listitem>
-        <para>Poll SBAS settings (UBX-CFG-SBAS).</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>SVIN</term>
-       <listitem>
-        <para>Poll survey in data (UBX-CFG-SVIN).</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>TMODE2</term>
-       <listitem>
-        <para>Poll Time Mode 2 configuration (UBX-CFG-TMODE2).</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>TP</term>
-       <listitem>
-        <para>Poll time pulse timedata (UBX-TIM-TP).</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>TP5</term>
-       <listitem>
-        <para>Get Time Pulse decodes (UBX-TIM-TP5).</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>USB</term>
-       <listitem>
-        <para>Poll USB config (UBX-CFG-USB).</para>
-       </listitem>
-      </varlistentry>
-      <varlistentry>
-       <term>VER</term>
+       <term>MON-VER</term>
        <listitem>
         <para>Poll GPS version (UBX-MON-VER).</para>
        </listitem>
@@ -373,7 +302,7 @@ after the GPS acknowledges the command, unless the -W is given.
    <varlistentry>
     <term>-s SPEED</term>
     <listitem>
-     <para>Set local serial port speed to SPEED bps. Default 115,200 bps.</para>
+     <para>Set local serial port speed to SPEED bps. Default 9,600 bps.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -392,8 +321,21 @@ after the GPS acknowledges the command, unless the -W is given.
    <varlistentry>
     <term>-w WAIT</term>
     <listitem>
-     <para>Wait for WAIT seconds before exiting.  Will exit early on command
-completion of -d, -e or -p command, unless -W is given.  Default 2.0 second.</para>
+     <para>Wait for WAIT seconds before exiting.  Default 2.0 second.</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-x ITEM</term>
+    <listitem>
+     <para>Delete the value of ITEM from the GPS.  Returning to the
+GPS default for that item.  See the section on CONFIGURATION ITEMS</para>
+    </listitem>
+   </varlistentry>
+   <varlistentry>
+    <term>-z ITEM,VAL</term>
+    <listitem>
+     <para>Set the value of ITEM to VAL in the GPS.  See the section on
+CONFIGURATION ITEMS</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -421,6 +363,10 @@ a usage message and exit.</para>
     </listitem>
    </varlistentry>
   </variablelist>
+ </refsect1>
+ <refsect1 id='configitems'>
+  <title>CONFIGURATION ITEMS</title>
+  <para>TBD.</para>
  </refsect1>
  <refsect1 id='environment'>
   <title>ENVIRONMENT</title>
