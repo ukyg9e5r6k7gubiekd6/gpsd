@@ -128,6 +128,12 @@ GBS, GGA, GSA, GGL, GST, GSV, RMC, VTG, and ZDA.</para>
        </listitem>
       </varlistentry>
       <varlistentry>
+       <term>PPS</term>
+       <listitem>
+        <para>Disable TIMEPULSE 0.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
        <term>RAWX</term>
        <listitem>
         <para>Disable sending of the UBX-RXM-RAWX messages.</para>
@@ -140,9 +146,15 @@ GBS, GGA, GSA, GGL, GST, GSV, RMC, VTG, and ZDA.</para>
        </listitem>
       </varlistentry>
       <varlistentry>
-       <term>TMODE2</term>
+       <term>SFRBX</term>
        <listitem>
-        <para>Disable sending TMODE2.</para>
+        <para>Disable use of the SFRBX messages.</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
+       <term>SURVEYIN</term>
+       <listitem>
+        <para>Disable survey-in mode with TMODE2.</para>
        </listitem>
       </varlistentry>
       <varlistentry>
