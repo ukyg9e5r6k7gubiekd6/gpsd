@@ -55,7 +55,7 @@ If you do not have a u-blox GPS then can stop reading now.</para>
 To understand <application>ubxtool</application> you must first be familiar
 with your u-blox GPS and the documentation for the u-blox binary protocol.
 The u-blox protocol varies greatly depending on GPS model and firmware
-revision.
+revision.  Use the u-blox documentation for your model and firmware.
 </para>
   <para>
    <application>ubxtool</application> can decode common u-blox binary
@@ -68,6 +68,13 @@ running gpsd instance.</para>
   <title>OPTIONS</title>
   <para>The program accepts the following options:</para>
   <variablelist remap='TP'>
+   <varlistentry>
+    <term>-?</term>
+    <listitem>
+     <para>Makes <application>ubxtool</application> print
+a usage message and exit.</para>
+    </listitem>
+   </varlistentry>
    <varlistentry>
     <term>-c COMMAND</term>
     <listitem>
@@ -297,7 +304,8 @@ options.</para>
    <varlistentry>
     <term>-R RAW</term>
     <listitem>
-     <para>Save all raw data from the GPS into the file RAW.</para>
+     <para>Save all raw serial data received from the GPS into the
+     file RAW.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -334,7 +342,7 @@ options.</para>
    <varlistentry>
     <term>-w WAIT</term>
     <listitem>
-     <para>Wait for WAIT seconds before exiting.  Default 2.0 second.</para>
+     <para>Wait for WAIT seconds before exiting.  Default 2 seconds.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -349,13 +357,6 @@ GPS default for that item.  See the section on CONFIGURATION ITEMS</para>
     <listitem>
      <para>Set the value of ITEM to VAL in the GPS.  See the section on
 CONFIGURATION ITEMS</para>
-    </listitem>
-   </varlistentry>
-   <varlistentry>
-    <term>-?</term>
-    <listitem>
-     <para>Makes <application>ubxtool</application> print
-a usage message and exit.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -379,12 +380,21 @@ a usage message and exit.</para>
  </refsect1>
  <refsect1 id='configitems'>
   <title>CONFIGURATION ITEMS</title>
-  <para>TBD.</para>
- </refsect1>
- <refsect1 id='environment'>
-  <title>ENVIRONMENT</title>
-  <para>Options can be placed in the UBXOPTS environment variable.
-UBXOPTS is processed before the CLI options.</para>
+  <para>Configuring u-blox GPS with the traditional configuration
+messages is fraught with problems.  Many configuration messages
+interact in odd ways.  Something as simple as changing the serial
+port speed requires you to read the curent configuration using
+UBX-CFG-PRT for the proper port, merging in the change, the
+writing back the changed UBX-CFG-PRT message.  Or just guessing
+at the current configuration and overwriting it all.</para>
+  <para>The u-blox 9 series, protocol version 27+, tries, but does
+not completely succeed, to solve the problem with Configuration
+Items.  If your GPS does not support protocol version 27+, then
+this section does not apply to you.</para>
+  <para>Most of the configuration variables in the GPS have been
+assigned a 32-bit Key ID.  Each Key ID has been assigned a Key Name.
+Over 600 Key Names are supported by ubxtool.  To see them all do:
+"ubxtool -h -v 3".  Each Key references one specific value.</para>
  </refsect1>
  <refsect1 id='examples'>
   <title>EXAMPLES</title>
@@ -417,6 +427,11 @@ ubxtool -w 5 server
 </programlisting>
   </para>
  </refsect1>
+ <refsect1 id='environment'>
+  <title>ENVIRONMENT</title>
+  <para>Options can be placed in the UBXOPTS environment variable.
+UBXOPTS is processed before the CLI options.</para>
+ </refsect1>
  <refsect1 id='see_also'>
   <title>SEE ALSO</title>
   <para>
@@ -425,37 +440,29 @@ u-blox documentation for the u-blox binary protocol.
 <ulink url="https://www.u-blox.com/en/product-resources"></ulink></para>
   <para>
    <citerefentry>
-    <refentrytitle>gpsd</refentrytitle>
-    <manvolnum>8</manvolnum>
-   </citerefentry>,
-<citerefentry>
-    <refentrytitle>gps</refentrytitle>
-    <manvolnum>1</manvolnum>
-   </citerefentry>,
-<citerefentry>
     <refentrytitle>cgps</refentrytitle>
     <manvolnum>1</manvolnum>
    </citerefentry>,
-<citerefentry>
-    <refentrytitle>xgps</refentrytitle>
-    <manvolnum>1</manvolnum>
-   </citerefentry>,
-<citerefentry>
-    <refentrytitle>gpsfake</refentrytitle>
-    <manvolnum>1</manvolnum>
-   </citerefentry>,
-<citerefentry>
-    <refentrytitle>gpsctl</refentrytitle>
-    <manvolnum>1</manvolnum>
-   </citerefentry>,
-<citerefentry>
+   <citerefentry>
     <refentrytitle>gpscat</refentrytitle>
     <manvolnum>1</manvolnum>
    </citerefentry>,
-<citerefentry>
-    <refentrytitle>gnuplot</refentrytitle>
+   <citerefentry>
+    <refentrytitle>gpsctl</refentrytitle>
     <manvolnum>1</manvolnum>
-   </citerefentry>.
+   </citerefentry>,
+   <citerefentry>
+    <refentrytitle>gpsfake</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+   <citerefentry>
+    <refentrytitle>xgps</refentrytitle>
+    <manvolnum>1</manvolnum>
+   </citerefentry>,
+   <citerefentry>
+    <refentrytitle>gpsd</refentrytitle>
+    <manvolnum>8</manvolnum>
+   </citerefentry>,
 </para>
  </refsect1>
  <refsect1 id='maintainer'>
