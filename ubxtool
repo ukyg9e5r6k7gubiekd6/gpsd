@@ -6840,11 +6840,11 @@ def usage():
           '       -S S          set GPS speed to S\n'
           '       -s S          set port speed to S\n'
           '                     default: %s bps\n'
-          '       -w W          wait time W before exiting\n'
-          '                     default: %s seconds\n'
           '       -V            print version\n'
           '       -v V          Set verbosity level to V, 0 to 4\n'
           '                     default: %s\n'
+          '       -w W          wait time W before exiting\n'
+          '                     default: %s seconds\n'
           '       -x I          delete config item I\n'
           '       -z I,v        set config item I to v\n'
           '       -?            print help\n'
@@ -6921,8 +6921,17 @@ for (opt, val) in options:
             opts['protver'] = 27
     elif opt == '-p':
         opts['poll'] = val
+    elif opt in '-R':
+        # raw log file
+        opts['raw_file'] = val
     elif opt == '-r':
         opts['read_only'] = True
+    elif opt in '-S':
+        opts['set_speed'] = int(val)
+        if opts['set_speed'] not in gps_model.speeds:
+            sys.stderr.write('%s: -S invalid speed %s\n' %
+                             (PROG_NAME, opts['set_speed']))
+            sys.exit(1)
     elif opt == '-s':
         try:
             opts['input_speed'] = int(val)
@@ -6936,24 +6945,14 @@ for (opt, val) in options:
                              (PROG_NAME, opts['input_speed']))
             sys.exit(1)
 
-    elif opt == '-w':
-        opts['input_wait'] = float(val)
-    elif opt in '-v':
-        opts['verbosity'] = int(val)
-    elif opt in '-R':
-        # raw log file
-        opts['raw_file'] = val
-    elif opt in '-S':
-        opts['set_speed'] = int(val)
-        if opts['set_speed'] not in gps_model.speeds:
-            sys.stderr.write('%s: -S invalid speed %s\n' %
-                             (PROG_NAME, opts['set_speed']))
-            sys.exit(1)
-
     elif opt == '-V':
         # version
         sys.stderr.write('%s: Version %s\n' % (PROG_NAME, gps_version))
         sys.exit(0)
+    elif opt in '-v':
+        opts['verbosity'] = int(val)
+    elif opt == '-w':
+        opts['input_wait'] = float(val)
     elif opt == '-x':
         opts['del_item'].append(val)
     elif opt == '-z':
