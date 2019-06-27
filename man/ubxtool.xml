@@ -217,8 +217,9 @@ a usage message and exit.</para>
     <term>-P protver</term>
     <listitem>
      <para>Sets the protocol version to use for sending commands.
-Minimum 10 (ublox 5).  Maximum 29 (u-blox 9).  Use <application>"ubxtool
--p MON-VER"</application> to see the version your GPS supports. </para>
+Minimum 10 (ublox 5).  Maximum 29 (u-blox 9).  Use "ubxtool -p MON-VER"
+ to see the version your GPS supports.
+     </para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -226,7 +227,7 @@ Minimum 10 (ublox 5).  Maximum 29 (u-blox 9).  Use <application>"ubxtool
     <listitem>
      <para>Send a preset command the GPS.  Accepts one parameter, PRESET,
 the name of the command to send.  Only the common PRESETS are shown here.
-To see the full list run <application>ubxtool -h -v 2</application>.
+To see the full list run "ubxtool -h -v 2".
 </para>
      <variablelist>
       <varlistentry>
@@ -267,6 +268,12 @@ To see the full list run <application>ubxtool -h -v 2</application>.
        </listitem>
       </varlistentry>
       <varlistentry>
+       <term>MON-RESETODO</term>
+       <listitem>
+        <para>Reset the odometer (UBX-MON-RESETODO).</para>
+       </listitem>
+      </varlistentry>
+      <varlistentry>
        <term>MON-VER</term>
        <listitem>
         <para>Poll GPS version (UBX-MON-VER).</para>
@@ -279,6 +286,12 @@ To see the full list run <application>ubxtool -h -v 2</application>.
        </listitem>
       </varlistentry>
      </variablelist>
+     <para>The PRESET parameters not shown above are all simple poll
+commands.  They merely poll the GPS to respond with the associated
+message.  For example "ubxtool -p CFG-GNSS" asks the GPS to respond with
+a UBX-CFG-GNSS message describing the current GNSS configuration.
+Increase the verbosity of the decode by adding the "-v 2" or "-v 3"
+options.</para>
     </listitem>
    </varlistentry>
    <varlistentry>
