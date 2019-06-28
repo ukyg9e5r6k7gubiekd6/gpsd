@@ -6975,11 +6975,14 @@ if opts['input_file_name'] is None:
     opts['target']['device'] = None
     if arguments:
         # server[:port[:device]]
+        # or maybe ::device
         parts = arguments[0].split(':')
-        opts['target']['server'] = parts[0]
+        if parts[0]:
+            opts['target']['server'] = parts[0]
         if 1 < len(parts):
-            opts['target']['port'] = parts[1]
-            if 2 < len(parts):
+            if parts[1]:
+                opts['target']['port'] = parts[1]
+            if 2 < len(parts) and parts[2]:
                 opts['target']['device'] = parts[2]
 
 elif arguments:
