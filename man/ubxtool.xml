@@ -436,19 +436,44 @@ ubxtool -w 5 x.example.com
    <title>Version 27+ examples</title>
    <para>The following examples require a GPS supporting protocol 27 or
    greater.</para>
-   <para>To check the current dynamic model, change it to AIR1 (Airborne
+   <para>To check the current dynamic model, change it to 6 (AIR1, Airborne
    with &lt;1g acceleration), revert to the default setting, and verify the
-   faults was restored</para>
+   faults was restored.</para>
 <programlisting>
-# ubxtool -g CFG-NAVSPG-DYNMODEL
+$ ubxtool -g CFG-NAVSPG-DYNMODEL
 [...]
 UBX-CFG-VALGET:
  version 1 layer 0 reserved 0,0
   layers (ram)
     item CFG-NAVSPG-DYNMODEL/0x20110021 val 2
-
-
+[...]
+$ ubxtool -z CFG-NAVSPG-DYNMODEL,6
+[...]
+UBX-ACK-ACK:
+ ACK to Class x6 (CFG) ID x8a (VALSET)
+[...]
+$ ubxtool -g CFG-NAVSPG-DYNMODEL
+[...]
+UBX-CFG-VALGET:
+ version 1 layer 0 reserved 0,0
+  layers (ram)
+    item CFG-NAVSPG-DYNMODEL/0x20110021 val 6
+[...]
+$ ubxtool -x CFG-NAVSPG-DYNMODEL
+[...]
+UBX-ACK-ACK:
+ ACK to Class x6 (CFG) ID x8c (VALDEL)
+[...]
+$ ubxtool -g CFG-NAVSPG-DYNMODEL
+[...]
+UBX-CFG-VALGET:
+ version 1 layer 0 reserved 0,0
+  layers (ram)
+    item CFG-NAVSPG-DYNMODEL/0x20110021 val 6
 </programlisting>
+   <para>Notice that the current DYNMODEL stayed at 6 (AIR1).  The
+   "-x" only affects the saved setting, not the current setting.  To
+   change the current setting you must set it with "-z".</para>
    </refsect2>
  </refsect1>
  <refsect1 id='environment'>
