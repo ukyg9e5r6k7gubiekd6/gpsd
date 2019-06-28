@@ -13,6 +13,8 @@
   Add Android (AOSP) support
   Improved multi gnss and multi signal support.
   NMEA 4.10 multi gnss multi signal support.
+  The arguments to "ubxtool -p P" ihave been expanded and changed.
+  New options, -g, -x, -z, added to ubxtool for u-blox 9 support.
 
 3.18.1: 2018-10-19 (Gary E. Miller <gem@rellim.com>)
   Fix some installation issues.
