@@ -333,13 +333,17 @@ class ubx(object):
     port_ids[5] = 'Reserved'  # Don't include this in port_id_map
 
     # Names for portID values in UBX-CFG-COMMS
-    # the doc is byteswapped from here
+    # the doc does not match what is seen
     port_ids1 = {0: 'DDC',
-                 0x100: 'UART1',
+                 0x001: 'UART1',     # as documented on ZED-M9
+                 0x003: 'USB',       # as documented on ZED-M9
+                 0x004: 'SPI',       # as documented on ZED-M9
+                 0x100: 'UART1',     # seen on ZED-M9, documented
                  0x101: 'UNKa',      # seen on ZED-M9T, undocumented
+                 0x102: 'UART2',     # as documented on ZED-M9
                  0x200: 'UNKb',      # seen on ZED-M9T, undocumented
                  0x201: 'UART2',
-                 0x300: 'USB',
+                 0x300: 'USB',       # seen on ZED-M9, undocumented
                  0x400: 'SPI',
                  }
     # u-blox 9 cfg items as a 5-tuple
