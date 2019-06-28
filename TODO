@@ -45,12 +45,6 @@ client uses a generic validator function, fed with templates for each
 JSON message.  Initially harder than a simple procedural parser, Once
 running it is very robust and easy to tweak.
 
-Handle mutifrequency GNSS (B1, E1, L1, L2, B3, L3, L5, L2C, E5, E6,
-etc.)
-
-Handle raw measurements, like UBX-RXM-RAW.  With an uploader for
-postprocessing.
-
 add u-blox IMU (UBX-ESF-RAW) and qErr (UBX-TIM-TP) support.
 
 Adding a sample Go client (gpspipe -> pytogo -> Go ?).
