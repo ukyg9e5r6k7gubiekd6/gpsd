@@ -379,7 +379,7 @@ static void sirf_update(void)
         display(mid7win, 1, 16, "%lu", (unsigned long)getbeu32(buf, 8));
         display(mid7win, 1, 29, "%lu", (unsigned long)getbeu32(buf, 12));
         /* Clock Bias */
-        display(mid7win, 2, 11, "%;u", (unsigned long)getbeu32(buf, 16));
+        display(mid7win, 2, 11, "%lu", (unsigned long)getbeu32(buf, 16));
         /* Estimated Time */
         monitor_log("CSD 0x07=");
         break;
