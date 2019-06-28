@@ -195,8 +195,8 @@ Requires the pyserial module.
    <varlistentry>
     <term>-g ITEM</term>
     <listitem>
-     <para>Get the value of ITEM from the GPS.  See the section on
-     CONFIGURATION ITEMS</para>
+     <para>Get the value of ITEM name from the GPS (UBX-CFG-VALGET).
+     See the section on CONFIGURATION ITEMS</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -348,15 +348,16 @@ options.</para>
    <varlistentry>
     <term>-x ITEM</term>
     <listitem>
-     <para>Delete the value of ITEM from the GPS.  Returning to the
-GPS default for that item.  See the section on CONFIGURATION ITEMS</para>
+     <para>Delete the value of ITEM name from the GPS (UBX_CFG-VALDEL).
+     Returning to the GPS default for that item.  See the section on
+     CONFIGURATION ITEMS</para>
     </listitem>
    </varlistentry>
    <varlistentry>
     <term>-z ITEM,VAL</term>
     <listitem>
-     <para>Set the value of ITEM to VAL in the GPS.  See the section on
-CONFIGURATION ITEMS</para>
+     <para>Set the value of ITEM name to VAL in the GPS (UBX-CFG-VALSET).
+     See the section on CONFIGURATION ITEMS</para>
     </listitem>
    </varlistentry>
    <varlistentry>
@@ -395,6 +396,11 @@ this section does not apply to you.</para>
 assigned a 32-bit Key ID.  Each Key ID has been assigned a Key Name.
 Over 600 Key Names are supported by ubxtool.  To see them all do:
 "ubxtool -h -v 3".  Each Key references one specific value.</para>
+  <para>To get the value related to an item, use "-g ITEM".</para>
+  <para>To reset the value related to an item to it default value, use
+"-x ITEM".</para>
+  <para>To set an ITEM name to a value, use "-z ITEM,VAL".</para>
+  <para>See the EXAMPLES section for concrete examples.</para>
  </refsect1>
  <refsect1 id='examples'>
   <title>EXAMPLES</title>
@@ -419,13 +425,31 @@ ubxtool -p COLDBOOT -w 20 -v 2
   <para>
 Poll Enabled Constellations:
 <programlisting>
-ubxtool -p GNSS
+ubxtool -p CFG-GNSS
 </programlisting>
-Dump gpsd data from remote server:
+Dump gpsd data from a remote server named x.example.com:
 <programlisting>
-ubxtool -w 5 server
+ubxtool -w 5 x.example.com
 </programlisting>
   </para>
+   <refsect2>
+   <title>Version 27+ examples</title>
+   <para>The following examples require a GPS supporting protocol 27 or
+   greater.</para>
+   <para>To check the current dynamic model, change it to AIR1 (Airborne
+   with &lt;1g acceleration), revert to the default setting, and verify the
+   faults was restored</para>
+<programlisting>
+# ubxtool -g CFG-NAVSPG-DYNMODEL
+[...]
+UBX-CFG-VALGET:
+ version 1 layer 0 reserved 0,0
+  layers (ram)
+    item CFG-NAVSPG-DYNMODEL/0x20110021 val 2
+
+
+</programlisting>
+   </refsect2>
  </refsect1>
  <refsect1 id='environment'>
   <title>ENVIRONMENT</title>

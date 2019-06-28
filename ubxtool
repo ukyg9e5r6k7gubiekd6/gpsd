@@ -6953,7 +6953,12 @@ for (opt, val) in options:
     elif opt in '-v':
         opts['verbosity'] = int(val)
     elif opt == '-w':
-        opts['input_wait'] = float(val)
+        try:
+            opts['input_wait'] = int(val)
+        except:
+            sys.stderr.write('%s: -w invalid time %s\n' % (PROG_NAME, val))
+            sys.exit(1)
+
     elif opt == '-x':
         opts['del_item'].append(val)
     elif opt == '-z':
