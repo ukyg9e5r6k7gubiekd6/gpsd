@@ -39,7 +39,7 @@ import gi
 try:
     gi.require_version('Gtk', '3.0')
 except ValueError:
-    # Gtk2 may be installed, has no equire_version()
+    # Gtk2 may be installed, has no require_version()
     sys.stderr.write("xgps: ERROR Unsupported Gtk version\n")
     exit(1)
 
