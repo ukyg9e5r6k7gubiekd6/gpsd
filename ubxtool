@@ -6620,11 +6620,11 @@ class gps_io(object):
                     sys.exit(1)
 
         if opts['target']['server'] is not None:
-            # try to open local gpsd
+            # try to open local/remote gpsd daemon
             try:
-                self.ser = gps.gpscommon(host=None)
-                self.ser.connect(opts['target']['server'],
-                                 opts['target']['port'])
+                self.ser = gps.gpscommon(host=opts['target']['server'],
+                                         port=opts['target']['port'],
+                                         verbose=0)
 
                 # alias self.ser.write() to self.write_gpsd()
                 self.ser.write = self.write_gpsd
