@@ -1924,7 +1924,6 @@ if tiocmiwait:
     })
 
 all_manpages = list(base_manpages.keys())
-# for some reason these don't get cleaned. Probably due to being python
 other_manpages = [
                   "man/gegps.1",
                   "man/xgps.1",
