@@ -2710,6 +2710,7 @@ sconsclean = Utility("sconsclean", '',
 
 if cleaning:
     env.Default(build_all, audit, clean_misc)
+    announce("You must manually remove .sconsign.dblite")
 else:
     env.Default(build)
 
