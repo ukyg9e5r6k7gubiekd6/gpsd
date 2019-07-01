@@ -6994,7 +6994,8 @@ elif arguments:
     sys.exit(1)
 
 if VERB_PROG <= opts['verbosity']:
-    # dump all options
+    # dump versions and all options
+    print('%s: Version %s\n' % (PROG_NAME, gps_version))
     print('Options:')
     for option in sorted(opts):
         print("   %s: %s" % (option, opts[option]))
