@@ -1,5 +1,7 @@
 			GPSD project news
 
+3.19.1: Dev branch in process
+
 3.19: 2019-07-01
   Rearrange rawdata_t.  Bump the API because gps_data_t changed.
   Report sequence-ID fields in type 7 and 13 AIS messages.

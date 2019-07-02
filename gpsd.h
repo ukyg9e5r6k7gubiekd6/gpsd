@@ -61,6 +61,7 @@ extern "C" {
  *      Add ubx.protver, ubx.last_msgid and more to gps_device_t.ubx
  *      MAX_PACKET_LENGTH 516 -> 9216
  *      Add stuff to gps_device_t.nmea for NMEA 4.1
+ # 3.19.1 
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */

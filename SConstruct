@@ -67,7 +67,7 @@ from leapsecond import conditional_leapsecond_fetch
 # sure to update all of them.
 #
 # package version
-gpsd_version = "3.19"
+gpsd_version = "3.19.1~dev"
 # client library version
 libgps_version_current = 25
 libgps_version_revision = 0
