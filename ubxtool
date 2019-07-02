@@ -36,6 +36,7 @@ from functools import reduce  # pylint: disable=redefined-builtin
 import getopt        # for getopt.getopt(), to parse CLI options
 import operator      # for or_
 import os            # for os.environ
+import re            # for regular expressions
 import socket        # for socket.error
 import stat          # for stat.S_ISBLK()
 import struct        # for pack()
@@ -6633,7 +6634,8 @@ class gps_io(object):
                 data_out = b'?WATCH={'
                 if opts['target']['device'] is not None:
                     # add in the requested device
-                    data_out += (b'"device":"' + opts['target']['device'] +
+                    data_out += (b'"device":"' +
+                                 gps.polybytes(opts['target']['device']) +
                                  b'",')
                 data_out += b'"enable":true,"raw":2}\r\n'
                 if VERB_RAW <= opts['verbosity']:
@@ -6978,11 +6980,21 @@ if opts['input_file_name'] is None:
     opts['target']['port'] = gps.GPSD_PORT
     opts['target']['device'] = None
     if arguments:
+        # TODO: move to module gps as a function
         # server[:port[:device]]
         # or maybe ::device
-        parts = arguments[0].split(':')
-        if parts[0]:
-            opts['target']['server'] = parts[0]
+        # or maybe \[ipv6\][:port[:device]]
+        if '[' == arguments[0][0]:
+            # hex IPv6 address
+            match = re.match(r'''\[([:a-fA-F0-9]+)\](.*)''', arguments[0])
+            opts['target']['server'] = match.group(1)
+            parts = match.group(2).split(':')
+        else:
+            # maybe IPv4 address, maybe hostname
+            parts = arguments[0].split(':')
+            if parts[0]:
+                opts['target']['server'] = parts[0]
+
         if 1 < len(parts):
             if parts[1]:
                 opts['target']['port'] = parts[1]
