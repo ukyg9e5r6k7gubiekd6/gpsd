@@ -383,6 +383,13 @@ Before uploading today.obs to Trimble you will need to change the _.obs_
 extention to _.YYo_, where YY is the 2-digit year.  Then proceed as
 above with CSRS-PPP.
 
+=== GAPS ===
+
+The University of New Brunswich has an online PPP sevice.  They call
+it GNSS Analysis and Positioning Software (GAPS).  GAPS requires
+observations from the L2 P signal or L5 signal.  No u-blox chip
+follows the L2 P signal.
+
 == References ==
 
 Wikipedia has a little information on PPP:
@@ -400,6 +407,9 @@ https://webapp.geod.nrcan.gc.ca/geod/tools-outils/ppp.php
 Another service known to work with gpsrinex output is Trimble RTX
 from Trimble.  They require dual frequency (L1 and L2) raw data:
 https://trimblertx.com/Home.aspx
+
+GAPS requires L2 P or L5 I+Q signals, and is not supported by gpsd:
+http://gaps.gge.unb.ca/
 
 OPUS requires L1/L2 frequency observation files, and has limited geographic
 coverage:
