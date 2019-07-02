@@ -132,15 +132,6 @@ the same device from ever resuming. This interferes with PPS support</p>
 <p>The workaround is to use stty to pre-set the serial port to the right
 baud rate so tcsetattr is never called.</p>
 
-<h2 id="pps-gpio">The pps-gpio only reports on one edge</h2>
-
-<p>The pps-gpio driver only looks at the clear edge to determine the
-time of the PPS pulse.  Many GPS use the other edge, so the reported
-time may be offset by the PPS pulse width.</p>
-
-<p>Problem is present in Linux 3.19 and earlier.  The module authors
-have been notified</p>
-
 <h2 id="bluetooth">Firmware problems in some Bluetooth and USB devices can hang them</h2>
 
 <p>The baudrate-hunting code in <code>gpsd</code> tickles a serious
