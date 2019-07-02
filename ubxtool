@@ -6961,7 +6961,7 @@ for (opt, val) in options:
     elif opt == '-w':
         try:
             opts['input_wait'] = int(val)
-        except:
+        except (ValueError):
             sys.stderr.write('%s: -w invalid time %s\n' % (PROG_NAME, val))
             sys.exit(1)
 
