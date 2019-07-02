@@ -182,7 +182,7 @@ class gps(gpscommon, gpsdata, gpsjson):
     "Client interface to a running gpsd instance."
 
     # module version, would be nice to automate the version
-    __version__ = "3.19~dev"
+    __version__ = "3.19"
 
     def __init__(self, host="127.0.0.1", port=GPSD_PORT, verbose=0, mode=0,
                  reconnect=False):
