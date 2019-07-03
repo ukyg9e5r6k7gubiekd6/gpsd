@@ -5,6 +5,8 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
+#include <ctype.h>              /* for isdigit() */
+#include <dirent.h>             /* for DIR */
 #include <errno.h>
 #include <fcntl.h>
 #include <stdbool.h>
@@ -123,8 +125,6 @@ static sourcetype_t gpsd_classify(const char *path)
 }
 
 #ifdef __linux__
-#include <dirent.h>
-#include <ctype.h>
 
 static int fusercount(const char *path)
 /* return true if any process has the specified path open */
