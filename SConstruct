@@ -973,6 +973,7 @@ else:
                 "netdb",
                 "netinet/in",
                 "netinet/ip",
+                "sys/sysmacros",   # for major(), on linux
                 "sys/socket",
                 "sys/un",
                 "syslog",
