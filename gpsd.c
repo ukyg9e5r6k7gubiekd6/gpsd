@@ -127,11 +127,7 @@
  * AF_INET: IPv4 only
  * AF_INET6: IPv6 only
  */
-#ifdef IPV6_ENABLE
 static const int af_allowed = AF_UNSPEC;
-#else
-static const int af_allowed = AF_INET;
-#endif
 #endif /* SOCKET_EXPORT_ENABLE */
 
 #define AFCOUNT 2
@@ -382,7 +378,6 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 	}
 
 	break;
-#ifdef IPV6_ENABLE
     case AF_INET6:
 	sin_len = sizeof(sat.sa_in6);
 
@@ -429,7 +424,6 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 #endif /* IPV6_TCLASS */
 	}
 	break;
-#endif  /* IPV6_ENABLE */
     default:
 	gpsd_log(&context.errout, LOG_ERROR,
 		 "unhandled address family %d\n", af);

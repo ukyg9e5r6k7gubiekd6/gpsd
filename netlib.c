@@ -222,12 +222,10 @@ char *netlib_sock2ip(socket_t fd)
 	    r = !inet_ntop(fsin.sa_in.sin_family, &(fsin.sa_in.sin_addr),
 			   ip, sizeof(ip));
 	    break;
-#ifdef IPV6_ENABLE
 	case AF_INET6:
-	    r = !inet_ntop((int)fsin.sa_in6.sin6_family, &(fsin.sa_in6.sin6_addr),
-			   ip, sizeof(ip));
+	    r = !inet_ntop((int)fsin.sa_in6.sin6_family,
+                           &(fsin.sa_in6.sin6_addr), ip, sizeof(ip));
 	    break;
-#endif
 	default:
 	    (void)strlcpy(ip, "<unknown AF>", sizeof(ip));
 	    return ip;
