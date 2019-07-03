@@ -2,18 +2,18 @@
  * This file is Copyright (c) 2010-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
-#include <sys/types.h>
 #include <err.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
 #include <termios.h>
 #include <time.h>  /* For nanosleep() and time() */
 #include <unistd.h>
-#include <limits.h>
 
 /* 
  * @@Cj - receiver ID
