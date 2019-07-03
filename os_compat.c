@@ -110,10 +110,7 @@ int os_daemon(int nochdir, int noclose)
 
 #if defined (__linux__) || defined (__GLIBC__)
 
-/* daemon() needs _DEFAULT_SOURCE */
-#undef _DEFAULT_SOURCE
-#define _DEFAULT_SOURCE
-#include <unistd.h>
+#include <unistd.h>      /* for daemon() */
 
 #elif defined(__APPLE__) /* !__linux__ */
 
