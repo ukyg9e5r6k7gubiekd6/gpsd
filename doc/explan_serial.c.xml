@@ -27,7 +27,7 @@
 </row>
 <row>
   <entry><function>void cfmakeraw(struct termios *termios_p)</function></entry>
-  <entry><para>Workaround for Cygwin, which is missing
+  <entry><para>Workaround for systems (Cygwin, Solaris), which are missing
   <function>cfmakeraw()</function>. It is pasted from man page and
   added in <function>serial.c</function> arbitrarily.</para></entry>
 </row>
