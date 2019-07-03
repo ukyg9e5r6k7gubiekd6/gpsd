@@ -7,7 +7,8 @@
 #ifndef _GPSD_H_
 #define _GPSD_H_
 
-#include "compiler.h"	/* Must be outside extern "C" for "atomic" */
+#include "compiler.h"	/* Must be outside extern "C" for "atomic"
+                         * pulls in gpsd_config.h */
 
 # ifdef __cplusplus
 extern "C" {
@@ -17,7 +18,6 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#include "gpsd_config.h"
 #ifdef HAVE_TERMIOS_H
 #include <termios.h>
 #endif
@@ -1055,13 +1055,13 @@ PRINTF_FUNC(3, 4) void gpsd_log(const struct gpsd_errout_t *, const int, const c
 #define NAN (0.0f/0.0f)
 #endif
 
-#if defined(__CYGWIN__) || defined(__sun)
+#if !defined(HAVE_CFMAKERAW)
 /*
  * POSIX does not specify cfmakeraw, but it is pretty common.  We
  * provide an implementation in serial.c for systems that lack it.
  */
 void cfmakeraw(struct termios *);
-#endif /* defined(__CYGWIN__) */
+#endif /* !defined(HAVE_CFMAKERAW) */
 
 #define DEVICEHOOKPATH "/" SYSCONFDIR "/gpsd/device-hook"
 
