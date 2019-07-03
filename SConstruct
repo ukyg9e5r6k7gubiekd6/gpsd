@@ -733,6 +733,7 @@ else:
     # for daemon(), cfmakeraw(), strsep() and setgroups()
     # on glibc 2.19+
     # may also be added by pkg_config
+    # on linux this eventually sets _USE_XOPEN
     confdefs.append('#if !defined(_DEFAULT_SOURCE)')
     confdefs.append('#define _DEFAULT_SOURCE')
     confdefs.append('#endif\n')
@@ -750,9 +751,11 @@ else:
     # 700 means X/Open 2008
     # glibc 2.10+ needs 700+ for strnlen()
     # Python.h wants 600 or 700
-    confdefs.append('#if !defined(_XOPEN_SOURCE)')
-    confdefs.append('#define _XOPEN_SOURCE 700')
-    confdefs.append('#endif\n')
+
+    # removed 2 Jul 2018 to see if anything breaks...
+    # confdefs.append('#if !defined(_XOPEN_SOURCE)')
+    # confdefs.append('#define _XOPEN_SOURCE 700')
+    # confdefs.append('#endif\n')
 
     if sys.platform.startswith('linux'):
         # for cfmakeraw(), strsep(), etc. on CentOS 7
