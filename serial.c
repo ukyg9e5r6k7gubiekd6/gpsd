@@ -172,7 +172,7 @@ void gpsd_tty_init(struct gps_device_t *session)
     session->reawake = (time_t)0;
 }
 
-#if defined(__CYGWIN__) || defined(__sun)
+#if !defined(HAVE_CFMAKERAW)
 /*
  * Local implementation of cfmakeraw (which is not specified by
  * POSIX; see matching declaration in gpsd.h).
@@ -187,7 +187,7 @@ void cfmakeraw(struct termios *termios_p)
     termios_p->c_cflag &= ~(CSIZE | PARENB);
     termios_p->c_cflag |= CS8;
 }
-#endif /* defined(__CYGWIN__) */
+#endif /* !defined(HAVE_CFMAKERAW) */
 
 static speed_t gpsd_get_speed_termios(const struct termios *ttyctl)
 {
