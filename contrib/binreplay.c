@@ -4,18 +4,18 @@
  * This file is Copyright (c) 2010-2018 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
-#include <sys/types.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
 #include <err.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
-#include <termios.h>
-#include <unistd.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <termios.h>
 #include <time.h>  /* For nanosleep() */
+#include <unistd.h>
 #ifndef __GLIBC__
   #include <util.h>
 #else
