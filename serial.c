@@ -17,9 +17,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#ifdef __linux__
+#ifdef HAVE_SYS_SYSMACROS_H
 #include <sys/sysmacros.h>	/* defines major() */
-#endif	/* __linux__ */
+#endif	/* HAVE_SYS_SYSMACROS_H */
 
 #ifdef ENABLE_BLUEZ
 #include <bluetooth/bluetooth.h>
