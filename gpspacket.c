@@ -6,9 +6,6 @@
  *
  */
 
-/* for vsnprintf() FreeBSD wants __ISO_C_VISIBLE >= 1999 */
-#define __ISO_C_VISIBLE 1999
-
 #include "gpsd_config.h"  /* must be before all includes */
 
 /* Python.h insists on setting GNU_SOURCE, _POSIX_C_SOURCE and
