@@ -77,15 +77,13 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-#define __USE_POSIX199309 1
-
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <stdio.h>
-#include <stdbool.h>
-#include <math.h>
-#include <string.h>
 #include <errno.h>
+#include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 
