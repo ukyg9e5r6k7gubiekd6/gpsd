@@ -180,13 +180,13 @@ static void usage(void)
     (void)fprintf(stderr,
 		  "Usage: gps2udp [OPTIONS] [server[:port[:device]]]\n\n"
 		  "-h Show this help.\n"
-                  "-u Send UDP NMEA/JASON feed to host:port [multiple -u host:port accepted\n"
+                  "-u Send UDP NMEA/JSON feed to host:port [multiple -u host:port accepted]\n"
 		  "-n Feed NMEA.\n"
-		  "-j Feed Jason.\n"
-		  "-a Select !AISDM message only.\n"
+		  "-j Feed JSON.\n"
+		  "-a Select AIS message only.\n"
 		  "-c [count] exit after count packets.\n"
 		  "-b Run in background as a daemon.\n"
-		  "-d [0-2] 1 display sent packets, 2 ignored packets.\n"
+		  "-d [0-2] 1 display sent packets, 2 display ignored packets.\n"
 		  "-v Print version and exit.\n\n"
                   "example: gps2udp -a -n -c 2 -d 1 -u data.aishub.net:2222 fridu.net\n"
 		  );
