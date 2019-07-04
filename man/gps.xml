@@ -211,8 +211,8 @@ support the feature) the locations of accessible satellites.</para>
 
 <para>In the sky view, satellites are color-coded to indicate quality
 of signal; consult the data display to the left for exact figures in
-dB. Square icons indicate WAAS/EGNOS satellites, circles indicate
-ordinary GPS satellites.  Filled icons were used in the last fix,
+dB. Square icons indicate SBAS/WAAS/EGNOS satellites, circles indicate
+ordinary GPS satellites.  Filled icons were used in the current fix,
 outline icons were not.</para>
 
 </refsect2>
