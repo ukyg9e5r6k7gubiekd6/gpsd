@@ -14,7 +14,7 @@ usage: xgps [-?] [-D level] [-h] [-l degmfmt] [-r rotation] [-u units] [-V]
                       m = DD MM.mmmm'
                       s = DD MM' SS.sss"
     -r rotation   Set rotation
-    -u units      Set units
+    -u units      Set units to Imperial, Nautical or Metric
     -V            Print version and exit.
 '''
 

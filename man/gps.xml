@@ -72,6 +72,7 @@ SPDX-License-Identifier: BSD-2-clause
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-l <group><arg>d</arg><arg>m</arg><arg>s</arg></group></arg>
       <arg choice='opt'>-u <group><arg>i</arg><arg>n</arg><arg>m</arg></group></arg>
+      <arg choice='opt'>-r <replaceable>degrees</replaceable></arg>
       <arg choice='opt'>-V </arg>
       <group>
 	<replaceable>server</replaceable>
@@ -214,6 +215,9 @@ of signal; consult the data display to the left for exact figures in
 dB. Square icons indicate SBAS/WAAS/EGNOS satellites, circles indicate
 ordinary GPS satellites.  Filled icons were used in the current fix,
 outline icons were not.</para>
+
+<para>The -r option accepts an argument in degrees, to rotate the
+skyview counterclockwise.</para>
 
 </refsect2>
 <refsect2><title>xgpsspeed</title>
