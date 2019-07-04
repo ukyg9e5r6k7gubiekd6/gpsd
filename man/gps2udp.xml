@@ -87,12 +87,13 @@ destinations).</para>
 <application>gps2udp</application> will then exit gracefully.</para>
 
 <para>-d 1 prints sent packet on stdout.</para>
+<para>-d 2 prints unsent packet on stdout.</para>
 <para>-v prints the version, then exits.</para>
 </refsect1>
 
 <refsect1 id='exampletitle'><title>EXAMPLE</title>
-<para>With a running <application>gpsd accessible on the
-network</application> </para>
+<para>With a running <application>gpsd</application> accessible on the
+network </para>
 
 <para><command>gps2udp -d 1 -n -u data.aishub.net:2222 </command> will
 collect data from localhost:gpsd display them on stdout and send a
