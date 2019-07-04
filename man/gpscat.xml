@@ -37,7 +37,7 @@ logging and packetizing GPS data streams.  It takes input from a
 specified file or serial device (presumed to have a GPS attached) and
 reports to standard output. The program runs until end of input or it is
 interrupted by ^C or other means. It does not terminate on a bad
-backet; this is intentional.</para>
+packet; this is intentional.</para>
 
 <para>In raw mode (the default) <application>gpscat</application>
 simply dumps its input to standard output.  Nonprintable characters
@@ -78,8 +78,8 @@ of one of the known types.</para>
 <para>Set the port's baud rate (and optionally its parity and stop
 bits) before reading.  Argument should begin with one of the normal integer
 baud rates (300, 1200, 4800, 9600, 19200, 38400, etc.).  It may be
-followed by an optional suffix [NOE][12] to set parity (None, Even,
-Odd) and stop bits (1 or 2).</para>
+followed by an optional suffix [NOE][12] to set parity (None, Odd,
+Even) and stop bits (1 or 2).</para>
 </listitem>
 </varlistentry>
 
@@ -96,7 +96,7 @@ parentheses) reported before a colon and space on each line.</para>
 <listitem>
 <para>In packetizer mode, enable progress messages from the packet
 getter.  Probably only of interest to developers testing packet
-getter changes.</para>
+getter changes.  Higher arguements to D produce more output.</para>
 </listitem>
 </varlistentry>
 
