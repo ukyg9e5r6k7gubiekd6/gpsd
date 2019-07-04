@@ -248,10 +248,10 @@ static void usage( char *prog)
         "                m = DD MM.mmmm'\n"
         "                s = DD MM' SS.sss\"\n"
         "  -s          Sleep for 10 seconds before starting\n"
-        "  -u {i|m|n}  Select Units\n"
+        "  -u {i|m|m}  Select Units\n"
         "                i = Imperial (default)\n"
-        "                m = Metric'\n"
-        "                n = Nautical\"\n"
+        "                n = Nautical\n"
+        "                m = Metric\n"
         "  -V          Show version, then exit\n"
         , prog);
 
