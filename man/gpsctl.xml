@@ -26,6 +26,7 @@ SPDX-License-Identifier: BSD-2-clause
       <group>
 	<arg choice='plain'>-b</arg>
 	<arg choice='plain'>-n</arg>
+	<arg choice='plain'>-r</arg>
       </group>
       <arg choice='opt'>-x <replaceable>control</replaceable></arg>
       <arg choice='opt'>-e </arg>
@@ -105,6 +106,13 @@ to which device types, and exit.</para>
 <term>-n</term>
 <listitem>
 <para>Put GPS into NMEA mode.</para>
+</listitem>
+</varlistentry>
+
+<varlistentry>
+<term>-r</term>
+<listitem>
+<para>Reset the GPS. Device port and type must be specified.</para>
 </listitem>
 </varlistentry>
 
