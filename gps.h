@@ -51,8 +51,9 @@ extern "C" {
  *       enlarge subtype to hold ZED-F9 string
  *       MAXCHANNELS bumped from 120 to 140
  *       Try to make PRN be NMEA 2.x-4.0 compliant, not 4.10 or u-blox
+ * 9.0   add NED and geoid_sep variables to gps_fix_t
  */
-#define GPSD_API_MAJOR_VERSION	8	/* bump on incompatible changes */
+#define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
 
 #define MAXCHANNELS	140	/* u-blox 9 tracks 140 signals */
@@ -120,6 +121,9 @@ struct gps_fix_t {
     /* sperical error probability, 3D. meters, maybe 50%, maybe 95% */
     /* Garmin, not gpsd, calls this estimated position error (epe) */
     double sep;
+    /* Geoid separation: difference between ellipsoid and mean sea level.
+     * In meters */
+    double geoid_sep;
 
     double magnetic_track;  /* Course (relative to Magnetic North) */
 
@@ -130,6 +134,11 @@ struct gps_fix_t {
 	double vx, vy, vz;	/* ECEF x, y, z velocity */
 	double vAcc;            /* Velocity Accuracy Estimate, probably SEP */
     } ecef;
+    /* NED data, all data in meters, and meters/second, or NaN */
+    struct {
+        double relPosN, relPosE, relPosD;   /* NED relative positions */
+        double velN, velE, velD;            /* NED velocities */
+    } NED;
     char datum[40];             /* map datum */
     /* quantization error adjustment to PPS. aka "sawtooth" correction */
     long qErr;                  /* offset in picoseconds (ps) */
