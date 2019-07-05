@@ -269,6 +269,13 @@ void gps_clear_fix(struct gps_fix_t *fixp)
     fixp->ecef.vz = NAN;
     fixp->ecef.pAcc = NAN;
     fixp->ecef.vAcc = NAN;
+    fixp->NED.relPosN = NAN;
+    fixp->NED.relPosE = NAN;
+    fixp->NED.relPosD = NAN;
+    fixp->NED.velN = NAN;
+    fixp->NED.velE = NAN;
+    fixp->NED.velD = NAN;
+    fixp->geoid_sep = NAN;
 }
 
 void gps_clear_att(struct attitude_t *attp)
