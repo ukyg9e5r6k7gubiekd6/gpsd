@@ -316,6 +316,49 @@ try to compute the value from the skyview.</para>
         view. Assumed to be 95% confidence, but many GPS do not specify.
         </entry>
 </row>
+<row>
+	<entry>relN</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>North component of relative position vector in meters.</entry>
+</row>
+<row>
+	<entry>relE</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>East component of relative position vector in meters.</entry>
+</row>
+<row>
+	<entry>relD</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Down component of relative position vector in meters.</entry>
+</row>
+<row>
+	<entry>velN</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>North velocity component in meters.</entry>
+</row>
+<row>
+	<entry>velE</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>wEast velocity component in meters.</entry>
+</row>
+<row>
+	<entry>velD</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Down velocity component in meters.</entry>
+</row>
+<row>
+	<entry>geoidSep</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Geoid separation: difference between ellipsoid and mean
+        sea level in meters.</entry>
+</row>
 
 </tbody>
 </tgroup>
