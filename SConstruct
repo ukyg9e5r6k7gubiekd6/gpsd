@@ -63,7 +63,7 @@ from leapsecond import conditional_leapsecond_fetch
 # name from the version, or separates version componnents.
 #
 # Keep in sync with gps/__init__.py
-# There are about 15 files with copies of the version number; make
+# There are about 16 files with copies of the version number; make
 # sure to update all of them.
 #
 # package version
