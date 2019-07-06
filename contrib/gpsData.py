@@ -7,11 +7,10 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
+import gps
 import os
-from gps import *
-from time import *
-import time
 import threading
+import time
 
 gpsd = None          # setting the global variable
 
@@ -22,7 +21,7 @@ class GpsPoller(threading.Thread):
     def __init__(self):
         threading.Thread.__init__(self)
         global gpsd                    # bring it in scope
-        gpsd = gps(mode=WATCH_ENABLE)  # starting the stream of info
+        gpsd = gps.gps(mode=gps.WATCH_ENABLE)  # starting the stream of info
         self.current_value = None
         self.running = True            # setting the thread running to true
 
