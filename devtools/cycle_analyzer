@@ -38,7 +38,7 @@ idea what is going on.  These are:
    sequence - the entire sequence of dump tag/timestamp pairs from the log
    events   - show how those reduce to event sequences
    bursts   - show how sentences are grouped into bursts
-   trim     - show the burst list after the end bursts have been removed 
+   trim     - show the burst list after the end bursts have been removed
 
 In an event sequence, a '<' is a nornal start of cycle where the
 timestamp increments. A '>' is where the timestamp actually
@@ -67,17 +67,21 @@ verbose = 0
 suppress_regular = False
 parse_json = False
 
+
 class analyze_error(BaseException):
     def __init__(self, filename, msg):
         self.filename = filename
         self.msg = msg
+
     def __repr__(self):
         return '%s: %s' % (self.filename, self.msg)
+
 
 class event(object):
     def __init__(self, tag, time=0):
         self.tag = tag
         self.time = time
+
     def __str__(self):
         if self.time == 0:
             return self.tag
@@ -85,8 +89,10 @@ class event(object):
             return self.tag + ":" + self.time
     __repr__ = __str__
 
+
 def tags(lst):
     return [x.tag for x in lst]
+
 
 def extract_from_nmea(filename, lineno, line):
     "Extend sequence of tag/timestamp tuples from an NMEA sentence"
@@ -112,6 +118,7 @@ def extract_from_nmea(filename, lineno, line):
     else:
         return []
 
+
 def extract_from_json(filename, lineno, line):
     "Extend sequence of tag/timestamp tuples from a JSON dump of a sentence"
     if not line.startswith("{"):
@@ -126,6 +133,7 @@ def extract_from_json(filename, lineno, line):
         print(line.rstrip(), file=sys.stderr)
         print(repr(e), file=sys.stderr)
         return []
+
 
 def extract_timestamped_sentences(fp, json_parse=parse_json):
     "Do the basic work of extracting tags and timestamps"
@@ -145,6 +153,7 @@ def extract_timestamped_sentences(fp, json_parse=parse_json):
         elif json_parse and line.startswith("{"):
             sequence += extract_from_json(fp.name, lineno, line)
     return sequence
+
 
 def analyze(sequence, name):
     "Analyze the cycle sequence of a device from its output logs."
@@ -221,14 +230,16 @@ def analyze(sequence, name):
     # Should know now if cycle is regular
     if regular:
         if not suppress_regular:
-            print("%s: has a regular cycle %s." % (name, " ".join(tags(bursts[0]))))
+            print("%s: has a regular cycle %s." %
+                  (name, " ".join(tags(bursts[0]))))
     else:
         # If it was not the case that all cycles matched, then we need
         # a minimum of 6 cycles because the first and last might be
         # incomplete, and we need at least 4 cycles in the middle to
         # have two full ones on split-cycle devices like old Garmins.
         if tags(events).count("<") < 6:
-            sys.stderr.write("%s: variable-cycle log has has fewer than 6 cycles.\n" % name)
+            sys.stderr.write("%s: variable-cycle log has has fewer "
+                             "than 6 cycles.\n" % name)
             return
         if verbose > 0:
             print("%s: has a split or variable cycle." % name)
@@ -238,17 +249,23 @@ def analyze(sequence, name):
                 cycle_enders.append(burst[-1].tag)
         if len(cycle_enders) == 1:
             if not suppress_regular:
-                print("%s: has a fixed end-of-cycle sentence %s." % (name, cycle_enders[0]))
+                print("%s: has a fixed end-of-cycle sentence %s." %
+                      (name, cycle_enders[0]))
         else:
-            print("%s: has multiple cycle-enders %s." % (name, " ".join(cycle_enders)))
+            print("%s: has multiple cycle-enders %s." %
+                  (name, " ".join(cycle_enders)))
         # Sanity check
         pathological = []
         for ender in cycle_enders:
             for burst in bursts:
-                if ender in tags(burst) and not ender == burst[-1].tag and not ender in pathological:
+                if ((ender in tags(burst) and
+                     not ender == burst[-1].tag and
+                     ender not in pathological)):
                     pathological.append(ender)
         if pathological:
-            print("%s: cycle-enders %s also occur in mid-cycle!" % (name, " ".join(pathological)))
+            print("%s: cycle-enders %s also occur in mid-cycle!" %
+                  (name, " ".join(pathological)))
+
 
 if __name__ == "__main__":
     stages = ""
@@ -275,10 +292,13 @@ if __name__ == "__main__":
                     sequence = extract_timestamped_sentences(fp)
                     analyze(sequence, filename)
                 except analyze_error as e:
-                    if filename.endswith(".log") and os.path.exists(filename+".chk"):
+                    if filename.endswith(".log") and os.path.exists(filename +
+                                                                    ".chk"):
                         fp2 = open(filename+".chk", "rb")
                         try:
-                            sequence = extract_timestamped_sentences(fp2, json_parse=True)
+                            sequence = extract_timestamped_sentences(
+                                fp2,
+                                json_parse=True)
                             analyze(sequence, filename+".chk")
                         finally:
                             fp2.close()
