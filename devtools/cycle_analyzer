@@ -56,9 +56,12 @@ than the ideal.
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
-import sys, os, getopt, json
+import getopt
+import gps
+import json
+import os
+import sys
 
-from gps.misc import polystr, isotime
 
 verbose = 0
 suppress_regular = False
@@ -117,7 +120,8 @@ def extract_from_json(filename, lineno, line):
         sentence = json.loads(line)
         if "time" not in sentence:
             return []
-        return [event(polystr(sentence["class"]), "%.2f" % isotime(sentence["time"]))]
+        return [event(gps.polystr(sentence["class"]), "%.2f" %
+                      gps.isotime(sentence["time"]))]
     except ValueError as e:
         print(line.rstrip(), file=sys.stderr)
         print(repr(e), file=sys.stderr)
@@ -128,7 +132,7 @@ def extract_timestamped_sentences(fp, json_parse=parse_json):
     sequence = []
     lineno = 0
     while True:
-        line = polystr(fp.readline())
+        line = gps.polystr(fp.readline())
         if not line:
             break
         lineno += 1
