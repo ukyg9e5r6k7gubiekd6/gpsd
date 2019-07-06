@@ -1122,7 +1122,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 			   "{\"ident\":%u,"
 			   "\"L1\":{\"ind\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u,"
-			   "\"amb\":%u,\"CNR\":%.2f}"
+			   "\"amb\":%u,\"CNR\":%.2f},"
 			   "\"L2\":{\"ind\":%u,\"prange\":%8.2f,"
 			   "\"delta\":%6.4f,\"lockt\":%u,"
 			   "\"CNR\":%.2f}"
