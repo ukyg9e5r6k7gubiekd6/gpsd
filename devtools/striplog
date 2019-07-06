@@ -5,14 +5,15 @@
 # striplog -j strips JSON leader sentences.
 # striplog with no option strips all leading lines beginning with #
 #
-# This file is Copyright (c) 2010 by the GPSD project
+# This file is Copyright (c) 2010-2019 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
 # This code runs compatibly under Python 2 and 3.x for x >= 2.
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
-import getopt, sys
+import getopt
+import sys
 
 secondline = firstline = stripjson = False
 stripval = 0
@@ -39,10 +40,10 @@ try:
     elif stripjson:
         while True:
             line = sys.stdin.readline()
-            if line.startswith('{"class":"VERSION"') \
-                   or line.startswith('{"class":"DEVICE"') \
-                   or line.startswith('{"class":"DEVICES"') \
-                   or line.startswith('{"class":"WATCH"'):
+            if ((line.startswith('{"class":"VERSION"') or
+                 line.startswith('{"class":"DEVICE"') or
+                 line.startswith('{"class":"DEVICES"') or
+                 line.startswith('{"class":"WATCH"'))):
                 continue
             else:
                 break
