@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 #
-# This file is Copyright (c) 2010 by the GPSD project
+# This file is Copyright (c) 2010-2019 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 """
 usage: regress-builder [-r limit] [-s seed]
 
-Test-compile gpsd with each of every possible combination of device-driver 
+Test-compile gpsd with each of every possible combination of device-driver
 options, excluding stub drivers we don't support yet.  This does a good
 job of catching bugs after driver API changes.
 
@@ -25,12 +25,16 @@ Although updating it for Python 3 doesn't look too difficult, it doesn't make
 sense to do so without first restoring it to correct operation with Python 2,
 since the former fixes would otherwise be untestable.
 """
-import os, sys, random, getopt, time
+import getopt
+import os
+import random
+import sys
+import time
 
 driver_names = (
     "aivdm",
     "ashtech",
-    #"earthmate",
+    # "earthmate",
     "evermore",
     "fv18",
     "garmin",
@@ -45,10 +49,10 @@ driver_names = (
     "oncore",
     "oceanserver",
     "rtcm104v2",
-    #"rtcm104v3",
+    # "rtcm104v3",
     "sirf",
     "superstar2",
-    #"tnt",
+    # "tnt",
     "tripmate",
     "tsip",
     "ubx",
@@ -64,11 +68,13 @@ driver_names = (
 
 cyclesize = 2 ** len(driver_names)
 
+
 def Sequential():
     "Generate sequential test vectors for exhautive search."
     for i in xrange(cyclesize):
         yield i
     return
+
 
 def MonteCarlo(seed):
     "Generate a random shuffle of test vectors for Monte Carlo testing."
@@ -85,15 +91,17 @@ def MonteCarlo(seed):
         yield (seed + i * modulus) % cyclesize
     return
 
+
 class TestFactory:
     "Manage compilation tests."
     Preamble = '''
-env	X_LIBS="" \\
-	CPPFLAGS="-I/usr/local/include " \\
-	LDFLAGS=" -L/usr/local/lib -g" \\
-	CFLAGS="-g -O2 -W -Wall" \\
+env     X_LIBS="" \\
+        CPPFLAGS="-I/usr/local/include " \\
+        LDFLAGS=" -L/usr/local/lib -g" \\
+        CFLAGS="-g -O2 -W -Wall" \\
 ./configure --prefix=/home/gpsd --disable-shared \\
 '''
+
     def n2v(self, n):
         "Number to test-vector"
         v = [0] * len(driver_names)
@@ -103,33 +111,41 @@ env	X_LIBS="" \\
             i += 1
             n = n >> 1
         return v
+
     def test_header(self, vector):
         hdr = ""
         for (i, name) in enumerate(driver_names):
             hdr += "--" + ("disable", "enable")[vector[i]] + "-" + name + " "
         return hdr[:-1]
+
     def make(self, vector):
         if os.system("make 2>&1 > /dev/null"):
-            print "FAILED:   ", self.test_header(vector) 
+            print("FAILED:   ", self.test_header(vector))
         else:
-            print "SUCCEEDED:", self.test_header(vector)
+            print("SUCCEEDED:", self.test_header(vector))
+
     def configure_build(self, vector):
         test = TestFactory.Preamble
         for (i, name) in enumerate(driver_names):
-            test += "        --" + ("disable", "enable")[vector[i]] + "-" + name + " \\\n"
+            test += ("        --" + ("disable", "enable")[vector[i]] +
+                     "-" + name + " \\\n")
         test += "\n"
-        if os.system("("+ test + ") >/dev/null"):
-            print "configure FAILED:", self.test_header(vector)
+        if os.system("(" + test + ") >/dev/null"):
+            print("configure FAILED:", self.test_header(vector))
         else:
             self.make(vector)
+
     def filter(self, vector):
         "Tell us whether this combination needs to be tested."
         # No drivers at all won't even configure
-        if vector == [0] *  len(driver_names):
+        if vector == [0] * len(driver_names):
             return False
-        compiled_in = map(lambda e: e[1], filter(lambda e: e[0], zip(vector, driver_names)))
+        compiled_in = map(lambda e: e[1], filter(lambda e: e[0],
+                          zip(vector, driver_names)))
+
         def on(name):
             return name in compiled_in
+
         def off(name):
             return name not in compiled_in
         # START OF FILTERS
@@ -148,12 +164,13 @@ env	X_LIBS="" \\
         #
         # END OF FILTERS
         return True
+
     def run(self, generator, limit=cyclesize):
         expect = 0
         for i in range(cyclesize):
             if self.filter(self.n2v(i)):
                 expect += 1
-        print "# Expect %d of %d tests." % (expect, cyclesize)
+        print("# Expect %d of %d tests." % (expect, cyclesize))
         starttime = time.time()
         included = 0
         excluded = 0
@@ -162,7 +179,7 @@ env	X_LIBS="" \\
                 return
             vector = self.n2v(n)
             if not self.filter(vector):
-                print "EXCLUDED:", self.test_header(vector)
+                print("EXCLUDED:", self.test_header(vector))
                 excluded += 1
             else:
                 self.configure_build(vector)
@@ -172,14 +189,15 @@ env	X_LIBS="" \\
         hours = elapsed/3600
         minutes = (elapsed - (hours * 3600)) / 60
         seconds = elapsed - (hours * 3600) - (minutes * 60)
-        print "%d tests, %d excluded, in %dh%dm%ds" % (included, excluded, hours, minutes, seconds)
+        print("%d tests, %d excluded, in %dh%dm%ds" %
+              (included, excluded, hours, minutes, seconds))
+
 
 if __name__ == '__main__':
     try:
         (options, arguments) = getopt.getopt(sys.argv[1:], "n:r:")
     except getopt.GetoptError, msg:
-        print "regress-builder: " + str(msg)
-        raise SystemExit, 1
+        sys.exit("regress-builder: " + str(msg))
     montecarlo = False
     limit = cyclesize
     seed = int(time.time())
@@ -191,8 +209,8 @@ if __name__ == '__main__':
             montecarlo = True
             seed = int(val)
     if montecarlo:
-        print "Monte Carlo test seeded with %d" % seed
+        print("Monte Carlo test seeded with %d" % seed)
         TestFactory().run(MonteCarlo(seed), limit)
     else:
-        print "Sequential compilation test"
+        print("Sequential compilation test")
         TestFactory().run(Sequential())
