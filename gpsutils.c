@@ -367,6 +367,16 @@ void gps_merge_fix(struct gps_fix_t *to,
 	to->ecef.vz = from->ecef.vz;
 	to->ecef.vAcc = from->ecef.vAcc;
     }
+    if ((transfer & NED_SET) != 0) {
+	to->NED.relPosN = from->NED.relPosN;
+	to->NED.relPosE = from->NED.relPosE;
+	to->NED.relPosD = from->NED.relPosD;
+    }
+    if ((transfer & VNED_SET) != 0) {
+	to->NED.velN = from->NED.velN;
+	to->NED.velE = from->NED.velE;
+	to->NED.velD = from->NED.velD;
+    }
     if ('\0' != from->datum[0]) {
         strlcpy(to->datum, from->datum, sizeof(to->datum));
     }
