@@ -4114,8 +4114,10 @@ class ubx(object):
         }
 
     def nav_relposned(self, buf):
-        """\
-UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
+        """UBX-NAV-RELPOSNED decode
+Relative Positioning Information in NED frame.
+protVer 20+
+High Precision GNSS products only."""
 
         m_len = len(buf)
         if 0 == m_len:
@@ -4632,7 +4634,8 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
         return '  iTOW %d ecef: VX %d VY %d VZ %d vAcc:%u' % u
 
     def nav_velned(self, buf):
-        """UBX-NAV-VELNED decode"""
+        """UBX-NAV-VELNED decode.
+protVer 15+."""
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -6478,6 +6481,7 @@ UBX-NAV-RELPOSND decode, Relative Positioning Information in NED frame"""
                     "help": "poll UBX-NAV-PVT Navigation Position Velocity "
                     "Time Solution"},
         # UBX-NAV-RELPOSNED
+        # HP only, 20+, otherwise not ACKed or NACKed
         "NAV-RELPOSNED": {"command": send_poll, "opt": [0x01, 0x3c],
                           "help": "poll UBX-NAV-RELPOSNED Relative "
                           "Positioning Information in NED frame"},
