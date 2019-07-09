@@ -1120,7 +1120,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
 }
 
 /*
- * Velocity Position ECEF message
+ * Velocity Position ECEF message, UBX-NAV-VELECEF
  */
 static gps_mask_t
 ubx_msg_nav_velecef(struct gps_device_t *session, unsigned char *buf,
@@ -1146,6 +1146,36 @@ ubx_msg_nav_velecef(struct gps_device_t *session, unsigned char *buf,
 	session->newdata.ecef.vy,
 	session->newdata.ecef.vz,
 	session->newdata.ecef.vAcc);
+    return mask;
+}
+
+/*
+ * Velocity NED message, UBX-NAV-VELNED
+ * protocol versions 15+
+ */
+static gps_mask_t
+ubx_msg_nav_velned(struct gps_device_t *session, unsigned char *buf,
+		size_t data_len)
+{
+    gps_mask_t mask = VNED_SET;
+
+    if (36 > data_len) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "Runt NAV-VELNED message, payload len %zd", data_len);
+	return 0;
+    }
+
+    session->driver.ubx.iTOW = getles32(buf, 0);
+    session->newdata.NED.velN = getles32(buf, 4) / 100.0;
+    session->newdata.NED.velN = getles32(buf, 8) / 100.0;
+    session->newdata.NED.velN = getles32(buf, 12) / 100.0;
+    /* ignore speed for now */
+    gpsd_log(&session->context->errout, LOG_DATA,
+	"UBX-NAV-VELNED: iTOW=%lld NED velN=%.2f velE=%.2f velD=%.2f\n",
+	 (long long)session->driver.ubx.iTOW,
+	session->newdata.NED.velN,
+	session->newdata.NED.velE,
+	session->newdata.NED.velD);
     return mask;
 }
 
@@ -1778,6 +1808,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
 	break;
     case UBX_NAV_VELNED:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX-NAV-VELNED\n");
+	mask = ubx_msg_nav_velned(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
 
     case UBX_RXM_ALM:
