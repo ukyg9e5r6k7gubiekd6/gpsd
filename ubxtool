@@ -5809,6 +5809,27 @@ protVer 15+."""
         # disable, then enable
         gps_model.send_cfg_gnss1(6, able)
 
+    def send_able_ned(self, able):
+        """Enable NAV-RELPOSNED and VELNED messages.
+protver 15+ required for VELNED
+protver 20+, and HP GNSS, required for RELPOSNED"""
+        if 15 > opts['protver']:
+            sys.stderr.write('%s: WARNING: protver %d too low for NED\n' %
+                             (PROG_NAME, opts['protver']))
+            return
+
+        # set NAV-VELNED rate
+        gps_model.send_cfg_msg(1, 0x12, able)
+
+        if 20 > opts['protver']:
+            sys.stderr.write('%s: WARNING: protver %d too low for '
+                             'RELPOSNED\n' %
+                             (PROG_NAME, opts['protver']))
+            return
+
+        # set NAV-RELPOSNED rate
+        gps_model.send_cfg_msg(1, 0x3C, able)
+
     def send_able_nmea(self, able):
         """dis/enable basic NMEA messages"""
 
@@ -6260,6 +6281,9 @@ protVer 15+."""
         # en/dis able GLONASS
         "GLONASS": {"command": send_able_glonass,
                     "help": "GLONASS"},
+        # en/dis able NED
+        "NED": {"command": send_able_ned,
+                "help": "NAV-VELNED and NAV-RELPOSNED"},
         # en/dis able basic NMEA messages
         "NMEA": {"command": send_able_nmea,
                  "help": "basic NMEA messages"},
