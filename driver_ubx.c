@@ -1167,8 +1167,8 @@ ubx_msg_nav_velned(struct gps_device_t *session, unsigned char *buf,
 
     session->driver.ubx.iTOW = getles32(buf, 0);
     session->newdata.NED.velN = getles32(buf, 4) / 100.0;
-    session->newdata.NED.velN = getles32(buf, 8) / 100.0;
-    session->newdata.NED.velN = getles32(buf, 12) / 100.0;
+    session->newdata.NED.velE = getles32(buf, 8) / 100.0;
+    session->newdata.NED.velD = getles32(buf, 12) / 100.0;
     /* ignore speed for now */
     gpsd_log(&session->context->errout, LOG_DATA,
 	"UBX-NAV-VELNED: iTOW=%lld NED velN=%.2f velE=%.2f velD=%.2f\n",
