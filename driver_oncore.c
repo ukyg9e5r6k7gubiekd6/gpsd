@@ -133,10 +133,9 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 
     session->newdata.latitude = lat;
     session->newdata.longitude = lon;
-    session->gpsdata.separation =
-	wgs84_separation(session->newdata.latitude,
-			 session->newdata.longitude);
-    session->newdata.altitude = alt - session->gpsdata.separation;
+    session->newdata.geoid_sep = wgs84_separation(session->newdata.latitude,
+			                          session->newdata.longitude);
+    session->newdata.altitude = alt;  /* assume WGS84 */
     session->newdata.speed = speed;
     session->newdata.track = track;
 

@@ -406,10 +406,31 @@ static gps_mask_t hnd_129540(unsigned char *bu, int len, PGN *pgn, struct gps_de
 
 
 /*
- *   PGN 129029: GNSS Positition Data
+ *   PGN 129029: GNSS Position Data
  */
 static gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
+    /* field  description
+     *  1     SID
+     *  2     Position Date
+     *  3     Position time
+     *  4     Latitude
+     *  5     Longitude
+     *  6     Altitude (what kind? Assume WGS84)
+     *  7     Type of System
+     *  8     Method, GNSS
+     *  9     Integrity
+     * 10     reserved
+     * 11     Number of SVs
+     * 12     HDOP
+     * 13     PDOP
+     * 14     Geoidal Separation
+     * 15     # of reference stations
+     * 16     REf station 1 type
+     * 17     REf station 1 ID
+     * 18     REf station 1 DGNSS correction age
+     * [ last 3 repeated]
+     */
     gps_mask_t mask;
 
     print_data(session->context, bu, len, pgn);
@@ -451,8 +472,7 @@ static gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_de
     }
     mask                            |= STATUS_SET;
 
-    session->gpsdata.separation      = getles32(bu, 38) / 100.0;
-    session->newdata.altitude       -= session->gpsdata.separation;
+    session->newdata.geoid_sep       = getles32(bu, 38) / 100.0;
 
     session->gpsdata.satellites_used = (int)bu[33];
 
