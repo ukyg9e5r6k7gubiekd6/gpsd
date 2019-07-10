@@ -691,7 +691,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     session->newdata.ecef.vy = getles32(buf, 32) / 100.0;
     session->newdata.ecef.vz = getles32(buf, 36) / 100.0;
     session->newdata.ecef.vAcc = getleu32(buf, 40) / 100.0;
-    ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
+    ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
 	session->newdata.ecef.x, session->newdata.ecef.y,
 	session->newdata.ecef.z, session->newdata.ecef.vx,
 	session->newdata.ecef.vy, session->newdata.ecef.vz);
