@@ -187,7 +187,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	session->newdata.ecef.vx = (double)getles16(buf2, 21) / 10.0,
 	session->newdata.ecef.vy = (double)getles16(buf2, 23) / 10.0,
 	session->newdata.ecef.vz = (double)getles16(buf2, 25) / 10.0;
-	ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
+	ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
 		     session->newdata.ecef.x, session->newdata.ecef.y,
 		     session->newdata.ecef.z, session->newdata.ecef.vx,
 		     session->newdata.ecef.vy, session->newdata.ecef.vz);
