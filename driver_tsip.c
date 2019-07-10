@@ -790,9 +790,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->newdata.longitude = (double)ul2 * SEMI_2_DEG;
 	    if (session->newdata.longitude > 180.0)
 		session->newdata.longitude -= 360.0;
-	    session->newdata.geoid_sep =
-		wgs84_separation(session->newdata.latitude,
-				 session->newdata.longitude);
 	    session->newdata.altitude = (double)sl2 * 1e-3;
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->newdata.mode = MODE_NO_FIX;
@@ -868,9 +865,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->newdata.longitude = (double)ul2 * SEMI_2_DEG;
 	    if (session->newdata.longitude > 180.0)
 		session->newdata.longitude -= 360.0;
-	    session->newdata.geoid_sep =
-		wgs84_separation(session->newdata.latitude,
-				 session->newdata.longitude);
 	    session->newdata.altitude = (double)sl3 * 1e-3;
 	    if ((u2 & 0x20) != (uint8_t) 0)	/* check velocity scaling */
 		d5 = 0.02;
