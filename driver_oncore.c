@@ -127,14 +127,12 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     dop = getbeu16(buf, 35) / 10.0f;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "oncore NAVSOL - %lf %lf %.2lfm-%.2lfm | %.2fm/s %.1fdeg dop=%.1f\n",
-	     lat, lon, alt, wgs84_separation(lat, lon), speed, track,
+	     "oncore NAVSOL - %lf %lf %.2lfm | %.2fm/s %.1fdeg dop=%.1f\n",
+	     lat, lon, alt, speed, track,
 	     (float)dop);
 
     session->newdata.latitude = lat;
     session->newdata.longitude = lon;
-    session->newdata.geoid_sep = wgs84_separation(session->newdata.latitude,
-			                          session->newdata.longitude);
     session->newdata.altitude = alt;  /* assume WGS84 */
     session->newdata.speed = speed;
     session->newdata.track = track;
