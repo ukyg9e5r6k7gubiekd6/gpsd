@@ -359,7 +359,7 @@ ubx_msg_nav_hpposecef(struct gps_device_t *session, unsigned char *buf,
  */
 static gps_mask_t
 ubx_msg_nav_hpposllh(struct gps_device_t *session, unsigned char *buf,
-		   size_t data_len UNUSED)
+		   size_t data_len)
 {
     int version;
     gps_mask_t mask = 0;
@@ -584,6 +584,64 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
 	gpsd_log(&session->context->errout, LOG_DATA,
 	     "  headVeh %.5f magDec %.2f magAcc %.2f\n",
 	     session->newdata.track, magDec, magAcc);
+    }
+    return mask;
+}
+
+
+ /**
+ * High Precision Relative Positioning Information in NED frame
+ * UBX-NAV-RELPOSNED, Class 1, ID x3c
+ * HP GNSS only, protver 20+
+ */
+static gps_mask_t
+ubx_msg_nav_relposned(struct gps_device_t *session, unsigned char *buf,
+		      size_t data_len)
+{
+    int version;
+    unsigned refStationId, flags;
+    double accN, accE, accD;
+    gps_mask_t mask = 0;
+
+    if (40 > data_len) {
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "Runt NAV-RELPOSNED message, payload len %zd", data_len);
+	return mask;
+    }
+
+    mask = NED_SET;
+
+    version = getub(buf, 0);
+    refStationId = getleu16(buf, 2);
+    session->driver.ubx.iTOW = getles32(buf, 4);
+    session->newdata.NED.relPosN = (1e-2 * (getles32(buf, 8) +
+        (getsb(buf, 20) * 1e-2)));
+    session->newdata.NED.relPosE = (1e-2 * (getles32(buf, 12) +
+        (getsb(buf, 21) * 1e-2)));
+    session->newdata.NED.relPosD = (1e-2 * (getles32(buf, 16) +
+        (getsb(buf, 22) * 1e-2)));
+
+    accN = 1e-4 * getles32(buf, 24);
+    accE = 1e-4 * getles32(buf, 28);
+    accD = 1e-4 * getles32(buf, 32);
+    flags = getleu32(buf, 36);
+
+    gpsd_log(&session->context->errout, LOG_DATA,
+	"UBX-NAV-RELPOSNED: version %d iTOW=%lld refStationId %u flags x%x\n"
+        "UBX-NAV-RELPOSNED: relPos N=%.4f E=%.4f D=%.4f\n"
+        "UBX-NAV-RELPOSNED: acc N=%.4f E=%.4f D=%.4f\n",
+        version,
+	(long long)session->driver.ubx.iTOW,
+        refStationId,
+        flags,
+        session->newdata.NED.relPosN,
+        session->newdata.NED.relPosE,
+        session->newdata.NED.relPosD,
+        accN, accE, accD);
+
+    if (5 != (flags & 5)) {
+        /* gnssFixOK or relPosValid are false, no fix */
+        return 0;
     }
     return mask;
 }
@@ -1740,6 +1798,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
         break;
     case UBX_NAV_RELPOSNED:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX-NAV-RELPOSNED\n");
+	mask = ubx_msg_nav_relposned(session, &buf[UBX_PREFIX_LEN], data_len);
 	break;
     case UBX_NAV_RESETODO:
 	gpsd_log(&session->context->errout, LOG_DATA, "UBX-NAV-RESETODO\n");
