@@ -175,10 +175,10 @@ static gps_mask_t handle1000(struct gps_device_t *session)
      * The Rockwell Jupiter TU30-D140 reports altitude as uncorrected height
      * above WGS84 geoid.  The Zodiac binary protocol manual does not
      * specify whether word 31 is geodetic or WGS 84.
+     * Here we assume altitude is always wgs84.
      */
     session->newdata.altitude = ((long)getzlong(31)) * 1e-2;
-    session->gpsdata.separation = ((short)getzword(33)) * 1e-2;
-    session->newdata.altitude -= session->gpsdata.separation;
+    session->newdata.geoid_sep = ((short)getzword(33)) * 1e-2;
     session->newdata.speed = (int)getzlong(34) * 1e-2;
     session->newdata.track = (int)getzword(36) * RAD_2_DEG * 1e-3;
     session->mag_var = ((short)getzword(37)) * RAD_2_DEG * 1e-4;
