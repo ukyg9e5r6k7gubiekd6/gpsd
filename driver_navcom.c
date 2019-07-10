@@ -430,7 +430,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 
     session->newdata.altitude = (double)(altitude * EL_RES)
 	+ (ant_height_adj * D_RES) + (set_delta_up * D_RES);
-    session->gpsdata.separation = (double)(ellips_height - altitude) * EL_RES
+    session->newdata.geoid_sep = (double)(ellips_height - altitude) * EL_RES
 	+ (ant_height_adj * D_RES) + (set_delta_up * D_RES);
 
     /* Speed Data */
@@ -479,7 +479,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "Navcom: latitude = %f, longitude = %f, altitude = %f, geoid = %f\n",
 	     session->newdata.latitude, session->newdata.longitude,
-	     session->newdata.altitude, session->gpsdata.separation);
+	     session->newdata.altitude, session->newdata.geoid_sep);
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "Navcom: velocities: north = %f, east = %f, up = %f (track = %f, speed = %f)\n",
 	     vel_north * VEL_RES, vel_east * VEL_RES, vel_up * VEL_RES,
