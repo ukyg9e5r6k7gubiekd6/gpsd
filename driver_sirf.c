@@ -1789,8 +1789,6 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
 	STATUS_SET | MODE_SET | DOP_SET;
     session->newdata.latitude = (double)getbes32(buf, 1) * RAD_2_DEG * 1e-8;
     session->newdata.longitude = (double)getbes32(buf, 5) * RAD_2_DEG * 1e-8;
-    session->newdata.geoid_sep = wgs84_separation(session->newdata.latitude,
-			                          session->newdata.longitude);
     session->newdata.altitude = (double)getbes32(buf, 9) * 1e-3;
     session->newdata.speed = (double)getbes32(buf, 13) * 1e-3;
     session->newdata.climb = (double)getbes32(buf, 17) * 1e-3;
