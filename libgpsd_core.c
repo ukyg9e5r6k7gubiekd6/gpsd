@@ -622,7 +622,6 @@ foundit:
 }
 
 
-#ifndef NOFLOATS_ENABLE
 /*****************************************************************************
 
 Carl Carter of SiRF supplied this algorithm for computing DOPs from
@@ -1088,7 +1087,6 @@ static void gpsd_error_model(struct gps_device_t *session)
 	*lastfix = *fix;
     }
 }
-#endif /* NOFLOATS_ENABLE */
 
 int gpsd_await_data(fd_set *rfds,
 		    fd_set *efds,
@@ -1483,7 +1481,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
 	session->gpsdata.set = ONLINE_SET | received;
 
-#ifndef NOFLOATS_ENABLE
 	/*
 	 * Compute fix-quality data from the satellite positions.
 	 * These will not overwrite any DOPs reported from the packet
@@ -1495,7 +1492,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 					     &session->gpsdata,
 					     &session->gpsdata.dop);
 	}
-#endif /* NOFLOATS_ENABLE */
 
 	/* copy/merge device data into staging buffers */
 	if ((session->gpsdata.set & CLEAR_IS) != 0) {
@@ -1510,9 +1506,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	gps_merge_fix(&session->gpsdata.fix,
 		      session->gpsdata.set, &session->newdata);
 
-#ifndef NOFLOATS_ENABLE
 	gpsd_error_model(session);
-#endif /* NOFLOATS_ENABLE */
 
 	/*
 	 * Count good fixes. We used to check

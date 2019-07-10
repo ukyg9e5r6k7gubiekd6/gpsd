@@ -225,7 +225,6 @@ boolopts = (
     ("qt",            True,  "build QT bindings"),
     # Daemon options
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
-    ("nofloats",   False, "float ops are expensive, suppress error estimates"),
     ("reconfigure",   True,  "allow gpsd to change device settings"),
     ("squelch",       False, "squelch gpsd_log/gpsd_hexdump to save cpu"),
     # Build control
