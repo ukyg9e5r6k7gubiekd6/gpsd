@@ -835,11 +835,11 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	session->newdata.mode = MODE_2D;
 	mask |= LATLON_SET;
 	if ('\0' == field[11][0]) {
-	    session->gpsdata.separation =
+	    session->newdata.geoid_sep =
 		wgs84_separation(session->newdata.latitude,
 				 session->newdata.longitude);
 	} else {
-	    session->gpsdata.separation = safe_atof(field[11]);
+	    session->newdata.geoid_sep = safe_atof(field[11]);
 	}
 	/*
 	 * SiRF chipsets up to version 2.2 report a null altitude field.
