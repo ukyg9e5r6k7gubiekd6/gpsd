@@ -411,7 +411,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 
 	// geoid separation from WGS 84
 	// gpsd sign is opposite of garmin sign
-	session->gpsdata.separation = -pvt->msl_hght;
+	session->newdata.geoid_sep = -pvt->msl_hght;
 
 	/* Estimated position error in meters.  2 sigma
 	 * We follow the advice at <http://gpsinformation.net/main/errors.htm>.
