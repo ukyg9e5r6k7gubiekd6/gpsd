@@ -459,7 +459,7 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
     session->newdata.ecef.vy = (double)getbef32((const char *)buf, 41),
     session->newdata.ecef.vz = (double)getbef32((const char *)buf, 45);
 
-    ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
+    ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
 	session->newdata.ecef.x, session->newdata.ecef.y,
 	session->newdata.ecef.z, session->newdata.ecef.vx,
 	session->newdata.ecef.vy, session->newdata.ecef.vz);
