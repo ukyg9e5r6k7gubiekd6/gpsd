@@ -86,7 +86,6 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
     char time_str[20];
     char lat_str[BUF_SZ];
     char lon_str[BUF_SZ];
-    double geoid_sep = NAN;
 
     utc_to_hhmmss(session->gpsdata.fix.time, time_str, sizeof(time_str), &tm);
 
@@ -111,16 +110,11 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
 	else
 	    str_appendf(bufp, len, "%.2f,M,", session->gpsdata.fix.altitude);
 
-        /* temp hack for gpsdata.separation move to newdata.geoid_sep */
-        if (0 != isfinite(session->gpsdata.fix.geoid_sep)) {
-            geoid_sep = session->gpsdata.fix.geoid_sep;
-	} else if (0 != isfinite(session->gpsdata.separation)) {
-            geoid_sep = session->gpsdata.separation;
-        }
-	if (0 == isfinite(geoid_sep))
+        if (0 == isfinite(session->gpsdata.fix.geoid_sep)) {
 	    (void)strlcat(bufp, ",", len);
-	else
-	    str_appendf(bufp, len, "%.3f,M,", geoid_sep);
+	} else {
+	    str_appendf(bufp, len, "%.3f,M,", session->gpsdata.fix.geoid_sep);
+        }
 	if (0 == isfinite(session->mag_var))
 	    (void)strlcat(bufp, ",", len);
 	else {
