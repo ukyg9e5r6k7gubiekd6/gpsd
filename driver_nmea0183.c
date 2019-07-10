@@ -834,11 +834,7 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
     if (0 == do_lat_lon(&field[2], &session->newdata)) {
 	session->newdata.mode = MODE_2D;
 	mask |= LATLON_SET;
-	if ('\0' == field[11][0]) {
-	    session->newdata.geoid_sep =
-		wgs84_separation(session->newdata.latitude,
-				 session->newdata.longitude);
-	} else {
+	if ('\0' != field[11][0]) {
 	    session->newdata.geoid_sep = safe_atof(field[11]);
 	}
 	/*
