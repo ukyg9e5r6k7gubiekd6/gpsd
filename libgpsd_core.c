@@ -1024,6 +1024,14 @@ static void gpsd_error_model(struct gps_device_t *session)
 	    fix->sep = session->gpsdata.dop.pdop * p_uere;
 	}
 
+        /* geoid (ellipsoid) separation */
+	if (0 == isfinite(fix->geoid_sep) &&
+	    0 != isfinite(fix->latitude) &&
+	    0 != isfinite(fix->longitude)) {
+		fix->geoid_sep = wgs84_separation(fix->latitude,
+				                  fix->longitude);
+        }
+
 	/*
 	 * If we have a current fix and an old fix, and the packet handler
 	 * didn't set the speed error, climb error or track error members
