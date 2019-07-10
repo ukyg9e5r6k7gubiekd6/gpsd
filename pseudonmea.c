@@ -77,7 +77,7 @@ static void utc_to_hhmmss(timestamp_t time, char *buf, ssize_t buf_sz,
 }
 
 /* Dump a $GPGGA.
- * looks like this is only called from net_ntrip.c
+ * looks like this is only called from net_ntrip.c and nmea_tpv_dump()
  */
 void gpsd_position_fix_dump(struct gps_device_t *session,
 			    char bufp[], size_t len)
