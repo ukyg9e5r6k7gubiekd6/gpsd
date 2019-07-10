@@ -936,6 +936,13 @@ static void gpsd_error_model(struct gps_device_t *session)
     if (9999.9 < fabs(fix->speed))
 	fix->speed = NAN;
 
+    /* compute speed from velN and velE if needed and possible */
+    if (0 == isfinite(fix->speed) &&
+        0 != isfinite(fix->NED.velN) &&
+        0 != isfinite(fix->NED.velE)) {
+	fix->speed = hypot(fix->NED.velN, fix->NED.velE);
+    }
+
     /* sanity check the climb, 10,000 m/s should be a nice max */
     if (9999.9 < fabs(fix->climb))
 	fix->climb = NAN;
