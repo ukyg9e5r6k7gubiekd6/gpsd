@@ -471,22 +471,31 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		 "Garmin: Appl, mode %d, status %d\n",
 		 session->newdata.mode, session->gpsdata.status);
 
-	gpsd_log(&session->context->errout, LOG_INF,
-		 "Garmin: UTC Time: %lf\n",
-		 session->newdata.time);
-	gpsd_log(&session->context->errout, LOG_INF,
-		 "Garmin: Geoid Separation (MSL-WGS84): from garmin %lf, calculated %lf\n",
-		 -pvt->msl_hght,
-		 wgs84_separation(session->newdata.latitude,
-				     session->newdata.longitude));
+        /* save some expensive calculations if not needed */
+        if (session->context->errout.debug >= LOG_INF) {
 
-	gpsd_log(&session->context->errout, LOG_INF,
-		 "Garmin: Alt: %.3f, Epe: %.3f, Eph: %.3f, Epv: %.3f, Fix: %d, Gps_tow: %f, Lat: %.3f, Lon: %.3f, LonVel: %.3f, LatVel: %.3f, AltVel: %.3f, MslHgt: %.3f, Leap: %d, GarminDays: %d\n",
-		 pvt->alt, pvt->epe, pvt->eph, pvt->epv, GPSD_LE16TOH(pvt->fix),
-		 pvt->gps_tow, session->newdata.latitude,
-		 session->newdata.longitude, pvt->lon_vel, pvt->lat_vel,
-		 pvt->alt_vel, pvt->msl_hght, GPSD_LE16TOH(pvt->leap_sec),
-		 GPSD_LE32TOH(pvt->grmn_days));
+	    gpsd_log(&session->context->errout, LOG_INF,
+		     "Garmin: UTC Time: %lf\n",
+		     session->newdata.time);
+	    gpsd_log(&session->context->errout, LOG_INF,
+		     "Garmin: Geoid Separation (MSL-WGS84): from garmin %lf, "
+                     "calculated %lf\n",
+		     -pvt->msl_hght,
+		     wgs84_separation(session->newdata.latitude,
+					 session->newdata.longitude));
+
+	    gpsd_log(&session->context->errout, LOG_INF,
+		     "Garmin: Alt: %.3f, Epe: %.3f, Eph: %.3f, Epv: %.3f, "
+                     "Fix: %d, Gps_tow: %f, Lat: %.3f, Lon: %.3f, "
+                     "LonVel: %.3f, LatVel: %.3f, AltVel: %.3f, MslHgt: %.3f, "
+                     "Leap: %d, GarminDays: %d\n",
+		     pvt->alt, pvt->epe, pvt->eph, pvt->epv,
+                     GPSD_LE16TOH(pvt->fix),
+		     pvt->gps_tow, session->newdata.latitude,
+		     session->newdata.longitude, pvt->lon_vel, pvt->lat_vel,
+		     pvt->alt_vel, pvt->msl_hght, GPSD_LE16TOH(pvt->leap_sec),
+		     GPSD_LE32TOH(pvt->grmn_days));
+        }
 
 	if (session->newdata.mode > MODE_NO_FIX) {
 	    /* data only valid with a fix */
