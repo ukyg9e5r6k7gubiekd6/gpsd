@@ -107,7 +107,8 @@ struct gps_fix_t {
     double epy;  	/* Latitude position uncertainty, meters */
     double longitude;	/* Longitude in degrees (valid if mode >= 2) */
     double epx;  	/* Longitude position uncertainty, meters */
-    double altitude;	/* Altitude in meters (valid if mode == 3) */
+    double altitude;	/* Altitude in meters probably WGS84
+                         * (valid if mode == 3) */
     double epv;  	/* Vertical position uncertainty, meters */
     double track;	/* Course made good (relative to true north) */
     double epd;		/* Track uncertainty, degrees */
@@ -2164,9 +2165,6 @@ struct gps_data_t {
     void* gps_fd;
 #endif
     struct gps_fix_t	fix;	/* accumulated PVT data */
-
-    /* this should move to the per-driver structure */
-    double separation;		/* Geoidal separation, MSL - WGS84 (Meters) */
 
     /* GPS status -- always valid */
     int    status;		/* Do we have a fix? */

@@ -424,7 +424,6 @@ void gpsd_clear(struct gps_device_t *session)
     gps_clear_dop(&session->gpsdata.dop);
     gps_clear_fix(&session->gpsdata.fix);
     session->gpsdata.status = STATUS_NO_FIX;
-    session->gpsdata.separation = NAN;
     session->mag_var = NAN;
     session->releasetime = (time_t)0;
     session->badcount = 0;

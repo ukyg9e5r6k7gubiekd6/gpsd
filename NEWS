@@ -3,6 +3,7 @@
 3.19.1: Dev branch in process
   Add NED and geoid_sep to gps_fix_t and TPV JSON.
   Add "-e NED" to ubxtool to enable NED messages.
+  gpsdata.separation replaced by gpsdata.fix.geoid_sep.
 
 3.19: 2019-07-01
   Rearrange rawdata_t.  Bump the API because gps_data_t changed.
