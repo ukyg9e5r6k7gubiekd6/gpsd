@@ -386,8 +386,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 
 	session->newdata.latitude = radtodeg(pvt->lat);
 	session->newdata.longitude = radtodeg(pvt->lon);
-	// altitude over WGS84 converted to MSL
-	session->newdata.altitude = pvt->alt + pvt->msl_hght;
+	// altitude is WGS84
+	session->newdata.altitude = pvt->alt;
 
 	// geoid separation from WGS 84
 	// gpsd sign is opposite of garmin sign
