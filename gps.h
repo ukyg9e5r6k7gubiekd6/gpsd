@@ -122,7 +122,7 @@ struct gps_fix_t {
     /* Garmin, not gpsd, calls this estimated position error (epe) */
     double sep;
     /* Geoid separation (ellipsoid separation)
-     * Difference between ellipsoid and mean sea level, In meters */
+     * Height above ellipsoid.  Postive is ellipsoid above geoid. In meters */
     double geoid_sep;
 
     double magnetic_track;  /* Course (relative to Magnetic North) */
