@@ -410,6 +410,9 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 
 	/* keep climb in meters/sec */
 	session->newdata.climb = pvt->alt_vel;
+	session->newdata.NED.velN = pvt->lat_vel;
+	session->newdata.NED.velE = pvt->lon_vel;
+	session->newdata.NED.velD = -pvt->alt_vel;
 
 	track = atan2(pvt->lon_vel, pvt->lat_vel);
 	if (track < 0) {
@@ -482,7 +485,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    mask |=
 		TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET |
 		SPEED_SET | TRACK_SET | CLIMB_SET | HERR_SET | PERR_IS |
-		CLEAR_IS | REPORT_IS;
+		CLEAR_IS | REPORT_IS | VNED_SET;
 	    /*
 	     * Garmin documentation says we should wait until four good fixes
 	     * have been seen before trying to use the device for precision
