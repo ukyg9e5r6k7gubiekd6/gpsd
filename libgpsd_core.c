@@ -946,6 +946,12 @@ static void gpsd_error_model(struct gps_device_t *session)
             fix->longitude = NAN;
         }
     }
+    if (0 != isfinite(fix->longitude)) {
+	if ((180.0 < fix->longitude) || (-180.0 > fix->longitude)) {
+            fix->latitude = NAN;
+            fix->longitude = NAN;
+        }
+    }
 
     /*
      * OK, this is not an error computation, but we're at the right
