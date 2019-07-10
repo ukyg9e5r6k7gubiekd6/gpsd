@@ -386,16 +386,6 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 
 	session->newdata.latitude = radtodeg(pvt->lat);
 	session->newdata.longitude = radtodeg(pvt->lon);
-	/* sanity check the lon */
-	if (180.0 < session->newdata.longitude) {
-	    session->newdata.longitude = 180.0;
-	    gpsd_log(&session->context->errout, LOG_INF,
-		     "Garmin: ERROR: Longitude overrange\n");
-	} else if (-180.0 > session->newdata.longitude) {
-	    session->newdata.longitude = -180.0;
-	    gpsd_log(&session->context->errout, LOG_INF,
-		     "Garmin: ERROR: Longitude negative overrange\n");
-	}
 	// altitude over WGS84 converted to MSL
 	session->newdata.altitude = pvt->alt + pvt->msl_hght;
 
