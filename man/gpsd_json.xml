@@ -356,8 +356,8 @@ try to compute the value from the skyview.</para>
 	<entry>geoidSep</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Geoid separation: difference between ellipsoid and mean
-        sea level in meters.</entry>
+        <entry>Geoid separation also known as Height above Ellipsoid.
+The difference between ellipsoid and mean sea level in meters.</entry>
 </row>
 
 </tbody>
