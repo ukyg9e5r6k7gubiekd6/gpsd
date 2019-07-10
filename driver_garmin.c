@@ -385,16 +385,6 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		 "Garmin: time_l: %ld\n", (long int)time_l);
 
 	session->newdata.latitude = radtodeg(pvt->lat);
-	/* sanity check the lat */
-	if (90.0 < session->newdata.latitude) {
-	    session->newdata.latitude = 90.0;
-	    gpsd_log(&session->context->errout, LOG_INF,
-		     "Garmin: ERROR: Latitude overrange\n");
-	} else if (-90.0 > session->newdata.latitude) {
-	    session->newdata.latitude = -90.0;
-	    gpsd_log(&session->context->errout, LOG_INF,
-		     "Garmin: ERROR: Latitude negative overrange\n");
-	}
 	session->newdata.longitude = radtodeg(pvt->lon);
 	/* sanity check the lon */
 	if (180.0 < session->newdata.longitude) {
