@@ -270,7 +270,8 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	     session->lexer.outbuflen, (char*)session->lexer.outbuffer);
 
     if (session->lexer.outbuflen < 54) {
-	/* trailing CR and LF can be ignored; ('@' + 54x 'DATA' + '\r\n') has length 57 */
+	/* trailing CR and LF can be ignored; ('@' + 54x 'DATA' + '\r\n')
+         * has length 57 */
 	gpsd_log(&session->context->errout, LOG_WARN,
 		 "Message is too short, rejected.\n");
 	return ONLINE_SET;
@@ -283,7 +284,8 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
     do {
 	unsigned int result;
 	char *buf = (char *)session->lexer.outbuffer + 1;
-	gpsd_log(&session->context->errout, LOG_PROG, "Timestamp: %.12s\n", buf);
+	gpsd_log(&session->context->errout, LOG_PROG,
+                 "Timestamp: %.12s\n", buf);
 
 	/* year */
 	if (0 != gar_int_decode(session->context,
@@ -305,7 +307,8 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	if (0 != gar_int_decode(session->context,
 				buf + 6, 2, 0, 23, &result))
 	    break;
-	session->driver.garmintxt.date.tm_hour = (int)result;	/* mday update?? */
+        /* mday update?? */
+	session->driver.garmintxt.date.tm_hour = (int)result;
 	/* minute */
 	if (0 != gar_int_decode(session->context,
 				buf + 8, 2, 0, 59, &result))
@@ -324,7 +327,8 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	mask |= TIME_SET;
     } while (0);
 
-    /* assume that possition is unknown; if the position is known we will fix status information later */
+    /* assume that position is unknown; if the position is known we
+     * will fix status information later */
     session->newdata.mode = MODE_NO_FIX;
     session->gpsdata.status = STATUS_NO_FIX;
     mask |= MODE_SET | STATUS_SET | CLEAR_IS | REPORT_IS;
@@ -417,50 +421,52 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 		       (char *)session->lexer.outbuffer + 34, 6, "+-", 1.0,
 		       &alt))
 	    break;
+        /* FIXME: alt is MSL, we want WGS84... */
 	session->newdata.altitude = alt;
 	mask |= ALTITUDE_SET;
     } while (0);
 
     /* Velocity */
     do {
-	double ewvel, nsvel, speed, track;
-	if (0 !=
-	    gar_decode(session->context,
-		       (char *)session->lexer.outbuffer + 40, 5, "EW", 10.0,
-		       &ewvel))
+	double ewvel, nsvel, track;
+	if (0 != gar_decode(session->context,
+		            (char *)session->lexer.outbuffer + 40, 5,
+                            "EW", 10.0, &ewvel))
 	    break;
-	if (0 !=
-	    gar_decode(session->context,
-		       (char *)session->lexer.outbuffer + 45, 5, "NS", 10.0,
-		       &nsvel))
+	if (0 != gar_decode(session->context,
+		            (char *)session->lexer.outbuffer + 45, 5,
+                            "NS", 10.0, &nsvel))
 	    break;
-	speed = sqrt(ewvel * ewvel + nsvel * nsvel);	/* is this correct formula? Result is in mps */
-	session->newdata.speed = speed;
-	track = atan2(ewvel, nsvel) * RAD_2_DEG;	/* is this correct formula? Result is in degrees */
+
+        session->newdata.NED.velN = ewvel;
+        session->newdata.NED.velE = nsvel;
+	/* is this correct formula? Result is in degrees */
+	track = atan2(ewvel, nsvel) * RAD_2_DEG;
 	if (track < 0.0)
 	    track += 360.0;
 	session->newdata.track = track;
-	mask |= SPEED_SET | TRACK_SET;
+	mask |= SPEED_SET | TRACK_SET | VNED_SET;
     } while (0);
 
 
     /* Climb (vertical velocity) */
     do {
 	double climb;
-	if (0 !=
-	    gar_decode(session->context,
-		       (char *)session->lexer.outbuffer + 50, 5, "UD", 100.0,
-		       &climb))
+	if (0 != gar_decode(session->context,
+		            (char *)session->lexer.outbuffer + 50, 5,
+                            "UD", 100.0, &climb))
 	    break;
 	session->newdata.climb = climb;	/* climb in mps */
-	mask |= CLIMB_SET;
+        session->newdata.NED.velD = -climb;
+	mask |= CLIMB_SET | VNED_SET;
     } while (0);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GTXT: time=%.2f, lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f climb=%.2f eph=%.2f mode=%d status=%d\n",
+	     "GTXT: time=%.2f, lat=%.2f lon=%.2f alt=%.2f track=%.2f "
+             "climb=%.2f eph=%.2f mode=%d status=%d\n",
 	     session->newdata.time, session->newdata.latitude,
 	     session->newdata.longitude, session->newdata.altitude,
-	     session->newdata.speed, session->newdata.track,
+	     session->newdata.track,
 	     session->newdata.climb, session->newdata.eph,
 	     session->newdata.mode,
 	     session->gpsdata.status);
