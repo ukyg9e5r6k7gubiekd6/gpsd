@@ -113,19 +113,19 @@ void ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
     lambda = atan2(y, x);
     p = sqrt(pow(x, 2) + pow(y, 2));
     theta = atan2(z * a, p * b);
-    phi =
-	atan2(z + e_2 * b * pow(sin(theta), 3),
-	      p - e2 * a * pow(cos(theta), 3));
+    phi = atan2(z + e_2 * b * pow(sin(theta), 3),
+	        p - e2 * a * pow(cos(theta), 3));
     n = a / sqrt(1.0 - e2 * pow(sin(phi), 2));
+    /* what datum is h in? */
     h = p / cos(phi) - n;
     fix->latitude = phi * RAD_2_DEG;
     fix->longitude = lambda * RAD_2_DEG;
     *separation = wgs84_separation(fix->latitude, fix->longitude);
+    /* this seems odd? */
     fix->altitude = h - *separation;
     /* velocity computation */
-    vnorth =
-	-vx * sin(phi) * cos(lambda) - vy * sin(phi) * sin(lambda) +
-	vz * cos(phi);
+    vnorth = -vx * sin(phi) * cos(lambda) - vy * sin(phi) * sin(lambda) +
+	     vz * cos(phi);
     veast = -vx * sin(lambda) + vy * cos(lambda);
 
     fix->climb =
