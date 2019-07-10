@@ -241,7 +241,7 @@ static gps_mask_t greis_msg_PV(struct gps_device_t *session,
     session->newdata.ecef.vy = vy;
     session->newdata.ecef.vz = vz;
     session->newdata.ecef.vAcc = v_sigma;
-    ecef_to_wgs84fix(&session->newdata, &session->gpsdata.separation,
+    ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
 		     x, y, z, vx, vy, vz);
 
     /* GREIS Reference Guide 3.4.2 "General Notes" part "Solution Types" */
