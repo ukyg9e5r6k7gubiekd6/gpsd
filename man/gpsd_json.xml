@@ -146,7 +146,8 @@ try to compute the value from the skyview.</para>
 	<entry>alt</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Altitude in meters. Present if mode is 3.</entry>
+        <entry>Altitude in meters.  Probably WGS84. Present if mode is 3.
+MSL is alt + geoidSep.</entry>
 </row>
 <row>
 	<entry>climb</entry>

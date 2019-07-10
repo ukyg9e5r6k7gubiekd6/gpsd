@@ -108,7 +108,8 @@ struct gps_fix_t {
     double longitude;	/* Longitude in degrees (valid if mode >= 2) */
     double epx;  	/* Longitude position uncertainty, meters */
     double altitude;	/* Altitude in meters probably WGS84
-                         * (valid if mode == 3) */
+                         * (valid if mode == 3)
+                         * MSL = altitude + geoid_sep */
     double epv;  	/* Vertical position uncertainty, meters */
     double track;	/* Course made good (relative to true north) */
     double epd;		/* Track uncertainty, degrees */
