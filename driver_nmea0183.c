@@ -660,6 +660,10 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
 		    session->newdata.mode = MODE_3D;
                 }
             }
+            /* only need geoid_sep if in 3D mode */
+	    if ('\0' != field[10][0]) {
+		session->newdata.geoid_sep = safe_atof(field[10]);
+	    }
 	}
     } else {
 	session->newdata.mode = MODE_NO_FIX;
@@ -722,7 +726,7 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
     int newstatus;
     char last_last_gga_talker = session->nmea.last_gga_talker;
     int fix;
-    char *altitude = field[9];
+    char altitude;
     int satellites_visible;
     session->nmea.last_gga_talker = field[0][1];
 
@@ -842,8 +846,8 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	 * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
 	 * If we see this, force mode to 2D at most.
 	 */
-	if ('\0' != altitude[0]) {
-	    session->newdata.altitude = safe_atof(altitude);
+	if ('\0' != field[9][0]) {
+	    session->newdata.altitude = safe_atof(field[9]);
 	    mask |= ALTITUDE_SET;
 	    /*
 	     * This is a bit dodgy.  Technically we shouldn't set the mode
@@ -857,6 +861,10 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	    if (4 <= satellites_visible) {
 		session->newdata.mode = MODE_3D;
 	    }
+            /* only need geoid_sep if in 3D mode */
+	    if ('\0' != field[8][0]) {
+		session->newdata.geoid_sep = safe_atof(field[11]);
+	    }
 	}
 	if (3 > satellites_visible) {
 	    session->newdata.mode = MODE_NO_FIX;
@@ -869,6 +877,7 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
     if ('\0' != field[8][0]) {
 	session->gpsdata.dop.hdop = safe_atof(field[8]);
     }
+
 
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "GGA: hhmmss=%s lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d\n",

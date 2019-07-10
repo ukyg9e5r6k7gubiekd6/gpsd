@@ -347,8 +347,13 @@ void gps_merge_fix(struct gps_fix_t *to,
     if (0 != isfinite(from->eps)) {
 	to->eps = from->eps;
     }
+    /* spherical error probability, not geoid separation */
     if (0 != isfinite(from->sep)) {
 	to->sep = from->sep;
+    }
+    /* geoid separation, not sperical error probability */
+    if (0 != isfinite(from->geoid_sep)) {
+	to->geoid_sep = from->geoid_sep;
     }
     if (0 != isfinite(from->epv)) {
 	to->epv = from->epv;

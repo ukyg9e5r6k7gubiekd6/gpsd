@@ -121,8 +121,8 @@ struct gps_fix_t {
     /* sperical error probability, 3D. meters, maybe 50%, maybe 95% */
     /* Garmin, not gpsd, calls this estimated position error (epe) */
     double sep;
-    /* Geoid separation: difference between ellipsoid and mean sea level.
-     * In meters */
+    /* Geoid separation (ellipsoid separation)
+     * Difference between ellipsoid and mean sea level, In meters */
     double geoid_sep;
 
     double magnetic_track;  /* Course (relative to Magnetic North) */
