@@ -863,7 +863,8 @@ static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
     return DOP_SET;
 }
 
-/* compute errors and derived quantities */
+/* compute errors and derived quantities
+ * also a handy place to do final sanity checking */
 static void gpsd_error_model(struct gps_device_t *session)
 {
     struct gps_fix_t *fix;           /* current fix */
@@ -938,6 +939,13 @@ static void gpsd_error_model(struct gps_device_t *session)
     /* sanity check the climb, 10,000 m/s should be a nice max */
     if (9999.9 < fabs(fix->climb))
 	fix->climb = NAN;
+
+    if (0 != isfinite(fix->latitude)) {
+	if ((90.0 < fix->latitude) || (-90.0 > fix->latitude)) {
+            fix->latitude = NAN;
+            fix->longitude = NAN;
+        }
+    }
 
     /*
      * OK, this is not an error computation, but we're at the right
