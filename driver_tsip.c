@@ -790,11 +790,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->newdata.longitude = (double)ul2 * SEMI_2_DEG;
 	    if (session->newdata.longitude > 180.0)
 		session->newdata.longitude -= 360.0;
-	    session->gpsdata.separation =
+	    session->newdata.geoid_sep =
 		wgs84_separation(session->newdata.latitude,
 				 session->newdata.longitude);
-	    session->newdata.altitude =
-		(double)sl2 * 1e-3 - session->gpsdata.separation;;
+	    session->newdata.altitude = (double)sl2 * 1e-3;
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->newdata.mode = MODE_NO_FIX;
 	    if ((u2 & 0x01) == (uint8_t) 0) {	/* Fix Available */
@@ -840,6 +839,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    sl1 = getbes32(buf, 9);	/* latitude */
 	    ul2 = getbeu32(buf, 13);	/* longitude */
 	    sl3 = getbes32(buf, 17);	/* altitude */
+            /* FIXME: set VNED here */
 	    s2 = getbes16(buf, 21);	/* east velocity */
 	    s3 = getbes16(buf, 23);	/* north velocity */
 	    s4 = getbes16(buf, 25);	/* up velocity */
@@ -868,11 +868,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->newdata.longitude = (double)ul2 * SEMI_2_DEG;
 	    if (session->newdata.longitude > 180.0)
 		session->newdata.longitude -= 360.0;
-	    session->gpsdata.separation =
+	    session->newdata.geoid_sep =
 		wgs84_separation(session->newdata.latitude,
 				 session->newdata.longitude);
-	    session->newdata.altitude =
-		(double)sl3 * 1e-3 - session->gpsdata.separation;;
+	    session->newdata.altitude = (double)sl3 * 1e-3;
 	    if ((u2 & 0x20) != (uint8_t) 0)	/* check velocity scaling */
 		d5 = 0.02;
 	    else
