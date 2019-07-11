@@ -2818,11 +2818,7 @@ static gps_mask_t processPSTI030(int count, char *field[],
 	session->newdata.NED.velE = east;
 	session->newdata.NED.velD = -session->newdata.climb;
 
-	session->newdata.track = atan2(east, north) * RAD_2_DEG;
-	if ( 0 > session->newdata.track )
-	    session->newdata.track += 360.0;
-
-        mask |= SPEED_SET | TRACK_SET | CLIMB_SET | VNED_SET;
+        mask |= CLIMB_SET | VNED_SET;
 
 	session->gpsdata.status = faa_mode(field[13][0]);
 	/* Ignore RTK Age and RTK Ratio, for now */
