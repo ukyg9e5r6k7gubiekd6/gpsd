@@ -440,7 +440,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 
         session->newdata.NED.velN = ewvel;
         session->newdata.NED.velE = nsvel;
-	mask |= SPEED_SET | TRACK_SET | VNED_SET;
+	mask |= VNED_SET;
     } while (0);
 
 
