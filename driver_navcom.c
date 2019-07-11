@@ -369,7 +369,6 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     /* Resolution of height and altitude values (2.0^-10) */
 #define EL_RES (0.0009765625)
     double vel_north, vel_east, vel_up;
-    double track;
     uint8_t gdop, pdop, hdop, vdop, tdop;
     /* This value means "undefined" */
 #define DOP_UNDEFINED (255)
@@ -441,11 +440,6 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     session->newdata.NED.velD = -vel_up * 0.1;
     session->newdata.climb = -session->newdata.NED.velD;
 
-    track = atan2(vel_east, vel_north);
-    if (track < 0)
-	track += 2 * GPS_PI;
-    session->newdata.track = track * RAD_2_DEG;
-
     /* Quality indicators */
     /* UNUSED fom = getub(buf, 40);     * FOM is DRMS */
     gdop = getub(buf, 41);
@@ -480,11 +474,10 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 	     session->newdata.latitude, session->newdata.longitude,
 	     session->newdata.altitude, session->newdata.geoid_sep);
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "Navcom: velocities: north = %f east = %f up = %f (track = %f)\n",
+	     "Navcom: velocities: north = %f east = %f up = %f\n",
 	     session->newdata.NED.velN,
 	     session->newdata.NED.velE,
-	     -session->newdata.NED.velD,
-	     session->newdata.track);
+	     -session->newdata.NED.velD);
 #undef D_RES
 #undef LL_RES
 #undef LL_FRAC_RES
@@ -498,7 +491,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 	| TIME_SET | NTPTIME_IS;
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.f "
-	     "speed=%.2f track=%.2f climb=%.2f mode=%d status=%d "
+	     "speed=%.2f climb=%.2f mode=%d status=%d "
 	     "gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f "
 	     "mask={LATLON|ALTITUDE|CLIMB|SPEED|TRACK|TIME|STATUS|MODE|"
 	     "USED|HERR|VERR|TIMERR|DOP}\n",
@@ -507,7 +500,6 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 	     session->newdata.longitude,
 	     session->newdata.altitude,
 	     session->newdata.speed,
-	     session->newdata.track,
 	     session->newdata.climb,
 	     session->newdata.mode,
 	     session->gpsdata.status,
