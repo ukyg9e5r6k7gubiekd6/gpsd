@@ -1844,7 +1844,9 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
     session->gpsdata.dop.tdop = (int)getub(buf, 38) / 5.0;
     session->driver.sirf.driverstate |= UBLOX;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "SiRF: EMD 0x62: time=%.2f lat=%.2f lon=%.2f alt=%.f speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f\n",
+	     "SiRF: EMD 0x62: time=%.2f lat=%.2f lon=%.2f alt=%.f speed=%.2f "
+             "track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f pdop=%.2f "
+             "hdop=%.2f vdop=%.2f tdop=%.2f\n",
 	     session->newdata.time, session->newdata.latitude,
 	     session->newdata.longitude, session->newdata.altitude,
 	     session->newdata.speed, session->newdata.track,
