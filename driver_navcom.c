@@ -369,8 +369,6 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     /* Resolution of height and altitude values (2.0^-10) */
 #define EL_RES (0.0009765625)
     double vel_north, vel_east, vel_up;
-    /* Resolution of velocity values (2.0^-10) */
-#define VEL_RES (0.0009765625)
     double track;
     uint8_t gdop, pdop, hdop, vdop, tdop;
     /* This value means "undefined" */
@@ -436,16 +434,17 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     /* Speed Data */
     vel_north = (double)getles3224(buf, 31);
     vel_east = (double)getles3224(buf, 34);
-    /* vel_up = getles3224(buf, 37); */
     vel_up = (double)getles3224(buf, 37);
+
+    session->newdata.NED.velN = vel_north * 0.1;
+    session->newdata.NED.velE = vel_east * 0.1;
+    session->newdata.NED.velD = -vel_up * 0.1;
+    session->newdata.climb = -session->newdata.NED.velD;
 
     track = atan2(vel_east, vel_north);
     if (track < 0)
 	track += 2 * GPS_PI;
     session->newdata.track = track * RAD_2_DEG;
-    session->newdata.speed =
-	sqrt(pow(vel_east, 2) + pow(vel_north, 2)) * VEL_RES;
-    session->newdata.climb = vel_up * VEL_RES;
 
     /* Quality indicators */
     /* UNUSED fom = getub(buf, 40);     * FOM is DRMS */
@@ -477,13 +476,15 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 	     ((nav_mode & 0x40)!='\0' ? "3D" : "2D"),
 	     ((nav_mode & 0x03)!='\0' ? "DGPS" : "GPS"));
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "Navcom: latitude = %f, longitude = %f, altitude = %f, geoid = %f\n",
+	     "Navcom: latitude = %f longitude = %f altitude = %f geoid = %f\n",
 	     session->newdata.latitude, session->newdata.longitude,
 	     session->newdata.altitude, session->newdata.geoid_sep);
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "Navcom: velocities: north = %f, east = %f, up = %f (track = %f, speed = %f)\n",
-	     vel_north * VEL_RES, vel_east * VEL_RES, vel_up * VEL_RES,
-	     session->newdata.track, session->newdata.speed);
+	     "Navcom: velocities: north = %f east = %f up = %f (track = %f)\n",
+	     session->newdata.NED.velN,
+	     session->newdata.NED.velE,
+	     -session->newdata.NED.velD,
+	     session->newdata.track);
 #undef D_RES
 #undef LL_RES
 #undef LL_FRAC_RES
@@ -493,7 +494,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 
     mask = LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET | TRACK_SET
 	| STATUS_SET | MODE_SET | USED_IS | HERR_SET
-	| TIMERR_SET | DOP_SET
+	| TIMERR_SET | DOP_SET | VNED_SET
 	| TIME_SET | NTPTIME_IS;
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.f "
