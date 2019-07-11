@@ -942,12 +942,19 @@ static void gpsd_error_model(struct gps_device_t *session)
     if (9999.9 < fabs(fix->NED.velD))
 	fix->NED.velD = NAN;
 
-    /* compute speed from velN and velE if needed and possible */
-    if (0 == isfinite(fix->speed) &&
-        0 != isfinite(fix->NED.velN) &&
+    /* compute speed and track from velN and velE if needed and possible */
+    if (0 != isfinite(fix->NED.velN) &&
         0 != isfinite(fix->NED.velE)) {
-	fix->speed = hypot(fix->NED.velN, fix->NED.velE);
+	if (0 == isfinite(fix->speed)) {
+	    fix->speed = hypot(fix->NED.velN, fix->NED.velE);
+        }
+	if (0 == isfinite(fix->track)) {
+	    fix->track = atan2(fix->NED.velN, fix->NED.velE) * RAD_2_DEG;
+	    if (fix->track < 0.0)
+		fix->track += 360.0;
+        }
     }
+
 
     /* sanity check the climb, 10,000 m/s should be a nice max */
     if (9999.9 < fabs(fix->climb))
