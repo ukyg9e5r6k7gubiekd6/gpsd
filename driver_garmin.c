@@ -298,7 +298,6 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
     int maj_ver;
     int min_ver;
     time_t time_l = 0;
-    double track;
     char msg_buf[512] = "";
     char *msg = NULL;
     cpo_sat_data *sats = NULL;
@@ -411,12 +410,6 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	session->newdata.NED.velE = pvt->lon_vel;
 	session->newdata.NED.velD = -pvt->alt_vel;
 
-	track = atan2(pvt->lon_vel, pvt->lat_vel);
-	if (track < 0) {
-	    track += 2 * GPS_PI;
-	}
-	session->newdata.track = radtodeg(track);
-
 	switch (GPSD_LE16TOH(pvt->fix)) {
 	case 0:
 	case 1:
@@ -493,12 +486,10 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	}
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "Garmin: PVT_DATA: time=%.2f, lat=%.2f lon=%.2f "
-		 "track=%.2f climb=%.2f eph=%.2f sep=%.2f epv=%.2f "
-		 "mode=%d status=%d\n",
+		 "climb=%.2f eph=%.2f sep=%.2f epv=%.2f  mode=%d status=%d\n",
 		 session->newdata.time,
 		 session->newdata.latitude,
 		 session->newdata.longitude,
-		 session->newdata.track,
 		 session->newdata.climb,
 		 session->newdata.eph,
 		 session->newdata.sep,
