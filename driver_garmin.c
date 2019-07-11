@@ -474,7 +474,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    /* data only valid with a fix */
 	    mask |=
 		TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET |
-		SPEED_SET | TRACK_SET | CLIMB_SET | HERR_SET | PERR_IS |
+		CLIMB_SET | HERR_SET | PERR_IS |
 		CLEAR_IS | REPORT_IS | VNED_SET;
 	    /*
 	     * Garmin documentation says we should wait until four good fixes
