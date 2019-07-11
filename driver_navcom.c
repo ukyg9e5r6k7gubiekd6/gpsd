@@ -485,28 +485,25 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 #undef VEL_RES
 #undef DOP_UNDEFINED
 
-    mask = LATLON_SET | ALTITUDE_SET | CLIMB_SET | SPEED_SET | TRACK_SET
-	| STATUS_SET | MODE_SET | USED_IS | HERR_SET
-	| TIMERR_SET | DOP_SET | VNED_SET
-	| TIME_SET | NTPTIME_IS;
+    mask = LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | USED_IS |
+           HERR_SET | TIMERR_SET | DOP_SET | VNED_SET | TIME_SET |
+           CLIMB_SET | NTPTIME_IS;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.f "
-	     "speed=%.2f climb=%.2f mode=%d status=%d "
-	     "gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f "
-	     "mask={LATLON|ALTITUDE|CLIMB|SPEED|TRACK|TIME|STATUS|MODE|"
-	     "USED|HERR|VERR|TIMERR|DOP}\n",
+	     "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.f climb=%.2f "
+             "mode=%d status=%d gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f "
+             "tdop=%.2f mask={%s}\n",
 	     session->newdata.time,
 	     session->newdata.latitude,
 	     session->newdata.longitude,
 	     session->newdata.altitude,
-	     session->newdata.speed,
 	     session->newdata.climb,
 	     session->newdata.mode,
 	     session->gpsdata.status,
 	     session->gpsdata.dop.gdop,
 	     session->gpsdata.dop.pdop,
 	     session->gpsdata.dop.hdop,
-	     session->gpsdata.dop.vdop, session->gpsdata.dop.tdop);
+	     session->gpsdata.dop.vdop, session->gpsdata.dop.tdop,
+             gps_maskdump(mask));
     return mask;
 }
 
