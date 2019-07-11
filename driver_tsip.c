@@ -428,16 +428,13 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	session->newdata.NED.velE = f1;
 	session->newdata.NED.velD = -f3;
 	session->newdata.climb = f3;
-	if ((session->newdata.track = atan2(f1, f2) * RAD_2_DEG) < 0)
-	    session->newdata.track += 360.0;
 	gpsd_log(&session->context->errout, LOG_INF,
 		 "GPS Velocity ENU %f %f %f %f %f\n", f1, f2, f3,
 		 f4, f5);
 	mask |= SPEED_SET | TRACK_SET | CLIMB_SET | VNED_SET;
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "VFENU 0x56 time=%.2f track=%.2f climb=%.2f\n",
+		 "VFENU 0x56 time=%.2f climb=%.2f\n",
 		 session->newdata.time,
-		 session->newdata.track,
 		 session->newdata.climb);
 	break;
     case 0x57:			/* Information About Last Computed Fix */
@@ -788,8 +785,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->newdata.NED.velE = d1;
 	    session->newdata.NED.velD = -session->newdata.climb;
 
-	    if ((session->newdata.track = atan2(d1, d2) * RAD_2_DEG) < 0)
-		session->newdata.track += 360.0;
 	    session->newdata.latitude = (double)sl1 * SEMI_2_DEG;
 	    session->newdata.longitude = (double)ul2 * SEMI_2_DEG;
 	    if (session->newdata.longitude > 180.0)
@@ -820,11 +815,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		REPORT_IS | VNED_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
 		     "SP-LFEI 0x20: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
-		     "track=%.2f climb=%.2f mode=%d status=%d\n",
+		     "climb=%.2f mode=%d status=%d\n",
 		     session->newdata.time,
 		     session->newdata.latitude, session->newdata.longitude,
-		     session->newdata.altitude,
-		     session->newdata.track, session->newdata.climb,
+		     session->newdata.altitude, session->newdata.climb,
 		     session->newdata.mode, session->gpsdata.status);
 	    break;
 	case 0x23:		/* Compact Super Packet */
@@ -879,19 +873,17 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->newdata.NED.velN = d2;
 	    session->newdata.NED.velE = d1;
 	    session->newdata.NED.velD = -session->newdata.climb;
-	    if ((session->newdata.track = atan2(d1, d2) * RAD_2_DEG) < 0)
-		session->newdata.track += 360.0;
+
 	    mask |=
 		TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET | SPEED_SET |
 		TRACK_SET |CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_IS |
 		REPORT_IS | VNED_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
 		     "SP-CSP 0x23: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
-		     "track=%.2f climb=%.2f mode=%d status=%d\n",
+		     "climb=%.2f mode=%d status=%d\n",
 		     session->newdata.time,
 		     session->newdata.latitude, session->newdata.longitude,
-		     session->newdata.altitude,
-		     session->newdata.track, session->newdata.climb,
+		     session->newdata.altitude, session->newdata.climb,
 		     session->newdata.mode, session->gpsdata.status);
 	    break;
 
