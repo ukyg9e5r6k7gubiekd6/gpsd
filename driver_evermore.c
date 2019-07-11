@@ -203,7 +203,7 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    session->newdata.mode = MODE_3D;
 	    mask |= ALTITUDE_SET | CLIMB_SET;
 	}
-	mask |= TIME_SET | NTPTIME_IS | LATLON_SET | TRACK_SET | SPEED_SET
+	mask |= TIME_SET | NTPTIME_IS | LATLON_SET
                 | MODE_SET | ECEF_SET | VECEF_SET;
 	if (session->subtype[0] == '\0') {
 	    (void)snprintf(session->subtype, sizeof(session->subtype),
@@ -211,10 +211,9 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    mask |= DEVICEID_SET;
 	}
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "NDO 0x02: time=%.2f, lat=%.2f lon=%.2f alt=%.2f speed=%.2f track=%.2f climb=%.2f mode=%d subtype='%s\n",
+		 "NDO 0x02: time=%.2f, lat=%.2f lon=%.2f alt=%.2f climb=%.2f mode=%d subtype='%s\n",
 		 session->newdata.time, session->newdata.latitude,
 		 session->newdata.longitude, session->newdata.altitude,
-		 session->newdata.speed, session->newdata.track,
 		 session->newdata.climb, session->newdata.mode,
 		 session->gpsdata.dev.subtype);
 	return mask | CLEAR_IS | REPORT_IS;
