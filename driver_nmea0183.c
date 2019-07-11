@@ -726,7 +726,6 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
     int newstatus;
     char last_last_gga_talker = session->nmea.last_gga_talker;
     int fix;
-    char altitude;
     int satellites_visible;
     session->nmea.last_gga_talker = field[0][1];
 
