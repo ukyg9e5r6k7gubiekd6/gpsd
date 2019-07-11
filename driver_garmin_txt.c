@@ -428,7 +428,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 
     /* Velocity */
     do {
-	double ewvel, nsvel, track;
+	double ewvel, nsvel;
 	if (0 != gar_decode(session->context,
 		            (char *)session->lexer.outbuffer + 40, 5,
                             "EW", 10.0, &ewvel))
@@ -440,11 +440,6 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 
         session->newdata.NED.velN = ewvel;
         session->newdata.NED.velE = nsvel;
-	/* is this correct formula? Result is in degrees */
-	track = atan2(ewvel, nsvel) * RAD_2_DEG;
-	if (track < 0.0)
-	    track += 360.0;
-	session->newdata.track = track;
 	mask |= SPEED_SET | TRACK_SET | VNED_SET;
     } while (0);
 
@@ -462,11 +457,10 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
     } while (0);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GTXT: time=%.2f, lat=%.2f lon=%.2f alt=%.2f track=%.2f "
+	     "GTXT: time=%.2f, lat=%.2f lon=%.2f alt=%.2f "
              "climb=%.2f eph=%.2f mode=%d status=%d\n",
 	     session->newdata.time, session->newdata.latitude,
 	     session->newdata.longitude, session->newdata.altitude,
-	     session->newdata.track,
 	     session->newdata.climb, session->newdata.eph,
 	     session->newdata.mode,
 	     session->gpsdata.status);
