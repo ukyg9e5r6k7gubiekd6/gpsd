@@ -288,7 +288,7 @@ static void register_fractional_time(const char *tag, const char *fld,
  *                                see faa_mode() for possible mode values
  *
  * see also:
- *     https://gpsd.gitlab.io/gpsd/NMEA.html#_vtg_track_made_good_and_ground_speed
+ * https://gpsd.gitlab.io/gpsd/NMEA.html#_vtg_track_made_good_and_ground_speed
  */
 static gps_mask_t processVTG(int count,
                              char *field[],
@@ -2808,19 +2808,22 @@ static gps_mask_t processPSTI030(int count, char *field[],
             }
 	    mask |= MODE_SET;
 	}
-	/* convert ENU to speed/track */
+	/* convert ENU to track */
 	/* this has more precision than GPVTG, GPVTG comes earlier
 	 * in the cycle */
 	east = safe_atof(field[9]);     /* east velocity m/s */
 	north = safe_atof(field[10]);   /* north velocity m/s */
-	session->newdata.speed = sqrt(pow(east, 2) + pow(north, 2));
+	/* up velocity m/s */
+	session->newdata.climb = safe_atof(field[11]);
+	session->newdata.NED.velN = north;
+	session->newdata.NED.velE = east;
+	session->newdata.NED.velD = -session->newdata.climb;
+
 	session->newdata.track = atan2(east, north) * RAD_2_DEG;
 	if ( 0 > session->newdata.track )
 	    session->newdata.track += 360.0;
 
-	/* up velocity m/s */
-	session->newdata.climb = safe_atof(field[11]);
-        mask |= SPEED_SET | TRACK_SET | CLIMB_SET;
+        mask |= SPEED_SET | TRACK_SET | CLIMB_SET | VNED_SET;
 
 	session->gpsdata.status = faa_mode(field[13][0]);
 	/* Ignore RTK Age and RTK Ratio, for now */
