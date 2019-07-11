@@ -431,7 +431,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	gpsd_log(&session->context->errout, LOG_INF,
 		 "GPS Velocity ENU %f %f %f %f %f\n", f1, f2, f3,
 		 f4, f5);
-	mask |= SPEED_SET | TRACK_SET | CLIMB_SET | VNED_SET;
+	mask |= CLIMB_SET | VNED_SET;
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "VFENU 0x56 time=%.2f climb=%.2f\n",
 		 session->newdata.time,
@@ -479,7 +479,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	d2 = getbef32((char *)buf, 16) * RAD_2_DEG;	/* Azimuth */
 	i = (int)(u2 >> 3);	/* channel number */
 	gpsd_log(&session->context->errout, LOG_INF,
-		 "Satellite Tracking Status: Ch %2d PRN %3d Res %d Acq %d Eph %2d SNR %4.1f LMT %.04f El %4.1f Az %5.1f\n",
+		 "Satellite Tracking Status: Ch %2d PRN %3d Res %d Acq %d "
+                 "Eph %2d SNR %4.1f LMT %.04f El %4.1f Az %5.1f\n",
 		 i, u1, u2 & 7, u3, u4, f1, f2, d1, d2);
 	if (i < TSIP_CHANNELS) {
 	    if (d1 >= 0.0) {
@@ -810,8 +811,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 						      (unsigned short)s4,
 						      (double)ul1 *1e-3);
 	    mask |=
-		TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET | SPEED_SET |
-		TRACK_SET | CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_IS |
+		TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET |
+		CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_IS |
 		REPORT_IS | VNED_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
 		     "SP-LFEI 0x20: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
@@ -875,8 +876,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->newdata.NED.velD = -session->newdata.climb;
 
 	    mask |=
-		TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET | SPEED_SET |
-		TRACK_SET |CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_IS |
+		TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET |
+		CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_IS |
 		REPORT_IS | VNED_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
 		     "SP-CSP 0x23: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
@@ -1164,7 +1165,8 @@ static bool tsip_speed_switch(struct gps_device_t *session,
     }
 
     putbyte(buf, 0, 0xff);	/* current port */
-    putbyte(buf, 1, (round(log((double)speed / 300) / GPS_LN2)) + 2);	/* input dev.baudrate */
+    /* input dev.baudrate */
+    putbyte(buf, 1, (round(log((double)speed / 300) / GPS_LN2)) + 2);
     putbyte(buf, 2, getub(buf, 1));	/* output baudrate */
     putbyte(buf, 3, 3);		/* character width (8 bits) */
     putbyte(buf, 4, parity);	/* parity (normally odd) */
