@@ -935,6 +935,12 @@ static void gpsd_error_model(struct gps_device_t *session)
      * Low Earth Orbit (LEO) is about 7,800 m/s */
     if (9999.9 < fabs(fix->speed))
 	fix->speed = NAN;
+    if (9999.9 < fabs(fix->NED.velN))
+	fix->NED.velN = NAN;
+    if (9999.9 < fabs(fix->NED.velE))
+	fix->NED.velE = NAN;
+    if (9999.9 < fabs(fix->NED.velD))
+	fix->NED.velD = NAN;
 
     /* compute speed from velN and velE if needed and possible */
     if (0 == isfinite(fix->speed) &&
