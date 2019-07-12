@@ -437,12 +437,10 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
     case 3:
 	session->gpsdata.status = STATUS_FIX;
 	session->newdata.mode = MODE_3D;
-	mask |= ALTITUDE_SET | CLIMB_SET;
 	break;
     case 4:
 	session->gpsdata.status = STATUS_DGPS_FIX;
 	session->newdata.mode = MODE_3D;
-	mask |= ALTITUDE_SET | CLIMB_SET;
 	break;
     default:
 	break;
@@ -459,7 +457,7 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
     session->newdata.ecef.vy = (double)getbef32((const char *)buf, 41),
     session->newdata.ecef.vz = (double)getbef32((const char *)buf, 45);
 
-    ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
+    mask |= ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
 	session->newdata.ecef.x, session->newdata.ecef.y,
 	session->newdata.ecef.z, session->newdata.ecef.vx,
 	session->newdata.ecef.vy, session->newdata.ecef.vz);
@@ -488,9 +486,8 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
 	    session->gpsdata.dop.vdop,
 	    session->gpsdata.dop.tdop);
 
-    mask |= TIME_SET | LATLON_SET | TRACK_SET | ECEF_SET | VECEF_SET
-            | SPEED_SET | STATUS_SET | MODE_SET | DOP_SET | CLEAR_IS
-            | REPORT_IS;
+    mask |= TIME_SET | ECEF_SET | VECEF_SET | STATUS_SET | MODE_SET |
+            DOP_SET | CLEAR_IS | REPORT_IS;
     return mask;
 }
 
