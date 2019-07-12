@@ -426,9 +426,11 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	mask |= ALTITUDE_SET;
     } while (0);
 
-    /* Velocity */
+    /* Velocities, meters per second */
     do {
 	double ewvel, nsvel;
+	double climb;
+
 	if (0 != gar_decode(session->context,
 		            (char *)session->lexer.outbuffer + 40, 5,
                             "EW", 10.0, &ewvel))
@@ -437,23 +439,15 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 		            (char *)session->lexer.outbuffer + 45, 5,
                             "NS", 10.0, &nsvel))
 	    break;
-
-        session->newdata.NED.velN = ewvel;
-        session->newdata.NED.velE = nsvel;
-	mask |= VNED_SET;
-    } while (0);
-
-
-    /* Climb (vertical velocity) */
-    do {
-	double climb;
 	if (0 != gar_decode(session->context,
 		            (char *)session->lexer.outbuffer + 50, 5,
                             "UD", 100.0, &climb))
 	    break;
-	session->newdata.climb = climb;	/* climb in mps */
+
+        session->newdata.NED.velN = ewvel;
+        session->newdata.NED.velE = nsvel;
         session->newdata.NED.velD = -climb;
-	mask |= CLIMB_SET | VNED_SET;
+	mask |= VNED_SET;
     } while (0);
 
     gpsd_log(&session->context->errout, LOG_DATA,
