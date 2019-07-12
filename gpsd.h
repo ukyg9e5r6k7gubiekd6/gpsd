@@ -951,10 +951,10 @@ extern void errout_reset(struct gpsd_errout_t *errout);
 extern void gpsd_acquire_reporting_lock(void);
 extern void gpsd_release_reporting_lock(void);
 
-extern void ecef_to_wgs84fix(struct gps_fix_t *,
-			     double *,
-			     double, double, double,
-			     double, double, double);
+extern gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *,
+                                   double *,
+                                   double, double, double,
+                                   double, double, double);
 extern void clear_dop(struct dop_t *);
 
 /* shmexport.c */

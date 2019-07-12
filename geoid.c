@@ -95,9 +95,9 @@ double wgs84_separation(double lat, double lon)
 }
 
 
-void ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
-		      double x, double y, double z,
-		      double vx, double vy, double vz)
+gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
+		            double x, double y, double z,
+		            double vx, double vy, double vz)
 /* fill in WGS84 position/velocity fields from ECEF coordinates
  * x, y, z are all in meters
  * vx, vy, vz are all in meters/second
@@ -108,6 +108,8 @@ void ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
     const double b = WGS84B;	/* polar radius */
     const double e2 = (a * a - b * b) / (a * a);
     const double e_2 = (a * a - b * b) / (b * b);
+    gps_mask_t mask = (LATLON_SET | ALTITUDE_SET | CLIMB_SET | TRACK_SET |
+                       SPEED_SET);
 
     /* geodetic location */
     lambda = atan2(y, x);
@@ -148,6 +150,8 @@ void ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
     if (heading < 0)
 	heading += 2 * GPS_PI;
     fix->track = heading * RAD_2_DEG;
+
+    return mask;
 }
 
 /*
