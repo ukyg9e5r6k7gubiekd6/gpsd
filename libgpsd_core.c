@@ -959,7 +959,7 @@ static void gpsd_error_model(struct gps_device_t *session)
 	    fix->speed = hypot(fix->NED.velN, fix->NED.velE);
         }
 	if (0 == isfinite(fix->track)) {
-	    fix->track = atan2(fix->NED.velN, fix->NED.velE) * RAD_2_DEG;
+	    fix->track = atan2(fix->NED.velE, fix->NED.velN) * RAD_2_DEG;
 	    if (fix->track < 0.0)
 		fix->track += 360.0;
         }
