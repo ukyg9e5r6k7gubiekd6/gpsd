@@ -438,7 +438,6 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     session->newdata.NED.velN = vel_north * 0.1;
     session->newdata.NED.velE = vel_east * 0.1;
     session->newdata.NED.velD = -vel_up * 0.1;
-    session->newdata.climb = -session->newdata.NED.velD;
 
     /* Quality indicators */
     /* UNUSED fom = getub(buf, 40);     * FOM is DRMS */
@@ -486,17 +485,15 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 #undef DOP_UNDEFINED
 
     mask = LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | USED_IS |
-           HERR_SET | TIMERR_SET | DOP_SET | VNED_SET | TIME_SET |
-           CLIMB_SET | NTPTIME_IS;
+           HERR_SET | TIMERR_SET | DOP_SET | VNED_SET | TIME_SET | NTPTIME_IS;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.f climb=%.2f "
+	     "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.f "
              "mode=%d status=%d gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f "
              "tdop=%.2f mask={%s}\n",
 	     session->newdata.time,
 	     session->newdata.latitude,
 	     session->newdata.longitude,
 	     session->newdata.altitude,
-	     session->newdata.climb,
 	     session->newdata.mode,
 	     session->gpsdata.status,
 	     session->gpsdata.dop.gdop,
