@@ -103,7 +103,7 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
 		            double x, double y, double z,
 		            double vx, double vy, double vz)
 {
-    double lambda, phi, p, theta, n, h, vnorth, veast, vup;
+    double lambda, phi, p, theta, n,vnorth, veast, vup;
     const double a = WGS84A;	/* equatorial radius */
     const double b = WGS84B;	/* polar radius */
     const double e2 = (a * a - b * b) / (a * a);
@@ -117,13 +117,13 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
     phi = atan2(z + e_2 * b * pow(sin(theta), 3),
 	        p - e2 * a * pow(cos(theta), 3));
     n = a / sqrt(1.0 - e2 * pow(sin(phi), 2));
-    /* what datum is h in? */
-    h = p / cos(phi) - n;
+
+    /* altitude is WGS84 */
+    fix->altitude = p / cos(phi) - n;
+
     fix->latitude = phi * RAD_2_DEG;
     fix->longitude = lambda * RAD_2_DEG;
     *separation = wgs84_separation(fix->latitude, fix->longitude);
-    /* this seems odd? */
-    fix->altitude = h - *separation;
     /* velocity computation */
     vnorth = -vx * sin(phi) * cos(lambda) - vy * sin(phi) * sin(lambda) +
 	     vz * cos(phi);
