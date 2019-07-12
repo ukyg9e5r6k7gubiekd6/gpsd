@@ -543,6 +543,7 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     session->newdata.latitude = 1e-7 * (int32_t)getles32(buf, 28);
     session->newdata.altitude = 1e-3 * (int32_t)getles32(buf, 36);
     session->newdata.speed = 1e-3 * (int32_t)getles32(buf, 60);
+    /* u-blox calls this Heading of motion (2-D) */
     session->newdata.track = 1e-5 * (int32_t)getles32(buf, 64);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET;
 
@@ -574,9 +575,13 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
         /* u-blox 8 and 9 extended */
         double magDec = NAN;
         double magAcc = NAN;
+#ifdef __UNUSED
         if (flags & UBX_NAV_PVT_FLAG_HDG_OK) {
+            /* u-blox calls this Heading of vehicle (2-D)
+             * why is it different than earlier track? */
 	    session->newdata.track = (double)(getles32(buf, 84) * 1e-5);
         }
+#endif /* __UNUSED */
 	if (valid & UBX_NAV_PVT_VALID_MAG) {
 	    magDec = (double)(getles16(buf, 88) * 1e-2);
 	    magAcc = (double)(getleu16(buf, 90) * 1e-2);
