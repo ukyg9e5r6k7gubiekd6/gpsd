@@ -216,6 +216,7 @@ static gps_mask_t greis_msg_PV(struct gps_device_t *session,
     float vx, vy, vz;	    /* Cartesian velocities [m/s] */
     float v_sigma;	    /* Velocity SEP [m/s] */
     uint8_t solution_type;
+    gps_mask_t mask = 0;
 
     if (len < 46) {
 	gpsd_log(&session->context->errout, LOG_WARN,
@@ -241,8 +242,8 @@ static gps_mask_t greis_msg_PV(struct gps_device_t *session,
     session->newdata.ecef.vy = vy;
     session->newdata.ecef.vz = vz;
     session->newdata.ecef.vAcc = v_sigma;
-    ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
-		     x, y, z, vx, vy, vz);
+    mask |= ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
+                             x, y, z, vx, vy, vz);
 
     /* GREIS Reference Guide 3.4.2 "General Notes" part "Solution Types" */
     if (solution_type > 0 && solution_type < 5) {
@@ -273,8 +274,8 @@ static gps_mask_t greis_msg_PV(struct gps_device_t *session,
 	     session->newdata.longitude, session->newdata.altitude,
 	     solution_type);
 
-   return LATLON_SET | ALTITUDE_SET | CLIMB_SET | TRACK_SET | SPEED_SET |
-	MODE_SET | STATUS_SET | ECEF_SET | VECEF_SET;
+   mask |= MODE_SET | STATUS_SET | ECEF_SET | VECEF_SET;
+   return mask;
 }
 
 /**
