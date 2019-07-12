@@ -371,6 +371,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	    break;
 	lon += degfrag * 100.0 / 60.0 / 100000.0;
 	session->newdata.longitude = lon;
+        session->newdata.geoid_sep = wgs84_separation(lat, lon);
 
 	/* fix mode, GPS status, [gGdDS_] */
 	status = (char)session->lexer.outbuffer[30];
@@ -421,8 +422,8 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 		       (char *)session->lexer.outbuffer + 34, 6, "+-", 1.0,
 		       &alt))
 	    break;
-        /* FIXME: alt is MSL, we want WGS84... */
-	session->newdata.altitude = alt;
+        /* alt is MSL, we want WGS84... */
+	session->newdata.altitude = alt - session->newdata.geoid_sep;
 	mask |= ALTITUDE_SET;
     } while (0);
 
