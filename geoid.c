@@ -108,8 +108,7 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
     const double b = WGS84B;	/* polar radius */
     const double e2 = (a * a - b * b) / (a * a);
     const double e_2 = (a * a - b * b) / (b * b);
-    gps_mask_t mask = (LATLON_SET | ALTITUDE_SET | TRACK_SET |
-                       SPEED_SET);
+    gps_mask_t mask = (LATLON_SET | ALTITUDE_SET | TRACK_SET);
 
     /* geodetic location */
     lambda = atan2(y, x);
@@ -141,13 +140,6 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
 
     /* FIXME: after velNED is saved, let gpsd_error_model() do the
      * sanity checks and speed/track */
-
-    fix->speed = hypot(vnorth, veast);
-    /* sanity check the speed, 10,000 m/s should be a nice max */
-    if ( 9999.9 < fix->speed )
-	fix->speed = NAN;
-    else if ( -9999.9 > fix->speed )
-	fix->speed = NAN;
 
     heading = atan2(fix_minuz(veast), fix_minuz(vnorth));
     if (heading < 0)
