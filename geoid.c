@@ -103,12 +103,12 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
 		            double x, double y, double z,
 		            double vx, double vy, double vz)
 {
-    double lambda, phi, p, theta, n, h, vnorth, veast, vup, heading;
+    double lambda, phi, p, theta, n, h, vnorth, veast, vup;
     const double a = WGS84A;	/* equatorial radius */
     const double b = WGS84B;	/* polar radius */
     const double e2 = (a * a - b * b) / (a * a);
     const double e_2 = (a * a - b * b) / (b * b);
-    gps_mask_t mask = (LATLON_SET | ALTITUDE_SET | TRACK_SET);
+    gps_mask_t mask = LATLON_SET | ALTITUDE_SET;
 
     /* geodetic location */
     lambda = atan2(y, x);
@@ -138,13 +138,8 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
     fix->NED.velD = -vup;
     mask |= VNED_SET;
 
-    /* FIXME: after velNED is saved, let gpsd_error_model() do the
-     * sanity checks and speed/track */
-
-    heading = atan2(fix_minuz(veast), fix_minuz(vnorth));
-    if (heading < 0)
-	heading += 2 * GPS_PI;
-    fix->track = heading * RAD_2_DEG;
+    /* velNED is saved, let gpsd_error_model() do the
+     * sanity checks and calculate climb/speed/track */
 
     return mask;
 }
