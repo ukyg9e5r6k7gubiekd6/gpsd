@@ -404,8 +404,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
         /* eph, horizaontal error, 2 sigma */
 	session->newdata.epv = pvt->epv * (GPSD_CONFIDENCE / CEP50_SIGMA);
 
-	/* keep climb in meters/sec */
-	session->newdata.climb = pvt->alt_vel;
+	/* meters/sec */
 	session->newdata.NED.velN = pvt->lat_vel;
 	session->newdata.NED.velE = pvt->lon_vel;
 	session->newdata.NED.velD = -pvt->alt_vel;
@@ -474,8 +473,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    /* data only valid with a fix */
 	    mask |=
 		TIME_SET | LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET |
-		CLIMB_SET | HERR_SET | PERR_IS |
-		CLEAR_IS | REPORT_IS | VNED_SET;
+		HERR_SET | PERR_IS | CLEAR_IS | REPORT_IS | VNED_SET;
 	    /*
 	     * Garmin documentation says we should wait until four good fixes
 	     * have been seen before trying to use the device for precision
@@ -486,11 +484,10 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	}
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "Garmin: PVT_DATA: time=%.2f, lat=%.2f lon=%.2f "
-		 "climb=%.2f eph=%.2f sep=%.2f epv=%.2f  mode=%d status=%d\n",
+		 "eph=%.2f sep=%.2f epv=%.2f  mode=%d status=%d\n",
 		 session->newdata.time,
 		 session->newdata.latitude,
 		 session->newdata.longitude,
-		 session->newdata.climb,
 		 session->newdata.eph,
 		 session->newdata.sep,
 		 session->newdata.epv,
