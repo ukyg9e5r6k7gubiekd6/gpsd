@@ -652,6 +652,7 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
 	session->newdata.mode = MODE_2D;
 
 	if ('\0' != field[9][0]) {
+            /* altitude is MSL */
 	    session->newdata.altitude = safe_atof(field[9]);
 	    if (0 != isfinite(session->newdata.altitude)) {
 		mask |= ALTITUDE_SET;
@@ -663,7 +664,12 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
             /* only need geoid_sep if in 3D mode */
 	    if ('\0' != field[10][0]) {
 		session->newdata.geoid_sep = safe_atof(field[10]);
+	    } else {
+		session->newdata.geoid_sep = wgs84_separation(
+		    session->newdata.latitude, session->newdata.longitude);
 	    }
+            /* convert to WGS 84 */
+	    session->newdata.altitude -= session->newdata.geoid_sep;
 	}
     } else {
 	session->newdata.mode = MODE_NO_FIX;
@@ -835,7 +841,10 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	mask |= LATLON_SET;
 	if ('\0' != field[11][0]) {
 	    session->newdata.geoid_sep = safe_atof(field[11]);
-	}
+	} else {
+	    session->newdata.geoid_sep = wgs84_separation(
+                session->newdata.latitude, session->newdata.longitude);
+        }
 	/*
 	 * SiRF chipsets up to version 2.2 report a null altitude field.
 	 * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
