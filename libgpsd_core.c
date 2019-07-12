@@ -935,12 +935,22 @@ static void gpsd_error_model(struct gps_device_t *session)
      * Low Earth Orbit (LEO) is about 7,800 m/s */
     if (9999.9 < fabs(fix->speed))
 	fix->speed = NAN;
+
     if (9999.9 < fabs(fix->NED.velN))
 	fix->NED.velN = NAN;
     if (9999.9 < fabs(fix->NED.velE))
 	fix->NED.velE = NAN;
     if (9999.9 < fabs(fix->NED.velD))
 	fix->NED.velD = NAN;
+
+    /* sanity check the climb, 10,000 m/s should be a nice max */
+    if (9999.9 < fabs(fix->climb))
+	fix->climb = NAN;
+    if (0 != isfinite(fix->NED.velD) &&
+        0 == isfinite(fix->climb)) {
+        /* have good velD, use it for climb */
+        fix->climb = -fix->NED.velD;
+    }
 
     /* compute speed and track from velN and velE if needed and possible */
     if (0 != isfinite(fix->NED.velN) &&
@@ -955,10 +965,6 @@ static void gpsd_error_model(struct gps_device_t *session)
         }
     }
 
-
-    /* sanity check the climb, 10,000 m/s should be a nice max */
-    if (9999.9 < fabs(fix->climb))
-	fix->climb = NAN;
 
     if (0 != isfinite(fix->latitude)) {
 	if ((90.0 < fix->latitude) || (-90.0 > fix->latitude)) {
