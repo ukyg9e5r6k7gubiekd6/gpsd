@@ -2786,7 +2786,7 @@ static gps_mask_t processPSTI030(int count, char *field[],
 	session->newdata.mode = MODE_NO_FIX;
 	mask |= MODE_SET;
     } else if ('A' == field[3][0]) {
-	double east, north;
+	double east, north, climb;
 
         /* data valid */
 	if (field[2][0] != '\0' && field[12][0] != '\0') {
@@ -2813,12 +2813,13 @@ static gps_mask_t processPSTI030(int count, char *field[],
 	east = safe_atof(field[9]);     /* east velocity m/s */
 	north = safe_atof(field[10]);   /* north velocity m/s */
 	/* up velocity m/s */
-	session->newdata.climb = safe_atof(field[11]);
+	climb = safe_atof(field[11]);
+
 	session->newdata.NED.velN = north;
 	session->newdata.NED.velE = east;
-	session->newdata.NED.velD = -session->newdata.climb;
+	session->newdata.NED.velD = -climb;
 
-        mask |= CLIMB_SET | VNED_SET;
+        mask |= VNED_SET;
 
 	session->gpsdata.status = faa_mode(field[13][0]);
 	/* Ignore RTK Age and RTK Ratio, for now */

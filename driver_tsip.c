@@ -427,15 +427,12 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	session->newdata.NED.velN = f2;
 	session->newdata.NED.velE = f1;
 	session->newdata.NED.velD = -f3;
-	session->newdata.climb = f3;
 	gpsd_log(&session->context->errout, LOG_INF,
-		 "GPS Velocity ENU %f %f %f %f %f\n", f1, f2, f3,
-		 f4, f5);
-	mask |= CLIMB_SET | VNED_SET;
+		 "GPS Velocity ENU %f %f %f %f %f\n", f1, f2, f3, f4, f5);
+	mask |= VNED_SET;
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "VFENU 0x56 time=%.2f climb=%.2f\n",
-		 session->newdata.time,
-		 session->newdata.climb);
+		 "VFENU 0x56 time=%.2f\n",
+		 session->newdata.time);
 	break;
     case 0x57:			/* Information About Last Computed Fix */
 	if (len != 8)
