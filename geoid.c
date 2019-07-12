@@ -134,7 +134,11 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
 	vx * cos(phi) * cos(lambda) + vy * cos(phi) * sin(lambda) +
 	vz * sin(phi);
 
-    /* FIXME: save velNED */
+    /* save velNED */
+    fix->NED.velN = vnorth;
+    fix->NED.velE = veast;
+    fix->NED.velD = -fix->climb;
+    mask |= VNED_SET;
 
     /* FIXME: after velNED is saved, let gpsd_error_model() do the
      * sanity checks and speed/track */
