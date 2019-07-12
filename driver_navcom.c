@@ -420,6 +420,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 
     /* Height Data */
     ellips_height = getles32(buf, 23);
+    /* doc seems to imply this is WGS 84 altitude */
     altitude = getles32(buf, 27);
 
     ant_height_adj = getles16(buf, 51);
