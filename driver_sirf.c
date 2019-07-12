@@ -1510,7 +1510,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
     session->newdata.ecef.vy = (double)getbes16(buf, 15) / 8.0;
     session->newdata.ecef.vz = (double)getbes16(buf, 17) / 8.0;
 
-    ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
+    mask |= ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
 		     session->newdata.ecef.x, session->newdata.ecef.y,
 		     session->newdata.ecef.z, session->newdata.ecef.vx,
 		     session->newdata.ecef.vy, session->newdata.ecef.vz);
@@ -1526,8 +1526,6 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 	session->newdata.mode = MODE_3D;
     else if (session->gpsdata.status != 0)
 	session->newdata.mode = MODE_2D;
-    if (session->newdata.mode == MODE_3D)
-	mask |= ALTITUDE_SET | CLIMB_SET;
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "SiRF: MND 0x02: Navtype %#0x, Status %d mode %d\n",
 	     navtype, session->gpsdata.status, session->newdata.mode);
@@ -1561,8 +1559,8 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 #endif /* TIMEHINT_ENABLE */
     /* clear computed DOPs so they get recomputed. */
     session->gpsdata.dop.tdop = NAN;
-    mask |= TIME_SET | LATLON_SET | ALTITUDE_SET | ECEF_SET |
-            VECEF_SET | STATUS_SET | MODE_SET | DOP_SET | USED_IS;
+    mask |= TIME_SET | ECEF_SET | VECEF_SET | STATUS_SET | MODE_SET |
+            DOP_SET | USED_IS;
     if ( 3 <= session->gpsdata.satellites_visible ) {
 	mask |= NTPTIME_IS;
     }
