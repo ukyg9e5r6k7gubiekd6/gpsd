@@ -95,13 +95,13 @@ double wgs84_separation(double lat, double lon)
 }
 
 
-gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
-		            double x, double y, double z,
-		            double vx, double vy, double vz)
 /* fill in WGS84 position/velocity fields from ECEF coordinates
  * x, y, z are all in meters
  * vx, vy, vz are all in meters/second
  */
+gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
+		            double x, double y, double z,
+		            double vx, double vy, double vz)
 {
     double lambda, phi, p, theta, n, h, vnorth, veast, heading;
     const double a = WGS84A;	/* equatorial radius */
@@ -133,13 +133,19 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
     fix->climb =
 	vx * cos(phi) * cos(lambda) + vy * cos(phi) * sin(lambda) +
 	vz * sin(phi);
+
+    /* FIXME: save velNED */
+
+    /* FIXME: after velNED is saved, let gpsd_error_model() do the
+     * sanity checks and speed/track */
+
     /* sanity check the climb, 10,000 m/s should be a nice max */
     if ( 9999.9 < fix->climb )
 	fix->climb = NAN;
     else if ( -9999.9 > fix->climb )
 	fix->climb = NAN;
 
-    fix->speed = sqrt(pow(vnorth, 2) + pow(veast, 2));
+    fix->speed = hypot(vnorth, veast);
     /* sanity check the speed, 10,000 m/s should be a nice max */
     if ( 9999.9 < fix->speed )
 	fix->speed = NAN;
