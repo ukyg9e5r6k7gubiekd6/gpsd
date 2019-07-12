@@ -73,12 +73,11 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
     session->newdata.ecef.vx = (double)(getles32(buf, 7 + 186) / 1000.0);
     session->newdata.ecef.vy = (double)(getles32(buf, 7 + 190) / 1000.0);
     session->newdata.ecef.vz = (double)(getles32(buf, 7 + 194) / 1000.0);
-    ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
+    mask |= ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
 		     session->newdata.ecef.x, session->newdata.ecef.y,
 		     session->newdata.ecef.z, session->newdata.ecef.vx,
 		     session->newdata.ecef.vy, session->newdata.ecef.vz);
-    mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET | CLIMB_SET
-            | ECEF_SET | VECEF_SET;
+    mask |= ECEF_SET | VECEF_SET;
     /* this eph does not look right, badly documented.
      * let gpsd_error_model() handle it
      * session->newdata.eph = (double)(getles32(buf, 7 + 252) / 100.0);
