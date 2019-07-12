@@ -778,10 +778,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		d5 = 0.005;
 	    d1 = (double)s1 * d5;	/* east velocity m/s */
 	    d2 = (double)s2 * d5;	/* north velocity m/s */
-	    session->newdata.climb = (double)s3 * d5;	/* up velocity m/s */
+	    d3 = (double)s3 * d5;       /* up velocity m/s */
 	    session->newdata.NED.velN = d2;
 	    session->newdata.NED.velE = d1;
-	    session->newdata.NED.velD = -session->newdata.climb;
+	    session->newdata.NED.velD = -d3;
 
 	    session->newdata.latitude = (double)sl1 * SEMI_2_DEG;
 	    session->newdata.longitude = (double)ul2 * SEMI_2_DEG;
@@ -809,14 +809,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 						      (double)ul1 *1e-3);
 	    mask |=
 		TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET |
-		CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_IS |
+		STATUS_SET | MODE_SET | CLEAR_IS |
 		REPORT_IS | VNED_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
 		     "SP-LFEI 0x20: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
-		     "climb=%.2f mode=%d status=%d\n",
+		     "mode=%d status=%d\n",
 		     session->newdata.time,
 		     session->newdata.latitude, session->newdata.longitude,
-		     session->newdata.altitude, session->newdata.climb,
+		     session->newdata.altitude,
 		     session->newdata.mode, session->gpsdata.status);
 	    break;
 	case 0x23:		/* Compact Super Packet */
@@ -867,21 +867,21 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		d5 = 0.005;
 	    d1 = (double)s2 * d5;	/* east velocity m/s */
 	    d2 = (double)s3 * d5;	/* north velocity m/s */
-	    session->newdata.climb = (double)s4 * d5;	/* up velocity m/s */
+	    d3 = (double)s4 * d5;	/* up velocity m/s */
 	    session->newdata.NED.velN = d2;
 	    session->newdata.NED.velE = d1;
-	    session->newdata.NED.velD = -session->newdata.climb;
+	    session->newdata.NED.velD = -d3;
 
 	    mask |=
 		TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET |
-		CLIMB_SET | STATUS_SET | MODE_SET | CLEAR_IS |
+		STATUS_SET | MODE_SET | CLEAR_IS |
 		REPORT_IS | VNED_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
 		     "SP-CSP 0x23: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
-		     "climb=%.2f mode=%d status=%d\n",
+		     "mode=%d status=%d\n",
 		     session->newdata.time,
 		     session->newdata.latitude, session->newdata.longitude,
-		     session->newdata.altitude, session->newdata.climb,
+		     session->newdata.altitude,
 		     session->newdata.mode, session->gpsdata.status);
 	    break;
 
