@@ -967,13 +967,13 @@ static void gpsd_error_model(struct gps_device_t *session)
 
 
     if (0 != isfinite(fix->latitude)) {
-	if ((90.0 < fix->latitude) || (-90.0 > fix->latitude)) {
+	if ((90.0 < fabs(fix->latitude))) {
             fix->latitude = NAN;
             fix->longitude = NAN;
         }
     }
     if (0 != isfinite(fix->longitude)) {
-	if ((180.0 < fix->longitude) || (-180.0 > fix->longitude)) {
+	if ((180.0 < fabs(fix->longitude))) {
             fix->latitude = NAN;
             fix->longitude = NAN;
         }
