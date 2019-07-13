@@ -363,6 +363,7 @@ ubx_msg_nav_hpposllh(struct gps_device_t *session, unsigned char *buf,
 {
     int version;
     gps_mask_t mask = 0;
+    double alt_msl;
 
     if (36 > data_len) {
 	gpsd_log(&session->context->errout, LOG_WARN,
@@ -378,8 +379,12 @@ ubx_msg_nav_hpposllh(struct gps_device_t *session, unsigned char *buf,
         (getsb(buf, 24) * 1e-2)));
     session->newdata.latitude = (1e-7 * (getles32(buf, 12) + \
         (getsb(buf, 25) * 1e-2)));
-    session->newdata.altitude = (1e-3 * (getles32(buf, 20) + \
-        (getsb(buf, 27) * 1e-2)));
+    /* altitude WGS84 */
+    session->newdata.altitude = (1e-3 * (getles32(buf, 16) + \
+        (getsb(buf, 26) * 1e-2)));
+    /* altitude MSL */
+    alt_msl = (1e-3 * (getles32(buf, 20) + (getsb(buf, 27) * 1e-2)));
+    session->newdata.geoid_sep = session->newdata.altitude - alt_msl;
 
     /* Horizontal accuracy estimate in .1 mm, unknown est type */
     session->newdata.eph = getleu32(buf, 28) * 1e-4;
@@ -446,6 +451,7 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     int *status = &session->gpsdata.status;
     int *mode = &session->newdata.mode;
     gps_mask_t mask = 0;
+    double alt_msl;
 
     /* u-blox 6 and 7 are 84 bytes, u-blox 8 and 9 are 92 bytes  */
     if (84 > data_len) {
@@ -491,7 +497,7 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
 		mask |= STATUS_SET;
 	    }
 	}
-	mask |=	  LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET;
+	mask |=	  LATLON_SET;
 	break;
     }
     case UBX_MODE_2D:
@@ -541,7 +547,12 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
 
     session->newdata.longitude = 1e-7 * (int32_t)getles32(buf, 24);
     session->newdata.latitude = 1e-7 * (int32_t)getles32(buf, 28);
-    session->newdata.altitude = 1e-3 * (int32_t)getles32(buf, 36);
+    /* altitude WGS84 */
+    session->newdata.altitude = 1e-3 * (int32_t)getles32(buf, 32);
+    /* altitude MSL */
+    alt_msl = 1e-3 * (int32_t)getles32(buf, 36);
+    session->newdata.geoid_sep = session->newdata.altitude - alt_msl;
+
     session->newdata.speed = 1e-3 * (int32_t)getles32(buf, 60);
     /* u-blox calls this Heading of motion (2-D) */
     session->newdata.track = 1e-5 * (int32_t)getles32(buf, 64);
@@ -745,12 +756,11 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     mask |= MODE_SET | STATUS_SET;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "UBX-NAV-SOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f\n"
-             "  speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
+	     "UBX-NAV-SOL: time=%.2f lat=%.2f lon=%.2f track=%.2f "
+             "speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
 	     session->newdata.time,
 	     session->newdata.latitude,
 	     session->newdata.longitude,
-	     session->newdata.altitude,
 	     session->newdata.track,
 	     session->newdata.speed,
 	     session->newdata.climb,
@@ -883,6 +893,7 @@ ubx_msg_nav_posllh(struct gps_device_t *session, unsigned char *buf,
 		   size_t data_len UNUSED)
 {
     gps_mask_t mask = 0;
+    double alt_msl;
 
     if (28 > data_len) {
 	gpsd_log(&session->context->errout, LOG_WARN,
@@ -895,7 +906,12 @@ ubx_msg_nav_posllh(struct gps_device_t *session, unsigned char *buf,
     session->driver.ubx.iTOW = getles32(buf, 0);
     session->newdata.longitude = 1e-7 * getles32(buf, 4);
     session->newdata.latitude = 1e-7 * getles32(buf, 8);
-    session->newdata.altitude = 1e-3 * getles32(buf, 16);
+    /* altitude WGS84 */
+    session->newdata.altitude = 1e-3 * getles32(buf, 12);
+    /* altitude MSL */
+    alt_msl = 1e-3 * getles32(buf, 16);
+    session->newdata.geoid_sep = session->newdata.altitude - alt_msl;
+
     /* Horizontal accuracy estimate in mm, unknown type */
     session->newdata.eph = getleu32(buf, 20) * 1e-3;
     /* Vertical accuracy estimate in mm, unknown type */
