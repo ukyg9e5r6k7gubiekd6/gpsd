@@ -2811,7 +2811,12 @@ static gps_mask_t processPSTI030(int count, char *field[],
 	    session->newdata.mode = MODE_2D;
 	    mask |= LATLON_SET;
 	    if ('\0' != field[8][0]) {
+                /* altitude is MSL */
+		session->newdata.geoid_sep = wgs84_separation(
+		    session->newdata.latitude, session->newdata.longitude);
 		session->newdata.altitude = safe_atof(field[8]);
+                /* convert to WGS84 */
+		session->newdata.altitude -= session->newdata.geoid_sep;
 		mask |= ALTITUDE_SET;
 		session->newdata.mode = MODE_3D;
             }
