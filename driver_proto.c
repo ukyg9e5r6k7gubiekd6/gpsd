@@ -132,11 +132,10 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
      * makes it relatively easy to track down data-management problems.
      */
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "NAVSOL: time=%.2f, lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d\n",
+	     "NAVSOL: time=%.2f, lat=%.2f lon=%.2f mode=%d status=%d\n",
 	     session->newdata.time,
 	     session->newdata.latitude,
 	     session->newdata.longitude,
-	     session->newdata.altitude,
 	     session->newdata.mode,
 	     session->gpsdata.status);
 
