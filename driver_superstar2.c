@@ -1,5 +1,5 @@
 /*
- * This file is Copyright (c) 2010-2018 by the GPSD project
+ * This file is Copyright (c) 2010-2019 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 #include "gpsd_config.h"  /* must be before all includes */
@@ -108,6 +108,7 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     /* extract the local tangential plane (ENU) solution */
     session->newdata.latitude = getled64((char *)buf, 18) * RAD_2_DEG;
     session->newdata.longitude = getled64((char *)buf, 26) * RAD_2_DEG;
+    /* unclear if this is MSL or WGS84.  Assume WGS84 */
     session->newdata.altitude = getlef32((char *)buf, 34);
     session->newdata.speed = getlef32((char *)buf, 38);
     session->newdata.track = getlef32((char *)buf, 42) * RAD_2_DEG;
