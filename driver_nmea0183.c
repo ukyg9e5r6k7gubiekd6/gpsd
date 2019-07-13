@@ -851,7 +851,10 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	 * If we see this, force mode to 2D at most.
 	 */
 	if ('\0' != field[9][0]) {
+            /* altitude is MSL */
 	    session->newdata.altitude = safe_atof(field[9]);
+            /* convert to WGS 84 */
+	    session->newdata.altitude -= session->newdata.geoid_sep;
 	    mask |= ALTITUDE_SET;
 	    /*
 	     * This is a bit dodgy.  Technically we shouldn't set the mode
@@ -864,10 +867,6 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	     */
 	    if (4 <= satellites_visible) {
 		session->newdata.mode = MODE_3D;
-	    }
-            /* only need geoid_sep if in 3D mode */
-	    if ('\0' != field[8][0]) {
-		session->newdata.geoid_sep = safe_atof(field[11]);
 	    }
 	}
 	if (3 > satellites_visible) {
