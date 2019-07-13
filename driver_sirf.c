@@ -598,7 +598,6 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     uint32_t clk_bias_error;
     int32_t clk_offset;
     uint32_t clk_offset_error;
-    int32_t alt_ellips;               /* altitude over ellipse */
     int16_t heading_rate;             /* rate of change cog deg/s * 100 */
     uint32_t distance_travel;         /* distance traveled m * 100 */
     uint16_t distance_travel_error;   /* distance traveled error in m * 100 */
@@ -612,6 +611,7 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     uint32_t sv_list_5;
     uint32_t additional_info;
     int debug_base = LOG_PROG;
+    double alt_msl;
 
     if (len < 126)
 	return 0;
@@ -666,8 +666,12 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     clk_offset_error = getbeu32(buf, 50) / 100.0;
     session->newdata.latitude = getbes32(buf, 54) * 1e-7;
     session->newdata.longitude = getbes32(buf, 58) * 1e-7;
-    alt_ellips = getbes32(buf, 62);
-    session->newdata.altitude = getbes32(buf, 66) * 1e-2;
+    /* altitude WGS84 */
+    session->newdata.altitude = getbes32(buf, 62) * 1e-2;
+    /* altitude MSL */
+    alt_msl = getbes32(buf, 66) * 1e-2;
+    /* compute geoid_sep */
+    session->newdata.geoid_sep = session->newdata.altitude - alt_msl;
 
     mask |= LATLON_SET;
 
@@ -769,9 +773,9 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
 	gpsd_log(&session->context->errout, debug_base,
                  "solution_info %08x\n", solution_info);
 	gpsd_log(&session->context->errout, debug_base,
-	         "lat %.7f lon %.7f alte %d msl %.2f\n",
+	         "lat %.7f lon %.7f geoid_sep %.2f alt %.2f\n",
 	         session->newdata.latitude, session->newdata.longitude,
-                 alt_ellips, session->newdata.altitude);
+                 session->newdata.geoid_sep, session->newdata.altitude);
 	gpsd_log(&session->context->errout, debug_base,
 	         "speed %.2f track %.2f climb %.2f heading_rate %d\n",
 	         session->newdata.speed, session->newdata.track,
