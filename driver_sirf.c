@@ -1573,10 +1573,10 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 	     "SiRF: MND 0x02: gpsd_week %u iTOW %u\n",
              gps_week, iTOW);
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "SiRF: MND 0x02: time %.2f lat %.2f lon %.2f alt %.2f "
+	     "SiRF: MND 0x02: time %.2f lat %.2f lon %.2f "
 	     "mode %d status %d hdop %.2f used %d\n",
 	     session->newdata.time, session->newdata.latitude,
-	     session->newdata.longitude, session->newdata.altitude,
+	     session->newdata.longitude,
 	     session->newdata.mode, session->gpsdata.status,
 	     session->gpsdata.dop.hdop, session->gpsdata.satellites_used);
     return mask;
@@ -1614,6 +1614,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
     gps_mask_t mask = 0;
     double eph;
     double dbl_tmp;
+    double alt_msl;
 
     if (len != 91)
 	return 0;
@@ -1721,8 +1722,11 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 	}
 
 #endif /* TIMEHINT_ENABLE */
-	/* skip 4 bytes of satellite map */
-	session->newdata.altitude = getbes32(buf, 35) * 1e-2;
+        /* alititude WGS84 */
+	session->newdata.altitude = getbes32(buf, 31) * 1e-2;
+	alt_msl = getbes32(buf, 35) * 1e-2;
+	/* compute geoid_sep */
+	session->newdata.geoid_sep = session->newdata.altitude - alt_msl;
 	/* skip 1 byte of map datum */
 	session->newdata.speed = getbeu16(buf, 40) * 1e-2;
 	session->newdata.track = getbeu16(buf, 42) * 1e-2;
@@ -1776,7 +1780,8 @@ static gps_mask_t sirf_msg_dgpsstatus(struct gps_device_t *session,
 }
 
 /* decode Extended Measured Navigation Data MID 98 (0x62)
- * What SiRF has this message? */
+ * Used in u-blox TIM GPS receivers (SiRF2-ublox)
+ * "Firmware Release 2.1 UBX 1.0" */
 static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
 				 unsigned char *buf, size_t len UNUSED)
 {
@@ -1791,6 +1796,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
 	STATUS_SET | MODE_SET | DOP_SET;
     session->newdata.latitude = (double)getbes32(buf, 1) * RAD_2_DEG * 1e-8;
     session->newdata.longitude = (double)getbes32(buf, 5) * RAD_2_DEG * 1e-8;
+    /* defaults to WGS84 */
     session->newdata.altitude = (double)getbes32(buf, 9) * 1e-3;
     session->newdata.speed = (double)getbes32(buf, 13) * 1e-3;
     session->newdata.climb = (double)getbes32(buf, 17) * 1e-3;
