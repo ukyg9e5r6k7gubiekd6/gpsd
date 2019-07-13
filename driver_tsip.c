@@ -347,6 +347,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    break;
 	session->newdata.latitude = getbef32((char *)buf, 0) * RAD_2_DEG;
 	session->newdata.longitude = getbef32((char *)buf, 4) * RAD_2_DEG;
+	/* depending on GPS config, could be either WGS84 or MSL
+	 * default differs by model, usually WGS84 */
 	session->newdata.altitude = getbef32((char *)buf, 8);
 	//f1 = getbef32((char *)buf, 12);	clock bias */
 	f2 = getbef32((char *)buf, 16);	/* time-of-fix */
@@ -711,6 +713,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    break;
 	session->newdata.latitude = getbed64((char *)buf, 0) * RAD_2_DEG;
 	session->newdata.longitude = getbed64((char *)buf, 8) * RAD_2_DEG;
+	/* depending on GPS config, could be either WGS84 or MSL
+	 * default differs by model, usually WGS84 */
 	session->newdata.altitude = getbed64((char *)buf, 16);
 	//d1 = getbed64((char *)buf, 24);	clock bias */
 	f1 = getbef32((char *)buf, 32);	/* time-of-fix */
@@ -761,6 +765,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    ul1 = getbeu32(buf, 8);	/* time */
 	    sl1 = getbes32(buf, 12);	/* latitude */
 	    ul2 = getbeu32(buf, 16);	/* longitude */
+	    /* depending on GPS config, could be either WGS84 or MSL
+	     * default differs by model, usually WGS84 */
 	    sl2 = getbes32(buf, 20);	/* altitude */
 	    u1 = getub(buf, 24);	/* velocity scaling */
 	    u2 = getub(buf, 27);	/* fix flags */
@@ -787,6 +793,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->newdata.longitude = (double)ul2 * SEMI_2_DEG;
 	    if (session->newdata.longitude > 180.0)
 		session->newdata.longitude -= 360.0;
+	    /* depending on GPS config, could be either WGS84 or MSL
+	     * default differs by model, usually WGS84 */
 	    session->newdata.altitude = (double)sl2 * 1e-3;
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->newdata.mode = MODE_NO_FIX;
@@ -830,6 +838,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    u2 = getub(buf, 8);	/* fix flags */
 	    sl1 = getbes32(buf, 9);	/* latitude */
 	    ul2 = getbeu32(buf, 13);	/* longitude */
+	    /* depending on GPS config, could be either WGS84 or MSL
+	     * default differs by model, usually WGS84 */
 	    sl3 = getbes32(buf, 17);	/* altitude */
             /* FIXME: set VNED here */
 	    s2 = getbes16(buf, 21);	/* east velocity */
@@ -860,6 +870,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->newdata.longitude = (double)ul2 * SEMI_2_DEG;
 	    if (session->newdata.longitude > 180.0)
 		session->newdata.longitude -= 360.0;
+	    /* depending on GPS config, could be either WGS84 or MSL
+	     * default differs by model, usually WGS84 */
 	    session->newdata.altitude = (double)sl3 * 1e-3;
 	    if ((u2 & 0x20) != (uint8_t) 0)	/* check velocity scaling */
 		d5 = 0.02;
@@ -928,6 +940,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    }
 	    session->newdata.latitude = getbed64((char *)buf, 36) * RAD_2_DEG;
 	    session->newdata.longitude = getbed64((char *)buf, 44) * RAD_2_DEG;
+	    /* depending on GPS config, could be either WGS84 or MSL
+	     * default differs by model, usually WGS84 */
 	    session->newdata.altitude = getbed64((char *)buf, 52);
 	    //f1 = getbef32((char *)buf, 16);    clock bias */
 
