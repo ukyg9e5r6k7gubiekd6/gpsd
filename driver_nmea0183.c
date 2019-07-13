@@ -1881,7 +1881,7 @@ static gps_mask_t processPGRMZ(int c UNUSED, char *field[],
 {
     /*
      * $PGRMZ,246,f,3*1B
-     * 1    = Altitude
+     * 1    = Altitude (probably WGS84)
      * 2    = f (feet)
      * 3    = Mode
      *         1 = No Fix
@@ -1897,6 +1897,7 @@ static gps_mask_t processPGRMZ(int c UNUSED, char *field[],
     if ('f' == field[2][0] &&
         0 < strlen(field[1])) {
         /* have a GPS altitude, must be 3D */
+        /* seems to be WGS 84 */
 	session->newdata.altitude = atoi(field[1]) / METERS_TO_FEET;
 	mask |= (ALTITUDE_SET);
     }
@@ -2586,6 +2587,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 	    if (0 == do_lat_lon(&field[5], &session->newdata)) {
 		mask |= LATLON_SET;
 		if ('\0' != field[9][0]) {
+                    /* altitude is already WGS 84 */
 		    session->newdata.altitude = safe_atof(field[9]);
 		    mask |= ALTITUDE_SET;
                 }
