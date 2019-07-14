@@ -1138,6 +1138,14 @@ static int nmeaid_to_prn(char *talker, int nmea_satnum,
 		*ubx_gnssid = 3;
             } /* else ?? */
             break;
+	case 'P':
+            /* Quectel EC25 & EC21 use PQxxx for BeiDou */
+            if (talker[1] == 'Q') {
+		/* map Beidou IDs */
+		nmea2_prn = 400 + nmea_satnum;
+		*ubx_gnssid = 3;
+            } /* else ?? */
+            break;
 	case 'Q':
             if (talker[1] == 'Z') {
 		/* QZSS */
@@ -1353,8 +1361,10 @@ static gps_mask_t processGSA(int count, char *field[],
                      "xxGSA: clear sats_used\n");
 	}
 	session->nmea.last_gsa_talker = GSA_TALKER;
-	if ((session->nmea.last_gsa_talker == 'D')
-            || (session->nmea.last_gsa_talker == 'B'))
+	if ((session->nmea.last_gsa_talker == 'B') ||
+            (session->nmea.last_gsa_talker == 'D') ||
+            (session->nmea.last_gsa_talker == 'Q'))
+            /* Quectel EC25 & EC21 use PQGSA for BeiDou */
 	    session->nmea.seen_bdgsa = true;
 	else if (session->nmea.last_gsa_talker == 'L')
 	    session->nmea.seen_glgsa = true;
@@ -1580,6 +1590,9 @@ static gps_mask_t processGSV(int count, char *field[],
 	case 'B':
 	    /* FALLTHROUGH */
 	case 'D':
+	    /* FALLTHROUGH */
+	case 'Q':
+            /* Quectel EC25 & EC21 use PQGSA for BeiDou */
 	    session->nmea.seen_bdgsv = true;
 	    break;
 	case 'L':
