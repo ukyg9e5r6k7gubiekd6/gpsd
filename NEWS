@@ -6,6 +6,7 @@
   gpsdata.separation replaced by gpsdata.fix.geoid_sep.
   Remove nofloats build option.
   TPV JSON "alt" is now fixed at WGS84.  Probably.
+  xgps now uses XGPSOPTS environment variable.
 
 3.19: 2019-07-01
   Rearrange rawdata_t.  Bump the API because gps_data_t changed.
