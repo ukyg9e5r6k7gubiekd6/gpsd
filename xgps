@@ -16,8 +16,15 @@ usage: xgps [-?] [-D level] [-h] [-l degmfmt] [-r rotation] [-u units] [-V]
     -r rotation   Set rotation
     -u units      Set units to Imperial, Nautical or Metric
     -V            Print version and exit.
+
+    Options can be placed in the XGPSOPTS environment variable.
+    XGPSOPTS is processed before the CLI options.
 '''
 
+# ENVIRONMENT:
+#    Options in the XGPSOPTS environment variable will be parsed before
+#    the CLI options.  A handy place to put your '-l m -u m '
+#
 # This file is Copyright (c) 2010 by the GPSD project
 # SPDX-License-Identifier: BSD-2-clause
 #
@@ -26,6 +33,7 @@ usage: xgps [-?] [-D level] [-h] [-l degmfmt] [-r rotation] [-u units] [-V]
 from __future__ import absolute_import, print_function, division
 
 import cairo
+import getopt
 import math
 import os
 import socket
@@ -1191,7 +1199,6 @@ class Base(object):
         # repaint Skyview
         self.skyview.redraw(satellites)
 
-
         # the first 21 fields are updated using TPV data
         # the next 7 fields are updated using SKY data
         for (hook, widget) in Base.gpsfields[21:28]:
@@ -1270,8 +1277,13 @@ class Base(object):
 
 if __name__ == "__main__":
     try:
-        import getopt
-        (options, arguments) = getopt.getopt(sys.argv[1:], "D:hl:u:r:V?",
+        if 'XGPSOPTS' in os.environ:
+            # grab the XGPSOPTS environment variable for options
+            options = os.environ['XGPSOPTS'].split(' ') + sys.argv[1:]
+        else:
+            options = sys.argv[1:]
+
+        (options, arguments) = getopt.getopt(options, "D:hl:u:r:V?",
                                              ['verbose'])
         debug = 0
         degreefmt = 'd'

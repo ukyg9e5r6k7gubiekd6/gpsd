@@ -171,6 +171,9 @@ brackets, the part inside them is taken as an IPv6 address and
 port/device suffixes are only parsed after the trailing bracket.
 Possible cases look like this:</para>
 
+<para>The options for xgps can be placed in the XGPSOPTS environment variable.
+XGPSOPTS is processed before the CLI options.</para>
+
 <variablelist>
 <varlistentry>
 <term>localhost:/dev/ttyS1</term>
