@@ -6531,6 +6531,9 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         # UBX-NAV-STATUS
         "NAV-STATUS": {"command": send_poll, "opt": [0x01, 0x03],
                        "help": "poll UBX-NAV-STATUS Receiver Nav Status"},
+        # UBX-NAV-SVINFO
+        "NAV-SVINFO": {"command": send_poll, "opt": [0x01, 0x30],
+                       "help": "poll UBX-NAV-SVINFO Satellite Information"},
         # UBX-NAV-TIMEBDS
         "NAV-TIMEBDS": {"command": send_poll, "opt": [0x01, 0x24],
                         "help": "poll UBX-NAV-TIMEBDS BDS Time Solution"},
