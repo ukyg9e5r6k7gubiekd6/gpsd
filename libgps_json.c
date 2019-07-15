@@ -234,6 +234,10 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 	{"gnssid", t_ubyte,   STRUCTOBJECT(struct satellite_t, gnssid)},
 	{"svid",   t_ubyte,   STRUCTOBJECT(struct satellite_t, svid)},
 	{"sigid",  t_ubyte,   STRUCTOBJECT(struct satellite_t, sigid)},
+	{"freqid", t_ubyte,   STRUCTOBJECT(struct satellite_t, freqid),
+                              .dflt.ubyte = 0},
+	{"health", t_ubyte,   STRUCTOBJECT(struct satellite_t, health),
+                              .dflt.ubyte = SAT_HEALTH_UNK},
 	/* *INDENT-ON* */
 	{NULL},
     };

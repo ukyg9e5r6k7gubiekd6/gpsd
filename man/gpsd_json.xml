@@ -564,6 +564,21 @@ error modeling than the covariance calculation.</para>
         <entry>The signal ID of this signal.  As defined by u-blox, not
         NMEA. See u-blox doc for details.</entry>
 </row>
+<row>
+	<entry>freqid</entry>
+	<entry>no</entry>
+	<entry>numeric</entry>
+        <entry>For GLONASS satellites only: the frequency ID of the signal.
+As defined by u-blox, range 0 to 13.  The freqid is the frequency slot
+plus 7.</entry>
+</row>
+<row>
+	<entry>health</entry>
+	<entry>no</entry>
+	<entry>numeric</entry>
+        <entry>The health of this satellite.  0 is unknown, 1 is
+OK, and 2 is unhealthy.</entry>
+</row>
 </tbody>
 </tgroup>
 </table>
