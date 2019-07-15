@@ -1078,7 +1078,7 @@ ubx_msg_nav_sat(struct gps_device_t *session, unsigned char *buf,
         unsigned char gnssId = getub(buf, off + 0);
         short svId = (short)getub(buf, off + 1);
         unsigned char cno = getub(buf, off + 2);
-        /* FIXME! Grab health data from flags.  To where? */
+        /* health data in flags. */
 	uint32_t flags = getleu32(buf, off + 8);
 	bool used = (bool)(flags  & 0x08);
         /* Notice NO sigid! */
@@ -1100,6 +1100,8 @@ ubx_msg_nav_sat(struct gps_device_t *session, unsigned char *buf,
 	session->gpsdata.skyview[st].elevation = (short)getsb(buf, off + 3);
 	session->gpsdata.skyview[st].azimuth = (short)getles16(buf, off + 4);
 	session->gpsdata.skyview[st].used = used;
+        /* by some coincidence, our health flags matches u-blox's */
+        session->gpsdata.skyview[st].health = flags & 3;
         /* sbas_in_use is not same as used */
 	if (used) {
 	    nsv++;
