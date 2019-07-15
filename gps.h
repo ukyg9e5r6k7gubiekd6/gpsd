@@ -1917,7 +1917,7 @@ struct satellite_t {
      * GLONASS:  1 = L1 OF, 3 = L2 OF
      */
     unsigned char sigid;
-    unsigned char freqid;       /* The GLONASS (Only) frequency, 0 - 13 */
+    char freqid;       /* The GLONASS (Only) frequency, 0 - 13 */
     unsigned char health;       /* 0 = unknown, 1 = helthy, 2 = unhealthy */
 #define SAT_HEALTH_UNK 0
 #define SAT_HEALTH_OK 1

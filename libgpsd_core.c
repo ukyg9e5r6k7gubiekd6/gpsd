@@ -1762,6 +1762,7 @@ void gpsd_zero_satellites( struct gps_data_t *out)
         out->skyview[sat].azimuth = -1;
         out->skyview[sat].elevation = -91;
         out->skyview[sat].ss = -1.0;
+        out->skyview[sat].freqid = -1;
     }
 #if 0
     /*
