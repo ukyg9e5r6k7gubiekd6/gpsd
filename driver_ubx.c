@@ -1101,7 +1101,7 @@ ubx_msg_nav_sat(struct gps_device_t *session, unsigned char *buf,
 	session->gpsdata.skyview[st].azimuth = (short)getles16(buf, off + 4);
 	session->gpsdata.skyview[st].used = used;
         /* by some coincidence, our health flags matches u-blox's */
-        session->gpsdata.skyview[st].health = flags & 3;
+        session->gpsdata.skyview[st].health = (flags >> 4) & 3;
         /* sbas_in_use is not same as used */
 	if (used) {
 	    nsv++;

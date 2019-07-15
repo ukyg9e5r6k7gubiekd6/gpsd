@@ -383,6 +383,10 @@ void json_sky_dump(const struct gps_data_t *datap,
                     str_appendf(reply, replylen,
                        ",\"freqid\":%d", datap->skyview[i].freqid);
                 }
+                if (SAT_HEALTH_UNK != datap->skyview[i].health) {
+                    str_appendf(reply, replylen,
+                       ",\"health\":%d", datap->skyview[i].health);
+                }
                 (void)strlcat(reply, "},", replylen);
 	    }
 	}

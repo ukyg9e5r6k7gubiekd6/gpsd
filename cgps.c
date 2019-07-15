@@ -577,6 +577,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
             int column = 1;     /* column to write to */
             char *gnssid;
             char sigid[2] = "";
+            char health = ' ';
 
             if ( 0 == gpsdata->skyview[sat_no].svid) {
                 gnssid = "  ";
@@ -639,7 +640,12 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
                             int_to_str((int)round(gpsdata->skyview[sat_no].ss),
                                        0, 254));
             column += 6;
-            (void)mvwprintw(satellites, sat_no + 2, column, "  %c ",
+            if (SAT_HEALTH_BAD == gpsdata->skyview[sat_no].health) {
+                /* only mark known unhealthy */
+                health = 'u';
+            }
+            (void)mvwprintw(satellites, sat_no + 2, column, " %c%c ",
+                            health,
                             gpsdata->skyview[sat_no].used ? 'Y' : 'N');
         }
 
