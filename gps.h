@@ -1891,6 +1891,14 @@ struct satellite_t {
      * Note: other GNSS receivers use different mappings!
      */
     unsigned char gnssid;
+#define SAT_GNSSID_GPS 0
+#define SAT_GNSSID_SBAS 1
+#define SAT_GNSSID_GALILEO 2
+#define SAT_GNSSID_BEIDOU 3
+#define SAT_GNSSID_IMES 4
+#define SAT_GNSSID_QZSS 5
+#define SAT_GNSSID_GLONASS 6
+
     /* ignore gnssid and sigid if svid is zero */
     unsigned char svid;
     /* sigid as defined by u-blox 9, and used here
