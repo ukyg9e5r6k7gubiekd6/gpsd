@@ -52,6 +52,7 @@ extern "C" {
  *       MAXCHANNELS bumped from 120 to 140
  *       Try to make PRN be NMEA 2.x-4.0 compliant, not 4.10 or u-blox
  * 9.0   add NED and geoid_sep variables to gps_fix_t
+ *       add health variable to satellite_t
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -1909,6 +1910,10 @@ struct satellite_t {
      */
     unsigned char sigid;
     unsigned char freqid;       /* The GLONASS (Only) frequency, 0 - 13 */
+    unsigned char health;       /* 0 = unknown, 1 = helthy, 2 = unhealthy */
+#define SAT_HEALTH_UNK 0
+#define SAT_HEALTH_OK 1
+#define SAT_HEALTH_BAD 2
 };
 
 struct attitude_t {
