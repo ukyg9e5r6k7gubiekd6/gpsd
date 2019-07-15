@@ -17,6 +17,7 @@
 #include "gpsd.h"
 
 static double fix_minuz(double d);
+static double atan2z(double y, double x);
 
 static double bilinear(double x1, double y1, double x2, double y2, double x,
 		       double y, double z11, double z12, double z21,
@@ -111,10 +112,10 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
     gps_mask_t mask = LATLON_SET | ALTITUDE_SET;
 
     /* geodetic location */
-    lambda = atan2(y, x);
+    lambda = atan2z(y, x);
     p = sqrt(pow(x, 2) + pow(y, 2));
-    theta = atan2(z * a, p * b);
-    phi = atan2(z + e_2 * b * pow(sin(theta), 3),
+    theta = atan2z(z * a, p * b);
+    phi = atan2z(z + e_2 * b * pow(sin(theta), 3),
 	        p - e2 * a * pow(cos(theta), 3));
     n = a / sqrt(1.0 - e2 * pow(sin(phi), 2));
 
@@ -157,4 +158,10 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
 static double fix_minuz(double d)
 {
     return ((d == 0.0) ? 0.0 : d);
+}
+
+/* atan2() protected by fix_minuz() */
+static double atan2z(double y, double x)
+{
+    return atan2(fix_minuz(y), fix_minuz(x));
 }
