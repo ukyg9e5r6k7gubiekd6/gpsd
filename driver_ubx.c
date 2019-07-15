@@ -1155,6 +1155,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
         short ubx_PRN = (short)getub(buf, off + 1);
         unsigned char snr = getub(buf, off + 4);
 	bool used = (bool)(getub(buf, off + 2) & 0x01);
+        unsigned char flags = getub(buf, off + 12) & 3;
 
         nmea_PRN = ubx_to_prn(ubx_PRN,
                               &session->gpsdata.skyview[st].gnssid,
@@ -1178,6 +1179,12 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
 	session->gpsdata.skyview[st].elevation = (short)getsb(buf, off + 5);
 	session->gpsdata.skyview[st].azimuth = (short)getles16(buf, off + 6);
 	session->gpsdata.skyview[st].used = used;
+        if (0x10 & flags) {
+           session->gpsdata.skyview[st].health = SAT_HEALTH_BAD;
+        } else {
+           session->gpsdata.skyview[st].health = SAT_HEALTH_OK;
+        }
+
         /* sbas_in_use is not same as used */
 	if (used) {
             /* not really 'used', just integrity data from there */
