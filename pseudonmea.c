@@ -180,8 +180,15 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 	    /* bad prn, ignore */
             continue;
 	}
-	if (90 < abs(session->gpsdata.skyview[i].elevation)) {
+	if (0 == isfinite(session->gpsdata.skyview[i].elevation) ||
+	    90 < fabs(session->gpsdata.skyview[i].elevation)) {
 	    /* bad elevation, ignore */
+            continue;
+	}
+	if (0 == isfinite(session->gpsdata.skyview[i].azimuth) ||
+	    0 > session->gpsdata.skyview[i].azimuth ||
+	    359 < session->gpsdata.skyview[i].azimuth) {
+	    /* bad azimuth, ignore */
             continue;
 	}
 	satellites_visible++;
@@ -191,8 +198,15 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 	    /* bad prn, skip */
 	    continue;
 	}
-	if (90 < abs(session->gpsdata.skyview[i].elevation)) {
+	if (0 == isfinite(session->gpsdata.skyview[i].elevation) ||
+	    90 < fabs(session->gpsdata.skyview[i].elevation)) {
 	    /* bad elevation, ignore */
+            continue;
+	}
+	if (0 == isfinite(session->gpsdata.skyview[i].azimuth) ||
+	    0 > session->gpsdata.skyview[i].azimuth ||
+	    359 < session->gpsdata.skyview[i].azimuth) {
+	    /* bad azimuth, ignore */
             continue;
 	}
 	if (j % 4 == 0) {
@@ -202,7 +216,7 @@ static void gpsd_binary_satellite_dump(struct gps_device_t *session,
 			    ((satellites_visible - 1) / 4) + 1, (j / 4) + 1,
 			    satellites_visible);
 	}
-	str_appendf(bufp, len, ",%02d,%02d,%03d,%02.0f",
+	str_appendf(bufp, len, ",%02d,%02.0f,%03.0f,%02.0f",
 		    session->gpsdata.skyview[i].PRN,
 		    session->gpsdata.skyview[i].elevation,
 		    session->gpsdata.skyview[i].azimuth,

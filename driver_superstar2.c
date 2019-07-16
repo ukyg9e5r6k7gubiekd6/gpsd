@@ -192,9 +192,9 @@ superstar2_msg_svinfo(struct gps_device_t *session,
 	    porn = (unsigned int)(getub(buf, off + 3) >> 1) + 87;
 
 	session->gpsdata.skyview[i].PRN = (short)porn;
-	session->gpsdata.skyview[i].ss = (float)getub(buf, off + 4);
-	session->gpsdata.skyview[i].elevation = (short)getsb(buf, off + 1);
-	session->gpsdata.skyview[i].azimuth = (short)getub(buf, off + 2) +
+	session->gpsdata.skyview[i].ss = (double)getub(buf, off + 4);
+	session->gpsdata.skyview[i].elevation = (double)getsb(buf, off + 1);
+	session->gpsdata.skyview[i].azimuth = (double)getub(buf, off + 2) +
 	    (short)((unsigned short)(getub(buf, off + 3) & 0x1) << 1);
 	session->gpsdata.skyview[i].used = used;
 	if (used)

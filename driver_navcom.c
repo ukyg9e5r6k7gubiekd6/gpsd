@@ -753,9 +753,10 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 	 * values below are zero, one is not interested in this satellite */
 	if (!(ele == 0 && azm == 0 && dgps_age == 0)) {
 	    session->gpsdata.skyview[i].PRN = (short)prn;
-	    session->gpsdata.skyview[i].elevation = (short)ele;
-	    session->gpsdata.skyview[i].azimuth = (short)azm;
-	    s = session->gpsdata.skyview[i].ss = (p2_snr ? p2_snr : ca_snr) / 4.0;
+	    session->gpsdata.skyview[i].elevation = (double)ele;
+	    session->gpsdata.skyview[i].azimuth = (double)azm;
+	    s = session->gpsdata.skyview[i].ss =
+                (p2_snr ? p2_snr : ca_snr) / 4.0;
 	    session->gpsdata.skyview[i++].used = (stat == 0xff);
 	    if (stat == 0xff)
 		nsu++;

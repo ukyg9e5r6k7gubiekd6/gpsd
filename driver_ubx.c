@@ -1081,6 +1081,7 @@ ubx_msg_nav_sat(struct gps_device_t *session, unsigned char *buf,
         /* health data in flags. */
 	uint32_t flags = getleu32(buf, off + 8);
 	bool used = (bool)(flags  & 0x08);
+        int tmp;
         /* Notice NO sigid! */
 
 	nmea_PRN = ubx2_to_prn(gnssId, svId);
@@ -1096,9 +1097,15 @@ ubx_msg_nav_sat(struct gps_device_t *session, unsigned char *buf,
 	session->gpsdata.skyview[st].svid = svId;
 	session->gpsdata.skyview[st].PRN = nmea_PRN;
 
-	session->gpsdata.skyview[st].ss = (float)cno;
-	session->gpsdata.skyview[st].elevation = (short)getsb(buf, off + 3);
-	session->gpsdata.skyview[st].azimuth = (short)getles16(buf, off + 4);
+	session->gpsdata.skyview[st].ss = (double)cno;
+	tmp = getsb(buf, off + 3);
+        if (90 >= abs(tmp)) {
+	    session->gpsdata.skyview[st].elevation = (double)tmp;
+        }
+	tmp = getles16(buf, off + 4);
+        if (359 > tmp && 0 <= tmp) {
+	    session->gpsdata.skyview[st].azimuth = (double)tmp;
+        }
 	session->gpsdata.skyview[st].used = used;
         /* by some coincidence, our health flags matches u-blox's */
         session->gpsdata.skyview[st].health = (flags >> 4) & 3;
@@ -1156,6 +1163,7 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
         unsigned char snr = getub(buf, off + 4);
 	bool used = (bool)(getub(buf, off + 2) & 0x01);
         unsigned char flags = getub(buf, off + 12) & 3;
+        int tmp;
 
         nmea_PRN = ubx_to_prn(ubx_PRN,
                               &session->gpsdata.skyview[st].gnssid,
@@ -1175,9 +1183,15 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
         }
 	session->gpsdata.skyview[st].PRN = nmea_PRN;
 
-	session->gpsdata.skyview[st].ss = (float)snr;
-	session->gpsdata.skyview[st].elevation = (short)getsb(buf, off + 5);
-	session->gpsdata.skyview[st].azimuth = (short)getles16(buf, off + 6);
+	session->gpsdata.skyview[st].ss = (double)snr;
+	tmp = getsb(buf, off + 5);
+        if (90 >= abs(tmp)) {
+	    session->gpsdata.skyview[st].elevation = (double)tmp;
+        }
+	tmp = (double)getles16(buf, off + 6);
+        if (359 > tmp && 0 <= tmp) {
+	    session->gpsdata.skyview[st].azimuth = (double)tmp;
+        }
 	session->gpsdata.skyview[st].used = used;
         if (0x10 & flags) {
            session->gpsdata.skyview[st].health = SAT_HEALTH_BAD;

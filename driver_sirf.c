@@ -896,8 +896,8 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
         unsigned char gnssId;
         unsigned char svId;
         short PRN;
-        short azimuth;
-        short elevation;
+        double azimuth;
+        double elevation;
         short avg_cno;
         double ss;
         uint32_t status;
@@ -1005,14 +1005,14 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
 	    continue;
         }
 
-        /* throw away tenths in az and el */
-        azimuth = getbeu16(buf, offset + 2) / 10;
+        /* note tenths in az and el */
+        azimuth = (double)getbeu16(buf, offset + 2) / 10.0;
         /* what, no negative elevation? */
-        elevation = getbeu16(buf, offset + 4) / 10;
+        elevation = (double)getbeu16(buf, offset + 4) / 10.0;
         avg_cno = getbeu16(buf, offset + 6);
-        ss = avg_cno / 10.0;
+        ss = (double)avg_cno / 10.0;
         status = getbeu32(buf, offset + 8);
-        if ((0 == avg_cno) && (0 == elevation) && (0 == azimuth)) {
+        if ((0 == avg_cno) && (0 >= elevation) && (0 >= azimuth)) {
             /* null data, skip it */
             continue;
         }
@@ -1027,8 +1027,8 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
 	    session->gpsdata.skyview[st].used = true;
         }
 	gpsd_log(&session->context->errout, LOG_IO,
-                 "sat_info %04x gnssId %u svId %3u o %2u PRN %3u az %3u "
-                 "el %2u ss %5.1f\n",
+                 "sat_info %04x gnssId %u svId %3u o %2u PRN %3u az %4.1f "
+                 "el %5.1f ss %5.1f\n",
 		 sat_info, gnssId, svId, other_info, PRN, azimuth,
                  elevation, ss);
         st++;
@@ -1368,9 +1368,9 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
             session->gpsdata.skyview[st].gnssid = 0;
         }
 	session->gpsdata.skyview[st].azimuth =
-	    (short)(((unsigned)getub(buf, off + 1) * 3) / 2.0);
+	    (double)(((unsigned)getub(buf, off + 1) * 3.0) / 2.0);
 	session->gpsdata.skyview[st].elevation =
-	    (short)((unsigned)getub(buf, off + 2) / 2.0);
+	    (double)((unsigned)getub(buf, off + 2) / 2.0);
 	cn = 0;
 	for (j = 0; j < 10; j++)
 	    cn += (int)getub(buf, off + 5 + j);

@@ -370,7 +370,7 @@ void libgps_dump_state(struct gps_data_t *collect)
 	for (sp = collect->skyview;
 	     sp < collect->skyview + collect->satellites_visible;
 	     sp++) {
-	    (void)fprintf(debugfp, "    %2.2d: %2.2d %3.3d %3.0f %c\n",
+	    (void)fprintf(debugfp, "  %2.2d: %4.1f %5.1f %3.0f %c\n",
 			  sp->PRN, sp->elevation,
 			  sp->azimuth, sp->ss,
 			  sp->used ? 'Y' : 'N');

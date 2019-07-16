@@ -485,17 +485,17 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    if (d1 >= 0.0) {
 		session->gpsdata.skyview[i].PRN = (short)u1;
 		session->gpsdata.skyview[i].ss = (double)f1;
-		session->gpsdata.skyview[i].elevation = (short)round(d1);
-		session->gpsdata.skyview[i].azimuth = (short)round(d2);
+		session->gpsdata.skyview[i].elevation = (double)d1;
+		session->gpsdata.skyview[i].azimuth = (double)d2;
 		session->gpsdata.skyview[i].used = false;
 		for (j = 0; j < session->gpsdata.satellites_used; j++)
 		    if (session->gpsdata.skyview[i].PRN != 0 && session->driver.tsip.sats_used[j] != 0)
 			session->gpsdata.skyview[i].used = true;
 	    } else {
-		session->gpsdata.skyview[i].PRN =
-		    session->gpsdata.skyview[i].elevation =
-		    session->gpsdata.skyview[i].azimuth = 0;
-		session->gpsdata.skyview[i].ss = 0.0;
+		session->gpsdata.skyview[i].PRN = 0;
+		session->gpsdata.skyview[i].elevation = NAN;
+		session->gpsdata.skyview[i].azimuth = NAN;
+		session->gpsdata.skyview[i].ss = NAN;
 		session->gpsdata.skyview[i].used = false;
 	    }
 	    if (++i == session->gpsdata.satellites_visible) {
@@ -535,14 +535,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    if (d1 >= 0.0) {
 		session->gpsdata.skyview[i].PRN = (short)u1;
 		session->gpsdata.skyview[i].ss = (double)f1;
-		session->gpsdata.skyview[i].elevation = (short)round(d1);
-		session->gpsdata.skyview[i].azimuth = (short)round(d2);
+		session->gpsdata.skyview[i].elevation = (double)d1;
+		session->gpsdata.skyview[i].azimuth = (double)d2;
 		session->gpsdata.skyview[i].used = (bool)u4;
 	    } else {
 		session->gpsdata.skyview[i].PRN = (short)u1;
-		session->gpsdata.skyview[i].elevation =
-		    session->gpsdata.skyview[i].azimuth = 0;
-		session->gpsdata.skyview[i].ss = 0.0;
+		session->gpsdata.skyview[i].elevation = NAN;
+		session->gpsdata.skyview[i].azimuth = NAN;
+		session->gpsdata.skyview[i].ss = NAN;
 		session->gpsdata.skyview[i].used = false;
 	    }
 	    if (++i == session->gpsdata.satellites_visible) {

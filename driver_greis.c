@@ -24,6 +24,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>       /* for abs() */
 #include <string.h>
 #include <sys/select.h>
 
@@ -459,10 +460,11 @@ static gps_mask_t greis_msg_EL(struct gps_device_t *session,
 
         /* GREIS elevation is -90 to 90 degrees */
         /* GREIS uses 127 for n/a */
-        /* gpsd uses -91 for n/a, so adjust acordingly */
+        /* gpsd uses NAN for n/a, so adjust acordingly */
 	elevation = getub(buf, i);
-        if ((-90 > elevation) || (90 < elevation)) elevation = -91;
-	session->gpsdata.skyview[i].elevation = elevation;
+        if (90 < abs(elevation)) {
+	    session->gpsdata.skyview[i].elevation = (double)elevation;
+        } /* else leave as NAN */
     }
 
     session->driver.greis.seen_el = true;
@@ -500,9 +502,12 @@ static gps_mask_t greis_msg_AZ(struct gps_device_t *session,
         /* GREIS uses 255 for n/a */
         /* gpsd azimuth is 0 to 359, so adjust acordingly */
 	azimuth = getub(buf, i) * 2;
-        if (360 == azimuth) azimuth = 0;
-        else if (360 < azimuth) azimuth = -1;
-	session->gpsdata.skyview[i].azimuth = azimuth;
+        if (360 == azimuth) {
+	    session->gpsdata.skyview[i].azimuth = 0;
+        } else if (0 <= azimuth &&
+                   360 > azimuth) {
+	    session->gpsdata.skyview[i].azimuth = (double)azimuth;
+        } /* else leave as NAN */
     }
 
     session->driver.greis.seen_az = true;

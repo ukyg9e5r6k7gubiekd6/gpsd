@@ -353,19 +353,25 @@ void json_sky_dump(const struct gps_data_t *datap,
 	(void)strlcat(reply, "\"satellites\":[", replylen);
 	for (i = 0; i < reported; i++) {
 	    if (datap->skyview[i].PRN) {
-                if (-90 > datap->skyview[i].elevation ||
-                    90 < datap->skyview[i].elevation ||
-                    0 > datap->skyview[i].azimuth ||
-                    360 < datap->skyview[i].azimuth) {
-                   /* do not report PRN w/o valid elevation and azimuth */
-                   continue;
+		str_appendf(reply, replylen, "{\"PRN\":%d,",
+                            datap->skyview[i].PRN);
+		if (0 != isfinite(datap->skyview[i].elevation) &&
+		    90 >= fabs(datap->skyview[i].elevation)) {
+		    str_appendf(reply, replylen, "\"el\":%.1f,",
+		                datap->skyview[i].elevation);
+                }
+		if (0 != isfinite(datap->skyview[i].azimuth) &&
+		    0 <= fabs(datap->skyview[i].azimuth) &&
+		    359 >= fabs(datap->skyview[i].azimuth)) {
+		    str_appendf(reply, replylen, "\"az\":%.1f,",
+		                datap->skyview[i].azimuth);
+                }
+		if (0 != isfinite(datap->skyview[i].ss)) {
+		    str_appendf(reply, replylen, "\"ss\":%.1f,",
+		                datap->skyview[i].ss);
                 }
 		str_appendf(reply, replylen,
-                   "{\"PRN\":%d,\"el\":%d,\"az\":%d,\"ss\":%.0f,\"used\":%s",
-                   datap->skyview[i].PRN,
-                   datap->skyview[i].elevation,
-                   datap->skyview[i].azimuth,
-                   datap->skyview[i].ss,
+                   "\"used\":%s",
                    datap->skyview[i].used ? "true" : "false");
                 if (0 != datap->skyview[i].svid) {
                     str_appendf(reply, replylen,

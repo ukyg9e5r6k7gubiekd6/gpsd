@@ -53,6 +53,8 @@ extern "C" {
  *       Try to make PRN be NMEA 2.x-4.0 compliant, not 4.10 or u-blox
  * 9.0   add NED and geoid_sep variables to gps_fix_t
  *       add health variable to satellite_t
+ *       change satellite_t elevation and azimuth to double
+ *       satellite_t elevation, azimuth, and ss use NAN for unknown value.
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -1858,8 +1860,8 @@ struct satellite_t {
      * how to code PRN
      */
     short PRN;          /* PRN numbering per NMEA 2.x to 4.0, not 4.10 */
-    short elevation;	/* elevation of satellite, -90 to 90 deg, -91 for n/a */
-    short azimuth;	/* azimuth, 0 to 359 deg, -1 for n/a */
+    double elevation;	/* elevation of satellite, -90 to 90 deg, NAN for n/a */
+    double azimuth;	/* azimuth, 0 to 359 deg, NAN1 for n/a */
     /* gnssid:svid:sigid, as defined by u-blox 8/9:
      *  gnssid        svid (native PRN)
      *  0 = GPS       1-32

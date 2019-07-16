@@ -8,6 +8,8 @@
   TPV JSON "alt" is now fixed at WGS84.  Probably.
   xgps now uses XGPSOPTS environment variable.
   add health variable to satellite_t
+  change satellite_t elevation and azimuth to double
+  satellite_t elevation, azimuth, and ss use NAN for unknown value.
 
 3.19: 2019-07-01
   Rearrange rawdata_t.  Bump the API because gps_data_t changed.

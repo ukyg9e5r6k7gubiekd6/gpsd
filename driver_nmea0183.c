@@ -1639,9 +1639,9 @@ static gps_mask_t processGSV(int count, char *field[],
 		 nmea_gnssid, nmea_svid, sp->gnssid, sp->svid, sp->PRN);
 #endif  /* __UNUSED__ */
 
-	sp->elevation = (short)atoi(field[fldnum++]);
-	sp->azimuth = (short)atoi(field[fldnum++]);
-	sp->ss = (float)atoi(field[fldnum++]);
+	sp->elevation = (double)atoi(field[fldnum++]);
+	sp->azimuth = (double)atoi(field[fldnum++]);
+	sp->ss = (double)atoi(field[fldnum++]);
 	sp->used = false;
         sp->sigid = ubx_sigid;
 
@@ -2641,8 +2641,8 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
             sp < session->gpsdata.skyview + n; sp++, i++) {
 
 	    sp->PRN = (short)atoi(field[3 + i * 5 + 0]);
-	    sp->azimuth = (short)atoi(field[3 + i * 5 + 1]);
-	    sp->elevation = (short)atoi(field[3 + i * 5 + 2]);
+	    sp->azimuth = (double)atoi(field[3 + i * 5 + 1]);
+	    sp->elevation = (double)atoi(field[3 + i * 5 + 2]);
 	    sp->ss = safe_atof(field[3 + i * 5 + 3]);
 	    sp->used = false;
 	    if (field[3 + i * 5 + 4][0] == 'U') {

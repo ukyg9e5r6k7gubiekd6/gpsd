@@ -151,6 +151,20 @@ static const char *int_to_str(int val, int min, int max)
     return buf;
 }
 
+/* range test an double, to tenths, return 5 chars + NUL */
+static const char *tenth_to_str(double val, double min, double max)
+{
+    static char buf[20];
+
+    if (0 == isfinite(val) ||
+        val < min ||
+        val > max) {
+        return " n/a";
+    }
+    (void)snprintf(buf, sizeof(buf), "%5.1f", val);
+    return buf;
+}
+
 /* format a DOP into a 5 char string, handle NAN, INFINITE */
 static char *dop_to_str(double dop)
 {
@@ -626,19 +640,18 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
             (void)mvwaddstr(satellites, sat_no + 2, column,
                             int_to_str(gpsdata->skyview[sat_no].PRN,
                                        1, 438));
-            /* u-blox uses -91 to signal something undocumented */
-            column += 6;
+            column += 5;
             (void)mvwaddstr(satellites, sat_no + 2, column,
-                            int_to_str(gpsdata->skyview[sat_no].elevation,
-                                       -90, 90));
+                            tenth_to_str(gpsdata->skyview[sat_no].elevation,
+                                       -90.0, 90.0));
             column += 7;
             (void)mvwaddstr(satellites, sat_no + 2, column,
-                            int_to_str(gpsdata->skyview[sat_no].azimuth,
-                                       0, 359));
+                            tenth_to_str(gpsdata->skyview[sat_no].azimuth,
+                                       0.0, 359.0));
             column += 6;
             (void)mvwaddstr(satellites, sat_no + 2, column,
-                            int_to_str((int)round(gpsdata->skyview[sat_no].ss),
-                                       0, 254));
+			    tenth_to_str(gpsdata->skyview[sat_no].ss,
+				       0.0, 254.0));
             column += 6;
             if (SAT_HEALTH_BAD == gpsdata->skyview[sat_no].health) {
                 /* only mark known unhealthy */

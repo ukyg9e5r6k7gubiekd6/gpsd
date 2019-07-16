@@ -732,13 +732,14 @@ static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
              /* skip bad PRN */
              continue;
         }
-        if (0 > gpsdata->skyview[k].azimuth ||
-             359 < gpsdata->skyview[k].azimuth) {
+	if (0 == isfinite(gpsdata->skyview[k].azimuth) ||
+            0 > gpsdata->skyview[k].azimuth ||
+            359 < gpsdata->skyview[k].azimuth) {
              /* skip bad azimuth */
              continue;
         }
-        if (-90 > gpsdata->skyview[k].elevation ||
-             90 < gpsdata->skyview[k].elevation) {
+	if (0 == isfinite(gpsdata->skyview[k].elevation) ||
+            90 < fabs(gpsdata->skyview[k].elevation)) {
              /* skip bad elevation */
              continue;
         }
@@ -749,7 +750,7 @@ static gps_mask_t fill_dop(const struct gpsd_errout_t *errout,
             * cos(sp->elevation * DEG_2_RAD);
         satpos[n][2] = sin(sp->elevation * DEG_2_RAD);
         satpos[n][3] = 1;
-        gpsd_log(errout, LOG_INF, "PRN=%3d az=%3d el=%2d (%f, %f, %f)\n",
+        gpsd_log(errout, LOG_INF, "PRN=%3d az=%.1f ael%.1f (%f, %f, %f)\n",
                  gpsdata->skyview[k].PRN,
                  gpsdata->skyview[k].azimuth,
                  gpsdata->skyview[k].elevation,
@@ -1759,9 +1760,9 @@ void gpsd_zero_satellites( struct gps_data_t *out)
     /* zero is good inbound data for ss, elevation, and azimuth.  */
     /* we need to set them to invalid values */
     for ( sat = 0; sat < MAXCHANNELS; sat++ ) {
-        out->skyview[sat].azimuth = -1;
-        out->skyview[sat].elevation = -91;
-        out->skyview[sat].ss = -1.0;
+        out->skyview[sat].azimuth = NAN;
+        out->skyview[sat].elevation = NAN;
+        out->skyview[sat].ss = NAN;
         out->skyview[sat].freqid = -1;
     }
 #if 0

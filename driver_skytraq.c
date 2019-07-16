@@ -364,11 +364,11 @@ static gps_mask_t sky_msg_DE(struct gps_device_t *session,
 
 	sv_stat = (unsigned short)getub(buf, off + 2);
 	ura = (unsigned short)getub(buf, off + 3);
-	session->gpsdata.skyview[st].ss = (float)getub(buf, off + 4);
+	session->gpsdata.skyview[st].ss = (double)getub(buf, off + 4);
 	session->gpsdata.skyview[st].elevation =
-	    (short)getbes16(buf, off + 5);
+	    (double)getbes16(buf, off + 5);
 	session->gpsdata.skyview[st].azimuth =
-	    (short)getbes16(buf, off + 7);
+	    (double)getbes16(buf, off + 7);
 	chan_stat = (unsigned short)getub(buf, off + 9);
 
 	session->gpsdata.skyview[st].used = (bool)(chan_stat & 0x30);
@@ -377,13 +377,14 @@ static gps_mask_t sky_msg_DE(struct gps_device_t *session,
 	    session->gpsdata.skyview[st].elevation != 0;
 
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "Skytraq: PRN=%2d El=%d Az=%d ss=%3.2f stat=%02x,%02x ura=%d %c\n",
-		session->gpsdata.skyview[st].PRN,
-		session->gpsdata.skyview[st].elevation,
-		session->gpsdata.skyview[st].azimuth,
-		session->gpsdata.skyview[st].ss,
-		chan_stat, sv_stat, ura,
-		good ? '*' : ' ');
+		 "Skytraq: PRN=%2d El=%4.0f Az=%5.0f ss=%3.2f stat=%02x,%02x "
+                 "ura=%d %c\n",
+		 session->gpsdata.skyview[st].PRN,
+		 session->gpsdata.skyview[st].elevation,
+		 session->gpsdata.skyview[st].azimuth,
+		 session->gpsdata.skyview[st].ss,
+		 chan_stat, sv_stat, ura,
+		 good ? '*' : ' ');
 
 	if ( good ) {
 	    st += 1;

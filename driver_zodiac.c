@@ -275,15 +275,16 @@ static gps_mask_t handle1003(struct gps_device_t *session)
 	if (i < session->gpsdata.satellites_visible) {
 	    session->gpsdata.skyview[i].PRN = (short)getzword(15 + (3 * i));
 	    session->gpsdata.skyview[i].azimuth =
-		(short)(((short)getzword(16 + (3 * i))) * RAD_2_DEG * 1e-4);
+		(((double)getzword(16 + (3 * i))) * RAD_2_DEG * 1e-4);
 	    if (session->gpsdata.skyview[i].azimuth < 0)
 		session->gpsdata.skyview[i].azimuth += 360;
 	    session->gpsdata.skyview[i].elevation =
-		(short)(((short)getzword(17 + (3 * i))) * RAD_2_DEG * 1e-4);
+		(((double)getzword(17 + (3 * i))) * RAD_2_DEG * 1e-4);
 	} else {
 	    session->gpsdata.skyview[i].PRN = 0;
-	    session->gpsdata.skyview[i].azimuth = 0;
-	    session->gpsdata.skyview[i].elevation = 0;
+	    session->gpsdata.skyview[i].azimuth = NAN;
+	    session->gpsdata.skyview[i].elevation = NAN;
+	    session->gpsdata.skyview[i].ss = NAN;
 	}
     }
     session->gpsdata.skyview_time = NAN;

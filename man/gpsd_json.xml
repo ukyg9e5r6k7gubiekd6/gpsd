@@ -519,21 +519,21 @@ error modeling than the covariance calculation.</para>
 </row>
 <row>
 	<entry>az</entry>
-	<entry>Yes</entry>
+	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Azimuth, degrees from true north.</entry>
 </row>
 <row>
 	<entry>el</entry>
-	<entry>Yes</entry>
+	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Elevation in degrees.</entry>
 </row>
 <row>
 	<entry>ss</entry>
-	<entry>Yes</entry>
+	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Signal strength in dB.</entry>
+        <entry>Signal to Noise ratio in dBHz.</entry>
 </row>
 <row>
 	<entry>used</entry>

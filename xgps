@@ -235,14 +235,23 @@ class SkyView(Gtk.DrawingArea):
                 else:
                     gnss_str = ''
 
+                if 1 == sat.health:
+                    health = "OK"
+                elif 2 == sat.health:
+                    health = "Bad"
+                else:
+                    health = "Unk"
+
                 s = ("PRN %d\n"
                      "%s"
-                     "Elevation %3d\n"
-                     "Azimuth  %3d\n"
-                     "SNR       %3d\n"
-                     "Used %8s" %
+                     "Elevation %4.1f\n"
+                     "Azimuth  %5.1f\n"
+                     "SNR       %4.1f\n"
+                     "Used %8s\n"
+                     "Health %7s" %
                      (sat.PRN, gnss_str,
-                      sat.el, sat.az, sat.ss, 'Yes' if sat.used else 'No'))
+                      sat.el, sat.az, sat.ss, 'Yes' if sat.used else 'No',
+                      health))
                 label = Gtk.Label(s)
                 rectangle = Gdk.Rectangle()
                 rectangle.x = x - 25
@@ -1148,6 +1157,12 @@ class Base(object):
             return '%3d' % value
         return 'n/a'
 
+    def _tenth_to_str(self, value, min_val, max_val):
+        "test val in range min to max, or return"
+        if min_val <= value <= max_val:
+            return '%5.1f' % value
+        return 'n/a'
+
     def update_skyview(self, data):
         "Update the satellite list and skyview."
         data.satellites_seen = 0
@@ -1168,6 +1183,10 @@ class Base(object):
                 if satellite.used:
                     yesno = 'Y'
                     data.satellites_used += 1
+                if 2 == satellite.health:
+                    yesno = 'u' + yesno
+                else:
+                    yesno = ' ' + yesno
 
                 if i >= MAXCHANDISP:
                     # more than can be displaced
@@ -1179,10 +1198,11 @@ class Base(object):
                                        self._int_to_str(satellite.PRN, 1, 437))
                 # allow satellites 10 degree below horizon
                 self.set_satlist_field(i, 2,
-                                       self._int_to_str(satellite.el, -10, 90))
+                                       self._tenth_to_str(satellite.el, -10, 90))
                 self.set_satlist_field(i, 3,
-                                       self._int_to_str(satellite.az, 0, 359))
-                self.set_satlist_field(i, 4, "%3d" % satellite.ss)
+                                       self._tenth_to_str(satellite.az, 0, 359))
+                self.set_satlist_field(i, 4,
+                                       self._tenth_to_str(satellite.ss, 0, 100))
                 self.set_satlist_field(i, 5, yesno)
 
             # clear rest of the list

@@ -162,9 +162,9 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	    for (j = 0; (int)j < session->driver.oncore.visible; j++)
 		if (session->driver.oncore.PRN[j] == sv) {
 		    session->gpsdata.skyview[st].elevation =
-			(short)session->driver.oncore.elevation[j];
+			(double)session->driver.oncore.elevation[j];
 		    session->gpsdata.skyview[st].azimuth =
-			(short)session->driver.oncore.azimuth[j];
+			(double)session->driver.oncore.azimuth[j];
 		    Bbused |= 1 << j;
 		    break;
 		}
@@ -188,11 +188,12 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     }
     for (j = 0; (int)j < session->driver.oncore.visible; j++)
 	if (!(Bbused & (1 << j))) {
-	    session->gpsdata.skyview[st].PRN = (short)session->driver.oncore.PRN[j];
+	    session->gpsdata.skyview[st].PRN =
+                (short)session->driver.oncore.PRN[j];
 	    session->gpsdata.skyview[st].elevation =
-		(short)session->driver.oncore.elevation[j];
+		(double)session->driver.oncore.elevation[j];
 	    session->gpsdata.skyview[st].azimuth =
-		(short)session->driver.oncore.azimuth[j];
+		(double)session->driver.oncore.azimuth[j];
 	    st++;
 	}
     session->gpsdata.skyview_time = session->newdata.time;
@@ -298,13 +299,13 @@ oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf,
 
 	/* Store for use when Ea messages come. */
 	session->driver.oncore.PRN[i] = sv;
-	session->driver.oncore.elevation[i] = el;
-	session->driver.oncore.azimuth[i] = az;
+	session->driver.oncore.elevation[i] = (short)el;
+	session->driver.oncore.azimuth[i] = (short)az;
 	/* If it has an entry in the satellite list, update it! */
 	for (j = 0; j < session->gpsdata.satellites_visible; j++)
 	    if (session->gpsdata.skyview[j].PRN == (short)sv) {
-		session->gpsdata.skyview[j].elevation = (short)el;
-		session->gpsdata.skyview[j].azimuth = (short)az;
+		session->gpsdata.skyview[j].elevation = (double)el;
+		session->gpsdata.skyview[j].azimuth = (double)az;
 	    }
     }
 
