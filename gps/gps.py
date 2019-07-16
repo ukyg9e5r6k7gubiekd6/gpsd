@@ -257,6 +257,12 @@ class gps(gpscommon, gpsdata, gpsjson):
             if "satellites" in self.data.keys():
                 self.satellites = []
                 for sat in self.data['satellites']:
+                    if 'el' not in sat:
+                        sat['el'] = -999
+                    if 'az' not in sat:
+                        sat['az'] = -999
+                    if 'ss' not in sat:
+                        sat['ss'] = -999
                     self.satellites.append(gps.satellite(PRN=sat['PRN'],
                                            elevation=sat['el'],
                                            azimuth=sat['az'], ss=sat['ss'],
