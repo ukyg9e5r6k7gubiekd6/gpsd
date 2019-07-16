@@ -1845,16 +1845,6 @@ struct ais_t
     };
 };
 
-/* defines for u-blox gnssId, as used in satellite_t */
-#define GNSSID_GPS 0
-#define GNSSID_SBAS 1
-#define GNSSID_GAL 2
-#define GNSSID_BD 3
-#define GNSSID_IMES 4
-#define GNSSID_QZSS 5
-#define GNSSID_GLO 6
-#define GNSSID_IRNSS 7            /* Not defined by u-blox */
-#define GNSSID_CNT 8              /* count for array size */
 
 /* basic data, per PRN, from GPGSA and GPGSV, or GPS binary messages */
 /* FIXME: u-blox 9 no longer uses PRN */
@@ -1891,13 +1881,16 @@ struct satellite_t {
      * Note: other GNSS receivers use different mappings!
      */
     unsigned char gnssid;
-#define SAT_GNSSID_GPS 0
-#define SAT_GNSSID_SBAS 1
-#define SAT_GNSSID_GALILEO 2
-#define SAT_GNSSID_BEIDOU 3
-#define SAT_GNSSID_IMES 4
-#define SAT_GNSSID_QZSS 5
-#define SAT_GNSSID_GLONASS 6
+/* defines for u-blox gnssId, as used in satellite_t */
+#define GNSSID_GPS 0
+#define GNSSID_SBAS 1
+#define GNSSID_GAL 2
+#define GNSSID_BD 3
+#define GNSSID_IMES 4
+#define GNSSID_QZSS 5
+#define GNSSID_GLO 6
+#define GNSSID_IRNSS 7            /* Not defined by u-blox */
+#define GNSSID_CNT 8              /* count for array size */
 
     /* ignore gnssid and sigid if svid is zero */
     unsigned char svid;

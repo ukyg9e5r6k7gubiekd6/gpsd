@@ -377,7 +377,7 @@ void json_sky_dump(const struct gps_data_t *datap,
                     str_appendf(reply, replylen,
                        ",\"sigid\":%d", datap->skyview[i].sigid);
                 }
-                if (SAT_GNSSID_GLONASS == datap->skyview[i].gnssid &&
+                if (GNSSID_GLO == datap->skyview[i].gnssid &&
                     0 <= datap->skyview[i].freqid &&
                     16 >= datap->skyview[i].freqid) {
                     str_appendf(reply, replylen,
