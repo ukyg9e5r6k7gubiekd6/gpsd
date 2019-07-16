@@ -4162,6 +4162,7 @@ High Precision GNSS products only."""
         }
 
     health = {
+        0: "Unknown",
         1: "Healthy",
         2: "Unhealthy",
         }
