@@ -1569,6 +1569,7 @@ else:
         "jsongen.py",
         "leapsecond.py",
         "maskaudit.py",
+        "test_clienthelpers.py",
         "test_maidenhead.py",
         "test_misc.py",
         "test_xgps_deps.py",
@@ -2375,6 +2376,7 @@ else:
             ' $SRCDIR/test/clientlib/*.log', ])
     # Unit-test the bitfield extractor
     misc_regress = Utility('misc-regress', [], [
+        '$SRCDIR/test_clienthelpers.py',
         '$SRCDIR/test_misc.py'
     ])
 
