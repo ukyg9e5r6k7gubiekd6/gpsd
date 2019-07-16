@@ -109,7 +109,14 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
     const double b = WGS84B;	/* polar radius */
     const double e2 = (a * a - b * b) / (a * a);
     const double e_2 = (a * a - b * b) / (b * b);
-    gps_mask_t mask = LATLON_SET | ALTITUDE_SET;
+    gps_mask_t mask = 0;
+
+    if (0 == isfinite(x) ||
+        0 == isfinite(y) ||
+        0 == isfinite(z)) {
+	/* invalid inputs */
+	return mask;
+    }
 
     /* geodetic location */
     lambda = atan2z(y, x);
@@ -124,6 +131,7 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
 
     fix->latitude = phi * RAD_2_DEG;
     fix->longitude = lambda * RAD_2_DEG;
+    mask |= LATLON_SET | ALTITUDE_SET;
     *separation = wgs84_separation(fix->latitude, fix->longitude);
     /* velocity computation */
     vnorth = -vx * sin(phi) * cos(lambda) - vy * sin(phi) * sin(lambda) +
