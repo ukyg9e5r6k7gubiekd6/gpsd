@@ -235,7 +235,7 @@ class SkyView(Gtk.DrawingArea):
                 else:
                     gnss_str = ''
 
-                if health not in sat:
+                if 'health' not in sat:
                     health = "Unk"
                 elif 1 == sat.health:
                     health = "OK"
@@ -1185,7 +1185,9 @@ class Base(object):
                 if satellite.used:
                     yesno = 'Y'
                     data.satellites_used += 1
-                if 2 == satellite.health:
+                if 'health' not in satellite:
+                    yesno = ' ' + yesno
+                elif 2 == satellite.health:
                     yesno = 'u' + yesno
                 else:
                     yesno = ' ' + yesno
