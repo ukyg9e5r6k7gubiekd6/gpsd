@@ -1849,7 +1849,9 @@ struct ais_t
 /* basic data, per PRN, from GPGSA and GPGSV, or GPS binary messages */
 /* FIXME: u-blox 9 no longer uses PRN */
 struct satellite_t {
-    double ss;		/* signal-to-noise ratio, 0 to 254 dB, -1 for n/a */
+    /* SNR. signal-to-noise ratio, 0 to 254 dB, u-blox can be 0 to 63.
+     * -1 for n/a */
+    double ss;
     bool used;		/* this satellite used in solution */
     /* PRN of this satellite, 1 to 437, 0 for n/a
      * sadly there is no standard, but many different implementations of
@@ -1978,7 +1980,8 @@ struct rawdata_t {
         unsigned char svid;
         /* sigid see satellite_t for decode */
         unsigned char sigid;
-        unsigned char snr;      /* SNR.  0 to 100 dB-Hz. */
+        /* SNR.  0 to 100 dB-Hz.  u-blox can be 0 to 63. */
+        unsigned char snr;
         unsigned char freqid;   /* The GLONASS (Only) frequency, 0 - 13 */
         unsigned char lli;      /* RINEX Loss of Lock Indicator
                                  * bit 0 - Lost Lock
