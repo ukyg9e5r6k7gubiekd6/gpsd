@@ -235,7 +235,9 @@ class SkyView(Gtk.DrawingArea):
                 else:
                     gnss_str = ''
 
-                if 1 == sat.health:
+                if health not in sat:
+                    health = "Unk"
+                elif 1 == sat.health:
                     health = "OK"
                 elif 2 == sat.health:
                     health = "Bad"
