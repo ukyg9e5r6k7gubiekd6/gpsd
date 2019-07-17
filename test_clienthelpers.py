@@ -7,6 +7,7 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
+import math               # for math.fabs()
 import os                 # for os.environ()
 import subprocess
 import sys
@@ -48,10 +49,13 @@ test2 = [
 
 test3 = [
     # wgs84 separation
-    (-27.1127, -109.3497, -5.4363644476), # Easter Island
-    (-25.5920,   21.0937, 27.337067632),  # Kalahari Desert
-    ( 71.7069,  -42.6043, 41.9313767802), # Greenland
-    ( -5.7837,  144.3317, 70.5250281251), # Kuk swamp P
+    # online calculator:
+    # https://geographiclib.sourceforge.io/cgi-bin/GeoidEval
+    (-27.1127, -109.3497, -5.4363644476, "Easter Island"),
+    (-25.5920,   21.0937, 27.337067632,  "Kalahari Desert"),
+    ( 71.7069,  -42.6043, 41.9313767802, "Greenland"),
+    ( -5.7837,  144.3317, 70.5250281251, "Kuk swamp P"),
+    ( 44.0687,  -121.3142, -20.139401446, "Bend, OR"),
     ]
 
 test4 = [
@@ -87,14 +91,15 @@ for (lat, lon, maidenhead, location) in test2:
             (lat, lon, maidenhead, location, converted))
         errors += 1
 
-for (lat, lon, wgs84) in test3:
+for (lat, lon, wgs84, location) in test3:
     separation = gps.clienthelpers.wgs84_separation(lat, lon)
     # check to 1 millimeter
     diff = separation - wgs84
-    if 0.001 < diff:
+    print("diff %f sep %f wgs84 %f" % (diff, separation, wgs84))
+    if 0.001 < math.fabs(diff):
         sys.stderr.write(
-            "fail: wgs84_separation(%s, %s) expected %s got %s\n" %
-            (lat, lon, wgs84, separation))
+            "fail: wgs84_separation(%s, %s) (%s) expected %s got %s\n" %
+            (lat, lon, location, wgs84, separation))
         errors += 1
 
 
@@ -117,8 +122,8 @@ for (key, val, expected) in test4:
 os.environ = savedenv
 
 if errors:
-    print("test_clienthhelpers.py: %d tests failed" % errors)
+    print("test_clienthelpers.py: %d tests failed" % errors)
     sys.exit(1)
 else:
-    print("test_clienthhelpers.py: OK")
+    print("test_clienthelpers.py: OK")
     sys.exit(0)
