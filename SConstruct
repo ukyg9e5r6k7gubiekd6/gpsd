@@ -1570,12 +1570,11 @@ else:
         "leapsecond.py",
         "maskaudit.py",
         "test_clienthelpers.py",
-        "test_maidenhead.py",
         "test_misc.py",
         "test_xgps_deps.py",
         "valgrind-audit.py"
     ]
-    python_deps['test_maidenhead.py'] = 'clienthelpers'
+    python_deps['test_clienthelpers.py'] = 'clienthelpers'
 
     python_manpages = {
         "man/gegps.1": "man/gps.xml",
@@ -2030,13 +2029,6 @@ if env['python']:
     python_compilation_regress = Utility('python-compilation-regress',
                                          python_all, check_compile)
 
-    # Regression-test the Maidenhead Locator
-    maidenhead_locator_regress = UtilityWithHerald(
-        'Testing the Maidenhead Locator conversion...',
-        'maidenhead-locator-regress', [python_built_extensions], [
-            '$PYTHON $PYTHON_COVERAGE $SRCDIR/test_maidenhead.py '
-            ' >/dev/null'])
-
     # Sanity-check Python code.
     # Bletch.  We don't really want to suppress W0231 E0602 E0611 E1123,
     # but Python 3 syntax confuses a pylint running under Python 2.
@@ -2085,7 +2077,6 @@ if env['python']:
 else:
     python_install = []
     python_compilation_regress = None
-    maidenhead_locator_regress = None
     python_versions = None
 
 pc_install = [env.Install(installdir('pkgconfig'), 'libgps.pc')]
@@ -2452,7 +2443,6 @@ test_nondaemon = [
     float_regress,
     geoid_regress,
     json_regress,
-    maidenhead_locator_regress,
     matrix_regress,
     method_regress,
     misc_regress,
