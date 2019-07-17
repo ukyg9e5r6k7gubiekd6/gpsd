@@ -357,6 +357,8 @@ struct exportmethod_t *export_default(void)
    off.  A better way to communicate this to the user is probably
    desirable (in case the don't notice the subtle change from "(mag)"
    to "(true)" on their display).
+
+   FIXME: Valid on what date?  The true/magnetic changes with time.
  */
 float true2magnetic(double lat, double lon, double heading)
 {
