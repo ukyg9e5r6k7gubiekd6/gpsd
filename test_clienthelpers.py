@@ -79,7 +79,9 @@ for (lat, lon, maidenhead) in test2:
 
 for (lat, lon, wgs84) in test3:
     separation = gps.clienthelpers.wgs84_separation(lat, lon)
-    if not gps.clienthelpers.EQ(separation, wgs84):
+    # check to 1 millimeter
+    diff = separation - wgs84
+    if 0.001 < diff:
         sys.stderr.write(
             "fail: wgs84_separation(%s, %s) expected %s got %s\n" %
             (lat, lon, wgs84, separation))
