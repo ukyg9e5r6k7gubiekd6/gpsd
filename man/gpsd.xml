@@ -794,7 +794,8 @@ exist.</para>
 <para>Optional file containing the device activation/deactivation script.
 Note that while <filename>/etc/gpsd</filename> is the default system
 configuration directory, it is possible to build the GPSD source code
-with different assumptions.</para>
+with different assumptions.  See above for further details on the
+device-hook mechanism.</para>
 </listitem>
 </varlistentry>
 <!--
