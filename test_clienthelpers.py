@@ -56,8 +56,17 @@ test3 = [
 
 test4 = [
     # gpsd gpsd_units
-    ('LANG' , 'C', gps.clienthelpers.imperial),
+    ('GPSD_UNITS' , 'imperial', gps.clienthelpers.imperial),
+    ('GPSD_UNITS' , 'nautical', gps.clienthelpers.nautical),
+    ('GPSD_UNITS' , 'metric', gps.clienthelpers.metric),
+    ('LC_MEASUREMENT', 'en_US', gps.clienthelpers.imperial),
+    ('LC_MEASUREMENT', 'C', gps.clienthelpers.imperial),
+    ('LC_MEASUREMENT', 'POSIX', gps.clienthelpers.imperial),
     ('LC_MEASUREMENT', 'ru_RU', gps.clienthelpers.metric),
+    ('LANG', 'en_US', gps.clienthelpers.imperial),
+    ('LANG', 'C', gps.clienthelpers.imperial),
+    ('LANG', 'POSIX', gps.clienthelpers.imperial),
+    ('LANG', 'ru_RU', gps.clienthelpers.metric),
     ]
 
 errors = 0
@@ -89,25 +98,23 @@ for (lat, lon, wgs84) in test3:
         errors += 1
 
 
+savedenv = os.environ
+os.unsetenv('GPSD_UNITS')
+os.unsetenv('LC_MEASUREMENT')
+os.unsetenv('LANG')
 for (key, val, expected) in test4:
-    if key in os.environ:
-        saved = os.environ[key]
-    else:
-        saved = None
-
     os.environ[key] = val
 
     result = gps.clienthelpers.gpsd_units()
-    # restore old value
-    if saved:
-        os.environ[key] = saved
-    else:
-        os.unsetenv(key)
+    os.unsetenv(key)
 
     if result != expected:
         print("fail: gpsd_units() %s=%s got %s expected %d" %
               (key, val, str(result), expected))
         errors += 1
+
+# restore environment
+os.environ = savedenv
 
 if errors:
     print("test_clienthhelpers.py: %d tests failed" % errors)
