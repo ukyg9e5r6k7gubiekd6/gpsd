@@ -41,8 +41,13 @@ static double bilinear(double x1, double y1, double x2, double y2, double x,
 }
 
 
+/* return geoid separation (MSL-WGS84) in meters, given a lat/lon in degrees
+ * FIXME: Which MSL is this?  EGM2008, EGM96 or EGM84?
+ *
+ * Online calculator here:
+ * https://geographiclib.sourceforge.io/cgi-bin/GeoidEval
+  */
 double wgs84_separation(double lat, double lon)
-/* return geoid separation (MSL-WGS84) in meters, given a lat/lon in degrees */
 {
 #define GEOID_ROW	19
 #define GEOID_COL	37
