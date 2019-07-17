@@ -15,6 +15,8 @@ import sys
 import gps.clienthelpers
 import gps.misc
 
+debug = 0
+
 test1 = [
     # deg_dd
     (0, 0, "  0.00000000"),
@@ -51,11 +53,21 @@ test3 = [
     # wgs84 separation
     # online calculator:
     # https://geographiclib.sourceforge.io/cgi-bin/GeoidEval
-    (-27.1127, -109.3497, -5.4363644476, "Easter Island"),
-    (-25.5920,   21.0937, 27.337067632,  "Kalahari Desert"),
-    ( 71.7069,  -42.6043, 41.9313767802, "Greenland"),
-    ( -5.7837,  144.3317, 70.5250281251, "Kuk swamp P"),
-    ( 44.0687,  -121.3142, -20.139401446, "Bend, OR"),
+    # what MSL is this?  EGM208, EGM96, EGM84, or??
+    # Seems closest to EGM2008, but still off by a meter.
+    (-27.1127, -109.3497, -5.4363, "Easter Island"),
+    (-25.5920, 21.0937, 27.3370,  "Kalahari Desert"),
+    (71.7069, -42.6043, 41.9313, "Greenland"),
+    (-5.7837, 144.3317, 70.5250, "Kuk Swamp PG"),
+    (44.094556, -121.200222, -20.0215, "Bend Airport, OR (KBDN)"),
+    (61.171333, -149.991164, 8.7136, "Anchorage Airport, AK (PANC)"),
+    (39.861666, -104.673166, -21.3813, "Denver Airport, CO (KDEN)"),
+    (51.46970, -0.45943, 47.5378, "London Heathrow Airport, UK (LHR)"),
+    (-22.92170, -68.158401, 31.3072,
+     "San Pedro de Atacama Airport, CL (SCPE)"),
+    (1.350190, 103.994003, 5.4259, "Singapore Changi Airport, SG (SIN)"),
+    (55.617199, 38.06000, 14.9197, "Moscow Bykovo Airport, RU (UUBB)"),
+    (-33.946098, 151.177002, 19.5850, "Sydney Airport, AU (SYD)"),
     ]
 
 test4 = [
@@ -95,7 +107,8 @@ for (lat, lon, wgs84, location) in test3:
     separation = gps.clienthelpers.wgs84_separation(lat, lon)
     # check to 1 millimeter
     diff = separation - wgs84
-    print("diff %f sep %f wgs84 %f" % (diff, separation, wgs84))
+    if debug:
+        print("diff %f sep %f wgs84 %f" % (diff, separation, wgs84))
     if 0.001 < math.fabs(diff):
         sys.stderr.write(
             "fail: wgs84_separation(%s, %s) (%s) expected %s got %s\n" %
