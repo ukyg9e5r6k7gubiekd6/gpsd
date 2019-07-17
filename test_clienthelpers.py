@@ -7,6 +7,9 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
+import json
+import os
+import subprocess
 import sys
 
 import gps.clienthelpers
@@ -33,7 +36,25 @@ test1 = {
     (2, 180.21, "180 12' 36.00000\""),
     (2, 359.321, "359 19' 15.60000\""),
     (2, 360.0, "  0 00' 00.00000\""),
-}
+    }
+
+test2 = {
+    # maidenhead
+    (48.86471, 2.37305, "JN18eu"),  # Paris
+    (41.93498, 12.43652, "JN61fw"),  # Rome
+    (39.9771, -75.1685, "FM29jx"),  # Philadelphia
+    (-23.4028, -50.9766, "GG46mo"),  # Sao Paulo
+    }
+
+test3 = {
+    # wgs84 separation
+    }
+
+test4 = [
+    # gpsd gpsd_units
+    ({'LANG':'C'}, str(gps.clienthelpers.imperial)),
+    ({'LC_MEASUREMENT':'ru_RU'}, str(gps.clienthelpers.metric)),
+    ]
 
 errors = 0
 
@@ -43,6 +64,36 @@ for test in test1:
     if result != expected:
         print("fail: deg_to_str(%d, %.3f) got %s expected %s" %
               (deg_type, deg, result, expected))
+        errors += 1
+
+for (lat, lon, maidenhead) in test2:
+    converted = gps.clienthelpers.maidenhead(lat, lon)
+    if converted != maidenhead:
+        sys.stderr.write(
+            "fail: maidenhead test(%s, %s) expected %s got %s\n" %
+            (lat, lon, maidenhead, converted))
+        errors += 1
+
+for (lat, lon, wgs84) in test3:
+    separation = gps.clienthelpers.wgs84_separation(lat, lon)
+    if separation != wgs84:
+        sys.stderr.write(
+            "fail: wgs84_separation(%s, %s) expected %s got %s\n" %
+            (lat, lon, wgs84, separation))
+        errors += 1
+
+
+for (envp, expected) in test4:
+    p = subprocess.Popen([sys.executable, '-c', """'import gps.clienthelpers
+print(gps.clienthelpers.gpsd_units())'"""],
+                      env=envp,
+                      stdin=subprocess.PIPE,
+                      stdout=subprocess.PIPE,
+                      stderr=subprocess.PIPE)
+    result, stderr = p.communicate()
+    if result != expected:
+        print("fail: gpsd_units() %s got %s expected %s" %
+              (json.dumps(envp), result, expected))
         errors += 1
 
 if errors:
