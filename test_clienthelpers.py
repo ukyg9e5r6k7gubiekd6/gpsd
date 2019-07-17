@@ -7,14 +7,13 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
-import json
-import os
 import subprocess
 import sys
 
 import gps.clienthelpers
+import gps.misc
 
-test1 = {
+test1 = [
     # deg_dd
     (0, 0, "  0.00000000"),
     (0, 89.999, " 89.99900000"),
@@ -36,24 +35,28 @@ test1 = {
     (2, 180.21, "180 12' 36.00000\""),
     (2, 359.321, "359 19' 15.60000\""),
     (2, 360.0, "  0 00' 00.00000\""),
-    }
+    ]
 
-test2 = {
+test2 = [
     # maidenhead
     (48.86471, 2.37305, "JN18eu"),  # Paris
     (41.93498, 12.43652, "JN61fw"),  # Rome
     (39.9771, -75.1685, "FM29jx"),  # Philadelphia
     (-23.4028, -50.9766, "GG46mo"),  # Sao Paulo
-    }
+    ]
 
-test3 = {
+test3 = [
     # wgs84 separation
-    }
+    (-27.1127, -109.3497, -5.4363644476), # Easter Island
+    (-25.5920,   21.0937, 27.337067632),  # Kalahari Desert
+    ( 71.7069,  -42.6043, 41.9313767802), # Greenland
+    ( -5.7837,  144.3317, 70.5250281251), # Kuk swamp P
+    ]
 
 test4 = [
     # gpsd gpsd_units
-    ({'LANG':'C'}, str(gps.clienthelpers.imperial)),
-    ({'LC_MEASUREMENT':'ru_RU'}, str(gps.clienthelpers.metric)),
+    ({'LANG':'C'}, gps.clienthelpers.imperial),
+    ({'LC_MEASUREMENT':'ru_RU'}, gps.clienthelpers.metric),
     ]
 
 errors = 0
@@ -76,7 +79,7 @@ for (lat, lon, maidenhead) in test2:
 
 for (lat, lon, wgs84) in test3:
     separation = gps.clienthelpers.wgs84_separation(lat, lon)
-    if separation != wgs84:
+    if not gps.clienthelpers.EQ(separation, wgs84):
         sys.stderr.write(
             "fail: wgs84_separation(%s, %s) expected %s got %s\n" %
             (lat, lon, wgs84, separation))
@@ -84,16 +87,18 @@ for (lat, lon, wgs84) in test3:
 
 
 for (envp, expected) in test4:
-    p = subprocess.Popen([sys.executable, '-c', """'import gps.clienthelpers
-print(gps.clienthelpers.gpsd_units())'"""],
+    p = subprocess.Popen([sys.executable, '-c', """import gps.clienthelpers
+print(gps.clienthelpers.gpsd_units())"""],
                       env=envp,
                       stdin=subprocess.PIPE,
                       stdout=subprocess.PIPE,
                       stderr=subprocess.PIPE)
-    result, stderr = p.communicate()
-    if result != expected:
-        print("fail: gpsd_units() %s got %s expected %s" %
-              (json.dumps(envp), result, expected))
+    result = p.communicate()[0]
+    result = gps.misc.polystr(result)
+    result = result.strip()
+    if result != str(expected):
+        print("fail: gpsd_units() %s got %s expected %d" %
+              (envp, str(result), expected))
         errors += 1
 
 if errors:
