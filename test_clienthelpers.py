@@ -40,10 +40,10 @@ test1 = [
 
 test2 = [
     # maidenhead
-    (48.86471, 2.37305, "JN18eu"),  # Paris
-    (41.93498, 12.43652, "JN61fw"),  # Rome
-    (39.9771, -75.1685, "FM29jx"),  # Philadelphia
-    (-23.4028, -50.9766, "GG46mo"),  # Sao Paulo
+    (48.86471, 2.37305, "JN18eu", "Paris"),
+    (41.93498, 12.43652, "JN61fw", "Rome"),
+    (39.9771, -75.1685, "FM29jx", "Philadelphia"),
+    (-23.4028, -50.9766, "GG46mo", "Sao Paulo"),
     ]
 
 test3 = [
@@ -79,12 +79,12 @@ for test in test1:
               (deg_type, deg, result, expected))
         errors += 1
 
-for (lat, lon, maidenhead) in test2:
+for (lat, lon, maidenhead, location) in test2:
     converted = gps.clienthelpers.maidenhead(lat, lon)
     if converted != maidenhead:
         sys.stderr.write(
-            "fail: maidenhead test(%s, %s) expected %s got %s\n" %
-            (lat, lon, maidenhead, converted))
+            "fail: maidenhead test%s, %s (%s)) expected %s got %s\n" %
+            (lat, lon, maidenhead, location, converted))
         errors += 1
 
 for (lat, lon, wgs84) in test3:
