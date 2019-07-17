@@ -7,6 +7,7 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
+import os                 # for os.environ()
 import subprocess
 import sys
 
@@ -55,8 +56,8 @@ test3 = [
 
 test4 = [
     # gpsd gpsd_units
-    ({'LANG':'C'}, gps.clienthelpers.imperial),
-    ({'LC_MEASUREMENT':'ru_RU'}, gps.clienthelpers.metric),
+    ('LANG' , 'C', gps.clienthelpers.imperial),
+    ('LC_MEASUREMENT', 'ru_RU', gps.clienthelpers.metric),
     ]
 
 errors = 0
@@ -88,19 +89,24 @@ for (lat, lon, wgs84) in test3:
         errors += 1
 
 
-for (envp, expected) in test4:
-    p = subprocess.Popen([sys.executable, '-c', """import gps.clienthelpers
-print(gps.clienthelpers.gpsd_units())"""],
-                      env=envp,
-                      stdin=subprocess.PIPE,
-                      stdout=subprocess.PIPE,
-                      stderr=subprocess.PIPE)
-    result = p.communicate()[0]
-    result = gps.misc.polystr(result)
-    result = result.strip()
-    if result != str(expected):
-        print("fail: gpsd_units() %s got %s expected %d" %
-              (envp, str(result), expected))
+for (key, val, expected) in test4:
+    if key in os.environ:
+        saved = os.environ[key]
+    else:
+        saved = None
+
+    os.environ[key] = val
+
+    result = gps.clienthelpers.gpsd_units()
+    # restore old value
+    if saved:
+        os.environ[key] = saved
+    else:
+        os.unsetenv(key)
+
+    if result != expected:
+        print("fail: gpsd_units() %s=%s got %s expected %d" %
+              (key, val, str(result), expected))
         errors += 1
 
 if errors:
