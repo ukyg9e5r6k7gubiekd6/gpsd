@@ -85,9 +85,9 @@ test3 = [
 
 test4 = [
     # gpsd gpsd_units
-    ('GPSD_UNITS' , 'imperial', gps.clienthelpers.imperial),
-    ('GPSD_UNITS' , 'nautical', gps.clienthelpers.nautical),
-    ('GPSD_UNITS' , 'metric', gps.clienthelpers.metric),
+    ('GPSD_UNITS', 'imperial', gps.clienthelpers.imperial),
+    ('GPSD_UNITS', 'nautical', gps.clienthelpers.nautical),
+    ('GPSD_UNITS', 'metric', gps.clienthelpers.metric),
     ('LC_MEASUREMENT', 'en_US', gps.clienthelpers.imperial),
     ('LC_MEASUREMENT', 'C', gps.clienthelpers.imperial),
     ('LC_MEASUREMENT', 'POSIX', gps.clienthelpers.imperial),
