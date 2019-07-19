@@ -1,6 +1,6 @@
 /* test driver for the ECEF to WGS84 conversions in geoid.c
  *
- * This file is Copyright (c) 2010 by the GPSD project
+ * This file is Copyright (c) 2010-2019 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 
@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 	return 1;
     }
 
-    (void)printf(" lat= %f lon= %f geoid correction= %f\n",
+    (void)printf(" lat= %f lon= %f geoid correction= %.2f\n",
                  lat, lon, wgs84_separation(lat, lon));
 
     return 0;
