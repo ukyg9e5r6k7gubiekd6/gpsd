@@ -80,11 +80,10 @@ test3 = [
     (55.617199, 38.06000, 13.04, "Moscow Bykovo Airport, RU (UUBB)"),
     # SYD: EGM2008 22.0915, EGM96 22.2038, EGM84 21.7914
     (-33.946098, 151.177002, 18.96, "Sydney Airport, AU (SYD)"),
-
     # some 10x10 points
     # North Poll: EGM2008 14.8980, EGM96 13.6050, EGM84 13.0980
     (90, 0, 14.90, "North Poll"),
-    # Doyle: EGM2008 51.9753, EGM96 51.8734, EGM84 52.1094
+    # Doyle: EGM2008 -23.3366, EGM96 -23.3278, EGM84 -21.1672
     (40, -120, -23.34, "Near Doyle, CA"),
     # Equator 0, EGM2008 17.2260, EGM96 17.1630, EGM84 18.3296
     (0, 0, 17.23, "Equator 0W"),
