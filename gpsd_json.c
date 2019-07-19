@@ -171,6 +171,9 @@ void json_tpv_dump(const struct gps_device_t *session,
 	if (0 != isfinite(gpsdata->fix.altitude))
 	    str_appendf(reply, replylen,
 			   "\"alt\":%.3f,", gpsdata->fix.altitude);
+	if (0 != isfinite(gpsdata->fix.altMSL))
+	    str_appendf(reply, replylen,
+			   "\"altMSL\":%.3f,", gpsdata->fix.altMSL);
 	if (isfinite(gpsdata->fix.epx) != 0)
 	    str_appendf(reply, replylen, "\"epx\":%.3f,", gpsdata->fix.epx);
 	if (isfinite(gpsdata->fix.epy) != 0)

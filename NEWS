@@ -10,6 +10,7 @@
   add health variable to satellite_t
   change satellite_t elevation and azimuth to double
   satellite_t elevation, azimuth, and ss use NAN for unknown value.
+  add altMSL to gps_fix_t
 
 3.19: 2019-07-01
   Rearrange rawdata_t.  Bump the API because gps_data_t changed.

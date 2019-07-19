@@ -243,6 +243,7 @@ void gps_clear_fix(struct gps_fix_t *fixp)
 {
     memset(fixp, 0, sizeof(struct gps_fix_t));
     fixp->altitude = NAN;
+    fixp->altMSL = NAN;
     fixp->climb = NAN;
     fixp->epc = NAN;
     fixp->epd = NAN;
