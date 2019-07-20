@@ -20,6 +20,13 @@
 */
 using namespace std;
 
+int printfinite(double val)
+{
+    if (0 == isfinite(val))
+        return fputs(" N/A   ", stdout);
+    return fprintf(stdout, "%6.2f ", val);
+}
+
 /*
  * We should get libgps_dump_state() from the client library, but
  * scons has a bug; we can't get it to add -lgps to the link line,
@@ -79,12 +86,11 @@ static void libgps_dump_state(struct gps_data_t *collect)
 	(void)fprintf(stdout, "SKY: satellites in view: %d\n",
 		      collect->satellites_visible);
 	for (i = 0; i < collect->satellites_visible; i++) {
-	    (void)fprintf(stdout, "    %3d: %6.2f %6.2f %5.2f %c\n",
-			  collect->skyview[i].PRN,
-			  collect->skyview[i].elevation,
-			  collect->skyview[i].azimuth,
-			  collect->skyview[i].ss,
-			  collect->skyview[i].used ? 'Y' : 'N');
+	    (void)fprintf(stdout, "    %3d", collect->skyview[i].PRN);
+            (void)printfinite(collect->skyview[i].elevation);
+            (void)printfinite(collect->skyview[i].azimuth);
+            (void)printfinite(collect->skyview[i].ss);
+	    (void)fprintf(stdout, collect->skyview[i].used ? " Y\n" : " N\n");
 	}
     }
     if (collect->set & DEVICE_SET)
