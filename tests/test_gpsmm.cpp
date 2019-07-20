@@ -79,7 +79,7 @@ static void libgps_dump_state(struct gps_data_t *collect)
 	(void)fprintf(stdout, "SKY: satellites in view: %d\n",
 		      collect->satellites_visible);
 	for (i = 0; i < collect->satellites_visible; i++) {
-	    (void)fprintf(stdout, "    %2.2d: %2.2d %3.3d %3.0f %c\n",
+	    (void)fprintf(stdout, "    %3d: %6.2f %6.2f %5.2f %c\n",
 			  collect->skyview[i].PRN,
 			  collect->skyview[i].elevation,
 			  collect->skyview[i].azimuth,
