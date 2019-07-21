@@ -20,11 +20,12 @@
 */
 using namespace std;
 
-int printfinite(double val)
+void printfinite(double val)
 {
     if (0 == isfinite(val))
-        return fputs(" N/A   ", stdout);
-    return fprintf(stdout, "%6.2f ", val);
+        (void)fputs(" N/A   ", stdout);
+    else
+        (void)fprintf(stdout, "%6.2f ", val);
 }
 
 /*
@@ -87,9 +88,9 @@ static void libgps_dump_state(struct gps_data_t *collect)
 		      collect->satellites_visible);
 	for (i = 0; i < collect->satellites_visible; i++) {
 	    (void)fprintf(stdout, "    %3d", collect->skyview[i].PRN);
-            (void)printfinite(collect->skyview[i].elevation);
-            (void)printfinite(collect->skyview[i].azimuth);
-            (void)printfinite(collect->skyview[i].ss);
+	    printfinite(collect->skyview[i].elevation);
+	    printfinite(collect->skyview[i].azimuth);
+	    printfinite(collect->skyview[i].ss);
 	    (void)fprintf(stdout, collect->skyview[i].used ? " Y\n" : " N\n");
 	}
     }
