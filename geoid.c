@@ -23,12 +23,14 @@ static double bilinear(double x1, double y1, double x2, double y2, double x,
 		       double y, double z11, double z12, double z21,
 		       double z22)
 {
-    double delta;
+    double delta = (y2 - y1) * (x2 - x1);
+    double xx1 = x - x1;
+    double x2x = x2 - x;
+    double yy1 = y - y1;
+    double y2y = y2 - y;
 
-    delta = (y2 - y1) * (x2 - x1);
-
-    return (z22 * (y - y1) * (x - x1) + z12 * (y2 - y) * (x - x1) +
-	    z21 * (y - y1) * (x2 - x) + z11 * (y2 - y) * (x2 - x)) / delta;
+    return (z22 * yy1 * xx1 + z12 * y2y * xx1 +
+	    z21 * yy1 * x2x + z11 * y2y * x2x) / delta;
 }
 
 
