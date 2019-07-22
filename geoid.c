@@ -25,15 +25,6 @@ static double bilinear(double x1, double y1, double x2, double y2, double x,
 {
     double delta;
 
-#define EQ(a, b) (fabs((a) - (b)) < 0.001)
-    if (EQ(y1, y2) && EQ(x1, x2))
-	return (z11);
-    if (EQ(y1, y2) && !EQ(x1, x2))
-	return (z22 * (x - x1) + z11 * (x2 - x)) / (x2 - x1);
-    if (EQ(x1, x2) && !EQ(y1, y2))
-	return (z22 * (y - y1) + z11 * (y2 - y)) / (y2 - y1);
-#undef EQ
-
     delta = (y2 - y1) * (x2 - x1);
 
     return (z22 * (y - y1) * (x - x1) + z12 * (y2 - y) * (x - x1) +
