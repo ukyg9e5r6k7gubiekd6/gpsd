@@ -158,14 +158,18 @@ for (lat, lon, wgs84, location) in test3:
 
 
 savedenv = os.environ
-os.unsetenv('GPSD_UNITS')
-os.unsetenv('LC_MEASUREMENT')
-os.unsetenv('LANG')
+# from the python doc:
+# calls to unsetenv() don’t update os.environ, so it is actually
+# preferable to delete items of os.environ.
+for key in ['GPSD_UNITS', 'LC_MEASUREMENT', 'LANG']:
+    if key in os.environ:
+        del os.environ[key]
+
 for (key, val, expected) in test4:
     os.environ[key] = val
 
     result = gps.clienthelpers.gpsd_units()
-    os.unsetenv(key)
+    del os.environ[key]
 
     if result != expected:
         print("fail: gpsd_units() %s=%s got %s expected %d" %
