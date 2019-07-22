@@ -11,7 +11,8 @@
   change satellite_t elevation and azimuth to double
   satellite_t elevation, azimuth, and ss use NAN for unknown value.
   add altMSL to gps_fix_t
-  wgs84_separation() now return EGM2008. Best to cm, worst to 12m.
+  wgs84_separation() now return EGM2008 computed from 5x5 degree base data.
+     The best results are close to cm, the worst off up to 12m.
 
 3.19: 2019-07-01
   Rearrange rawdata_t.  Bump the API because gps_data_t changed.
