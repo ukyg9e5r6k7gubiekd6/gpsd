@@ -131,11 +131,17 @@ const short geoid_delta[GEOID_ROW][GEOID_COL]={
 };
 /* *INDENT-ON* */
 
-static double bilinear(double x1, double y1, double x2, double y2, double x,
-		       double y, double z11, double z12, double z21,
-		       double z22)
+/* compute bilinear approximation
+ * since our data set rows and columns are integer degree, the corner
+ * points can be integers.
+ *
+ * since the geoid_delta is shorts, the z11, z12, z21 an z22 can be ints.
+ */
+static double bilinear(int x1, int y1, int x2, int y2, double x,
+		       double y, int z11, int z12, int z21,
+		       int z22)
 {
-    double delta = (y2 - y1) * (x2 - x1);
+    int delta = (y2 - y1) * (x2 - x1);
     double xx1 = x - x1;
     double x2x = x2 - x;
     double yy1 = y - y1;
@@ -189,13 +195,13 @@ double wgs84_separation(double lat, double lon)
                     ilon1, lon, ilon2);
 #endif
 
-    return bilinear(ilon1 * 10.0 - 180.0, ilat1 * 10.0 - 90.0,
-		    ilon2 * 10.0 - 180.0, ilat2 * 10.0 - 90.0,
+    return bilinear(ilon1 * 10 - 180, ilat1 * 10 - 90,
+		    ilon2 * 10 - 180, ilat2 * 10 - 90,
 		    lon, lat,
-		    (double)geoid_delta[ilat1][ilon1],
-		    (double)geoid_delta[ilat1][ilon2],
-		    (double)geoid_delta[ilat2][ilon1],
-		    (double)geoid_delta[ilat2][ilon2]
+		    geoid_delta[ilat1][ilon1],
+		    geoid_delta[ilat1][ilon2],
+		    geoid_delta[ilat2][ilon1],
+		    geoid_delta[ilat2][ilon2]
 	) / 100;
 }
 
