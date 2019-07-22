@@ -611,7 +611,6 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     uint32_t sv_list_5;
     uint32_t additional_info;
     int debug_base = LOG_PROG;
-    double alt_msl;
 
     if (len < 126)
 	return 0;
@@ -669,9 +668,10 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     /* altitude WGS84 */
     session->newdata.altitude = getbes32(buf, 62) * 1e-2;
     /* altitude MSL */
-    alt_msl = getbes32(buf, 66) * 1e-2;
+    session->newdata.altMSL = getbes32(buf, 66) * 1e-2;
     /* compute geoid_sep */
-    session->newdata.geoid_sep = session->newdata.altitude - alt_msl;
+    session->newdata.geoid_sep = session->newdata.altitude -
+				 session->newdata.altMSL;
 
     mask |= LATLON_SET;
 
@@ -1614,7 +1614,6 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
     gps_mask_t mask = 0;
     double eph;
     double dbl_tmp;
-    double alt_msl;
 
     if (len != 91)
 	return 0;
@@ -1724,9 +1723,10 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 #endif /* TIMEHINT_ENABLE */
         /* alititude WGS84 */
 	session->newdata.altitude = getbes32(buf, 31) * 1e-2;
-	alt_msl = getbes32(buf, 35) * 1e-2;
+	session->newdata.altMSL = getbes32(buf, 35) * 1e-2;
 	/* compute geoid_sep */
-	session->newdata.geoid_sep = session->newdata.altitude - alt_msl;
+	session->newdata.geoid_sep = session->newdata.altitude -
+	                             session->newdata.altMSL;
 	/* skip 1 byte of map datum */
 	session->newdata.speed = getbeu16(buf, 40) * 1e-2;
 	session->newdata.track = getbeu16(buf, 42) * 1e-2;
