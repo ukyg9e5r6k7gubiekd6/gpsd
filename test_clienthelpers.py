@@ -2,15 +2,15 @@
 #
 # Test gps/clienthelpers.py
 #
-
 # This code runs compatibly under Python 2 and 3.x for x >= 2.
 # Preserve this property!
+"""Partial test suite for gps.clienthelpers module."""
+
 from __future__ import absolute_import, print_function, division
 
 import math               # for math.fabs()
 import os                 # for os.environ()
-import subprocess
-import sys
+import sys                # for stderr, etc.
 
 import gps.clienthelpers
 import gps.misc
@@ -47,6 +47,8 @@ test2 = [
     (41.93498, 12.43652, "JN61fw", "Rome"),
     (39.9771, -75.1685, "FM29jx", "Philadelphia"),
     (-23.4028, -50.9766, "GG46mo", "Sao Paulo"),
+    (90, 180, "SS00aa", "North Pole"),
+    (-90, -180, "AA00aa", "South Pole"),
     ]
 
 test3 = [
@@ -89,6 +91,11 @@ test3 = [
     (0, 0, 17.23, "Equator 0W"),
     # South Poll: EGM2008 -30.1500, EGM96 -29.5350, EGM84 -29.7120
     (-90, 0, -30.15, "South Poll"),
+    # test data for some former corners in the code
+    # 0, -78.*: EGM2008 26.8978, EGM96 25.3457, EGM84 26.1507
+    (0, -78.452222, 14.46, "Equatorial Sign Bolivia"),
+    # 51.*, 0: EGM2008 45.8961, EGM96 45.7976, EGM84 47.2468
+    (51.4778067, 0, 45.48, "Lawn Greenwich Observatory UK"),
     ]
 
 test4 = [
