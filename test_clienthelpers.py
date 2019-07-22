@@ -159,7 +159,7 @@ for (lat, lon, wgs84, location) in test3:
 
 savedenv = os.environ
 # from the python doc:
-# calls to unsetenv() don’t update os.environ, so it is actually
+# calls to unsetenv() don't update os.environ, so it is actually
 # preferable to delete items of os.environ.
 for key in ['GPSD_UNITS', 'LC_MEASUREMENT', 'LANG']:
     if key in os.environ:
