@@ -147,7 +147,15 @@ try to compute the value from the skyview.</para>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Altitude in meters.  Probably WGS84. Present if mode is 3.
-MSL is alt + geoidSep.</entry>
+</entry>
+</row>
+<row>
+	<entry>altMSL</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>MSL Altitude in meters.  The geoid used is rarely specified
+and is often inacurate.  See the comments below on geoidSep.  Present if
+ mode is 3.  MSL is alt + geoidSep.</entry>
 </row>
 <row>
 	<entry>climb</entry>
@@ -357,8 +365,14 @@ MSL is alt + geoidSep.</entry>
 	<entry>geoidSep</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Geoid separation also known as Height above Ellipsoid.
-The difference between ellipsoid and mean sea level in meters.</entry>
+        <entry>Geoid separation is the difference between the WGS84
+reference elipsoid and the geoid (Mean Sea Level) in meters.  Almost no
+GNSS receiver specifies how they compute their geoid. gpsd computes the
+geoid from a 5x5 degree table of EGM2008 values when the receiver does
+not supply a geoid separation.  The gpsd computed geoidSep is usually
+within one meter of the "true" value, but can be off as much as 12 meters.
+</entry>
+
 </row>
 
 </tbody>
