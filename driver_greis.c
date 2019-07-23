@@ -270,9 +270,9 @@ static gps_mask_t greis_msg_PV(struct gps_device_t *session,
 	     session->newdata.ecef.vAcc);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GREIS: PV, lat: %.2f, lon: %.2f, alt: %.2f, solution_type: %d\n",
+	     "GREIS: PV, lat: %.2f, lon: %.2f, solution_type: %d\n",
 	     session->newdata.latitude,
-	     session->newdata.longitude, session->newdata.altitude,
+	     session->newdata.longitude,
 	     solution_type);
 
    mask |= MODE_SET | STATUS_SET | ECEF_SET | VECEF_SET;
