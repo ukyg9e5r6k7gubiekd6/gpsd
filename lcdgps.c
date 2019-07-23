@@ -209,7 +209,8 @@ static void update_lcd(struct gps_data_t *gpsdata)
     track=(int)(gpsdata->fix.track);
     if (track == 0) track = 360;
 
-    snprintf(tmpbuf, sizeof(tmpbuf) - 1, "widget_set gpsd three 1 3 {%.1f %s %d deg}\n",
+    snprintf(tmpbuf, sizeof(tmpbuf) - 1,
+             "widget_set gpsd three 1 3 {%.1f %s %d deg}\n",
              gpsdata->fix.speed*speedfactor, speedunits,
              track);
     send_lcd(tmpbuf);
@@ -229,8 +230,10 @@ static void update_lcd(struct gps_data_t *gpsdata)
     avgclimb=0.0;
     for(n=0;n<CLIMB;n++) avgclimb+=climb[n];
     avgclimb/=CLIMB;
-    snprintf(tmpbuf, sizeof(tmpbuf) - 1, "widget_set gpsd four 1 4 {%d %s %s %d fpm       }\n",
-            (int)(gpsdata->fix.altitude*altfactor), altunits, gridsquare, (int)(avgclimb * METERS_TO_FEET * 60));
+    snprintf(tmpbuf, sizeof(tmpbuf) - 1,
+             "widget_set gpsd four 1 4 {%d %s %s %d fpm       }\n",
+            (int)(gpsdata->fix.altMSL * altfactor), altunits,
+            gridsquare, (int)(avgclimb * METERS_TO_FEET * 60));
   } else {
     snprintf(tmpbuf, sizeof(tmpbuf) - 1, "widget_set gpsd four 1 4 {n/a}\n");
   }
