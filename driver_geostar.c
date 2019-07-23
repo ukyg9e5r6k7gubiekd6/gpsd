@@ -6,7 +6,7 @@
  *
  * By Viktar Palstsiuk, viktar.palstsiuk@promwad.com
  *
- * This file is Copyright (c) 2010-2018 by the GPSD project
+ * This file is Copyright (c) 2010-2019 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 
@@ -175,6 +175,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	session->newdata.time = d1 + JAN_2008;
 	session->newdata.latitude = getled64(buf, OFFSET(3)) * RAD_2_DEG;
 	session->newdata.longitude = getled64(buf, OFFSET(5)) * RAD_2_DEG;
+        /* altitude above ellipsoid */
 	session->newdata.altitude = getled64(buf, OFFSET(7));
 	session->newdata.geoid_sep = getled64(buf, OFFSET(9));
 	session->gpsdata.satellites_used = (int)getles32(buf, OFFSET(11));
