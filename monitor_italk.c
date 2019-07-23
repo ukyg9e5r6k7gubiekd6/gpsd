@@ -79,7 +79,7 @@ static void display_itk_navfix(unsigned char *buf, size_t len)
 	return;
 
 #ifdef __UNUSED__
-    flags = (unsigned short) getleu16(buf, 7 + 4); */
+    flags = (unsigned short) getleu16(buf, 7 + 4);
     cflags = (unsigned short) getleu16(buf, 7 + 6);
     pflags = (unsigned short) getleu16(buf, 7 + 8);
 #endif /* __UNUSED__ */
