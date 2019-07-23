@@ -322,8 +322,14 @@ void gps_merge_fix(struct gps_fix_t *to,
     }
     if ((transfer & MODE_SET) != 0)
 	to->mode = from->mode;
-    if ((transfer & ALTITUDE_SET) != 0)
-	to->altitude = from->altitude;
+    if ((transfer & ALTITUDE_SET) != 0) {
+	if (0 != isfinite(from->altitude)) {
+	    to->altitude = from->altitude;
+	}
+	if (0 != isfinite(from->altMSL)) {
+	    to->altMSL = from->altMSL;
+	}
+    }
     if ((transfer & TRACK_SET) != 0)
         to->track = from->track;
     if ((transfer & MAGNETIC_TRACK_SET) != 0)
