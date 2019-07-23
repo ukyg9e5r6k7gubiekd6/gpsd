@@ -1,5 +1,5 @@
 /*
- * This file is Copyright (c) 2010-2018 by the GPSD project
+ * This file is Copyright (c) 2010-2019 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 #include "gpsd_config.h"  /* must be before all includes */
@@ -48,6 +48,8 @@ void send_dbus_fix(struct gps_device_t *channel)
     gpsd_devname = gpsdata->dev.path;
 
     /* Send the named signal.  */
+    /* the dbus/locationd doc fails to specify altitude as WGS84 or MSL.
+     * assume altMSL */
     message = dbus_message_new_signal("/org/gpsd", "org.gpsd", "fix");
     dbus_message_append_args(message,
 			     DBUS_TYPE_DOUBLE, &(gpsfix->time),
@@ -56,7 +58,7 @@ void send_dbus_fix(struct gps_device_t *channel)
 			     DBUS_TYPE_DOUBLE, &(gpsfix->latitude),
 			     DBUS_TYPE_DOUBLE, &(gpsfix->longitude),
 			     DBUS_TYPE_DOUBLE, &(gpsfix->eph),
-			     DBUS_TYPE_DOUBLE, &(gpsfix->altitude),
+			     DBUS_TYPE_DOUBLE, &(gpsfix->altMSL),
 			     DBUS_TYPE_DOUBLE, &(gpsfix->epv),
 			     DBUS_TYPE_DOUBLE, &(gpsfix->track),
 			     DBUS_TYPE_DOUBLE, &(gpsfix->epd),
