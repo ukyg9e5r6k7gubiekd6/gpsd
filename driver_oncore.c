@@ -59,6 +59,102 @@ static void oncore_event_hook(struct gps_device_t *, event_t);
 
 /*
  * Decode the navigation solution message
+ *
+ * @@Ea - Position/Status/Data Message
+
+@@EamdyyhmsffffaaaaoooohhhhmmmmvvhhddtntimsdimsdimsdimsdimsdimsdimsdimsdsC
+<CR><LF>
+
+ *
+ *      Date
+ *       m         - month                       1 .. 12
+ *       d         - day                         1 .. 31
+ *       yy        - year                        1980 .. 2079
+ *
+ *      Time
+ *       h         - hours                       0 .. 23
+ *       m         - minutes                     0 .. 59
+ *       s         - seconds                     0 .. 60
+ *       ffff      - fractional second           0 .. 999,999,999
+ *                 (0.0 .. 0.999999999)
+ *
+ *      Position
+ *       aaaa      - latitude in mas             -324,000,000 .. 324,000,000
+ *                 (-90 degrees .. 90 degrees)
+ *
+ *       oooo      - longitude in mas            -648,000,000 .. 648,000,000
+ *                 (-180 degrees .. 180 degrees)
+ *
+ *       hhhh       - ellipsoid height in cm     -100,000 .. 1,800,000
+ *                 (-1000.00 .. 18,000.00m)*
+ *
+ *       mmmm  - not used                        0
+ *
+ *      Velocity
+ *       vv        - velocity in cm/s            0 .. 51,400 (0..514.00 m/s)*
+ *       hh        - heading                     0 .. 3599 (0.0..359.9 degrees)
+ *
+ *                 (true north res 0.1 degrees)
+ *
+ *      Geometry
+ *       dd        - current DOP (0.1 res)       0 .. 999 (0.0 to 99.9 DOP)
+ *             (0 = not computable, position-hold, or    position propagate)
+ *
+ *       t         - DOP TYPE
+ *                   0   PDOP (3D)/antenna ok
+ *                   1   PDOP (3D)/antenna OK
+ *                   64  PDOP (3D)/antenna shorted
+ *                   65  PDOP (3D)/antenna shorted
+ *                   128 PDOP (3D)/antenna open
+ *                   129 PDOP (3D)/antenna open
+ *                   192 PDOP (3D)/antenna shorted
+ *                   193 PDOP (3D)/antenna shorted
+ *
+ *      Satellite visibility and tracking status
+ *       n         - num of visible sats         0 .. 12
+ *       t         - num of satellites tracked   0 .. 8
+ *
+ *      For each of eight receiver channels
+ *       i         - sat ID                      0 .. 37
+ *       m         - channel tracking mode       0 .. 8
+ *                 0 = code search    5 = message sync detect
+ *                 1 = code acquire   6 = satellite time avail.
+ *                 2 = AGC set        7 = ephemeris acquire
+ *                 3 = prep acquire   8 = avail for position
+ *                 4 = bit sync detect
+ *
+ *       s         - carrier to noise density ratio
+ *                 (C/No)                        0 .. 255 db-Hz
+ *
+ *       d         - channel status flag
+ *                 Each bit represents one of the following:
+ *                 (msb)   Bit 7: using for position fix
+ *                         Bit 6: satellite momentum alert flag
+ *                         Bit 5: satellite anti-spoof flag set
+ *                         Bit 4: satellite reported unhealthy
+ *                         Bit 3: satellite reported inaccurate
+ *                         (> 16m)
+ *                         Bit 2: spare
+ *                         Bit 1: spare
+ *                 (lsb)   Bit 0: parity error
+ *
+ *      End of channel dependent data
+ *       s         - receiver status flag
+ *
+ *                 Each bit represents one of the following:
+ *                 (msb)   Bit 7: position propagate mode
+ *                         Bit 6: poor geometry (DOP > 12)
+ *                         Bit 5: 3D fix
+ *                         Bit 4: 2D fix
+ *                         Bit 3: acquiring satellites/position hold
+ *                         Bit 2: spare
+ *                         Bit 1: insufficient visible satellites
+ *                         (< 3)
+ *                 (lsb)   Bit 0: bad almanac
+ *
+ *       C  - checksum
+ *       Message length: 76 bytes
+ *
  */
 static gps_mask_t
 oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
@@ -133,7 +229,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 
     session->newdata.latitude = lat;
     session->newdata.longitude = lon;
-    session->newdata.altitude = alt;  /* assume WGS84 */
+    session->newdata.altitude = alt;  /* is WGS84 */
     session->newdata.speed = speed;
     session->newdata.track = track;
 
