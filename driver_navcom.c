@@ -470,10 +470,6 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 	     ((nav_mode & 0x40)!='\0' ? "3D" : "2D"),
 	     ((nav_mode & 0x03)!='\0' ? "DGPS" : "GPS"));
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "Navcom: latitude = %f longitude = %f altitude = %f geoid = %f\n",
-	     session->newdata.latitude, session->newdata.longitude,
-	     session->newdata.altitude, session->newdata.geoid_sep);
-    gpsd_log(&session->context->errout, LOG_DATA,
 	     "Navcom: velocities: north = %f east = %f up = %f\n",
 	     session->newdata.NED.velN,
 	     session->newdata.NED.velE,
@@ -488,13 +484,14 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     mask = LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | USED_IS |
            HERR_SET | TIMERR_SET | DOP_SET | VNED_SET | TIME_SET | NTPTIME_IS;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.f "
+	     "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.f geoid %.2f "
              "mode=%d status=%d gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f "
              "tdop=%.2f mask={%s}\n",
 	     session->newdata.time,
 	     session->newdata.latitude,
 	     session->newdata.longitude,
 	     session->newdata.altitude,
+	     session->newdata.geoid_sep,
 	     session->newdata.mode,
 	     session->gpsdata.status,
 	     session->gpsdata.dop.gdop,
