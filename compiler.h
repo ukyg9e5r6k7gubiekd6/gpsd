@@ -46,9 +46,9 @@
     0 * (int) sizeof(({ \
         struct { \
             int unused_int; \
-            typeof(arr) unused_arr; \
+            __typeof__(arr) unused_arr; \
         } zero_init = {0}; \
-        typeof(arr) arg_is_not_array UNUSED = { \
+        __typeof__(arr) arg_is_not_array UNUSED = { \
             zero_init.unused_arr[0], \
         }; \
         1; \
@@ -100,7 +100,7 @@ static inline void memory_barrier(void)
     /* do it the OS X way */
     OSMemoryBarrier();
 #elif defined(__GNUC__)
-    asm volatile ("" : : : "memory");
+    __asm__ __volatile__ ("" : : : "memory");
 #endif
 }
 
