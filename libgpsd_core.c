@@ -982,6 +982,31 @@ static void gpsd_error_model(struct gps_device_t *session)
 
     /*
      * OK, this is not an error computation, but we're at the right
+     * place in the architecture for it.  Compute geoid separation
+     * and altHAE and altMSL in the simplest possible way.
+     */
+
+    /* geoid (ellipsoid) separation */
+    if (0 == isfinite(fix->geoid_sep) &&
+	0 != isfinite(fix->latitude) &&
+	0 != isfinite(fix->longitude)) {
+	    fix->geoid_sep = wgs84_separation(fix->latitude,
+					      fix->longitude);
+    }
+    if (0 != isfinite(fix->geoid_sep)) {
+	if (0 != isfinite(fix->altitude) &&
+	    0 == isfinite(fix->altMSL)) {
+	    /* compute missing altMSL */
+	    fix->altMSL = fix->altitude - fix->geoid_sep;
+	} else if (0 == isfinite(fix->altitude) &&
+		   0 != isfinite(fix->altMSL)) {
+	    /* compute missing altHAE */
+	    fix->altitude = fix->altMSL + fix->geoid_sep;
+	}
+    }
+
+    /*
+     * OK, this is not an error computation, but we're at the right
      * place in the architecture for it.  Compute speed over ground
      * and climb/sink in the simplest possible way.
      */
@@ -1063,25 +1088,6 @@ static void gpsd_error_model(struct gps_device_t *session)
 	    0 != isfinite(session->gpsdata.dop.pdop)) {
 	    fix->sep = session->gpsdata.dop.pdop * p_uere;
 	}
-
-        /* geoid (ellipsoid) separation */
-	if (0 == isfinite(fix->geoid_sep) &&
-	    0 != isfinite(fix->latitude) &&
-	    0 != isfinite(fix->longitude)) {
-		fix->geoid_sep = wgs84_separation(fix->latitude,
-				                  fix->longitude);
-        }
-	if (0 != isfinite(fix->geoid_sep)) {
-	    if (0 != isfinite(fix->altitude) &&
-	        0 == isfinite(fix->altMSL)) {
-                /* compute missing altMSL */
-	        fix->altMSL = fix->altitude - fix->geoid_sep;
-            } else if (0 == isfinite(fix->altitude) &&
-	               0 != isfinite(fix->altMSL)) {
-                /* compute missing altHAE */
-	        fix->altitude = fix->altMSL + fix->geoid_sep;
-            }
-        }
 
 	/*
 	 * If we have a current fix and an old fix, and the packet handler
