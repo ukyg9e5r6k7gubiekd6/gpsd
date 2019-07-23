@@ -76,6 +76,19 @@ static void utc_to_hhmmss(timestamp_t time, char *buf, ssize_t buf_sz,
     return;
 }
 
+static void dbl_to_str(const char *fmt, double val, char *bufp, size_t len,
+                       const char *suffix)
+{
+    if (0 == isfinite(val)) {
+	(void)strlcat(bufp, ",", len);
+    } else {
+	str_appendf(bufp, len, fmt, val);
+    }
+    if (NULL != suffix) {
+	str_appendf(bufp, len, "%s", suffix);
+    }
+}
+
 /* Dump a $GPGGA.
  * looks like this is only called from net_ntrip.c and nmea_tpv_dump()
  */
@@ -101,26 +114,12 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
                        ((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
                        session->gpsdata.status,
                        session->gpsdata.satellites_used);
-        if (0 == isfinite(session->gpsdata.dop.hdop))
-            (void)strlcat(bufp, ",", len);
-        else
-            str_appendf(bufp, len, "%.2f,", session->gpsdata.dop.hdop);
-        if (0 == isfinite(session->gpsdata.fix.altMSL))
-            (void)strlcat(bufp, ",", len);
-        else
-            str_appendf(bufp, len, "%.2f,M,", session->gpsdata.fix.altMSL);
-
-        if (0 == isfinite(session->gpsdata.fix.geoid_sep)) {
-            (void)strlcat(bufp, ",", len);
-        } else {
-            str_appendf(bufp, len, "%.3f,M,", session->gpsdata.fix.geoid_sep);
-        }
-        if (0 == isfinite(session->mag_var))
-            (void)strlcat(bufp, ",", len);
-        else {
-            str_appendf(bufp, len, "%3.2f,", fabs(session->mag_var));
-            (void)strlcat(bufp, (session->mag_var > 0) ? "E" : "W", len);
-        }
+        dbl_to_str("%.2f,", session->gpsdata.dop.hdop, bufp, len, NULL);
+        dbl_to_str("%.2f,", session->gpsdata.fix.altMSL, bufp, len, "M,");
+        dbl_to_str("%.3f,", session->gpsdata.fix.geoid_sep, bufp, len, "M,");
+        /* empty place holders for Age of correction data, and
+         * Differential base station ID */
+	(void)strlcat(bufp, ",", len);
         nmea_add_checksum(bufp);
     }
 }
