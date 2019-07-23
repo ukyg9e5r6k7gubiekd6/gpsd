@@ -383,6 +383,9 @@ within one meter of the "true" value, but can be off as much as 12 meters.
 will assert validity bits in the top-level set member for each
 field actually received; see gps.h for bitmask names and values.</para>
 
+<para>Invalid or known floating point values will be set to NAN.
+</para>
+
 <para>Here's an example:</para>
 
 <programlisting>
