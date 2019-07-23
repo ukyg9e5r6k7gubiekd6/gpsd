@@ -155,7 +155,7 @@ try to compute the value from the skyview.</para>
 	<entry>numeric</entry>
         <entry>MSL Altitude in meters.  The geoid used is rarely specified
 and is often inacurate.  See the comments below on geoidSep.  Present if
- mode is 3.  MSL is alt + geoidSep.</entry>
+ mode is 3.  MSL is alt - geoidSep.</entry>
 </row>
 <row>
 	<entry>climb</entry>
