@@ -1071,6 +1071,17 @@ static void gpsd_error_model(struct gps_device_t *session)
 		fix->geoid_sep = wgs84_separation(fix->latitude,
 				                  fix->longitude);
         }
+	if (0 != isfinite(fix->geoid_sep)) {
+	    if (0 != isfinite(fix->altitude) &&
+	        0 == isfinite(fix->altMSL)) {
+                /* compute missing altMSL */
+	        fix->altMSL = fix->altitude - fix->geoid_sep;
+            } else if (0 == isfinite(fix->altitude) &&
+	               0 != isfinite(fix->altMSL)) {
+                /* compute missing altHAE */
+	        fix->altitude = fix->altMSL + fix->geoid_sep;
+            }
+        }
 
 	/*
 	 * If we have a current fix and an old fix, and the packet handler
