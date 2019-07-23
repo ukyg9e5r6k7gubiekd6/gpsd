@@ -669,9 +669,7 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     session->newdata.altitude = getbes32(buf, 62) * 1e-2;
     /* altitude MSL */
     session->newdata.altMSL = getbes32(buf, 66) * 1e-2;
-    /* compute geoid_sep */
-    session->newdata.geoid_sep = session->newdata.altitude -
-                                 session->newdata.altMSL;
+    /* Let gpsd_error_model() deal with geoid_sep */
 
     mask |= LATLON_SET;
 
@@ -773,9 +771,9 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
         gpsd_log(&session->context->errout, debug_base,
                  "solution_info %08x\n", solution_info);
         gpsd_log(&session->context->errout, debug_base,
-                 "lat %.7f lon %.7f geoid_sep %.2f alt %.2f\n",
+                 "lat %.7f lon %.7f alt %.2f altMSL %.2f\n",
                  session->newdata.latitude, session->newdata.longitude,
-                 session->newdata.geoid_sep, session->newdata.altitude);
+                 session->newdata.altitude, session->newdata.altMSL);
         gpsd_log(&session->context->errout, debug_base,
                  "speed %.2f track %.2f climb %.2f heading_rate %d\n",
                  session->newdata.speed, session->newdata.track,
@@ -1724,9 +1722,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
         /* alititude WGS84 */
         session->newdata.altitude = getbes32(buf, 31) * 1e-2;
         session->newdata.altMSL = getbes32(buf, 35) * 1e-2;
-        /* compute geoid_sep */
-        session->newdata.geoid_sep = session->newdata.altitude -
-                                     session->newdata.altMSL;
+	/* Let gpsd_error_model() deal with geoid_sep and altHAE */
         /* skip 1 byte of map datum */
         session->newdata.speed = getbeu16(buf, 40) * 1e-2;
         session->newdata.track = getbeu16(buf, 42) * 1e-2;
@@ -1737,7 +1733,8 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
             mask |= ALTITUDE_SET | CLIMB_SET;
     }
     gpsd_log(&session->context->errout, LOG_DATA,
-             "SiRF: GND 0x29: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f mode=%d status=%d\n",
+             "SiRF: GND 0x29: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
+             "track=%.2f speed=%.2f mode=%d status=%d\n",
                 session->newdata.time,
                 session->newdata.latitude,
                 session->newdata.longitude,
