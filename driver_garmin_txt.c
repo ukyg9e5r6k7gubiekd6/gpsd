@@ -424,6 +424,7 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 	    break;
         /* alt is MSL, we want WGS84... */
 	session->newdata.altitude = alt - session->newdata.geoid_sep;
+	session->newdata.altMSL = alt;
 	mask |= ALTITUDE_SET;
     } while (0);
 
@@ -452,10 +453,10 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
     } while (0);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GTXT: time=%.2f, lat=%.2f lon=%.2f alt=%.2f "
+	     "GTXT: time=%.2f, lat=%.2f lon=%.2f altMSL=%.2f "
              "climb=%.2f eph=%.2f mode=%d status=%d\n",
 	     session->newdata.time, session->newdata.latitude,
-	     session->newdata.longitude, session->newdata.altitude,
+	     session->newdata.longitude, session->newdata.altMSL,
 	     session->newdata.climb, session->newdata.eph,
 	     session->newdata.mode,
 	     session->gpsdata.status);
