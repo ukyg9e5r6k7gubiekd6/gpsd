@@ -105,10 +105,10 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
 	    (void)strlcat(bufp, ",", len);
 	else
 	    str_appendf(bufp, len, "%.2f,", session->gpsdata.dop.hdop);
-	if (0 == isfinite(session->gpsdata.fix.altitude))
+	if (0 == isfinite(session->gpsdata.fix.altMSL))
 	    (void)strlcat(bufp, ",", len);
 	else
-	    str_appendf(bufp, len, "%.2f,M,", session->gpsdata.fix.altitude);
+	    str_appendf(bufp, len, "%.2f,M,", session->gpsdata.fix.altMSL);
 
         if (0 == isfinite(session->gpsdata.fix.geoid_sep)) {
 	    (void)strlcat(bufp, ",", len);
