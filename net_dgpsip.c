@@ -76,7 +76,7 @@ void dgpsip_report(struct gps_context_t *context,
 	    (void)snprintf(buf, sizeof(buf), "R %0.8f %0.8f %0.2f\r\n",
 			   gps->gpsdata.fix.latitude,
 			   gps->gpsdata.fix.longitude,
-			   gps->gpsdata.fix.altitude);
+			   gps->gpsdata.fix.altMSL);
 	    if (write(dgpsip->gpsdata.gps_fd, buf, strlen(buf)) ==
 		(ssize_t) strlen(buf))
 		gpsd_log(&context->errout, LOG_IO, "=> dgps %s\n", buf);
