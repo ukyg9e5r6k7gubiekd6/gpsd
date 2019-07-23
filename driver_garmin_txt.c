@@ -422,9 +422,9 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 		       (char *)session->lexer.outbuffer + 34, 6, "+-", 1.0,
 		       &alt))
 	    break;
-        /* alt is MSL, we want WGS84... */
-	session->newdata.altitude = alt - session->newdata.geoid_sep;
+        /* alt is MSL */
 	session->newdata.altMSL = alt;
+	/* Let gpsd_error_model() deal with altHAE */
 	mask |= ALTITUDE_SET;
     } while (0);
 
