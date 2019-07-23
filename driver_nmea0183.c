@@ -437,6 +437,7 @@ static gps_mask_t processRMC(int count, char *field[],
 	    mask |= TRACK_SET;
         }
 
+        /* FIXME: get magnetic variance */
 	if (count >= 12) {
 	    newstatus = faa_mode(field[12][0]);
         }
@@ -451,7 +452,8 @@ static gps_mask_t processRMC(int count, char *field[],
             /* 4 sats used means 3D */
 	    session->newdata.mode = MODE_3D;
 	    mask |= MODE_SET;
-        } else if (0 != isfinite(session->gpsdata.fix.altitude)) {
+        } else if (0 != isfinite(session->gpsdata.fix.altitude) ||
+                   0 != isfinite(session->gpsdata.fix.altMSL)) {
             /* we probably have at least a 3D fix */
             /* this handles old GPS that do not report 3D */
 	    session->newdata.mode = MODE_3D;
@@ -544,7 +546,8 @@ static gps_mask_t processGLL(int count, char *field[],
          * and elsewhere in the code we want to be able to test for the
          * presence of a valid fix with mode > MODE_NO_FIX.
 	 */
-	if (0 != isfinite(session->gpsdata.fix.altitude)) {
+	if (0 != isfinite(session->gpsdata.fix.altitude) ||
+	    0 != isfinite(session->gpsdata.fix.altMSL)) {
 	    session->newdata.mode = MODE_3D;
 	    mask |= MODE_SET;
 	} else if (3 < session->gpsdata.satellites_used) {
@@ -552,7 +555,8 @@ static gps_mask_t processGLL(int count, char *field[],
 	    session->newdata.mode = MODE_3D;
 	    mask |= MODE_SET;
 	} else if (MODE_2D > session->gpsdata.fix.mode ||
-	    0 == isfinite(session->oldfix.altitude)) {
+	           (0 == isfinite(session->oldfix.altitude) &&
+	            0 == isfinite(session->oldfix.altMSL))) {
 	    session->newdata.mode = MODE_2D;
 	    mask |= MODE_SET;
 	}
@@ -653,8 +657,8 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
 
 	if ('\0' != field[9][0]) {
             /* altitude is MSL */
-	    session->newdata.altitude = safe_atof(field[9]);
-	    if (0 != isfinite(session->newdata.altitude)) {
+	    session->newdata.altMSL = safe_atof(field[9]);
+	    if (0 != isfinite(session->newdata.altMSL)) {
 		mask |= ALTITUDE_SET;
 		if (3 < satellites_used) {
 		    /* more than 3 sats used means 3D */
@@ -664,12 +668,8 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
             /* only need geoid_sep if in 3D mode */
 	    if ('\0' != field[10][0]) {
 		session->newdata.geoid_sep = safe_atof(field[10]);
-	    } else {
-		session->newdata.geoid_sep = wgs84_separation(
-		    session->newdata.latitude, session->newdata.longitude);
 	    }
-            /* convert to WGS 84 */
-	    session->newdata.altitude -= session->newdata.geoid_sep;
+            /* Let gpsd_error_model() deal with geoid_sep and altHAE */
 	}
     } else {
 	session->newdata.mode = MODE_NO_FIX;
@@ -852,9 +852,8 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 	 */
 	if ('\0' != field[9][0]) {
             /* altitude is MSL */
-	    session->newdata.altitude = safe_atof(field[9]);
-            /* convert to WGS 84 */
-	    session->newdata.altitude -= session->newdata.geoid_sep;
+	    session->newdata.altMSL = safe_atof(field[9]);
+            /* Let gpsd_error_model() deal with altHAE */
 	    mask |= ALTITUDE_SET;
 	    /*
 	     * This is a bit dodgy.  Technically we shouldn't set the mode
@@ -883,11 +882,11 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
 
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GGA: hhmmss=%s lat=%.2f lon=%.2f alt=%.2f mode=%d status=%d\n",
+	     "GGA: hhmmss=%s lat=%.2f lon=%.2f altMSL=%.2f mode=%d status=%d\n",
 	     field[1],
 	     session->newdata.latitude,
 	     session->newdata.longitude,
-	     session->newdata.altitude,
+	     session->newdata.altMSL,
 	     session->newdata.mode,
 	     session->gpsdata.status);
     return mask;
@@ -1894,7 +1893,7 @@ static gps_mask_t processPGRMZ(int c UNUSED, char *field[],
 {
     /*
      * $PGRMZ,246,f,3*1B
-     * 1    = Altitude (probably WGS84)
+     * 1    = Altitude (probably WGS84) in feet
      * 2    = f (feet)
      * 3    = Mode
      *         1 = No Fix
@@ -1910,8 +1909,8 @@ static gps_mask_t processPGRMZ(int c UNUSED, char *field[],
     if ('f' == field[2][0] &&
         0 < strlen(field[1])) {
         /* have a GPS altitude, must be 3D */
-        /* seems to be WGS 84 */
-	session->newdata.altitude = atoi(field[1]) / METERS_TO_FEET;
+        /* seems to be altMSL.  regressions show this matches GPGGA MSL */
+	session->newdata.altMSL = atoi(field[1]) / METERS_TO_FEET;
 	mask |= (ALTITUDE_SET);
     }
     switch (field[3][0]) {
@@ -1933,8 +1932,8 @@ static gps_mask_t processPGRMZ(int c UNUSED, char *field[],
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "PGRMZ: Altitude %.2f mode %d\n",
-	     session->newdata.altitude,
+	     "PGRMZ: altMSL %.2f mode %d\n",
+	     session->newdata.altMSL,
 	     session->newdata.mode);
     return mask;
 }
@@ -2285,7 +2284,7 @@ static gps_mask_t processDBT(int c UNUSED, char *field[],
      */
     gps_mask_t mask = ONLINE_SET;
 
-    /* this is criminal.  Depth != altitude */
+    /* FIXME!!  this is criminal.  Depth != altitude */
     if (field[3][0] != '\0') {
 	session->newdata.altitude = -safe_atof(field[3]);
 	mask |= (ALTITUDE_SET);
@@ -2825,13 +2824,10 @@ static gps_mask_t processPSTI030(int count, char *field[],
 	    mask |= LATLON_SET;
 	    if ('\0' != field[8][0]) {
                 /* altitude is MSL */
-		session->newdata.geoid_sep = wgs84_separation(
-		    session->newdata.latitude, session->newdata.longitude);
-		session->newdata.altitude = safe_atof(field[8]);
-                /* convert to WGS84 */
-		session->newdata.altitude -= session->newdata.geoid_sep;
+		session->newdata.altMSL = safe_atof(field[8]);
 		mask |= ALTITUDE_SET;
 		session->newdata.mode = MODE_3D;
+		/* Let gpsd_error_model() deal with geoid_sep and altHAE */
             }
 	    mask |= MODE_SET;
 	}
@@ -3305,7 +3301,9 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
         MODE_3D == session->gpsdata.fix.mode &&
         MODE_NO_FIX != session->newdata.mode &&
         (0 != isfinite(session->lastfix.altitude) ||
-         0 != isfinite(session->oldfix.altitude))) {
+         0 != isfinite(session->oldfix.altitude) ||
+         0 != isfinite(session->lastfix.altMSL) ||
+         0 != isfinite(session->oldfix.altMSL))) {
         session->newdata.mode = session->gpsdata.fix.mode;
     }
     return mask;
