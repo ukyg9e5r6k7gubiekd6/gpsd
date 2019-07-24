@@ -2231,6 +2231,69 @@ static gps_mask_t processZDA(int c UNUSED, char *field[],
     return mask;
 }
 
+static gps_mask_t processHDG(int c UNUSED, char *field[],
+                             struct gps_device_t *session)
+{
+    /*
+     *  $SDHDG,234.6,,,1.3,E*34
+     *
+     *  $--HDG,h.h,d.d,a,v.v,a*hh<CR><LF>
+     *  Magnetic sensor heading, degrees
+     *  Magnetic deviation, degrees E/W
+     *  Magnetic variation, degrees, E/W
+     *
+     *  1. To obtain Magnetic Heading:
+     *  Add Easterly deviation (E) to Magnetic Sensor Reading
+     *  Subtract Westerly deviation (W) from Magnetic Sensor Reading
+     *  2. To obtain True Heading:
+     *  Add Easterly variation (E) to Magnetic Heading
+     *  Subtract Westerly variation (W) from Magnetic Heading
+     *  3. Variation and deviation fields shall be null fields if unknown.
+     */
+
+    gps_mask_t mask = ONLINE_SET;
+    double sensor_heading;
+    double magnetic_deviation;
+
+    if ( 0 == strlen(field[1])) {
+        /* no data */
+        return mask;
+    }
+    sensor_heading = safe_atof(field[1]);
+    if ((0.0 > sensor_heading) || (360.0 < sensor_heading)) {
+        /* bad data */
+        return mask;
+    }
+    magnetic_deviation = safe_atof(field[2]);
+    if ((0.0 > magnetic_deviation) || (360.0 < magnetic_deviation)) {
+        /* bad data */
+        return mask;
+    }
+    switch (field[2][0]) {
+    case 'E':
+        sensor_heading += magnetic_deviation;
+        break;
+    case 'W':
+        sensor_heading += magnetic_deviation;
+        break;
+    default:
+        /* ignore */
+        break;
+    }
+
+    /* good data */
+    session->newdata.magnetic_track = sensor_heading;
+    mask |= MAGNETIC_TRACK_SET;
+
+    /* FIXME: place to put mag_var?? */
+
+    gpsd_log(&session->context->errout, LOG_RAW,
+             "time %.3f, heading %lf.\n",
+             session->newdata.time,
+             session->gpsdata.attitude.heading);
+    return mask;
+}
+
 static gps_mask_t processHDT(int c UNUSED, char *field[],
 				struct gps_device_t *session)
 {
@@ -3012,7 +3075,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 	{"GST", 8,  false, processGST},
 	{"GSV", 0,  false, processGSV},
         /* ignore Heading, Deviation and Variation */
-	{"HDG", 0,  false, NULL},
+	{"HDG", 0,  false, processHDG},
         {"HDT", 1,  false, processHDT},
 	{"MSS", 0,  false, NULL},       /* ignore beacon receiver status */
 	{"MTW", 0,  false, NULL},       /* ignore Water Temperature */
