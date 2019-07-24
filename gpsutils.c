@@ -245,6 +245,7 @@ void gps_clear_fix(struct gps_fix_t *fixp)
     fixp->altHAE = NAN;
     fixp->altMSL = NAN;
     fixp->climb = NAN;
+    fixp->depth = NAN;
     fixp->epc = NAN;
     fixp->epd = NAN;
     fixp->eph = NAN;
@@ -328,6 +329,9 @@ void gps_merge_fix(struct gps_fix_t *to,
 	}
 	if (0 != isfinite(from->altMSL)) {
 	    to->altMSL = from->altMSL;
+	}
+	if (0 != isfinite(from->depth)) {
+	    to->depth = from->depth;
 	}
     }
     if ((transfer & TRACK_SET) != 0)

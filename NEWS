@@ -10,7 +10,7 @@
   add health variable to satellite_t
   change satellite_t elevation and azimuth to double
   satellite_t elevation, azimuth, and ss use NAN for unknown value.
-  add altMSL to gps_fix_t
+  add altMSL, and depth, to gps_fix_t
   change altitude to altHAE to gps_fix_t
   wgs84_separation() now return EGM2008 computed from 5x5 degree base data.
      The best results are close to cm, the worst off up to 12m.

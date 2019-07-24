@@ -119,6 +119,8 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
 			         .dflt.real = NAN},
 	{"geoidSep", t_real,  .addr.real = &gpsdata->fix.geoid_sep,
 			         .dflt.real = NAN},
+	{"depth", t_real,  .addr.real = &gpsdata->fix.depth,
+			         .dflt.real = NAN},
 	{NULL},
 	/* *INDENT-ON* */
     };
@@ -583,6 +585,7 @@ int libgps_json_unpack(const char *buf,
 	if (isfinite(gpsdata->fix.longitude) != 0)
 	    gpsdata->set |= LATLON_SET;
 	if (0 != isfinite(gpsdata->fix.altHAE) ||
+	    0 != isfinite(gpsdata->fix.depth) ||
 	    0 != isfinite(gpsdata->fix.altMSL))
 	    gpsdata->set |= ALTITUDE_SET;
 	if (isfinite(gpsdata->fix.epx) != 0 && isfinite(gpsdata->fix.epy) != 0)

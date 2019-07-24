@@ -172,6 +172,12 @@ and is often inacurate.  See the comments below on geoidSep.  Present if
         <entry>Current datum.</entry>
 </row>
 <row>
+	<entry>depth</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Depth in meters.  Probably depth below the keel..</entry>
+</row>
+<row>
 	<entry>epc</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>

@@ -282,6 +282,9 @@ void json_tpv_dump(const struct gps_device_t *session,
 	if ('\0' != gpsdata->fix.datum[0])
 	    str_appendf(reply, replylen, "\"datum\":\"%.40s\",",
                         gpsdata->fix.datum);
+	if (0 != isfinite(gpsdata->fix.depth))
+	    str_appendf(reply, replylen,
+			   "\"depth\":%.3f,", gpsdata->fix.depth);
     }
     str_rstrip_char(reply, ',');
     (void)strlcat(reply, "}\r\n", replylen);

@@ -55,7 +55,7 @@ extern "C" {
  *       add health variable to satellite_t
  *       change satellite_t elevation and azimuth to double
  *       satellite_t elevation, azimuth, and ss use NAN for unknown value.
- *       add altMSL to gps_fix_t
+ *       add altMSL, and depth, to gps_fix_t
  *       change altitude to altHAE to gps_fix_t
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
@@ -136,6 +136,8 @@ struct gps_fix_t {
     double geoid_sep;
 
     double magnetic_track;  /* Course (relative to Magnetic North) */
+    double depth;           /* depth in meters, probably depth of water
+                             * under the keel */
 
     /* ECEF data, all data in meters, and meters/second, or NaN */
     struct {

@@ -2284,34 +2284,21 @@ static gps_mask_t processDBT(int c UNUSED, char *field[],
      */
     gps_mask_t mask = ONLINE_SET;
 
-    /* FIXME!!  this is criminal.  Depth != altHAE */
     if (field[3][0] != '\0') {
-	session->newdata.altHAE = -safe_atof(field[3]);
+	session->newdata.depth = safe_atof(field[3]);
 	mask |= (ALTITUDE_SET);
     } else if (field[1][0] != '\0') {
-	session->newdata.altHAE = -safe_atof(field[1]) / METERS_TO_FEET;
+	session->newdata.depth = safe_atof(field[1]) / METERS_TO_FEET;
 	mask |= (ALTITUDE_SET);
     } else if (field[5][0] != '\0') {
-	session->newdata.altHAE = -safe_atof(field[5]) / METERS_TO_FATHOMS;
+	session->newdata.depth = safe_atof(field[5]) / METERS_TO_FATHOMS;
 	mask |= (ALTITUDE_SET);
     }
 
-    if ((mask & ALTITUDE_SET) != 0) {
-	if (session->newdata.mode < MODE_3D) {
-	    session->newdata.mode = MODE_3D;
-	    mask |= MODE_SET;
-	}
-    }
-
-    /*
-     * Hack: We report depth below keep as negative altitude because there's
-     * no better place to put it.  Should work in practice as nobody is
-     * likely to be operating a depth sounder at varying altitudes.
-     */
     gpsd_log(&session->context->errout, LOG_RAW,
 	     "mode %d, depth %lf.\n",
 	     session->newdata.mode,
-	     session->newdata.altHAE);
+	     session->newdata.depth);
     return mask;
 }
 
