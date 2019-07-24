@@ -52,13 +52,13 @@ static int do_lat_lon(char *field[], struct gps_fix_t *out)
     m = 100.0 * modf(lat / 100.0, &d);
     lat = d + m / 60.0;
     if ('S' == field[1][0])
-	lat = -lat;
+        lat = -lat;
 
     lon = safe_atof(field[2]);
     m = 100.0 * modf(lon / 100.0, &d);
     lon = d + m / 60.0;
     if ('W' == field[3][0])
-	lon = -lon;
+        lon = -lon;
 
     if (0 == isfinite(lat) ||
         0 == isfinite(lon)) {
@@ -78,35 +78,35 @@ static int faa_mode(char mode)
     int newstatus = STATUS_FIX;
 
     switch (mode) {
-    case '\0':	/* missing */
-	newstatus = STATUS_NO_FIX;
-	break;
+    case '\0':  /* missing */
+        newstatus = STATUS_NO_FIX;
+        break;
     case 'A':   /* Autonomous */
     default:
-	newstatus = STATUS_FIX;
-	break;
-    case 'D':	/* Differential */
-	newstatus = STATUS_DGPS_FIX;
-	break;
-    case 'E':	/* Estimated dead reckoning */
-	newstatus = STATUS_DR;
-	break;
-    case 'F':	/* Float RTK */
-	newstatus = STATUS_RTK_FLT;
-	break;
-    case 'N':	/* Data Not Valid */
-	/* already handled, for paranoia sake also here */
-	newstatus = STATUS_NO_FIX;
-	break;
-    case 'P':	/* Precise (NMEA 4+) */
-	newstatus = STATUS_DGPS_FIX;	/* sort of DGPS */
-	break;
-    case 'R':	/* fixed RTK */
-	newstatus = STATUS_RTK_FIX;
-	break;
-    case 'S':	/* simulator */
-	newstatus = STATUS_NO_FIX;      /* or maybe MODE_FIX? */
-	break;
+        newstatus = STATUS_FIX;
+        break;
+    case 'D':   /* Differential */
+        newstatus = STATUS_DGPS_FIX;
+        break;
+    case 'E':   /* Estimated dead reckoning */
+        newstatus = STATUS_DR;
+        break;
+    case 'F':   /* Float RTK */
+        newstatus = STATUS_RTK_FLT;
+        break;
+    case 'N':   /* Data Not Valid */
+        /* already handled, for paranoia sake also here */
+        newstatus = STATUS_NO_FIX;
+        break;
+    case 'P':   /* Precise (NMEA 4+) */
+        newstatus = STATUS_DGPS_FIX;    /* sort of DGPS */
+        break;
+    case 'R':   /* fixed RTK */
+        newstatus = STATUS_RTK_FIX;
+        break;
+    case 'S':   /* simulator */
+        newstatus = STATUS_NO_FIX;      /* or maybe MODE_FIX? */
+        break;
     }
     return newstatus;
 }
@@ -127,7 +127,7 @@ static int faa_mode(char mode)
  *
  **************************************************************************/
 
-#define DD(s)	((int)((s)[0]-'0')*10+(int)((s)[1]-'0'))
+#define DD(s)   ((int)((s)[0]-'0')*10+(int)((s)[1]-'0'))
 
 /* sentence supplied ddmmyy, but no century part
  *
@@ -149,17 +149,17 @@ static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
         if (0 == isdigit((int)ddmmyy[i])) {
             /* catches NUL and non-digits */
             /* Telit HE910 can set year to "-1" (1999 - 2000) */
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "merge_ddmmyy(%s), malformed date\n",  ddmmyy);
+            gpsd_log(&session->context->errout, LOG_WARN,
+                     "merge_ddmmyy(%s), malformed date\n",  ddmmyy);
             return 2;
         }
     }
     /* check for termination */
     if ('\0' != ddmmyy[6]) {
-	/* missing NUL */
-	gpsd_log(&session->context->errout, LOG_WARN,
-		 "merge_ddmmyy(%s), malformed date\n",  ddmmyy);
-	return 3;
+        /* missing NUL */
+        gpsd_log(&session->context->errout, LOG_WARN,
+                 "merge_ddmmyy(%s), malformed date\n",  ddmmyy);
+        return 3;
     }
 
     /* should be no defects left to segfault DD() */
@@ -169,7 +169,7 @@ static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
 
     /* check for century wrap */
     if (session->nmea.date.tm_year % 100 == 99 && yy == 0)
-	gpsd_century_update(session, session->context->century + 100);
+        gpsd_century_update(session, session->context->century + 100);
     year = (session->context->century + yy);
 
     /* 32 bit systems will break in 2038.
@@ -183,20 +183,20 @@ static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
     }
 
     if ( (1 > mon ) || (12 < mon ) ) {
-	gpsd_log(&session->context->errout, LOG_WARN,
-		 "merge_ddmmyy(%s), malformed month\n",  ddmmyy);
+        gpsd_log(&session->context->errout, LOG_WARN,
+                 "merge_ddmmyy(%s), malformed month\n",  ddmmyy);
         return 4;
     } else if ( (1 > mday ) || (31 < mday ) ) {
-	gpsd_log(&session->context->errout, LOG_WARN,
-		 "merge_ddmmyy(%s), malformed day\n",  ddmmyy);
+        gpsd_log(&session->context->errout, LOG_WARN,
+                 "merge_ddmmyy(%s), malformed day\n",  ddmmyy);
         return 5;
     } else {
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "merge_ddmmyy(%s) sets year %d\n",
-		 ddmmyy, year);
-	session->nmea.date.tm_year = year - 1900;
-	session->nmea.date.tm_mon = mon - 1;
-	session->nmea.date.tm_mday = mday;
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "merge_ddmmyy(%s) sets year %d\n",
+                 ddmmyy, year);
+        session->nmea.date.tm_year = year - 1900;
+        session->nmea.date.tm_mon = mon - 1;
+        session->nmea.date.tm_mday = mday;
     }
     return 0;
 }
@@ -217,42 +217,42 @@ static int merge_hhmmss(char *hhmmss, struct gps_device_t *session)
         /* NetBSD 6 wants the cast */
         if (0 == isdigit((int)hhmmss[i])) {
             /* catches NUL and non-digits */
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "merge_hhmmss(%s), malformed time\n",  hhmmss);
+            gpsd_log(&session->context->errout, LOG_WARN,
+                     "merge_hhmmss(%s), malformed time\n",  hhmmss);
             return 2;
         }
     }
     /* don't check for termination, might have fractional seconds */
 
     session->nmea.date.tm_hour = DD(hhmmss);
-    if (session->nmea.date.tm_hour < old_hour)	/* midnight wrap */
-	session->nmea.date.tm_mday++;
+    if (session->nmea.date.tm_hour < old_hour)  /* midnight wrap */
+        session->nmea.date.tm_mday++;
     session->nmea.date.tm_min = DD(hhmmss + 2);
     session->nmea.date.tm_sec = DD(hhmmss + 4);
 
     if ('.' == hhmmss[6] &&
         /* NetBSD 6 wants the cast */
         0 != isdigit((int)hhmmss[7])) {
-	i = atoi(hhmmss + 7);
+        i = atoi(hhmmss + 7);
         sublen = strlen(hhmmss + 7);
-	session->nmea.subseconds = i / pow(10.0, sublen);
+        session->nmea.subseconds = i / pow(10.0, sublen);
     } else {
-	session->nmea.subseconds = 0.0;
+        session->nmea.subseconds = 0.0;
     }
 
     return 0;
 }
 
 static void register_fractional_time(const char *tag, const char *fld,
-				     struct gps_device_t *session)
+                                     struct gps_device_t *session)
 {
     if (fld[0] != '\0') {
-	session->nmea.last_frac_time = session->nmea.this_frac_time;
-	session->nmea.this_frac_time = safe_atof(fld);
-	session->nmea.latch_frac_time = true;
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "%s: registers fractional time %.3f\n",
-		 tag, session->nmea.this_frac_time);
+        session->nmea.last_frac_time = session->nmea.this_frac_time;
+        session->nmea.this_frac_time = safe_atof(fld);
+        session->nmea.latch_frac_time = true;
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "%s: registers fractional time %.3f\n",
+                 tag, session->nmea.this_frac_time);
     }
 }
 
@@ -310,7 +310,7 @@ static gps_mask_t processVTG(int count,
         case 'D':
             /* Differential, 2D or 3D fix */
             // MODE_SET here causes issues
-	    // mask |= MODE_SET;
+            // mask |= MODE_SET;
             break;
         case 'E':
             /* Estimated, DR only */
@@ -318,7 +318,7 @@ static gps_mask_t processVTG(int count,
         case 'N':
             /* Not Valid */
             // MODE_SET here causes issues
-	    // mask |= MODE_SET;
+            // mask |= MODE_SET;
             // nothing to use here, leave
             return mask;
         default:
@@ -388,96 +388,96 @@ static gps_mask_t processRMC(int count, char *field[],
         /* FALLTHROUGH */
     case 'V':
         /* Invalid */
-	session->gpsdata.status = STATUS_NO_FIX;
-	session->newdata.mode = MODE_NO_FIX;
-	mask |= STATUS_SET | MODE_SET;
+        session->gpsdata.status = STATUS_NO_FIX;
+        session->newdata.mode = MODE_NO_FIX;
+        mask |= STATUS_SET | MODE_SET;
         break;
     case 'D':
         /* Differential Fix */
         /* FALLTHROUGH */
     case 'A':
         /* Valid Fix */
-	/*
-	 * The MTK3301, Royaltek RGM-3800, and possibly other
-	 * devices deliver bogus time values when the navigation
-	 * warning bit is set.
-	 */
-	if ('\0' != field[1][0] &&
-	    9 < count &&
-	    '\0' !=  field[9][0]) {
-	    if (0 == merge_hhmmss(field[1], session) &&
-		0 == merge_ddmmyy(field[9], session)) {
-		/* got a good data/time */
-		mask |= TIME_SET;
-		register_fractional_time(field[0], field[1], session);
-	    }
+        /*
+         * The MTK3301, Royaltek RGM-3800, and possibly other
+         * devices deliver bogus time values when the navigation
+         * warning bit is set.
+         */
+        if ('\0' != field[1][0] &&
+            9 < count &&
+            '\0' !=  field[9][0]) {
+            if (0 == merge_hhmmss(field[1], session) &&
+                0 == merge_ddmmyy(field[9], session)) {
+                /* got a good data/time */
+                mask |= TIME_SET;
+                register_fractional_time(field[0], field[1], session);
+            }
         }
         /* else, no point to the time only case, no regressions with that */
 
-	if (0 == do_lat_lon(&field[3], &session->newdata)) {
-	    newstatus = STATUS_FIX;
-	    mask |= LATLON_SET;
+        if (0 == do_lat_lon(&field[3], &session->newdata)) {
+            newstatus = STATUS_FIX;
+            mask |= LATLON_SET;
             if (MODE_2D >= session->gpsdata.fix.mode) {
-		/* we have at least a 2D fix */
-		/* might cause blinking */
-		session->newdata.mode = MODE_2D;
-		mask |= MODE_SET;
+                /* we have at least a 2D fix */
+                /* might cause blinking */
+                session->newdata.mode = MODE_2D;
+                mask |= MODE_SET;
             }
         } else {
-	    newstatus = STATUS_NO_FIX;
-	    session->newdata.mode = MODE_NO_FIX;
-	    mask |= MODE_SET;
+            newstatus = STATUS_NO_FIX;
+            session->newdata.mode = MODE_NO_FIX;
+            mask |= MODE_SET;
         }
-	if ('\0' != field[7][0]) {
-	    session->newdata.speed = safe_atof(field[7]) * KNOTS_TO_MPS;
-	    mask |= SPEED_SET;
+        if ('\0' != field[7][0]) {
+            session->newdata.speed = safe_atof(field[7]) * KNOTS_TO_MPS;
+            mask |= SPEED_SET;
         }
-	if ('\0' != field[8][0]) {
-	    session->newdata.track = safe_atof(field[8]);
-	    mask |= TRACK_SET;
+        if ('\0' != field[8][0]) {
+            session->newdata.track = safe_atof(field[8]);
+            mask |= TRACK_SET;
         }
 
         /* FIXME: get magnetic variance */
-	if (count >= 12) {
-	    newstatus = faa_mode(field[12][0]);
+        if (count >= 12) {
+            newstatus = faa_mode(field[12][0]);
         }
 
-	/*
-	 * This copes with GPSes like the Magellan EC-10X that *only* emit
-	 * GPRMC. In this case we set mode and status here so the client
-	 * code that relies on them won't mistakenly believe it has never
-	 * received a fix.
-	 */
-	if (3 < session->gpsdata.satellites_used) {
+        /*
+         * This copes with GPSes like the Magellan EC-10X that *only* emit
+         * GPRMC. In this case we set mode and status here so the client
+         * code that relies on them won't mistakenly believe it has never
+         * received a fix.
+         */
+        if (3 < session->gpsdata.satellites_used) {
             /* 4 sats used means 3D */
-	    session->newdata.mode = MODE_3D;
-	    mask |= MODE_SET;
+            session->newdata.mode = MODE_3D;
+            mask |= MODE_SET;
         } else if (0 != isfinite(session->gpsdata.fix.altHAE) ||
                    0 != isfinite(session->gpsdata.fix.altMSL)) {
             /* we probably have at least a 3D fix */
             /* this handles old GPS that do not report 3D */
-	    session->newdata.mode = MODE_3D;
-	    mask |= MODE_SET;
+            session->newdata.mode = MODE_3D;
+            mask |= MODE_SET;
         }
-	session->gpsdata.status = newstatus;
+        session->gpsdata.status = newstatus;
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "RMC: ddmmyy=%s hhmmss=%s lat=%.2f lon=%.2f "
-	     "speed=%.2f track=%.2f mode=%d status=%d\n",
-	     field[9], field[1],
-	     session->newdata.latitude,
-	     session->newdata.longitude,
-	     session->newdata.speed,
-	     session->newdata.track,
-	     session->newdata.mode,
-	     session->gpsdata.status);
+             "RMC: ddmmyy=%s hhmmss=%s lat=%.2f lon=%.2f "
+             "speed=%.2f track=%.2f mode=%d status=%d\n",
+             field[9], field[1],
+             session->newdata.latitude,
+             session->newdata.longitude,
+             session->newdata.speed,
+             session->newdata.track,
+             session->newdata.mode,
+             session->gpsdata.status);
     return mask;
 }
 
 /* Geographic position - Latitude, Longitude */
 static gps_mask_t processGLL(int count, char *field[],
-			     struct gps_device_t *session)
+                             struct gps_device_t *session)
 {
     /* Introduced in NMEA 3.0.
      *
@@ -511,75 +511,75 @@ static gps_mask_t processGLL(int count, char *field[],
     gps_mask_t mask = ONLINE_SET;
 
     if (field[5][0] != '\0') {
-	if (0 == merge_hhmmss(field[5], session)) {
-	    register_fractional_time(field[0], field[5], session);
-	    if (session->nmea.date.tm_year == 0)
-		gpsd_log(&session->context->errout, LOG_WARN,
-			 "can't use GLL time until after ZDA or RMC"
-			 " has supplied a year.\n");
-	    else {
-		mask = TIME_SET;
-	    }
+        if (0 == merge_hhmmss(field[5], session)) {
+            register_fractional_time(field[0], field[5], session);
+            if (session->nmea.date.tm_year == 0)
+                gpsd_log(&session->context->errout, LOG_WARN,
+                         "can't use GLL time until after ZDA or RMC"
+                         " has supplied a year.\n");
+            else {
+                mask = TIME_SET;
+            }
         }
     }
     if ('\0' == field[6][0] ||
         'V' == field[6][0]) {
         /* Invalid */
-	session->gpsdata.status = STATUS_NO_FIX;
-	session->newdata.mode = MODE_NO_FIX;
-	mask |= STATUS_SET | MODE_SET;
+        session->gpsdata.status = STATUS_NO_FIX;
+        session->newdata.mode = MODE_NO_FIX;
+        mask |= STATUS_SET | MODE_SET;
     } else if ('A' == field[6][0] &&
         (count < 8 || *status != 'N') &&
-	0 == do_lat_lon(&field[1], &session->newdata)) {
-	int newstatus;
+        0 == do_lat_lon(&field[1], &session->newdata)) {
+        int newstatus;
 
-	mask |= LATLON_SET;
+        mask |= LATLON_SET;
 
-	newstatus = STATUS_FIX;
-	if (count >= 8) {
-	    newstatus = faa_mode(*status);
+        newstatus = STATUS_FIX;
+        if (count >= 8) {
+            newstatus = faa_mode(*status);
         }
-	/*
+        /*
          * This is a bit dodgy.  Technically we shouldn't set the mode
          * bit until we see GSA, or similar.  But it may be later in the
          * cycle, some devices like the FV-18 don't send it by default,
          * and elsewhere in the code we want to be able to test for the
          * presence of a valid fix with mode > MODE_NO_FIX.
-	 */
-	if (0 != isfinite(session->gpsdata.fix.altHAE) ||
-	    0 != isfinite(session->gpsdata.fix.altMSL)) {
-	    session->newdata.mode = MODE_3D;
-	    mask |= MODE_SET;
-	} else if (3 < session->gpsdata.satellites_used) {
+         */
+        if (0 != isfinite(session->gpsdata.fix.altHAE) ||
+            0 != isfinite(session->gpsdata.fix.altMSL)) {
+            session->newdata.mode = MODE_3D;
+            mask |= MODE_SET;
+        } else if (3 < session->gpsdata.satellites_used) {
             /* 4 sats used means 3D */
-	    session->newdata.mode = MODE_3D;
-	    mask |= MODE_SET;
-	} else if (MODE_2D > session->gpsdata.fix.mode ||
-	           (0 == isfinite(session->oldfix.altHAE) &&
-	            0 == isfinite(session->oldfix.altMSL))) {
-	    session->newdata.mode = MODE_2D;
-	    mask |= MODE_SET;
-	}
-	session->gpsdata.status = newstatus;
+            session->newdata.mode = MODE_3D;
+            mask |= MODE_SET;
+        } else if (MODE_2D > session->gpsdata.fix.mode ||
+                   (0 == isfinite(session->oldfix.altHAE) &&
+                    0 == isfinite(session->oldfix.altMSL))) {
+            session->newdata.mode = MODE_2D;
+            mask |= MODE_SET;
+        }
+        session->gpsdata.status = newstatus;
     } else {
-	session->gpsdata.status = STATUS_NO_FIX;
-	session->newdata.mode = MODE_NO_FIX;
-	mask |= STATUS_SET | MODE_SET;
+        session->gpsdata.status = STATUS_NO_FIX;
+        session->newdata.mode = MODE_NO_FIX;
+        mask |= STATUS_SET | MODE_SET;
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GLL: hhmmss=%s lat=%.2f lon=%.2f mode=%d status=%d\n",
-	     field[5],
-	     session->newdata.latitude,
-	     session->newdata.longitude,
-	     session->newdata.mode,
-	     session->gpsdata.status);
+             "GLL: hhmmss=%s lat=%.2f lon=%.2f mode=%d status=%d\n",
+             field[5],
+             session->newdata.latitude,
+             session->newdata.longitude,
+             session->newdata.mode,
+             session->gpsdata.status);
     return mask;
 }
 
 /* Geographic position - Latitude, Longitude, and more */
 static gps_mask_t processGNS(int count UNUSED, char *field[],
-			       struct gps_device_t *session)
+                               struct gps_device_t *session)
 {
     /* Introduced in NMEA 4.0?
      *
@@ -621,15 +621,15 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
     gps_mask_t mask = ONLINE_SET;
 
     if (field[1][0] != '\0') {
-	if (0 == merge_hhmmss(field[1], session)) {
-	    register_fractional_time(field[0], field[1], session);
-	    if (session->nmea.date.tm_year == 0) {
-		gpsd_log(&session->context->errout, LOG_WARN,
-			 "can't use GNS time until after ZDA or RMC"
-			 " has supplied a year.\n");
-	    } else {
-		mask = TIME_SET;
-	    }
+        if (0 == merge_hhmmss(field[1], session)) {
+            register_fractional_time(field[0], field[1], session);
+            if (session->nmea.date.tm_year == 0) {
+                gpsd_log(&session->context->errout, LOG_WARN,
+                         "can't use GNS time until after ZDA or RMC"
+                         " has supplied a year.\n");
+            } else {
+                mask = TIME_SET;
+            }
         }
     }
 
@@ -638,7 +638,7 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
      * the confusion */
     if ('\0' == field[6][0] ||      /* FAA mode: missing */
         'N' == field[6][0]) {       /* FAA mode: not valid */
-	session->newdata.mode = MODE_NO_FIX;
+        session->newdata.mode = MODE_NO_FIX;
         mask |= MODE_SET;
         return mask;
     }
@@ -652,32 +652,32 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
     satellites_used = atoi(field[7]);
 
     if (0 == do_lat_lon(&field[2], &session->newdata)) {
-	mask |= LATLON_SET;
-	session->newdata.mode = MODE_2D;
+        mask |= LATLON_SET;
+        session->newdata.mode = MODE_2D;
 
-	if ('\0' != field[9][0]) {
+        if ('\0' != field[9][0]) {
             /* altitude is MSL */
-	    session->newdata.altMSL = safe_atof(field[9]);
-	    if (0 != isfinite(session->newdata.altMSL)) {
-		mask |= ALTITUDE_SET;
-		if (3 < satellites_used) {
-		    /* more than 3 sats used means 3D */
-		    session->newdata.mode = MODE_3D;
+            session->newdata.altMSL = safe_atof(field[9]);
+            if (0 != isfinite(session->newdata.altMSL)) {
+                mask |= ALTITUDE_SET;
+                if (3 < satellites_used) {
+                    /* more than 3 sats used means 3D */
+                    session->newdata.mode = MODE_3D;
                 }
             }
             /* only need geoid_sep if in 3D mode */
-	    if ('\0' != field[10][0]) {
-		session->newdata.geoid_sep = safe_atof(field[10]);
-	    }
+            if ('\0' != field[10][0]) {
+                session->newdata.geoid_sep = safe_atof(field[10]);
+            }
             /* Let gpsd_error_model() deal with geoid_sep and altHAE */
-	}
+        }
     } else {
-	session->newdata.mode = MODE_NO_FIX;
+        session->newdata.mode = MODE_NO_FIX;
         mask |= MODE_SET;
     }
 
     if (field[8][0] != '\0') {
-	session->gpsdata.dop.hdop = safe_atof(field[8]);
+        session->gpsdata.dop.hdop = safe_atof(field[8]);
     }
 
     newstatus = faa_mode(field[6][0]);
@@ -686,18 +686,18 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
     mask |= MODE_SET;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GNS: hhmmss=%s lat=%.2f lon=%.2f mode=%d status=%d\n",
-	     field[1],
-	     session->newdata.latitude,
-	     session->newdata.longitude,
-	     session->newdata.mode,
-	     session->gpsdata.status);
+             "GNS: hhmmss=%s lat=%.2f lon=%.2f mode=%d status=%d\n",
+             field[1],
+             session->newdata.latitude,
+             session->newdata.longitude,
+             session->newdata.mode,
+             session->gpsdata.status);
     return mask;
 }
 
 /* Global Positioning System Fix Data */
 static gps_mask_t processGGA(int c UNUSED, char *field[],
-			       struct gps_device_t *session)
+                               struct gps_device_t *session)
 {
     /*
      * GGA,123519,4807.038,N,01131.324,E,1,08,0.9,545.4,M,46.9,M, , *42
@@ -736,54 +736,54 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
     session->nmea.last_gga_talker = field[0][1];
 
     if (0 == strlen(field[6])) {
-	/* no data is no data, assume no fix
+        /* no data is no data, assume no fix
          * the test/daemon/myguide-3100.log shows lat/lon/alt but
          * no status, and related RMC shows no fix. */
-	fix = -1;
+        fix = -1;
     } else {
         fix = atoi(field[6]);
     }
     switch (fix) {
-    case 0:	/* no fix */
-	newstatus = STATUS_NO_FIX;
-	break;
+    case 0:     /* no fix */
+        newstatus = STATUS_NO_FIX;
+        break;
     case 1:
         /* could be 2D, 3D, GNSSDR */
-	newstatus = STATUS_FIX;
-	break;
-    case 2:	/* differential */
-	newstatus = STATUS_DGPS_FIX;
-	break;
+        newstatus = STATUS_FIX;
+        break;
+    case 2:     /* differential */
+        newstatus = STATUS_DGPS_FIX;
+        break;
     case 3:
         /* GPS PPS, fix valid, could be 2D, 3D, GNSSDR */
-	newstatus = STATUS_FIX;
-	break;
-    case 4:	/* RTK integer */
-	newstatus = STATUS_RTK_FIX;
-	break;
-    case 5:	/* RTK float */
-	newstatus = STATUS_RTK_FLT;
-	break;
+        newstatus = STATUS_FIX;
+        break;
+    case 4:     /* RTK integer */
+        newstatus = STATUS_RTK_FIX;
+        break;
+    case 5:     /* RTK float */
+        newstatus = STATUS_RTK_FLT;
+        break;
     case 6:
         /* dead reckoning, could be valid or invalid */
-	newstatus = STATUS_DR;
-	break;
+        newstatus = STATUS_DR;
+        break;
     case 7:
         /* manual input, surveyed */
-	newstatus = STATUS_TIME;
-	break;
+        newstatus = STATUS_TIME;
+        break;
     case 8:
         /* simulated mode */
         /* Garmin GPSMAP and Gecko sends an 8, but undocumented why */
-	newstatus = STATUS_SIM;
-	break;
+        newstatus = STATUS_SIM;
+        break;
     default:
-	newstatus = -1;
-	break;
+        newstatus = -1;
+        break;
     }
     if (0 <= newstatus) {
-	session->gpsdata.status = newstatus;
-	mask = STATUS_SET;
+        session->gpsdata.status = newstatus;
+        mask = STATUS_SET;
     }
     /*
      * There are some receivers (the Trimble Placer 450 is an example) that
@@ -805,17 +805,17 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
     } else {
         session->nmea.latch_mode = strncmp(field[1],
                           session->nmea.last_gga_timestamp,
-			  sizeof(session->nmea.last_gga_timestamp))==0;
+                          sizeof(session->nmea.last_gga_timestamp))==0;
     }
 
     if (session->nmea.latch_mode) {
-	session->gpsdata.status = STATUS_NO_FIX;
-	session->newdata.mode = MODE_NO_FIX;
+        session->gpsdata.status = STATUS_NO_FIX;
+        session->newdata.mode = MODE_NO_FIX;
         gpsd_log(&session->context->errout, LOG_PROG,
                  "xxGGA: latch mode\n");
     } else
-	(void)strlcpy(session->nmea.last_gga_timestamp, field[1],
-		      sizeof(session->nmea.last_gga_timestamp));
+        (void)strlcpy(session->nmea.last_gga_timestamp, field[1],
+                      sizeof(session->nmea.last_gga_timestamp));
 
     /* satellites_visible is used as an accumulator in xxGSV
      * so if we set it here we break xxGSV
@@ -826,69 +826,69 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
     satellites_visible = atoi(field[7]);
 
     if (0 == merge_hhmmss(field[1], session)) {
-	register_fractional_time(field[0], field[1], session);
-	if (session->nmea.date.tm_year == 0)
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "can't use GGA time until after ZDA or RMC"
-		     " has supplied a year.\n");
-	else {
-	    mask |= TIME_SET;
-	}
+        register_fractional_time(field[0], field[1], session);
+        if (session->nmea.date.tm_year == 0)
+            gpsd_log(&session->context->errout, LOG_WARN,
+                     "can't use GGA time until after ZDA or RMC"
+                     " has supplied a year.\n");
+        else {
+            mask |= TIME_SET;
+        }
     }
 
     if (0 == do_lat_lon(&field[2], &session->newdata)) {
-	session->newdata.mode = MODE_2D;
-	mask |= LATLON_SET;
-	if ('\0' != field[11][0]) {
-	    session->newdata.geoid_sep = safe_atof(field[11]);
-	} else {
-	    session->newdata.geoid_sep = wgs84_separation(
+        session->newdata.mode = MODE_2D;
+        mask |= LATLON_SET;
+        if ('\0' != field[11][0]) {
+            session->newdata.geoid_sep = safe_atof(field[11]);
+        } else {
+            session->newdata.geoid_sep = wgs84_separation(
                 session->newdata.latitude, session->newdata.longitude);
         }
-	/*
-	 * SiRF chipsets up to version 2.2 report a null altitude field.
-	 * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
-	 * If we see this, force mode to 2D at most.
-	 */
-	if ('\0' != field[9][0]) {
+        /*
+         * SiRF chipsets up to version 2.2 report a null altitude field.
+         * See <http://www.sirf.com/Downloads/Technical/apnt0033.pdf>.
+         * If we see this, force mode to 2D at most.
+         */
+        if ('\0' != field[9][0]) {
             /* altitude is MSL */
-	    session->newdata.altMSL = safe_atof(field[9]);
+            session->newdata.altMSL = safe_atof(field[9]);
             /* Let gpsd_error_model() deal with altHAE */
-	    mask |= ALTITUDE_SET;
-	    /*
-	     * This is a bit dodgy.  Technically we shouldn't set the mode
-	     * bit until we see GSA.  But it may be later in the cycle,
-	     * some devices like the FV-18 don't send it by default, and
-	     * elsewhere in the code we want to be able to test for the
-	     * presence of a valid fix with mode > MODE_NO_FIX.
-	     *
-	     * Use satellites_visible as double check on MODE_3D
-	     */
-	    if (4 <= satellites_visible) {
-		session->newdata.mode = MODE_3D;
-	    }
-	}
-	if (3 > satellites_visible) {
-	    session->newdata.mode = MODE_NO_FIX;
-	}
+            mask |= ALTITUDE_SET;
+            /*
+             * This is a bit dodgy.  Technically we shouldn't set the mode
+             * bit until we see GSA.  But it may be later in the cycle,
+             * some devices like the FV-18 don't send it by default, and
+             * elsewhere in the code we want to be able to test for the
+             * presence of a valid fix with mode > MODE_NO_FIX.
+             *
+             * Use satellites_visible as double check on MODE_3D
+             */
+            if (4 <= satellites_visible) {
+                session->newdata.mode = MODE_3D;
+            }
+        }
+        if (3 > satellites_visible) {
+            session->newdata.mode = MODE_NO_FIX;
+        }
     } else {
-	session->newdata.mode = MODE_NO_FIX;
+        session->newdata.mode = MODE_NO_FIX;
     }
     mask |= MODE_SET;
 
     if ('\0' != field[8][0]) {
-	session->gpsdata.dop.hdop = safe_atof(field[8]);
+        session->gpsdata.dop.hdop = safe_atof(field[8]);
     }
 
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GGA: hhmmss=%s lat=%.2f lon=%.2f altMSL=%.2f mode=%d status=%d\n",
-	     field[1],
-	     session->newdata.latitude,
-	     session->newdata.longitude,
-	     session->newdata.altMSL,
-	     session->newdata.mode,
-	     session->gpsdata.status);
+             "GGA: hhmmss=%s lat=%.2f lon=%.2f altMSL=%.2f mode=%d status=%d\n",
+             field[1],
+             session->newdata.latitude,
+             session->newdata.longitude,
+             session->newdata.altMSL,
+             session->newdata.mode,
+             session->gpsdata.status);
     return mask;
 }
 
@@ -933,16 +933,16 @@ static gps_mask_t processGST(int count, char *field[],
     session->gpsdata.gst.utctime += mkgmtime(&session->nmea.date);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GST: utc = %.3f, rms = %.2f, maj = %.2f, min = %.2f,"
+             "GST: utc = %.3f, rms = %.2f, maj = %.2f, min = %.2f,"
              " ori = %.2f, lat = %.2f, lon = %.2f, alt = %.2f\n",
-	     session->gpsdata.gst.utctime,
-	     session->gpsdata.gst.rms_deviation,
-	     session->gpsdata.gst.smajor_deviation,
-	     session->gpsdata.gst.sminor_deviation,
-	     session->gpsdata.gst.smajor_orientation,
-	     session->gpsdata.gst.lat_err_deviation,
-	     session->gpsdata.gst.lon_err_deviation,
-	     session->gpsdata.gst.alt_err_deviation);
+             session->gpsdata.gst.utctime,
+             session->gpsdata.gst.rms_deviation,
+             session->gpsdata.gst.smajor_deviation,
+             session->gpsdata.gst.sminor_deviation,
+             session->gpsdata.gst.smajor_orientation,
+             session->gpsdata.gst.lat_err_deviation,
+             session->gpsdata.gst.lon_err_deviation,
+             session->gpsdata.gst.alt_err_deviation);
 
     mask = GST_SET | ONLINE_SET;
     return mask;
@@ -958,31 +958,31 @@ static unsigned char nmea_sigid_to_ubx(unsigned char nmea_sigid)
         /* FALLTHROUGH */
     case 0:
         /* missing, assume GPS L1 */
-	ubx_sigid = 0;
+        ubx_sigid = 0;
         break;
     case 1:
         /* L1 */
-	ubx_sigid = 0;
+        ubx_sigid = 0;
         break;
     case 2:
         /* E5, could be 5 or 6. */
-	ubx_sigid = 5;
+        ubx_sigid = 5;
         break;
     case 3:
         /* B2 or L2, could be 2 or 3. */
-	ubx_sigid = 2;
+        ubx_sigid = 2;
         break;
     case 5:
         /* L2 */
-	ubx_sigid = 4;
+        ubx_sigid = 4;
         break;
     case 6:
         /* L2CL */
-	ubx_sigid = 3;
+        ubx_sigid = 3;
         break;
     case 7:
         /* E1, could be 0 or 1. */
-	ubx_sigid = 0;
+        ubx_sigid = 0;
         break;
     }
 
@@ -1043,113 +1043,113 @@ static int nmeaid_to_prn(char *talker, int nmea_satnum,
         /* uh, oh... */
         nmea2_prn = 0;
     } else if (0 < nmea_gnssid) {
-	/* this switch handles case where nmea_gnssid is known */
-	switch (nmea_gnssid) {
-	default:
-	    /* x = IMES                Not defined by NMEA 4.10 */
-	    /* FALLTHROUGH */
-	case 0:
-	    /* none given, ignore */
-	    nmea2_prn = 0;
-	    break;
-	case 1:
-	    if (33 > nmea_satnum) {
-		/* 1 = GPS       1-32 */
-		*ubx_gnssid = 0;
-		*ubx_svid = nmea_satnum;
-	    } else if (65 > nmea_satnum) {
-		/* 1 = SBAS      33-64 */
-		*ubx_gnssid = 1;
-		*ubx_svid = 87 + nmea_satnum;
-	    } else if (152 > nmea_satnum) {
-		/* Huh? */
-		*ubx_gnssid = 0;
-		*ubx_svid = 0;
-		nmea2_prn = 0;
-	    } else if (158 > nmea_satnum) {
-		/* 1 = SBAS      152-158 */
-		*ubx_gnssid = 1;
-		*ubx_svid = nmea_satnum;
-	    } else if (193 > nmea_satnum) {
-		/* Huh? */
-		*ubx_gnssid = 0;
-		*ubx_svid = 0;
-		nmea2_prn = 0;
-	    } else if (200 > nmea_satnum) {
-		/* 1 = QZSS      193-197 */
-                /* undocumented u-blox goes to 199 */
-		*ubx_gnssid = 3;
-		*ubx_svid = nmea_satnum - 192;
-	    } else {
-		/* Huh? */
-		*ubx_gnssid = 0;
-		*ubx_svid = 0;
-		nmea2_prn = 0;
-	    }
-	    break;
-	case 2:
-	    /*  2 = GLONASS   65-96, nul */
-	    *ubx_gnssid = 6;
-	    *ubx_svid = nmea_satnum;
+        /* this switch handles case where nmea_gnssid is known */
+        switch (nmea_gnssid) {
+        default:
+            /* x = IMES                Not defined by NMEA 4.10 */
+            /* FALLTHROUGH */
+        case 0:
+            /* none given, ignore */
+            nmea2_prn = 0;
             break;
-	case 3:
-	    /*  3 = Galileo   1-36 */
-	    *ubx_gnssid = 2;
-	    *ubx_svid = nmea_satnum;
-	    nmea2_prn = 300 + nmea_satnum;
-	    break;
-	case 4:
-	    /*  4 - BeiDou    1-37 */
-	    *ubx_gnssid = 3;
-	    *ubx_svid = nmea_satnum;
-	    nmea2_prn = 300 + nmea_satnum;
-	    break;
-	}
+        case 1:
+            if (33 > nmea_satnum) {
+                /* 1 = GPS       1-32 */
+                *ubx_gnssid = 0;
+                *ubx_svid = nmea_satnum;
+            } else if (65 > nmea_satnum) {
+                /* 1 = SBAS      33-64 */
+                *ubx_gnssid = 1;
+                *ubx_svid = 87 + nmea_satnum;
+            } else if (152 > nmea_satnum) {
+                /* Huh? */
+                *ubx_gnssid = 0;
+                *ubx_svid = 0;
+                nmea2_prn = 0;
+            } else if (158 > nmea_satnum) {
+                /* 1 = SBAS      152-158 */
+                *ubx_gnssid = 1;
+                *ubx_svid = nmea_satnum;
+            } else if (193 > nmea_satnum) {
+                /* Huh? */
+                *ubx_gnssid = 0;
+                *ubx_svid = 0;
+                nmea2_prn = 0;
+            } else if (200 > nmea_satnum) {
+                /* 1 = QZSS      193-197 */
+                /* undocumented u-blox goes to 199 */
+                *ubx_gnssid = 3;
+                *ubx_svid = nmea_satnum - 192;
+            } else {
+                /* Huh? */
+                *ubx_gnssid = 0;
+                *ubx_svid = 0;
+                nmea2_prn = 0;
+            }
+            break;
+        case 2:
+            /*  2 = GLONASS   65-96, nul */
+            *ubx_gnssid = 6;
+            *ubx_svid = nmea_satnum;
+            break;
+        case 3:
+            /*  3 = Galileo   1-36 */
+            *ubx_gnssid = 2;
+            *ubx_svid = nmea_satnum;
+            nmea2_prn = 300 + nmea_satnum;
+            break;
+        case 4:
+            /*  4 - BeiDou    1-37 */
+            *ubx_gnssid = 3;
+            *ubx_svid = nmea_satnum;
+            nmea2_prn = 300 + nmea_satnum;
+            break;
+        }
 
     /* left with NMEA 2.x to NMEA 4.0 satnums
      * use talker ID to disambiguate */
     } else if (32 >= nmea_satnum) {
         *ubx_svid = nmea_satnum;
-	switch (talker[0]) {
+        switch (talker[0]) {
         case 'G':
-	    if (talker[1] == 'A') {
-		/* Galileo */
-		nmea2_prn = 300 + nmea_satnum;
-		*ubx_gnssid = 2;
-	    } else if (talker[1] == 'B') {
-		/* map Beidou IDs 1..37 to 401..437 */
-		*ubx_gnssid = 3;
-		nmea2_prn = 400 + nmea_satnum;
-	    } else if (talker[1] == 'L') {
-		/* GLONASS GL doesn't seem to do this, better safe than sorry */
-		nmea2_prn = 64 + nmea_satnum;
-		*ubx_gnssid = 6;
-	    } else if (talker[1] == 'N') {
+            if (talker[1] == 'A') {
+                /* Galileo */
+                nmea2_prn = 300 + nmea_satnum;
+                *ubx_gnssid = 2;
+            } else if (talker[1] == 'B') {
+                /* map Beidou IDs 1..37 to 401..437 */
+                *ubx_gnssid = 3;
+                nmea2_prn = 400 + nmea_satnum;
+            } else if (talker[1] == 'L') {
+                /* GLONASS GL doesn't seem to do this, better safe than sorry */
+                nmea2_prn = 64 + nmea_satnum;
+                *ubx_gnssid = 6;
+            } else if (talker[1] == 'N') {
                 /* all of them, but only GPS is 0 < PRN < 33 */
-	    } else if (talker[1] == 'P') {
+            } else if (talker[1] == 'P') {
                 /* GPS,SBAS,QZSS, but only GPS is 0 < PRN < 33 */
             } /* else ?? */
             break;
-	case 'B':
+        case 'B':
             if (talker[1] == 'D') {
-		/* map Beidou IDs */
-		nmea2_prn = 400 + nmea_satnum;
-		*ubx_gnssid = 3;
+                /* map Beidou IDs */
+                nmea2_prn = 400 + nmea_satnum;
+                *ubx_gnssid = 3;
             } /* else ?? */
             break;
-	case 'P':
+        case 'P':
             /* Quectel EC25 & EC21 use PQxxx for BeiDou */
             if (talker[1] == 'Q') {
-		/* map Beidou IDs */
-		nmea2_prn = 400 + nmea_satnum;
-		*ubx_gnssid = 3;
+                /* map Beidou IDs */
+                nmea2_prn = 400 + nmea_satnum;
+                *ubx_gnssid = 3;
             } /* else ?? */
             break;
-	case 'Q':
+        case 'Q':
             if (talker[1] == 'Z') {
-		/* QZSS */
-		nmea2_prn = 192 + nmea_satnum;
-		*ubx_gnssid = 5;
+                /* QZSS */
+                nmea2_prn = 192 + nmea_satnum;
+                *ubx_gnssid = 5;
             } /* else ? */
             break;
         default:
@@ -1166,77 +1166,77 @@ static int nmeaid_to_prn(char *talker, int nmea_satnum,
         *ubx_gnssid = 6;
         *ubx_svid = nmea_satnum - 64;
     } else if (120 > nmea_satnum) {
-	/* Huh? */
-	*ubx_gnssid = 0;
-	*ubx_svid = 0;
-	nmea2_prn = 0;
+        /* Huh? */
+        *ubx_gnssid = 0;
+        *ubx_svid = 0;
+        nmea2_prn = 0;
     } else if (158 >= nmea_satnum) {
         /* SBAS 120..158 */
         *ubx_gnssid = 1;
         *ubx_svid = nmea_satnum;
     } else if (173 > nmea_satnum) {
-	/* Huh? */
-	*ubx_gnssid = 0;
-	*ubx_svid = 0;
-	nmea2_prn = 0;
+        /* Huh? */
+        *ubx_gnssid = 0;
+        *ubx_svid = 0;
+        nmea2_prn = 0;
     } else if (182 >= nmea_satnum) {
         /* IMES 173..182 */
         *ubx_gnssid = 4;
         *ubx_svid = nmea_satnum - 172;
     } else if (193 > nmea_satnum) {
-	/* Huh? */
-	*ubx_gnssid = 0;
-	*ubx_svid = 0;
-	nmea2_prn = 0;
+        /* Huh? */
+        *ubx_gnssid = 0;
+        *ubx_svid = 0;
+        nmea2_prn = 0;
     } else if (197 >= nmea_satnum) {
         /* QZSS 193..197 */
-	/* undocumented u-blox goes to 199 */
+        /* undocumented u-blox goes to 199 */
         *ubx_gnssid = 5;
         *ubx_svid = nmea_satnum - 192;
     } else if (201 > nmea_satnum) {
-	/* Huh? */
-	*ubx_gnssid = 0;
-	*ubx_svid = 0;
-	nmea2_prn = 0;
+        /* Huh? */
+        *ubx_gnssid = 0;
+        *ubx_svid = 0;
+        nmea2_prn = 0;
     } else if (237 >= nmea_satnum) {
         /* BeiDou, non-standard, some SiRF put BeiDou 201-237 */
         /* $GBGSV,2,2,05,209,07,033,*62 */
         *ubx_gnssid = 3;
         *ubx_svid = nmea_satnum - 200;
-	nmea2_prn += 200;           /* move up to 400 where NMEA 2.x wants it. */
+        nmea2_prn += 200;           /* move up to 400 where NMEA 2.x wants it. */
     } else if (301 > nmea_satnum) {
-	/* Huh? */
-	*ubx_gnssid = 0;
-	*ubx_svid = 0;
-	nmea2_prn = 0;
+        /* Huh? */
+        *ubx_gnssid = 0;
+        *ubx_svid = 0;
+        nmea2_prn = 0;
     } else if (356 >= nmea_satnum) {
         /* Galileo 301..356 */
         *ubx_gnssid = 2;
         *ubx_svid = nmea_satnum - 300;
     } else if (401 > nmea_satnum) {
-	/* Huh? */
-	*ubx_gnssid = 0;
-	*ubx_svid = 0;
-	nmea2_prn = 0;
+        /* Huh? */
+        *ubx_gnssid = 0;
+        *ubx_svid = 0;
+        nmea2_prn = 0;
     } else if (437 >= nmea_satnum) {
         /* BeiDou */
         *ubx_gnssid = 3;
         *ubx_svid = nmea_satnum - 400;
     } else {
-	/* greater than 437 Huh? */
-	*ubx_gnssid = 0;
-	*ubx_svid = 0;
-	nmea2_prn = 0;
+        /* greater than 437 Huh? */
+        *ubx_gnssid = 0;
+        *ubx_svid = 0;
+        nmea2_prn = 0;
     }
 
     return nmea2_prn;
 }
 
 static gps_mask_t processGSA(int count, char *field[],
-			     struct gps_device_t *session)
+                             struct gps_device_t *session)
 /* GPS DOP and Active Satellites */
 {
-#define GSA_TALKER	field[0][1]
+#define GSA_TALKER      field[0][1]
     /*
      * eg1. $GPGSA,A,3,,,,,,16,18,,22,24,,,3.6,2.1,2.2*3C
      * eg2. $GPGSA,A,3,19,28,14,18,27,22,31,39,,,,,1.7,1.0,1.3*35
@@ -1304,131 +1304,131 @@ static gps_mask_t processGSA(int count, char *field[],
      * Alarmingly, it's possible this error may be generic to SiRFstarIII.
      */
     if (18 > count) {
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "xxGSA: malformed, setting ONLINE_SET only.\n");
-	mask = ONLINE_SET;
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "xxGSA: malformed, setting ONLINE_SET only.\n");
+        mask = ONLINE_SET;
     } else if (session->nmea.latch_mode) {
-	/* last GGA had a non-advancing timestamp; don't trust this GSA */
-	mask = ONLINE_SET;
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "xxGSA: non-advancing timestamp\n");
+        /* last GGA had a non-advancing timestamp; don't trust this GSA */
+        mask = ONLINE_SET;
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "xxGSA: non-advancing timestamp\n");
     } else {
-	int i;
-	session->newdata.mode = atoi(field[2]);
-	/*
-	 * The first arm of this conditional ignores dead-reckoning
-	 * fixes from an Antaris chipset. which returns E in field 2
-	 * for a dead-reckoning estimate.  Fix by Andreas Stricker.
-	 */
-	if ('E' == field[2][0])
-	    mask = ONLINE_SET;
-	else
-	    mask = MODE_SET;
+        int i;
+        session->newdata.mode = atoi(field[2]);
+        /*
+         * The first arm of this conditional ignores dead-reckoning
+         * fixes from an Antaris chipset. which returns E in field 2
+         * for a dead-reckoning estimate.  Fix by Andreas Stricker.
+         */
+        if ('E' == field[2][0])
+            mask = ONLINE_SET;
+        else
+            mask = MODE_SET;
 
-	gpsd_log(&session->context->errout, LOG_PROG,
-		 "xxGSA sets mode %d\n", session->newdata.mode);
+        gpsd_log(&session->context->errout, LOG_PROG,
+                 "xxGSA sets mode %d\n", session->newdata.mode);
 
-	if (19 < count ) {
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "xxGSA: count %d too long!\n", count);
+        if (19 < count ) {
+            gpsd_log(&session->context->errout, LOG_WARN,
+                     "xxGSA: count %d too long!\n", count);
         } else {
             /* Just ignore the last fields of the Navior CH-4701 */
-	    if (field[15][0] != '\0')
-		session->gpsdata.dop.pdop = safe_atof(field[15]);
-	    if (field[16][0] != '\0')
-		session->gpsdata.dop.hdop = safe_atof(field[16]);
-	    if (field[17][0] != '\0')
-		session->gpsdata.dop.vdop = safe_atof(field[17]);
-	    if (19 == count && '\0' != field[18][0]) {
+            if (field[15][0] != '\0')
+                session->gpsdata.dop.pdop = safe_atof(field[15]);
+            if (field[16][0] != '\0')
+                session->gpsdata.dop.hdop = safe_atof(field[16]);
+            if (field[17][0] != '\0')
+                session->gpsdata.dop.vdop = safe_atof(field[17]);
+            if (19 == count && '\0' != field[18][0]) {
                 /* get the NMEA 4.10 sigid */
-		nmea_sigid = atoi(field[18]);
+                nmea_sigid = atoi(field[18]);
                 /* FIXME: ubx_sigid not used yet */
-		ubx_sigid = nmea_sigid_to_ubx(nmea_sigid);
-	    }
+                ubx_sigid = nmea_sigid_to_ubx(nmea_sigid);
+            }
         }
-	/*
-	 * might have gone from GPGSA to GLGSA/BDGSA
-	 * or GNGSA to GNGSA
-	 * in which case accumulate
-	 */
-	if ( '\0' == session->nmea.last_gsa_talker
+        /*
+         * might have gone from GPGSA to GLGSA/BDGSA
+         * or GNGSA to GNGSA
+         * in which case accumulate
+         */
+        if ( '\0' == session->nmea.last_gsa_talker
           || (GSA_TALKER == session->nmea.last_gsa_talker
               && 'N' != GSA_TALKER) ) {
-	    session->gpsdata.satellites_used = 0;
-	    memset(session->nmea.sats_used, 0, sizeof(session->nmea.sats_used));
+            session->gpsdata.satellites_used = 0;
+            memset(session->nmea.sats_used, 0, sizeof(session->nmea.sats_used));
             gpsd_log(&session->context->errout, LOG_DATA,
                      "xxGSA: clear sats_used\n");
-	}
-	session->nmea.last_gsa_talker = GSA_TALKER;
-	if ((session->nmea.last_gsa_talker == 'B') ||
+        }
+        session->nmea.last_gsa_talker = GSA_TALKER;
+        if ((session->nmea.last_gsa_talker == 'B') ||
             (session->nmea.last_gsa_talker == 'D') ||
             (session->nmea.last_gsa_talker == 'Q'))
             /* Quectel EC25 & EC21 use PQGSA for BeiDou */
-	    session->nmea.seen_bdgsa = true;
-	else if (session->nmea.last_gsa_talker == 'L')
-	    session->nmea.seen_glgsa = true;
-	else if (session->nmea.last_gsa_talker == 'N')
-	    session->nmea.seen_gngsa = true;
- 	else if (session->nmea.last_gsa_talker == 'A')
- 	    session->nmea.seen_gagsa = true;
+            session->nmea.seen_bdgsa = true;
+        else if (session->nmea.last_gsa_talker == 'L')
+            session->nmea.seen_glgsa = true;
+        else if (session->nmea.last_gsa_talker == 'N')
+            session->nmea.seen_gngsa = true;
+        else if (session->nmea.last_gsa_talker == 'A')
+            session->nmea.seen_gagsa = true;
 
-	/* the magic 6 here counts the tag, two mode fields, and DOP fields */
-	for (i = 0; i < count - 6; i++) {
-	    int prn;
+        /* the magic 6 here counts the tag, two mode fields, and DOP fields */
+        for (i = 0; i < count - 6; i++) {
+            int prn;
             int nmea_satnum;
             unsigned char ubx_gnssid;   /* UNUSED */
             unsigned char ubx_svid;     /* UNUSED */
 
-	    /* skip empty fields, otherwise empty becomes prn=200 */
+            /* skip empty fields, otherwise empty becomes prn=200 */
             nmea_satnum = atoi(field[i + 3]);
-	    if (1 > nmea_satnum) {
-		continue;
-	    }
-	    prn = nmeaid_to_prn(field[0], nmea_satnum, nmea_gnssid,
+            if (1 > nmea_satnum) {
+                continue;
+            }
+            prn = nmeaid_to_prn(field[0], nmea_satnum, nmea_gnssid,
                                 &ubx_gnssid, &ubx_svid);
 
 #ifdef __UNUSED__
             /* debug */
-	    gpsd_log(&session->context->errout, LOG_ERROR,
-		     "%s nmeaid_to_prn: nmea_gnssid %d nmea_satnum %d ubx_gnssid %d "
+            gpsd_log(&session->context->errout, LOG_ERROR,
+                     "%s nmeaid_to_prn: nmea_gnssid %d nmea_satnum %d ubx_gnssid %d "
                      "ubx_svid %d nmea2_prn %d\n", field[0],
-		     nmea_gnssid, nmea_satnum, ubx_gnssid, ubx_svid, prn);
-	    gpsd_log(&session->context->errout, LOG_ERROR,
+                     nmea_gnssid, nmea_satnum, ubx_gnssid, ubx_svid, prn);
+            gpsd_log(&session->context->errout, LOG_ERROR,
                      "%s count %d\n", field[0], count);
 #endif  /*  __UNUSED__ */
 
-	    if (prn > 0) {
-		/* check first BEFORE over-writing memory */
-		if (MAXCHANNELS <= session->gpsdata.satellites_used) {
-		    /* This should never happen as xxGSA is limited to 12,
+            if (prn > 0) {
+                /* check first BEFORE over-writing memory */
+                if (MAXCHANNELS <= session->gpsdata.satellites_used) {
+                    /* This should never happen as xxGSA is limited to 12,
                      * except for the Navior-24 CH-4701.
                      * But it could happen with multiple GSA per cycle */
-		    break;
-		}
-		session->nmea.sats_used[session->gpsdata.satellites_used++] =
-		    (unsigned short)prn;
+                    break;
+                }
+                session->nmea.sats_used[session->gpsdata.satellites_used++] =
+                    (unsigned short)prn;
             }
-	}
-	mask |= DOP_SET | USED_IS;
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "xxGSA: mode=%d used=%d pdop=%.2f hdop=%.2f vdop=%.2f "
+        }
+        mask |= DOP_SET | USED_IS;
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "xxGSA: mode=%d used=%d pdop=%.2f hdop=%.2f vdop=%.2f "
                  "ubx_sigid %d\n",
-		 session->newdata.mode,
-		 session->gpsdata.satellites_used,
-		 session->gpsdata.dop.pdop,
-		 session->gpsdata.dop.hdop,
-		 session->gpsdata.dop.vdop, ubx_sigid);
+                 session->newdata.mode,
+                 session->gpsdata.satellites_used,
+                 session->gpsdata.dop.pdop,
+                 session->gpsdata.dop.hdop,
+                 session->gpsdata.dop.vdop, ubx_sigid);
     }
     /* assumes GLGSA or BDGSA, if present, is emitted  directly
      * after the GPGSA*/
     if ((session->nmea.seen_glgsa || session->nmea.seen_bdgsa ||
          session->nmea.seen_gagsa) && GSA_TALKER == 'P') {
-	mask = ONLINE_SET;
+        mask = ONLINE_SET;
 
     /* first of two GNGSA */
     /* if mode == 1 some GPS only output 1 GNGSA, so ship mode always */
     } else if ( 'N' != last_last_gsa_talker && 'N' == GSA_TALKER) {
-	mask =  ONLINE_SET | MODE_SET;
+        mask =  ONLINE_SET | MODE_SET;
     }
 
     /* cast for 32/64 compatibility */
@@ -1440,9 +1440,9 @@ static gps_mask_t processGSA(int count, char *field[],
 
 /* xxGSV -  GPS Satellites in View */
 static gps_mask_t processGSV(int count, char *field[],
-			     struct gps_device_t *session)
+                             struct gps_device_t *session)
 {
-#define GSV_TALKER	field[0][1]
+#define GSV_TALKER      field[0][1]
     /*
      * GSV,2,1,08,01,40,083,46,02,17,308,41,12,07,344,39,14,22,228,45*75
      *  1) 2           Number of sentences for full data
@@ -1519,18 +1519,18 @@ static gps_mask_t processGSV(int count, char *field[],
     unsigned char  ubx_sigid = 0;
 
     if (count <= 3) {
-	gpsd_log(&session->context->errout, LOG_WARN,
-		 "malformed xxGSV - fieldcount %d <= 3\n",
-		 count);
-	gpsd_zero_satellites(&session->gpsdata);
-	return ONLINE_SET;
+        gpsd_log(&session->context->errout, LOG_WARN,
+                 "malformed xxGSV - fieldcount %d <= 3\n",
+                 count);
+        gpsd_zero_satellites(&session->gpsdata);
+        return ONLINE_SET;
     }
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "x%cGSV: part %s of %s, last_gsv_talker '%#x' "
+             "x%cGSV: part %s of %s, last_gsv_talker '%#x' "
              " last_gsv_sigid %u\n",
-	     GSV_TALKER, field[2], field[1],
-	     session->nmea.last_gsv_talker,
-	     session->nmea.last_gsv_sigid);
+             GSV_TALKER, field[2], field[1],
+             session->nmea.last_gsv_talker,
+             session->nmea.last_gsv_sigid);
 
     /*
      * This check used to be !=0, but we have loosen it a little to let by
@@ -1538,140 +1538,140 @@ static gps_mask_t processGSV(int count, char *field[],
      */
     switch (count % 4) {
     case 0:
-	/* normal, pre-NMEA 4.10 */
-	break;
+        /* normal, pre-NMEA 4.10 */
+        break;
     case 1:
-	/* NMEA 4.10, get the signal ID */
-	nmea_sigid = atoi(field[count - 1]);
+        /* NMEA 4.10, get the signal ID */
+        nmea_sigid = atoi(field[count - 1]);
         ubx_sigid = nmea_sigid_to_ubx(nmea_sigid);
-	break;
+        break;
     default:
-	/* bad count */
-	gpsd_log(&session->context->errout, LOG_WARN,
-		 "malformed GPGSV - fieldcount %d %% 4 != 0\n", count);
-	gpsd_zero_satellites(&session->gpsdata);
-	return ONLINE_SET;
+        /* bad count */
+        gpsd_log(&session->context->errout, LOG_WARN,
+                 "malformed GPGSV - fieldcount %d %% 4 != 0\n", count);
+        gpsd_zero_satellites(&session->gpsdata);
+        return ONLINE_SET;
     }
 
     session->nmea.await = atoi(field[1]);
     if ((session->nmea.part = atoi(field[2])) < 1) {
-	gpsd_log(&session->context->errout, LOG_WARN,
-		 "malformed GPGSV - bad part\n");
-	gpsd_zero_satellites(&session->gpsdata);
-	return ONLINE_SET;
+        gpsd_log(&session->context->errout, LOG_WARN,
+                 "malformed GPGSV - bad part\n");
+        gpsd_zero_satellites(&session->gpsdata);
+        return ONLINE_SET;
     }
 
     if (session->nmea.part == 1) {
-	/*
-	 * might have gone from GPGSV to GLGSV/BDGSV/QZGSV,
-	 * in which case accumulate
+        /*
+         * might have gone from GPGSV to GLGSV/BDGSV/QZGSV,
+         * in which case accumulate
          *
          * NMEA 4.1 might have gone from GPGVS,sigid=x to GPGSV,sigid=y
          *
-	 * session->nmea.last_gsv_talker is zero at cycle start
+         * session->nmea.last_gsv_talker is zero at cycle start
          */
-	if (session->nmea.last_gsv_talker == '\0' ||
+        if (session->nmea.last_gsv_talker == '\0' ||
             ('P' == GSV_TALKER &&
              0 == ubx_sigid)) {
-	    gpsd_log(&session->context->errout, LOG_PROG,
-		     "x%cGSV: new part %d, last_gsv_talker '%#x', zeroing\n",
+            gpsd_log(&session->context->errout, LOG_PROG,
+                     "x%cGSV: new part %d, last_gsv_talker '%#x', zeroing\n",
                      GSV_TALKER,
-		     session->nmea.part,
-		     session->nmea.last_gsv_talker);
-	    gpsd_zero_satellites(&session->gpsdata);
-	}
-	session->nmea.last_gsv_talker = GSV_TALKER;
-	session->nmea.last_gsv_sigid = ubx_sigid; /* UNUSED */
-	switch (GSV_TALKER) {
-	case 'A':
-	    session->nmea.seen_gagsv = true;
-	    break;
-	case 'B':
-	    /* FALLTHROUGH */
-	case 'D':
-	    /* FALLTHROUGH */
-	case 'Q':
+                     session->nmea.part,
+                     session->nmea.last_gsv_talker);
+            gpsd_zero_satellites(&session->gpsdata);
+        }
+        session->nmea.last_gsv_talker = GSV_TALKER;
+        session->nmea.last_gsv_sigid = ubx_sigid; /* UNUSED */
+        switch (GSV_TALKER) {
+        case 'A':
+            session->nmea.seen_gagsv = true;
+            break;
+        case 'B':
+            /* FALLTHROUGH */
+        case 'D':
+            /* FALLTHROUGH */
+        case 'Q':
             /* Quectel EC25 & EC21 use PQGSA for BeiDou */
-	    session->nmea.seen_bdgsv = true;
-	    break;
-	case 'L':
-	    session->nmea.seen_glgsv = true;
-	    break;
-	case 'P':
-	    session->nmea.seen_gpgsv = true;
-	    break;
-	case 'Z':
-	    session->nmea.seen_qzss = true;
-	    break;
-	default:
-	    /* uh, what? */
-	    break;
-	}
+            session->nmea.seen_bdgsv = true;
+            break;
+        case 'L':
+            session->nmea.seen_glgsv = true;
+            break;
+        case 'P':
+            session->nmea.seen_gpgsv = true;
+            break;
+        case 'Z':
+            session->nmea.seen_qzss = true;
+            break;
+        default:
+            /* uh, what? */
+            break;
+        }
     }
 
     for (fldnum = 4; fldnum < count / 4 * 4;) {
-	struct satellite_t *sp;
+        struct satellite_t *sp;
         int nmea_svid;
 
-	if (session->gpsdata.satellites_visible >= MAXCHANNELS) {
-	    gpsd_log(&session->context->errout, LOG_ERROR,
-		     "xxGSV: internal error - too many satellites [%d]!\n",
-		     session->gpsdata.satellites_visible);
-	    gpsd_zero_satellites(&session->gpsdata);
-	    break;
-	}
-	sp = &session->gpsdata.skyview[session->gpsdata.satellites_visible];
-	nmea_svid = atoi(field[fldnum++]);
-	if (0 == nmea_svid) {
-	    /* skip bogus fields */
-	    continue;
-	}
-	/* FIXME: this ignores possible NMEA 4.1 Signal ID hint */
-	sp->PRN = (short)nmeaid_to_prn(field[0], nmea_svid, nmea_gnssid,
+        if (session->gpsdata.satellites_visible >= MAXCHANNELS) {
+            gpsd_log(&session->context->errout, LOG_ERROR,
+                     "xxGSV: internal error - too many satellites [%d]!\n",
+                     session->gpsdata.satellites_visible);
+            gpsd_zero_satellites(&session->gpsdata);
+            break;
+        }
+        sp = &session->gpsdata.skyview[session->gpsdata.satellites_visible];
+        nmea_svid = atoi(field[fldnum++]);
+        if (0 == nmea_svid) {
+            /* skip bogus fields */
+            continue;
+        }
+        /* FIXME: this ignores possible NMEA 4.1 Signal ID hint */
+        sp->PRN = (short)nmeaid_to_prn(field[0], nmea_svid, nmea_gnssid,
                                        &sp->gnssid, &sp->svid);
 
 #ifdef __UNUSED__
-	/* debug */
-	gpsd_log(&session->context->errout, LOG_ERROR,
-		 "%s nmeaid_to_prn: nmea_gnssid %d nmea_satnum %d "
+        /* debug */
+        gpsd_log(&session->context->errout, LOG_ERROR,
+                 "%s nmeaid_to_prn: nmea_gnssid %d nmea_satnum %d "
                  "ubx_gnssid %d ubx_svid %d nmea2_prn %d\n", field[0],
-		 nmea_gnssid, nmea_svid, sp->gnssid, sp->svid, sp->PRN);
+                 nmea_gnssid, nmea_svid, sp->gnssid, sp->svid, sp->PRN);
 #endif  /* __UNUSED__ */
 
-	sp->elevation = (double)atoi(field[fldnum++]);
-	sp->azimuth = (double)atoi(field[fldnum++]);
-	sp->ss = (double)atoi(field[fldnum++]);
-	sp->used = false;
+        sp->elevation = (double)atoi(field[fldnum++]);
+        sp->azimuth = (double)atoi(field[fldnum++]);
+        sp->ss = (double)atoi(field[fldnum++]);
+        sp->used = false;
         sp->sigid = ubx_sigid;
 
         /* sadly NMEA 4.1 does not tell us which sigid (L1, L2) is
          * used.  So if the ss is zero, do not mark used */
-	if (0 < sp->PRN && 0 < sp->ss) {
-	    for (n = 0; n < MAXCHANNELS; n++)
-		if (session->nmea.sats_used[n] == (unsigned short)sp->PRN) {
-		    sp->used = true;
-		    break;
-		}
+        if (0 < sp->PRN && 0 < sp->ss) {
+            for (n = 0; n < MAXCHANNELS; n++)
+                if (session->nmea.sats_used[n] == (unsigned short)sp->PRN) {
+                    sp->used = true;
+                    break;
+                }
         }
-	/*
-	 * Incrementing this unconditionally falls afoul of chipsets like
-	 * the Motorola Oncore GT+ that emit empty fields at the end of the
-	 * last sentence in a GPGSV set if the number of satellites is not
-	 * a multiple of 4.
-	 */
-	session->gpsdata.satellites_visible++;
+        /*
+         * Incrementing this unconditionally falls afoul of chipsets like
+         * the Motorola Oncore GT+ that emit empty fields at the end of the
+         * last sentence in a GPGSV set if the number of satellites is not
+         * a multiple of 4.
+         */
+        session->gpsdata.satellites_visible++;
     }
 
 #if __UNUSED
     /* debug code */
     gpsd_log(&session->context->errout, LOG_ERROR,
         "x%cGSV: vis %d gagsv %d bdgsv %d glgsv %d qzss %d\n",
-	GSV_TALKER,
-	session->gpsdata.satellites_visible,
-	session->nmea.seen_gagsv,
-	session->nmea.seen_bdgsv,
-	session->nmea.seen_glgsv,
-	session->nmea.seen_qzss);
+        GSV_TALKER,
+        session->gpsdata.satellites_visible,
+        session->nmea.seen_gagsv,
+        session->nmea.seen_bdgsv,
+        session->nmea.seen_glgsv,
+        session->nmea.seen_qzss);
 #endif
 
     /*
@@ -1685,18 +1685,18 @@ static gps_mask_t processGSV(int count, char *field[],
      */
     if (!(session->nmea.seen_glgsv || session->nmea.seen_bdgsv
         || session->nmea.seen_qzss || session->nmea.seen_gagsv))
-	if (session->nmea.part == session->nmea.await
-		&& atoi(field[3]) != session->gpsdata.satellites_visible)
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "GPGSV field 3 value of %d != actual count %d\n",
-		     atoi(field[3]), session->gpsdata.satellites_visible);
+        if (session->nmea.part == session->nmea.await
+                && atoi(field[3]) != session->gpsdata.satellites_visible)
+            gpsd_log(&session->context->errout, LOG_WARN,
+                     "GPGSV field 3 value of %d != actual count %d\n",
+                     atoi(field[3]), session->gpsdata.satellites_visible);
 
     /* not valid data until we've seen a complete set of parts */
     if (session->nmea.part < session->nmea.await) {
-	gpsd_log(&session->context->errout, LOG_PROG,
-		 "xxGSV: Partial satellite data (%d of %d).\n",
-		 session->nmea.part, session->nmea.await);
-	return ONLINE_SET;
+        gpsd_log(&session->context->errout, LOG_PROG,
+                 "xxGSV: Partial satellite data (%d of %d).\n",
+                 session->nmea.part, session->nmea.await);
+        return ONLINE_SET;
     }
     /*
      * This sanity check catches an odd behavior of SiRFstarII receivers.
@@ -1707,31 +1707,31 @@ static gps_mask_t processGSV(int count, char *field[],
      * revision 231.000.000_A2.
      */
     for (n = 0; n < session->gpsdata.satellites_visible; n++)
-	if (session->gpsdata.skyview[n].azimuth != 0)
-	    goto sane;
+        if (session->gpsdata.skyview[n].azimuth != 0)
+            goto sane;
     gpsd_log(&session->context->errout, LOG_WARN,
-	     "xxGSV: Satellite data no good (%d of %d).\n",
-	     session->nmea.part, session->nmea.await);
+             "xxGSV: Satellite data no good (%d of %d).\n",
+             session->nmea.part, session->nmea.await);
     gpsd_zero_satellites(&session->gpsdata);
     return ONLINE_SET;
   sane:
     session->gpsdata.skyview_time = NAN;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "xxGSV: Satellite data OK (%d of %d).\n",
-	     session->nmea.part, session->nmea.await);
+             "xxGSV: Satellite data OK (%d of %d).\n",
+             session->nmea.part, session->nmea.await);
 
     /* assumes GLGSV or BDGSV group, if present, is emitted after the GPGSV */
     if ((session->nmea.seen_glgsv || session->nmea.seen_bdgsv
          || session->nmea.seen_qzss  || session->nmea.seen_gagsv)
         && GSV_TALKER == 'P')
-	return ONLINE_SET;
+        return ONLINE_SET;
 
 #if __UNUSED
     /* debug code */
     gpsd_log(&session->context->errout, LOG_ERROR,
         "x%cGSV: set skyview_time %.2f frac_time %.2f\n", GSV_TALKER,
-	session->gpsdata.skyview_time,
-	session->nmea.this_frac_time);
+        session->gpsdata.skyview_time,
+        session->nmea.this_frac_time);
 #endif
 
     /* clear computed DOPs so they get recomputed. */
@@ -1746,7 +1746,7 @@ static gps_mask_t processGSV(int count, char *field[],
 
 /* Garmin Estimated Position Error */
 static gps_mask_t processPGRME(int c UNUSED, char *field[],
-			       struct gps_device_t *session)
+                               struct gps_device_t *session)
 {
     /*
      * $PGRME,15.0,M,45.0,M,25.0,M*22
@@ -1768,23 +1768,23 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[],
     if ('M' != field[2][0] ||
         'M' != field[4][0] ||
         'M' != field[6][0]) {
-	mask = ONLINE_SET;
+        mask = ONLINE_SET;
     } else {
-	session->newdata.epx = session->newdata.epy =
-	    safe_atof(field[1]) * (1 / sqrt(2))
+        session->newdata.epx = session->newdata.epy =
+            safe_atof(field[1]) * (1 / sqrt(2))
                       * (GPSD_CONFIDENCE / CEP50_SIGMA);
-	session->newdata.epv =
-	    safe_atof(field[3]) * (GPSD_CONFIDENCE / CEP50_SIGMA);
-	session->newdata.sep =
-	    safe_atof(field[5]) * (GPSD_CONFIDENCE / CEP50_SIGMA);
-	mask = HERR_SET | VERR_SET | PERR_IS;
+        session->newdata.epv =
+            safe_atof(field[3]) * (GPSD_CONFIDENCE / CEP50_SIGMA);
+        session->newdata.sep =
+            safe_atof(field[5]) * (GPSD_CONFIDENCE / CEP50_SIGMA);
+        mask = HERR_SET | VERR_SET | PERR_IS;
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "PGRME: epx=%.2f epy=%.2f sep=%.2f\n",
-	     session->newdata.epx,
-	     session->newdata.epy,
-	     session->newdata.sep);
+             "PGRME: epx=%.2f epy=%.2f sep=%.2f\n",
+             session->newdata.epx,
+             session->newdata.epy,
+             session->newdata.sep);
     return mask;
 }
 
@@ -1793,7 +1793,7 @@ static gps_mask_t processPGRME(int c UNUSED, char *field[],
  * FIXME: seems to happen after cycle ender, so little happens...
  */
 static gps_mask_t processPGRMF(int c UNUSED, char *field[],
-			       struct gps_device_t *session)
+                               struct gps_device_t *session)
 {
  /*
   * $PGRMF,290,293895,160305,093802,13,5213.1439,N,02100.6511,E,A,2,0,226,2,1*11
@@ -1817,36 +1817,36 @@ static gps_mask_t processPGRMF(int c UNUSED, char *field[],
     gps_mask_t mask = ONLINE_SET;
 
     if (0 == merge_hhmmss(field[4], session) &&
-	0 == merge_ddmmyy(field[3], session)) {
-	/* got a good data/time */
-	mask |= TIME_SET;
+        0 == merge_ddmmyy(field[3], session)) {
+        /* got a good data/time */
+        mask |= TIME_SET;
     }
     if ('A' != field[10][0]) {
-	/* Huh? */
+        /* Huh? */
         return mask;
     }
     if ('\0' != field[5][0]) {
         session->context->leap_seconds = atoi(field[5]);
-	session->context->valid = LEAP_SECOND_VALID;
+        session->context->valid = LEAP_SECOND_VALID;
     }
     if (0 == do_lat_lon(&field[6], &session->newdata)) {
-	mask |= LATLON_SET;
+        mask |= LATLON_SET;
     }
     switch (field[11][0]) {
     default:
         /* Huh? */
         break;
     case '0':
-	session->newdata.mode = MODE_NO_FIX;
-	mask |= MODE_SET;
+        session->newdata.mode = MODE_NO_FIX;
+        mask |= MODE_SET;
         break;
     case '1':
-	session->newdata.mode = MODE_2D;
-	mask |= MODE_SET;
+        session->newdata.mode = MODE_2D;
+        mask |= MODE_SET;
         break;
     case '2':
-	session->newdata.mode = MODE_3D;
-	mask |= MODE_SET;
+        session->newdata.mode = MODE_3D;
+        mask |= MODE_SET;
         break;
     }
     session->newdata.speed = safe_atof(field[12]) / MPS_TO_KPH;
@@ -1857,9 +1857,9 @@ static gps_mask_t processPGRMF(int c UNUSED, char *field[],
     mask |= DOP_SET;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "PGRMF: pdop %.1f tdop %.1f \n",
-	     session->gpsdata.dop.pdop,
-	     session->gpsdata.dop.tdop);
+             "PGRMF: pdop %.1f tdop %.1f \n",
+             session->gpsdata.dop.pdop,
+             session->gpsdata.dop.tdop);
     return mask;
 }
 
@@ -1868,7 +1868,7 @@ static gps_mask_t processPGRMF(int c UNUSED, char *field[],
  * FIXME: seems to happen after cycle ender, so nothing happens...
  */
 static gps_mask_t processPGRMM(int c UNUSED, char *field[],
-			       struct gps_device_t *session)
+                               struct gps_device_t *session)
 {
     /*
      * $PGRMM,NAD83*29
@@ -1882,14 +1882,14 @@ static gps_mask_t processPGRMM(int c UNUSED, char *field[],
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "PGRMM: datum=%.40s\n",
-	     session->newdata.datum);
+             "PGRMM: datum=%.40s\n",
+             session->newdata.datum);
     return mask;
 }
 
 /* Garmin Altitude Information */
 static gps_mask_t processPGRMZ(int c UNUSED, char *field[],
-			       struct gps_device_t *session)
+                               struct gps_device_t *session)
 {
     /*
      * $PGRMZ,246,f,3*1B
@@ -1910,37 +1910,37 @@ static gps_mask_t processPGRMZ(int c UNUSED, char *field[],
         0 < strlen(field[1])) {
         /* have a GPS altitude, must be 3D */
         /* seems to be altMSL.  regressions show this matches GPGGA MSL */
-	session->newdata.altMSL = atoi(field[1]) / METERS_TO_FEET;
-	mask |= (ALTITUDE_SET);
+        session->newdata.altMSL = atoi(field[1]) / METERS_TO_FEET;
+        mask |= (ALTITUDE_SET);
     }
     switch (field[3][0]) {
     default:
         /* Huh? */
         break;
     case '1':
-	session->newdata.mode = MODE_NO_FIX;
-	mask |= MODE_SET;
+        session->newdata.mode = MODE_NO_FIX;
+        mask |= MODE_SET;
         break;
     case '2':
-	session->newdata.mode = MODE_2D;
-	mask |= MODE_SET;
+        session->newdata.mode = MODE_2D;
+        mask |= MODE_SET;
         break;
     case '3':
-	session->newdata.mode = MODE_3D;
-	mask |= MODE_SET;
+        session->newdata.mode = MODE_3D;
+        mask |= MODE_SET;
         break;
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "PGRMZ: altMSL %.2f mode %d\n",
-	     session->newdata.altMSL,
-	     session->newdata.mode);
+             "PGRMZ: altMSL %.2f mode %d\n",
+             session->newdata.altMSL,
+             session->newdata.mode);
     return mask;
 }
 
 /* Magellan Status */
 static gps_mask_t processPMGNST(int c UNUSED, char *field[],
-			        struct gps_device_t *session)
+                                struct gps_device_t *session)
 {
     /*
      * $PMGNST,01.75,3,T,816,11.1,-00496,00*43
@@ -1956,32 +1956,32 @@ static gps_mask_t processPMGNST(int c UNUSED, char *field[],
     int newmode = atoi(field[3]);
 
     if ('T' == field[4][0]) {
-	switch(newmode) {
-	default:
-	    session->newdata.mode = MODE_NO_FIX;
-	    break;
-	case 2:
-	    session->newdata.mode = MODE_2D;
-	    break;
-	case 3:
-	    session->newdata.mode = MODE_3D;
-	    break;
-	}
+        switch(newmode) {
+        default:
+            session->newdata.mode = MODE_NO_FIX;
+            break;
+        case 2:
+            session->newdata.mode = MODE_2D;
+            break;
+        case 3:
+            session->newdata.mode = MODE_3D;
+            break;
+        }
     } else {
         /* Can report 3D fix, but 'F' for no fix */
-	session->newdata.mode = MODE_NO_FIX;
+        session->newdata.mode = MODE_NO_FIX;
     }
     mask |= MODE_SET;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "PMGNST: mode: %d\n",
-	     session->newdata.mode);
+             "PMGNST: mode: %d\n",
+             session->newdata.mode);
     return mask;
 }
 
 /* SiRF Estimated Position Errors */
 static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
-			       struct gps_device_t *session)
+                               struct gps_device_t *session)
 {
     /*
      * $PSRFEPE,100542.000,A,0.7,6.82,10.69,0.0,180.0*24
@@ -1999,57 +1999,57 @@ static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
 
     /* get time/ valid or not */
     if ('\0' != field[1][0]) {
-	if (0 == merge_hhmmss(field[1], session)) {
-	    register_fractional_time(field[0], field[1], session);
-	    if (session->nmea.date.tm_year == 0) {
-		gpsd_log(&session->context->errout, LOG_WARN,
-			 "can't use PSRFEPE time until after ZDA or RMC"
-			 " has supplied a year.\n");
-	    } else {
-		mask |= TIME_SET;
+        if (0 == merge_hhmmss(field[1], session)) {
+            register_fractional_time(field[0], field[1], session);
+            if (session->nmea.date.tm_year == 0) {
+                gpsd_log(&session->context->errout, LOG_WARN,
+                         "can't use PSRFEPE time until after ZDA or RMC"
+                         " has supplied a year.\n");
+            } else {
+                mask |= TIME_SET;
             }
-	}
+        }
     }
     if ('A' != field[2][0]) {
-	/* Huh? */
+        /* Huh? */
         return mask;
     }
 
     if ('\0' != field[3][0]) {
         /* This adds nothing, it just agrees with the gpsd calculation
          * from the skyview.  Which is a nice confirmation. */
-	session->gpsdata.dop.hdop = safe_atof(field[3]);
+        session->gpsdata.dop.hdop = safe_atof(field[3]);
         mask |= DOP_SET;
     }
     if ('\0' != field[4][0]) {
-	/* EHPE (Estimated Horizontal Position Error) */
-	session->newdata.eph = safe_atof(field[4]);
-	mask |= HERR_SET;
+        /* EHPE (Estimated Horizontal Position Error) */
+        session->newdata.eph = safe_atof(field[4]);
+        mask |= HERR_SET;
     }
 
     if ('\0' != field[5][0]) {
         /* Estimated Vertical Position Error (meters, 0.01 resolution) */
-	session->newdata.epv = safe_atof(field[5]);
-	mask |= VERR_SET;
+        session->newdata.epv = safe_atof(field[5]);
+        mask |= VERR_SET;
     }
 
     if ('\0' != field[6][0]) {
         /* Estimated Horizontal Speed Error meters/sec */
-	session->newdata.eps = safe_atof(field[6]);
+        session->newdata.eps = safe_atof(field[6]);
     }
 
     if ('\0' != field[7][0]) {
         /* Estimated Heading Error degrees */
-	session->newdata.epd = safe_atof(field[7]);
+        session->newdata.epd = safe_atof(field[7]);
     }
 
     gpsd_log(&session->context->errout, LOG_PROG,
-	     "PSRFEPE: hdop=%.1f eph=%.1f epv=%.1f eps=%.1f epd=%.1f\n",
-	     session->gpsdata.dop.hdop,
-	     session->newdata.eph,
-	     session->newdata.epv,
-	     session->newdata.eps,
-	     session->newdata.epd);
+             "PSRFEPE: hdop=%.1f eph=%.1f epv=%.1f eps=%.1f epd=%.1f\n",
+             session->gpsdata.dop.hdop,
+             session->newdata.eph,
+             session->newdata.epv,
+             session->newdata.eps,
+             session->newdata.epd);
     return mask;
 }
 
@@ -2058,7 +2058,7 @@ static gps_mask_t processPSRFEPE(int c UNUSED, char *field[],
  * FIXME: seems to happen after cycle ender, so nothing happens...
  */
 static gps_mask_t processDTM(int c UNUSED, char *field[],
-			       struct gps_device_t *session)
+                               struct gps_device_t *session)
 {
     /*
      * $GPDTM,W84,C*52
@@ -2088,8 +2088,8 @@ static gps_mask_t processDTM(int c UNUSED, char *field[],
     int i;
     static struct
     {
-	char *code;
-	char *name;
+        char *code;
+        char *name;
     } codes[] = {
         {"W84", "WGS84"},
         {"W72", "WGS72"},
@@ -2108,26 +2108,26 @@ static gps_mask_t processDTM(int c UNUSED, char *field[],
     for (i = 0; ; i++) {
         if ('\0' == codes[i].code[0]) {
             /* not found */
-	    strlcpy(session->newdata.datum, field[1],
+            strlcpy(session->newdata.datum, field[1],
                     sizeof(session->newdata.datum));
             break;
         }
         if (0 ==strcmp(codes[i].code, field[1])) {
-	    strlcpy(session->newdata.datum, codes[i].name,
+            strlcpy(session->newdata.datum, codes[i].name,
                     sizeof(session->newdata.datum));
             break;
         }
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "xxDTM: datum=%.40s\n",
-	     session->newdata.datum);
+             "xxDTM: datum=%.40s\n",
+             session->newdata.datum);
     return mask;
 }
 
 /* NMEA 3.0 Estimated Position Error */
 static gps_mask_t processGBS(int c UNUSED, char *field[],
-			       struct gps_device_t *session)
+                               struct gps_device_t *session)
 {
     /*
      * $GPGBS,082941.00,2.4,1.5,3.9,25,,-43.7,27.5*65
@@ -2152,26 +2152,26 @@ static gps_mask_t processGBS(int c UNUSED, char *field[],
 
     /* check that we're associated with the current fix */
     if (session->nmea.date.tm_hour == DD(field[1])
-	&& session->nmea.date.tm_min == DD(field[1] + 2)
-	&& session->nmea.date.tm_sec == DD(field[1] + 4)) {
-	session->newdata.epy = safe_atof(field[2]);
-	session->newdata.epx = safe_atof(field[3]);
-	session->newdata.epv = safe_atof(field[4]);
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "GBS: epx=%.2f epy=%.2f epv=%.2f\n",
-		 session->newdata.epx,
-		 session->newdata.epy,
-		 session->newdata.epv);
-	mask = HERR_SET | VERR_SET;
+        && session->nmea.date.tm_min == DD(field[1] + 2)
+        && session->nmea.date.tm_sec == DD(field[1] + 4)) {
+        session->newdata.epy = safe_atof(field[2]);
+        session->newdata.epx = safe_atof(field[3]);
+        session->newdata.epv = safe_atof(field[4]);
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "GBS: epx=%.2f epy=%.2f epv=%.2f\n",
+                 session->newdata.epx,
+                 session->newdata.epy,
+                 session->newdata.epv);
+        mask = HERR_SET | VERR_SET;
     } else {
-	gpsd_log(&session->context->errout, LOG_PROG,
-		 "second in $GPGBS error estimates doesn't match.\n");
+        gpsd_log(&session->context->errout, LOG_PROG,
+                 "second in $GPGBS error estimates doesn't match.\n");
     }
     return mask;
 }
 
 static gps_mask_t processZDA(int c UNUSED, char *field[],
-			       struct gps_device_t *session)
+                               struct gps_device_t *session)
 /* Time & Date */
 {
     /*
@@ -2192,8 +2192,8 @@ static gps_mask_t processZDA(int c UNUSED, char *field[],
     int year, mon, mday, century;
 
     if (field[1][0] == '\0' || field[2][0] == '\0' || field[3][0] == '\0'
-	|| field[4][0] == '\0') {
-	gpsd_log(&session->context->errout, LOG_WARN, "ZDA fields are empty\n");
+        || field[4][0] == '\0') {
+        gpsd_log(&session->context->errout, LOG_WARN, "ZDA fields are empty\n");
         return mask;
     }
 
@@ -2213,20 +2213,20 @@ static gps_mask_t processZDA(int c UNUSED, char *field[],
     mday = atoi(field[2]);
     century = year - year % 100;
     if ( (1900 > year ) || (2200 < year ) ) {
-	gpsd_log(&session->context->errout, LOG_WARN,
-		 "malformed ZDA year: %s\n",  field[4]);
+        gpsd_log(&session->context->errout, LOG_WARN,
+                 "malformed ZDA year: %s\n",  field[4]);
     } else if ( (1 > mon ) || (12 < mon ) ) {
-	gpsd_log(&session->context->errout, LOG_WARN,
-		 "malformed ZDA month: %s\n",  field[3]);
+        gpsd_log(&session->context->errout, LOG_WARN,
+                 "malformed ZDA month: %s\n",  field[3]);
     } else if ( (1 > mday ) || (31 < mday ) ) {
-	gpsd_log(&session->context->errout, LOG_WARN,
-		 "malformed ZDA day: %s\n",  field[2]);
+        gpsd_log(&session->context->errout, LOG_WARN,
+                 "malformed ZDA day: %s\n",  field[2]);
     } else {
-	gpsd_century_update(session, century);
-	session->nmea.date.tm_year = year - 1900;
-	session->nmea.date.tm_mon = mon - 1;
-	session->nmea.date.tm_mday = mday;
-	mask = TIME_SET;
+        gpsd_century_update(session, century);
+        session->nmea.date.tm_year = year - 1900;
+        session->nmea.date.tm_mon = mon - 1;
+        session->nmea.date.tm_mday = mday;
+        mask = TIME_SET;
     }
     return mask;
 }
@@ -2295,7 +2295,7 @@ static gps_mask_t processHDG(int c UNUSED, char *field[],
 }
 
 static gps_mask_t processHDT(int c UNUSED, char *field[],
-				struct gps_device_t *session)
+                                struct gps_device_t *session)
 {
     /*
      * $HEHDT,341.8,T*21
@@ -2331,7 +2331,7 @@ static gps_mask_t processHDT(int c UNUSED, char *field[],
 }
 
 static gps_mask_t processDBT(int c UNUSED, char *field[],
-				struct gps_device_t *session)
+                                struct gps_device_t *session)
 {
     /*
      * $SDDBT,7.7,f,2.3,M,1.3,F*05
@@ -2348,26 +2348,26 @@ static gps_mask_t processDBT(int c UNUSED, char *field[],
     gps_mask_t mask = ONLINE_SET;
 
     if (field[3][0] != '\0') {
-	session->newdata.depth = safe_atof(field[3]);
-	mask |= (ALTITUDE_SET);
+        session->newdata.depth = safe_atof(field[3]);
+        mask |= (ALTITUDE_SET);
     } else if (field[1][0] != '\0') {
-	session->newdata.depth = safe_atof(field[1]) / METERS_TO_FEET;
-	mask |= (ALTITUDE_SET);
+        session->newdata.depth = safe_atof(field[1]) / METERS_TO_FEET;
+        mask |= (ALTITUDE_SET);
     } else if (field[5][0] != '\0') {
-	session->newdata.depth = safe_atof(field[5]) / METERS_TO_FATHOMS;
-	mask |= (ALTITUDE_SET);
+        session->newdata.depth = safe_atof(field[5]) / METERS_TO_FATHOMS;
+        mask |= (ALTITUDE_SET);
     }
 
     gpsd_log(&session->context->errout, LOG_RAW,
-	     "mode %d, depth %lf.\n",
-	     session->newdata.mode,
-	     session->newdata.depth);
+             "mode %d, depth %lf.\n",
+             session->newdata.mode,
+             session->newdata.depth);
     return mask;
 }
 
 /* GPS Text message */
 static gps_mask_t processTXT(int count, char *field[],
-			     struct gps_device_t *session)
+                             struct gps_device_t *session)
 {
     /*
      * $GNTXT,01,01,01,PGRM inv format*2A
@@ -2401,29 +2401,29 @@ static gps_mask_t processTXT(int count, char *field[],
 
     switch ( msgType ) {
     case 0:
-	msgType_txt = "Error";
+        msgType_txt = "Error";
         break;
     case 1:
-	msgType_txt = "Warning";
+        msgType_txt = "Warning";
         break;
     case 2:
-	msgType_txt = "Notice";
+        msgType_txt = "Notice";
         break;
     case 7:
-	msgType_txt = "User";
+        msgType_txt = "User";
         break;
     }
 
     /* maximum text lenght unknown, guess 80 */
     gpsd_log(&session->context->errout, LOG_WARN,
-	     "TXT: %.10s: %.80s\n",
+             "TXT: %.10s: %.80s\n",
              msgType_txt, field[4]);
     return mask;
 }
 
 #ifdef TNT_ENABLE
 static gps_mask_t processTNTHTM(int c UNUSED, char *field[],
-				struct gps_device_t *session)
+                                struct gps_device_t *session)
 {
     /*
      * Proprietary sentence for True North Technologies Magnetic Compass.
@@ -2468,15 +2468,15 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[],
     mask |= (ATTITUDE_SET);
 
     gpsd_log(&session->context->errout, LOG_RAW,
-	     "time %.3f, heading %lf (%c).\n",
-	     session->newdata.time,
-	     session->gpsdata.attitude.heading,
-	     session->gpsdata.attitude.mag_st);
+             "time %.3f, heading %lf (%c).\n",
+             session->newdata.time,
+             session->gpsdata.attitude.heading,
+             session->gpsdata.attitude.mag_st);
     return mask;
 }
 
 static gps_mask_t processTNTA(int c UNUSED, char *field[],
-			      struct gps_device_t *session)
+                              struct gps_device_t *session)
 {
     /*
      * Proprietary sentence for iSync GRClok/LNRClok.
@@ -2503,30 +2503,30 @@ static gps_mask_t processTNTA(int c UNUSED, char *field[],
     gps_mask_t mask = ONLINE_SET;
 
     if (strcmp(field[3], "T4") == 0) {
-	struct oscillator_t *osc = &session->gpsdata.osc;
-	unsigned int quality = atoi(field[2]);
-	unsigned int delta = atoi(field[4]);
-	unsigned int fine = atoi(field[5]);
-	unsigned int status = atoi(field[6]);
-	char deltachar = field[4][0];
+        struct oscillator_t *osc = &session->gpsdata.osc;
+        unsigned int quality = atoi(field[2]);
+        unsigned int delta = atoi(field[4]);
+        unsigned int fine = atoi(field[5]);
+        unsigned int status = atoi(field[6]);
+        char deltachar = field[4][0];
 
-	osc->running = (quality > 0);
-	osc->reference = (deltachar && (deltachar != '?'));
-	if (osc->reference) {
-	    if (delta < 500) {
-		osc->delta = fine;
-	    } else {
-		osc->delta = ((delta < 500000000) ? delta : 1000000000 - delta);
-	    }
-	} else {
-	    osc->delta = 0;
-	}
-	osc->disciplined = ((quality == 2) && (status == 3));
-	mask |= OSCILLATOR_SET;
+        osc->running = (quality > 0);
+        osc->reference = (deltachar && (deltachar != '?'));
+        if (osc->reference) {
+            if (delta < 500) {
+                osc->delta = fine;
+            } else {
+                osc->delta = ((delta < 500000000) ? delta : 1000000000 - delta);
+            }
+        } else {
+            osc->delta = 0;
+        }
+        osc->disciplined = ((quality == 2) && (status == 3));
+        mask |= OSCILLATOR_SET;
 
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "PTNTA,T4: quality=%s, delta=%s, fine=%s, status=%s\n",
-		 field[2], field[4], field[5], field[6]);
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "PTNTA,T4: quality=%s, delta=%s, fine=%s, status=%s\n",
+                 field[2], field[4], field[5], field[6]);
     }
     return mask;
 }
@@ -2534,7 +2534,7 @@ static gps_mask_t processTNTA(int c UNUSED, char *field[],
 
 #ifdef OCEANSERVER_ENABLE
 static gps_mask_t processOHPR(int c UNUSED, char *field[],
-			      struct gps_device_t *session)
+                              struct gps_device_t *session)
 {
     /*
      * Proprietary sentence for OceanServer Magnetic Compass.
@@ -2576,7 +2576,7 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[],
     mask |= (ATTITUDE_SET);
 
     gpsd_log(&session->context->errout, LOG_RAW,
-	     "Heading %lf.\n", session->gpsdata.attitude.heading);
+             "Heading %lf.\n", session->gpsdata.attitude.heading);
     return mask;
 }
 #endif /* OCEANSERVER_ENABLE */
@@ -2594,131 +2594,131 @@ static gps_mask_t processOHPR(int c UNUSED, char *field[],
  *
  */
 static gps_mask_t processPASHR(int c UNUSED, char *field[],
-			       struct gps_device_t *session)
+                               struct gps_device_t *session)
 {
     gps_mask_t mask = ONLINE_SET;
 
     if (0 == strcmp("ACK", field[1])) {
         /* ACK */
-	gpsd_log(&session->context->errout, LOG_DATA, "PASHR,ACK\n");
-	return ONLINE_SET;
+        gpsd_log(&session->context->errout, LOG_DATA, "PASHR,ACK\n");
+        return ONLINE_SET;
     } else if (0 == strcmp("MCA", field[1])) {
         /* MCA, raw data */
-	gpsd_log(&session->context->errout, LOG_DATA, "PASHR,MCA\n");
-	return ONLINE_SET;
+        gpsd_log(&session->context->errout, LOG_DATA, "PASHR,MCA\n");
+        return ONLINE_SET;
     } else if (0 == strcmp("NAK", field[1])) {
         /* NAK */
-	gpsd_log(&session->context->errout, LOG_DATA, "PASHR,NAK\n");
-	return ONLINE_SET;
+        gpsd_log(&session->context->errout, LOG_DATA, "PASHR,NAK\n");
+        return ONLINE_SET;
     } else if (0 == strcmp("PBN", field[1])) {
         /* PBN, position data */
         /* FIXME: decode this for ECEF */
-	gpsd_log(&session->context->errout, LOG_DATA, "PASHR,PBN\n");
-	return ONLINE_SET;
-    } else if (0 == strcmp("POS", field[1])) {	/* 3D Position */
-	/* $PASHR,POS,
+        gpsd_log(&session->context->errout, LOG_DATA, "PASHR,PBN\n");
+        return ONLINE_SET;
+    } else if (0 == strcmp("POS", field[1])) {  /* 3D Position */
+        /* $PASHR,POS,
          *
-	 * 2: position type:
-	 *	0 = autonomous
-	 *	1 = position differentially corrected with RTCM code
-	 *	2 = position differentially corrected with CPD float solution
-	 *	3 = position is CPD fixed solution
-	 */
-	mask |= MODE_SET | STATUS_SET | CLEAR_IS;
-	if (0 == strlen(field[2])) {
-	    /* empty first field means no 3D fix is available */
-	    session->gpsdata.status = STATUS_NO_FIX;
-	    session->newdata.mode = MODE_NO_FIX;
-	} else {
+         * 2: position type:
+         *      0 = autonomous
+         *      1 = position differentially corrected with RTCM code
+         *      2 = position differentially corrected with CPD float solution
+         *      3 = position is CPD fixed solution
+         */
+        mask |= MODE_SET | STATUS_SET | CLEAR_IS;
+        if (0 == strlen(field[2])) {
+            /* empty first field means no 3D fix is available */
+            session->gpsdata.status = STATUS_NO_FIX;
+            session->newdata.mode = MODE_NO_FIX;
+        } else {
             int satellites_used;
 
-	    /* if we make it this far, we at least have a 3D fix */
-	    session->newdata.mode = MODE_3D;
-	    if (1 <= atoi(field[2]))
-		session->gpsdata.status = STATUS_DGPS_FIX;
-	    else
-		session->gpsdata.status = STATUS_FIX;
+            /* if we make it this far, we at least have a 3D fix */
+            session->newdata.mode = MODE_3D;
+            if (1 <= atoi(field[2]))
+                session->gpsdata.status = STATUS_DGPS_FIX;
+            else
+                session->gpsdata.status = STATUS_FIX;
 
-	    /* don't use as this breaks the GPGSV counter
+            /* don't use as this breaks the GPGSV counter
              * session->gpsdata.satellites_used = atoi(field[3]);  */
-	    satellites_used = atoi(field[3]);
-	    if (0 == merge_hhmmss(field[4], session)) {
-		register_fractional_time(field[0], field[4], session);
-		mask |= TIME_SET;
+            satellites_used = atoi(field[3]);
+            if (0 == merge_hhmmss(field[4], session)) {
+                register_fractional_time(field[0], field[4], session);
+                mask |= TIME_SET;
             }
-	    if (0 == do_lat_lon(&field[5], &session->newdata)) {
-		mask |= LATLON_SET;
-		if ('\0' != field[9][0]) {
+            if (0 == do_lat_lon(&field[5], &session->newdata)) {
+                mask |= LATLON_SET;
+                if ('\0' != field[9][0]) {
                     /* altitude is already WGS 84 */
-		    session->newdata.altHAE = safe_atof(field[9]);
-		    mask |= ALTITUDE_SET;
+                    session->newdata.altHAE = safe_atof(field[9]);
+                    mask |= ALTITUDE_SET;
                 }
             }
-	    session->newdata.track = safe_atof(field[11]);
-	    session->newdata.speed = safe_atof(field[12]) / MPS_TO_KPH;
-	    session->newdata.climb = safe_atof(field[13]);
-	    session->gpsdata.dop.pdop = safe_atof(field[14]);
-	    session->gpsdata.dop.hdop = safe_atof(field[15]);
-	    session->gpsdata.dop.vdop = safe_atof(field[16]);
-	    session->gpsdata.dop.tdop = safe_atof(field[17]);
-	    mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
-	    mask |= DOP_SET;
-	    gpsd_log(&session->context->errout, LOG_DATA,
-		     "PASHR,POS: hhmmss=%s lat=%.2f lon=%.2f altHAE=%.f"
+            session->newdata.track = safe_atof(field[11]);
+            session->newdata.speed = safe_atof(field[12]) / MPS_TO_KPH;
+            session->newdata.climb = safe_atof(field[13]);
+            session->gpsdata.dop.pdop = safe_atof(field[14]);
+            session->gpsdata.dop.hdop = safe_atof(field[15]);
+            session->gpsdata.dop.vdop = safe_atof(field[16]);
+            session->gpsdata.dop.tdop = safe_atof(field[17]);
+            mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
+            mask |= DOP_SET;
+            gpsd_log(&session->context->errout, LOG_DATA,
+                     "PASHR,POS: hhmmss=%s lat=%.2f lon=%.2f altHAE=%.f"
                      " speed=%.2f track=%.2f climb=%.2f mode=%d status=%d"
                      " pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f used=%d\n",
-		     field[4], session->newdata.latitude,
-		     session->newdata.longitude, session->newdata.altHAE,
-		     session->newdata.speed, session->newdata.track,
-		     session->newdata.climb, session->newdata.mode,
-		     session->gpsdata.status, session->gpsdata.dop.pdop,
-		     session->gpsdata.dop.hdop, session->gpsdata.dop.vdop,
-		     session->gpsdata.dop.tdop, satellites_used);
-	}
-    } else if (0 == strcmp("RID", field[1])) {	/* Receiver ID */
-	(void)snprintf(session->subtype, sizeof(session->subtype) - 1,
-		       "%s ver %s", field[2], field[3]);
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "PASHR,RID: subtype=%s mask={}\n",
-		 session->subtype);
-	return mask;
-    } else if (0 == strcmp("SAT", field[1])) {	/* Satellite Status */
-	struct satellite_t *sp;
-	int i, n = session->gpsdata.satellites_visible = atoi(field[2]);
-	session->gpsdata.satellites_used = 0;
-	for (i = 0, sp = session->gpsdata.skyview;
+                     field[4], session->newdata.latitude,
+                     session->newdata.longitude, session->newdata.altHAE,
+                     session->newdata.speed, session->newdata.track,
+                     session->newdata.climb, session->newdata.mode,
+                     session->gpsdata.status, session->gpsdata.dop.pdop,
+                     session->gpsdata.dop.hdop, session->gpsdata.dop.vdop,
+                     session->gpsdata.dop.tdop, satellites_used);
+        }
+    } else if (0 == strcmp("RID", field[1])) {  /* Receiver ID */
+        (void)snprintf(session->subtype, sizeof(session->subtype) - 1,
+                       "%s ver %s", field[2], field[3]);
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "PASHR,RID: subtype=%s mask={}\n",
+                 session->subtype);
+        return mask;
+    } else if (0 == strcmp("SAT", field[1])) {  /* Satellite Status */
+        struct satellite_t *sp;
+        int i, n = session->gpsdata.satellites_visible = atoi(field[2]);
+        session->gpsdata.satellites_used = 0;
+        for (i = 0, sp = session->gpsdata.skyview;
             sp < session->gpsdata.skyview + n; sp++, i++) {
 
-	    sp->PRN = (short)atoi(field[3 + i * 5 + 0]);
-	    sp->azimuth = (double)atoi(field[3 + i * 5 + 1]);
-	    sp->elevation = (double)atoi(field[3 + i * 5 + 2]);
-	    sp->ss = safe_atof(field[3 + i * 5 + 3]);
-	    sp->used = false;
-	    if (field[3 + i * 5 + 4][0] == 'U') {
-		sp->used = true;
-		session->gpsdata.satellites_used++;
-	    }
-	}
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "PASHR,SAT: used=%d\n",
-		 session->gpsdata.satellites_used);
-	session->gpsdata.skyview_time = NAN;
-	mask |= SATELLITE_SET | USED_IS;
+            sp->PRN = (short)atoi(field[3 + i * 5 + 0]);
+            sp->azimuth = (double)atoi(field[3 + i * 5 + 1]);
+            sp->elevation = (double)atoi(field[3 + i * 5 + 2]);
+            sp->ss = safe_atof(field[3 + i * 5 + 3]);
+            sp->used = false;
+            if (field[3 + i * 5 + 4][0] == 'U') {
+                sp->used = true;
+                session->gpsdata.satellites_used++;
+            }
+        }
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "PASHR,SAT: used=%d\n",
+                 session->gpsdata.satellites_used);
+        session->gpsdata.skyview_time = NAN;
+        mask |= SATELLITE_SET | USED_IS;
 
     } else if (0 == strcmp("T", field[3])) { /* Assume OxTS PASHR */
-	/* FIXME: decode OxTS $PASHDR, time is wrong, breaks cycle order */
-	if (0 == merge_hhmmss(field[1], session)) {
-	    register_fractional_time(field[0], field[1], session);
-	    /* mask |= TIME_SET; confuses cycle order */
+        /* FIXME: decode OxTS $PASHDR, time is wrong, breaks cycle order */
+        if (0 == merge_hhmmss(field[1], session)) {
+            register_fractional_time(field[0], field[1], session);
+            /* mask |= TIME_SET; confuses cycle order */
         }
-	session->gpsdata.attitude.heading = safe_atof(field[2]);
-	session->gpsdata.attitude.roll = safe_atof(field[4]);
-	session->gpsdata.attitude.pitch = safe_atof(field[5]);
-	/* mask |= ATTITUDE_SET;  * confuses cycle order ?? */
-	gpsd_log(&session->context->errout, LOG_RAW,
-	    "PASHR (OxTS) time %.3f, heading %lf.\n",
-	    session->newdata.time,
-	    session->gpsdata.attitude.heading);
+        session->gpsdata.attitude.heading = safe_atof(field[2]);
+        session->gpsdata.attitude.roll = safe_atof(field[4]);
+        session->gpsdata.attitude.pitch = safe_atof(field[5]);
+        /* mask |= ATTITUDE_SET;  * confuses cycle order ?? */
+        gpsd_log(&session->context->errout, LOG_RAW,
+            "PASHR (OxTS) time %.3f, heading %lf.\n",
+            session->newdata.time,
+            session->gpsdata.attitude.heading);
     }
     return mask;
 }
@@ -2726,43 +2726,43 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 
 #ifdef MTK3301_ENABLE
 static gps_mask_t processMTK3301(int c UNUSED, char *field[],
-			       struct gps_device_t *session)
+                               struct gps_device_t *session)
 {
     int msg, reason;
 
     msg = atoi(&(session->nmea.field[0])[4]);
     switch (msg) {
-    case 001:			/* ACK / NACK */
-	reason = atoi(field[2]);
-	if (atoi(field[1]) == -1)
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "MTK NACK: unknown sentence\n");
-	else if (reason < 3) {
-	    const char *mtk_reasons[] = {
-		"Invalid",
-		"Unsupported",
-		"Valid but Failed",
-		"Valid success"
-	    };
-	    gpsd_log(&session->context->errout, LOG_WARN,
-		     "MTK NACK: %s, reason: %s\n",
-		     field[1], mtk_reasons[reason]);
-	}
-	else
-	    gpsd_log(&session->context->errout, LOG_DATA,
-		     "MTK ACK: %s\n", field[1]);
-	return ONLINE_SET;
-    case 424:			/* PPS pulse width response */
-	/*
-	 * Response will look something like: $PMTK424,0,0,1,0,69*12
-	 * The pulse width is in field 5 (69 in this example).  This
-	 * sentence is poorly documented at:
-	 * http://www.trimble.com/embeddedsystems/condor-gps-module.aspx?dtID=documentation
-	 *
-	 * Packet Type: 324 PMTK_API_SET_OUTPUT_CTL
-	 * Packet meaning
-	 * Write the TSIP / antenna / PPS configuration data to the Flash memory.
-	 * DataField [Data0]:TSIP Packet[on/off]
+    case 001:                   /* ACK / NACK */
+        reason = atoi(field[2]);
+        if (atoi(field[1]) == -1)
+            gpsd_log(&session->context->errout, LOG_WARN,
+                     "MTK NACK: unknown sentence\n");
+        else if (reason < 3) {
+            const char *mtk_reasons[] = {
+                "Invalid",
+                "Unsupported",
+                "Valid but Failed",
+                "Valid success"
+            };
+            gpsd_log(&session->context->errout, LOG_WARN,
+                     "MTK NACK: %s, reason: %s\n",
+                     field[1], mtk_reasons[reason]);
+        }
+        else
+            gpsd_log(&session->context->errout, LOG_DATA,
+                     "MTK ACK: %s\n", field[1]);
+        return ONLINE_SET;
+    case 424:                   /* PPS pulse width response */
+        /*
+         * Response will look something like: $PMTK424,0,0,1,0,69*12
+         * The pulse width is in field 5 (69 in this example).  This
+         * sentence is poorly documented at:
+         * http://www.trimble.com/embeddedsystems/condor-gps-module.aspx?dtID=documentation
+         *
+         * Packet Type: 324 PMTK_API_SET_OUTPUT_CTL
+         * Packet meaning
+         * Write the TSIP / antenna / PPS configuration data to the Flash memory.
+         * DataField [Data0]:TSIP Packet[on/off]
          * 0 - Disable TSIP output (Default).
          * 1 - Enable TSIP output.
          * [Data1]:Antenna Detect[on/off]
@@ -2776,44 +2776,44 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
          * 1 - Only output PPS when GPS position is fixed.
          * [Data4]:PPS pulse width
          * 1~16367999: 61 ns~(61x 16367999) ns (Default = 69)
-	 *
-	 * The documentation does not give the units of the data field.
-	 * Andy Walls <andy@silverblocksystems.net> says:
-	 *
-	 * "The best I can figure using an oscilloscope, is that it is
-	 * in units of 16.368000 MHz clock cycles.  It may be
-	 * different for any other unit other than the Trimble
-	 * Condor. 69 cycles / 16368000 cycles/sec = 4.216 microseconds
-	 * [which is the pulse width I have observed]"
-	 *
-	 * Support for this theory comes from the fact that crystal
-	 * TXCOs with a 16.368MHZ period are commonly available from
-	 * multiple vendors. Furthermore, 61*69 = 4209, which is
-	 * close to the observed cycle time and suggests that the
-	 * documentation is trying to indicate 61ns units.
-	 *
-	 * He continues:
-	 *
-	 * "I chose [127875] because to divides 16368000 nicely and the
-	 * pulse width is close to 1/100th of a second.  Any number
-	 * the user wants to use would be fine.  127875 cycles /
-	 * 16368000 cycles/second = 1/128 seconds = 7.8125
-	 * milliseconds"
-	 */
+         *
+         * The documentation does not give the units of the data field.
+         * Andy Walls <andy@silverblocksystems.net> says:
+         *
+         * "The best I can figure using an oscilloscope, is that it is
+         * in units of 16.368000 MHz clock cycles.  It may be
+         * different for any other unit other than the Trimble
+         * Condor. 69 cycles / 16368000 cycles/sec = 4.216 microseconds
+         * [which is the pulse width I have observed]"
+         *
+         * Support for this theory comes from the fact that crystal
+         * TXCOs with a 16.368MHZ period are commonly available from
+         * multiple vendors. Furthermore, 61*69 = 4209, which is
+         * close to the observed cycle time and suggests that the
+         * documentation is trying to indicate 61ns units.
+         *
+         * He continues:
+         *
+         * "I chose [127875] because to divides 16368000 nicely and the
+         * pulse width is close to 1/100th of a second.  Any number
+         * the user wants to use would be fine.  127875 cycles /
+         * 16368000 cycles/second = 1/128 seconds = 7.8125
+         * milliseconds"
+         */
 
-	/* too short?  Make it longer */
-	if (atoi(field[5]) < 127875)
-	    (void)nmea_send(session, "$PMTK324,0,0,1,0,127875");
-	return ONLINE_SET;
-    case 705:			/* return device subtype */
-	(void)strlcat(session->subtype, field[1], sizeof(session->subtype));
-	(void)strlcat(session->subtype, "-", sizeof(session->subtype));
-	(void)strlcat(session->subtype, field[2], sizeof(session->subtype));
-	return ONLINE_SET;
+        /* too short?  Make it longer */
+        if (atoi(field[5]) < 127875)
+            (void)nmea_send(session, "$PMTK324,0,0,1,0,127875");
+        return ONLINE_SET;
+    case 705:                   /* return device subtype */
+        (void)strlcat(session->subtype, field[1], sizeof(session->subtype));
+        (void)strlcat(session->subtype, "-", sizeof(session->subtype));
+        (void)strlcat(session->subtype, field[2], sizeof(session->subtype));
+        return ONLINE_SET;
     default:
-	gpsd_log(&session->context->errout, LOG_PROG,
-	     "MTK: unknown msg: %d\n", msg);
-	return ONLINE_SET;		/* ignore */
+        gpsd_log(&session->context->errout, LOG_PROG,
+             "MTK: unknown msg: %d\n", msg);
+        return ONLINE_SET;              /* ignore */
     }
 }
 #endif /* MTK3301_ENABLE */
@@ -2822,7 +2822,7 @@ static gps_mask_t processMTK3301(int c UNUSED, char *field[],
 
 /*  Recommended Minimum 3D GNSS Data */
 static gps_mask_t processPSTI030(int count, char *field[],
-			        struct gps_device_t *session)
+                                struct gps_device_t *session)
 {
     /*
      * $PSTI,030,hhmmss.sss,A,dddmm.mmmmmmm,a,dddmm.mmmmmmm,a,x.x,x.x,x.x,x.x,ddmmyy,a.x.x,x.x*hh<CR><LF>
@@ -2849,64 +2849,64 @@ static gps_mask_t processPSTI030(int count, char *field[],
     gps_mask_t mask = ONLINE_SET;
 
     if ( 16 != count )
-	    return mask;
+            return mask;
 
     if ('V' == field[3][0] ||
         'N' == field[13][0]) {
         /* nav warning, or FAA not valid, ignore the rest of the data */
-	session->gpsdata.status = STATUS_NO_FIX;
-	session->newdata.mode = MODE_NO_FIX;
-	mask |= MODE_SET;
+        session->gpsdata.status = STATUS_NO_FIX;
+        session->newdata.mode = MODE_NO_FIX;
+        mask |= MODE_SET;
     } else if ('A' == field[3][0]) {
-	double east, north, climb;
+        double east, north, climb;
 
         /* data valid */
-	if (field[2][0] != '\0' && field[12][0] != '\0') {
-	    /* good date and time */
-	    if (0 == merge_hhmmss(field[2], session) &&
-	        0 == merge_ddmmyy(field[12], session)) {
-		mask |= TIME_SET;
-		register_fractional_time( "PSTI030", field[2], session);
+        if (field[2][0] != '\0' && field[12][0] != '\0') {
+            /* good date and time */
+            if (0 == merge_hhmmss(field[2], session) &&
+                0 == merge_ddmmyy(field[12], session)) {
+                mask |= TIME_SET;
+                register_fractional_time( "PSTI030", field[2], session);
             }
-	}
-	if (0 == do_lat_lon(&field[4], &session->newdata)) {
-	    session->newdata.mode = MODE_2D;
-	    mask |= LATLON_SET;
-	    if ('\0' != field[8][0]) {
+        }
+        if (0 == do_lat_lon(&field[4], &session->newdata)) {
+            session->newdata.mode = MODE_2D;
+            mask |= LATLON_SET;
+            if ('\0' != field[8][0]) {
                 /* altitude is MSL */
-		session->newdata.altMSL = safe_atof(field[8]);
-		mask |= ALTITUDE_SET;
-		session->newdata.mode = MODE_3D;
-		/* Let gpsd_error_model() deal with geoid_sep and altHAE */
+                session->newdata.altMSL = safe_atof(field[8]);
+                mask |= ALTITUDE_SET;
+                session->newdata.mode = MODE_3D;
+                /* Let gpsd_error_model() deal with geoid_sep and altHAE */
             }
-	    mask |= MODE_SET;
-	}
-	/* convert ENU to track */
-	/* this has more precision than GPVTG, GPVTG comes earlier
-	 * in the cycle */
-	east = safe_atof(field[9]);     /* east velocity m/s */
-	north = safe_atof(field[10]);   /* north velocity m/s */
-	/* up velocity m/s */
-	climb = safe_atof(field[11]);
+            mask |= MODE_SET;
+        }
+        /* convert ENU to track */
+        /* this has more precision than GPVTG, GPVTG comes earlier
+         * in the cycle */
+        east = safe_atof(field[9]);     /* east velocity m/s */
+        north = safe_atof(field[10]);   /* north velocity m/s */
+        /* up velocity m/s */
+        climb = safe_atof(field[11]);
 
-	session->newdata.NED.velN = north;
-	session->newdata.NED.velE = east;
-	session->newdata.NED.velD = -climb;
+        session->newdata.NED.velN = north;
+        session->newdata.NED.velE = east;
+        session->newdata.NED.velD = -climb;
 
         mask |= VNED_SET;
 
-	session->gpsdata.status = faa_mode(field[13][0]);
-	/* Ignore RTK Age and RTK Ratio, for now */
+        session->gpsdata.status = faa_mode(field[13][0]);
+        /* Ignore RTK Age and RTK Ratio, for now */
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "PSTI,030: ddmmyy=%s hhmmss=%s lat=%.2f lon=%.2f "
-	     "status=%d, RTK(Age=%s Ratio=%s)\n",
-	     field[12], field[2],
-	     session->newdata.latitude,
-	     session->newdata.longitude,
-	     session->gpsdata.status,
-	     field[14], field[15]);
+             "PSTI,030: ddmmyy=%s hhmmss=%s lat=%.2f lon=%.2f "
+             "status=%d, RTK(Age=%s Ratio=%s)\n",
+             field[12], field[2],
+             session->newdata.latitude,
+             session->newdata.longitude,
+             session->gpsdata.status,
+             field[14], field[15]);
     return mask;
 }
 
@@ -2920,65 +2920,65 @@ static gps_mask_t processPSTI030(int count, char *field[],
  *
  */
 static gps_mask_t processPSTI(int count, char *field[],
-			      struct gps_device_t *session)
+                              struct gps_device_t *session)
 {
     gps_mask_t mask = ONLINE_SET;
 
     if ( 0 != strncmp(session->subtype, "Skytraq", 7) ) {
-	/* this is skytraq, but not marked yet, so probe for Skytraq */
-	(void)gpsd_write(session, "\xA0\xA1\x00\x02\x02\x01\x03\x0d\x0a",9);
+        /* this is skytraq, but not marked yet, so probe for Skytraq */
+        (void)gpsd_write(session, "\xA0\xA1\x00\x02\x02\x01\x03\x0d\x0a",9);
     }
 
     if (0 == strcmp("00", field[1]) ) {
-	if ( 4 != count )
-		return mask;
-	/* 1 PPS Timing report ID */
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "PSTI,00: Mode: %s, Length: %s, Quant: %s\n",
-		field[2], field[3], field[4]);
-	return mask;
+        if ( 4 != count )
+                return mask;
+        /* 1 PPS Timing report ID */
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "PSTI,00: Mode: %s, Length: %s, Quant: %s\n",
+                field[2], field[3], field[4]);
+        return mask;
     }
     if (0 == strcmp("001", field[1])) {
-	/* Active Antenna Status Report */
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "PSTI,001: Count: %d\n", count);
-	return mask;
+        /* Active Antenna Status Report */
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "PSTI,001: Count: %d\n", count);
+        return mask;
     }
     if (0 == strcmp("005", field[1])) {
-	/* GPIO 10 event-triggered time & position stamp. */
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "PSTI,005: Count: %d\n", count);
-	return mask;
+        /* GPIO 10 event-triggered time & position stamp. */
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "PSTI,005: Count: %d\n", count);
+        return mask;
     }
     if (0 == strcmp("030", field[1])) {
-	/*  Recommended Minimum 3D GNSS Data */
-	return processPSTI030(count, field, session);
+        /*  Recommended Minimum 3D GNSS Data */
+        return processPSTI030(count, field, session);
     }
     if (0 == strcmp("032", field[1])) {
 
-	if ( 16 != count )
-		return mask;
-	/* RTK Baseline */
-	if ( 0 == strcmp(field[4], "A")) {
-	    /* Status Valid */
-	    if (field[2][0] != '\0' && field[3][0] != '\0') {
-		/* good date and time */
-		if (0 == merge_hhmmss(field[2], session) &&
-		    0 == merge_ddmmyy(field[3], session)) {
-		    mask |= TIME_SET;
-		    register_fractional_time( "PSTI032", field[2], session);
+        if ( 16 != count )
+                return mask;
+        /* RTK Baseline */
+        if ( 0 == strcmp(field[4], "A")) {
+            /* Status Valid */
+            if (field[2][0] != '\0' && field[3][0] != '\0') {
+                /* good date and time */
+                if (0 == merge_hhmmss(field[2], session) &&
+                    0 == merge_ddmmyy(field[3], session)) {
+                    mask |= TIME_SET;
+                    register_fractional_time( "PSTI032", field[2], session);
                 }
-	    }
-	}
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "PSTI,032: stat:%s mode: %s E: %s N: %s U:%s L:%s C:%s\n",
-		field[4], field[5],
-		field[6], field[7], field[8],
-		field[9], field[10]);
-	return mask;
+            }
+        }
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "PSTI,032: stat:%s mode: %s E: %s N: %s U:%s L:%s C:%s\n",
+                field[4], field[5],
+                field[6], field[7], field[8],
+                field[9], field[10]);
+        return mask;
     }
     gpsd_log(&session->context->errout, LOG_DATA,
-		 "PSTI,%s: Unknown type, Count: %d\n", field[1], count);
+                 "PSTI,%s: Unknown type, Count: %d\n", field[1], count);
 
     return mask;
 }
@@ -2990,23 +2990,23 @@ static gps_mask_t processPSTI(int count, char *field[],
  * Note: NO checksum
  */
 static gps_mask_t processSTI(int count, char *field[],
-			     struct gps_device_t *session)
+                             struct gps_device_t *session)
 {
     gps_mask_t mask = ONLINE_SET;
 
     if ( 0 != strncmp(session->subtype, "Skytraq", 7) ) {
-	/* this is skytraq, but marked yet, so probe for Skytraq */
-	(void)gpsd_write(session, "\xA0\xA1\x00\x02\x02\x01\x03\x0d\x0a",9);
+        /* this is skytraq, but marked yet, so probe for Skytraq */
+        (void)gpsd_write(session, "\xA0\xA1\x00\x02\x02\x01\x03\x0d\x0a",9);
     }
 
     if ( 0 == strcmp( field[1], "IC") ) {
-	/* $STI,IC,error=XX, this is always very bad, but undocumented */
-	gpsd_log(&session->context->errout, LOG_ERROR,
-		     "Skytraq: $STI,%s,%s\n", field[1], field[2]);
+        /* $STI,IC,error=XX, this is always very bad, but undocumented */
+        gpsd_log(&session->context->errout, LOG_ERROR,
+                     "Skytraq: $STI,%s,%s\n", field[1], field[2]);
         return mask;
     }
     gpsd_log(&session->context->errout, LOG_DATA,
-		 "STI,%s: Unknown type, Count: %d\n", field[1], count);
+                 "STI,%s: Unknown type, Count: %d\n", field[1], count);
 
     return mask;
 }
@@ -3022,104 +3022,104 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 /* parse an NMEA sentence, unpack it into a session structure */
 {
     typedef gps_mask_t(*nmea_decoder) (int count, char *f[],
-				       struct gps_device_t * session);
+                                       struct gps_device_t * session);
     static struct
     {
-	char *name;
-	int nf;			/* minimum number of fields required to parse */
-	bool cycle_continue;	/* cycle continuer? */
-	nmea_decoder decoder;
+        char *name;
+        int nf;                 /* minimum number of fields required to parse */
+        bool cycle_continue;    /* cycle continuer? */
+        nmea_decoder decoder;
     } nmea_phrase[] = {
-	{"PGRMB", 0,  false, NULL},	/* ignore Garmin DGPS Beacon Info */
-	{"PGRMC", 0,  false, NULL},	/* ignore Garmin Sensor Config */
-	{"PGRME", 7,  false, processPGRME},
-	{"PGRMF", 15, false, processPGRMF},	/* Garmin GPS Fix Data */
-	{"PGRMH", 0,  false, NULL},	/* ignore Garmin Aviation Height... */
-	{"PGRMI", 0,  false, NULL},	/* ignore Garmin Sensor Init */
-	{"PGRMM", 2,  false, processPGRMM},	/* Garmin Map Datum */
-	{"PGRMO", 0,  false, NULL},	/* ignore Garmin Sentence Enable */
-	{"PGRMT", 0,  false, NULL},	/* ignore Garmin Sensor Info */
-	{"PGRMV", 0,  false, NULL},	/* ignore Garmin 3D Velocity Info */
-	{"PGRMZ", 4,  false, processPGRMZ},
-	    /*
-	     * Basic sentences must come after the PG* ones, otherwise
-	     * Garmins can get stuck in a loop that looks like this:
-	     *
-	     * 1. A Garmin GPS in NMEA mode is detected.
-	     *
-	     * 2. PGRMC is sent to reconfigure to Garmin binary mode.
-	     *    If successful, the GPS echoes the phrase.
-	     *
-	     * 3. nmea_parse() sees the echo as RMC because the talker
-	     *    ID is ignored, and fails to recognize the echo as
-	     *    PGRMC and ignore it.
-	     *
-	     * 4. The mode is changed back to NMEA, resulting in an
-	     *    infinite loop.
-	     */
-	{"AAM", 0,  false, NULL},    /* ignore Waypoint Arrival Alarm  */
-	{"APB", 0,  false, NULL},    /* ignore Autopilot Sentence B  */
-	{"BOD", 0,  false, NULL},    /* ignore Bearing Origin to Destination  */
+        {"PGRMB", 0,  false, NULL},     /* ignore Garmin DGPS Beacon Info */
+        {"PGRMC", 0,  false, NULL},     /* ignore Garmin Sensor Config */
+        {"PGRME", 7,  false, processPGRME},
+        {"PGRMF", 15, false, processPGRMF},     /* Garmin GPS Fix Data */
+        {"PGRMH", 0,  false, NULL},     /* ignore Garmin Aviation Height... */
+        {"PGRMI", 0,  false, NULL},     /* ignore Garmin Sensor Init */
+        {"PGRMM", 2,  false, processPGRMM},     /* Garmin Map Datum */
+        {"PGRMO", 0,  false, NULL},     /* ignore Garmin Sentence Enable */
+        {"PGRMT", 0,  false, NULL},     /* ignore Garmin Sensor Info */
+        {"PGRMV", 0,  false, NULL},     /* ignore Garmin 3D Velocity Info */
+        {"PGRMZ", 4,  false, processPGRMZ},
+            /*
+             * Basic sentences must come after the PG* ones, otherwise
+             * Garmins can get stuck in a loop that looks like this:
+             *
+             * 1. A Garmin GPS in NMEA mode is detected.
+             *
+             * 2. PGRMC is sent to reconfigure to Garmin binary mode.
+             *    If successful, the GPS echoes the phrase.
+             *
+             * 3. nmea_parse() sees the echo as RMC because the talker
+             *    ID is ignored, and fails to recognize the echo as
+             *    PGRMC and ignore it.
+             *
+             * 4. The mode is changed back to NMEA, resulting in an
+             *    infinite loop.
+             */
+        {"AAM", 0,  false, NULL},    /* ignore Waypoint Arrival Alarm  */
+        {"APB", 0,  false, NULL},    /* ignore Autopilot Sentence B  */
+        {"BOD", 0,  false, NULL},    /* ignore Bearing Origin to Destination  */
         /* ignore Bearing & Distance to Waypoint, Great Circle*/
-	{"BWC", 0,  false, NULL},
-	{"DBT", 7,  true,  processDBT},
-	{"DPT", 0,  false, NULL},       /* ignore depth  */
-	{"DTM", 2,  false, processDTM},	/* datum */
-	{"GBS", 7,  false, processGBS},
-	{"GGA", 13, false, processGGA},
-	{"GLC", 0,  false, NULL},       /* ignore Geographic Position, LoranC */
-	{"GLL", 7,  false, processGLL},
-	{"GNS", 13, false, processGNS},
-	{"GRS", 0,  false, NULL},	/* ignore GNSS Range Residuals */
-	{"GSA", 18, false, processGSA},
-	{"GST", 8,  false, processGST},
-	{"GSV", 0,  false, processGSV},
+        {"BWC", 0,  false, NULL},
+        {"DBT", 7,  true,  processDBT},
+        {"DPT", 0,  false, NULL},       /* ignore depth  */
+        {"DTM", 2,  false, processDTM}, /* datum */
+        {"GBS", 7,  false, processGBS},
+        {"GGA", 13, false, processGGA},
+        {"GLC", 0,  false, NULL},       /* ignore Geographic Position, LoranC */
+        {"GLL", 7,  false, processGLL},
+        {"GNS", 13, false, processGNS},
+        {"GRS", 0,  false, NULL},       /* ignore GNSS Range Residuals */
+        {"GSA", 18, false, processGSA},
+        {"GST", 8,  false, processGST},
+        {"GSV", 0,  false, processGSV},
         /* ignore Heading, Deviation and Variation */
-	{"HDG", 0,  false, processHDG},
+        {"HDG", 0,  false, processHDG},
         {"HDT", 1,  false, processHDT},
-	{"MSS", 0,  false, NULL},       /* ignore beacon receiver status */
-	{"MTW", 0,  false, NULL},       /* ignore Water Temperature */
-	{"MWD", 0,  false, NULL},       /* ignore Wind Direction and Speed */
-	{"MWV", 0,  false, NULL},       /* ignore Wind Speed and Angle */
+        {"MSS", 0,  false, NULL},       /* ignore beacon receiver status */
+        {"MTW", 0,  false, NULL},       /* ignore Water Temperature */
+        {"MWD", 0,  false, NULL},       /* ignore Wind Direction and Speed */
+        {"MWV", 0,  false, NULL},       /* ignore Wind Speed and Angle */
 #ifdef OCEANSERVER_ENABLE
-	{"OHPR", 18, false, processOHPR},
+        {"OHPR", 18, false, processOHPR},
 #endif /* OCEANSERVER_ENABLE */
 #ifdef ASHTECH_ENABLE
         /* general handler for Ashtech */
-	{"PASHR", 3, false, processPASHR},
+        {"PASHR", 3, false, processPASHR},
 #endif /* ASHTECH_ENABLE */
-	{"PMGNST", 8, false, processPMGNST},	/* Magellan Status */
+        {"PMGNST", 8, false, processPMGNST},    /* Magellan Status */
 #ifdef MTK3301_ENABLE
-	{"PMTK", 3,  false, processMTK3301},
+        {"PMTK", 3,  false, processMTK3301},
         /* for some reason the parser no longer triggering on leading chars */
-	{"PMTK001", 3,  false, processMTK3301},
-	{"PMTK424", 3,  false, processMTK3301},
-	{"PMTK705", 3,  false, processMTK3301},
-	{"PMTKCHN", 0, false, NULL},	/* ignore MediaTek Channel Status */
+        {"PMTK001", 3,  false, processMTK3301},
+        {"PMTK424", 3,  false, processMTK3301},
+        {"PMTK705", 3,  false, processMTK3301},
+        {"PMTKCHN", 0, false, NULL},    /* ignore MediaTek Channel Status */
 #endif /* MTK3301_ENABLE */
-	{"PRWIZCH", 0, false, NULL},	/* ignore Rockwell Channel Status */
-	{"PSRFEPE", 7, false, processPSRFEPE},	/* SiRF Estimated Errors */
-	{"PTFTTXT", 0, false, NULL},	/* ignore unknown uptime */
-	{"PUBX", 0, false, NULL},	/* ignore u-blox Antaris */
+        {"PRWIZCH", 0, false, NULL},    /* ignore Rockwell Channel Status */
+        {"PSRFEPE", 7, false, processPSRFEPE},  /* SiRF Estimated Errors */
+        {"PTFTTXT", 0, false, NULL},    /* ignore unknown uptime */
+        {"PUBX", 0, false, NULL},       /* ignore u-blox Antaris */
 #ifdef TNT_ENABLE
-	{"PTNTHTM", 9, false, processTNTHTM},
-	{"PTNTA", 8, false, processTNTA},
+        {"PTNTHTM", 9, false, processTNTHTM},
+        {"PTNTA", 8, false, processTNTA},
 #endif /* TNT_ENABLE */
 #ifdef SKYTRAQ_ENABLE
-	{"PSTI", 2, false, processPSTI},	/* $PSTI Skytraq */
-	{"STI", 2, false, processSTI},		/* $STI  Skytraq */
+        {"PSTI", 2, false, processPSTI},        /* $PSTI Skytraq */
+        {"STI", 2, false, processSTI},          /* $STI  Skytraq */
 #endif /* SKYTRAQ_ENABLE */
         /* ignore Recommended Minimum Navigation Info, waypoint */
-	{"RMB", 0,  false, NULL},
-	{"RMC", 8,  false, processRMC},
-	{"RTE", 0,  false, NULL},	/* ignore Routes */
-	{"TXT", 5,  false, processTXT},
-	{"VHW", 0,  false, NULL},	/* ignore Water Speed and Heading */
-	{"VLW", 0,  false, NULL},	/* ignore Dual ground/water distance */
-	{"VTG", 5,  false, processVTG},
-	{"XDR", 0,  false, NULL},	/* ignore $HCXDR, IMU? */
-	{"XTE", 0,  false, NULL},	/* ignore Cross-Track Error */
-	{"ZDA", 4,  false, processZDA},
+        {"RMB", 0,  false, NULL},
+        {"RMC", 8,  false, processRMC},
+        {"RTE", 0,  false, NULL},       /* ignore Routes */
+        {"TXT", 5,  false, processTXT},
+        {"VHW", 0,  false, NULL},       /* ignore Water Speed and Heading */
+        {"VLW", 0,  false, NULL},       /* ignore Dual ground/water distance */
+        {"VTG", 5,  false, processVTG},
+        {"XDR", 0,  false, NULL},       /* ignore $HCXDR, IMU? */
+        {"XTE", 0,  false, NULL},       /* ignore Cross-Track Error */
+        {"ZDA", 4,  false, processZDA},
     };
 
     int count;
@@ -3142,10 +3142,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
      * packets.  This may be a generic bug of all Garmin chipsets.
      */
     if (strlen(sentence) > NMEA_MAX) {
-	gpsd_log(&session->context->errout, LOG_WARN,
-		 "Overlong packet of %zd chars rejected.\n",
-		 strlen(sentence));
-	return ONLINE_SET;
+        gpsd_log(&session->context->errout, LOG_WARN,
+                 "Overlong packet of %zd chars rejected.\n",
+                 strlen(sentence));
+        return ONLINE_SET;
     }
 
     /* make an editable copy of the sentence */
@@ -3153,15 +3153,15 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
                   sizeof(session->nmea.fieldcopy) - 1);
     /* discard the checksum part */
     for (p = (char *)session->nmea.fieldcopy;
-	 (*p != '*') && (*p >= ' ');)
-	++p;
+         (*p != '*') && (*p >= ' ');)
+        ++p;
     if (*p == '*')
-	*p++ = ',';		/* otherwise we drop the last field */
+        *p++ = ',';             /* otherwise we drop the last field */
 #ifdef SKYTRAQ_ENABLE_UNUSED
     /* $STI is special, no trailing *, or chacksum */
     if ( 0 != strncmp( "STI,", sentence, 4) ) {
-	skytraq_sti = true;
-	*p++ = ',';		/* otherwise we drop the last field */
+        skytraq_sti = true;
+        *p++ = ',';             /* otherwise we drop the last field */
     }
 #endif
     *p = '\0';
@@ -3169,95 +3169,95 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 
     /* split sentence copy on commas, filling the field array */
     count = 0;
-    t = p;			/* end of sentence */
+    t = p;                      /* end of sentence */
     p = (char *)session->nmea.fieldcopy + 1; /* beginning of tag, 'G' not '$' */
     /* while there is a search string and we haven't run off the buffer... */
     while ((p != NULL) && (p <= t)) {
-	session->nmea.field[count] = p;	/* we have a field. record it */
-	if ((p = strchr(p, ',')) != NULL) {  /* search for the next delimiter */
-	    *p = '\0';		/* replace it with a NUL */
-	    count++;		/* bump the counters and continue */
-	    p++;
-	}
+        session->nmea.field[count] = p; /* we have a field. record it */
+        if ((p = strchr(p, ',')) != NULL) {  /* search for the next delimiter */
+            *p = '\0';          /* replace it with a NUL */
+            count++;            /* bump the counters and continue */
+            p++;
+        }
     }
 
     /* point remaining fields at empty string, just in case */
     for (i = (unsigned int)count;
-	 i <
-	 (unsigned)(sizeof(session->nmea.field) /
-		    sizeof(session->nmea.field[0])); i++)
-	session->nmea.field[i] = e;
+         i <
+         (unsigned)(sizeof(session->nmea.field) /
+                    sizeof(session->nmea.field[0])); i++)
+        session->nmea.field[i] = e;
 
     /* sentences handlers will tell us when they have fractional time */
     session->nmea.latch_frac_time = false;
 
     /* dispatch on field zero, the sentence tag */
     for (thistag = i = 0;
-	 i < (unsigned)(sizeof(nmea_phrase) / sizeof(nmea_phrase[0])); ++i) {
-	char *s = session->nmea.field[0];
-	if (strlen(nmea_phrase[i].name) == 3
+         i < (unsigned)(sizeof(nmea_phrase) / sizeof(nmea_phrase[0])); ++i) {
+        char *s = session->nmea.field[0];
+        if (strlen(nmea_phrase[i].name) == 3
 #ifdef SKYTRAQ_ENABLE
-	        /* $STI is special */
-		&& !skytraq_sti
+                /* $STI is special */
+                && !skytraq_sti
 #endif
-		) {
-	    s += 2;		/* skip talker ID */
+                ) {
+            s += 2;             /* skip talker ID */
         }
-	if (strcmp(nmea_phrase[i].name, s) == 0) {
-	    if (NULL == nmea_phrase[i].decoder) {
+        if (strcmp(nmea_phrase[i].name, s) == 0) {
+            if (NULL == nmea_phrase[i].decoder) {
                 /* no decoder for this sentence */
-		mask = ONLINE_SET;
-		gpsd_log(&session->context->errout, LOG_DATA,
+                mask = ONLINE_SET;
+                gpsd_log(&session->context->errout, LOG_DATA,
                          "No decoder for sentence %s\n",
                          session->nmea.field[0]);
                 break;
             }
-	    if (count < nmea_phrase[i].nf) {
+            if (count < nmea_phrase[i].nf) {
                 /* sentence to short */
-		mask = ONLINE_SET;
-		gpsd_log(&session->context->errout, LOG_DATA,
+                mask = ONLINE_SET;
+                gpsd_log(&session->context->errout, LOG_DATA,
                          "Sentence %s too short\n", session->nmea.field[0]);
                 break;
             }
-	    mask = (nmea_phrase[i].decoder)(count, session->nmea.field,
-					    session);
-	    if (nmea_phrase[i].cycle_continue)
-		session->nmea.cycle_continue = true;
-	    /*
-	     * Must force this to be nz, as we're going to rely on a zero
-	     * value to mean "no previous tag" later.
-	     */
-	    thistag = i + 1;
-	    break;
-	}
+            mask = (nmea_phrase[i].decoder)(count, session->nmea.field,
+                                            session);
+            if (nmea_phrase[i].cycle_continue)
+                session->nmea.cycle_continue = true;
+            /*
+             * Must force this to be nz, as we're going to rely on a zero
+             * value to mean "no previous tag" later.
+             */
+            thistag = i + 1;
+            break;
+        }
     }
 
     /* prevent overaccumulation of sat reports */
     if (!str_starts_with(session->nmea.field[0] + 2, "GSV"))
-	session->nmea.last_gsv_talker = '\0';
+        session->nmea.last_gsv_talker = '\0';
     if (!str_starts_with(session->nmea.field[0] + 2, "GSA"))
-	session->nmea.last_gsa_talker = '\0';
+        session->nmea.last_gsa_talker = '\0';
 
     /* timestamp recording for fixes happens here */
     if ((mask & TIME_SET) != 0) {
-	session->newdata.time = gpsd_utc_resolve(session);
+        session->newdata.time = gpsd_utc_resolve(session);
 
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "%s time is %.3f = %d-%02d-%02dT%02d:%02d:%.3fZ\n",
-		 session->nmea.field[0], session->newdata.time,
-		 1900 + session->nmea.date.tm_year,
-		 session->nmea.date.tm_mon + 1,
-		 session->nmea.date.tm_mday,
-		 session->nmea.date.tm_hour,
-		 session->nmea.date.tm_min,
-		 session->nmea.date.tm_sec + session->nmea.subseconds);
-	/*
-	 * If we have time and PPS is available, assume we have good time.
-	 * Because this is a generic driver we don't really have enough
-	 * information for a sharper test, so we'll leave it up to the
-	 * PPS code to do its own sanity filtering.
-	 */
-	mask |= NTPTIME_IS;
+        gpsd_log(&session->context->errout, LOG_DATA,
+                 "%s time is %.3f = %d-%02d-%02dT%02d:%02d:%.3fZ\n",
+                 session->nmea.field[0], session->newdata.time,
+                 1900 + session->nmea.date.tm_year,
+                 session->nmea.date.tm_mon + 1,
+                 session->nmea.date.tm_mday,
+                 session->nmea.date.tm_hour,
+                 session->nmea.date.tm_min,
+                 session->nmea.date.tm_sec + session->nmea.subseconds);
+        /*
+         * If we have time and PPS is available, assume we have good time.
+         * Because this is a generic driver we don't really have enough
+         * information for a sharper test, so we'll leave it up to the
+         * PPS code to do its own sanity filtering.
+         */
+        mask |= NTPTIME_IS;
     }
 
     /*
@@ -3273,13 +3273,13 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
      */
     /* cast for 32/64 bit compat */
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "%s time %.3f last %.3f latch %d cont %d enders %#llx\n",
-	     session->nmea.field[0],
-	     session->nmea.this_frac_time,
-	     session->nmea.last_frac_time,
-	     session->nmea.latch_frac_time,
-	     session->nmea.cycle_continue,
-	     (unsigned long long)session->nmea.cycle_enders);
+             "%s time %.3f last %.3f latch %d cont %d enders %#llx\n",
+             session->nmea.field[0],
+             session->nmea.this_frac_time,
+             session->nmea.last_frac_time,
+             session->nmea.latch_frac_time,
+             session->nmea.cycle_continue,
+             (unsigned long long)session->nmea.cycle_enders);
     lasttag = session->nmea.lasttag;
     if (0 < session->nmea.lasttag) {
         lasttag_mask = (uint64_t)1 << lasttag;
@@ -3288,62 +3288,62 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
         thistag_mask = (uint64_t)1 << thistag;
     }
     if (session->nmea.latch_frac_time) {
-	if (!GPS_TIME_EQUAL(session->nmea.this_frac_time,
-	                    session->nmea.last_frac_time)) {
+        if (!GPS_TIME_EQUAL(session->nmea.this_frac_time,
+                            session->nmea.last_frac_time)) {
 
-	    mask |= CLEAR_IS;
-	    gpsd_log(&session->context->errout, LOG_PROG,
-		     "%s starts a reporting cycle. lasttag %d\n",
-		     session->nmea.field[0], lasttag);
-	    /*
-	     * Have we seen a previously timestamped NMEA tag?
-	     * If so, designate as end-of-cycle marker.
-	     * But not if there are continuation sentences;
-	     * those get sorted after the last timestamped sentence
+            mask |= CLEAR_IS;
+            gpsd_log(&session->context->errout, LOG_PROG,
+                     "%s starts a reporting cycle. lasttag %d\n",
+                     session->nmea.field[0], lasttag);
+            /*
+             * Have we seen a previously timestamped NMEA tag?
+             * If so, designate as end-of-cycle marker.
+             * But not if there are continuation sentences;
+             * those get sorted after the last timestamped sentence
              *
-	     */
-	    if (0 < lasttag &&
-		0 == (session->nmea.cycle_enders & lasttag_mask) &&
-		!session->nmea.cycle_continue) {
-		session->nmea.cycle_enders |= lasttag_mask;
-		/* cast for 32/64 bit compat */
-		gpsd_log(&session->context->errout, LOG_PROG,
-			 "tagged %s as a cycle ender. %#llx\n",
-			 nmea_phrase[lasttag - 1].name,
+             */
+            if (0 < lasttag &&
+                0 == (session->nmea.cycle_enders & lasttag_mask) &&
+                !session->nmea.cycle_continue) {
+                session->nmea.cycle_enders |= lasttag_mask;
+                /* cast for 32/64 bit compat */
+                gpsd_log(&session->context->errout, LOG_PROG,
+                         "tagged %s as a cycle ender. %#llx\n",
+                         nmea_phrase[lasttag - 1].name,
                          (unsigned long long)lasttag_mask);
-	    }
-	}
-    } else {
-	/* extend the cycle to an un-timestamped sentence? */
-	if (0 != (session->nmea.cycle_enders & lasttag_mask)) {
-	    gpsd_log(&session->context->errout, LOG_PROG,
-		     "%s is just after a cycle ender.\n",
-		     session->nmea.field[0]);
+            }
         }
-	if (session->nmea.cycle_continue) {
-	    gpsd_log(&session->context->errout, LOG_PROG,
-		     "%s extends the reporting cycle.\n",
-		     session->nmea.field[0]);
+    } else {
+        /* extend the cycle to an un-timestamped sentence? */
+        if (0 != (session->nmea.cycle_enders & lasttag_mask)) {
+            gpsd_log(&session->context->errout, LOG_PROG,
+                     "%s is just after a cycle ender.\n",
+                     session->nmea.field[0]);
+        }
+        if (session->nmea.cycle_continue) {
+            gpsd_log(&session->context->errout, LOG_PROG,
+                     "%s extends the reporting cycle.\n",
+                     session->nmea.field[0]);
             /* change ender */
-	    session->nmea.cycle_enders &= ~lasttag_mask;
-	    session->nmea.cycle_enders |= thistag_mask;
-	}
+            session->nmea.cycle_enders &= ~lasttag_mask;
+            session->nmea.cycle_enders |= thistag_mask;
+        }
     }
 
     /* here's where we check for end-of-cycle */
     if ((session->nmea.latch_frac_time || session->nmea.cycle_continue)
-	&& (session->nmea.cycle_enders & thistag_mask)!=0) {
-	gpsd_log(&session->context->errout, LOG_PROG,
-		 "%s ends a reporting cycle.\n",
-		 session->nmea.field[0]);
-	mask |= REPORT_IS;
+        && (session->nmea.cycle_enders & thistag_mask)!=0) {
+        gpsd_log(&session->context->errout, LOG_PROG,
+                 "%s ends a reporting cycle.\n",
+                 session->nmea.field[0]);
+        mask |= REPORT_IS;
     }
     if (session->nmea.latch_frac_time)
-	session->nmea.lasttag = thistag;
+        session->nmea.lasttag = thistag;
 
     /* we might have a (somewhat) reliable end-of-cycle */
     if (session->nmea.cycle_enders != 0)
-	session->cycle_end_reliable = true;
+        session->cycle_end_reliable = true;
 
     /* don't downgrade mode if holding previous fix */
     /* usually because of xxRMC which does not report 2D/3D */
@@ -3368,11 +3368,11 @@ void nmea_add_checksum(char *sentence)
     char c, *p = sentence;
 
     if (*p == '$' || *p == '!') {
-	p++;
+        p++;
     }
     while (((c = *p) != '*') && (c != '\0')) {
-	sum ^= c;
-	p++;
+        sum ^= c;
+        p++;
     }
     *p++ = '*';
     (void)snprintf(p, 5, "%02X\r\n", (unsigned)sum);
@@ -3383,10 +3383,10 @@ ssize_t nmea_write(struct gps_device_t *session, char *buf, size_t len UNUSED)
 {
     (void)strlcpy(session->msgbuf, buf, sizeof(session->msgbuf));
     if (session->msgbuf[0] == '$') {
-	(void)strlcat(session->msgbuf, "*", sizeof(session->msgbuf));
-	nmea_add_checksum(session->msgbuf);
+        (void)strlcat(session->msgbuf, "*", sizeof(session->msgbuf));
+        nmea_add_checksum(session->msgbuf);
     } else
-	(void)strlcat(session->msgbuf, "\r\n", sizeof(session->msgbuf));
+        (void)strlcat(session->msgbuf, "\r\n", sizeof(session->msgbuf));
     session->msgbuflen = strlen(session->msgbuf);
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }
