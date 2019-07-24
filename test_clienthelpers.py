@@ -87,6 +87,8 @@ test3 = [
     # some 10x10 points, s/b exact EGM2008, +/- rounding
     # North Poll: EGM2008 14.8980, EGM96 13.6050, EGM84 13.0980
     (90, 0, 14.90, "North Poll"),
+    # North Poll2: EGM2008 14.8980, EGM96 13.6050, EGM84 13.0980
+    (90, 180, 14.90, "North Poll"),
     # Doyle: EGM2008 -23.3366, EGM96 -23.3278, EGM84 -21.1672
     (40, -120, -23.34, "Near Doyle, CA"),
     # Equator 0, EGM2008 17.2260, EGM96 17.1630, EGM84 18.3296
