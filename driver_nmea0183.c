@@ -604,7 +604,7 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
      *                       Char 4 = ?
      * 7:  19           Number of Satellites used in solution
      * 8:  0.6          HDOP
-     * 9:  406110       Altitude in meters
+     * 9:  406110       MSL Altitude in meters
      * 10: -26.294      Geoid separation in meters
      * 11: 6.0          Age of differential corrections, in seconds
      * 12: 0138         Differential reference station ID
@@ -717,7 +717,7 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
      *                     8 = Simulator
      * 7     08           Number of satellites in use
      * 8     0.9          Horizontal dilution of position
-     * 9,10  545.4,M      Altitude, Metres above mean sea level
+     * 9,10  545.4,M      Altitude, Meters MSL
      * 11,12 46.9,M       Height of geoid (mean sea level) above WGS84
      *                    ellipsoid, in Meters
      * 13    33           time in seconds since last DGPS update
@@ -1893,7 +1893,7 @@ static gps_mask_t processPGRMZ(int c UNUSED, char *field[],
 {
     /*
      * $PGRMZ,246,f,3*1B
-     * 1    = Altitude (probably WGS84) in feet
+     * 1    = Altitude (probably MSL) in feet
      * 2    = f (feet)
      * 3    = Mode
      *         1 = No Fix
