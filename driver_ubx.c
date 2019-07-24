@@ -384,8 +384,7 @@ ubx_msg_nav_hpposllh(struct gps_device_t *session, unsigned char *buf,
     /* altitude MSL */
     session->newdata.altMSL = (1e-3 * (getles32(buf, 20) + \
                                        (getsb(buf, 27) * 1e-2)));
-    session->newdata.geoid_sep = session->newdata.altitude -
-                                 session->newdata.altMSL;
+    /* Let gpsd_error_model() deal with geoid_sep */
 
     /* Horizontal accuracy estimate in .1 mm, unknown est type */
     session->newdata.eph = getleu32(buf, 28) * 1e-4;
@@ -551,8 +550,7 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     session->newdata.altitude = 1e-3 * getles32(buf, 32);
     /* altitude MSL */
     session->newdata.altMSL = 1e-3 * getles32(buf, 36);
-    session->newdata.geoid_sep = session->newdata.altitude -
-                                 session->newdata.altMSL;
+    /* Let gpsd_error_model() deal with geoid_sep */
 
     session->newdata.speed = 1e-3 * (int32_t)getles32(buf, 60);
     /* u-blox calls this Heading of motion (2-D) */
@@ -910,8 +908,7 @@ ubx_msg_nav_posllh(struct gps_device_t *session, unsigned char *buf,
     session->newdata.altitude = 1e-3 * getles32(buf, 12);
     /* altitude MSL */
     session->newdata.altMSL = 1e-3 * getles32(buf, 16);
-    session->newdata.geoid_sep = session->newdata.altitude -
-                                 session->newdata.altMSL;
+    /* Let gpsd_error_model() deal with geoid_sep */
 
     /* Horizontal accuracy estimate in mm, unknown type */
     session->newdata.eph = getleu32(buf, 20) * 1e-3;
