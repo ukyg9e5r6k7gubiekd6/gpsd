@@ -56,6 +56,7 @@ extern "C" {
  *       change satellite_t elevation and azimuth to double
  *       satellite_t elevation, azimuth, and ss use NAN for unknown value.
  *       add altMSL to gps_fix_t
+ *       change altitude to altHAE to gps_fix_t
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -111,9 +112,10 @@ struct gps_fix_t {
     double epy;  	/* Latitude position uncertainty, meters */
     double longitude;	/* Longitude in degrees (valid if mode >= 2) */
     double epx;  	/* Longitude position uncertainty, meters */
-    double altitude;	/* Altitude in meters probably WGS84
+    double altHAE;	/* Altitude, height above allipsoid.
+                         * in meters and probably WGS84
                          * (valid if mode == 3)
-                         * MSL = altitude + geoid_sep */
+                         * MSL = altHAE - geoid_sep */
     double altMSL;      /* Altitude MSL (maybe EGM2008) */
     double epv;  	/* Vertical position uncertainty, meters */
     double track;	/* Course made good (relative to true north) */

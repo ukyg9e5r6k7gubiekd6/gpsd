@@ -428,7 +428,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 
     session->newdata.altMSL = (double)(altitude * EL_RES)
 	+ (ant_height_adj * D_RES) + (set_delta_up * D_RES);
-    session->newdata.altitude = (double)(ellips_height) * EL_RES
+    session->newdata.altHAE = (double)(ellips_height) * EL_RES
 	+ (ant_height_adj * D_RES) + (set_delta_up * D_RES);
     /* Let gpsd_error_model() deal with geoid_sep */
 
@@ -485,13 +485,13 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     mask = LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | USED_IS |
            HERR_SET | TIMERR_SET | DOP_SET | VNED_SET | TIME_SET | NTPTIME_IS;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.2f altMSL %.2f "
+	     "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f altHAE=%.2f altMSL %.2f "
              "mode=%d status=%d gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f "
              "tdop=%.2f mask={%s}\n",
 	     session->newdata.time,
 	     session->newdata.latitude,
 	     session->newdata.longitude,
-	     session->newdata.altitude,
+	     session->newdata.altHAE,
 	     session->newdata.altMSL,
 	     session->newdata.mode,
 	     session->gpsdata.status,

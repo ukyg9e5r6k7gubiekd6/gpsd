@@ -110,7 +110,7 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     session->newdata.latitude = getled64((char *)buf, 18) * RAD_2_DEG;
     session->newdata.longitude = getled64((char *)buf, 26) * RAD_2_DEG;
     /* unclear if this is MSL or WGS84.  Assume WGS84 */
-    session->newdata.altitude = getlef32((char *)buf, 34);
+    session->newdata.altHAE = getlef32((char *)buf, 34);
     session->newdata.speed = getlef32((char *)buf, 38);
     session->newdata.track = getlef32((char *)buf, 42) * RAD_2_DEG;
     session->newdata.climb = getlef32((char *)buf, 54);
@@ -148,13 +148,13 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
 
     mask |= MODE_SET | STATUS_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "NAVSOL_LLA: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f "
+	     "NAVSOL_LLA: time=%.2f lat=%.2f lon=%.2f altHAE=%.2f track=%.2f "
 	     "speed=%.2f climb=%.2f mode=%d status=%d hdop=%.2f hdop=%.2f "
 	     "used=%d\n",
 	     session->newdata.time,
 	     session->newdata.latitude,
 	     session->newdata.longitude,
-	     session->newdata.altitude,
+	     session->newdata.altHAE,
 	     session->newdata.track,
 	     session->newdata.speed,
 	     session->newdata.climb,

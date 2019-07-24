@@ -666,7 +666,7 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     session->newdata.latitude = getbes32(buf, 54) * 1e-7;
     session->newdata.longitude = getbes32(buf, 58) * 1e-7;
     /* altitude WGS84 */
-    session->newdata.altitude = getbes32(buf, 62) * 1e-2;
+    session->newdata.altHAE = getbes32(buf, 62) * 1e-2;
     /* altitude MSL */
     session->newdata.altMSL = getbes32(buf, 66) * 1e-2;
     /* Let gpsd_error_model() deal with geoid_sep */
@@ -771,9 +771,9 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
         gpsd_log(&session->context->errout, debug_base,
                  "solution_info %08x\n", solution_info);
         gpsd_log(&session->context->errout, debug_base,
-                 "lat %.7f lon %.7f alt %.2f altMSL %.2f\n",
+                 "lat %.7f lon %.7f altHAE %.2f altMSL %.2f\n",
                  session->newdata.latitude, session->newdata.longitude,
-                 session->newdata.altitude, session->newdata.altMSL);
+                 session->newdata.altHAE, session->newdata.altMSL);
         gpsd_log(&session->context->errout, debug_base,
                  "speed %.2f track %.2f climb %.2f heading_rate %d\n",
                  session->newdata.speed, session->newdata.track,
@@ -1720,7 +1720,7 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
 
 #endif /* TIMEHINT_ENABLE */
         /* alititude WGS84 */
-        session->newdata.altitude = getbes32(buf, 31) * 1e-2;
+        session->newdata.altHAE = getbes32(buf, 31) * 1e-2;
         session->newdata.altMSL = getbes32(buf, 35) * 1e-2;
 	/* Let gpsd_error_model() deal with geoid_sep and altHAE */
         /* skip 1 byte of map datum */
@@ -1733,12 +1733,12 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
             mask |= ALTITUDE_SET | CLIMB_SET;
     }
     gpsd_log(&session->context->errout, LOG_DATA,
-             "SiRF: GND 0x29: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
+             "SiRF: GND 0x29: time=%.2f lat=%.2f lon=%.2f altHAE=%.2f "
              "track=%.2f speed=%.2f mode=%d status=%d\n",
                 session->newdata.time,
                 session->newdata.latitude,
                 session->newdata.longitude,
-                session->newdata.altitude,
+                session->newdata.altHAE,
                 session->newdata.track,
                 session->newdata.speed,
                 session->newdata.mode,
@@ -1794,7 +1794,7 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
     session->newdata.latitude = (double)getbes32(buf, 1) * RAD_2_DEG * 1e-8;
     session->newdata.longitude = (double)getbes32(buf, 5) * RAD_2_DEG * 1e-8;
     /* defaults to WGS84 */
-    session->newdata.altitude = (double)getbes32(buf, 9) * 1e-3;
+    session->newdata.altHAE = (double)getbes32(buf, 9) * 1e-3;
     session->newdata.speed = (double)getbes32(buf, 13) * 1e-3;
     session->newdata.climb = (double)getbes32(buf, 17) * 1e-3;
     session->newdata.track = (double)getbes32(buf, 21) * RAD_2_DEG * 1e-8;
@@ -1849,11 +1849,11 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
     session->gpsdata.dop.tdop = (int)getub(buf, 38) / 5.0;
     session->driver.sirf.driverstate |= UBLOX;
     gpsd_log(&session->context->errout, LOG_DATA,
-             "SiRF: EMD 0x62: time=%.2f lat=%.2f lon=%.2f alt=%.f speed=%.2f "
-             "track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f pdop=%.2f "
-             "hdop=%.2f vdop=%.2f tdop=%.2f\n",
+             "SiRF: EMD 0x62: time=%.2f lat=%.2f lon=%.2f altHAE=%.2f "
+             "speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f "
+             "pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f\n",
              session->newdata.time, session->newdata.latitude,
-             session->newdata.longitude, session->newdata.altitude,
+             session->newdata.longitude, session->newdata.altHAE,
              session->newdata.speed, session->newdata.track,
              session->newdata.climb, session->newdata.mode,
              session->gpsdata.status, session->gpsdata.dop.gdop,

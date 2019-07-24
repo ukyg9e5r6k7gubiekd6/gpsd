@@ -994,14 +994,14 @@ static void gpsd_error_model(struct gps_device_t *session)
 					      fix->longitude);
     }
     if (0 != isfinite(fix->geoid_sep)) {
-	if (0 != isfinite(fix->altitude) &&
+	if (0 != isfinite(fix->altHAE) &&
 	    0 == isfinite(fix->altMSL)) {
 	    /* compute missing altMSL */
-	    fix->altMSL = fix->altitude - fix->geoid_sep;
-	} else if (0 == isfinite(fix->altitude) &&
+	    fix->altMSL = fix->altHAE - fix->geoid_sep;
+	} else if (0 == isfinite(fix->altHAE) &&
 		   0 != isfinite(fix->altMSL)) {
 	    /* compute missing altHAE */
-	    fix->altitude = fix->altMSL + fix->geoid_sep;
+	    fix->altHAE = fix->altMSL + fix->geoid_sep;
 	}
     }
 
@@ -1028,9 +1028,9 @@ static void gpsd_error_model(struct gps_device_t *session)
 	    if (MODE_3D <= fix->mode &&
 		MODE_3D <= oldfix->mode &&
 		0 == isfinite(fix->climb) &&
-		0 != isfinite(fix->altitude) &&
-		0 != isfinite(oldfix->altitude)) {
-		    fix->climb = (fix->altitude - oldfix->altitude) / deltatime;
+		0 != isfinite(fix->altHAE) &&
+		0 != isfinite(oldfix->altHAE)) {
+		    fix->climb = (fix->altHAE - oldfix->altHAE) / deltatime;
 
 		    /* sanity check the climb */
 		    if (9999.9 < fabs(fix->climb))

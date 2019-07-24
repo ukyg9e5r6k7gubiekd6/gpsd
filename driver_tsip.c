@@ -349,7 +349,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	session->newdata.longitude = getbef32((char *)buf, 4) * RAD_2_DEG;
 	/* depending on GPS config, could be either WGS84 or MSL
 	 * default differs by model, usually WGS84 */
-	session->newdata.altitude = getbef32((char *)buf, 8);
+	session->newdata.altHAE = getbef32((char *)buf, 8);
 	//f1 = getbef32((char *)buf, 12);	clock bias */
 	f2 = getbef32((char *)buf, 16);	/* time-of-fix */
 	if ((session->context->valid & GPS_TIME_VALID)!=0) {
@@ -361,11 +361,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	}
 	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_IS | REPORT_IS;
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "SPPLLA 0x4a time=%.2f lat=%.2f lon=%.2f alt=%.2f\n",
+		 "SPPLLA 0x4a time=%.2f lat=%.2f lon=%.2f altMSL=%.2f\n",
 		 session->newdata.time,
 		 session->newdata.latitude,
 		 session->newdata.longitude,
-		 session->newdata.altitude);
+		 session->newdata.altHAE);
 	break;
     case 0x4b:			/* Machine/Code ID and Additional Status */
 	if (len != 3)
@@ -715,7 +715,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	session->newdata.longitude = getbed64((char *)buf, 8) * RAD_2_DEG;
 	/* depending on GPS config, could be either WGS84 or MSL
 	 * default differs by model, usually WGS84 */
-	session->newdata.altitude = getbed64((char *)buf, 16);
+	session->newdata.altMSL = getbed64((char *)buf, 16);
 	mask |= ALTITUDE_SET;
 	//d1 = getbed64((char *)buf, 24);	clock bias */
 	f1 = getbef32((char *)buf, 32);	/* time-of-fix */
@@ -730,14 +730,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 "GPS DP LLA %f %f %f %f\n",
 		 session->newdata.time,
 		 session->newdata.latitude,
-		 session->newdata.longitude, session->newdata.altitude);
+		 session->newdata.longitude, session->newdata.altMSL);
 	mask |= LATLON_SET | CLEAR_IS | REPORT_IS;
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "DPPLLA 0x84 time=%.2f lat=%.2f lon=%.2f alt=%.2f\n",
+		 "DPPLLA 0x84 time=%.2f lat=%.2f lon=%.2f altMSL=%.2f\n",
 		 session->newdata.time,
 		 session->newdata.latitude,
 		 session->newdata.longitude,
-		 session->newdata.altitude);
+		 session->newdata.altMSL);
 	break;
     case 0x8f:			/* Super Packet.  Well...  */
 	u1 = (uint8_t) getub(buf, 0);
@@ -796,7 +796,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		session->newdata.longitude -= 360.0;
 	    /* depending on GPS config, could be either WGS84 or MSL
 	     * default differs by model, usually WGS84 */
-	    session->newdata.altitude = (double)sl2 * 1e-3;
+	    session->newdata.altHAE = (double)sl2 * 1e-3;
 	    mask |= ALTITUDE_SET;
 
 	    session->gpsdata.status = STATUS_NO_FIX;
@@ -822,11 +822,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		    STATUS_SET | MODE_SET | CLEAR_IS |
 		    REPORT_IS | VNED_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
-		     "SP-LFEI 0x20: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
+		     "SP-LFEI 0x20: time=%.2f lat=%.2f lon=%.2f altMSL=%.2f "
 		     "mode=%d status=%d\n",
 		     session->newdata.time,
 		     session->newdata.latitude, session->newdata.longitude,
-		     session->newdata.altitude,
+		     session->newdata.altHAE,
 		     session->newdata.mode, session->gpsdata.status);
 	    break;
 	case 0x23:		/* Compact Super Packet */
@@ -874,7 +874,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		session->newdata.longitude -= 360.0;
 	    /* depending on GPS config, could be either WGS84 or MSL
 	     * default differs by model, usually WGS84 */
-	    session->newdata.altitude = (double)sl3 * 1e-3;
+	    session->newdata.altHAE = (double)sl3 * 1e-3;
 	    mask |= ALTITUDE_SET;
 	    if ((u2 & 0x20) != (uint8_t) 0)	/* check velocity scaling */
 		d5 = 0.02;
@@ -891,11 +891,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		    STATUS_SET | MODE_SET | CLEAR_IS |
 		    REPORT_IS | VNED_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
-		     "SP-CSP 0x23: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
+		     "SP-CSP 0x23: time=%.2f lat=%.2f lon=%.2f altHAE=%.2f "
 		     "mode=%d status=%d\n",
 		     session->newdata.time,
 		     session->newdata.latitude, session->newdata.longitude,
-		     session->newdata.altitude,
+		     session->newdata.altHAE,
 		     session->newdata.mode, session->gpsdata.status);
 	    break;
 
@@ -944,7 +944,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->newdata.longitude = getbed64((char *)buf, 44) * RAD_2_DEG;
 	    /* depending on GPS config, could be either WGS84 or MSL
 	     * default differs by model, usually WGS84 */
-	    session->newdata.altitude = getbed64((char *)buf, 52);
+	    session->newdata.altHAE = getbed64((char *)buf, 52);
 	    //f1 = getbef32((char *)buf, 16);    clock bias */
 
 	    u1 = getub(buf, 12);	/* GPS Decoding Status */
@@ -1005,11 +1005,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
 	    mask |= LATLON_SET | ALTITUDE_SET | MODE_SET | REPORT_IS;
 	    gpsd_log(&session->context->errout, LOG_DATA,
-		     "SP-TPS 0xac time=%.2f lat=%.2f lon=%.2f alt=%.2f\n",
+		     "SP-TPS 0xac time=%.2f lat=%.2f lon=%.2f altHAE=%.2f\n",
 		     session->newdata.time,
 		     session->newdata.latitude,
 		     session->newdata.longitude,
-		     session->newdata.altitude);
+		     session->newdata.altHAE);
 	    break;
 
 	default:

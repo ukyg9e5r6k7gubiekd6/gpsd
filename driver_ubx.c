@@ -379,7 +379,7 @@ ubx_msg_nav_hpposllh(struct gps_device_t *session, unsigned char *buf,
     session->newdata.latitude = (1e-7 * (getles32(buf, 12) + \
                                          (getsb(buf, 25) * 1e-2)));
     /* altitude WGS84 */
-    session->newdata.altitude = (1e-3 * (getles32(buf, 16) + \
+    session->newdata.altHAE = (1e-3 * (getles32(buf, 16) + \
                                          (getsb(buf, 26) * 1e-2)));
     /* altitude MSL */
     session->newdata.altMSL = (1e-3 * (getles32(buf, 20) + \
@@ -392,12 +392,13 @@ ubx_msg_nav_hpposllh(struct gps_device_t *session, unsigned char *buf,
     session->newdata.epv = getleu32(buf, 32) * 1e-4;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-        "UBX-NAV-HPPOSLLH: version %d iTOW=%lld lat=%.4f lon=%.4f alt=%.4f\n",
+        "UBX-NAV-HPPOSLLH: version %d iTOW=%lld lat=%.4f lon=%.4f "
+        "altHAE=%.4f\n",
         version,
         (long long)session->driver.ubx.iTOW,
         session->newdata.latitude,
         session->newdata.longitude,
-        session->newdata.altitude);
+        session->newdata.altHAE);
     return mask;
 }
 
@@ -547,7 +548,7 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     session->newdata.longitude = 1e-7 * getles32(buf, 24);
     session->newdata.latitude = 1e-7 * getles32(buf, 28);
     /* altitude WGS84 */
-    session->newdata.altitude = 1e-3 * getles32(buf, 32);
+    session->newdata.altHAE = 1e-3 * getles32(buf, 32);
     /* altitude MSL */
     session->newdata.altMSL = 1e-3 * getles32(buf, 36);
     /* Let gpsd_error_model() deal with geoid_sep */
@@ -568,13 +569,13 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     mask |= HERR_SET | SPEEDERR_SET | VERR_SET;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-         "NAV-PVT: flags=%02x time=%.2f lat=%.2f lon=%.2f alt=%.2f\n"
-         "  track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
+         "NAV-PVT: flags=%02x time=%.2f lat=%.2f lon=%.2f altHAE=%.2f "
+         "track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
          flags,
          session->newdata.time,
          session->newdata.latitude,
          session->newdata.longitude,
-         session->newdata.altitude,
+         session->newdata.altHAE,
          session->newdata.track,
          session->newdata.speed,
          session->newdata.climb,
@@ -905,7 +906,7 @@ ubx_msg_nav_posllh(struct gps_device_t *session, unsigned char *buf,
     session->newdata.longitude = 1e-7 * getles32(buf, 4);
     session->newdata.latitude = 1e-7 * getles32(buf, 8);
     /* altitude WGS84 */
-    session->newdata.altitude = 1e-3 * getles32(buf, 12);
+    session->newdata.altHAE = 1e-3 * getles32(buf, 12);
     /* altitude MSL */
     session->newdata.altMSL = 1e-3 * getles32(buf, 16);
     /* Let gpsd_error_model() deal with geoid_sep */
@@ -916,12 +917,12 @@ ubx_msg_nav_posllh(struct gps_device_t *session, unsigned char *buf,
     session->newdata.epv = getleu32(buf, 24) * 1e-3;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-        "UBX-NAV-POSLLH: iTOW=%lld lat=%.3f lon=%.3f alt=%.3f "
+        "UBX-NAV-POSLLH: iTOW=%lld lat=%.3f lon=%.3f altHAE=%.3f "
         "eph %.3f epv %.3f\n",
         (long long)session->driver.ubx.iTOW,
         session->newdata.latitude,
         session->newdata.longitude,
-        session->newdata.altitude,
+        session->newdata.altHAE,
         session->newdata.eph,
         session->newdata.epv);
     return mask;

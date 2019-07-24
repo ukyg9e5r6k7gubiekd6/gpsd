@@ -168,9 +168,9 @@ void json_tpv_dump(const struct gps_device_t *session,
 	if (isfinite(gpsdata->fix.longitude) != 0)
 	    str_appendf(reply, replylen,
 			   "\"lon\":%.9f,", gpsdata->fix.longitude);
-	if (0 != isfinite(gpsdata->fix.altitude))
+	if (0 != isfinite(gpsdata->fix.altHAE))
 	    str_appendf(reply, replylen,
-			   "\"alt\":%.3f,", gpsdata->fix.altitude);
+			   "\"altHAE\":%.3f,", gpsdata->fix.altHAE);
 	if (0 != isfinite(gpsdata->fix.altMSL))
 	    str_appendf(reply, replylen,
 			   "\"altMSL\":%.3f,", gpsdata->fix.altMSL);

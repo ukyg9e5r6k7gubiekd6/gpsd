@@ -447,7 +447,7 @@ static gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_de
     session->newdata.longitude       = getles64(bu, 15) * 1e-16;
     mask                            |= LATLON_SET;
 
-    session->newdata.altitude        = getles64(bu, 23) * 1e-6;
+    session->newdata.altHAE         = getles64(bu, 23) * 1e-6;
     mask                            |= ALTITUDE_SET;
 
 //  printf("mode %x %x\n", (bu[31] >> 4) & 0x0f, bu[31]);

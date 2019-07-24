@@ -473,7 +473,7 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
     n = a / sqrt(1.0 - e2 * pow(sin(phi), 2));
 
     /* altitude is WGS84 */
-    fix->altitude = p / cos(phi) - n;
+    fix->altHAE = p / cos(phi) - n;
 
     fix->latitude = phi * RAD_2_DEG;
     fix->longitude = lambda * RAD_2_DEG;

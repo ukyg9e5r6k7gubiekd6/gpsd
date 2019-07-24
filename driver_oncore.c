@@ -229,7 +229,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 
     session->newdata.latitude = lat;
     session->newdata.longitude = lon;
-    session->newdata.altitude = alt;  /* is WGS84 */
+    session->newdata.altHAE = alt;  /* is WGS84 */
     session->newdata.speed = speed;
     session->newdata.track = track;
 
@@ -308,10 +308,10 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     (void)oncore_control_send(session, (char *)pollEn, sizeof(pollEn));
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "NAVSOL: time=%.2f lat=%.2f lon=%.2f alt=%.2f speed=%.2f "
+	     "NAVSOL: time=%.2f lat=%.2f lon=%.2f altMSL=%.2f speed=%.2f "
              "track=%.2f mode=%d status=%d visible=%d used=%d\n",
 	     session->newdata.time, session->newdata.latitude,
-	     session->newdata.longitude, session->newdata.altitude,
+	     session->newdata.longitude, session->newdata.altHAE,
 	     session->newdata.speed, session->newdata.track,
 	     session->newdata.mode, session->gpsdata.status,
 	     session->gpsdata.satellites_used,

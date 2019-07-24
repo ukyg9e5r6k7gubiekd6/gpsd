@@ -176,7 +176,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	session->newdata.latitude = getled64(buf, OFFSET(3)) * RAD_2_DEG;
 	session->newdata.longitude = getled64(buf, OFFSET(5)) * RAD_2_DEG;
         /* altitude above ellipsoid */
-	session->newdata.altitude = getled64(buf, OFFSET(7));
+	session->newdata.altHAE = getled64(buf, OFFSET(7));
 	session->newdata.geoid_sep = getled64(buf, OFFSET(9));
 	session->gpsdata.satellites_used = (int)getles32(buf, OFFSET(11));
 	session->gpsdata.dop.gdop = getled64(buf, OFFSET(13));
@@ -206,7 +206,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 		 d1,
 		 session->newdata.latitude,
 		 session->newdata.longitude,
-		 session->newdata.altitude,
+		 session->newdata.altHAE,
 		 session->newdata.speed,
 		 session->newdata.track);
 	gpsd_log(&session->context->errout, LOG_INF,

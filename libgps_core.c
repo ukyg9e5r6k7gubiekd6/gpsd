@@ -319,8 +319,8 @@ void libgps_dump_state(struct gps_data_t *collect)
 	(void)fprintf(debugfp, "LATLON: lat/lon: %.7lf %.7lf\n",
 		      collect->fix.latitude, collect->fix.longitude);
     if (collect->set & ALTITUDE_SET)
-	(void)fprintf(debugfp, "ALTITUDE: altitude: %lf  U: climb: %lf\n",
-		      collect->fix.altitude, collect->fix.climb);
+	(void)fprintf(debugfp, "ALTITUDE: altHAE: %lf  U: climb: %lf\n",
+		      collect->fix.altHAE, collect->fix.climb);
     if (collect->set & SPEED_SET)
 	(void)fprintf(debugfp, "SPEED: %lf\n", collect->fix.speed);
     if (collect->set & TRACK_SET)

@@ -53,7 +53,9 @@ static DBusHandlerResult handle_gps_fix(DBusMessage * message)
 			  DBUS_TYPE_DOUBLE, &share_gpsdata->fix.latitude,
 			  DBUS_TYPE_DOUBLE, &share_gpsdata->fix.longitude,
 			  DBUS_TYPE_DOUBLE, &share_gpsdata->fix.eph,
-			  DBUS_TYPE_DOUBLE, &share_gpsdata->fix.altitude,
+                          /* The debus doc does not seem to specify
+                           * altHAE or altMSL */
+			  DBUS_TYPE_DOUBLE, &share_gpsdata->fix.altHAE,
 			  DBUS_TYPE_DOUBLE, &share_gpsdata->fix.epv,
 			  DBUS_TYPE_DOUBLE, &share_gpsdata->fix.track,
 			  DBUS_TYPE_DOUBLE, &share_gpsdata->fix.epd,

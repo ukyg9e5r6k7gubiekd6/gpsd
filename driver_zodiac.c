@@ -177,7 +177,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
      * specify whether word 31 is geodetic or WGS 84.
      * Here we assume altitude is always wgs84.
      */
-    session->newdata.altitude = ((long)getzlong(31)) * 1e-2;
+    session->newdata.altHAE = ((long)getzlong(31)) * 1e-2;
     session->newdata.geoid_sep = ((short)getzword(33)) * 1e-2;
     session->newdata.speed = (int)getzlong(34) * 1e-2;
     session->newdata.track = (int)getzword(36) * RAD_2_DEG * 1e-3;
@@ -203,9 +203,10 @@ static gps_mask_t handle1000(struct gps_device_t *session)
            SPEED_SET | TRACK_SET | STATUS_SET | MODE_SET |
            HERR_SET | SPEEDERR_SET | VERR_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "1000: time=%.2f lat=%.2f lon=%.2f alt=%.2f track=%.2f speed=%.2f climb=%.2f mode=%d status=%d\n",
+	     "1000: time=%.2f lat=%.2f lon=%.2f altHAE=%.2f track=%.2f "
+             "speed=%.2f climb=%.2f mode=%d status=%d\n",
 	     session->newdata.time, session->newdata.latitude,
-	     session->newdata.longitude, session->newdata.altitude,
+	     session->newdata.longitude, session->newdata.altHAE,
 	     session->newdata.track, session->newdata.speed,
 	     session->newdata.climb, session->newdata.mode,
 	     session->gpsdata.status);

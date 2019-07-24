@@ -143,10 +143,11 @@ try to compute the value from the skyview.</para>
         is not 2 or 3.</entry>
 </row>
 <row>
-	<entry>alt</entry>
+	<entry>altHAE</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Altitude in meters.  Probably WGS84. Present if mode is 3.
+        <entry>Altitude, height above allipsoid, in meters.  Probably
+WGS84. Present if mode is 3.
 </entry>
 </row>
 <row>
@@ -155,7 +156,7 @@ try to compute the value from the skyview.</para>
 	<entry>numeric</entry>
         <entry>MSL Altitude in meters.  The geoid used is rarely specified
 and is often inacurate.  See the comments below on geoidSep.  Present if
- mode is 3.  MSL is alt - geoidSep.</entry>
+ mode is 3.  altMSL is altHAE - geoidSep.</entry>
 </row>
 <row>
 	<entry>climb</entry>

@@ -452,7 +452,7 @@ static gps_mask_t processRMC(int count, char *field[],
             /* 4 sats used means 3D */
 	    session->newdata.mode = MODE_3D;
 	    mask |= MODE_SET;
-        } else if (0 != isfinite(session->gpsdata.fix.altitude) ||
+        } else if (0 != isfinite(session->gpsdata.fix.altHAE) ||
                    0 != isfinite(session->gpsdata.fix.altMSL)) {
             /* we probably have at least a 3D fix */
             /* this handles old GPS that do not report 3D */
@@ -546,7 +546,7 @@ static gps_mask_t processGLL(int count, char *field[],
          * and elsewhere in the code we want to be able to test for the
          * presence of a valid fix with mode > MODE_NO_FIX.
 	 */
-	if (0 != isfinite(session->gpsdata.fix.altitude) ||
+	if (0 != isfinite(session->gpsdata.fix.altHAE) ||
 	    0 != isfinite(session->gpsdata.fix.altMSL)) {
 	    session->newdata.mode = MODE_3D;
 	    mask |= MODE_SET;
@@ -555,7 +555,7 @@ static gps_mask_t processGLL(int count, char *field[],
 	    session->newdata.mode = MODE_3D;
 	    mask |= MODE_SET;
 	} else if (MODE_2D > session->gpsdata.fix.mode ||
-	           (0 == isfinite(session->oldfix.altitude) &&
+	           (0 == isfinite(session->oldfix.altHAE) &&
 	            0 == isfinite(session->oldfix.altMSL))) {
 	    session->newdata.mode = MODE_2D;
 	    mask |= MODE_SET;
@@ -2284,15 +2284,15 @@ static gps_mask_t processDBT(int c UNUSED, char *field[],
      */
     gps_mask_t mask = ONLINE_SET;
 
-    /* FIXME!!  this is criminal.  Depth != altitude */
+    /* FIXME!!  this is criminal.  Depth != altHAE */
     if (field[3][0] != '\0') {
-	session->newdata.altitude = -safe_atof(field[3]);
+	session->newdata.altHAE = -safe_atof(field[3]);
 	mask |= (ALTITUDE_SET);
     } else if (field[1][0] != '\0') {
-	session->newdata.altitude = -safe_atof(field[1]) / METERS_TO_FEET;
+	session->newdata.altHAE = -safe_atof(field[1]) / METERS_TO_FEET;
 	mask |= (ALTITUDE_SET);
     } else if (field[5][0] != '\0') {
-	session->newdata.altitude = -safe_atof(field[5]) / METERS_TO_FATHOMS;
+	session->newdata.altHAE = -safe_atof(field[5]) / METERS_TO_FATHOMS;
 	mask |= (ALTITUDE_SET);
     }
 
@@ -2311,7 +2311,7 @@ static gps_mask_t processDBT(int c UNUSED, char *field[],
     gpsd_log(&session->context->errout, LOG_RAW,
 	     "mode %d, depth %lf.\n",
 	     session->newdata.mode,
-	     session->newdata.altitude);
+	     session->newdata.altHAE);
     return mask;
 }
 
@@ -2600,7 +2600,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 		mask |= LATLON_SET;
 		if ('\0' != field[9][0]) {
                     /* altitude is already WGS 84 */
-		    session->newdata.altitude = safe_atof(field[9]);
+		    session->newdata.altHAE = safe_atof(field[9]);
 		    mask |= ALTITUDE_SET;
                 }
             }
@@ -2614,11 +2614,11 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
 	    mask |= (SPEED_SET | TRACK_SET | CLIMB_SET);
 	    mask |= DOP_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
-		     "PASHR,POS: hhmmss=%s lat=%.2f lon=%.2f alt=%.f"
+		     "PASHR,POS: hhmmss=%s lat=%.2f lon=%.2f altHAE=%.f"
                      " speed=%.2f track=%.2f climb=%.2f mode=%d status=%d"
                      " pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f used=%d\n",
 		     field[4], session->newdata.latitude,
-		     session->newdata.longitude, session->newdata.altitude,
+		     session->newdata.longitude, session->newdata.altHAE,
 		     session->newdata.speed, session->newdata.track,
 		     session->newdata.climb, session->newdata.mode,
 		     session->gpsdata.status, session->gpsdata.dop.pdop,
@@ -3300,8 +3300,8 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     if (MODE_SET == (mask & MODE_SET) &&
         MODE_3D == session->gpsdata.fix.mode &&
         MODE_NO_FIX != session->newdata.mode &&
-        (0 != isfinite(session->lastfix.altitude) ||
-         0 != isfinite(session->oldfix.altitude) ||
+        (0 != isfinite(session->lastfix.altHAE) ||
+         0 != isfinite(session->oldfix.altHAE) ||
          0 != isfinite(session->lastfix.altMSL) ||
          0 != isfinite(session->oldfix.altMSL))) {
         session->newdata.mode = session->gpsdata.fix.mode;

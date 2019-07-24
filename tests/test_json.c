@@ -107,10 +107,11 @@ static struct gps_data_t gpsdata;
 /* Case 1: TPV report */
 
 /* *INDENT-OFF* */
-static const char json_str1[] = "{\"class\":\"TPV\",\
-    \"device\":\"GPS#1\",				\
-    \"time\":\"2005-06-19T08:12:41.89Z\",\"lon\":46.498203637,\"lat\":7.568074350,\
-    \"alt\":1327.780,\"epx\":21.000,\"epy\":23.000,\"epv\":124.484,\"mode\":3}";
+static const char json_str1[] = 
+    "{\"class\":\"TPV\","
+    "\"device\":\"GPS#1\",\"time\":\"2005-06-19T08:12:41.89Z\","
+    "\"lon\":46.498203637,\"lat\":7.568074350,\"altHAE\":1327.780,"
+    "\"epx\":21.000,\"epy\":23.000,\"epv\":124.484,\"mode\":3}";
 
 /*
  * Case 2: SKY report

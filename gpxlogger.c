@@ -93,8 +93,8 @@ static void print_fix(struct gps_data_t *gpsdata, double time)
     /* lat/lon/ele are all WGS84, no altMSL */
     (void)fprintf(logfile,"   <trkpt lat=\"%f\" lon=\"%f\">\n",
 		 gpsdata->fix.latitude, gpsdata->fix.longitude);
-    if ((isfinite(gpsdata->fix.altitude) != 0))
-	(void)fprintf(logfile,"    <ele>%f</ele>\n", gpsdata->fix.altitude);
+    if ((isfinite(gpsdata->fix.altHAE) != 0))
+	(void)fprintf(logfile,"    <ele>%f</ele>\n", gpsdata->fix.altHAE);
     (void)fprintf(logfile,"    <time>%s</time>\n",
 		 unix_to_iso8601(time, tbuf, sizeof(tbuf)));
     if (gpsdata->status == STATUS_DGPS_FIX)
