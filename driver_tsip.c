@@ -716,6 +716,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	/* depending on GPS config, could be either WGS84 or MSL
 	 * default differs by model, usually WGS84 */
 	session->newdata.altitude = getbed64((char *)buf, 16);
+	mask |= ALTITUDE_SET;
 	//d1 = getbed64((char *)buf, 24);	clock bias */
 	f1 = getbef32((char *)buf, 32);	/* time-of-fix */
 	if ((session->context->valid & GPS_TIME_VALID)!=0) {
@@ -730,7 +731,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 session->newdata.time,
 		 session->newdata.latitude,
 		 session->newdata.longitude, session->newdata.altitude);
-	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_IS | REPORT_IS;
+	mask |= LATLON_SET | CLEAR_IS | REPORT_IS;
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "DPPLLA 0x84 time=%.2f lat=%.2f lon=%.2f alt=%.2f\n",
 		 session->newdata.time,
@@ -796,6 +797,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    /* depending on GPS config, could be either WGS84 or MSL
 	     * default differs by model, usually WGS84 */
 	    session->newdata.altitude = (double)sl2 * 1e-3;
+	    mask |= ALTITUDE_SET;
+
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->newdata.mode = MODE_NO_FIX;
 	    if ((u2 & 0x01) == (uint8_t) 0) {	/* Fix Available */
@@ -815,10 +818,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->newdata.time = gpsd_gpstime_resolve(session,
 						      (unsigned short)s4,
 						      (double)ul1 *1e-3);
-	    mask |=
-		TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET |
-		STATUS_SET | MODE_SET | CLEAR_IS |
-		REPORT_IS | VNED_SET;
+	    mask |= TIME_SET | NTPTIME_IS | LATLON_SET |
+		    STATUS_SET | MODE_SET | CLEAR_IS |
+		    REPORT_IS | VNED_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
 		     "SP-LFEI 0x20: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
 		     "mode=%d status=%d\n",
@@ -873,6 +875,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    /* depending on GPS config, could be either WGS84 or MSL
 	     * default differs by model, usually WGS84 */
 	    session->newdata.altitude = (double)sl3 * 1e-3;
+	    mask |= ALTITUDE_SET;
 	    if ((u2 & 0x20) != (uint8_t) 0)	/* check velocity scaling */
 		d5 = 0.02;
 	    else
@@ -884,10 +887,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->newdata.NED.velE = d1;
 	    session->newdata.NED.velD = -d3;
 
-	    mask |=
-		TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET |
-		STATUS_SET | MODE_SET | CLEAR_IS |
-		REPORT_IS | VNED_SET;
+	    mask |= TIME_SET | NTPTIME_IS | LATLON_SET |
+		    STATUS_SET | MODE_SET | CLEAR_IS |
+		    REPORT_IS | VNED_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
 		     "SP-CSP 0x23: time=%.2f lat=%.2f lon=%.2f alt=%.2f "
 		     "mode=%d status=%d\n",
