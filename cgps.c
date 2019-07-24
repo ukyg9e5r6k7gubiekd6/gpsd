@@ -400,7 +400,7 @@ static void windowsetup(void)
         (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET, "Time:");
         (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET, "Latitude:");
         (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET, "Longitude:");
-        (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET, "AltHAE:");
+        (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET, "Alt (HAE, MSL):");
         (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET, "Speed:");
         (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET, "Heading:");
         (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET, "Climb:");
@@ -712,12 +712,27 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         (void)strncpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(datawin, 3, DATAWIN_VALUE_OFFSET, "  %-*s", 25, scr);
 
-    /* Fill in the altitude. */
-    if (gpsdata->fix.mode >= MODE_3D && isfinite(gpsdata->fix.altHAE) != 0)
-        (void)snprintf(scr, sizeof(scr), "%9.3f %s",
-                       gpsdata->fix.altHAE * altfactor, altunits);
-    else
-        (void)strncpy(scr, "  n/a", sizeof(scr));
+    /* Fill in the altitudes. */
+    if (gpsdata->fix.mode >= MODE_3D) {
+        char buf1[20], buf2[20];
+        if (0 != isfinite(gpsdata->fix.altHAE))
+	    (void)snprintf(buf1, sizeof(buf1), " %10.3f,",
+			   gpsdata->fix.altHAE * altfactor);
+	else
+	    (void)strncpy(buf1, "        n/a,", sizeof(buf1));
+
+	if (0 != isfinite(gpsdata->fix.altMSL))
+	    (void)snprintf(buf2, sizeof(buf2), "%10.3f ",
+			   gpsdata->fix.altMSL * altfactor);
+	else
+	    (void)strncpy(scr, "       n/a ", sizeof(scr));
+
+        (void)strlcpy(scr, buf1, sizeof(scr));
+        (void)strlcat(scr, buf2, sizeof(scr));
+        (void)strlcat(scr, altunits, sizeof(scr));
+    } else {
+	(void)strncpy(scr, "        n/a,       n/a ", sizeof(scr));
+    }
     (void)mvwprintw(datawin, 4, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* Fill in the speed. */
