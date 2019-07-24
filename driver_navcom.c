@@ -418,18 +418,19 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 	    ((nav_mode & 0x03)!=0 ? STATUS_DGPS_FIX : STATUS_FIX);
     }
 
-    /* Height Data */
+    /* altHAE */
     ellips_height = getles32(buf, 23);
-    /* doc seems to imply this is WGS 84 altitude */
+    /* altMSL */
     altitude = getles32(buf, 27);
 
     ant_height_adj = getles16(buf, 51);
     set_delta_up = getles32(buf, 79);
 
-    session->newdata.altitude = (double)(altitude * EL_RES)
+    session->newdata.altMSL = (double)(altitude * EL_RES)
 	+ (ant_height_adj * D_RES) + (set_delta_up * D_RES);
-    session->newdata.geoid_sep = (double)(ellips_height - altitude) * EL_RES
+    session->newdata.altitude = (double)(ellips_height) * EL_RES
 	+ (ant_height_adj * D_RES) + (set_delta_up * D_RES);
+    /* Let gpsd_error_model() deal with geoid_sep */
 
     /* Speed Data */
     vel_north = (double)getles3224(buf, 31);
@@ -484,14 +485,14 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     mask = LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | USED_IS |
            HERR_SET | TIMERR_SET | DOP_SET | VNED_SET | TIME_SET | NTPTIME_IS;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.f geoid %.2f "
+	     "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f alt=%.2f altMSL %.2f "
              "mode=%d status=%d gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f "
              "tdop=%.2f mask={%s}\n",
 	     session->newdata.time,
 	     session->newdata.latitude,
 	     session->newdata.longitude,
 	     session->newdata.altitude,
-	     session->newdata.geoid_sep,
+	     session->newdata.altMSL,
 	     session->newdata.mode,
 	     session->gpsdata.status,
 	     session->gpsdata.dop.gdop,
