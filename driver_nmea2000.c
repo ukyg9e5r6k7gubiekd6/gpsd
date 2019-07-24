@@ -416,7 +416,7 @@ static gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_de
      *  3     Position time
      *  4     Latitude
      *  5     Longitude
-     *  6     Altitude (what kind? Assume WGS84)
+     *  6     Altitude (what kind?  probably WGS84?)
      *  7     Type of System
      *  8     Method, GNSS
      *  9     Integrity
