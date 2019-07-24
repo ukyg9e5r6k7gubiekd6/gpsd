@@ -545,7 +545,6 @@ struct gps_device_t {
 #ifdef PPS_ENABLE
     volatile struct pps_thread_t pps_thread;
 #endif /* PPS_ENABLE */
-    double mag_var;			/* magnetic variation in degrees */
     bool back_to_nmea;			/* back to NMEA on revert? */
     /*
      * msgbuf needs to hold the hex decode of inbuffer

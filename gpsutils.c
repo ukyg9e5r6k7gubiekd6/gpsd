@@ -257,6 +257,7 @@ void gps_clear_fix(struct gps_fix_t *fixp)
     fixp->latitude = NAN;
     fixp->longitude = NAN;
     fixp->magnetic_track = NAN;
+    fixp->magnetic_var = NAN;
     fixp->mode = MODE_NOT_SEEN;
     fixp->sep = NAN;
     fixp->speed = NAN;
@@ -336,8 +337,14 @@ void gps_merge_fix(struct gps_fix_t *to,
     }
     if ((transfer & TRACK_SET) != 0)
         to->track = from->track;
-    if ((transfer & MAGNETIC_TRACK_SET) != 0)
-        to->magnetic_track = from->magnetic_track;
+    if ((transfer & MAGNETIC_TRACK_SET) != 0) {
+	if (0 != isfinite(from->magnetic_track)) {
+	    to->magnetic_track = from->magnetic_track;
+	}
+	if (0 != isfinite(from->magnetic_var)) {
+	    to->magnetic_var = from->magnetic_var;
+	}
+    }
     if ((transfer & SPEED_SET) != 0)
 	to->speed = from->speed;
     if ((transfer & CLIMB_SET) != 0)

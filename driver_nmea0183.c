@@ -2290,7 +2290,7 @@ static gps_mask_t processHDG(int c UNUSED, char *field[],
     gpsd_log(&session->context->errout, LOG_RAW,
              "time %.3f, heading %lf.\n",
              session->newdata.time,
-             session->gpsdata.attitude.heading);
+             session->newdata.magnetic_track);
     return mask;
 }
 

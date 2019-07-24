@@ -57,6 +57,7 @@ extern "C" {
  *       satellite_t elevation, azimuth, and ss use NAN for unknown value.
  *       add altMSL, and depth, to gps_fix_t
  *       change altitude to altHAE to gps_fix_t
+ *       Move mag_var from gps_device_t to magnetic_var gps_data_t.
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -136,6 +137,7 @@ struct gps_fix_t {
     double geoid_sep;
 
     double magnetic_track;  /* Course (relative to Magnetic North) */
+    double magnetic_var;    /* magnetic variation in degrees */
     double depth;           /* depth in meters, probably depth of water
                              * under the keel */
 

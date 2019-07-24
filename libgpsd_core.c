@@ -328,7 +328,6 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     session->gpsdata.set = 0;
     gps_clear_att(&session->gpsdata.attitude);
     gps_clear_dop(&session->gpsdata.dop);
-    session->mag_var = NAN;
     session->gpsdata.dev.cycle = session->gpsdata.dev.mincycle = 1;
 #ifdef TIMING_ENABLE
     session->sor = 0.0;
@@ -424,7 +423,6 @@ void gpsd_clear(struct gps_device_t *session)
     gps_clear_dop(&session->gpsdata.dop);
     gps_clear_fix(&session->gpsdata.fix);
     session->gpsdata.status = STATUS_NO_FIX;
-    session->mag_var = NAN;
     session->releasetime = (time_t)0;
     session->badcount = 0;
 

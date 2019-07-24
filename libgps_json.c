@@ -79,6 +79,8 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
 			         .dflt.real = NAN},
 	{"magtrack",  t_real,    .addr.real = &gpsdata->fix.magnetic_track,
 				 .dflt.real = NAN},
+	{"magvar",  t_real,   .addr.real = &gpsdata->fix.magnetic_var,
+				 .dflt.real = NAN},
 	{"speed",  t_real,    .addr.real = &gpsdata->fix.speed,
 			         .dflt.real = NAN},
 	{"climb",  t_real,    .addr.real = &gpsdata->fix.climb,
@@ -594,7 +596,8 @@ int libgps_json_unpack(const char *buf,
 	    gpsdata->set |= VERR_SET;
 	if (isfinite(gpsdata->fix.track) != 0)
 	    gpsdata->set |= TRACK_SET;
-	if (isfinite(gpsdata->fix.magnetic_track) != 0)
+	if (0 != isfinite(gpsdata->fix.magnetic_track) ||
+	    0 != isfinite(gpsdata->fix.magnetic_var))
 	    gpsdata->set |= MAGNETIC_TRACK_SET;
 	if (isfinite(gpsdata->fix.speed) != 0)
 	    gpsdata->set |= SPEED_SET;

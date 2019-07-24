@@ -182,9 +182,12 @@ void json_tpv_dump(const struct gps_device_t *session,
 	    str_appendf(reply, replylen, "\"epv\":%.3f,", gpsdata->fix.epv);
 	if (isfinite(gpsdata->fix.track) != 0)
 	    str_appendf(reply, replylen, "\"track\":%.4f,", gpsdata->fix.track);
-	if (isfinite(gpsdata->fix.magnetic_track) != 0)
+	if (0 != isfinite(gpsdata->fix.magnetic_track))
 		str_appendf(reply, replylen, "\"magtrack\":%.4f,",
                             gpsdata->fix.magnetic_track);
+	if (0 != isfinite(gpsdata->fix.magnetic_var))
+		str_appendf(reply, replylen, "\"magvar\":%.1f,",
+                            gpsdata->fix.magnetic_var);
 	if (isfinite(gpsdata->fix.speed) != 0)
 	    str_appendf(reply, replylen, "\"speed\":%.3f,", gpsdata->fix.speed);
 	if ((gpsdata->fix.mode >= MODE_3D) && isfinite(gpsdata->fix.climb) != 0)

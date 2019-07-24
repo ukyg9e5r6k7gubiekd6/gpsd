@@ -181,7 +181,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     session->newdata.geoid_sep = ((short)getzword(33)) * 1e-2;
     session->newdata.speed = (int)getzlong(34) * 1e-2;
     session->newdata.track = (int)getzword(36) * RAD_2_DEG * 1e-3;
-    session->mag_var = ((short)getzword(37)) * RAD_2_DEG * 1e-4;
+    session->newdata.magnetic_var = ((short)getzword(37)) * RAD_2_DEG * 1e-4;
     session->newdata.climb = ((short)getzword(38)) * 1e-2;
     datum = getzword(39);
     datum_code_string(datum, session->newdata.datum,

@@ -270,6 +270,12 @@ and is often inacurate.  See the comments below on geoidSep.  Present if
         <entry>Course over ground, degrees magnetic.</entry>
 </row>
 <row>
+	<entry>magvar</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Magnetic variation, degrees.</entry>
+</row>
+<row>
 	<entry>speed</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
