@@ -72,6 +72,7 @@ superstar2_msg_ack(struct gps_device_t *session,
  */
 
 
+/* Navigation Data (User Coordinates) ID# 20 */
 static gps_mask_t
 superstar2_msg_navsol_lla(struct gps_device_t *session,
 			  unsigned char *buf, size_t data_len)
