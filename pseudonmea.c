@@ -134,6 +134,8 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
     char lon_str[BUF_SZ];
     char speed_str[BUF_SZ];
     char track_str[BUF_SZ];
+    char var_str[BUF_SZ];
+    char *var_dir = "";
     struct tm tm;
 
     utc_to_hhmmss(session->gpsdata.fix.time, time_str, sizeof(time_str), &tm);
@@ -147,8 +149,15 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
     } else {
         time2_str[0] = '\0';
     }
+    if (0 != isfinite(session->gpsdata.fix.magnetic_var)) {
+	f_str(session->gpsdata.fix.magnetic_var, "%.1f", var_str),
+	var_dir = (session->gpsdata.fix.magnetic_var > 0) ? "E" : "W";
+    } else {
+        var_str[0] = '\0';
+        var_dir = "";
+    }
     (void)snprintf(bufp, len,
-                   "$GPRMC,%s,%c,%s,%c,%s,%c,%s,%s,%s,,",
+                   "$GPRMC,%s,%c,%s,%c,%s,%c,%s,%s,%s,%s,%s",
                    time_str,
                    session->gpsdata.status ? 'A' : 'V',
                    degtodm_str(session->gpsdata.fix.latitude, "%09.4f",
@@ -160,7 +169,8 @@ static void gpsd_transit_fix_dump(struct gps_device_t *session,
                    f_str(session->gpsdata.fix.speed * MPS_TO_KNOTS, "%.4f",
                             speed_str),
                    f_str(session->gpsdata.fix.track, "%.3f", track_str),
-                   time2_str);
+                   time2_str,
+                   var_str, var_dir);
     nmea_add_checksum(bufp);
 }
 
