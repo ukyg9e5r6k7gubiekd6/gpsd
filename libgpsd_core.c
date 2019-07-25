@@ -920,17 +920,11 @@ static void gpsd_error_model(struct gps_device_t *session)
 	(session->gpsdata.status ==
 	 STATUS_DGPS_FIX ? P_UERE_WITH_DGPS : P_UERE_NO_DGPS);
 
-    if (0 != isfinite(fix->latitude)) {
-	if ((90.0 < fabs(fix->latitude))) {
-            fix->latitude = NAN;
-            fix->longitude = NAN;
-        }
-    }
-    if (0 != isfinite(fix->longitude)) {
-	if ((180.0 < fabs(fix->longitude))) {
-            fix->latitude = NAN;
-            fix->longitude = NAN;
-        }
+    if (0 == isfinite(fix->latitude) ||
+        0 == isfinite(fix->longitude) ||  /* both lat/lon, or none */
+        90.0 < fabs(fix->latitude) ||     /* lat out of range */
+        180.0 < fabs(fix->longitude)) {   /* lon out of range */
+	fix->latitude = fix->longitude = NAN;
     }
     /* validate ECEF */
     if (0 == isfinite(fix->ecef.x) ||
