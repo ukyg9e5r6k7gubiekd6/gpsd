@@ -1531,9 +1531,6 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
         session->newdata.mode = MODE_3D;
     else if (session->gpsdata.status != 0)
         session->newdata.mode = MODE_2D;
-    gpsd_log(&session->context->errout, LOG_PROG,
-             "SiRF: MND 0x02: Navtype %#0x, Status %d mode %d\n",
-             navtype, session->gpsdata.status, session->newdata.mode);
     /* byte 20 is HDOP */
     session->gpsdata.dop.hdop = (double)getub(buf, 20) / 5.0;
     /* byte 21 is nav_mode2, not clear how to interpret that */
@@ -1569,14 +1566,17 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
         mask |= NTPTIME_IS;
     }
 
+    gpsd_log(&session->context->errout, LOG_PROG,
+             "SiRF: MND 0x02: Navtype %#0x, Status %d mode %d\n",
+             navtype, session->gpsdata.status, session->newdata.mode);
     gpsd_log(&session->context->errout, LOG_DATA,
              "SiRF: MND 0x02: gpsd_week %u iTOW %u\n",
              gps_week, iTOW);
     gpsd_log(&session->context->errout, LOG_DATA,
-             "SiRF: MND 0x02: time %.2f lat %.2f lon %.2f "
+             "SiRF: MND 0x02: time %.2f ecef x: %.2f y: %.2f z: %.2f "
              "mode %d status %d hdop %.2f used %d\n",
-             session->newdata.time, session->newdata.latitude,
-             session->newdata.longitude,
+             session->newdata.time, session->newdata.ecef.x,
+             session->newdata.ecef.y, session->newdata.ecef.z,
              session->newdata.mode, session->gpsdata.status,
              session->gpsdata.dop.hdop, session->gpsdata.satellites_used);
     return mask;
