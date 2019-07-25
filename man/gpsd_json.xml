@@ -273,8 +273,10 @@ and is often inacurate.  See the comments below on geoidSep.  Present if
 	<entry>magvar</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Magnetic variation, degrees.  Positive is West variation.
-Negative is East variation.</entry>
+        <entry>Magnetic variation, degrees.  Also known as
+the magnetic declination (the direction of the horizontal component of
+the magnetic field measured clockwise from north) in degrees,
+Positive is West variation.  Negative is East variation.</entry>
 </row>
 <row>
 	<entry>speed</entry>
