@@ -920,6 +920,25 @@ static void gpsd_error_model(struct gps_device_t *session)
 	(session->gpsdata.status ==
 	 STATUS_DGPS_FIX ? P_UERE_WITH_DGPS : P_UERE_NO_DGPS);
 
+    if (0 != isfinite(fix->latitude)) {
+	if ((90.0 < fabs(fix->latitude))) {
+            fix->latitude = NAN;
+            fix->longitude = NAN;
+        }
+    }
+    if (0 != isfinite(fix->longitude)) {
+	if ((180.0 < fabs(fix->longitude))) {
+            fix->latitude = NAN;
+            fix->longitude = NAN;
+        }
+    }
+    /* validate ECEF */
+    if (0 == isfinite(fix->ecef.x) ||
+        0 == isfinite(fix->ecef.y) ||
+        0 == isfinite(fix->ecef.z)) {
+        fix->ecef.x = fix->ecef.y = fix->ecef.z = NAN;
+    }
+
     /* If you are in a rocket, and your GPS is ITAR unlocked, then
      * triple check these sanity checks.
      *
@@ -961,20 +980,6 @@ static void gpsd_error_model(struct gps_device_t *session)
 	    fix->track = atan2(fix->NED.velE, fix->NED.velN) * RAD_2_DEG;
 	    if (fix->track < 0.0)
 		fix->track += 360.0;
-        }
-    }
-
-
-    if (0 != isfinite(fix->latitude)) {
-	if ((90.0 < fabs(fix->latitude))) {
-            fix->latitude = NAN;
-            fix->longitude = NAN;
-        }
-    }
-    if (0 != isfinite(fix->longitude)) {
-	if ((180.0 < fabs(fix->longitude))) {
-            fix->latitude = NAN;
-            fix->longitude = NAN;
         }
     }
 
