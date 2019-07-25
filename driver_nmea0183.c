@@ -438,17 +438,17 @@ static gps_mask_t processRMC(int count, char *field[],
         }
 
         /* get magnetic variation */
-	if ('\0' != field[11][0] &&
-	    '\0' != field[12][0]) {
-	    session->newdata.magnetic_var = safe_atof(field[11]);
+	if ('\0' != field[10][0] &&
+	    '\0' != field[11][0]) {
+	    session->newdata.magnetic_var = safe_atof(field[10]);
 
-            switch (field[12][0]) {
+            switch (field[11][0]) {
             case 'E':
-                /* no change */
+		session->newdata.magnetic_var = -session->newdata.magnetic_var;
 		mask |= MAGNETIC_TRACK_SET;
                 break;
             case 'W':
-		session->newdata.magnetic_var = -session->newdata.magnetic_var;
+                /* no change */
 		mask |= MAGNETIC_TRACK_SET;
                 break;
             default:
@@ -484,13 +484,14 @@ static gps_mask_t processRMC(int count, char *field[],
 
     gpsd_log(&session->context->errout, LOG_DATA,
              "RMC: ddmmyy=%s hhmmss=%s lat=%.2f lon=%.2f "
-             "speed=%.2f track=%.2f mode=%d status=%d\n",
+             "speed=%.2f track=%.2f mode=%d var=%.1f status=%d\n",
              field[9], field[1],
              session->newdata.latitude,
              session->newdata.longitude,
              session->newdata.speed,
              session->newdata.track,
              session->newdata.mode,
+             session->newdata.magnetic_var,
              session->gpsdata.status);
     return mask;
 }
@@ -2305,12 +2306,33 @@ static gps_mask_t processHDG(int c UNUSED, char *field[],
     session->newdata.magnetic_track = sensor_heading;
     mask |= MAGNETIC_TRACK_SET;
 
-    /* FIXME: place to put mag_var?? */
+    /* get magnetic variation */
+    if ('\0' != field[3][0] &&
+	'\0' != field[4][0]) {
+	session->newdata.magnetic_var = safe_atof(field[3]);
+
+	switch (field[4][0]) {
+	case 'E':
+	    /* no change */
+	    mask |= MAGNETIC_TRACK_SET;
+	    break;
+	case 'W':
+	    session->newdata.magnetic_var = -session->newdata.magnetic_var;
+	    mask |= MAGNETIC_TRACK_SET;
+	    break;
+	default:
+	    /* huh? */
+	    session->newdata.magnetic_var = NAN;
+	    break;
+	}
+    }
+
 
     gpsd_log(&session->context->errout, LOG_RAW,
-             "time %.3f, heading %lf.\n",
+             "time %.3f, heading %lf var %.1f\n",
              session->newdata.time,
-             session->newdata.magnetic_track);
+             session->newdata.magnetic_track,
+             session->newdata.magnetic_var);
     return mask;
 }
 
