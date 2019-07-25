@@ -1516,6 +1516,9 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
                      session->newdata.ecef.x, session->newdata.ecef.y,
                      session->newdata.ecef.z, session->newdata.ecef.vx,
                      session->newdata.ecef.vy, session->newdata.ecef.vz);
+
+    mask |= ECEF_SET | VECEF_SET;
+
     /* fix status is byte 19 */
     navtype = (unsigned short)getub(buf, 19);
     session->gpsdata.status = STATUS_NO_FIX;
@@ -1561,8 +1564,7 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
 #endif /* TIMEHINT_ENABLE */
     /* clear computed DOPs so they get recomputed. */
     session->gpsdata.dop.tdop = NAN;
-    mask |= TIME_SET | ECEF_SET | VECEF_SET | STATUS_SET | MODE_SET |
-            DOP_SET | USED_IS;
+    mask |= TIME_SET | STATUS_SET | MODE_SET | DOP_SET | USED_IS;
     if ( 3 <= session->gpsdata.satellites_visible ) {
         mask |= NTPTIME_IS;
     }
