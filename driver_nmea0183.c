@@ -437,7 +437,27 @@ static gps_mask_t processRMC(int count, char *field[],
             mask |= TRACK_SET;
         }
 
-        /* FIXME: get magnetic variance */
+        /* get magnetic variation */
+	if ('\0' != field[11][0] &&
+	    '\0' != field[12][0]) {
+	    session->newdata.magnetic_var = safe_atof(field[11]);
+
+            switch (field[12][0]) {
+            case 'E':
+                /* no change */
+		mask |= MAGNETIC_TRACK_SET;
+                break;
+            case 'W':
+		session->newdata.magnetic_var = -session->newdata.magnetic_var;
+		mask |= MAGNETIC_TRACK_SET;
+                break;
+            default:
+                /* huh? */
+		session->newdata.magnetic_var = NAN;
+                break;
+            }
+	}
+
         if (count >= 12) {
             newstatus = faa_mode(field[12][0]);
         }
