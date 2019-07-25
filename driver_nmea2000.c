@@ -252,10 +252,18 @@ static gps_mask_t hnd_126996(unsigned char *bu, int len, PGN *pgn, struct gps_de
 
 /*
  *   PGN 127258: GNSS Magnetic Variation
+ *
+ *   1 Sequence ID
+ *   2 Variation Source
+ *   3 Reserved Bits
+ *   4 Age of Service (Date)
+ *   5 Variation
+ *   6 Reserved B
  */
 static gps_mask_t hnd_127258(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
     print_data(session->context, bu, len, pgn);
+    /* FIXME?  Get magnetic variation */
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
     return(0);
