@@ -929,7 +929,10 @@ static void gpsd_error_model(struct gps_device_t *session)
     /* validate ECEF */
     if (0 == isfinite(fix->ecef.x) ||
         0 == isfinite(fix->ecef.y) ||
-        0 == isfinite(fix->ecef.z)) {
+        0 == isfinite(fix->ecef.z) ||
+        10.0 >= (fabs(fix->ecef.x) +
+                 fabs(fix->ecef.y) +
+                 fabs(fix->ecef.z))) { /* all zeros */
         fix->ecef.x = fix->ecef.y = fix->ecef.z = NAN;
     }
 
