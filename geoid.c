@@ -446,7 +446,7 @@ double wgs84_separation(double lat, double lon)
  * x, y, z are all in meters
  * vx, vy, vz are all in meters/second
  */
-gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
+gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix,
 		            double x, double y, double z,
 		            double vx, double vy, double vz)
 {
@@ -478,7 +478,7 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix, double *separation,
     fix->latitude = phi * RAD_2_DEG;
     fix->longitude = lambda * RAD_2_DEG;
     mask |= LATLON_SET | ALTITUDE_SET;
-    *separation = wgs84_separation(fix->latitude, fix->longitude);
+
     /* velocity computation */
     vnorth = -vx * sin(phi) * cos(lambda) - vy * sin(phi) * sin(lambda) +
 	     vz * cos(phi);

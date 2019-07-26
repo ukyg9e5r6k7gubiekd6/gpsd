@@ -940,7 +940,7 @@ static void gpsd_error_model(struct gps_device_t *session)
     if ((0 == isfinite(fix->longitude) ||
          0 == isfinite(fix->latitude)) &&
         0 != isfinite(fix->ecef.x)) {
-	session->gpsdata.set |= ecef_to_wgs84fix(fix, &fix->geoid_sep,
+	session->gpsdata.set |= ecef_to_wgs84fix(fix,
 			                         fix->ecef.x, fix->ecef.y,
 			                         fix->ecef.z, fix->ecef.vx,
 			                         fix->ecef.vy, fix->ecef.vz);
