@@ -132,7 +132,6 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
     double epx, epy, epz, evx, evy, evz;
     unsigned char navmode;
     struct gps_data_t g;
-    double separation;
 
     if (data_len != 52)
 	return;
@@ -151,7 +150,7 @@ static void display_nav_sol(unsigned char *buf, size_t data_len)
     evx = (double)(getles32(buf, 28) / 100.0);
     evy = (double)(getles32(buf, 32) / 100.0);
     evz = (double)(getles32(buf, 36) / 100.0);
-    (void)ecef_to_wgs84fix(&g.fix, &separation, epx, epy, epz, evx, evy, evz);
+    (void)ecef_to_wgs84fix(&g.fix, epx, epy, epz, evx, evy, evz);
     /* maybe should check the ecef_to_wgs84fix() return code? */
 
     g.fix.epx = g.fix.epy = (double)(getles32(buf, 24) / 100.0);
