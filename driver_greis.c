@@ -261,7 +261,7 @@ static gps_mask_t greis_msg_PV(struct gps_device_t *session,
 	     session->newdata.ecef.pAcc);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GREIS: PV, ECEF vx=%.2f vy=%.2f vz=%.2f vAcc=%.2f ",
+	     "GREIS: PV, ECEF vx=%.2f vy=%.2f vz=%.2f vAcc=%.2f "
 	     "solution_type: %d\n",
 	     session->newdata.ecef.vx,
 	     session->newdata.ecef.vy,
