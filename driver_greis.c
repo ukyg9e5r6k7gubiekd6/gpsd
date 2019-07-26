@@ -243,8 +243,6 @@ static gps_mask_t greis_msg_PV(struct gps_device_t *session,
     session->newdata.ecef.vy = vy;
     session->newdata.ecef.vz = vz;
     session->newdata.ecef.vAcc = v_sigma;
-    mask |= ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
-                             x, y, z, vx, vy, vz);
 
     /* GREIS Reference Guide 3.4.2 "General Notes" part "Solution Types" */
     if (solution_type > 0 && solution_type < 5) {
@@ -263,16 +261,12 @@ static gps_mask_t greis_msg_PV(struct gps_device_t *session,
 	     session->newdata.ecef.pAcc);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GREIS: PV, ECEF vx=%.2f vy=%.2f vz=%.2f vAcc=%.2f\n",
+	     "GREIS: PV, ECEF vx=%.2f vy=%.2f vz=%.2f vAcc=%.2f ",
+	     "solution_type: %d\n",
 	     session->newdata.ecef.vx,
 	     session->newdata.ecef.vy,
 	     session->newdata.ecef.vz,
-	     session->newdata.ecef.vAcc);
-
-    gpsd_log(&session->context->errout, LOG_DATA,
-	     "GREIS: PV, lat: %.2f, lon: %.2f, solution_type: %d\n",
-	     session->newdata.latitude,
-	     session->newdata.longitude,
+	     session->newdata.ecef.vAcc,
 	     solution_type);
 
    mask |= MODE_SET | STATUS_SET | ECEF_SET | VECEF_SET;
