@@ -189,11 +189,6 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	session->newdata.ecef.vx = (double)getles16(buf2, 21) / 10.0,
 	session->newdata.ecef.vy = (double)getles16(buf2, 23) / 10.0,
 	session->newdata.ecef.vz = (double)getles16(buf2, 25) / 10.0;
-	mask |= ecef_to_wgs84fix(&session->newdata,
-		     &session->newdata.geoid_sep,
-		     session->newdata.ecef.x, session->newdata.ecef.y,
-		     session->newdata.ecef.z, session->newdata.ecef.vx,
-		     session->newdata.ecef.vy, session->newdata.ecef.vz);
 	used = (unsigned char)getub(buf2, 27) & 0x0f;
 	//visible = (getub(buf2, 27) & 0xf0) >> 4;
 	version = (unsigned int) getleu16(buf2, 28) / 100.0;
@@ -212,10 +207,10 @@ gps_mask_t evermore_parse(struct gps_device_t * session, unsigned char *buf,
 	    mask |= DEVICEID_SET;
 	}
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "NDO 0x02: time=%.2f, lat=%.2f lon=%.2f "
+		 "NDO 0x02: time=%.2f, ecef x: %.2f y: %.2f z: %.2f "
                  "climb=%.2f mode=%d subtype='%s\n",
-		 session->newdata.time, session->newdata.latitude,
-		 session->newdata.longitude,
+		 session->newdata.time, session->newdata.ecef.x,
+		 session->newdata.ecef.y, session->newdata.ecef.z,
 		 session->newdata.climb, session->newdata.mode,
 		 session->gpsdata.dev.subtype);
 	return mask | CLEAR_IS | REPORT_IS;
