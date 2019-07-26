@@ -707,11 +707,6 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     session->newdata.ecef.vy = getles32(buf, 32) / 100.0;
     session->newdata.ecef.vz = getles32(buf, 36) / 100.0;
     session->newdata.ecef.vAcc = getleu32(buf, 40) / 100.0;
-    mask |= ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
-                    session->newdata.ecef.x, session->newdata.ecef.y,
-                    session->newdata.ecef.z, session->newdata.ecef.vx,
-                    session->newdata.ecef.vy, session->newdata.ecef.vz);
-
     mask |= ECEF_SET | VECEF_SET;
 
     session->newdata.eps = (double)(getles32(buf, 40) / 100.0);
@@ -756,11 +751,12 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     mask |= MODE_SET | STATUS_SET;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-             "UBX-NAV-SOL: time=%.2f lat=%.2f lon=%.2f track=%.2f "
+             "UBX-NAV-SOL: time=%.2f ecef x:%.2f y:%.2f z:%.2f track=%.2f "
              "speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
              session->newdata.time,
-             session->newdata.latitude,
-             session->newdata.longitude,
+             session->newdata.ecef.x,
+             session->newdata.ecef.y,
+             session->newdata.ecef.z,
              session->newdata.track,
              session->newdata.speed,
              session->newdata.climb,
