@@ -402,6 +402,11 @@ double wgs84_separation(double lat, double lon)
     int ilat1, ilat2, ilon1, ilon2;
     const int span = 5;
 
+    if (0 == isfinite(lat) ||
+        0 == isfinite(lon)) {
+        return 0.0;
+    }
+
     /* ilat is 0 to 18
      * lat -90 (90S) is ilat 0
      * lat 0 is ilat 9
