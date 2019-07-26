@@ -1512,11 +1512,6 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
     session->newdata.ecef.vy = (double)getbes16(buf, 15) / 8.0;
     session->newdata.ecef.vz = (double)getbes16(buf, 17) / 8.0;
 
-    mask |= ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
-                     session->newdata.ecef.x, session->newdata.ecef.y,
-                     session->newdata.ecef.z, session->newdata.ecef.vx,
-                     session->newdata.ecef.vy, session->newdata.ecef.vz);
-
     mask |= ECEF_SET | VECEF_SET;
 
     /* fix status is byte 19 */
