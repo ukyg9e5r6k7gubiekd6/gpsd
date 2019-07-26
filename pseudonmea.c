@@ -496,7 +496,7 @@ void nmea_tpv_dump(struct gps_device_t *session,
     if ((session->gpsdata.set & TIME_SET) != 0)
         gpsd_binary_time_dump(session, bufp + strlen(bufp),
                               len - strlen(bufp));
-    if ((session->gpsdata.set & LATLON_SET) != 0) {
+    if ((session->gpsdata.set & (LATLON_SET | MODE_SET)) != 0) {
         gpsd_position_fix_dump(session, bufp + strlen(bufp),
                                len - strlen(bufp));
         gpsd_transit_fix_dump(session, bufp + strlen(bufp),
