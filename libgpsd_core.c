@@ -936,6 +936,16 @@ static void gpsd_error_model(struct gps_device_t *session)
         fix->ecef.x = fix->ecef.y = fix->ecef.z = NAN;
     }
 
+    /* if we have not lat/lon, but do have ECEF, calculate lat/lon */
+    if ((0 == isfinite(fix->longitude) ||
+         0 == isfinite(fix->latitude)) &&
+        0 != isfinite(fix->ecef.x)) {
+	(void)ecef_to_wgs84fix(fix, &fix->geoid_sep,
+			fix->ecef.x, fix->ecef.y,
+			fix->ecef.z, fix->ecef.vx,
+			fix->ecef.vy, fix->ecef.vz);
+    }
+
     /* If you are in a rocket, and your GPS is ITAR unlocked, then
      * triple check these sanity checks.
      *
