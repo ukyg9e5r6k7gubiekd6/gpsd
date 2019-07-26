@@ -73,10 +73,6 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
     session->newdata.ecef.vx = (double)(getles32(buf, 7 + 186) / 1000.0);
     session->newdata.ecef.vy = (double)(getles32(buf, 7 + 190) / 1000.0);
     session->newdata.ecef.vz = (double)(getles32(buf, 7 + 194) / 1000.0);
-    mask |= ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
-		     session->newdata.ecef.x, session->newdata.ecef.y,
-		     session->newdata.ecef.z, session->newdata.ecef.vx,
-		     session->newdata.ecef.vy, session->newdata.ecef.vz);
     mask |= ECEF_SET | VECEF_SET;
     /* this eph does not look right, badly documented.
      * let gpsd_error_model() handle it
@@ -114,16 +110,17 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "NAV_FIX: time=%.2f, lat=%.2f lon=%.2f altHAE=%.2f speed=%.2f "
-             "track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f pdop=%.2f  "
-             "hdop=%.2f vdop=%.2f tdop=%.2f\n",
-	     session->newdata.time, session->newdata.latitude,
-	     session->newdata.longitude, session->newdata.altHAE,
-	     session->newdata.speed, session->newdata.track,
-	     session->newdata.climb, session->newdata.mode,
-	     session->gpsdata.status, session->gpsdata.dop.gdop,
-	     session->gpsdata.dop.pdop, session->gpsdata.dop.hdop,
-	     session->gpsdata.dop.vdop, session->gpsdata.dop.tdop);
+	     "NAV_FIX: time=%.2f, ecef x:%.2f y:%.2f z:%.2f altHAE=%.2f "
+             "speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f "
+             "pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f\n",
+	     session->newdata.time, session->newdata.ecef.x,
+	     session->newdata.ecef.y, session->newdata.ecef.z,
+             session->newdata.altHAE, session->newdata.speed,
+             session->newdata.track, session->newdata.climb,
+             session->newdata.mode, session->gpsdata.status,
+             session->gpsdata.dop.gdop, session->gpsdata.dop.pdop,
+             session->gpsdata.dop.hdop, session->gpsdata.dop.vdop,
+             session->gpsdata.dop.tdop);
     return mask;
 }
 
