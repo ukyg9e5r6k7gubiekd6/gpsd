@@ -92,10 +92,6 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
     session->newdata.ecef.vx,
     session->newdata.ecef.vy,
     session->newdata.ecef.vz] = GET_ECEF_FIX();
-    mask |= ecef_to_wgs84fix(&session->newdata,  &session->newdata.geoid_sep,
-		     session->newdata.ecef.x, session->newdata.ecef.y,
-		     session->newdata.ecef.z, session->newdata.ecef.vx,
-		     session->newdata.ecef.vy, session->newdata.ecef.vz);
     mask |= ECEF_SET | VECEF_SET;
 
     session->newdata.epx = GET_LONGITUDE_ERROR();
@@ -132,9 +128,12 @@ _proto__msg_navsol(struct gps_device_t *session, unsigned char *buf, size_t data
      * makes it relatively easy to track down data-management problems.
      */
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "NAVSOL: time=%.2f, lat=%.2f lon=%.2f mode=%d status=%d\n",
+	     "NAVSOL: time=%.2f, ecef x:%.2f y: %.2f z: %.2f mode=%d "
+             "status=%d\n",
 	     session->newdata.time,
-	     session->newdata.latitude,
+	     session->newdata.ecef.x,
+	     session->newdata.ecef.y,
+	     session->newdata.ecef.z,
 	     session->newdata.longitude,
 	     session->newdata.mode,
 	     session->gpsdata.status);
