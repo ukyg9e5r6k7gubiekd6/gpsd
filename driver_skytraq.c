@@ -457,11 +457,7 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
     session->newdata.ecef.vx = (double)getbef32((const char *)buf, 37),
     session->newdata.ecef.vy = (double)getbef32((const char *)buf, 41),
     session->newdata.ecef.vz = (double)getbef32((const char *)buf, 45);
-
-    mask |= ecef_to_wgs84fix(&session->newdata, &session->newdata.geoid_sep,
-	session->newdata.ecef.x, session->newdata.ecef.y,
-	session->newdata.ecef.z, session->newdata.ecef.vx,
-	session->newdata.ecef.vy, session->newdata.ecef.vz);
+    mask |= ECEF_SET | VECEF_SET;
 
     clock_bias = getbed64((const char *)buf, 49);
     clock_drift = getbes32(buf, 57);
@@ -487,8 +483,7 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
 	    session->gpsdata.dop.vdop,
 	    session->gpsdata.dop.tdop);
 
-    mask |= TIME_SET | ECEF_SET | VECEF_SET | STATUS_SET | MODE_SET |
-            DOP_SET | CLEAR_IS | REPORT_IS;
+    mask |= TIME_SET | STATUS_SET | MODE_SET | DOP_SET | CLEAR_IS | REPORT_IS;
     return mask;
 }
 
