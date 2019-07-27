@@ -2338,17 +2338,10 @@ packet_regress = UtilityWithHerald(
 Utility('packet-makeregress', [test_packet], [
     '$SRCDIR/tests/test_packet >$SRCDIR/test/packet.test.chk', ])
 
-# Rebuild the geoid test
-Utility('geoid-makeregress', [test_geoid], [
-    '$SRCDIR/tests/test_geoid 37.371192 122.014965 '
-    ' >$SRCDIR/test/geoid.test.chk'])
-
-# Regression-test the geoid tester.
+# Regression-test the geoid and variation tester.
 geoid_regress = UtilityWithHerald(
-    'Testing the geoid model...',
-    'geoid-regress', [test_geoid], [
-        '$SRCDIR/tests/test_geoid 37.371192 122.014965'
-        ' | diff -u $SRCDIR/test/geoid.test.chk -', ])
+    'Testing the geoid and variation models...',
+    'geoid-regress', [test_geoid], ['$SRCDIR/tests/test_geoid'])
 
 # Regression-test the calendar functions
 time_regress = Utility('time-regress', [test_mktime], [
