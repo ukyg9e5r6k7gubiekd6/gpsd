@@ -756,7 +756,7 @@ static double bilinear(int x1, int y1, int x2, int y2, double x,
                        double y, int z11, int z12, int z21,
                        int z22)
 {
-    int delta = (y2 - y1) * (x2 - x1);
+    int delta;
     double xx1 = x - x1;
     double x2x = x2 - x;
     double yy1 = y - y1;
@@ -767,10 +767,12 @@ static double bilinear(int x1, int y1, int x2, int y2, double x,
        if (x1 == x2)
            return z11;
        else
-           return (z22 * (x - x1) + z11 * (x2 - x)) / (x2 - x1);
+           return (z22 * (xx1) + z11 * (x2x)) / (x2 - x1);
     } else if (x1 == x2) {
-       return (z22 * (y - y1) + z11 * (y2 - y)) / (y2 - y1);
+       return (z22 * (yy1) + z11 * (y2y)) / (y2 - y1);
     }
+
+    delta = (y2 - y1) * (x2 - x1);
 
 #ifdef __UNUSED
     fprintf(stderr, "x1 %d x2 %d y1 %d y2 %d delta %d\n",
