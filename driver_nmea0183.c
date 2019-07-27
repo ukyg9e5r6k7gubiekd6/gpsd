@@ -444,17 +444,22 @@ static gps_mask_t processRMC(int count, char *field[],
 
             switch (field[11][0]) {
             case 'E':
-		session->newdata.magnetic_var = -session->newdata.magnetic_var;
-		mask |= MAGNETIC_TRACK_SET;
+                /* no change */
                 break;
             case 'W':
-                /* no change */
-		mask |= MAGNETIC_TRACK_SET;
+		session->newdata.magnetic_var = -session->newdata.magnetic_var;
                 break;
             default:
                 /* huh? */
 		session->newdata.magnetic_var = NAN;
                 break;
+            }
+	    if (0 == isfinite(session->newdata.magnetic_var) ||
+		0.09 >= fabs(session->newdata.magnetic_var)) {
+		/* some GPS set 0.0,E, or 0,w instead of blank */
+		session->newdata.magnetic_var = NAN;
+            } else {
+		mask |= MAGNETIC_TRACK_SET;
             }
 	}
 

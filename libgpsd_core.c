@@ -996,12 +996,19 @@ static void gpsd_error_model(struct gps_device_t *session)
      * and altHAE and altMSL in the simplest possible way.
      */
 
-    /* geoid (ellipsoid) separation */
-    if (0 == isfinite(fix->geoid_sep) &&
-	0 != isfinite(fix->latitude) &&
-	0 != isfinite(fix->longitude)) {
-	    fix->geoid_sep = wgs84_separation(fix->latitude,
-					      fix->longitude);
+    /* geoid (ellipsoid) separation and variation */
+    if (0 != isfinite(fix->latitude) &&
+        0 != isfinite(fix->longitude)) {
+        if (0 == isfinite(fix->geoid_sep)) {
+            fix->geoid_sep = wgs84_separation(fix->latitude,
+                                              fix->longitude);
+        }
+        if (0 == isfinite(fix->magnetic_var) ||
+            0.09 >= fabs(fix->magnetic_var)) {
+            /* some GPS set 0.0,E, or 0,w instead of blank */
+            fix->magnetic_var = mag_var(fix->latitude,
+                                        fix->longitude);
+        }
     }
     if (0 != isfinite(fix->geoid_sep)) {
 	if (0 != isfinite(fix->altHAE) &&
