@@ -30,8 +30,8 @@ struct test3 tests3[] = {
     /*  wgs84 separation, cm precision
      *  online calculator:
      *  https://geographiclib.sourceforge.io/cgi-bin/GeoidEval
-     *  what MSL is this?  EGM208, EGM96, EGM84, or??
-     *  Seems closest to EGM2008, but still off by a meter.
+     *
+     * magnetic variation, hundredths of a degree precision.
      *
      * same tests as test_clienthelpers.py.  Keep them in sync.
      */
