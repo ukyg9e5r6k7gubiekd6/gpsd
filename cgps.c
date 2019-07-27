@@ -159,7 +159,7 @@ static const char *tenth_to_str(double val, double min, double max)
     if (0 == isfinite(val) ||
         val < min ||
         val > max) {
-        return " n/a";
+        return "  n/a";
     }
     (void)snprintf(buf, sizeof(buf), "%5.1f", val);
     return buf;
