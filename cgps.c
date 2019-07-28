@@ -745,27 +745,33 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 
     /* Fill in the heading. */
     if (gpsdata->fix.mode >= MODE_2D && isfinite(gpsdata->fix.track) != 0) {
-        char buf1[20];
+        char buf1[20], buf2[20];
         double magheading = true2magnetic(gpsdata->fix.latitude,
                                          gpsdata->fix.longitude,
                                           gpsdata->fix.track);
+        if (!magnetic_flag) {
+            (void)strlcpy(scr, " (true, var):   ", sizeof(scr));
+        } else {
+            (void)strlcpy(scr, " (mag, var):    ", sizeof(scr));
+        }
         if (!magnetic_flag || isfinite(magheading) == 0) {
-            (void)snprintf(scr, sizeof(scr), " (true, var): %5.1f,",
+            (void)snprintf(buf1, sizeof(buf1), "%5.1f,",
                            gpsdata->fix.track);
         } else {
-            (void)snprintf(scr, sizeof(scr), " (mag, var):  %5.1f,",
+            (void)snprintf(buf1, sizeof(buf1), "%5.1f,",
                 magheading);
         }
+	(void)strlcat(scr, buf1, sizeof(scr));
         if (0 != isfinite(gpsdata->fix.magnetic_var)) {
-            (void)snprintf(buf1, sizeof(buf1), "%6.1f deg",
+            (void)snprintf(buf2, sizeof(buf2), "%6.1f",
                            gpsdata->fix.magnetic_var);
-            (void)strlcat(scr, buf1, sizeof(scr));
+            (void)strlcat(scr, buf2, sizeof(scr));
         } else {
-            (void)strlcat(scr, "       deg", sizeof(scr));
+            (void)strlcat(scr, "      ", sizeof(scr));
         }
     } else
-        (void)strncpy(scr, "          n/a", sizeof(scr));
-    (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET - 8, "%-*s", 25, scr);
+        (void)strncpy(scr, "              n/a", sizeof(scr));
+    (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET - 8, "%-*s deg", 25, scr);
 
     /* Fill in the rate of climb. */
     if (isfinite(gpsdata->fix.climb) != 0)
