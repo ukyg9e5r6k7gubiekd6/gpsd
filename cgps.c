@@ -558,7 +558,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 /* This gets called once for each new GPS sentence. */
 {
     int newstate;
-    char scr[60];
+    char scr[80];
 
     /* This is for the satellite status display.  Originally lifted from
      * xgps.c.  Note that the satellite list may be truncated based on
@@ -771,7 +771,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
             (void)strlcat(scr, "      ", sizeof(scr));
         }
     } else
-        (void)strncpy(scr, "                n/a", sizeof(scr));
+        (void)strncat(scr, "             n/a", sizeof(scr));
     (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET - 10, "%-*s deg",
                     32, scr);
 
