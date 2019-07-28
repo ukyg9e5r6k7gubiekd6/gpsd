@@ -590,7 +590,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         for (sat_no = 0; sat_no < loop_end; sat_no++) {
             int column = 1;     /* column to write to */
             char *gnssid;
-            char sigid[2] = "";
+            char sigid[2] = " ";
             char health = ' ';
 
             if ( 0 == gpsdata->skyview[sat_no].svid) {
@@ -716,13 +716,13 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
     if (gpsdata->fix.mode >= MODE_3D) {
         char buf1[20], buf2[20];
         if (0 != isfinite(gpsdata->fix.altHAE))
-	    (void)snprintf(buf1, sizeof(buf1), " %10.3f,",
+	    (void)snprintf(buf1, sizeof(buf1), "%11.3f,",
 			   gpsdata->fix.altHAE * altfactor);
 	else
 	    (void)strncpy(buf1, "        n/a,", sizeof(buf1));
 
 	if (0 != isfinite(gpsdata->fix.altMSL))
-	    (void)snprintf(buf2, sizeof(buf2), "%10.3f ",
+	    (void)snprintf(buf2, sizeof(buf2), "%11.3f ",
 			   gpsdata->fix.altMSL * altfactor);
 	else
 	    (void)strncpy(scr, "       n/a ", sizeof(scr));
