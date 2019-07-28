@@ -919,7 +919,6 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
                             27, estr);
         }
 
-
         /* Fill in the estimated speed error, EPS. */
         ep_str = ep_to_str(gpsdata->fix.eps, speedfactor, speedunits);
         (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET + 8,
@@ -927,7 +926,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 
         /* Fill in the estimated track error, EPD. */
         ep_str = ep_to_str(gpsdata->fix.epd, speedfactor, "deg");
-        (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET +8, "%-*s ",
+        (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET + 8, "%-*s ",
                         14, ep_str);
 
         /* Fill in the time offset, milliseconds. */
