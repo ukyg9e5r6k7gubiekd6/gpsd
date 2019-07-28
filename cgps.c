@@ -186,7 +186,8 @@ static char *ep_to_str(double ep, double factor, char *units)
     if (isfinite(ep) == 0) {
         return " n/a  ";
     }
-    val = ep * factor;
+    /* somehow these go negative now and then... */
+    val = fabs(ep * factor);
     if ( 100 <= val ) {
         (void)snprintf(buf, sizeof(buf), "+/-%5d %.3s", (int)val, units);
     } else {
@@ -922,12 +923,12 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         /* Fill in the estimated speed error, EPS. */
         ep_str = ep_to_str(gpsdata->fix.eps, speedfactor, speedunits);
         (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET + 8,
-                        "%-*s", 12, ep_str);
+                        "%-*s    ", 14, ep_str);
 
         /* Fill in the estimated track error, EPD. */
         ep_str = ep_to_str(gpsdata->fix.epd, speedfactor, "deg");
-        (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET + 8, "%-*s", 18,
-                        ep_str);
+        (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET +8, "%-*s ",
+                        14, ep_str);
 
         /* Fill in the time offset, milliseconds. */
         if (isfinite(gpsdata->fix.time) != 0)
