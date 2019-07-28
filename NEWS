@@ -15,6 +15,8 @@
   wgs84_separation() now return EGM2008 computed from 5x5 degree base data.
      The best results are close to cm, the worst off up to 12m.
   Move mag_var from gps_device_t to magnetic_var gps_data_t.
+  Added mag_var() to interpolate magnetic variation (deviation) from a table.
+  Remove true2magnetic() as mag_var() improves on it.
 
 3.19: 2019-07-01
   Rearrange rawdata_t.  Bump the API because gps_data_t changed.
