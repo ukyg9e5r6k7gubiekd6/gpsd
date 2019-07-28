@@ -383,7 +383,7 @@ Positive is West variation.  Negative is East variation.</entry>
 	<entry>numeric</entry>
         <entry>Geoid separation is the difference between the WGS84
 reference elipsoid and the geoid (Mean Sea Level) in meters.  Almost no
-GNSS receiver specifies how they compute their geoid. gpsd computes the
+GNSS receiver specifies how they compute their geoid. gpsd interpolates the
 geoid from a 5x5 degree table of EGM2008 values when the receiver does
 not supply a geoid separation.  The gpsd computed geoidSep is usually
 within one meter of the "true" value, but can be off as much as 12 meters.
