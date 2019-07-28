@@ -369,7 +369,7 @@ static void windowsetup(void)
 
         /* Do the initial field label setup. */
         (void)mvwprintw(datawin, row++, DATAWIN_DESC_OFFSET, "Time:");
-        (void)mvwprintw(datawin, row++, DATAWIN_DESC_OFFSET, "Heading:");
+        (void)mvwprintw(datawin, row++, DATAWIN_DESC_OFFSET, "Heading ");
         (void)mvwprintw(datawin, row++, DATAWIN_DESC_OFFSET, "Pitch:");
         (void)mvwprintw(datawin, row++, DATAWIN_DESC_OFFSET, "Roll:");
         (void)mvwprintw(datawin, row++, DATAWIN_DESC_OFFSET, "Dip:");
@@ -745,19 +745,27 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 
     /* Fill in the heading. */
     if (gpsdata->fix.mode >= MODE_2D && isfinite(gpsdata->fix.track) != 0) {
+        char buf1[20];
         double magheading = true2magnetic(gpsdata->fix.latitude,
                                          gpsdata->fix.longitude,
                                           gpsdata->fix.track);
         if (!magnetic_flag || isfinite(magheading) == 0) {
-            (void)snprintf(scr, sizeof(scr), "%5.1f deg (true)",
+            (void)snprintf(scr, sizeof(scr), " (true, var): %5.1f,",
                            gpsdata->fix.track);
         } else {
-            (void)snprintf(scr, sizeof(scr), "%5.1f deg (mag) ",
+            (void)snprintf(scr, sizeof(scr), " (mag, var):  %5.1f,",
                 magheading);
         }
+        if (0 != isfinite(gpsdata->fix.magnetic_var)) {
+            (void)snprintf(buf1, sizeof(buf1), "%6.1f deg",
+                           gpsdata->fix.magnetic_var);
+	    (void)strlcat(scr, buf1, sizeof(scr));
+        } else {
+	    (void)strlcat(scr, "       deg", sizeof(scr));
+        }
     } else
-        (void)strncpy(scr, "n/a", sizeof(scr));
-    (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET, "  %-*s", 25, scr);
+        (void)strncpy(scr, "          n/a", sizeof(scr));
+    (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET - 8, "%-*s", 25, scr);
 
     /* Fill in the rate of climb. */
     if (isfinite(gpsdata->fix.climb) != 0)
