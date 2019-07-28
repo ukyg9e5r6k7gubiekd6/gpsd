@@ -569,13 +569,13 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         /* got version, check it */
         /* FIXME: expected API version not available ? */
         if (0 != strcmp(gpsdata->version.release, VERSION)) {
-	    (void)fprintf(stderr, "cgps: WARNING gpsd release %s, API: %d.%d, "
+            (void)fprintf(stderr, "cgps: WARNING gpsd release %s, API: %d.%d, "
                                   "expected %s ",
-			  gpsdata->version.release,
-			  gpsdata->version.proto_major,
-			  gpsdata->version.proto_minor,
-			  VERSION);
-	    sleep(2);
+                          gpsdata->version.release,
+                          gpsdata->version.proto_major,
+                          gpsdata->version.proto_minor,
+                          VERSION);
+            sleep(2);
         }
     }
 
@@ -650,8 +650,8 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
                                        0.0, 359.0));
             column += 6;
             (void)mvwaddstr(satellites, sat_no + 2, column,
-			    tenth_to_str(gpsdata->skyview[sat_no].ss,
-				       0.0, 254.0));
+                            tenth_to_str(gpsdata->skyview[sat_no].ss,
+                                       0.0, 254.0));
             column += 6;
             if (SAT_HEALTH_BAD == gpsdata->skyview[sat_no].health) {
                 /* only mark known unhealthy */
@@ -698,16 +698,16 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 
     /* Fill in the latitude. */
     if (gpsdata->fix.mode >= MODE_2D) {
-	deg_to_str2(deg_type, gpsdata->fix.latitude,
-		    scr, sizeof(scr), " N", " S");
+        deg_to_str2(deg_type, gpsdata->fix.latitude,
+                    scr, sizeof(scr), " N", " S");
     } else
         (void)strncpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(datawin, 2, DATAWIN_VALUE_OFFSET, "  %-*s", 25, scr);
 
     /* Fill in the longitude. */
     if (gpsdata->fix.mode >= MODE_2D) {
-	deg_to_str2(deg_type, gpsdata->fix.longitude,
-	            scr, sizeof(scr), " E", " W");
+        deg_to_str2(deg_type, gpsdata->fix.longitude,
+                    scr, sizeof(scr), " E", " W");
     } else
         (void)strncpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(datawin, 3, DATAWIN_VALUE_OFFSET, "  %-*s", 25, scr);
@@ -716,22 +716,22 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
     if (gpsdata->fix.mode >= MODE_3D) {
         char buf1[20], buf2[20];
         if (0 != isfinite(gpsdata->fix.altHAE))
-	    (void)snprintf(buf1, sizeof(buf1), "%11.3f,",
-			   gpsdata->fix.altHAE * altfactor);
-	else
-	    (void)strncpy(buf1, "        n/a,", sizeof(buf1));
+            (void)snprintf(buf1, sizeof(buf1), "%11.3f,",
+                           gpsdata->fix.altHAE * altfactor);
+        else
+            (void)strncpy(buf1, "        n/a,", sizeof(buf1));
 
-	if (0 != isfinite(gpsdata->fix.altMSL))
-	    (void)snprintf(buf2, sizeof(buf2), "%11.3f ",
-			   gpsdata->fix.altMSL * altfactor);
-	else
-	    (void)strncpy(scr, "       n/a ", sizeof(scr));
+        if (0 != isfinite(gpsdata->fix.altMSL))
+            (void)snprintf(buf2, sizeof(buf2), "%11.3f ",
+                           gpsdata->fix.altMSL * altfactor);
+        else
+            (void)strncpy(scr, "       n/a ", sizeof(scr));
 
         (void)strlcpy(scr, buf1, sizeof(scr));
         (void)strlcat(scr, buf2, sizeof(scr));
         (void)strlcat(scr, altunits, sizeof(scr));
     } else {
-	(void)strncpy(scr, "        n/a,       n/a ", sizeof(scr));
+        (void)strncpy(scr, "        n/a,       n/a ", sizeof(scr));
     }
     (void)mvwprintw(datawin, 4, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
@@ -759,9 +759,9 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         if (0 != isfinite(gpsdata->fix.magnetic_var)) {
             (void)snprintf(buf1, sizeof(buf1), "%6.1f deg",
                            gpsdata->fix.magnetic_var);
-	    (void)strlcat(scr, buf1, sizeof(scr));
+            (void)strlcat(scr, buf1, sizeof(scr));
         } else {
-	    (void)strlcat(scr, "       deg", sizeof(scr));
+            (void)strlcat(scr, "       deg", sizeof(scr));
         }
     } else
         (void)strncpy(scr, "          n/a", sizeof(scr));
@@ -785,47 +785,47 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         const char *mod = "";
 
         newstate = gpsdata->fix.mode;
-	switch (gpsdata->status) {
-	case STATUS_DGPS_FIX:
+        switch (gpsdata->status) {
+        case STATUS_DGPS_FIX:
             mod = "DIFF ";
-	    break;
-	case STATUS_RTK_FIX:
+            break;
+        case STATUS_RTK_FIX:
             mod = "RTK ";
-	    break;
-	case STATUS_RTK_FLT:
+            break;
+        case STATUS_RTK_FLT:
             mod = "RTK ";
-	    break;
-	case STATUS_DR:
+            break;
+        case STATUS_DR:
             mod = "DR ";
-	    break;
-	case STATUS_GNSSDR:
+            break;
+        case STATUS_GNSSDR:
             mod = "+DR ";
-	    break;
-	case STATUS_TIME:
+            break;
+        case STATUS_TIME:
             mod = "FIXED ";
-	    break;
-	default:
-	    /* ignore: */
-	    mod = "";
-	    break;
-	}
+            break;
+        default:
+            /* ignore: */
+            mod = "";
+            break;
+        }
         switch (gpsdata->fix.mode) {
         case MODE_2D:
             fmt = "2D %sFIX (%d secs)";
             break;
         case MODE_3D:
-	    if (STATUS_TIME == gpsdata->status) {
-		fmt = "%sSURVEYED (%d secs)";
-	    } else {
-		fmt = "3D %sFIX (%d secs)";
-	    }
+            if (STATUS_TIME == gpsdata->status) {
+                fmt = "%sSURVEYED (%d secs)";
+            } else {
+                fmt = "3D %sFIX (%d secs)";
+            }
             break;
         default:
             fmt = "NO %sFIX (%d secs)";
             break;
         }
-	(void)snprintf(scr, sizeof(scr), fmt,  mod,
-	               (int)(time(NULL) - status_timer));
+        (void)snprintf(scr, sizeof(scr), fmt,  mod,
+                       (int)(time(NULL) - status_timer));
     }
     (void)mvwprintw(datawin, 8, DATAWIN_VALUE_OFFSET + 1, "%-*s", 26, scr);
 
