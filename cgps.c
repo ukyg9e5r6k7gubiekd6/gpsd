@@ -748,9 +748,9 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 
     /* Fill in the track. */
     if (!magnetic_flag) {
-	(void)strlcpy(scr, " (true, var):   ", sizeof(scr));
+        (void)strlcpy(scr, " (true, var):   ", sizeof(scr));
     } else {
-	(void)strlcpy(scr, " (mag, var):    ", sizeof(scr));
+        (void)strlcpy(scr, " (mag, var):    ", sizeof(scr));
     }
     if (gpsdata->fix.mode >= MODE_2D && isfinite(gpsdata->fix.track) != 0) {
         char buf1[20], buf2[20];
@@ -762,7 +762,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
             (void)snprintf(buf1, sizeof(buf1), "%5.1f,",
                 gpsdata->fix.magnetic_track);
         }
-	(void)strlcat(scr, buf1, sizeof(scr));
+        (void)strlcat(scr, buf1, sizeof(scr));
         if (0 != isfinite(gpsdata->fix.magnetic_var)) {
             (void)snprintf(buf2, sizeof(buf2), "%6.1f",
                            gpsdata->fix.magnetic_var);
