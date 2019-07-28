@@ -447,7 +447,7 @@ static void windowsetup(void)
             (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET,
                             "Speed Err (EPS):");
             (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET,
-                            "Head Err  (EPD):");
+                            "Track Err (EPD):");
             /* it's actually esr that thought *these* were interesting */
             (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET,
                             "Time offset:");
