@@ -369,7 +369,8 @@ static void windowsetup(void)
 
         /* Do the initial field label setup. */
         (void)mvwprintw(datawin, row++, DATAWIN_DESC_OFFSET, "Time:");
-        (void)mvwprintw(datawin, row++, DATAWIN_DESC_OFFSET, "Heading ");
+        /* FIXME: prolly should be heading... */
+        (void)mvwprintw(datawin, row++, DATAWIN_DESC_OFFSET, "Track:");
         (void)mvwprintw(datawin, row++, DATAWIN_DESC_OFFSET, "Pitch:");
         (void)mvwprintw(datawin, row++, DATAWIN_DESC_OFFSET, "Roll:");
         (void)mvwprintw(datawin, row++, DATAWIN_DESC_OFFSET, "Dip:");
@@ -402,7 +403,7 @@ static void windowsetup(void)
         (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET, "Longitude:");
         (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET, "Alt (HAE, MSL):");
         (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET, "Speed:");
-        (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET, "Heading:");
+        (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET, "Track ");
         (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET, "Climb:");
         (void)mvwaddstr(datawin, row++, DATAWIN_DESC_OFFSET, "Status:");
 
@@ -496,7 +497,8 @@ static void update_compass_panel(struct gps_data_t *gpsdata)
         (void)strncpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
-    /* Fill in the heading. */
+    /* Fill in the track. */
+    /* FIXME: prolly should be heading... */
     if (isfinite(gpsdata->fix.track) != 0) {
         (void)snprintf(scr, sizeof(scr), "%.1f degrees", gpsdata->fix.track);
     } else
@@ -743,7 +745,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         (void)strncpy(scr, "  n/a", sizeof(scr));
     (void)mvwprintw(datawin, 5, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
-    /* Fill in the heading. */
+    /* Fill in the track. */
     if (!magnetic_flag) {
 	(void)strlcpy(scr, " (true, var):   ", sizeof(scr));
     } else {
@@ -751,16 +753,13 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
     }
     if (gpsdata->fix.mode >= MODE_2D && isfinite(gpsdata->fix.track) != 0) {
         char buf1[20], buf2[20];
-        double magheading = true2magnetic(gpsdata->fix.latitude,
-                                         gpsdata->fix.longitude,
-                                          gpsdata->fix.track);
 
-        if (!magnetic_flag || isfinite(magheading) == 0) {
+        if (!magnetic_flag || isfinite(gpsdata->fix.magnetic_track) == 0) {
             (void)snprintf(buf1, sizeof(buf1), "%5.1f,",
                            gpsdata->fix.track);
         } else {
             (void)snprintf(buf1, sizeof(buf1), "%5.1f,",
-                magheading);
+                gpsdata->fix.magnetic_track);
         }
 	(void)strlcat(scr, buf1, sizeof(scr));
         if (0 != isfinite(gpsdata->fix.magnetic_var)) {
@@ -771,8 +770,9 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
             (void)strlcat(scr, "      ", sizeof(scr));
         }
     } else
-        (void)strncpy(scr, "              n/a", sizeof(scr));
-    (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET - 8, "%-*s deg", 30, scr);
+        (void)strncpy(scr, "                n/a", sizeof(scr));
+    (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET - 10, "%-*s deg",
+                    32, scr);
 
     /* Fill in the rate of climb. */
     if (isfinite(gpsdata->fix.climb) != 0)
@@ -984,7 +984,7 @@ static void usage(char *prog)
         "                      d = DD.ddddddd\n"
         "                      m = DD MM.mmmmmm'\n"
         "                      s = DD MM' SS.sssss\"\n"
-        "  -m              Display heading as the estimated magnetic heading\n"
+        "  -m              Display track as the estimated magnetic track\n"
         "                  Valid or USA (Lower 48 + AK) and Western Europe.\n"
         "  -s              Be silent (don't print raw gpsd data)\n"
         "  -V              Show version, then exit\n",

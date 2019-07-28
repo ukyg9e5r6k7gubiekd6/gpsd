@@ -257,11 +257,9 @@ the daemon. This display can also be toggled with the s
 command.</para>
 
 <para>The <option>-m</option> option will display your magnetic
-heading (as opposed to your true heading).  This is a calculated
-value, not a measured value, and is subject to a potential error of up
-to two degrees in the areas for which the calculation is valid
-(currently Western Europe, Alaska, and Lower 48 in the USA).  The
-formulas used are those found in the Aviation Formulary v1.43.</para>
+track (as opposed to your true track).  This is a calculated
+value, not a measured value.  Magnetic variation is always potentially
+subject to large errors, but is usually better than two degrees.</para>
 
 <para><application>cgps</application> terminates when you send it a
 SIGHUP or SIGINT; given default terminal settings this will happen
