@@ -396,21 +396,21 @@ env['SC_PYTHON'] = sys.executable  # Path to SCons Python
 # with multi-word CPPFLAGS/LDFLAGS/SHLINKFLAGS values; you'll have to
 # explicitly quote them or (better yet) use the "=" form of GNU option
 # settings.
+# Scons also uses different internal names than most other build-systems.
+# So we rely on MergeFlags/ParseFlags to do the right thing for us.
 env['STRIP'] = "strip"
 env['PKG_CONFIG'] = "pkg-config"
-for i in ["AR", "ARFLAGS", "CC", "CCFLAGS", "CFLAGS", "CXX", "CXXFLAGS", "LD",
-          "LINKFLAGS", "PKG_CONFIG", "STRIP", "TAR"]:
+for i in ["AR", "CC", "CXX", "LD",
+          "PKG_CONFIG", "STRIP", "TAR"]:
     if i in os.environ:
         j = i
         if i == "LD":
             i = "SHLINK"
-        if i in ("CFLAGS", "CCFLAGS", "LINKFLAGS"):
-            env.Replace(**{j: Split(os.getenv(i))})
-        else:
-            env.Replace(**{j: os.getenv(i)})
-for flag in ["LDFLAGS", "SHLINKFLAGS", "CPPFLAGS"]:
+        env[i] =  os.getenv(j)
+for i in ["ARFLAGS", "CFLAGS", "CXXFLAGS", "LDFLAGS", "SHLINKFLAGS",
+          "CPPFLAGS", "CCFLAGS", "LINKFLAGS"]:
     if i in os.environ:
-        env.MergeFlags({flag: Split(os.getenv(flag))})
+        env.MergeFlags(Split(os.getenv(i)))
 
 
 # Keep scan-build options in the environment
