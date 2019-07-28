@@ -495,7 +495,7 @@ static void update_compass_panel(struct gps_data_t *gpsdata)
     if (isfinite(gpsdata->fix.time) != 0) {
         (void)unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr));
     } else
-        (void)strncpy(scr, "n/a", sizeof(scr));
+        (void)strlcpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* Fill in the track. */
@@ -503,28 +503,28 @@ static void update_compass_panel(struct gps_data_t *gpsdata)
     if (isfinite(gpsdata->fix.track) != 0) {
         (void)snprintf(scr, sizeof(scr), "%.1f degrees", gpsdata->fix.track);
     } else
-        (void)strncpy(scr, "n/a", sizeof(scr));
+        (void)strlcpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* Fill in the climb. */
     if (isfinite(gpsdata->fix.climb) != 0) {
         (void)snprintf(scr, sizeof(scr), "%.2f", gpsdata->fix.climb);
     } else
-        (void)strncpy(scr, "n/a", sizeof(scr));
+        (void)strlcpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* Fill in the speed. */
     if (isfinite(gpsdata->fix.speed) != 0)
         (void)snprintf(scr, sizeof(scr), "%.2f", gpsdata->fix.speed);
     else
-        (void)strncpy(scr, "n/a", sizeof(scr));
+        (void)strlcpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* Fill in the altitude. */
     if (isfinite(gpsdata->fix.altHAE) != 0)
         (void)snprintf(scr, sizeof(scr), "%.3f", gpsdata->fix.altHAE);
     else
-        (void)strncpy(scr, "n/a", sizeof(scr));
+        (void)strlcpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* When we need to fill in receiver type again, do it here. */
@@ -695,7 +695,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
     if (isfinite(gpsdata->fix.time) != 0) {
         (void)unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr));
     } else
-        (void)strncpy(scr, "  n/a", sizeof(scr));
+        (void)strlcpy(scr, "  n/a", sizeof(scr));
     (void)mvwprintw(datawin, 1, DATAWIN_VALUE_OFFSET, "%-*s", 26, scr);
 
 
@@ -704,7 +704,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         deg_to_str2(deg_type, gpsdata->fix.latitude,
                     scr, sizeof(scr), " N", " S");
     } else
-        (void)strncpy(scr, "n/a", sizeof(scr));
+        (void)strlcpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(datawin, 2, DATAWIN_VALUE_OFFSET, "  %-*s", 25, scr);
 
     /* Fill in the longitude. */
@@ -712,7 +712,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         deg_to_str2(deg_type, gpsdata->fix.longitude,
                     scr, sizeof(scr), " E", " W");
     } else
-        (void)strncpy(scr, "n/a", sizeof(scr));
+        (void)strlcpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(datawin, 3, DATAWIN_VALUE_OFFSET, "  %-*s", 25, scr);
 
     /* Fill in the altitudes. */
@@ -722,19 +722,19 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
             (void)snprintf(buf1, sizeof(buf1), "%11.3f,",
                            gpsdata->fix.altHAE * altfactor);
         else
-            (void)strncpy(buf1, "        n/a,", sizeof(buf1));
+            (void)strlcpy(buf1, "        n/a,", sizeof(buf1));
 
         if (0 != isfinite(gpsdata->fix.altMSL))
             (void)snprintf(buf2, sizeof(buf2), "%11.3f ",
                            gpsdata->fix.altMSL * altfactor);
         else
-            (void)strncpy(scr, "       n/a ", sizeof(scr));
+            (void)strlcpy(scr, "       n/a ", sizeof(scr));
 
         (void)strlcpy(scr, buf1, sizeof(scr));
         (void)strlcat(scr, buf2, sizeof(scr));
         (void)strlcat(scr, altunits, sizeof(scr));
     } else {
-        (void)strncpy(scr, "        n/a,       n/a ", sizeof(scr));
+        (void)strlcpy(scr, "        n/a,       n/a ", sizeof(scr));
     }
     (void)mvwprintw(datawin, 4, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
@@ -743,7 +743,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         (void)snprintf(scr, sizeof(scr), "%8.2f %s",
                        gpsdata->fix.speed * speedfactor, speedunits);
     else
-        (void)strncpy(scr, "  n/a", sizeof(scr));
+        (void)strlcpy(scr, "  n/a", sizeof(scr));
     (void)mvwprintw(datawin, 5, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* Fill in the track. */
@@ -771,7 +771,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
             (void)strlcat(scr, "      ", sizeof(scr));
         }
     } else
-        (void)strncat(scr, "             n/a", sizeof(scr));
+        (void)strlcat(scr, "             n/a", sizeof(scr));
     (void)mvwprintw(datawin, 6, DATAWIN_VALUE_OFFSET - 10, "%-*s deg",
                     32, scr);
 
@@ -780,14 +780,14 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         (void)snprintf(scr, sizeof(scr), "%8.2f %s/min",
                        gpsdata->fix.climb * altfactor * 60, altunits);
     else
-        (void)strncpy(scr, "  n/a", sizeof(scr));
+        (void)strlcpy(scr, "  n/a", sizeof(scr));
     (void)mvwprintw(datawin, 7, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
 
     /* Fill in the GPS status and the time since the last state
      * change. */
     if (gpsdata->online == 0) {
         newstate = 0;
-        (void)strncpy(scr, "OFFLINE", sizeof(scr));
+        (void)strlcpy(scr, "OFFLINE", sizeof(scr));
     } else {
         const char *fmt;
         const char *mod = "";
@@ -935,7 +935,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
             (void)snprintf(scr, sizeof(scr), "%6.3f sec",
                            (double)(timestamp()-gpsdata->fix.time));
         else
-            (void)strncpy(scr, " n/a", sizeof(scr));
+            (void)strlcpy(scr, " n/a", sizeof(scr));
         (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET + 8, "%-*s", 18,
                         scr);
         /* Fill in the grid square (esr thought *this* one was interesting). */
