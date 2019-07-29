@@ -930,6 +930,9 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix,
     const double b = WGS84B;    /* polar radius */
     const double e2 = (a * a - b * b) / (a * a);
     const double e_2 = (a * a - b * b) / (b * b);
+    double cos_lambda, sin_lambda;
+    double cos_phi, sin_phi;
+    double cos_theta, sin_theta;
     gps_mask_t mask = 0;
 
     if (0 == isfinite(x) ||
@@ -940,27 +943,32 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix,
     }
 
     /* geodetic location */
-    lambda = atan2z(y, x);
+    lambda = atan2(y, x);
+    sincos(lambda, &sin_lambda, &cos_lambda);
+
     p = sqrt(pow(x, 2) + pow(y, 2));
-    theta = atan2z(z * a, p * b);
-    phi = atan2z(z + e_2 * b * pow(sin(theta), 3),
-                p - e2 * a * pow(cos(theta), 3));
-    n = a / sqrt(1.0 - e2 * pow(sin(phi), 2));
+    theta = atan2(z * a, p * b);
+    sincos(theta, &sin_theta, &cos_theta);
+
+    phi = atan2(z + e_2 * b * pow(sin_theta, 3),
+                p - e2 * a * pow(cos_theta, 3));
+    sincos(phi, &sin_phi, &cos_phi);
+
+    n = a / sqrt(1.0 - e2 * pow(sin_phi, 2));
 
     /* altitude is WGS84 */
-    fix->altHAE = p / cos(phi) - n;
+    fix->altHAE = p / cos_phi - n;
 
     fix->latitude = phi * RAD_2_DEG;
     fix->longitude = lambda * RAD_2_DEG;
     mask |= LATLON_SET | ALTITUDE_SET;
 
     /* velocity computation */
-    vnorth = -vx * sin(phi) * cos(lambda) - vy * sin(phi) * sin(lambda) +
-             vz * cos(phi);
-    veast = -vx * sin(lambda) + vy * cos(lambda);
+    vnorth = -vx * sin_phi * cos_lambda - vy * sin_phi * sin_lambda +
+             vz * cos_phi;
+    veast = -vx * sin_lambda + vy * cos_lambda;
 
-    vup = vx * cos(phi) * cos(lambda) + vy * cos(phi) * sin(lambda) +
-          vz * sin(phi);
+    vup = vx * cos_phi * cos_lambda + vy * cos_phi * sin_lambda + vz * sin_phi;
 
     /* save velNED */
     fix->NED.velN = vnorth;
