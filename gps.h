@@ -2311,10 +2311,12 @@ extern void datum_code_string(int code, char *buffer, size_t len);
 #define GPS_LN2         0.693147180559945309417232121458176568
 
 
-/* geodetic constants */
+/* WGS84 degining parameters */
+/* https://en.wikipedia.org/wiki/Geodetic_datum
+ * Sectoin #World_Geodetic_System_1984_(WGS_84) */
 #define WGS84A 6378137		/* equatorial radius */
 #define WGS84F 298.257223563	/* flattening */
-#define WGS84B 6356752.3142	/* polar radius */
+#define WGS84B 6356752.314245	/* polar radius */
 
 #define CLIGHT      299792458.0  /* speed of light (m/s) */
 
