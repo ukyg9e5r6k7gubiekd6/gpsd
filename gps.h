@@ -2317,12 +2317,15 @@ extern void datum_code_string(int code, char *buffer, size_t len);
  *
  * http://www.unoosa.org/pdf/icg/2012/template/WGS_84.pdf
  */
-#define WGS84A 6378137.0	        /* equatorial radius */
+#define WGS84A 6378137.0	     /* equatorial radius (semi-major axis) */
 #define WGS84F 298.257223563	        /* flattening */
-#define WGS84B 6356752.314245	        /* polar radius */
+#define WGS84B 6356752.314245	        /* polar radius (semi-minor axis) */
 /* 1st eccentricity = (WGS84A ^ 2 + WGS84B ^ 2) / (WGS84A ^ 2)
  * precomputed so C does not recompute every time */
 #define WGS84E 0.006694379990197585	/* 1st eccentricity */
+/* 2nd eccentricity squared = ((WGS84A ^ 2 - WGS84B ^ 2) / (WGS84B ^ 2)
+ * precomputed so C does not recompute every time */
+#define WGS84E2 0.006739496742333464    /* 2nd eccentricy squared */
 
 #define CLIGHT      299792458.0  /* speed of light (m/s) */
 

@@ -928,7 +928,6 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix,
     double lambda, phi, p, theta, n,vnorth, veast, vup;
     const double a = WGS84A;    /* equatorial radius */
     const double b = WGS84B;    /* polar radius */
-    const double e_2 = (a * a - b * b) / (b * b);
     double cos_lambda, sin_lambda;
     double cos_phi, sin_phi;
     double cos_theta, sin_theta;
@@ -949,7 +948,7 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix,
     theta = atan2(z * a, p * b);
     sincos(theta, &sin_theta, &cos_theta);
 
-    phi = atan2(z + e_2 * b * pow(sin_theta, 3),
+    phi = atan2(z + WGS84E2 * b * pow(sin_theta, 3),
                 p - WGS84E * a * pow(cos_theta, 3));
     sincos(phi, &sin_phi, &cos_phi);
 
