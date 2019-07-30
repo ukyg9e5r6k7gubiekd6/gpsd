@@ -14,8 +14,10 @@
 #include <math.h>
 #include "gpsd.h"
 
+#ifdef __UNUSED
 static double fix_minuz(double d);
 static double atan2z(double y, double x);
+#endif /* __UNUSED */
 
 #define GEOID_ROW       37
 #define GEOID_COL       73
@@ -926,8 +928,6 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix,
                             double vx, double vy, double vz)
 {
     double lambda, phi, p, theta, n,vnorth, veast, vup;
-    const double a = WGS84A;    /* equatorial radius */
-    const double b = WGS84B;    /* polar radius */
     double cos_lambda, sin_lambda;
     double cos_phi, sin_phi;
     double cos_theta, sin_theta;
@@ -945,17 +945,17 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix,
     sincos(lambda, &sin_lambda, &cos_lambda);
 
     p = sqrt(pow(x, 2) + pow(y, 2));
-    theta = atan2(z * a, p * b);
+    theta = atan2(z * WGS84A, p * WGS84B);
     sincos(theta, &sin_theta, &cos_theta);
 
-    phi = atan2(z + WGS84E2 * b * pow(sin_theta, 3),
-                p - WGS84E * a * pow(cos_theta, 3));
+    phi = atan2(z + WGS84E2 * WGS84B * pow(sin_theta, 3),
+                p - WGS84E * WGS84A * pow(cos_theta, 3));
     sincos(phi, &sin_phi, &cos_phi);
 
-    n = a / sqrt(1.0 - WGS84E * pow(sin_phi, 2));
+    n = WGS84A / sqrt(1.0 - WGS84E * pow(sin_phi, 2));
 
     /* altitude is WGS84 */
-    fix->altHAE = p / cos_phi - n;
+    fix->altHAE = (p / cos_phi) - n;
 
     fix->latitude = phi * RAD_2_DEG;
     fix->longitude = lambda * RAD_2_DEG;
@@ -980,6 +980,7 @@ gps_mask_t ecef_to_wgs84fix(struct gps_fix_t *fix,
     return mask;
 }
 
+#ifdef __UNUSED
 /*
  * Some systems propagate the sign along with zero. This messes up
  * certain trig functions, like atan2():
@@ -1000,3 +1001,4 @@ static double atan2z(double y, double x)
 {
     return atan2(fix_minuz(y), fix_minuz(x));
 }
+#endif /* __UNUSED */

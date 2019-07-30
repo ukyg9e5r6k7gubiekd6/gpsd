@@ -2313,16 +2313,16 @@ extern void datum_code_string(int code, char *buffer, size_t len);
 
 /* WGS84(G1674) degining parameters */
 /* https://en.wikipedia.org/wiki/Geodetic_datum
- * Sectoin #World_Geodetic_System_1984_(WGS_84)
+ * Section #World_Geodetic_System_1984_(WGS_84)
  *
  * http://www.unoosa.org/pdf/icg/2012/template/WGS_84.pdf
  */
 #define WGS84A 6378137.0	     /* equatorial radius (semi-major axis) */
 #define WGS84F 298.257223563	        /* flattening */
 #define WGS84B 6356752.314245	        /* polar radius (semi-minor axis) */
-/* 1st eccentricity = (WGS84A ^ 2 + WGS84B ^ 2) / (WGS84A ^ 2)
+/* 1st eccentricity squared = (WGS84A ^ 2 + WGS84B ^ 2) / (WGS84A ^ 2)
  * precomputed so C does not recompute every time */
-#define WGS84E 0.006694379990197585	/* 1st eccentricity */
+#define WGS84E 0.006694379990197585	/* 1st eccentricity squared */
 /* 2nd eccentricity squared = ((WGS84A ^ 2 - WGS84B ^ 2) / (WGS84B ^ 2)
  * precomputed so C does not recompute every time */
 #define WGS84E2 0.006739496742333464    /* 2nd eccentricy squared */
