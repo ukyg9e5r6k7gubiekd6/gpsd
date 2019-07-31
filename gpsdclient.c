@@ -36,7 +36,7 @@ static struct exportmethod_t exportmethods[] = {
  * Return a pointer to the buffer.
  *
  * deg_str_type:
- *   	deg_dd     : return DD.ddddddd[suffix]
+ *      deg_dd     : return DD.ddddddd[suffix]
  *      deg_ddmm   : return DD MM.mmmmmm'[suffix]
  *      deg_ddmmss : return DD MM' SS.sssss"[suffix]
  *
@@ -59,23 +59,23 @@ char *deg_to_str2(enum deg_str_type type, double f,
     const char *suffix = "";
 
     if (20 > buf_size) {
-	(void)strlcpy(buf, "Err", buf_size);
-	return buf;
+        (void)strlcpy(buf, "Err", buf_size);
+        return buf;
     }
 
     if (!isfinite(f) || 360.0 < fabs(f)) {
-	(void)strlcpy(buf, "n/a", buf_size);
-	return buf;
+        (void)strlcpy(buf, "n/a", buf_size);
+        return buf;
     }
 
     /* suffix? */
     if (0.0 > f) {
-	f = -f;
+        f = -f;
         if (NULL != suffix_neg) {
             suffix = suffix_neg;
         }
     } else if (NULL != suffix_pos) {
-	suffix = suffix_pos;
+        suffix = suffix_pos;
     }
 
     /* add rounding quanta */
@@ -88,49 +88,49 @@ char *deg_to_str2(enum deg_str_type type, double f,
         type = deg_dd;
         /* FALLTHROUGH */
     case deg_dd:
-	/* DD.dddddddd */
-	f += 0.5 * 1e-8;              /* round up */
+        /* DD.dddddddd */
+        f += 0.5 * 1e-8;              /* round up */
         break;
     case deg_ddmm:
-	/* DD MM.mmmmmm */
-	f += (0.5 * 1e-6) / 60;       /* round up */
+        /* DD MM.mmmmmm */
+        f += (0.5 * 1e-6) / 60;       /* round up */
         break;
     case deg_ddmmss:
-	f += (0.5 * 1e-5) / 3600;     /* round up */
+        f += (0.5 * 1e-5) / 3600;     /* round up */
         break;
     }
     fmin = modf(f, &fdeg);
     deg = (int)fdeg;
     if (360 == deg) {
-	/* fix round-up roll-over */
-	deg = 0;
-	fmin = 0.0;
+        /* fix round-up roll-over */
+        deg = 0;
+        fmin = 0.0;
     }
 
     if (deg_dd == type) {
-	/* DD.dddddddd */
-	long frac_deg = (long)(fmin * 100000000.0);
+        /* DD.dddddddd */
+        long frac_deg = (long)(fmin * 100000000.0);
         /* cm level accuracy requires the %08ld */
-	(void)snprintf(buf, buf_size, "%3d.%08ld%s", deg, frac_deg, suffix);
-	return buf;
+        (void)snprintf(buf, buf_size, "%3d.%08ld%s", deg, frac_deg, suffix);
+        return buf;
     }
 
     fsec = modf(fmin * 60, &fmin);
     min = (int)fmin;
 
     if (deg_ddmm == type) {
-	/* DD MM.mmmmmm */
-	sec = (int)(fsec * 1000000.0);
-	(void)snprintf(buf, buf_size, "%3d %02d.%06d'%s", deg, min, sec,
+        /* DD MM.mmmmmm */
+        sec = (int)(fsec * 1000000.0);
+        (void)snprintf(buf, buf_size, "%3d %02d.%06d'%s", deg, min, sec,
                        suffix);
-	return buf;
+        return buf;
     }
     /* else DD MM SS.sss */
     fdsec = modf(fsec * 60.0, &fsec);
     sec = (int)fsec;
     dsec = (int)(fdsec * 100000.0);
     (void)snprintf(buf, buf_size, "%3d %02d' %02d.%05d\"%s", deg, min, sec,
-		   dsec, suffix);
+                   dsec, suffix);
 
     return buf;
 }
@@ -140,7 +140,7 @@ char *deg_to_str2(enum deg_str_type type, double f,
  * WARNING: Not thread safe.
  *
  * deg_str_type:
- *   	deg_dd     : return DD.ddddddd
+ *      deg_dd     : return DD.ddddddd
  *      deg_ddmm   : return DD MM.mmmmmm'
  *      deg_ddmmss : return DD MM' SS.sssss"
  *
@@ -173,16 +173,16 @@ char *deg_to_str(enum deg_str_type type, double f)
  *
  * In order check these environment vars:
  *    GPSD_UNITS one of:
- *            	imperial   = miles/feet
+ *              imperial   = miles/feet
  *              nautical   = knots/feet
  *              metric     = km/meters
  *    LC_MEASUREMENT
- *		en_US      = miles/feet
+ *              en_US      = miles/feet
  *              C          = miles/feet
  *              POSIX      = miles/feet
  *              [other]    = km/meters
  *    LANG
- *		en_US      = miles/feet
+ *              en_US      = miles/feet
  *              C          = miles/feet
  *              POSIX      = miles/feet
  *              [other]    = km/meters
@@ -194,25 +194,25 @@ enum unit gpsd_units(void)
     char *envu = NULL;
 
     if ((envu = getenv("GPSD_UNITS")) != NULL && *envu != '\0') {
-	if (0 == strcasecmp(envu, "imperial")) {
-	    return imperial;
-	}
-	if (0 == strcasecmp(envu, "nautical")) {
-	    return nautical;
-	}
-	if (0 == strcasecmp(envu, "metric")) {
-	    return metric;
-	}
-	/* unrecognized, ignore it */
+        if (0 == strcasecmp(envu, "imperial")) {
+            return imperial;
+        }
+        if (0 == strcasecmp(envu, "nautical")) {
+            return nautical;
+        }
+        if (0 == strcasecmp(envu, "metric")) {
+            return metric;
+        }
+        /* unrecognized, ignore it */
     }
     if (((envu = getenv("LC_MEASUREMENT")) != NULL && *envu != '\0')
-	|| ((envu = getenv("LANG")) != NULL && *envu != '\0')) {
-	if (strncasecmp(envu, "en_US", 5) == 0
-	    || strcasecmp(envu, "C") == 0 || strcasecmp(envu, "POSIX") == 0) {
-	    return imperial;
-	}
-	/* Other, must be metric */
-	return metric;
+        || ((envu = getenv("LANG")) != NULL && *envu != '\0')) {
+        if (strncasecmp(envu, "en_US", 5) == 0
+            || strcasecmp(envu, "C") == 0 || strcasecmp(envu, "POSIX") == 0) {
+            return imperial;
+        }
+        /* Other, must be metric */
+        return metric;
     }
     /* TODO: allow a compile time default here */
     return unspecified;
@@ -227,40 +227,40 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
     source->device = NULL;
 
     if (arg != NULL) {
-	char *colon1, *skipto, *rbrk;
-	source->spec = (char *)arg;
-	assert(source->spec != NULL);
+        char *colon1, *skipto, *rbrk;
+        source->spec = (char *)arg;
+        assert(source->spec != NULL);
 
-	skipto = source->spec;
-	if (*skipto == '[' && (rbrk = strchr(skipto, ']')) != NULL) {
-	    skipto = rbrk;
-	}
-	colon1 = strchr(skipto, ':');
+        skipto = source->spec;
+        if (*skipto == '[' && (rbrk = strchr(skipto, ']')) != NULL) {
+            skipto = rbrk;
+        }
+        colon1 = strchr(skipto, ':');
 
-	if (colon1 != NULL) {
-	    char *colon2;
-	    *colon1 = '\0';
-	    if (colon1 != source->spec) {
-		source->server = source->spec;
-	    }
-	    source->port = colon1 + 1;
-	    colon2 = strchr(source->port, ':');
-	    if (colon2 != NULL) {
-		*colon2 = '\0';
-		source->device = colon2 + 1;
-	    }
-	} else if (strchr(source->spec, '/') != NULL) {
-	    source->device = source->spec;
-	} else {
-	    source->server = source->spec;
-	}
+        if (colon1 != NULL) {
+            char *colon2;
+            *colon1 = '\0';
+            if (colon1 != source->spec) {
+                source->server = source->spec;
+            }
+            source->port = colon1 + 1;
+            colon2 = strchr(source->port, ':');
+            if (colon2 != NULL) {
+                *colon2 = '\0';
+                source->device = colon2 + 1;
+            }
+        } else if (strchr(source->spec, '/') != NULL) {
+            source->device = source->spec;
+        } else {
+            source->server = source->spec;
+        }
     }
 
     if (*source->server == '[') {
-	char *rbrk = strchr(source->server, ']');
-	++source->server;
-	if (rbrk != NULL)
-	    *rbrk = '\0';
+        char *rbrk = strchr(source->server, ']');
+        ++source->server;
+        if (rbrk != NULL)
+            *rbrk = '\0';
     }
 }
 
@@ -275,7 +275,7 @@ char *maidenhead(double n, double e)
      * There's a fair amount of slop in how Maidenhead converters operate
      * that can make it look like this one is wrong.
      *
-     * 1. Many return caps for paces 5 and 6 when according to the spwec
+     * 1. Many return caps for paces 5 and 6 when according to the spec
      *    they should return smalls.
      *
      * 2. Some converters, including QGrid from which this code was originally
@@ -288,23 +288,35 @@ char *maidenhead(double n, double e)
     static char buf[7];
 
     int t1;
-    e=e+180.0;
-    t1=(int)(e/20);
-    buf[0]=(char)t1+'A';
-    e-=(float)t1*20.0;
-    t1=(int)e/2;
-    buf[2]=(char)t1+'0';
-    e-=(float)t1*2;
-    buf[4]=(char)(int)(e*12.0)+'a';
 
-    n=n+90.0;
-    t1=(int)(n/10.0);
-    buf[1]=(char)t1+'A';
-    n-=(float)t1*10.0;
-    buf[3]=(char)n+'0';
-    n-=(int)n;
-    n*=24; // convert to 24 division
-    buf[5]=(char)(int)(n)+'a';
+    /* longitude */
+    e = e + 180.0;
+    t1 = (int)(e / 20);
+    buf[0] = (char)t1 + 'A';
+    if ('R' < buf[0]) {
+        /* A to R, North Pole is R */
+        buf[0] = 'R';
+    }
+    e -= (float)t1 * 20.0;
+    t1 = (int)e / 2;
+    buf[2] = (char)t1 + '0';
+    e -= (float)t1 * 2;
+    buf[4] = (char) ((int)(e * 12.0)) + 'a';
+
+    /* latitude */
+    n = n + 90.0;
+    t1 = (int)(n / 10.0);
+    buf[1] = (char)t1 + 'A';
+    if ('R' < buf[1]) {
+        /* A to R, North Pole is R */
+        buf[1] = 'R';
+    }
+
+    n -= (float)t1 * 10.0;
+    buf[3] = (char)n + '0';
+    n -= (int)n;
+    n *= 24; // convert to 24 division
+    buf[5] = (char)((int)n) + 'a';
     buf[6] = '\0';
 
     return buf;
@@ -318,10 +330,10 @@ struct exportmethod_t *export_lookup(const char *name)
     struct exportmethod_t *mp, *method = NULL;
 
     for (mp = exportmethods;
-	 mp < exportmethods + NITEMS(exportmethods);
-	 mp++)
-	if (strcmp(mp->name, name) == 0)
-	    method = mp;
+         mp < exportmethods + NITEMS(exportmethods);
+         mp++)
+        if (strcmp(mp->name, name) == 0)
+            method = mp;
     return method;
 }
 
@@ -331,9 +343,9 @@ void export_list(FILE *fp)
     struct exportmethod_t *method;
 
     for (method = exportmethods;
-	 method < exportmethods + NITEMS(exportmethods);
-	 method++)
-	(void)fprintf(fp, "%s: %s\n", method->name, method->description);
+         method < exportmethods + NITEMS(exportmethods);
+         method++)
+        (void)fprintf(fp, "%s: %s\n", method->name, method->description);
 }
 
 struct exportmethod_t *export_default(void)
