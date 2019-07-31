@@ -265,8 +265,8 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 }
 
 
-char *maidenhead(double n, double e)
 /* lat/lon to Maidenhead */
+char *maidenhead(double lat, double lon
 {
     /*
      * Specification at
@@ -290,33 +290,34 @@ char *maidenhead(double n, double e)
     int t1;
 
     /* longitude */
-    e = e + 180.0;
-    t1 = (int)(e / 20);
+    lon += 180.0;
+    t1 = (int)(lon / 20);
     buf[0] = (char)t1 + 'A';
     if ('R' < buf[0]) {
-        /* A to R, North Pole is R */
+        /* A to R */
         buf[0] = 'R';
     }
-    e -= (float)t1 * 20.0;
-    t1 = (int)e / 2;
+    lon -= (float)t1 * 20.0;
+    t1 = (int)lon / 2;
     buf[2] = (char)t1 + '0';
-    e -= (float)t1 * 2;
-    buf[4] = (char) ((int)(e * 12.0)) + 'a';
+    lon -= (float)t1 * 2;
+    buf[4] = (char) ((int)(lon * 12.0)) + 'a';
 
     /* latitude */
-    n = n + 90.0;
-    t1 = (int)(n / 10.0);
+    lat += 90.0;
+    t1 = (int)(lat / 10.0);
     buf[1] = (char)t1 + 'A';
     if ('R' < buf[1]) {
         /* A to R, North Pole is R */
         buf[1] = 'R';
     }
 
-    n -= (float)t1 * 10.0;
-    buf[3] = (char)n + '0';
-    n -= (int)n;
-    n *= 24; // convert to 24 division
-    buf[5] = (char)((int)n) + 'a';
+    lat -= (float)t1 * 10.0;
+    buf[3] = (char)lat + '0';
+    lat -= (int)lat;
+    lat *= 24; // convert to 24 division
+    buf[5] = (char)((int)lat) + 'a';
+
     buf[6] = '\0';
 
     return buf;
