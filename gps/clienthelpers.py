@@ -2,6 +2,10 @@
 # -*- coding: utf-8 -*-
 #
 # clienthelpers.py - helper functions for xgps and test_maidenhead
+# This duplicates gpsclient.c, but in python.  Keep the two files in
+# sync.
+#
+# See gpsclient.c for code comments.
 #
 # SPDX-License-Identifier: BSD-2-Clause
 """GPSd client helpers submodule."""
@@ -348,13 +352,17 @@ GEOID_DELTA = [
        1490,  1490,  1490]]
 
 
+# "enum" for display units
 unspecified = 0
 imperial = 1
 nautical = 2
 metric = 3
+
+# "enum" for deg_to_str() conversion type
 deg_dd = 0
 deg_ddmm = 1
 deg_ddmmss = 2
+
 
 def _non_finite(num):
     """Is this number not finite?"""
@@ -365,8 +373,9 @@ def deg_to_str(fmt, degrees):
     """String-format a latitude/longitude."""
     try:
         degrees = float(degrees)
-    except:
+    except ValueError:
         return ''
+
     if _non_finite(degrees):
         return ''
 
@@ -418,7 +427,7 @@ def maidenhead(dec_lat, dec_lon):
     try:
         dec_lat = float(dec_lat)
         dec_lon = float(dec_lon)
-    except:
+    except ValueError:
         return ''
     if _non_finite(dec_lat) or _non_finite(dec_lon):
         return ''
@@ -451,7 +460,7 @@ def wgs84_separation(lat, lon):
     try:
         lat = float(lat)
         lon = float(lon)
-    except:
+    except ValueError:
         return ''
     if _non_finite(lat) or _non_finite(lon):
         return ''
@@ -486,7 +495,7 @@ def wgs84_separation(lat, lon):
     from_east = east - lat
     from_north = north - lon
 
-    result  = GEOID_DELTA[grid_e][grid_n] * from_west * from_south
+    result = GEOID_DELTA[grid_e][grid_n] * from_west * from_south
     result += GEOID_DELTA[grid_w][grid_n] * from_east * from_south
     result += GEOID_DELTA[grid_e][grid_s] * from_west * from_north
     result += GEOID_DELTA[grid_w][grid_s] * from_east * from_north
