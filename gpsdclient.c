@@ -266,7 +266,7 @@ void gpsd_source_spec(const char *arg, struct fixsource_t *source)
 
 
 /* lat/lon to Maidenhead */
-char *maidenhead(double lat, double lon
+char *maidenhead(double lat, double lon)
 {
     /*
      * Specification at
