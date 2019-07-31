@@ -1574,7 +1574,6 @@ else:
         "test_xgps_deps.py",
         "valgrind-audit.py"
     ]
-    python_deps['test_clienthelpers.py'] = 'clienthelpers'
 
     python_manpages = {
         "man/gegps.1": "man/gps.xml",
@@ -1610,7 +1609,6 @@ else:
             "man/xgps.1": "man/gps.xml",
             "man/xgpsspeed.1": "man/gps.xml",
         })
-        python_deps['xgps'] = 'clienthelpers'
 
     python_modules = Glob('gps/*.py')
 
@@ -1625,12 +1623,7 @@ else:
                                     "isgps.c",
                                     "os_compat.c",
                                     "packet.c",
-                                    ],
-        "gps" + os.sep + "clienthelpers": ["geoid.c",
-                                           "gpsclient.c",
-                                           "gpsdclient.c",
-                                           "os_compat.c",
-                                           ]
+                                    ]
     }
 
     python_env = env.Clone()
