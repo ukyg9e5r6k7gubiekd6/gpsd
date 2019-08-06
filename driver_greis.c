@@ -1146,7 +1146,6 @@ static void greis_set_mode(struct gps_device_t *session, int mode)
 
 #endif /* RECONFIGURE_ENABLE */
 
-#ifdef TIMEHINT_ENABLE
 #if 0 /* TODO */
 static double greis_time_offset(struct gps_device_t *session)
 {
@@ -1163,7 +1162,6 @@ static double greis_time_offset(struct gps_device_t *session)
     return MAGIC_CONSTANT;
 }
 #endif
-#endif /* TIMEHINT_ENABLE */
 
 /* This is everything we export */
 /* *INDENT-OFF* */
@@ -1205,11 +1203,7 @@ const struct gps_type_t driver_greis = {
     /* Control string sender - should provide checksum and headers/trailer */
     .control_send   = greis_control_send,
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
-#if 0 /* TODO */
-    .time_offset     = greis_time_offset,
-#endif
-#endif /* TIMEHINT_ENABLE */
+    .time_offset     = NULL,
 /* *INDENT-ON* */
 };
 #endif /* defined(GREIS_ENABLE) && defined(BINARY_ENABLE) */

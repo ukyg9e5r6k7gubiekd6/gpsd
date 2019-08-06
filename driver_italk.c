@@ -448,9 +448,7 @@ const struct gps_type_t driver_italk =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,             /* no control string sender */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,            /* no method for NTP fudge factor */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* defined(ITRAX_ENABLE) && defined(BINARY_ENABLE) */

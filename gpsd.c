@@ -206,9 +206,6 @@ static void typelist(void)
 #if defined(DBUS_EXPORT_ENABLE)
     (void)printf("# DBUS export enabled\n");
 #endif
-#if defined(TIMEHINT_ENABLE)
-    (void)printf("# Time service features enabled.\n");
-#endif
 #if defined(PPS_ENABLE)
     (void)printf("# PPS enabled.\n");
 #endif

@@ -1757,9 +1757,7 @@ const struct gps_type_t driver_nmea2000 = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 

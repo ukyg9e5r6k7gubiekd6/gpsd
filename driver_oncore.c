@@ -549,7 +549,6 @@ static void oncore_event_hook(struct gps_device_t *session, event_t event)
     }
 }
 
-#ifdef TIMEHINT_ENABLE
 static double oncore_time_offset(struct gps_device_t *session UNUSED)
 {
     /*
@@ -559,7 +558,6 @@ static double oncore_time_offset(struct gps_device_t *session UNUSED)
      */
     return 0.175;
 }
-#endif /* TIMEHINT_ENABLE */
 
 static gps_mask_t oncore_parse_input(struct gps_device_t *session)
 {
@@ -599,9 +597,7 @@ const struct gps_type_t driver_oncore = {
     /* Control string sender - should provide checksum and headers/trailer */
     .control_send   = oncore_control_send,	/* to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset = oncore_time_offset,		/* NTP offset array */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* defined(ONCORE_ENABLE) && defined(BINARY_ENABLE) */

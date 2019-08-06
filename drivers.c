@@ -101,9 +101,7 @@ const struct gps_type_t driver_unknown = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 
@@ -282,9 +280,7 @@ const struct gps_type_t driver_nmea0183 = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 
@@ -389,9 +385,7 @@ const struct gps_type_t driver_garmin = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* GARMIN_ENABLE && NMEA0183_ENABLE */
@@ -452,9 +446,7 @@ const struct gps_type_t driver_ashtech = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* ASHTECH_ENABLE */
@@ -504,9 +496,7 @@ const struct gps_type_t driver_fv18 = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* FV18_ENABLE */
@@ -544,9 +534,7 @@ const struct gps_type_t driver_gpsclock = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* GPSCLOCK_ENABLE */
@@ -600,9 +588,7 @@ static const struct gps_type_t driver_tripmate = {
 #ifdef CONTROLSEND_ENABLE
     .control_send  = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* TRIPMATE_ENABLE */
@@ -657,9 +643,7 @@ static const struct gps_type_t driver_earthmate = {
 #ifdef CONTROLSEND_ENABLE
     .control_send  = nmea_write,	/* never actually used. */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* EARTHMATE_ENABLE */
@@ -782,9 +766,7 @@ const struct gps_type_t driver_trueNorth = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = tnt_control_send,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif
@@ -862,9 +844,7 @@ static const struct gps_type_t driver_oceanServer = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif
@@ -930,9 +910,7 @@ static const struct gps_type_t driver_fury = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 
@@ -985,9 +963,7 @@ static const struct gps_type_t driver_rtcm104v2 = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* RTCM104V2_ENABLE */
@@ -1032,9 +1008,7 @@ static const struct gps_type_t driver_rtcm104v3 = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* RTCM104V3_ENABLE */
@@ -1068,9 +1042,7 @@ static const struct gps_type_t driver_garmintxt = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* GARMINTXT_ENABLE */
@@ -1177,9 +1149,7 @@ const struct gps_type_t driver_mtk3301 = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* MTK3301_ENABLE */
@@ -1344,9 +1314,7 @@ const struct gps_type_t driver_isync = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* ISYNC_ENABLE */
@@ -1603,9 +1571,7 @@ const struct gps_type_t driver_aivdm = {
 #ifdef CONTROLSEND_ENABLE
     .control_send     = NULL,		/* no control sender */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no NTP communication */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* AIVDM_ENABLE */
@@ -1715,9 +1681,7 @@ const struct gps_type_t driver_json_passthrough = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 
@@ -1746,9 +1710,7 @@ const struct gps_type_t driver_pps = {
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 

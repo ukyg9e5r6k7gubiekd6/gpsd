@@ -289,9 +289,7 @@ void gps_context_init(struct gps_context_t *context,
 {
     (void)memset(context, '\0', sizeof(struct gps_context_t));
     //context.readonly = false;
-#ifdef TIMEHINT_ENABLE
     context->leap_notify    = LEAP_NOWARNING;
-#endif /* TIMEHINT_ENABLE */
     context->serial_write = gpsd_serial_write;
 
     errout_reset(&context->errout);
@@ -1822,14 +1820,12 @@ void ntp_latch(struct gps_device_t *device, struct timedelta_t *td)
     (void)clock_gettime(CLOCK_REALTIME, &td->clock);
     fix_time = device->newdata.time;
 
-#ifdef TIMEHINT_ENABLE
     /* assume zero when there's no offset method */
     if (device->device_type == NULL
 	|| device->device_type->time_offset == NULL)
 	fix_time += 0.0;
     else
 	fix_time += device->device_type->time_offset(device);
-#endif /* TIMEHINT_ENABLE */
     /* it's ugly but timestamp_t is double */
     /* note loss of precision here
      * td->clock is in nanoSec

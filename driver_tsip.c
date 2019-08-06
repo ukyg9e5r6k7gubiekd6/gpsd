@@ -1240,7 +1240,6 @@ static void tsip_mode(struct gps_device_t *session, int mode)
 }
 #endif /* RECONFIGURE_ENABLE */
 
-#ifdef TIMEHINT_ENABLE
 static double tsip_time_offset(struct gps_device_t *session UNUSED)
 {
     /*
@@ -1256,7 +1255,6 @@ static double tsip_time_offset(struct gps_device_t *session UNUSED)
      */
     return 0.0;
 }
-#endif /* TIMEHINT_ENABLE */
 
 void configuration_packets_generic(struct gps_device_t *session)
 /* configure generic Trimble TSIP device to a known state */
@@ -1369,9 +1367,7 @@ const struct gps_type_t driver_tsip =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = tsip_control_send,/* how to send commands */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = tsip_time_offset,
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 

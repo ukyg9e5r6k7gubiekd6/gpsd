@@ -467,7 +467,6 @@ static void _proto__set_mode(struct gps_device_t *session, int mode)
 }
 #endif /* RECONFIGURE_ENABLE */
 
-#ifdef TIMEHINT_ENABLE
 static double _proto_time_offset(struct gps_device_t *session)
 {
     /*
@@ -482,7 +481,6 @@ static double _proto_time_offset(struct gps_device_t *session)
      */
     return MAGIC_CONSTANT;
 }
-#endif /* TIMEHINT_ENABLE */
 
 static void _proto__wrapup(struct gps_device_t *session)
 {
@@ -541,9 +539,7 @@ const struct gps_type_t driver__proto__binary = {
     /* Control string sender - should provide checksum and headers/trailer */
     .control_send   = _proto__control_send,
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = _proto_time_offset,
-#endif /* TIMEHINT_ENABLE */
 /* *INDENT-ON* */
 };
 #endif /* defined(_PROTO__ENABLE) && defined(BINARY_ENABLE) */

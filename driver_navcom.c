@@ -1249,9 +1249,7 @@ const struct gps_type_t driver_navcom =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = navcom_control_send,	/* how to send a control string */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 

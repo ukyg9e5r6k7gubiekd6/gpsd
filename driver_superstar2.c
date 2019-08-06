@@ -575,9 +575,7 @@ const struct gps_type_t driver_superstar2 = {
     /* Control string sender - should provide checksum and trailer */
     .control_send	= superstar2_control_send,
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = NULL,		/* no method for NTP fudge factor */
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* defined(SUPERSTAR2_ENABLE) && defined(BINARY_ENABLE) */

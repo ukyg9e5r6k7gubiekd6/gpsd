@@ -1197,7 +1197,6 @@ static ssize_t garmin_control_send(struct gps_device_t *session,
 }
 #endif /* CONTROLSEND_ENABLE */
 
-#ifdef TIMEHINT_ENABLE
 static double garmin_time_offset(struct gps_device_t *session)
 {
     if (session->sourcetype == source_usb) {
@@ -1217,7 +1216,6 @@ static double garmin_time_offset(struct gps_device_t *session)
     }
     return 0.430;		/* WTF?  WAG */
 }
-#endif /* TIMEHINT_ENABLE */
 
 /* this is everything we export */
 #ifdef __UNUSED__
@@ -1364,9 +1362,7 @@ const struct gps_type_t driver_garmin_usb_binary_old =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = garmin_time_offset,
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 #endif /* __UNUSED__ */
@@ -1394,9 +1390,7 @@ const struct gps_type_t driver_garmin_usb_binary =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = garmin_time_offset,
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 
@@ -1423,9 +1417,7 @@ const struct gps_type_t driver_garmin_ser_binary =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = garmin_control_send,	/* send raw bytes */
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     .time_offset     = garmin_time_offset,
-#endif /* TIMEHINT_ENABLE */
 };
 /* *INDENT-ON* */
 

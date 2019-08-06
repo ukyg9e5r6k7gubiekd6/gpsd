@@ -106,9 +106,6 @@ extern "C" {
 #if defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE)
 #define COMPASS_ENABLE
 #endif
-#ifdef NTPSHM_ENABLE
-#define TIMEHINT_ENABLE
-#endif
 #ifdef ISYNC_ENABLE
 #define STASH_ENABLE
 #endif
@@ -290,13 +287,11 @@ struct gps_context_t {
     double gps_tow;                     /* GPS time of week, actually 19 bits */
     int century;			/* for NMEA-only devices without ZDA */
     int rollovers;			/* rollovers since start of run */
-#ifdef TIMEHINT_ENABLE
     int leap_notify;			/* notification state from subframe */
 #define LEAP_NOWARNING  0x0     /* normal, no leap second warning */
 #define LEAP_ADDSECOND  0x1     /* last minute of day has 60 seconds */
 #define LEAP_DELSECOND  0x2     /* last minute of day has 59 seconds */
 #define LEAP_NOTINSYNC  0x3     /* overload, clock is free running */
-#endif /* TIMEHINT_ENABLE */
 #ifdef NTPSHM_ENABLE
     /* we need the volatile here to tell the C compiler not to
      * 'optimize' as 'dead code' the writes to SHM */
@@ -407,9 +402,7 @@ struct gps_type_t {
 #ifdef CONTROLSEND_ENABLE
     ssize_t (*control_send)(struct gps_device_t *session, char *buf, size_t buflen);
 #endif /* CONTROLSEND_ENABLE */
-#ifdef TIMEHINT_ENABLE
     double (*time_offset)(struct gps_device_t *session);
-#endif /* TIMEHINT_ENABLE */
 };
 
 /*
