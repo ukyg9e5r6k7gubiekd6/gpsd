@@ -254,9 +254,7 @@ static void ubx_update(void)
 	break;
     }
 
-#ifdef NTP_ENABLE
     toff_update(ppswin, TOFF_LINE, TOFF_COLUMN + 6);
-#endif /* NTP_ENABLE */
 
 #ifdef PPS_ENABLE
     pps_update(ppswin, PPS_LINE, PPS_COLUMN + 5);

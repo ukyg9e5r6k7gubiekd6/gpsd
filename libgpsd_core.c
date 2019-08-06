@@ -1808,7 +1808,6 @@ void gpsd_zero_satellites( struct gps_data_t *out)
 #endif
 }
 
-#ifdef NTP_ENABLE
 void ntp_latch(struct gps_device_t *device, struct timedelta_t *td)
 /* latch the fact that we've saved a fix */
 {
@@ -1840,6 +1839,5 @@ void ntp_latch(struct gps_device_t *device, struct timedelta_t *td)
     pps_thread_fixin(&device->pps_thread, td);
 #endif /* PPS_ENABLE */
 }
-#endif /* NTP_ENABLE */
 
 /* end */

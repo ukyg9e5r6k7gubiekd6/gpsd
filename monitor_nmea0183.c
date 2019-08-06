@@ -308,9 +308,7 @@ static void nmea_update(void)
 	    monitor_fixframe(gpgsawin);
 	}
 
-#ifdef NTP_ENABLE
 	toff_update(gpgsawin, TOFF_LINE, 7);
-#endif /* NTP_ENABLE */
 
 	if (strcmp(fields[0], "GPGGA") == 0
 	    || strcmp(fields[0], "GNGGA") == 0

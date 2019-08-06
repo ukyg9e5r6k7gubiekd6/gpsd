@@ -202,7 +202,6 @@ boolopts = (
     ("rtcm104v3",     True,  "rtcm104v3 support"),
     # Time service
     ("ntpshm",        True,  "NTP time hinting via shared memory"),
-    ("ntp",           True,  "NTP time hinting support"),
     ("oscillator",    True,  "Disciplined oscillator support"),
     ("pps",           True,  "PPS time syncing support"),
     # Export methods
@@ -345,7 +344,6 @@ if ARGUMENTS.get('timeservice'):
                    "mtk3301",    # For the Adafruit HAT
                    "ncurses",
                    "nmea0183",   # For generic hats of unknown type.
-                   "ntp",
                    "ntpshm",
                    "oscillator",
                    "pps",
@@ -357,10 +355,6 @@ if ARGUMENTS.get('timeservice'):
              not ARGUMENTS.get(name) and
              name not in timerelated)):
             env[name] = False
-
-# NTPSHM requires NTP
-if env['ntpshm']:
-    env['ntp'] = True
 
 # Many drivers require NMEA0183 - in case we select timeserver/minimal
 # followed by one of these.

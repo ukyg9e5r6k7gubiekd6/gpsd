@@ -1521,7 +1521,6 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
     }
 
 
-#ifdef NTP_ENABLE
     /*
      * Time is eligible for shipping to NTPD if the driver has
      * asserted NTPTIME_IS at any point in the current cycle.
@@ -1578,7 +1577,6 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 #endif /* SOCKET_EXPORT_ENABLE */
 
     }
-#endif /* NTP_ENABLE */
 
     /*
      * If no reliable end of cycle, must report every time

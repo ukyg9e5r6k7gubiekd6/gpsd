@@ -66,9 +66,7 @@ static size_t promptlen = 0;
 static struct termios cooked, rare;
 static struct fixsource_t source;
 static char hostname[HOST_NAME_MAX];
-#ifdef NTP_ENABLE
 static struct timedelta_t time_offset;
-#endif /* NTP_ENABLE */
 
 #ifdef PASSTHROUGH_ENABLE
 /* no methods, it's all device window */
@@ -226,7 +224,6 @@ static void cond_hexdump(char *buf2, size_t len2,
     }
 }
 
-#ifdef NTP_ENABLE
 void toff_update(WINDOW *win, int y, int x)
 {
     assert(win != NULL);
@@ -257,7 +254,6 @@ void toff_update(WINDOW *win, int y, int x)
 	}
     }
 }
-#endif /* NTP_ENABLE */
 
 /* FIXME:  Decouple this reporting from local PPS monitoring. */
 #ifdef PPS_ENABLE
@@ -755,9 +751,7 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 			      (long)session.gpsdata.toff.clock.tv_nsec,
 			      (long)session.gpsdata.toff.real.tv_sec,
 			      (long)session.gpsdata.toff.real.tv_nsec);
-#ifdef NTP_ENABLE
 	    time_offset = session.gpsdata.toff;
-#endif /* NTP_ENABLE */
 	    return;
 	}
     } else if (!serial && str_starts_with((char*)device->lexer.outbuffer, "{\"class\":\"PPS\",")) {
@@ -853,7 +847,6 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 
     report_unlock();
 
-#ifdef NTP_ENABLE
     /* Update the last fix time seen for PPS if we've actually seen one,
      * and it is a new second. */
     if ( 0 == isfinite(device->newdata.time)) {
@@ -864,7 +857,6 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 #endif /* PPS_ENABLE */
     } else
 	ntp_latch(device, &time_offset);
-#endif /* NTP_ENABLE */
 }
 
 static bool do_command(const char *line)

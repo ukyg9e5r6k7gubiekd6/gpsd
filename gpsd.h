@@ -526,7 +526,6 @@ struct gps_device_t {
     timestamp_t sor;	/* timestamp start of this reporting cycle */
     unsigned long chars;	/* characters in the cycle */
 #endif /* TIMING_ENABLE */
-#ifdef NTP_ENABLE
     bool ship_to_ntpd;
 #ifdef NTPSHM_ENABLE
     volatile struct shmTime *shm_clock;
@@ -535,7 +534,6 @@ struct gps_device_t {
     volatile struct shmTime *shm_pps;
     int chronyfd;			/* for talking to chrony */
 # endif /* PPS_ENABLE */
-#endif /* NTP_ENABLE */
 #ifdef PPS_ENABLE
     volatile struct pps_thread_t pps_thread;
 #endif /* PPS_ENABLE */
@@ -928,7 +926,6 @@ extern void nmea_subframe_dump(struct gps_device_t *, char[], size_t);
 extern void nmea_ais_dump(struct gps_device_t *, char[], size_t);
 extern unsigned int ais_binary_encode(struct ais_t *ais, unsigned char *bits, int flag);
 
-#ifdef NTP_ENABLE
 extern void ntp_latch(struct gps_device_t *device,  struct timedelta_t *td);
 #ifdef NTPSHM_ENABLE
 extern void ntpshm_context_init(struct gps_context_t *);
@@ -937,7 +934,6 @@ extern int ntpshm_put(struct gps_device_t *, volatile struct shmTime *, struct t
 extern void ntpshm_link_deactivate(struct gps_device_t *);
 extern void ntpshm_link_activate(struct gps_device_t *);
 #endif /* NTPSHM_ENABLE */
-#endif /* NTP_ENABLE */
 
 extern void errout_reset(struct gpsd_errout_t *errout);
 

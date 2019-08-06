@@ -35,9 +35,7 @@ extern void monitor_complain(const char *fmt, ...);
 extern WINDOW *devicewin;
 extern struct gps_device_t	session;
 extern bool serial;	/* True - direct mode, False - daemon mode */
-#ifdef NTP_ENABLE
 void toff_update(WINDOW *, int, int);
-#endif /* NTP_ENABLE */
 #ifdef PPS_ENABLE
 void pps_update(WINDOW *, int, int);
 #endif /* PPS_ENABLE */
