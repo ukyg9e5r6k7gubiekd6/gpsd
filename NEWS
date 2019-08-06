@@ -17,6 +17,7 @@
   Move mag_var from gps_device_t to magnetic_var gps_data_t.
   Added mag_var() to interpolate magnetic variation (deviation) from a table.
   Remove true2magnetic() as mag_var() improves on it.
+  Remove TIMEHINT_ENABLE.  It only worked when enabled.
 
 3.19: 2019-07-01
   Rearrange rawdata_t.  Bump the API because gps_data_t changed.
@@ -101,9 +102,9 @@
   New HOWTO on the website: "Introduction to Time Service".
 
 3.13: 2015-02-26 (Eric S. Raymond <esr@snark.thyrsus.com>)
-  compiler.h inclusion removed for gps.h so it's standalone for /usr/include. 
+  compiler.h inclusion removed for gps.h so it's standalone for /usr/include.
   TOFF JSON report gives the offset between GPS top of second and clock time.
-  A new ntpmon tool supports capturing clock samples from NTP SHM segments. 
+  A new ntpmon tool supports capturing clock samples from NTP SHM segments.
 
 3.12: 2015-02-22 (Eric S. Raymond <esr@snark.thyrsus.com>)
   The daemon's power utilization has been reduced by changing from
