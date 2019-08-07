@@ -50,7 +50,7 @@ static void libgps_dump_state(struct gps_data_t *collect)
                       collect->fix.latitude, collect->fix.longitude);
     if (collect->set & ALTITUDE_SET)
         (void)fprintf(stdout, "ALTITUDE: altHAE: %lf  U: climb: %lf\n",
-                      collect->fix.altitude, collect->fix.climb);
+                      collect->fix.altHAE, collect->fix.climb);
     if (collect->set & SPEED_SET)
         (void)fprintf(stdout, "SPEED: %lf\n", collect->fix.speed);
     if (collect->set & TRACK_SET)
