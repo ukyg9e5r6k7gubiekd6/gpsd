@@ -2299,7 +2299,7 @@ class ubx(object):
             u1 = struct.unpack_from('<BBHHLHBB', buf, 20)
             s += ("\n sigAttenCompMode %u reserved456 %u %u %u usePPP %u "
                   "aopCfg %u reserved7 %u"
-                  "\n aopOrbMaxErr %u reserved89 %u %u %u useAdr %u" % u)
+                  "\n aopOrbMaxErr %u reserved89 %u %u %u useAdr %u" % u1)
 
         if VERB_DECODE <= opts['verbosity']:
             s += ("\n   mask1 (%s)"
