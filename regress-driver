@@ -204,7 +204,7 @@ case $mode in
         for f in $*; do
 	    case $testing in
             daemon) ${PYTHON} ${PYTHON_COVERAGE} ${GPSD_HOME}/gpsfake -s 38400 -1 -p $opts ${f} | ${GPSFILTER} ;;
-            clientlib) ${GPSD_HOME}/test_libgps -b <${f} ;;
+            clientlib) ${GPSD_HOME}/tests/test_libgps -b <${f} ;;
             esac
         done
         status=0
