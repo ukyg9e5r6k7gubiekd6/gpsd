@@ -2291,12 +2291,12 @@ class ubx(object):
         u = struct.unpack_from('<HHLHBBBBBHBH', buf, 0)
         s = (" version %u mask1 x%x mask2 x%x reserved1 %u minSVs %u "
              "maxSVs %u minCNO %u\n"
-             " reserved2 %u iniFix3D %u reserved3 %u  ackAiding %u\n"
+             " reserved2 %u iniFix3D %u reserved3 %u  ackAiding %u "
              "wknRollover %u" % u)
 
         # length == 40 in protver 27
         if 40 <= m_len:
-            u1 = struct.unpack_from('<BBHHLHBB', buf, 20)
+            u1 = struct.unpack_from('<BBHHBBHHLHBB', buf, 20)
             s += ("\n sigAttenCompMode %u reserved456 %u %u %u usePPP %u "
                   "aopCfg %u reserved7 %u"
                   "\n aopOrbMaxErr %u reserved89 %u %u %u useAdr %u" % u1)
