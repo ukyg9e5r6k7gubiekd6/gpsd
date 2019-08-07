@@ -2715,8 +2715,11 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         distfiles.append("packaging/rpm/gpsd.spec")
 
     # How to build a zip file.
+    # Perversely, if the zip existed, it is modified, not replaced.
+    # So delete it dirst.
     zip = env.Command('zip', distfiles, [
-        '@zip -ry gpsd-${VERSION}.zip $SOURCES',
+        'rm -f gpsd-${VERSION}.zip',
+        '@zip -ry gpsd-${VERSION}.zip $SOURCES -x contrib/ais-samples/\*',
         '@ls -l gpsd-${VERSION}.zip',
     ])
     env.Clean(zip, ["gpsd-${VERSION}.zip", "packaging/rpm/gpsd.spec"])
@@ -2729,7 +2732,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # pass TAR=gtar in the environment.
     dist = env.Command('dist', distfiles, [
         '@${TAR} --transform "s:^:gpsd-${VERSION}/:S" '
-        ' -czf gpsd-${VERSION}.tar.gz $SOURCES',
+        ' -czf gpsd-${VERSION}.tar.gz --exclude contrib/ais-samples $SOURCES',
         '@ls -l gpsd-${VERSION}.tar.gz',
     ])
     env.Clean(dist, ["gpsd-${VERSION}.tar.gz", "packaging/rpm/gpsd.spec"])
