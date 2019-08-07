@@ -170,5 +170,6 @@ nohup.out
 *.bak
 tmp*
 # release files
-*.tar.gz
+*.tar.?z
+*.tar.?z.sig
 *.zip
