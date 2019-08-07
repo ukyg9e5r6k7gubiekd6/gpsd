@@ -172,9 +172,7 @@ static bool sirf_initialize(void)
     display(mid7win, 2, 1, "GPS Time: ");
     display(mid7win, 2, 23, "PPS: ");
     (void)syncok(mid7win, true);
-#ifndef PPS_ENABLE
     (void)mvwaddstr(mid7win, 2, 40, "N/A");
-#endif /* PPS_ENABLE */
     display(mid7win, 3, 8, " Packet type 7 (0x07) ");
     (void)wattrset(mid7win, A_NORMAL);
 
@@ -569,9 +567,7 @@ static void sirf_update(void)
 	(void)wnoutrefresh(mid19win);
     }
 
-#ifdef PPS_ENABLE
     pps_update(mid7win, 2, 32);
-#endif /* PPS_ENABLE */
 }
 
 #ifdef CONTROLSEND_ENABLE

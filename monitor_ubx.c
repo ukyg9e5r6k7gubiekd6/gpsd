@@ -80,15 +80,11 @@ static bool ubx_initialize(void)
 #define TOFF_LINE	1
 #define TOFF_COLUMN	1
     (void)mvwaddstr(ppswin, TOFF_LINE, TOFF_COLUMN, "TOFF: ");
-#ifndef PPS_ENABLE
     (void)mvwaddstr(ppswin, TOFF_LINE, TOFF_COLUMN + 10, "N/A");
-#endif /* PPS_ENABLE */
 #define PPS_LINE	1
 #define PPS_COLUMN	26
     (void)mvwaddstr(ppswin, PPS_LINE, PPS_COLUMN, "PPS: ");
-#ifndef PPS_ENABLE
     (void)mvwaddstr(ppswin, PPS_LINE, PPS_COLUMN + 10, "N/A");
-#endif /* PPS_ENABLE */
     (void)wattrset(ppswin, A_NORMAL);
 
     return true;
@@ -256,9 +252,7 @@ static void ubx_update(void)
 
     toff_update(ppswin, TOFF_LINE, TOFF_COLUMN + 6);
 
-#ifdef PPS_ENABLE
     pps_update(ppswin, PPS_LINE, PPS_COLUMN + 5);
-#endif /* PPS_ENABLE */
 }
 
 static int ubx_command(char line[]UNUSED)

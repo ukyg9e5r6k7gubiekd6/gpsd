@@ -18,6 +18,7 @@
   Added mag_var() to interpolate magnetic variation (deviation) from a table.
   Remove true2magnetic() as mag_var() improves on it.
   Remove TIMEHINT_ENABLE.  It only worked when enabled.
+  Remove NTP_ENABLE and NTPSHM_ENABLE.  It only worked when enabled.
 
 3.19: 2019-07-01
   Rearrange rawdata_t.  Bump the API because gps_data_t changed.

@@ -63,6 +63,7 @@ extern "C" {
  *      Add stuff to gps_device_t.nmea for NMEA 4.1
  * 3.19.1
  *      Remove TIMEHINT_ENABLE.  It only worked when enabled.
+ *      Remove NTP_ENABLE and NTPSHM_ENABLE.  It only worked when enabled.
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -293,15 +294,11 @@ struct gps_context_t {
 #define LEAP_ADDSECOND  0x1     /* last minute of day has 60 seconds */
 #define LEAP_DELSECOND  0x2     /* last minute of day has 59 seconds */
 #define LEAP_NOTINSYNC  0x3     /* overload, clock is free running */
-#ifdef NTPSHM_ENABLE
     /* we need the volatile here to tell the C compiler not to
      * 'optimize' as 'dead code' the writes to SHM */
     volatile struct shmTime *shmTime[NTPSHMSEGS];
     bool shmTimeInuse[NTPSHMSEGS];
-#endif /* NTPSHM_ENABLE */
-#ifdef PPS_ENABLE
     void (*pps_hook)(struct gps_device_t *, struct timedelta_t *);
-#endif /* PPS_ENABLE */
 #ifdef SHM_EXPORT_ENABLE
     /* we don't want the compiler to treat writes to shmexport as dead code,
      * and we don't want them reordered either */
@@ -487,9 +484,7 @@ struct ntrip_stream_t
     int bitrate;
 };
 
-#ifdef PPS_ENABLE
 #include "ppsthread.h"
-#endif /* PPS_ENABLE */
 
 struct gps_device_t {
 /* session object, encapsulates all global state */
@@ -527,16 +522,10 @@ struct gps_device_t {
     unsigned long chars;	/* characters in the cycle */
 #endif /* TIMING_ENABLE */
     bool ship_to_ntpd;
-#ifdef NTPSHM_ENABLE
     volatile struct shmTime *shm_clock;
-#endif /* NTPSHM_ENABLE */
-# ifdef PPS_ENABLE
     volatile struct shmTime *shm_pps;
     int chronyfd;			/* for talking to chrony */
-# endif /* PPS_ENABLE */
-#ifdef PPS_ENABLE
     volatile struct pps_thread_t pps_thread;
-#endif /* PPS_ENABLE */
     bool back_to_nmea;			/* back to NMEA on revert? */
     /*
      * msgbuf needs to hold the hex decode of inbuffer
@@ -927,13 +916,11 @@ extern void nmea_ais_dump(struct gps_device_t *, char[], size_t);
 extern unsigned int ais_binary_encode(struct ais_t *ais, unsigned char *bits, int flag);
 
 extern void ntp_latch(struct gps_device_t *device,  struct timedelta_t *td);
-#ifdef NTPSHM_ENABLE
 extern void ntpshm_context_init(struct gps_context_t *);
 extern void ntpshm_session_init(struct gps_device_t *);
 extern int ntpshm_put(struct gps_device_t *, volatile struct shmTime *, struct timedelta_t *);
 extern void ntpshm_link_deactivate(struct gps_device_t *);
 extern void ntpshm_link_activate(struct gps_device_t *);
-#endif /* NTPSHM_ENABLE */
 
 extern void errout_reset(struct gpsd_errout_t *errout);
 

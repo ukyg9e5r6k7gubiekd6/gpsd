@@ -100,14 +100,10 @@ static bool nmea_initialize(void)
     (void)mvwprintw(gpgsawin, DOP_LINE, 1, "DOP: H=      V=      P=");
 #define TOFF_LINE	3
     (void)mvwprintw(gpgsawin, TOFF_LINE, 1, "TOFF: ");
-#ifndef PPS_ENABLE
     (void)mvwaddstr(gpgsawin, TOFF_LINE, 7, "N/A");
-#endif /* PPS_ENABLE */
 #define PPS_LINE	4
     (void)mvwprintw(gpgsawin, PPS_LINE, 1, "PPS: ");
-#ifndef PPS_ENABLE
     (void)mvwaddstr(gpgsawin, PPS_LINE, 6, "N/A");
-#endif /* PPS_ENABLE */
     (void)mvwprintw(gpgsawin, 5, 9, " GSA + PPS ");
     (void)wattrset(gpgsawin, A_NORMAL);
     (void)syncok(gpgsawin, true);
@@ -334,9 +330,7 @@ static void nmea_update(void)
 	}
     }
 
-#ifdef PPS_ENABLE
     pps_update(gpgsawin, PPS_LINE, 6);
-#endif /* PPS_ENABLE */
 }
 
 #undef SENTENCELINE

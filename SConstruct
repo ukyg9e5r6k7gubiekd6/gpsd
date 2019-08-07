@@ -201,9 +201,7 @@ boolopts = (
     ("rtcm104v2",     True,  "rtcm104v2 support"),
     ("rtcm104v3",     True,  "rtcm104v3 support"),
     # Time service
-    ("ntpshm",        True,  "NTP time hinting via shared memory"),
     ("oscillator",    True,  "Disciplined oscillator support"),
-    ("pps",           True,  "PPS time syncing support"),
     # Export methods
     ("dbus_export",   True,  "enable DBUS export support"),
     ("shm_export",    True,  "export via shared memory"),
@@ -344,9 +342,7 @@ if ARGUMENTS.get('timeservice'):
                    "mtk3301",    # For the Adafruit HAT
                    "ncurses",
                    "nmea0183",   # For generic hats of unknown type.
-                   "ntpshm",
                    "oscillator",
-                   "pps",
                    "socket_export",
                    "ublox",      # For the Uputronics board
                    )
@@ -1000,10 +996,8 @@ else:
             announce("Forcing magic_hat=no since RFC2783 API is unavailable")
             config.env["magic_hat"] = False
     tiocmiwait = config.CheckHeaderDefines("sys/ioctl.h", "TIOCMIWAIT")
-    if config.env["pps"] and not tiocmiwait and not kpps:
-        announce("Forcing pps=no (neither TIOCMIWAIT nor RFC2783 "
-                 "API is available)")
-        config.env["pps"] = False
+    if not tiocmiwait and not kpps:
+        announce("Neither TIOCMIWAIT nor RFC2783 API is available)")
         if config.env["timeservice"]:
             announce("ERROR: timeservice specified, but no PPS available")
             Exit(1)
@@ -1480,7 +1474,7 @@ if env["gpsdclients"]:
         gpxlogger,
         lcdgps
     ]
-if env['pps'] and (env["timeservice"] or env["gpsdclients"]):
+if env["timeservice"] or env["gpsdclients"]:
     bin_binaries += [ntpshmmon]
     if tiocmiwait:
         bin_binaries += [ppscheck]
@@ -1902,7 +1896,7 @@ base_manpages = {
     "man/srec.5": "man/srec.xml",
 }
 
-if env['pps'] and (env["timeservice"] or env["gpsdclients"]):
+if env["timeservice"] or env["gpsdclients"]:
     base_manpages.update({
         "man/ntpshmmon.1": "man/ntpshmmon.xml",
     })
@@ -2136,7 +2130,7 @@ Utility("xmllint", glob.glob("man/*.xml"),
 Utility("deheader", generated_sources, [
     'deheader -x cpp -x contrib -x gpspacket.c -x gpsclient.c '
     '-x monitor_proto.c -i gpsd_config.h -i gpsd.h '
-    '-m "MORECFLAGS=\'-Werror -Wfatal-errors -DDEBUG -DPPS_ENABLE\' scons -Q"',
+    '-m "MORECFLAGS=\'-Werror -Wfatal-errors -DDEBUG \' scons -Q"',
 ])
 
 # Perform all local code-sanity checks (but not the Coverity scan).

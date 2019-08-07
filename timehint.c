@@ -25,7 +25,6 @@
 #include "timespec.h"
 #include "gpsd.h"
 
-#ifdef NTPSHM_ENABLE
 #include "ntpshm.h"
 
 /* Note: you can start gpsd as non-root, and have it work with ntpd.
@@ -208,13 +207,9 @@ static bool ntpshm_free(struct gps_context_t * context, volatile struct shmTime 
 
 void ntpshm_session_init(struct gps_device_t *session)
 {
-#ifdef NTPSHM_ENABLE
     /* mark NTPD shared memory segments as unused */
     session->shm_clock = NULL;
-#endif /* NTPSHM_ENABLE */
-#ifdef PPS_ENABLE
     session->shm_pps = NULL;
-#endif	/* PPS_ENABLE */
 }
 
 int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, struct timedelta_t *td)
@@ -231,18 +226,16 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
 	return 0;
     }
 
-#ifdef PPS_ENABLE
     if (shmseg == session->shm_pps) {
         /* precision is a floor so do not make it tight */
         if ( source_usb == session->sourcetype ) {
-	    /* if PPS over USB, then precision = -20, 1 micro sec  */
-	    precision = -20;
+	    /* if PPS over USB, then precision = -10, 1 milli sec  */
+	    precision = -10;
         } else {
-	    /* likely PPS over serial, precision = -30, 1 nano sec */
-	    precision = -30;
+	    /* likely PPS over serial, precision = -20, 1 micro sec */
+	    precision = -20;
         }
     }
-#endif	/* PPS_ENABLE */
 
     ntp_write(shmseg, td, precision, session->context->leap_notify);
 
@@ -257,7 +250,6 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
     return 1;
 }
 
-#ifdef PPS_ENABLE
 #define SOCK_MAGIC 0x534f434b
 struct sock_sample {
     struct timeval tv;
@@ -398,7 +390,6 @@ static char *report_hook(volatile struct pps_thread_t *pps_thread,
 
     return log1;
 }
-#endif	/* PPS_ENABLE */
 
 void ntpshm_link_deactivate(struct gps_device_t *session)
 /* release ntpshm storage for a session */
@@ -407,7 +398,6 @@ void ntpshm_link_deactivate(struct gps_device_t *session)
 	(void)ntpshm_free(session->context, session->shm_clock);
 	session->shm_clock = NULL;
     }
-#if defined(PPS_ENABLE)
     if (session->shm_pps != NULL) {
 	pps_thread_deactivate(&session->pps_thread);
 	if (session->chronyfd != -1)
@@ -415,7 +405,6 @@ void ntpshm_link_deactivate(struct gps_device_t *session)
 	(void)ntpshm_free(session->context, session->shm_pps);
 	session->shm_pps = NULL;
     }
-#endif	/* PPS_ENABLE */
 }
 
 void ntpshm_link_activate(struct gps_device_t *session)
@@ -436,7 +425,6 @@ void ntpshm_link_activate(struct gps_device_t *session)
         }
     }
 
-#if defined(PPS_ENABLE)
     if (session->sourcetype == source_usb
             || session->sourcetype == source_rs232
             || session->sourcetype == source_pps) {
@@ -468,8 +456,6 @@ void ntpshm_link_activate(struct gps_device_t *session)
 	    pps_thread_activate(&session->pps_thread);
 	}
     }
-#endif /* PPS_ENABLE */
 }
 
-#endif /* NTPSHM_ENABLE */
 /* end */

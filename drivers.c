@@ -1687,7 +1687,6 @@ const struct gps_type_t driver_json_passthrough = {
 
 #endif /* PASSTHROUGH_ENABLE */
 
-#if defined(PPS_ENABLE)
 /* *INDENT-OFF* */
 const struct gps_type_t driver_pps = {
     .type_name      = "PPS",		/* full name of type */
@@ -1713,8 +1712,6 @@ const struct gps_type_t driver_pps = {
     .time_offset     = NULL,		/* no method for NTP fudge factor */
 };
 /* *INDENT-ON* */
-
-#endif /* PPS_ENABLE */
 
 
 extern const struct gps_type_t driver_evermore;
@@ -1835,10 +1832,7 @@ static const struct gps_type_t *gpsd_driver_array[] = {
 #ifdef PASSTHROUGH_ENABLE
     &driver_json_passthrough,
 #endif /* PASSTHROUGH_ENABLE */
-#if defined(PPS_ENABLE)
     &driver_pps,
-#endif /* PPS_ENABLE */
-
     NULL,
 };
 

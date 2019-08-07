@@ -59,7 +59,6 @@ void errout_reset(struct gpsd_errout_t *errout)
     errout->report = basic_report;
 }
 
-#if defined(PPS_ENABLE)
 static pthread_mutex_t report_mutex;
 
 void gpsd_acquire_reporting_lock(void)
@@ -92,7 +91,6 @@ void gpsd_release_reporting_lock(void)
 	exit(EXIT_FAILURE);
     }
 }
-#endif /* PPS_ENABLE */
 
 #ifndef SQUELCH_ENABLE
 static void visibilize(char *outbuf, size_t outlen,
@@ -127,9 +125,7 @@ void gpsd_vlog(const struct gpsd_errout_t *errout,
 	char buf[BUFSIZ];
 	char *err_str;
 
-#if defined(PPS_ENABLE)
 	gpsd_acquire_reporting_lock();
-#endif /* PPS_ENABLE */
 	switch ( errlevel ) {
 	case LOG_ERROR:
 		err_str = "ERROR: ";
@@ -179,9 +175,7 @@ void gpsd_vlog(const struct gpsd_errout_t *errout,
 	    errout->report(outbuf);
 	else
 	    (void)fputs(outbuf, stderr);
-#if defined(PPS_ENABLE)
 	gpsd_release_reporting_lock();
-#endif /* PPS_ENABLE */
     }
 #endif /* !SQUELCH_ENABLE */
 }
@@ -295,9 +289,7 @@ void gps_context_init(struct gps_context_t *context,
     errout_reset(&context->errout);
     context->errout.label = (char *)label;
 
-#if defined(PPS_ENABLE)
     (void)pthread_mutex_init(&report_mutex, NULL);
-#endif /* defined(PPS_ENABLE) */
 }
 
 void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
@@ -368,14 +360,12 @@ void gpsd_deactivate(struct gps_device_t *session)
 	gpsd_run_device_hook(&session->context->errout,
 			     session->gpsdata.dev.path,
 			     HOOK_DEACTIVATE);
-#ifdef PPS_ENABLE
-    session->pps_thread.report_hook = NULL; /* tell any PPS-watcher thread to die */
-#endif /* PPS_ENABLE */
+    /* tell any PPS-watcher thread to die */
+    session->pps_thread.report_hook = NULL;
     /* mark it inactivated */
     session->gpsdata.online = (timestamp_t)0;
 }
 
-#ifdef PPS_ENABLE
 static void ppsthread_log(volatile struct pps_thread_t *pps_thread,
 			  int loglevel, const char *fmt, ...)
 /* shim function to decouple PPS monitor code from the session structure */
@@ -407,7 +397,6 @@ static void ppsthread_log(volatile struct pps_thread_t *pps_thread,
     gpsd_vlog(&device->context->errout, loglevel, buf, sizeof(buf), fmt, ap);
     va_end(ap);
 }
-#endif /* PPS_ENABLE */
 
 
 void gpsd_clear(struct gps_device_t *session)
@@ -426,14 +415,12 @@ void gpsd_clear(struct gps_device_t *session)
 
     /* clear the private data union */
     memset( (void *)&session->driver, '\0', sizeof(session->driver));
-#ifdef PPS_ENABLE
     /* set up the context structure for the PPS thread monitor */
     memset((void *)&session->pps_thread, 0, sizeof(session->pps_thread));
     session->pps_thread.devicefd = session->gpsdata.gps_fd;
     session->pps_thread.devicename = session->gpsdata.dev.path;
     session->pps_thread.log_hook = ppsthread_log;
     session->pps_thread.context = (void *)session;
-#endif /* PPS_ENABLE */
 
     session->opentime = time(NULL);
 }
@@ -1834,10 +1821,8 @@ void ntp_latch(struct gps_device_t *device, struct timedelta_t *td)
     td->real.tv_sec = (time_t)integral;
     td->real.tv_nsec = (long)(fractional * 1e+9);
 
-#ifdef PPS_ENABLE
     /* thread-safe update */
     pps_thread_fixin(&device->pps_thread, td);
-#endif /* PPS_ENABLE */
 }
 
 /* end */

@@ -206,9 +206,6 @@ static void typelist(void)
 #if defined(DBUS_EXPORT_ENABLE)
     (void)printf("# DBUS export enabled\n");
 #endif
-#if defined(PPS_ENABLE)
-    (void)printf("# PPS enabled.\n");
-#endif
     exit(EXIT_SUCCESS);
 }
 
@@ -593,14 +590,10 @@ static ssize_t throttled_write(struct subscriber_t *sub, char *buf,
 	}
     }
 
-#if defined(PPS_ENABLE)
     gpsd_acquire_reporting_lock();
-#endif /* PPS_ENABLE */
     status = send(sub->fd, buf, len, 0);
-#if defined(PPS_ENABLE)
     gpsd_release_reporting_lock();
 
-#endif /* PPS_ENABLE */
     if (status == (ssize_t) len)
 	return status;
     else if (status > -1) {
@@ -658,9 +651,7 @@ static void deactivate_device(struct gps_device_t *device)
     if (!BAD_SOCKET(device->gpsdata.gps_fd)) {
 	FD_CLR(device->gpsdata.gps_fd, &all_fds);
 	adjust_max_fd(device->gpsdata.gps_fd, false);
-#ifdef NTPSHM_ENABLE
 	ntpshm_link_deactivate(device);
-#endif /* NTPSHM_ENABLE */
 	gpsd_deactivate(device);
     }
 }
@@ -701,7 +692,6 @@ static bool open_device( struct gps_device_t *device)
 	return false;
     }
 
-#ifdef NTPSHM_ENABLE
     /*
      * Now is the right time to grab the shared memory segment(s)
      * to communicate the navigation message derived and (possibly)
@@ -712,7 +702,6 @@ static bool open_device( struct gps_device_t *device)
 	     "PPS:%s ntpshm_link_activate: %d\n",
 	     device->gpsdata.dev.path,
 	     device->shm_clock != NULL);
-#endif /* NTPSHM_ENABLE */
 
     gpsd_log(&context.errout, LOG_INF,
 	     "device %s activated\n", device->gpsdata.dev.path);
@@ -745,9 +734,7 @@ bool gpsd_add_device(const char *device_name, bool flag_nowait)
     for (devp = devices; devp < devices + MAX_DEVICES; devp++)
 	if (!allocated_device(devp)) {
 	    gpsd_init(devp, &context, device_name);
-#ifdef NTPSHM_ENABLE
 	    ntpshm_session_init(devp);
-#endif /* NTPSHM_ENABLE */
 	    gpsd_log(&context.errout, LOG_INF,
 		     "stashing device %s at slot %d\n",
 		     device_name, (int)(devp - devices));
@@ -1541,32 +1528,24 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: no fix\n");
     } else if (0 == isfinite(device->newdata.time)) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: bad new time\n");
-#if defined(PPS_ENABLE)
     } else if (device->newdata.time <= device->pps_thread.fix_in.real.tv_sec) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: Not a new time\n");
-#endif /* PPS_ENABLE */
     } else if (!device->ship_to_ntpd) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: No precision time report\n");
     } else {
 	struct timedelta_t td;
-#if defined(PPS_ENABLE)
 	struct gps_device_t *ppsonly;
-#endif /* PPS_ENABLE */
 
 	ntp_latch(device, &td);
 
-#if defined(PPS_ENABLE)
 	/* propagate this in-band-time to all PPS-only devices */
 	for (ppsonly = devices; ppsonly < devices + MAX_DEVICES; ppsonly++)
 	    if (ppsonly->sourcetype == source_pps)
 		pps_thread_fixin(&ppsonly->pps_thread, &td);
-#endif /* PPS_ENABLE */
 
-#ifdef NTPSHM_ENABLE
 	if (device->shm_clock != NULL) {
 	    (void)ntpshm_put(device, device->shm_clock, &td);
 	}
-#endif /* NTPSHM_ENABLE */
 
 #ifdef SOCKET_EXPORT_ENABLE
 	notify_watchers(device, false, true,
@@ -1697,7 +1676,7 @@ static int handle_gpsd_request(struct subscriber_t *sub, const char *buf)
 }
 #endif /* SOCKET_EXPORT_ENABLE */
 
-#if defined(CONTROL_SOCKET_ENABLE) && defined(PPS_ENABLE) && defined(SOCKET_EXPORT_ENABLE)
+#if defined(CONTROL_SOCKET_ENABLE) && defined(SOCKET_EXPORT_ENABLE)
 static void ship_pps_message(struct gps_device_t *session,
 				   struct timedelta_t *td)
 /* on PPS interrupt, ship a message to all clients */
@@ -1806,12 +1785,7 @@ static void netgnss_autoconnect(struct gps_context_t *context,
 }
 #endif /* __UNUSED_AUTOCONNECT__ */
 
-#ifdef PPS_ENABLE
-#define CONDITIONALLY_UNUSED
-#else
-#define CONDITIONALLY_UNUSED UNUSED
-#endif /* PPS_ENABLE */
-static void gpsd_terminate(struct gps_context_t *context CONDITIONALLY_UNUSED)
+static void gpsd_terminate(struct gps_context_t *context)
 /* finish cleanly, reverting device configuration */
 {
     int dfd;
@@ -1821,9 +1795,7 @@ static void gpsd_terminate(struct gps_context_t *context CONDITIONALLY_UNUSED)
 	    (void)gpsd_wrap(&devices[dfd]);
 	}
     }
-#ifdef PPS_ENABLE
     context->pps_hook = NULL;	/* tell any PPS-watcher thread to die */
-#endif /* PPS_ENABLE */
 }
 
 int main(int argc, char *argv[])
@@ -1857,9 +1829,9 @@ int main(int argc, char *argv[])
 
 #ifdef CONTROL_SOCKET_ENABLE
     INVALIDATE_SOCKET(csock);
-#if defined(PPS_ENABLE) && defined(SOCKET_EXPORT_ENABLE)
+#if defined(SOCKET_EXPORT_ENABLE)
     context.pps_hook = ship_pps_message;
-#endif /* PPS_ENABLE && SOCKET_EXPORT_ENABLE */
+#endif /* SOCKET_EXPORT_ENABLE */
 #endif /* CONTROL_SOCKET_ENABLE */
 
     while ((option = getopt(argc, argv, "F:D:S:bGhlNnrP:V")) != -1) {
@@ -2025,7 +1997,6 @@ int main(int argc, char *argv[])
     gpsd_log(&context.errout, LOG_INF, "listening on port %s\n", gpsd_service);
 #endif /* SOCKET_EXPORT_ENABLE */
 
-#ifdef NTPSHM_ENABLE
     if (getuid() == 0) {
 	errno = 0;
 	// nice() can ONLY succeed when run as root!
@@ -2040,7 +2011,6 @@ int main(int argc, char *argv[])
      * to use segments 0 and 1.
      */
     (void)ntpshm_context_init(&context);
-#endif /* NTPSHM_ENABLE */
 
 #if defined(DBUS_EXPORT_ENABLE)
     /* we need to connect to dbus as root */

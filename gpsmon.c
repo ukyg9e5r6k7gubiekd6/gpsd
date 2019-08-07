@@ -146,7 +146,6 @@ static jmp_buf terminate;
 #define TERM_QUIT		6
 
 /* PPS monitoring */
-#if defined(PPS_ENABLE)
 static inline void report_lock(void)
 {
     gpsd_acquire_reporting_lock();
@@ -156,10 +155,6 @@ static inline void report_unlock(void)
 {
     gpsd_release_reporting_lock();
 }
-#else
-static inline void report_lock(void) { }
-static inline void report_unlock(void) { }
-#endif /* PPS_ENABLE */
 
 #define PPSBAR "-------------------------------------" \
 	       " PPS " \
@@ -174,7 +169,6 @@ static inline void report_unlock(void) { }
  *
  ******************************************************************************/
 
-#ifdef PPS_ENABLE
 static void visibilize(char *buf2, size_t len2, const char *buf)
 /* string is mostly printable, dress up the nonprintables a bit */
 {
@@ -189,7 +183,6 @@ static void visibilize(char *buf2, size_t len2, const char *buf)
 	    (void)snprintf(buf2 + strlen(buf2), 6, "\\x%02x",
 			   (unsigned)(*sp & 0xff));
 }
-#endif /* PPS_ENABLE */
 
 static void cond_hexdump(char *buf2, size_t len2,
 			 const char *buf, size_t len)
@@ -256,7 +249,6 @@ void toff_update(WINDOW *win, int y, int x)
 }
 
 /* FIXME:  Decouple this reporting from local PPS monitoring. */
-#ifdef PPS_ENABLE
 void pps_update(WINDOW *win, int y, int x)
 {
     struct timedelta_t ppstimes;
@@ -285,7 +277,6 @@ void pps_update(WINDOW *win, int y, int x)
 	(void)wnoutrefresh(win);
     }
 }
-#endif /* PPS_ENABLE */
 
 /******************************************************************************
  *
@@ -340,7 +331,6 @@ static void gpsmon_report(const char *buf)
 	(void)fputs(buf, logfile);
 }
 
-#ifdef PPS_ENABLE
 static void packet_vlog(char *buf, size_t len, const char *fmt, va_list ap)
 {
     char buf2[BUFSIZ];
@@ -352,7 +342,6 @@ static void packet_vlog(char *buf, size_t len, const char *fmt, va_list ap)
     gpsmon_report(buf2);
     report_unlock();
 }
-#endif /* PPS_ENABLE */
 
 #ifdef RECONFIGURE_ENABLE
 static void announce_log(const char *fmt, ...)
@@ -661,7 +650,6 @@ static char *curses_get_command(void)
  *
  ******************************************************************************/
 
-#ifdef PPS_ENABLE
 static void packet_log(const char *fmt, ...)
 {
     char buf[BUFSIZ];
@@ -672,7 +660,6 @@ static void packet_log(const char *fmt, ...)
     packet_vlog(buf, sizeof(buf), fmt, ap);
     va_end(ap);
 }
-#endif /* PPS_ENABLE */
 
 static ssize_t gpsmon_serial_write(struct gps_device_t *session,
 		   const char *buf,
@@ -790,7 +777,6 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 			"------------------- PPS offset: %.20s ------\n",
 			timedelta_str);
 /* FIXME:  Decouple this from the pps_thread code. */
-#ifdef PPS_ENABLE
 	    /*
 	     * In direct mode this would be a bad idea, but we're not actually
 	     * watching for handshake events on a spawned thread here.
@@ -799,7 +785,6 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	    session.pps_thread.pps_out = noclobber.pps;
 	    /* coverity[missing_lock] */
 	    session.pps_thread.ppsout_count++;
-#endif /* PPS_ENABLE */
 	}
     }
     else
@@ -851,10 +836,8 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
      * and it is a new second. */
     if ( 0 == isfinite(device->newdata.time)) {
 	// "NTP: bad new time
-#if defined(PPS_ENABLE)
     } else if (device->newdata.time <= device->pps_thread.fix_in.real.tv_sec) {
 	// "NTP: Not a new time
-#endif /* PPS_ENABLE */
     } else
 	ntp_latch(device, &time_offset);
 }
@@ -1134,13 +1117,11 @@ static bool do_command(const char *line)
     return true;
 }
 
-#ifdef PPS_ENABLE
 static char *pps_report(volatile struct pps_thread_t *pps_thread UNUSED,
 			struct timedelta_t *td UNUSED) {
     packet_log(PPSBAR);
     return "gpsmon";
 }
-#endif /* PPS_ENABLE */
 
 static jmp_buf assertbuf;
 
@@ -1319,7 +1300,6 @@ int main(int argc, char **argv)
 
 
     if (serial) {
-#ifdef PPS_ENABLE
 	/* this guard suppresses a warning on Bluetooth devices */
 	if (session.sourcetype == source_rs232 || session.sourcetype == source_usb) {
 	    session.pps_thread.report_hook = pps_report;
@@ -1339,7 +1319,6 @@ int main(int argc, char **argv)
 	    #endif /* MAGIC_HAT_ENABLE */
 	    pps_thread_activate(&session.pps_thread);
 	}
-#endif /* PPS_ENABLE */
     }
     else {
 	if (source.device != NULL)
@@ -1465,11 +1444,9 @@ int main(int argc, char **argv)
   quit:
     /* we'll fall through to here on longjmp() */
 
-#ifdef PPS_ENABLE
     /* Shut down PPS monitoring. */
     if (serial)
        (void)pps_thread_deactivate(&session.pps_thread);
-#endif /* PPS_ENABLE*/
 
     gpsd_close(&session);
     if (logfile)
