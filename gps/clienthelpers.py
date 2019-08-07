@@ -432,7 +432,7 @@ def maidenhead(dec_lat, dec_lon):
     if _non_finite(dec_lat) or _non_finite(dec_lon):
         return ''
 
-    if not -90 <= dec_lat < 90 or not math.fabs(dec_lon) <= 180:
+    if 90 < math.fabs(dec_lat) or 180 < math.fabs(dec_lon):
         return ''
 
     adj_lat = dec_lat + 90.0
