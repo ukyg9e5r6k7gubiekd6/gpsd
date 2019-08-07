@@ -2730,9 +2730,12 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # scons in theory has code to cope with this, but in practice this
     # is not working.  On BSD-derived systems, install GNU tar and
     # pass TAR=gtar in the environment.
+    # make a .tar.gz and a .tar.xz
     dist = env.Command('dist', distfiles, [
         '@${TAR} --transform "s:^:gpsd-${VERSION}/:S" '
         ' -czf gpsd-${VERSION}.tar.gz --exclude contrib/ais-samples $SOURCES',
+        '@${TAR} --transform "s:^:gpsd-${VERSION}/:S" '
+        ' -cJf gpsd-${VERSION}.tar.xz --exclude contrib/ais-samples $SOURCES',
         '@ls -l gpsd-${VERSION}.tar.gz',
     ])
     env.Clean(dist, ["gpsd-${VERSION}.tar.gz", "packaging/rpm/gpsd.spec"])
@@ -2758,9 +2761,11 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # The chmod copes with the fact that scp will give a
     # replacement the permissions of the *original*...
     upload_release = Utility('upload-release', [dist], [
+        'rm -f gpsd-*tar*sig',
         'gpg -b gpsd-${VERSION}.tar.gz',
-        'chmod ug=rw,o=r gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig',
-        'scp gpsd-${VERSION}.tar.gz gpsd-${VERSION}.tar.gz.sig ' + scpupload,
+        'gpg -b gpsd-${VERSION}.tar.xz',
+        'chmod ug=rw,o=r gpsd-${VERSION}.tar.*',
+        'scp gpsd-${VERSION}.tar.* ' + scpupload,
     ])
 
     # How to tag a release
