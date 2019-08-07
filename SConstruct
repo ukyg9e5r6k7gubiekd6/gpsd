@@ -2652,7 +2652,8 @@ clean_misc = env.Alias('clean-misc')
 env.Clean(clean_misc, all_manpages + other_manpages)
 # Clean compiled Python
 env.Clean(clean_misc,
-          glob.glob('*.pyc') + glob.glob('gps/*.pyc') + ['gps/__pycache__'])
+          glob.glob('*.pyc') + glob.glob('gps/*.pyc') +
+          glob.glob('gps/*.so') + ['gps/__pycache__'])
 # Clean coverage and profiling files
 env.Clean(clean_misc, glob.glob('*.gcno') + glob.glob('*.gcda'))
 # Clean Python coverage files
