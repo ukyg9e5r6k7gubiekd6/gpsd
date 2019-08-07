@@ -723,7 +723,7 @@ class Base(object):
         ("Time", lambda s, r: s.update_time(r)),
         ("Latitude", lambda s, r: s.update_latitude(r)),
         ("Longitude", lambda s, r: s.update_longitude(r)),
-        ("Altitude", lambda s, r: s.update_altitude(r)),
+        ("   Altitude\n(HAE, MSL)", lambda s, r: s.update_altitude(r)),
         ("Speed", lambda s, r: s.update_speed(r)),
         ("Climb", lambda s, r: s.update_climb(r)),
         ("Track", lambda s, r: s.update_track(r)),
@@ -1027,12 +1027,19 @@ class Base(object):
 
     def update_altitude(self, data):
         "Update altitude"
-        if data.mode >= gps.MODE_3D and hasattr(data, "alt"):
-            return "%9.3f %s" % (
-                data.alt * self.conversions.altfactor,
-                self.conversions.altunits)
+        if data.mode >= gps.MODE_3D:
+            if hasattr(data, "altHAE"):
+                altHAE = "%10.3f" % (data.altHAE * self.conversions.altfactor)
+            else:
+                altHAE = "    n/a   "
+            if hasattr(data, "altMSL"):
+                altMSL = "%10.3f" % (data.altMSL * self.conversions.altfactor)
+            else:
+                altMSL = "    n/a   "
 
-        return "n/a"
+            return "%s,%s %s" % (altHAE, altMSL, self.conversions.altunits)
+
+        return "    n/a       n/a   "
 
     def update_speed(self, data):
         "Update speed"
@@ -1202,11 +1209,14 @@ class Base(object):
                                        self._int_to_str(satellite.PRN, 1, 437))
                 # allow satellites 10 degree below horizon
                 self.set_satlist_field(i, 2,
-                                       self._tenth_to_str(satellite.el, -10, 90))
+                                       self._tenth_to_str(satellite.el,
+                                                          -10, 90))
                 self.set_satlist_field(i, 3,
-                                       self._tenth_to_str(satellite.az, 0, 359))
+                                       self._tenth_to_str(satellite.az,
+                                                          0, 359))
                 self.set_satlist_field(i, 4,
-                                       self._tenth_to_str(satellite.ss, 0, 100))
+                                       self._tenth_to_str(satellite.ss,
+                                                          0, 100))
                 self.set_satlist_field(i, 5, yesno)
 
             # clear rest of the list
