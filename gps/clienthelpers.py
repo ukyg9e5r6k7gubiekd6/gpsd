@@ -439,7 +439,14 @@ def maidenhead(dec_lat, dec_lon):
     adj_lon = dec_lon + 180.0
 
     grid_lat_sq = chr(int(adj_lat / 10) + 65)
+    if 'R' < grid_lat_sq:
+        # A to R
+        grid_lat_sq = 'R'
+
     grid_lon_sq = chr(int(adj_lon / 20) + 65)
+    if 'R' < grid_lon_sq:
+        # A to R
+        grid_lon_sq = 'R'
 
     grid_lat_field = str(int(adj_lat % 10))
     grid_lon_field = str(int((adj_lon / 2) % 10))
