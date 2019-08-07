@@ -2715,8 +2715,8 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         distfiles.append("packaging/rpm/gpsd.spec")
 
     # How to build a zip file.
-    # Perversely, if the zip existed, it is modified, not replaced.
-    # So delete it dirst.
+    # Perversely, if the zip exists, it is modified, not replaced.
+    # So delete it first.
     zip = env.Command('zip', distfiles, [
         'rm -f gpsd-${VERSION}.zip',
         '@zip -ry gpsd-${VERSION}.zip $SOURCES -x contrib/ais-samples/\*',
