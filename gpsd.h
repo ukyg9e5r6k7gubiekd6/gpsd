@@ -214,10 +214,8 @@ struct gps_lexer_t {
     unsigned long retry_counter;	/* count sniff retries */
     unsigned counter;			/* packets since last driver switch */
     struct gpsd_errout_t errout;		/* how to report errors */
-#ifdef TIMING_ENABLE
     timestamp_t start_time;		/* timestamp of first input */
     unsigned long start_char;		/* char counter at first input */
-#endif /* TIMING_ENABLE */
     /*
      * ISGPS200 decoding context.
      *
@@ -517,10 +515,8 @@ struct gps_device_t {
     time_t releasetime;
     bool zerokill;
     time_t reawake;
-#ifdef TIMING_ENABLE
     timestamp_t sor;	/* timestamp start of this reporting cycle */
     unsigned long chars;	/* characters in the cycle */
-#endif /* TIMING_ENABLE */
     bool ship_to_ntpd;
     volatile struct shmTime *shm_clock;
     volatile struct shmTime *shm_pps;

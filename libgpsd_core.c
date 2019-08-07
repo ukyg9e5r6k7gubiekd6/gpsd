@@ -319,10 +319,8 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     gps_clear_att(&session->gpsdata.attitude);
     gps_clear_dop(&session->gpsdata.dop);
     session->gpsdata.dev.cycle = session->gpsdata.dev.mincycle = 1;
-#ifdef TIMING_ENABLE
     session->sor = 0.0;
     session->chars = 0;
-#endif /* TIMING_ENABLE */
     /* tty-level initialization */
     gpsd_tty_init(session);
     /* necessary in case we start reading in the middle of a GPGSV sequence */
@@ -1261,7 +1259,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 
     gps_clear_fix(&session->newdata);
 
-#ifdef TIMING_ENABLE
     /*
      * Input just became available from a sensor, but no read from the
      * device has yet been done.
@@ -1323,7 +1320,6 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	}
 	session->lexer.start_time = now;
     }
-#endif /* TIMING_ENABLE */
 
     if (session->lexer.type >= COMMENT_PACKET) {
 	session->observed |= PACKET_TYPEMASK(session->lexer.type);
@@ -1531,13 +1527,10 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	}
 #endif /* RECONFIGURE_ENABLE */
 
-#ifdef TIMING_ENABLE
 	/* are we going to generate a report? if so, count characters */
 	if ((received & REPORT_IS) != 0) {
 	    session->chars = session->lexer.char_counter - session->lexer.start_char;
 	}
-#endif /* TIMING_ENABLE */
-
 
 	session->gpsdata.set = ONLINE_SET | received;
 

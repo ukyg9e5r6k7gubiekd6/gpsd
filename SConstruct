@@ -214,7 +214,6 @@ boolopts = (
     ("control_socket", True,  "control socket for hotplug notifications"),
     ("force_global",  False, "force daemon to listen on all addressses"),
     ("systemd",       systemd, "systemd socket activation"),
-    ("timing",        False, "latency timing support"),
     # Client-side options
     ("clientdebug",   True,  "client debugging support"),
     ("libgpsmm",      True,  "build C++ bindings"),

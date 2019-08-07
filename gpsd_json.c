@@ -116,15 +116,8 @@ void json_version_dump( char *reply, size_t replylen)
 		   GPSD_PROTO_MAJOR_VERSION, GPSD_PROTO_MINOR_VERSION);
 }
 
-#ifdef TIMING_ENABLE
-#define CONDITIONALLY_UNUSED
-#else
-#define CONDITIONALLY_UNUSED UNUSED
-#endif /* TIMING_ENABLE */
-
-
 void json_tpv_dump(const struct gps_device_t *session,
-		   const struct gps_policy_t *policy CONDITIONALLY_UNUSED,
+		   const struct gps_policy_t *policy,
 		   char *reply, size_t replylen)
 {
     const struct gps_data_t *gpsdata = &session->gpsdata;
@@ -247,7 +240,6 @@ void json_tpv_dump(const struct gps_device_t *session,
 		str_appendf(reply, replylen, "\"geoidSep\":%.3f,",
 			    gpsdata->fix.geoid_sep);
         }
-#ifdef TIMING_ENABLE
 	if (policy->timing) {
 	    char rtime_str[TIMESPEC_LEN];
 	    struct timespec rtime_tmp;
@@ -274,7 +266,6 @@ void json_tpv_dump(const struct gps_device_t *session,
 			session->context->gps_tow,
 			session->context->rollovers);
 	}
-#endif /* TIMING_ENABLE */
         /* at the end because it is new and microjson chokes on new items */
 	if (0 != isfinite(gpsdata->fix.eph))
 	    str_appendf(reply, replylen, "\"eph\":%.3f,", gpsdata->fix.eph);
