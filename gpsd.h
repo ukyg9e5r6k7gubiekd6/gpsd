@@ -1008,13 +1008,6 @@ void gpsd_vlog(const struct gpsd_errout_t *,
 	       const int, char *, size_t, const char *, va_list ap);
 PRINTF_FUNC(3, 4) void gpsd_log(const struct gpsd_errout_t *, const int, const char *, ...);
 
-/*
- * How to mix together epx and epy to get a horizontal circular error
- * eph when reporting requires it. Most devices don't report these;
- * NMEA 3.x devices reporting $GPGBS are the exception.
- */
-#define EMIX(x, y)	(((x) > (y)) ? (x) : (y))
-
 #define NITEMS(x) ((int) (sizeof(x) / sizeof(x[0]) + COMPILE_CHECK_IS_ARRAY(x)))
 
 /*

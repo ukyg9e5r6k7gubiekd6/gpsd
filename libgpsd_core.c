@@ -1094,14 +1094,17 @@ static void gpsd_error_model(struct gps_device_t *session)
 	 * didn't set the speed error, climb error or track error members
          * itself, try to compute them now.
 	 */
+
+#define EMAX(x, y)     (((x) > (y)) ? (x) : (y))
+
 	if (0 < deltatime &&
 	    MODE_2D <= oldfix->mode) {
 
 	    if (0 == isfinite(fix->eps) &&
 		0 != isfinite(oldfix->epx) &&
 		0 != isfinite(oldfix->epy)) {
-		    fix->eps = (EMIX(oldfix->epx, oldfix->epy) +
-				EMIX(fix->epx, fix->epy)) / deltatime;
+		    fix->eps = (EMAX(oldfix->epx, oldfix->epy) +
+				EMAX(fix->epx, fix->epy)) / deltatime;
 	    }
 
 	    if (0 == isfinite(fix->epd)) {
@@ -1123,7 +1126,7 @@ static void gpsd_error_model(struct gps_device_t *session)
 		 */
 		double adj = earth_distance(oldfix->latitude, oldfix->longitude,
 					    fix->latitude, fix->longitude);
-		double opp = EMIX(fix->epx, fix->epy);
+		double opp = EMAX(fix->epx, fix->epy);
 		if (isfinite(adj) != 0 && adj > opp) {
 		    double hyp = sqrt(adj * adj + opp * opp);
 		    fix->epd = RAD_2_DEG * 2 * asin(opp / hyp);
