@@ -1,12 +1,12 @@
 WARNING
-=======
+~~~~~~~
 
 The files at https://gitlab.com/gpsd/gpsd/-/tags are NOT the gpsd
-release files.  DO NOT use them.  The relases files are at:
+release files.  DO NOT use them.  The release files are at:
     http://download-mirror.savannah.gnu.org/releases/gpsd/
 
 GENERAL
-=======
+~~~~~~~
 
 gpsd is a userland daemon acting as a translator between GPS and
 AIS receivers and their clients. gpsd listens on port 2947 for clients
@@ -30,13 +30,13 @@ contains resources and suggestions for packagers and distribution
 integrators.
 
 LICENSE
-=======
+~~~~~~~
 
 This software (gpsd) is released under the terms and conditions of the BSD
 License, a copy of which is included in the file COPYING.
 
 1.X CREDITS
-===========
+~~~~~~~~~~~
 
 Remco Treffkorn designed and originated the code.
 
@@ -62,7 +62,7 @@ None of these people have been active in 2.X and later versions; gpsd
 has evolved out of recognition from the 1.X codebase.
 
 2.X CREDITS
-===========
+~~~~~~~~~~~
 
 Eric S. Raymond drastically rewrote this code in late 2004/early 2005
 to clean it up and extend it.  The 2.X architecture has become
@@ -83,7 +83,7 @@ included:
      library, libgpsd(3).
    * C and Python libraries are available to encapsulate the client side of
      querying gpsd, see libgps(3).
-   * Cleaned-up error reporting, we don't use syslog when running in foreground
+   * Cleaned-up error reporting, we don't use syslog when running in the foreground
      but send all error and status messages to the tty instead.
    * Added -n option to do batch monitoring of GPSes.
    * xgpsspeed is working again; xgps has been seriously reworked and improved.
@@ -111,17 +111,17 @@ Amaury Jacquot <sxpert@esitcom.org> added DBUS support.
 
 Ville Nuorvala <vnuorval@tcs.hut.fi> wrote the NTRIP support.
 
-We are delighted to acknowlege the assistance of Carl Carter, a field
+We are delighted to acknowledge the assistance of Carl Carter, a field
 application engineer at SiRF.  He assisted us with the correction and
 tuning of the SiRF binary-protocol driver, shedding a good deal of
 light on murky aspects of the chip's behavior.
 
 We are also delighted to acknowledge the assistance of Timo Ylhainen, VP of
-Software Operations at Fastrax. He clarified a number of points about
+Software Operations at Fastrax. He clarified some points about
 the iTalk protocol, helping to further development of iTalk support.
 
 3.X CREDITS
-===========
+~~~~~~~~~~~
 
 The main feature of the 3.x versions is a stabilized and finalized
 version of the JSON command/response protocol. This was designed and mainly
