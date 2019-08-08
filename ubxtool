@@ -3299,10 +3299,10 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
             s += ("\n      contentValid (%s) valid (%s) fixType (%s) "
                   "flags (%s)" %
                   (flag_s(u[1], self.log_batch_contentValid),
-                   flag_s(u[15], self.log_batch_valid),
-                   index_s(u[24], self.log_batch_fixType),
-                   flag_s(u[25] & 3, self.log_batch_valid),
-                   index_s(u[25] & 0x1c, self.log_batch_psmState)))
+                   flag_s(u[10], self.log_batch_valid),
+                   index_s(u[13], self.log_batch_fixType),
+                   flag_s(u[14] & 3, self.log_batch_flags),
+                   index_s(u[14] & 0x1c, self.log_batch_psmState)))
 
         return s
 
@@ -3370,6 +3370,38 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
 
         return s
 
+    log_info_status = {
+        8: 'recording',
+        0x10: 'inactive',
+        0x20: 'circular',
+        }
+
+    def log_info(self, buf):
+        """UBX-LOG-INFO decode"""
+        # protVer 15+
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 48 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBHLLLLLLHBBBBBBHBBBBBBBBH', buf, 0)
+        s = ("  version %u reserved1 x%x x%x filestoreCapacity %u "
+             "reserved2 x%x x%x\n"
+             "  currentMaxLogSize %u currentLogSize %u entryCount %u\n"
+             "  oldestYear %u oldestMonth %u oldestDay %u \n"
+             "  oldestHour %u oldestMin %u oldestSec %u reserved3 x%x\n"
+             "  newestYear %u newestMonth %u newestDay %u \n"
+             "  newestHour %u newestMin %u newestSec %u reserved4 x%x\n"
+             "  status x%x reserved5 x%x x%x" % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n      status (%s)" %
+                  (flag_s(u[23], self.log_info_status)))
+
+        return s
+
     log_retrievebatch_flags = {
         1: 'sendMonFirst',
         }
@@ -3399,7 +3431,8 @@ Oddly this is the poll for UBX-LOG-BATCH
                0x04: {'str': 'STRING', 'name': "UBX-LOG-STRING"},
                0x07: {'str': 'CREATE', 'dec': log_create,
                       'name': "UBX-LOG-CREATE"},
-               0x08: {'str': 'INFO', 'name': "UBX-LOG-INFO"},
+               0x08: {'str': 'INFO', 'dec': log_info,
+                      'name': "UBX-LOG-INFO"},
                0x09: {'str': 'RETRIEVE', 'name': "UBX-LOG-RETRIEVE"},
                0x0b: {'str': 'RETRIEVEPOS', 'name': "UBX-LOG-RETRIEVEPOS"},
                0x0d: {'str': 'RETRIEVESTRING',
@@ -6603,6 +6636,9 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         # UBX-LOG-ERASE
         "LOG-ERASE": {"command": send_poll, "opt": [0x21, 0x03],
                       "help": "send UBX-LOG-ERASE"},
+        # UBX-LOG-INFO
+        "LOG-INFO": {"command": send_poll, "opt": [0x21, 0x08],
+                     "help": "poll UBX-LOG-INFO"},
         # UBX-LOG-RETRIEVEBATCH
         "LOG-RETRIEVEBATCH": {"command": send_poll,
                               "opt": [0x21, 0x10, 0, 1, 0, 0],
