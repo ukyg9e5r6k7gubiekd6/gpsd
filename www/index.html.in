@@ -211,7 +211,7 @@ version) rather than the latest released stable version.</p>
 <h1 id='downloads'>Repository, Downloads and Packages</h1>
 
 <dl>
-<dt><a href='@MAINPAGE@'>Repository</a></dt>
+<dt><a href='@PROJECTPAGE@'>Repository</a></dt>
 <dd>Repository and project administration lives here.</dd>
 
 <dt><a
