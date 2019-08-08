@@ -3459,6 +3459,24 @@ Oddly this is the poll for UBX-LOG-BATCH
 
         return s
 
+    def log_retrievestring(self, buf):
+        """UBX-LOG-RETRIEVESTRING decode"""
+        # protVer 15+
+        m_len = len(buf)
+
+        if 16 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LBBHBBBBBBH', buf, 0)
+        s = ("  entryIndex %u version %u reserved2 x%x\n"
+             "  year %u month %u day %u hour %u min %u sec %u\n"
+             "  reserved2 x%x byteCount %u\n"
+             "\n  bytes " % u)
+        if 0 < u[10]:
+            s += gps.polystr(binascii.hexlify(buf[16:16 + u[10]]))
+
+        return s
+
     # UBX-LOG-
     log_ids = {
                0x03: {'str': 'ERASE', 'dec': log_erase,
@@ -3470,7 +3488,7 @@ Oddly this is the poll for UBX-LOG-BATCH
                       'name': "UBX-LOG-INFO"},
                0x09: {'str': 'RETRIEVE', 'name': "UBX-LOG-RETRIEVE"},
                0x0b: {'str': 'RETRIEVEPOS', 'name': "UBX-LOG-RETRIEVEPOS"},
-               0x0d: {'str': 'RETRIEVESTRING',
+               0x0d: {'str': 'RETRIEVESTRING', 'dec': log_retrievestring,
                       'name': "UBX-LOG-RETRIEVESTRING"},
                0x0e: {'str': 'FINDTIME', 'dec': log_findtime,
                       'name': "UBX-LOG-FINDTIME"},
