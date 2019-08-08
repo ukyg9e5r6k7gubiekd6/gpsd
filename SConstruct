@@ -2127,7 +2127,7 @@ Utility("xmllint", glob.glob("man/*.xml"),
 # Use deheader to remove headers not required.  If the statistics line
 # ends with other than '0 removed' there's work to be done.
 Utility("deheader", generated_sources, [
-    'deheader -x cpp -x contrib -x gpspacket.c -x gpsclient.c '
+    'deheader -x cpp -x contrib -x gpspacket.c '
     '-x monitor_proto.c -i gpsd_config.h -i gpsd.h '
     '-m "MORECFLAGS=\'-Werror -Wfatal-errors -DDEBUG \' scons -Q"',
 ])
