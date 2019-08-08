@@ -2217,6 +2217,33 @@ class ubx(object):
                    index_s((u[1] >> 12) & 3, self.cfg_itfm_config2)))
         return s
 
+    cfg_logfilter_flags = {
+        1: "recordEnabled",
+        2: "psmOncePerWakupEnabled",
+        4: "applyAllFilterSettings",
+        }
+
+    def cfg_logfilter(self, buf):
+        """UBX-CFG-LOGFILTER decode, Data Logger Configuration"""
+
+        # protVer 15+
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 12 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBHHHL', buf, 0)
+        s = (" version %u flags x%x minInterval %u timeThreshold %u\n"
+             " speedThreshold %u positionThreshold %u" % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   flags (%s)" %
+                  (flag_s(buf[1], self.cfg_logfilter_flags)))
+
+        return s
+
     utc_std = {
             0: "Default",
             1: "CRL",
@@ -3158,7 +3185,8 @@ class ubx(object):
                # in u-blox 7+  Not in u-blox 6-
                0x3e: {'str': 'GNSS', 'dec': cfg_gnss, 'name': 'UBX-CFG-GNSS'},
                # in u-blox 7+  Not in u-blox 6-
-               0x47: {'str': 'LOGFILTER', 'name': 'UBX-CFG-LOGFILTER'},
+               0x47: {'str': 'LOGFILTER', 'dec': cfg_logfilter,
+                      'name': 'UBX-CFG-LOGFILTER'},
                # Not in u-blox 8-
                0x53: {'str': 'TXSLOT', 'name': 'UBX-CFG-TXSLOT'},
                # Not in u-blox 7-
@@ -6107,6 +6135,29 @@ protVer 15+."""
         # disable, then enable
         gps_model.send_cfg_gnss1(6, able)
 
+    def send_able_logfilter(self, able):
+        """Enable logging"""
+
+        if able:
+            m_data = bytearray([1,            # version
+                                5,            # flags
+                                1, 0,         # minInterval
+                                1, 0,         # timeThreshold
+                                1, 0,         # speedThreshold
+                                1, 0, 0, 0    # positionThreshold
+                                ])
+        else:
+            m_data = bytearray([1,      # version
+                                0,      # flags
+                                0, 0,   # minInterval
+                                0, 0,   # timeThreshold
+                                0, 0,   # speedThreshold
+                                1, 0, 0, 0    # positionThreshold
+                                ])
+
+        # set UBX-CFG-LOGFILTER
+        gps_model.gps_send(6, 0x47, m_data)
+
     def send_able_ned(self, able):
         """Enable NAV-RELPOSNED and VELNED messages.
 protver 15+ required for VELNED
@@ -6579,6 +6630,9 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         # en/dis able GLONASS
         "GLONASS": {"command": send_able_glonass,
                     "help": "GLONASS"},
+        # en/dis able LOG
+        "LOG": {"command": send_able_logfilter,
+                "help": "Data Logger"},
         # en/dis able NED
         "NED": {"command": send_able_ned,
                 "help": "NAV-VELNED and NAV-RELPOSNED"},
@@ -6654,6 +6708,10 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         "CFG-ITFM": {"command": send_poll, "opt": [0x06, 0x39],
                      "help": "poll UBX-CFG-RXM Jamming/Interference "
                      "Monitor configuration"},
+        # UBX-CFG-LOGFILTER
+        "CFG-LOGFILTER": {"command": send_poll, "opt": [0x06, 0x47],
+                          "help": "poll UBX-CFG-LOGFILTER "
+                          " Data Logger Configuration"},
         # UBX-CFG-NAV5
         "CFG-NAV5": {"command": send_poll, "opt": [0x06, 0x24],
                      "help": "poll UBX-CFG-NAV5 Nav Engines settings"},
