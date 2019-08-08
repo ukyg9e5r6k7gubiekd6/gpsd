@@ -3424,6 +3424,21 @@ Oddly this is the poll for UBX-LOG-BATCH
 
         return s
 
+    def log_retrieveposextra(eself, buf):
+        """UBX-LOG-RETRIEVEPOSEXTRA decode"""
+        # protVer 15+
+        m_len = len(buf)
+
+        if 32 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LBBHBBBBBBHLLLL', buf, 0)
+        s = ("  version %u reserved1 x%x\n"
+             "  year %u month %u day %u hour %u minute %u seconds %u\n"
+             "  reserved2 x%x %x distance %u reserved3 x%x %x %x" % u)
+
+        return s
+
     # UBX-LOG-
     log_ids = {
                0x03: {'str': 'ERASE', 'dec': log_erase,
@@ -3439,7 +3454,7 @@ Oddly this is the poll for UBX-LOG-BATCH
                       'name': "UBX-LOG-RETRIEVESTRING"},
                0x0e: {'str': 'FINDTIME', 'dec': log_findtime,
                       'name': "UBX-LOG-FINDTIME"},
-               0x0f: {'str': 'RETRIEVEPOSEXTRA',
+               0x0f: {'str': 'RETRIEVEPOSEXTRA', 'dec': log_retrieveposextra,
                       'name': "UBX-LOG-RETRIEVEPOSEXTRA"},
                0x10: {'str': 'RETRIEVEBATCH', 'dec': log_retrievebatch,
                       'name': "UBX-LOG-RETRIEVEBATCH"},
