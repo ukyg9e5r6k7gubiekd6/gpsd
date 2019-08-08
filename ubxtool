@@ -3306,6 +3306,12 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
 
         return s
 
+    def log_erase(self, buf):
+        """UBX-LOG-ERASE decode"""
+        m_len = len(buf)
+
+        return "  Erase Logged Data"
+
     log_retrievebatch_flags = {
         1: 'sendMonFirst',
         }
@@ -3330,7 +3336,8 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     # UBX-LOG-
     log_ids = {
-               0x03: {'str': 'ERASE', 'name': "UBX-LOG-ERASE"},
+               0x03: {'str': 'ERASE', 'dec': log_erase,
+                      'name': "UBX-LOG-ERASE"},
                0x04: {'str': 'STRING', 'name': "UBX-LOG-STRING"},
                0x07: {'str': 'CREATE', 'name': "UBX-LOG-CREATE"},
                0x08: {'str': 'INFO', 'name': "UBX-LOG-INFO"},
@@ -6529,6 +6536,9 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         "HOTBOOT": {"command": send_cfg_rst,
                     "help": "UBX-CFG-RST hotboot the GPS",
                     "opt": 0},
+        # UBX-LOG-ERASE
+        "LOG-ERASE": {"command": send_poll, "opt": [0x21, 0x03],
+                      "help": "send UBX-LOG-ERASE"},
         # UBX-LOG-RETRIEVEBATCH
         "LOG-RETRIEVEBATCH": {"command": send_poll,
                               "opt": [0x21, 0x10, 0, 1, 0, 0],
