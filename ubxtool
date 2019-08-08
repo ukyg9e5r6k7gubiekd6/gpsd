@@ -3490,11 +3490,26 @@ Oddly this is the poll for UBX-LOG-BATCH
 
         return s
 
+    def log_string(self, buf):
+        """UBX-LOG-STRING decode"""
+        # protVer 15+
+        m_len = len(buf)
+
+        if 256 < m_len:
+            return "Bad Length %s" % m_len
+
+        s = "  bytes "
+        if 0 < m_len:
+            s += gps.polystr(binascii.hexlify(buf))
+
+        return s
+
     # UBX-LOG-
     log_ids = {
                0x03: {'str': 'ERASE', 'dec': log_erase,
                       'name': "UBX-LOG-ERASE"},
-               0x04: {'str': 'STRING', 'name': "UBX-LOG-STRING"},
+               0x04: {'str': 'STRING', 'dec': log_string,
+                      'name': "UBX-LOG-STRING"},
                0x07: {'str': 'CREATE', 'dec': log_create,
                       'name': "UBX-LOG-CREATE"},
                0x08: {'str': 'INFO', 'dec': log_info,
@@ -6715,6 +6730,10 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         "LOG-RETRIEVEBATCH": {"command": send_poll,
                               "opt": [0x21, 0x10, 0, 1, 0, 0],
                               "help": "send UBX-LOG-RETRIEVEBATCH"},
+        # UBX-LOG-STRING
+        "LOG-STRING": {"command": send_poll,
+                       "opt": [0x21, 4, ord("H"), ord("i")],
+                       "help": "send UBX-LOG-STRING"},
         # UBX-CFG-NAV5
         "MODEL": {"command": send_cfg_nav5_model,
                   "help": "set UBX-CFG-NAV5 Dynamic Platform Model"},
