@@ -3339,6 +3339,37 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
 
         return "  Erase Logged Data"
 
+    log_findtime_type = {
+        0: 'request',
+        1: 'response',
+        }
+
+    def log_findtime(self, buf):
+        """UBX-LOG-FINDIME decode"""
+        # protVer 15+
+        m_len = len(buf)
+
+        # length 8 is reponse, length 12 is request
+        if 8 > m_len:
+            return "Bad Length %s" % m_len
+
+        if 12 >= m_len:
+            # request
+            u = struct.unpack_from('<BBLLBBBBBB', buf, 0)
+            s = ("  version %u type %u reserved1 x%x\n"
+                 "  year %u month %u day %u hour %u min %u sec %u "
+                 "reserved2 x%x" % u)
+        else:
+            # response
+            u = struct.unpack_from('<BBLLBBBBBB', buf, 0)
+            s = ("  version %u type %u reserved1 x%x entryNumber %u" % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n      type (%s)" %
+                  (index_s(u[1], self.log_findtime_type)))
+
+        return s
+
     log_retrievebatch_flags = {
         1: 'sendMonFirst',
         }
@@ -3373,7 +3404,8 @@ Oddly this is the poll for UBX-LOG-BATCH
                0x0b: {'str': 'RETRIEVEPOS', 'name': "UBX-LOG-RETRIEVEPOS"},
                0x0d: {'str': 'RETRIEVESTRING',
                       'name': "UBX-LOG-RETRIEVESTRING"},
-               0x0e: {'str': 'FINDTIME', 'name': "UBX-LOG-FINDTIME"},
+               0x0e: {'str': 'FINDTIME', 'dec': log_findtime,
+                      'name': "UBX-LOG-FINDTIME"},
                0x0f: {'str': 'RETRIEVEPOSEXTRA',
                       'name': "UBX-LOG-RETRIEVEPOSEXTRA"},
                0x10: {'str': 'RETRIEVEBATCH', 'dec': log_retrievebatch,
