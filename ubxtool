@@ -1979,8 +1979,8 @@ class ubx(object):
             return "Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHHBB', buf, 0)
-        s = (" version %u flags x%x bufsize %u notifThrs %u\n"
-             " pioId %u reserved1 %u" % u)
+        s = ("  version %u flags x%x bufsize %u notifThrs %u\n"
+             "  pioId %u reserved1 %u" % u)
         if VERB_DECODE <= opts['verbosity']:
             s += ('\n      flags (%s)' % flag_s(u[1], self.cfg_batch_flags))
 
@@ -3306,7 +3306,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
 
         return s
 
-    log_retreivebatch_flags = {
+    log_retrievebatch_flags = {
         1: 'sendMonFirst',
         }
 
@@ -3320,7 +3320,7 @@ Oddly this is the poll for UBX-LOG-BATCH
             return "Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBH', buf, 0)
-        s = (" version %u flags x%x reserved1 x%x\n" % u)
+        s = ("  version %u flags x%x reserved1 x%x" % u)
         if VERB_DECODE <= opts['verbosity']:
             # flags2 undocumented
             s += ("\n      flags (%s)" %
@@ -3341,7 +3341,7 @@ Oddly this is the poll for UBX-LOG-BATCH
                0x0e: {'str': 'FINDTIME', 'name': "UBX-LOG-FINDTIME"},
                0x0f: {'str': 'RETRIEVEPOSEXTRA',
                       'name': "UBX-LOG-RETRIEVEPOSEXTRA"},
-               0x10: {'str': 'RETRIEVEBATCH', 'dec': log_retreivebatch,
+               0x10: {'str': 'RETRIEVEBATCH', 'dec': log_retrievebatch,
                       'name': "UBX-LOG-RETRIEVEBATCH"},
                0x11: {'str': 'BATCH', 'dec': log_batch,
                       'name': "UBX-LOG-BATCH"},
@@ -6529,6 +6529,10 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         "HOTBOOT": {"command": send_cfg_rst,
                     "help": "UBX-CFG-RST hotboot the GPS",
                     "opt": 0},
+        # UBX-LOG-RETRIEVEBATCH
+        "LOG-RETRIEVEBATCH": {"command": send_poll,
+                              "opt": [0x21, 0x10, 0, 1, 0, 0],
+                              "help": "send UBX-LOG-RETRIEVEBATCH"},
         # UBX-CFG-NAV5
         "MODEL": {"command": send_cfg_nav5_model,
                   "help": "set UBX-CFG-NAV5 Dynamic Platform Model"},
