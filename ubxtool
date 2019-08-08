@@ -3247,6 +3247,56 @@ class ubx(object):
                      'name': 'UBX-INF-DEBUG'},
                }
 
+    log_batch_contentValid = {
+        1: 'extraPvt',
+        2: 'extraOdo',
+        }
+
+    log_batch_valid = {
+        1: 'validDate',
+        2: 'validTime',
+        }
+
+    log_batch_fixType = {
+        0: 'No Fix',
+        2: '2D Fix',
+        3: '3D Fix',
+        }
+
+    # FIXME: psmState
+    log_batch_flags = {
+        1: 'gnssFixOK',
+        2: 'diffSoln',
+        }
+
+    def log_batch(self, buf):
+        """UBX-LOG-BATCH decode
+Oddly this is polled with UBX-LOG-RETRIEVEBATCH
+"""
+        m_len = len(buf)
+
+        if 100 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBHLHBBBBBBLlBBBBllllHHlllllLLHHLLLL', buf, 0)
+        s = (" version %u contentValid x%x msgCnt %u iTow %u\n"
+             " year %u month %u day %u hour %u min %u sec %u valid x%x\n"
+             " tAcc %u fracSec %d fixType %u flags x%x flags2 x%x numSV %u\n"
+             " lon %d lat %d height %d hMSL %d hAcc %u vAcc %u\n"
+             " vel N %u E %u D %u gSpeed %rdA headMot %d sAxx %u headAcc %u\n"
+             " pdep %u reserved1 x%x distance %u totalDistance %u\n"
+             " distanceStd %u reserved2 x%x" % u)
+        if VERB_DECODE <= opts['verbosity']:
+            # flags2 undocumented
+            s += ("\n      contentValid (%s) valid (%s) fixType (%s) "
+                  "flags (%s)" %
+                  flag_s(u[1], self.log_batch_contentValid),
+                  flag_s(u[15], self.log_batch_valid),
+                  index_s(u[24], self.log_batch_fixType),
+                  flag_s(u[25] & 3, self.log_batch_valid))
+
+        return s
+
     # UBX-LOG-
     log_ids = {
                0x03: {'str': 'ERASE', 'name': "UBX-LOG-ERASE"},
@@ -3261,7 +3311,8 @@ class ubx(object):
                0x0f: {'str': 'RETRIEVEPOSEXTRA',
                       'name': "UBX-LOG-RETRIEVEPOSEXTRA"},
                0x10: {'str': 'RETRIEVEBATCH', 'name': "UBX-LOG-RETRIEVEBATCH"},
-               0x11: {'str': 'BATCH', 'name': "UBX-LOG-BATCH"},
+               0x11: {'str': 'BATCH', 'dec': log_batch,
+                      'name': "UBX-LOG-BATCH"},
                }
 
     # UBX-MGA-
