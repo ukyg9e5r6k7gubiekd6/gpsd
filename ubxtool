@@ -3263,10 +3263,18 @@ class ubx(object):
         3: '3D Fix',
         }
 
-    # FIXME: psmState
     log_batch_flags = {
         1: 'gnssFixOK',
         2: 'diffSoln',
+        }
+
+    log_batch_psmState = {
+        0: 'Not Active',
+        4: 'Enabled',
+        8: 'Acquisition',
+        9: 'Tracking',
+        0x10: 'Power Optimized Tracking',
+        0x11: 'Inactive',
         }
 
     def log_batch(self, buf):
@@ -3293,7 +3301,30 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
                   flag_s(u[1], self.log_batch_contentValid),
                   flag_s(u[15], self.log_batch_valid),
                   index_s(u[24], self.log_batch_fixType),
-                  flag_s(u[25] & 3, self.log_batch_valid))
+                  flag_s(u[25] & 3, self.log_batch_valid),
+                  index_s(u[25] & 0x1c, self.log_batch_psmState))
+
+        return s
+
+    log_retreivebatch_flags = {
+        1: 'sendMonFirst',
+        }
+
+    def log_retrievebatch(self, buf):
+        """UBX-LOG-RETRIEVEBATCH decode
+Oddly this is the poll for UBX-LOG-BATCH
+"""
+        m_len = len(buf)
+
+        if 4 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBH', buf, 0)
+        s = (" version %u flags x%x reserved1 x%x\n" % u)
+        if VERB_DECODE <= opts['verbosity']:
+            # flags2 undocumented
+            s += ("\n      flags (%s)" %
+                  flag_s(u[1], self.log_retrievebatch_flags))
 
         return s
 
@@ -3310,7 +3341,8 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
                0x0e: {'str': 'FINDTIME', 'name': "UBX-LOG-FINDTIME"},
                0x0f: {'str': 'RETRIEVEPOSEXTRA',
                       'name': "UBX-LOG-RETRIEVEPOSEXTRA"},
-               0x10: {'str': 'RETRIEVEBATCH', 'name': "UBX-LOG-RETRIEVEBATCH"},
+               0x10: {'str': 'RETRIEVEBATCH', 'dec': log_retreivebatch,
+                      'name': "UBX-LOG-RETRIEVEBATCH"},
                0x11: {'str': 'BATCH', 'dec': log_batch,
                       'name': "UBX-LOG-BATCH"},
                }
