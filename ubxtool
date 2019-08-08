@@ -3169,6 +3169,10 @@ class ubx(object):
                # in u-blox 9
                0x8c: {'str': 'VALDEL', 'dec': cfg_valdel,
                       'name': 'UBX-CFG-VALDEL'},
+               # u-blox 8
+               0x8d: {'str': 'SLAS', 'name': 'UBX-CFG-SLAS'},
+               # only in u-blox 8
+               0x93: {'str': 'BATCH', 'name': 'UBX-CFG-BATCH'},
                }
 
     # UBX-ESF-
@@ -3218,9 +3222,10 @@ class ubx(object):
                }
 
     # UBX-LOG-
-    log_ids = {0x07: {'str': 'CREATE', 'name': "UBX-LOG-CREATE"},
+    log_ids = {
                0x03: {'str': 'ERASE', 'name': "UBX-LOG-ERASE"},
                0x04: {'str': 'STRING', 'name': "UBX-LOG-STRING"},
+               0x07: {'str': 'CREATE', 'name': "UBX-LOG-CREATE"},
                0x08: {'str': 'INFO', 'name': "UBX-LOG-INFO"},
                0x09: {'str': 'RETRIEVE', 'name': "UBX-LOG-RETRIEVE"},
                0x0b: {'str': 'RETRIEVEPOS', 'name': "UBX-LOG-RETRIEVEPOS"},
