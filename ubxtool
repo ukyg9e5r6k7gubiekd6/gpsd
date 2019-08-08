@@ -3407,6 +3407,19 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
         1: 'sendMonFirst',
         }
 
+    def log_retrieve(self, buf):
+        """UBX-LOG-RETRIEVE decode"""
+        # protVer 15+
+        m_len = len(buf)
+
+        if 12 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LLBBH', buf, 0)
+        s = "  startNumber %u entryCount %u version %u reserved1 x%x %x" % u
+
+        return s
+
     def log_retrievebatch(self, buf):
         """UBX-LOG-RETRIEVEBATCH decode
 Oddly this is the poll for UBX-LOG-BATCH
@@ -3486,7 +3499,8 @@ Oddly this is the poll for UBX-LOG-BATCH
                       'name': "UBX-LOG-CREATE"},
                0x08: {'str': 'INFO', 'dec': log_info,
                       'name': "UBX-LOG-INFO"},
-               0x09: {'str': 'RETRIEVE', 'name': "UBX-LOG-RETRIEVE"},
+               0x09: {'str': 'RETRIEVE', 'dec': log_retrieve,
+                      'name': "UBX-LOG-RETRIEVE"},
                0x0b: {'str': 'RETRIEVEPOS', 'name': "UBX-LOG-RETRIEVEPOS"},
                0x0d: {'str': 'RETRIEVESTRING', 'dec': log_retrievestring,
                       'name': "UBX-LOG-RETRIEVESTRING"},
@@ -6692,6 +6706,11 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         # UBX-LOG-INFO
         "LOG-INFO": {"command": send_poll, "opt": [0x21, 0x08],
                      "help": "poll UBX-LOG-INFO"},
+        # UBX-LOG-RETRIEVE
+        "LOG-RETRIEVE": {"command": send_poll,
+                         "opt": [0x21, 9, 0, 0, 0, 0, 0, 1, 0, 0,
+                                 0, 0, 0, 0, 0],
+                         "help": "send UBX-LOG-RETRIEVE"},
         # UBX-LOG-RETRIEVEBATCH
         "LOG-RETRIEVEBATCH": {"command": send_poll,
                               "opt": [0x21, 0x10, 0, 1, 0, 0],
