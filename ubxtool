@@ -1826,8 +1826,6 @@ class ubx(object):
     def aid_alm(self, buf):
         """UBX-AID-ALM decode, GPS Aiding Almanac Data"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request all"
 
         if 1 == m_len:
             return "  Poll request svid %u" % buf[0]
@@ -1848,8 +1846,6 @@ class ubx(object):
     def aid_aop(self, buf):
         """UBX-AID-AOP decode, AssistNow Autonomous data"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request all"
 
         if 1 == m_len:
             return "  Poll request svid %u" % buf[0]
@@ -1867,8 +1863,6 @@ class ubx(object):
     def aid_eph(self, buf):
         """UBX-AID-EPH decode, GPS Aiding Ephemeris Data"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request all"
 
         if 1 == m_len:
             return "  Poll request svid %u" % buf[0]
@@ -1893,8 +1887,6 @@ class ubx(object):
     def aid_hui(self, buf):
         """UBX-AID-HUI decode, GPS Heatlh, UTC, Ionosphere"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request all"
 
         if 72 > m_len:
             return "  Bad Length %s" % m_len
@@ -1911,8 +1903,6 @@ class ubx(object):
     def aid_ini(self, buf):
         """UBX-AID-INI decode, Aiding position, time, frequency, clock drift"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 48 > m_len:
             return "  Bad Length %s" % m_len
@@ -1952,8 +1942,6 @@ class ubx(object):
     def cfg_ant(self, buf):
         """UBX-CFG-ANT decode"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request all"
 
         if 4 > m_len:
             return "  Bad Length %s" % m_len
@@ -1979,8 +1967,6 @@ class ubx(object):
     def cfg_batch(self, buf):
         """UBX-CFG-BATCH decode"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request all"
 
         if 8 > m_len:
             return "  Bad Length %s" % m_len
@@ -2042,10 +2028,8 @@ class ubx(object):
 
         # u-blox 5, protVet 4.00 to 6.02
         m_len = len(buf)
-        if 0 == m_len:
-            s = "  Poll request"
 
-        elif 2 > m_len:
+        if 2 > m_len:
             s = "  Bad Length %d" % m_len
 
         elif 2 == m_len:
@@ -2087,8 +2071,6 @@ class ubx(object):
     def cfg_dgnss(self, buf):
         """UBX-CFG-DGNSS decode, DGNSS configuration"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 4 > m_len:
             return "  Bad Length %d" % m_len
@@ -2102,8 +2084,6 @@ class ubx(object):
         """UBX-CFG-DOSC decode, Disciplined oscillator configuration"""
 
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 4 > m_len:
             return "  Bad Length %s" % m_len
@@ -2118,8 +2098,6 @@ class ubx(object):
         configuration"""
 
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 4 > m_len:
             return "  Bad Length %s" % m_len
@@ -2140,8 +2118,6 @@ class ubx(object):
 
         # Antaris 4, u-blox 5, protVer 6.00 to 6.02
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 36 > m_len:
             return "  Bad Length %s" % m_len
@@ -2158,8 +2134,6 @@ class ubx(object):
         """UBX-CFG-GEOFENCE decode, Geofencing configuration"""
 
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 8 > m_len:
             return "  Bad Length %s" % m_len
@@ -2194,8 +2168,6 @@ class ubx(object):
     def cfg_gnss(self, buf):
         """UBX-CFG-GNSS decode, GNSS system configuration"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 4 > m_len:
             return "  Bad Length %d" % m_len
@@ -2272,8 +2244,6 @@ class ubx(object):
         """UBX-CFG-ITFM decode, Jamming/Interference Monitor configuration"""
 
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 8 > m_len:
             return "  Bad Length %s" % m_len
@@ -2302,8 +2272,6 @@ class ubx(object):
 
         # protVer 15+
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 12 > m_len:
             return "  Bad Length %s" % m_len
@@ -2362,8 +2330,6 @@ class ubx(object):
     def cfg_nav5(self, buf):
         """UBX-CFG-NAV5 nav Engine Settings"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 36 > m_len:
             return "  Bad Length %s" % m_len
@@ -2408,8 +2374,6 @@ class ubx(object):
         # deprecated protver 23+
         # length == 20 case seems broken?
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 20 > m_len:
             return "  Bad Length %s" % m_len
@@ -2509,8 +2473,6 @@ class ubx(object):
     def cfg_nmea(self, buf):
         """UBX-CFG-NMEA decode, Extended NMEA protocol configuration V1"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 20 > m_len:
             return "  Bad Length %s" % m_len
@@ -2545,8 +2507,6 @@ Save and Load non-volatile storage data"""
 
         # u-blox 6, protVer 7.03
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 13 > m_len:
             return "  Bad Length %s" % m_len
@@ -2581,8 +2541,6 @@ Save and Load non-volatile storage data"""
     def cfg_odo(self, buf):
         """UBX-CFG-ODO decode, Odometer, Low-speed COG Engine Settings"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 20 > m_len:
             return "  Bad Length %s" % m_len
@@ -2620,8 +2578,6 @@ Save and Load non-volatile storage data"""
 
         # u-blox 5, protVer 6.00 to 6.02
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 24 > m_len:
             return "  Bad Length %s" % m_len
@@ -2658,8 +2614,6 @@ Save and Load non-volatile storage data"""
         # "version" 2 is 48 bytes,protver >= 23
 
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         # 48 bytes protver 18+
         if 44 > m_len:
@@ -2700,8 +2654,6 @@ Save and Load non-volatile storage data"""
         """UBX-CFG-PMS decode, Power Mode Setup"""
 
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 8 > m_len:
             return "  Bad Length %s" % m_len
@@ -2730,8 +2682,6 @@ Save and Load non-volatile storage data"""
         """UBX-CFG-PRT decode, Port Configuration """
 
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         portid = buf[0]
         idstr = '%u (%s)' % (portid, self.port_ids.get(portid, '?'))
@@ -2804,8 +2754,6 @@ Save and Load non-volatile storage data"""
         """UBX-CFG-RATE decode, Navigation/Measurement Rate Settings"""
 
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 6 > m_len:
             return "  Bad Length %s" % m_len
@@ -2825,8 +2773,6 @@ Save and Load non-volatile storage data"""
 
         # u-blox 5, protVer 6.00 to 6.02
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         u = struct.unpack_from('<B', buf, 0)
         s = (" flags x%x (%s) data:" %
@@ -2901,8 +2847,6 @@ Save and Load non-volatile storage data"""
         """UBX-CFG-RXM decode, Navigation/Measurement"""
 
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 2 > m_len:
             return "  Bad Length %s" % m_len
@@ -2971,8 +2915,6 @@ Save and Load non-volatile storage data"""
     def cfg_sbas(self, buf):
         """UBX-CFG-SBAS decode, SBAS Configuration"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 8 > m_len:
             return "  Bad Length %s" % m_len
@@ -3001,8 +2943,6 @@ Save and Load non-volatile storage data"""
 
         # protVer 19.2 (ADR, UDR only)
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 4 > m_len:
             return "  Bad Length %s" % m_len
@@ -3025,8 +2965,6 @@ Save and Load non-volatile storage data"""
     def cfg_smgr(self, buf):
         """UBX-CFG-SMGR decode, Synchronization manager configuration"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 20 > m_len:
             return "  Bad Length %s" % m_len
@@ -3055,8 +2993,6 @@ Save and Load non-volatile storage data"""
 
         # u-blox 5, protVer 5.00 to 6.02 (timing feature only)
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 28 > m_len:
             return "  Bad Length %s" % m_len
@@ -3079,8 +3015,6 @@ Save and Load non-volatile storage data"""
     def cfg_tmode2(self, buf):
         """UBX-CFG-TMODE2 decode, Time Mode Settings 2"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 28 > m_len:
             return "  Bad Length %s" % m_len
@@ -3118,8 +3052,6 @@ Save and Load non-volatile storage data"""
 
         # protVer 4.00 to 6.02
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 28 > m_len:
             return "  Bad Length %s" % m_len
@@ -3157,8 +3089,6 @@ Save and Load non-volatile storage data"""
     def cfg_tp5(self, buf):
         """UBX-CFG-TP5 decode, Time Pulse Parameters"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request tpIdx 0"
 
         if 1 == m_len:
             return "  Poll request tpIdx %d" % buf[0]
@@ -3185,8 +3115,6 @@ Save and Load non-volatile storage data"""
     def cfg_usb(self, buf):
         """UBX-CFG-USB decode, USB Configuration"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 108 > m_len:
             return "  Bad Length %s" % m_len
@@ -3621,8 +3549,6 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
         """UBX-LOG-INFO decode"""
         # protVer 15+
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 48 > m_len:
             return "  Bad Length %s" % m_len
@@ -3774,8 +3700,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def mga_dbd(self, buf):
         """UBX-MGA-DBD- decode, Navigation Database Dump Entry"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         # max 172
         if 12 > m_len:
@@ -3802,8 +3726,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def mon_batch(self, buf):
         """UBX-MON-BATCH decode, Data batching buffer status"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 12 > m_len:
             return "  Bad Length %s" % m_len
@@ -3825,8 +3747,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def mon_comms(self, buf):
         """UBX-MON-COMMS decode, Comm port information"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 8 > m_len:
             return "  Bad Length %s" % m_len
@@ -3875,8 +3795,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def mon_gnss(self, buf):
         """UBX-MON-GNSS decode, Information message major GNSS selection"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 8 > m_len:
             return "  Bad Length %s" % m_len
@@ -3915,8 +3833,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def mon_hw(self, buf):
         """UBX-MON-HW decode, Hardware Status"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 60 > m_len:
             return "  Bad Length %s" % m_len
@@ -3947,8 +3863,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def mon_hw2(self, buf):
         """UBX-MON-HW2 decode, Extended Hardware Status"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 28 > m_len:
             return "  Bad Length %s" % m_len
@@ -3973,8 +3887,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def mon_hw3(self, buf):
         """UBX-MON-HW3 decode, HW I/O pin information"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 22 > m_len:
             return "  Bad Length %s" % m_len
@@ -4003,8 +3915,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def mon_io(self, buf):
         """UBX-MON-IO decode, I/O Subsystem Status"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         s = ''
         for i in range(0, int(m_len / 20)):
@@ -4020,8 +3930,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def mon_msgpp(self, buf):
         """UBX-MON-MSGPP decode, Message Parse and Process Status"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 120 > m_len:
             return "  Bad Length %s" % m_len
@@ -4049,9 +3957,6 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MON-PATCH decode, Output information about installed patches."""
 
         m_len = len(buf)
-
-        if 0 == m_len:
-            return "  Poll request"
 
         if 4 > m_len:
             return "  Bad Length %s" % m_len
@@ -4090,8 +3995,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
         # first seen in protver 27
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 4 > m_len:
             return "  Bad Length %s" % m_len
@@ -4119,8 +4022,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def mon_rxbuf(self, buf):
         """UBX-MON-RXBUF decode, Receiver Buffer Status"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 24 > m_len:
             return "  Bad Length %s" % m_len
@@ -4184,9 +4085,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
         m_len = len(buf)
 
-        if 0 == m_len:
-            return "  Poll request"
-
         if 16 > m_len:
             return "  Bad Length %s" % m_len
 
@@ -4207,8 +4105,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def mon_txbuf(self, buf):
         """UBX-MON-TXBUF decode, Transmitter Buffer Status"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 28 > m_len:
             return "  Bad Length %s" % m_len
@@ -4240,8 +4136,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def mon_ver(self, buf):
         """UBX-MON-VER decode, Poll Receiver/Software Version"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 40 > m_len:
             return "  Bad Length %s" % m_len
@@ -4285,8 +4179,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def nav_aopstatus(self, buf):
         """UBX-NAV-AOPSTATUS decode, AssistNow Autonomous Status"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 16 > m_len:
             return "  Bad Length %s" % m_len
@@ -4302,8 +4194,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def nav_att(self, buf):
         """UBX-NAV-ATT decode, Attitude Solution"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 32 > m_len:
             return "  Bad Length %s" % m_len
@@ -4318,8 +4208,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def nav_clock(self, buf):
         """UBX-NAV-CLOCK decode, Clock Solution"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 20 > m_len:
             return "  Bad Length %s" % m_len
@@ -4337,8 +4225,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
         # not present in protver 27+
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 16 > m_len:
             return "  Bad Length %s" % m_len
@@ -4362,8 +4248,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def nav_dop(self, buf):
         """UBX-NAV-DOP decode, Dilution of Precision"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 18 > m_len:
             return "  Bad Length %s" % m_len
@@ -4395,8 +4279,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def nav_geofence(self, buf):
         """UBX-NAV-GEOFENCE decode, Geofencing status"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 8 > m_len:
             return "  Bad Length %s" % m_len
@@ -4420,8 +4302,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def nav_hpposecef(self, buf):
         """UBX-NAV-POSECEF decode, High Precision Position Solution in ECEF"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 28 > m_len:
             return "  Bad Length %s" % m_len
@@ -4435,8 +4315,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def nav_hpposllh(self, buf):
         """UBX-NAV-HPPOSLLH decode, HP Geodetic Position Solution"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 36 > m_len:
             return "  Bad Length %s" % m_len
@@ -4450,8 +4328,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def nav_odo(self, buf):
         """UBX-NAV-ODO decode, Odometer Solution"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 20 > m_len:
             return "  Bad Length %s" % m_len
@@ -4487,8 +4363,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def nav_orb(self, buf):
         """UBX-NAV-ORB decode, GNSS Orbit Database Info"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 8 > m_len:
             return "  Bad Length %s" % m_len
@@ -4535,8 +4409,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def nav_posecef(self, buf):
         """UBX-NAV-POSECEF decode, Position Solution in ECEF"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 20 > m_len:
             return "  Bad Length %s" % m_len
@@ -4547,8 +4419,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def nav_posllh(self, buf):
         """UBX-NAV-POSLLH decode, Geodetic Position Solution"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 20 > m_len:
             return "  Bad Length %s" % m_len
@@ -4605,8 +4475,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def nav_pvt(self, buf):
         """UBX-NAV-PVT decode, Navigation Position Velocity Time Solution"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         # 84 bytes long in protver 14.
         # 92 bytes long in protver 15.
@@ -4657,8 +4525,6 @@ protVer 20+
 High Precision GNSS products only."""
 
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 64 > m_len:
             return "  Bad Length %s" % m_len
@@ -4682,6 +4548,7 @@ High Precision GNSS products only."""
 
         m_len = len(buf)
         if 0 == m_len:
+            # FIXME; this shows up as "  Poll request"
             s = " reset request"
         else:
             s = " unexpected data"
@@ -4740,8 +4607,6 @@ High Precision GNSS products only."""
     def nav_sat(self, buf):
         """UBX-NAV-SAT decode"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 8 > m_len:
             return "  Bad Length %s" % m_len
@@ -4792,8 +4657,6 @@ High Precision GNSS products only."""
 
         # undocuemnted, but present in protver 27+
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 12 > m_len:
             return "  Bad Length %s" % m_len
@@ -4852,8 +4715,6 @@ High Precision GNSS products only."""
     def nav_sig(self, buf):
         """UBX-NAV-SIG decode, Signal Information"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 8 > m_len:
             return "  Bad Length %s" % m_len
@@ -4890,8 +4751,6 @@ High Precision GNSS products only."""
     def nav_slas(self, buf):
         """UBX-NAV-SLAS decode, QZSS L1S SLAS Status Data"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 20 > m_len:
             return "  Bad Length %s" % m_len
@@ -4922,8 +4781,6 @@ High Precision GNSS products only."""
 
         #  deprecated by u-blox
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 52 > m_len:
             return "  Bad Length %s" % m_len
@@ -4944,8 +4801,6 @@ High Precision GNSS products only."""
     def nav_status(self, buf):
         """UBX-NAV-STATUS decode"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 16 > m_len:
             return "  Bad Length %s" % m_len
@@ -4957,8 +4812,6 @@ High Precision GNSS products only."""
     def nav_svin(self, buf):
         """UBX-NAV-SVIN decode, Survey-in data"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 40 > m_len:
             return "  Bad Length %s" % m_len
@@ -4972,8 +4825,6 @@ High Precision GNSS products only."""
     def nav_svinfo(self, buf):
         """UBX-NAV-SVINFO decode"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 8 > m_len:
             return "  Bad Length %s" % m_len
@@ -5019,8 +4870,6 @@ High Precision GNSS products only."""
     def nav_timebds(self, buf):
         """UBX-NAV-TIMEBDS decode"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 20 > m_len:
             return ".Bad Length %s" % m_len
@@ -5037,8 +4886,6 @@ High Precision GNSS products only."""
     def nav_timegal(self, buf):
         """UBX-NAV-TIMEGAL decode"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 20 > m_len:
             return "  Bad Length %s" % m_len
@@ -5055,8 +4902,6 @@ High Precision GNSS products only."""
     def nav_timeglo(self, buf):
         """UBX-NAV-TIMEGLO decode"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 20 > m_len:
             return "  Bad Length %s" % m_len
@@ -5073,8 +4918,6 @@ High Precision GNSS products only."""
     def nav_timegps(self, buf):
         """UBX-NAV-TIMEGPS decode"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 16 > m_len:
             return "  Bad Length %s" % m_len
@@ -5115,8 +4958,6 @@ High Precision GNSS products only."""
     def nav_timels(self, buf):
         """UBX-NAV-TIMELS decode, Leap second event information"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 24 > m_len:
             return "  Bad Length %s" % m_len
@@ -5143,8 +4984,6 @@ High Precision GNSS products only."""
     def nav_timeutc(self, buf):
         """UBX-NAV-TIMEUTC decode"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 20 > m_len:
             return "  Bad Length %s" % m_len
@@ -5162,8 +5001,6 @@ High Precision GNSS products only."""
     def nav_velecef(self, buf):
         """UBX-NAV-VELECEF decode"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 20 != m_len:
             return "  Bad Length %s" % m_len
@@ -5175,8 +5012,6 @@ High Precision GNSS products only."""
         """UBX-NAV-VELNED decode.
 protVer 15+."""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 36 > m_len:
             return "  Bad Length %s" % m_len
@@ -5279,8 +5114,6 @@ protVer 15+."""
     def rxm_imes(self, buf):
         """UBX-RXM-IMES decode, Indoor Messaging System Information"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 4 > m_len:
             return "  Bad Length %s" % m_len
@@ -5300,8 +5133,6 @@ protVer 15+."""
     def rxm_measx(self, buf):
         """UBX-RXM-RAW decode"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 44 > m_len:
             return "  Bad Length %s" % m_len
@@ -5327,8 +5158,6 @@ protVer 15+."""
     def rxm_raw(self, buf):
         """UBX-RXM-RAW decode"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 8 > m_len:
             return "  Bad Length %s" % m_len
@@ -5355,8 +5184,6 @@ protVer 15+."""
     def rxm_rawx(self, buf):
         """UBX-RXM-RAWX decode"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 16 > m_len:
             return "  Bad Length %s" % m_len
@@ -5410,8 +5237,6 @@ protVer 15+."""
     def rxm_rtcm(self, buf):
         """UBX-RXM-RTCM decode, RTCM Input Status"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 8 > m_len:
             return "  Bad Length %s" % m_len
@@ -5423,8 +5248,6 @@ protVer 15+."""
     def rxm_sfrb(self, buf):
         """UBX-RXM-SFRB decode, Subframe Buffer"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 42 > m_len:
             return "  Bad Length %s" % m_len
@@ -5781,8 +5604,6 @@ protVer 15+."""
     def rxm_svsi(self, buf):
         """UBX-RXM-SVSI decode, SV Status Info"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 8 > m_len:
             return "  Bad Length %s" % m_len
@@ -5824,8 +5645,6 @@ protVer 15+."""
     def sec_uniqid(self, buf):
         """UBX-SEC_UNIQID decode Unique chip ID"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 9 > m_len:
             return "  Bad Length %s" % m_len
@@ -5844,8 +5663,6 @@ protVer 15+."""
     def tim_svin(self, buf):
         """UBX-TIM-SVIN decode, Survey-in data"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 28 > m_len:
             return "  Bad Length %s" % m_len
@@ -5858,8 +5675,6 @@ protVer 15+."""
     def tim_tm2(self, buf):
         """UBX-TIM-TM2 decode, Time mark data"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 28 > m_len:
             return "  Bad Length %s" % m_len
@@ -5872,8 +5687,6 @@ protVer 15+."""
     def tim_tp(self, buf):
         """UBX-TIM-TP decode, Time Pulse Timedata"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 16 > m_len:
             return "  Bad Length %s" % m_len
@@ -5911,8 +5724,6 @@ protVer 15+."""
     def tim_vrfy(self, buf):
         """UBX-TIM-VRFY decode, Sourced Time Verification"""
         m_len = len(buf)
-        if 0 == m_len:
-            return "  Poll request"
 
         if 20 > m_len:
             return "  Bad Length %s" % m_len
@@ -6188,9 +5999,11 @@ protVer 15+."""
                             s_payload = this_class['ids'][m_id]['name']
                             s_payload += ':\n'
 
-                            if (('minlen' in this_class['ids'][m_id]) and
-                                (this_class['ids'][m_id]['minlen'] >
-                                 m_len)):
+                            if 0 == m_len:
+                                s_payload += "  Poll request"
+                            elif (('minlen' in this_class['ids'][m_id]) and
+                                  (this_class['ids'][m_id]['minlen'] >
+                                   m_len)):
                                 # failed minimum length for this message
                                 s_payload += "  Bad Length %s" % m_len
                             elif 'dec' in this_class['ids'][m_id]:
