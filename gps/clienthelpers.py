@@ -436,11 +436,11 @@ def maidenhead(dec_lat, dec_lon):
         return ''
 
     if 89.99999 < dec_lat:
-        # force North Pole, just inside lat_sq 'R'
+        # force North Pole to just inside lat_sq 'R'
         dec_lat = 89.99999
 
     if 179.99999 < dec_lon:
-        # force 180, just inside lon_sq 'R'
+        # force 180 to just inside lon_sq 'R'
         dec_lon = 179.99999
 
     adj_lat = dec_lat + 90.0
