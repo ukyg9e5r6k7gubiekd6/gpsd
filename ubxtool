@@ -1814,7 +1814,7 @@ class ubx(object):
         # NOTE: Not all messages to u-blox GPS are ACKed...
         m_len = len(buf)
         if 2 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BB', buf, 0)
         return ' ACK to %s' % self.class_id_s(u[0], u[1])
@@ -1828,13 +1828,13 @@ class ubx(object):
         """UBX-AID-ALM decode, GPS Aiding Almanac Data"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request all"
+            return "  Poll request all"
 
         if 1 == m_len:
-            return " Poll request svid %u" % buf[0]
+            return "  Poll request svid %u" % buf[0]
 
         if 8 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LL', buf, 0)
         s = ' svid %u week %u ' % u
@@ -1850,14 +1850,14 @@ class ubx(object):
         """UBX-AID-AOP decode, AssistNow Autonomous data"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request all"
+            return "  Poll request all"
 
         if 1 == m_len:
-            return " Poll request svid %u" % buf[0]
+            return "  Poll request svid %u" % buf[0]
 
         # length 2 is undocumented...
         if 2 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BB', buf, 0)
         s = ' gnssid %u svid %u' % u
@@ -1869,13 +1869,13 @@ class ubx(object):
         """UBX-AID-EPH decode, GPS Aiding Ephemeris Data"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request all"
+            return "  Poll request all"
 
         if 1 == m_len:
-            return " Poll request svid %u" % buf[0]
+            return "  Poll request svid %u" % buf[0]
 
         if 8 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LL', buf, 0)
         s = ' svid %u how x%x ' % u
@@ -1895,10 +1895,10 @@ class ubx(object):
         """UBX-AID-HUI decode, GPS Heatlh, UTC, Ionosphere"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request all"
+            return "  Poll request all"
 
         if 72 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LddlhhhhhhffffffffL', buf, 0)
         s = (' health x%x utcAo %e utcA1 %e utcTOW %d'
@@ -1913,10 +1913,10 @@ class ubx(object):
         """UBX-AID-INI decode, Aiding position, time, frequency, clock drift"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 48 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<lllLHHLlLLlLL', buf, 0)
         s = (' ecefXOrLat %d ecefYOrLon %d ecefZOrAlt %d posAcc %u'
@@ -1954,10 +1954,10 @@ class ubx(object):
         """UBX-CFG-ANT decode"""
         m_len = len(buf)
         if 0 == m_len:
-            return "Poll request all"
+            return "  Poll request all"
 
         if 4 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<HH', buf, 0)
         s = ' flags x%x pins x%x ' % u
@@ -1981,10 +1981,10 @@ class ubx(object):
         """UBX-CFG-BATCH decode"""
         m_len = len(buf)
         if 0 == m_len:
-            return "Poll request all"
+            return "  Poll request all"
 
         if 8 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHHBB', buf, 0)
         s = ("  version %u flags x%x bufsize %u notifThrs %u\n"
@@ -2018,7 +2018,7 @@ class ubx(object):
         """UBX-CFG-CFG decode"""
         m_len = len(buf)
         if 12 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         if 12 == m_len:
             u = struct.unpack_from('<LLL', buf, 0)
@@ -2044,10 +2044,10 @@ class ubx(object):
         # u-blox 5, protVet 4.00 to 6.02
         m_len = len(buf)
         if 0 == m_len:
-            s = "Poll request"
+            s = "  Poll request"
 
         elif 2 > m_len:
-            s = "Bad Length %d" % m_len
+            s = "  Bad Length %d" % m_len
 
         elif 2 == m_len:
             # standard datum
@@ -2055,7 +2055,7 @@ class ubx(object):
             s = "  datumNum %u" % u
 
         elif 44 > m_len:
-            s = "Bad Length %d" % m_len
+            s = "  Bad Length %d" % m_len
 
         elif 44 == m_len:
             # set user defined datum
@@ -2064,7 +2064,7 @@ class ubx(object):
                  "  rotX %.1f rotY %.1f rotZ %.1f scale %.1f" % u)
 
         elif 52 > m_len:
-            s = "Bad Length %d" % m_len
+            s = "  Bad Length %d" % m_len
 
         elif 52 <= m_len:
             # get user defined datum
@@ -2089,10 +2089,10 @@ class ubx(object):
         """UBX-CFG-DGNSS decode, DGNSS configuration"""
         m_len = len(buf)
         if 0 == m_len:
-            return "Poll request"
+            return "  Poll request"
 
         if 4 > m_len:
-            return "Bad Length %d" % m_len
+            return "  Bad Length %d" % m_len
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = (" dgnssMode %u (%s) reserved1 %u %u %u" % u
@@ -2104,10 +2104,10 @@ class ubx(object):
 
         m_len = len(buf)
         if 0 == m_len:
-            return "Poll request"
+            return "  Poll request"
 
         if 4 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = " version %u numOsc %u reserved1 %u" % u
@@ -2120,10 +2120,10 @@ class ubx(object):
 
         m_len = len(buf)
         if 0 == m_len:
-            return "Poll request"
+            return "  Poll request"
 
         if 4 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = "  version %u numSources %u reserved1 %u" % u
@@ -2142,10 +2142,10 @@ class ubx(object):
         # Antaris 4, u-blox 5, protVer 6.00 to 6.02
         m_len = len(buf)
         if 0 == m_len:
-            return "Poll request"
+            return "  Poll request"
 
         if 36 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLLLLLLLL', buf, 0)
         s = ("  flags x%x tReacq %u tAcq %u tReacqOff %u\n"
@@ -2160,10 +2160,10 @@ class ubx(object):
 
         m_len = len(buf)
         if 0 == m_len:
-            return "Poll request"
+            return "  Poll request"
 
         if 8 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBBBBB', buf, 0)
         s = (" version %u numFences %u confLvl %u reserved1 %u\n"
@@ -2196,10 +2196,10 @@ class ubx(object):
         """UBX-CFG-GNSS decode, GNSS system configuration"""
         m_len = len(buf)
         if 0 == m_len:
-            return "Poll request"
+            return "  Poll request"
 
         if 4 > m_len:
-            return "Bad Length %d" % m_len
+            return "  Bad Length %d" % m_len
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = " msgVer %u  numTrkChHw %u numTrkChUse %u numConfigBlocks %u" % u
@@ -2227,7 +2227,7 @@ class ubx(object):
 
         m_len = len(buf)
         if 4 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBb', buf, 0)
         s = " highNavRate %u reserved %u %u" % u
@@ -2242,11 +2242,11 @@ class ubx(object):
         """UBX-CFG-INF decode, Poll configuration for one protocol"""
         m_len = len(buf)
         if 1 == m_len:
-            return ("Poll request: %s" %
+            return ("  Poll request: %s" %
                     index_s(buf[0], self.cfg_inf_protid))
 
         if 10 < m_len:
-            return "Bad Length %d" % m_len
+            return "  Bad Length %d" % m_len
 
         u = struct.unpack_from('<BBBBBBBBBB', buf, 0)
         s = (" protocolId %u reserved1 %u %u %u\n"
@@ -2274,10 +2274,10 @@ class ubx(object):
 
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 8 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LL', buf, 0)
         s = " config x%x config2 x%x" % u
@@ -2304,10 +2304,10 @@ class ubx(object):
         # protVer 15+
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 12 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHHHL', buf, 0)
         s = (" version %u flags x%x minInterval %u timeThreshold %u\n"
@@ -2364,10 +2364,10 @@ class ubx(object):
         """UBX-CFG-NAV5 nav Engine Settings"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 36 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<HBBlLbBHHHHbbbbHHbBL', buf, 0)
         s = (' mask %#x dynModel %u fixmode %d fixedAlt %d FixedAltVar %u\n'
@@ -2410,10 +2410,10 @@ class ubx(object):
         # length == 20 case seems broken?
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 20 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<HHLHBBBBBHBH', buf, 0)
         s = (" version %u mask1 x%x mask2 x%x reserved1 %u minSVs %u "
@@ -2450,7 +2450,7 @@ class ubx(object):
                     (self.class_id_s(u[0], u[1]), u[2]))
 
         if 8 != m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBBBBB', buf, 0)
         s = (' %s Rates: %u %u %u %u %u %u' %
@@ -2511,10 +2511,10 @@ class ubx(object):
         """UBX-CFG-NMEA decode, Extended NMEA protocol configuration V1"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 20 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLBBBBBBBBBBBB', buf, 0)
         s = (" filter x%x nmeaVersion x%x numSv %u flags x%x "
@@ -2547,10 +2547,10 @@ Save and Load non-volatile storage data"""
         # u-blox 6, protVer 7.03
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 13 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLLB', buf, 0)
         s = ('  clearMask: %#x (%s)\n' %
@@ -2583,10 +2583,10 @@ Save and Load non-volatile storage data"""
         """UBX-CFG-ODO decode, Odometer, Low-speed COG Engine Settings"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 20 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBBBBBBBBBBBBBBBBB', buf, 0)
         s = (" version %u reserved1 %u %u %u flags x%x odoCfg x%x\n"
@@ -2622,10 +2622,10 @@ Save and Load non-volatile storage data"""
         # u-blox 5, protVer 6.00 to 6.02
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 24 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLLLLHH', buf, 0)
         s = (" version %u res1 %u res2 %u res3 %u flags x%x updatePeriod %u\n"
@@ -2660,11 +2660,11 @@ Save and Load non-volatile storage data"""
 
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         # 48 bytes protver 18+
         if 44 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLLLLHHLLLLL', buf, 0)
         s = (" version %u reserved1 %u maxStartupStateDur %u reserved2 %u\n"
@@ -2702,10 +2702,10 @@ Save and Load non-volatile storage data"""
 
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 8 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHHBB', buf, 0)
         s = (' version %u powerSetupValue %u'
@@ -2732,18 +2732,18 @@ Save and Load non-volatile storage data"""
 
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         portid = buf[0]
         idstr = '%u (%s)' % (portid, self.port_ids.get(portid, '?'))
 
         if 1 == m_len:
-            return " Poll request PortID %s" % idstr
+            return "  Poll request PortID %s" % idstr
 
         # Note that this message can contain multiple 20-byte submessages, but
         # only in the send direction, which we don't currently do.
         if 20 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHLLHHHH', buf, 0)
 
@@ -2786,7 +2786,7 @@ Save and Load non-volatile storage data"""
 
         m_len = len(buf)
         if 8 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBL', buf, 0)
         s = (" version %u reserved %u %u %u state %u" %
@@ -2806,10 +2806,10 @@ Save and Load non-volatile storage data"""
 
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 6 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<HHH', buf, 0)
         s = (" measRate %u navRate %u timeRef %u (%s)" %
@@ -2827,7 +2827,7 @@ Save and Load non-volatile storage data"""
         # u-blox 5, protVer 6.00 to 6.02
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         u = struct.unpack_from('<B', buf, 0)
         s = (" flags x%x (%s) data:" %
@@ -2874,7 +2874,7 @@ Save and Load non-volatile storage data"""
         m_len = len(buf)
 
         if 4 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<HBB', buf, 0)
         s = ' navBbrmask x%x resetMode %u reserved %u' % u
@@ -2903,10 +2903,10 @@ Save and Load non-volatile storage data"""
 
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 2 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BB', buf, 0)
         s = (" reserved1 %u lpMode %u (%s)" %
@@ -2973,10 +2973,10 @@ Save and Load non-volatile storage data"""
         """UBX-CFG-SBAS decode, SBAS Configuration"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 8 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBL', buf, 0)
         s = (" mode x%x usage x%x maxSBAS %u scanMode2 x%x"
@@ -3003,10 +3003,10 @@ Save and Load non-volatile storage data"""
         # protVer 19.2 (ADR, UDR only)
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 4 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBH', buf, 0)
         s = " mode %u reserved1 %u %u" % u
@@ -3027,10 +3027,10 @@ Save and Load non-volatile storage data"""
         """UBX-CFG-SMGR decode, Synchronization manager configuration"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 20 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHHBBHHHHL', buf, 0)
         s = (" version %u minGNSSFix %u maxFreqChangeRate %u "
@@ -3057,10 +3057,10 @@ Save and Load non-volatile storage data"""
         # u-blox 5, protVer 5.00 to 6.02 (timing feature only)
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 28 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHlllLLL', buf, 0)
         s = ('  timeMode %u fixedPosX %d fixedPosY %d fixedPosZ %d\n'
@@ -3081,10 +3081,10 @@ Save and Load non-volatile storage data"""
         """UBX-CFG-TMODE2 decode, Time Mode Settings 2"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 28 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHlllLLL', buf, 0)
         s = ('  timeMode %u reserved1 %u  usage %#x\n'
@@ -3120,10 +3120,10 @@ Save and Load non-volatile storage data"""
         # protVer 4.00 to 6.02
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 28 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<HHbBBBhhl', buf, 0)
         s = (' interval %u length %u status %d timeRef %u flags x%x res x%x\n'
@@ -3159,13 +3159,13 @@ Save and Load non-volatile storage data"""
         """UBX-CFG-TP5 decode, Time Pulse Parameters"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request tpIdx 0"
+            return "  Poll request tpIdx 0"
 
         if 1 == m_len:
-            return " Poll request tpIdx %d" % buf[0]
+            return "  Poll request tpIdx %d" % buf[0]
 
         if 32 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHhhLLLLlL', buf, 0)
         s = ("tpIdx %u version %u reserved1 %u\n"
@@ -3187,10 +3187,10 @@ Save and Load non-volatile storage data"""
         """UBX-CFG-USB decode, USB Configuration"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 108 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<HHHHHH', buf, 0)
         s = (' vendorID: %#x productID: %#x reserved1: %u'
@@ -3233,7 +3233,7 @@ Save and Load non-volatile storage data"""
         m_len = len(buf)
 
         if 4 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         # this is a poll options, so does not set min protver
 
@@ -3260,7 +3260,7 @@ Save and Load non-volatile storage data"""
         # version zero is a poll
         # version one is the response
         if 4 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = ' version %u layer %u reserved %u,%u\n' % u
@@ -3308,7 +3308,7 @@ Save and Load non-volatile storage data"""
         m_len = len(buf)
 
         if 4 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         # this is a poll option, so does not set min protver
 
@@ -3526,7 +3526,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
         m_len = len(buf)
 
         if 100 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHLHBBBBBBLlBBBBllllHHlllllLLHHLLLL', buf, 0)
         s = ("  version %u contentValid x%x msgCnt %u iTow %u\n"
@@ -3563,7 +3563,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
         m_len = len(buf)
 
         if 8 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBL', buf, 0)
         s = ("  version %u logCfg x%x reserved1 x%x logSize %u\n"
@@ -3593,7 +3593,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
 
         # length 8 is reponse, length 12 is request
         if 8 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         if 12 >= m_len:
             # request
@@ -3623,10 +3623,10 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
         # protVer 15+
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 48 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHLLLLLLHBBBBBBHBBBBBBBBH', buf, 0)
         s = ("  version %u reserved1 x%x x%x filestoreCapacity %u "
@@ -3654,7 +3654,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
         m_len = len(buf)
 
         if 12 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLBBH', buf, 0)
         s = "  startNumber %u entryCount %u version %u reserved1 x%x %x" % u
@@ -3668,7 +3668,7 @@ Oddly this is the poll for UBX-LOG-BATCH
         m_len = len(buf)
 
         if 4 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBH', buf, 0)
         s = ("  version %u flags x%x reserved1 x%x" % u)
@@ -3685,7 +3685,7 @@ Oddly this is the poll for UBX-LOG-BATCH
         m_len = len(buf)
 
         if 40 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllLLLBBHBBBBBBBB', buf, 0)
         s = ("  entryIndex %u lon %d lat %d hMSL %d hAcc %u\n"
@@ -3704,7 +3704,7 @@ Oddly this is the poll for UBX-LOG-BATCH
         m_len = len(buf)
 
         if 32 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBHBBBBBBHLLLL', buf, 0)
         s = ("  version %u reserved1 x%x\n"
@@ -3719,7 +3719,7 @@ Oddly this is the poll for UBX-LOG-BATCH
         m_len = len(buf)
 
         if 16 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBHBBBBBBH', buf, 0)
         s = ("  entryIndex %u version %u reserved2 x%x\n"
@@ -3737,7 +3737,7 @@ Oddly this is the poll for UBX-LOG-BATCH
         m_len = len(buf)
 
         if 256 < m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         s = "  bytes "
         if 0 < m_len:
@@ -3776,11 +3776,11 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MGA-DBD- decode, Navigation Database Dump Entry"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         # max 172
         if 12 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLL', buf, 0)
         s = ' reserved1 %u %u %u' % u
@@ -3804,10 +3804,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MON-BATCH decode, Data batching buffer status"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 12 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBHHHH', buf, 0)
         s = ("   version %u reserved1 %u %u %u fillLevel %u\n"
@@ -3827,10 +3827,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MON-COMMS decode, Comm port information"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 8 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         # at least protver 27
         if 27 > opts['protver']:
@@ -3877,10 +3877,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MON-GNSS decode, Information message major GNSS selection"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 8 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBBBBB', buf, 0)
         s = ('   version %u supported %#x defaultGnss %#x enabled %#x\n'
@@ -3917,10 +3917,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MON-HW decode, Hardware Status"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 60 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLLLHHBBBBLBBBBBBBBBBBBBBBBBBBBLLL', buf, 0)
         s = ('  pinSel %#x pinBank %#x pinDir %#x pinVal %#x noisePerRMS %u\n'
@@ -3949,10 +3949,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MON-HW2 decode, Extended Hardware Status"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 28 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<bBbBBBBBLLLLL', buf, 0)
         s = ('   ofsI %d magI %u ofsQ %d magQ %u cfgSource %u\n'
@@ -3975,10 +3975,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MON-HW3 decode, HW I/O pin information"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 22 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         # at least protver 27
         if 27 > opts['protver']:
@@ -4005,7 +4005,7 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MON-IO decode, I/O Subsystem Status"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         s = ''
         for i in range(0, int(m_len / 20)):
@@ -4022,10 +4022,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MON-MSGPP decode, Message Parse and Process Status"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 120 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         s = ''
         for i in range(1, 7):
@@ -4052,10 +4052,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         m_len = len(buf)
 
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 4 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         # first seen in protver 15
         u = struct.unpack_from('<HH', buf, 0)
@@ -4092,10 +4092,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         # first seen in protver 27
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 4 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         # at least protver 27
         if 27 > opts['protver']:
@@ -4121,10 +4121,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MON-RXBUF decode, Receiver Buffer Status"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 24 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         rxbuf_name = {
            1: " pending   ",
@@ -4149,7 +4149,7 @@ Oddly this is the poll for UBX-LOG-BATCH
         m_len = len(buf)
 
         if 1 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<B', buf, 0)
         s = "  flags: x%x" % u
@@ -4186,10 +4186,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         m_len = len(buf)
 
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 16 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLHHBBBB', buf, 0)
         s = (" version %u reserved1 %u %u %u iTOW %u intOsc x%x extOsc x%x\n"
@@ -4209,10 +4209,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MON-TXBUF decode, Transmitter Buffer Status"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 28 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         rxbuf_name = {
            1: " pending   ",
@@ -4242,16 +4242,16 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MON-VER decode, Poll Receiver/Software Version"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 40 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         substr = buf.split(gps.polybytes('\0'))[0]
         substr1 = buf[30:39]
         substr1 = substr1.split(gps.polybytes('\0'))[0]
-        s = (" swVersion %s\n"
-             " hwVersion %s" %
+        s = ("  swVersion %s\n"
+             "  hwVersion %s" %
              (gps.polystr(substr), gps.polystr(substr1)))
 
         # extensions??
@@ -4260,7 +4260,7 @@ Oddly this is the poll for UBX-LOG-BATCH
             loc = 40 + (i * 30)
             substr = buf[loc:]
             substr = substr.split(gps.polybytes('\0'))[0]
-            s += '\n extension %s' % gps.polystr(substr)
+            s += '\n  extension %s' % gps.polystr(substr)
         return s
 
     mon_ids = {2: {'str': 'IO', 'dec': mon_io, 'name': 'UBX-MON-IO'},
@@ -4287,10 +4287,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-NAV-AOPSTATUS decode, AssistNow Autonomous Status"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 16 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBLLH', buf, 0)
         s = '  iTOW %u aopCfg %u status %u reserved1 %u %u %u' % u
@@ -4304,10 +4304,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-NAV-ATT decode, Attitude Solution"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 32 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBHBlllLLL', buf, 0)
         s = ("  iTOW %u version %u reserved1 %u %u\n"
@@ -4320,10 +4320,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-NAV-CLOCK decode, Clock Solution"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 20 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LllLL', buf, 0)
         return '  iTOW %u clkB %d clkD %d tAcc %u fAcc %u' % u
@@ -4339,10 +4339,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         # not present in protver 27+
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 16 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlhhBBH', buf, 0)
         s = (' iTOW %u age %d baseID %d basehealth %d numCh %u\n'
@@ -4364,10 +4364,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-NAV-DOP decode, Dilution of Precision"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 18 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<Lhhhhhhh', buf, 0)
         s = ('  iTOW %u gDOP %u pDOP %u tDOP %u vDOP %u\n'
@@ -4378,7 +4378,7 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-NAV-EOE decode, End Of Epoch"""
         m_len = len(buf)
         if 4 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<L', buf, 0)
         return ' iTOW %u' % u
@@ -4397,10 +4397,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-NAV-GEOFENCE decode, Geofencing status"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 8 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBBB', buf, 0)
         s = '  iTOW:%u version %u status %u numFences %u combState %u' % u
@@ -4422,10 +4422,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-NAV-POSECEF decode, High Precision Position Solution in ECEF"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 28 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLlllbbbbL', buf, 0)
         return ('  version %u reserved1 %u %u %u iTOW %u\n'
@@ -4437,10 +4437,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-NAV-HPPOSLLH decode, HP Geodetic Position Solution"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 36 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLllllbbbbLL', buf, 0)
         return ('  version %u reserved1 %u %u %u iTOW %u\n'
@@ -4452,10 +4452,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-NAV-ODO decode, Odometer Solution"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 20 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLLLL', buf, 0)
         return ("  version %u reserved1 %u %u %u iTOW %u\n"
@@ -4489,10 +4489,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-NAV-ORB decode, GNSS Orbit Database Info"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 8 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBH', buf, 0)
         s = "  iTOW %u version %u numSv %u reserved1 %u" % u
@@ -4537,10 +4537,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-NAV-POSECEF decode, Position Solution in ECEF"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 20 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllL', buf, 0)
         return '  iTOW %u ecefX %d Y %d Z %d pAcc %u' % u
@@ -4549,10 +4549,10 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-NAV-POSLLH decode, Geodetic Position Solution"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 20 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LllllLL', buf, 0)
         return ('  iTOW %u lon %d lat %d height %d\n'
@@ -4607,12 +4607,12 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-NAV-PVT decode, Navigation Position Velocity Time Solution"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         # 84 bytes long in protver 14.
         # 92 bytes long in protver 15.
         if 84 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         # flags2 is protver 27
         u = struct.unpack_from('<LHBBBBBBLlBBBBllllLLlllllLLHHHH', buf, 0)
@@ -4659,10 +4659,10 @@ High Precision GNSS products only."""
 
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 64 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHLlllllLbbbbLLLLLLL', buf, 0)
         s = ('  version %u reserved1 %u refStationId %u iTOW %u\n'
@@ -4742,10 +4742,10 @@ High Precision GNSS products only."""
         """UBX-NAV-SAT decode"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 8 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBBB', buf, 0)
         s = '  iTOW %u version %u numSvs %u reserved1 %u %u' % u
@@ -4794,10 +4794,10 @@ High Precision GNSS products only."""
         # undocuemnted, but present in protver 27+
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 12 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBbBBBBB', buf, 0)
         s = (" iTOW %d geo %u mode x%x sys %d service x%x cnt %u "
@@ -4854,10 +4854,10 @@ High Precision GNSS products only."""
         """UBX-NAV-SIG decode, Signal Information"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 8 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBH', buf, 0)
         s = '  iTOW %u version %u numSigs %u reserved1 %u' % u
@@ -4892,10 +4892,10 @@ High Precision GNSS products only."""
         """UBX-NAV-SLAS decode, QZSS L1S SLAS Status Data"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 20 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBBBllBBBB', buf, 0)
         s = ('  iTOW %u version %u reserved1 %u %u %u'
@@ -4924,10 +4924,10 @@ High Precision GNSS products only."""
         #  deprecated by u-blox
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 52 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlhBBlllLlllLHBBL', buf, 0)
         s = ('  iTOW %u fTOW %d week %d gpsFix %u flags x%x\n'
@@ -4946,10 +4946,10 @@ High Precision GNSS products only."""
         """UBX-NAV-STATUS decode"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 16 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBBBLL', buf, 0)
         return ('  iTOW:%d ms, fix:%d flags:%#x fixstat:%#x flags2:%#x\n'
@@ -4959,10 +4959,10 @@ High Precision GNSS products only."""
         """UBX-NAV-SVIN decode, Survey-in data"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 40 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLLlllbbbBLLBB', buf, 0)
         return ('  version %u reserved1[%u %u %u] iTOW %u dur %u\n'
@@ -4974,10 +4974,10 @@ High Precision GNSS products only."""
         """UBX-NAV-SVINFO decode"""
         m_len = len(buf)
         if 0 == m_len:
-            return "Poll request"
+            return "  Poll request"
 
         if 8 > m_len:
-            return "Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<Lbb', buf, 0)
         s = ' iTOW:%d ms, numCh:%d globalFlags:%d' % u
@@ -5021,7 +5021,7 @@ High Precision GNSS products only."""
         """UBX-NAV-TIMEBDS decode"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 20 > m_len:
             return ".Bad Length %s" % m_len
@@ -5039,10 +5039,10 @@ High Precision GNSS products only."""
         """UBX-NAV-TIMEGAL decode"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 20 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlhbBL', buf, 0)
         s = ("  iTOW %d galTOW %d fGalTow %d galWno %d leapS %d\n"
@@ -5057,10 +5057,10 @@ High Precision GNSS products only."""
         """UBX-NAV-TIMEGLO decode"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 20 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlhbBL', buf, 0)
         s = ("  iTOW %d TOD %d fTOD %d Nt %d  N4 %d\n"
@@ -5075,10 +5075,10 @@ High Precision GNSS products only."""
         """UBX-NAV-TIMEGPS decode"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 16 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlhbBL', buf, 0)
         s = "  iTOW %u fTOW %u week %d leapS %d valid x%x tAcc %d" % u
@@ -5117,10 +5117,10 @@ High Precision GNSS products only."""
         """UBX-NAV-TIMELS decode, Leap second event information"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 24 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBBBBbBblHHBBBB', buf, 0)
         s = ('  iTOW %u version %u reserved2 %u %u %u srcOfCurrLs %u\n'
@@ -5145,10 +5145,10 @@ High Precision GNSS products only."""
         """UBX-NAV-TIMEUTC decode"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 20 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlHbbbbbB', buf, 0)
         s = ("  iTOW %d tAcc %d nano %d Time  %d/%d/%d %d:%d:%d\n"
@@ -5164,10 +5164,10 @@ High Precision GNSS products only."""
         """UBX-NAV-VELECEF decode"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 20 != m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllL', buf, 0)
         return '  iTOW %d ecef: VX %d VY %d VZ %d vAcc:%u' % u
@@ -5177,10 +5177,10 @@ High Precision GNSS products only."""
 protVer 15+."""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 36 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllLLlLL', buf, 0)
         return ('  iTOW %u vel: N %d E %d D %d speed %u\n'
@@ -5281,10 +5281,10 @@ protVer 15+."""
         """UBX-RXM-IMES decode, Indoor Messaging System Information"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 4 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBH', buf, 0)
         s = ' numTx %u version %u reserved1 %u' % u
@@ -5302,10 +5302,10 @@ protVer 15+."""
         """UBX-RXM-RAW decode"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 44 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLLLLLHHHHHBBLL', buf, 0)
         s = (' version %u reserved1 %u %u %u gpsTOW %u gloTOW %u\n'
@@ -5329,10 +5329,10 @@ protVer 15+."""
         """UBX-RXM-RAW decode"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 8 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<lhBB', buf, 0)
         s = ' iTOW %d weeks %d numSV %u res1 %u' % u
@@ -5357,10 +5357,10 @@ protVer 15+."""
         """UBX-RXM-RAWX decode"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 16 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         # version not here before protver 18, I hope it is zero.
         u = struct.unpack_from('<dHbBBBBB', buf, 0)
@@ -5390,7 +5390,7 @@ protVer 15+."""
         m_len = len(buf)
 
         if 16 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         # common to Short-RLM and Long-RLM report
         u = struct.unpack_from('<BBBBLLB', buf, 0)
@@ -5412,10 +5412,10 @@ protVer 15+."""
         """UBX-RXM-RTCM decode, RTCM Input Status"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 8 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHHH', buf, 0)
         s = " version %u flags x%x subtype %u refstation %u msgtype %u" % u
@@ -5425,10 +5425,10 @@ protVer 15+."""
         """UBX-RXM-SFRB decode, Subframe Buffer"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 42 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBLLLLLLLLLL', buf, 0)
         s = (' chn %d s svid %3d\n'
@@ -5585,7 +5585,7 @@ protVer 15+."""
         m_len = len(buf)
 
         if 8 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBBBBB', buf, 0)
         svId = u[1]
@@ -5783,10 +5783,10 @@ protVer 15+."""
         """UBX-RXM-SVSI decode, SV Status Info"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 8 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LhBB', buf, 0)
         s = ' iTOW %d week %d numVis %d numSV %d' % u
@@ -5826,10 +5826,10 @@ protVer 15+."""
         """UBX-SEC_UNIQID decode Unique chip ID"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 9 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBBBBBB', buf, 0)
         s = (' version %u reserved %u %u %u uniqueId %#02x%02x%02x%02x%02x'
@@ -5846,10 +5846,10 @@ protVer 15+."""
         """UBX-TIM-SVIN decode, Survey-in data"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 28 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllLLBB', buf, 0)
         s = ('  dur %u meanX %d meanY %d meanZ %d meanV %u\n'
@@ -5860,10 +5860,10 @@ protVer 15+."""
         """UBX-TIM-TM2 decode, Time mark data"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 28 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHHHLLLLL', buf, 0)
         s = ('  ch %u flags %#x count %u wnR %u wnF %u\n'
@@ -5874,10 +5874,10 @@ protVer 15+."""
         """UBX-TIM-TP decode, Time Pulse Timedata"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 16 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlHbb', buf, 0)
         s = ('  towMS %u towSubMS %u qErr %d week %d\n'
@@ -5913,10 +5913,10 @@ protVer 15+."""
         """UBX-TIM-VRFY decode, Sourced Time Verification"""
         m_len = len(buf)
         if 0 == m_len:
-            return " Poll request"
+            return "  Poll request"
 
         if 20 > m_len:
-            return " Bad Length %s" % m_len
+            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<llllHBB', buf, 0)
         s = ('  itow %d frac %d deltaMs %d deltaMs %d\n'
