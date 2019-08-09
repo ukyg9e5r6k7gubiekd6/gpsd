@@ -1812,16 +1812,15 @@ class ubx(object):
         """UBX-ACK-ACK decode"""
 
         # NOTE: Not all messages to u-blox GPS are ACKed...
-        m_len = len(buf)
-        if 2 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BB', buf, 0)
         return ' ACK to %s' % self.class_id_s(u[0], u[1])
 
     # UBX-ACK-
-    ack_ids = {0: {'str': 'NAK', 'dec': ack_ack, 'name': 'UBX-ACK-NAK'},
-               1: {'str': 'ACK', 'dec': ack_ack, 'name': 'UBX-ACK-ACK'}}
+    ack_ids = {0: {'str': 'NAK', 'dec': ack_ack, 'minlen': 2,
+                   'name': 'UBX-ACK-NAK'},
+               1: {'str': 'ACK', 'dec': ack_ack, 'minlen': 2,
+                   'name': 'UBX-ACK-ACK'}}
 
     # UBX-AID-
     def aid_alm(self, buf):
@@ -6184,11 +6183,19 @@ protVer 15+."""
                     this_class = self.classes[m_class]
                     if 'ids' in this_class:
                         if m_id in this_class['ids']:
+                            # got an entry for this message
                             if 'dec' in this_class['ids'][m_id]:
+                                # got a decoder for this message
                                 dec = this_class['ids'][m_id]['dec']
                                 s_payload = this_class['ids'][m_id]['name']
                                 s_payload += ':\n'
-                                s_payload += dec(self, m_payload)
+                                if (('minlen' in this_class['ids'][m_id]) and
+                                    (this_class['ids'][m_id]['minlen'] >
+                                     m_len)):
+                                    # failed minimum length for this message
+                                    s_payload += "  Bad Length %s" % m_len
+                                else:
+                                    s_payload += dec(self, m_payload)
                             else:
                                 s_payload = ("%s, len %#x, raw %s" %
                                              (self.class_id_s(m_class, m_id),
