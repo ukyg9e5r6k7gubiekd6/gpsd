@@ -13,9 +13,10 @@ import math
 import os
 
 
-GEOID_ROW = 37
-GEOID_COL = 73
-GEOID_SPAN = 5
+TABLE_ROWS = 37
+TABLE_COLS = 73
+TABLE_SPAN = 5
+
 GEOID_DELTA = [
     # -90
     [ -3015, -3015, -3015, -3015, -3015, -3015, -3015, -3015, -3015, -3015,
@@ -361,7 +362,7 @@ GEOID_DELTA = [
 #  This table is duplicated in geoid.c.  Keep them in sync.
 #
 
-magvar_delta = [
+magvar_table = [
     # -90
     [  14920,  14420,  13920,  13420,  12920,  12420,  11920,  11420,  10920,
        10420,   9920,   9420,   8920,   8420,   7920,   7420,   6920,   6420,
@@ -843,9 +844,9 @@ def maidenhead(dec_lat, dec_lon):
             grid_lat_field + grid_lon_subsq + grid_lat_subsq)
 
 
-def wgs84_separation(lat, lon):
-    # return geoid separation (MSL-WGS84) in meters, given a lat/lon in degrees
-    """Return WGS84 geodetic separation in meters."""
+def __bilinear(lat, lon, table):
+    """Return bilinear interpolated data from table"""
+
     try:
         lat = float(lat)
         lon = float(lon)
@@ -857,35 +858,47 @@ def wgs84_separation(lat, lon):
     if math.fabs(lat) > 90 or math.fabs(lon) > 180:
         return ''
 
-    row = int(math.floor((90.0 + lat) / GEOID_SPAN))
-    column = int(math.floor((180.0 + lon) / GEOID_SPAN))
+    row = int(math.floor((90.0 + lat) / TABLE_SPAN))
+    column = int(math.floor((180.0 + lon) / TABLE_SPAN))
 
-    if row < (GEOID_ROW - 1):
+    if row < (TABLE_ROWS - 1):
         grid_w = row
         grid_e = row + 1
     else:
         grid_w = row - 1
         grid_e = row
-    if column < (GEOID_COL - 1):
+    if column < (TABLE_COLS - 1):
         grid_s = column
         grid_n = column + 1
     else:
         grid_s = column - 1
         grid_n = column
 
-    south = grid_s * GEOID_SPAN - 180
-    north = grid_n * GEOID_SPAN - 180
-    west = grid_w * GEOID_SPAN - 90
-    east = grid_e * GEOID_SPAN - 90
+    south = grid_s * TABLE_SPAN - 180
+    north = grid_n * TABLE_SPAN - 180
+    west = grid_w * TABLE_SPAN - 90
+    east = grid_e * TABLE_SPAN - 90
 
-    delta = GEOID_SPAN * GEOID_SPAN * 100
+    delta = TABLE_SPAN * TABLE_SPAN * 100
     from_west = lat - west
     from_south = lon - south
     from_east = east - lat
     from_north = north - lon
 
-    result = GEOID_DELTA[grid_e][grid_n] * from_west * from_south
-    result += GEOID_DELTA[grid_w][grid_n] * from_east * from_south
-    result += GEOID_DELTA[grid_e][grid_s] * from_west * from_north
-    result += GEOID_DELTA[grid_w][grid_s] * from_east * from_north
+    result = table[grid_e][grid_n] * from_west * from_south
+    result += table[grid_w][grid_n] * from_east * from_south
+    result += table[grid_e][grid_s] * from_west * from_north
+    result += table[grid_w][grid_s] * from_east * from_north
     return result / delta
+
+
+def mag_var(lat, lon):
+    """Return magnetic variation (declination) in degrees.
+Given a lat/lon in degrees"""
+    return __bilinear(lat, lon, magvar_table)
+
+
+def wgs84_separation(lat, lon):
+    """Return MSL-WGS84 geodetic separation in meters.
+Given a lat/lon in degrees"""
+    return __bilinear(lat, lon, GEOID_DELTA)

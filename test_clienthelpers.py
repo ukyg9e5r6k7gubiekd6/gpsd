@@ -220,6 +220,7 @@ for (lat, lon, maidenhead, location) in test2:
             (lat, lon, maidenhead, location, converted))
         errors += 1
 
+# check wgs84_separation()
 for (lat, lon, wgs84, var, desc) in test3:
     separation = gps.clienthelpers.wgs84_separation(lat, lon)
     # check to 1 millimeter
@@ -230,6 +231,19 @@ for (lat, lon, wgs84, var, desc) in test3:
         sys.stderr.write(
             "fail: wgs84_separation(%s, %s) (%s) expected %.2f got %.2f\n" %
             (lat, lon, desc, wgs84, separation))
+        errors += 1
+
+# check mag_var()
+for (lat, lon, wgs84, var, desc) in test3:
+    magvar = gps.clienthelpers.mag_var(lat, lon)
+    # check to 0.1 degree
+    diff = magvar - var
+    if debug:
+        print("diff %f magvar %f s/b %f" % (diff, magvar, var))
+    if 0.09 < math.fabs(diff):
+        sys.stderr.write(
+            "fail: mag_var(%s, %s) (%s) expected %.2f got %.2f\n" %
+            (lat, lon, desc, var, magvar))
         errors += 1
 
 
