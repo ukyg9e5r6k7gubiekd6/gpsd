@@ -2562,7 +2562,7 @@ class ubx(object):
                    index_s(u[5], self.cfg_odo_profile)))
         return s
 
-    cfg_pm2_flags = {
+    cfg_pm_flags = {
         0x20: "extintWake",
         0x40: "extintBackup",
         0x80: "extintInactive",
@@ -2572,12 +2572,34 @@ class ubx(object):
         0x10000: "doNotEnterOff",
         }
 
-    cfg_pm2_limitPeakCurr = {
+    cfg_pm_limitPeakCurr = {
         0: "disabled",
         1: "enabled",
         2: "reserved",
         3: "reserved3",
         }
+
+    def cfg_pm(self, buf):
+        """UBX-CFG-PM decode, Poswer Management Configuration"""
+
+        # u-blox 5, protVer 6.00 to 6.02
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 24 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBBBLLLLHH', buf, 0)
+        s = (" version %u res1 %u res2 %u res3 %u flags x%x updatePeriod %u\n"
+             " searchPeriod %u gridOffset %u onTime %u minAcqTime %u\n" % u)
+        if VERB_DECODE <= opts['verbosity']:
+            s += ('\n  flags (%s) extintSel (EXTINT%u) '
+                  'limitPeakCurr (%s)' %
+                  (flag_s(u[4], self.cfg_pm_flags),
+                   (u[4] >> 4) & 1,
+                   index_s((u[4] >> 8) & 3, self.cfg_pm_limitPeakCurr)))
+        return s
 
     cfg_pm2_mode = {
         0: "ON/OFF operation (PSMOO)",
@@ -2620,9 +2642,9 @@ class ubx(object):
             s += ('\n  flags (%s) extintSel (EXTINT%u)'
                   '\n  limitPeakCurr (%s)'
                   '\n  optTarget (%s) mode (%s)' %
-                  (flag_s(u[4], self.cfg_pm2_flags),
+                  (flag_s(u[4], self.cfg_pm_flags),
                    (u[4] >> 4) & 1,
-                   index_s((u[4] >> 8) & 3, self.cfg_pm2_limitPeakCurr),
+                   index_s((u[4] >> 8) & 3, self.cfg_pm_limitPeakCurr),
                    index_s((u[4] >> 1) & 3, self.cfg_pm2_optTarget,
                            nf="reserved"),
                    index_s((u[4] >> 17) & 3, self.cfg_pm2_mode)))
@@ -3313,7 +3335,7 @@ class ubx(object):
                       'name': 'UBX-CFG-TMODE'},
                # in u-blox 8+. Not in u-blox 7-
                0x1e: {'str': 'ODO', 'dec': cfg_odo, 'name': 'UBX-CFG-ODO'},
-               # in u-blox 5, 6, not in u-blox 7+
+               # in u-blox 6, not in u-blox 7+
                0x22: {'str': 'NVS', 'name': 'UBX-CFG-NVS'},
                # in u-blox 5+
                0x23: {'str': 'NAVX5', 'dec': cfg_navx5,
@@ -3325,7 +3347,7 @@ class ubx(object):
                # in u-blox 6+, Not u-blox 5-
                0x31: {'str': 'TP5', 'dec': cfg_tp5, 'name': 'UBX-CFG-TP5'},
                # In u-blox 5, 6. Not in u-blox 7+
-               0x32: {'str': 'PM', 'name': 'UBX-CFG-PM'},
+               0x32: {'str': 'PM', 'dec': cfg_pm, 'name': 'UBX-CFG-PM'},
                # in u-blox 5+
                0x34: {'str': 'RINV', 'dec': cfg_rinv, 'name': 'UBX-CFG-RINV'},
                # in u-blox 6+.  Not in u-blox 5-
@@ -6885,9 +6907,12 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         "CFG-ODO": {"command": send_poll, "opt": [0x06, 0x1e],
                     "help": "poll UBX-CFG-ODO Odometer, Low-speed COG "
                             "Engine Settings"},
+        # UBX-CFG-PM
+        "CFG-PM": {"command": send_poll, "opt": [0x06, 0x32],
+                   "help": "poll UBX-CFG-PM Power management settings"},
         # UBX-CFG-PM2
         "CFG-PM2": {"command": send_poll, "opt": [0x06, 0x3b],
-                    "help": "poll UBX-CFG-PM2 Exetnded power management "
+                    "help": "poll UBX-CFG-PM2 Extended power management "
                     "settings"},
         # UBX-CFG-PMS
         "CFG-PMS": {"command": send_poll, "opt": [0x06, 0x86],
