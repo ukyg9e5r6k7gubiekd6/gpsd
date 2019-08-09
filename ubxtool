@@ -2985,11 +2985,32 @@ class ubx(object):
 
         return s
 
-    cfg_tmode2_timeMode = {
+    cfg_tmode_timeMode = {
         0: "Disabled",
         1: "Survey In",
         2: "Fixed Mode",
         }
+
+    def cfg_tmode(self, buf):
+        """UBX-CFG-TMODE decode, Time Mode Settings"""
+
+        # u-blox 5, protVer 5.00 to 6.02 (timing feature only)
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 28 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBHlllLLL', buf, 0)
+        s = ('  timeMode %u fixedPosX %d fixedPosY %d fixedPosZ %d\n'
+             '  fixedPosVar %u svinMinDur %u svinAccLimit %u' % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n    timeMode (%s)" %
+                  (index_s(u[0], self.cfg_tmode_timeMode)))
+
+        return s
 
     cfg_tmode2_flags = {
         1: "lla",
@@ -3006,13 +3027,13 @@ class ubx(object):
             return "Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHlllLLL', buf, 0)
-        s = (' timeMode: %u reserved1: %u  usage: %#x\n'
-             ' ecefXOrLat: %d ecefYOrLon: %d ecefZOrAlt: %d\n'
-             ' fixedPosAcc %u svinMinDur %u svinAccLimit %u' % u)
+        s = ('  timeMode %u reserved1 %u  usage %#x\n'
+             '  ecefXOrLat %d ecefYOrLon %d ecefZOrAlt %d\n'
+             '  fixedPosAcc %u svinMinDur %u svinAccLimit %u' % u)
 
         if VERB_DECODE <= opts['verbosity']:
-            s += ("\n   timeMode (%s) flags (%s)" %
-                  (index_s(u[0], self.cfg_tmode2_timeMode),
+            s += ("\n    timeMode (%s) flags (%s)" %
+                  (index_s(u[0], self.cfg_tmode_timeMode),
                    flag_s(u[2], self.cfg_tmode2_flags)))
 
         return s
@@ -3034,7 +3055,7 @@ class ubx(object):
         }
 
     def cfg_tp(self, buf):
-        """UBX-CFG-TMODE2 decode, Time Mode Settings"""
+        """UBX-CFG-TP decode, Time Pulse Settings"""
 
         # protVer 4.00 to 6.02
         m_len = len(buf)
@@ -3288,7 +3309,8 @@ class ubx(object):
                # in u-blox 6+, Not in u-blox 5-
                0x1b: {'str': 'USB', 'dec': cfg_usb, 'name': 'UBX-CFG-USB'},
                # u-blox 5 and 6.  Not in u-blox 7+
-               0x1d: {'str': 'TMODE', 'name': 'UBX-CFG-TMODE'},
+               0x1d: {'str': 'TMODE', 'dec': cfg_tmode,
+                      'name': 'UBX-CFG-TMODE'},
                # in u-blox 8+. Not in u-blox 7-
                0x1e: {'str': 'ODO', 'dec': cfg_odo, 'name': 'UBX-CFG-ODO'},
                # in u-blox 5, 6, not in u-blox 7+
@@ -6893,6 +6915,9 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         "CFG-SMGR": {"command": send_poll, "opt": [0x06, 0x62],
                      "help": "poll UBX-CFG-SMGR Synchronization manager "
                      " configuration"},
+        # UBX-CFG-TMODE
+        "CFG-TMODE": {"command": send_poll, "opt": [0x06, 0x1d],
+                      "help": "poll UBX-CFG-TMODE time mode settings"},
         # UBX-CFG-TMODE2
         "CFG-TMODE2": {"command": send_poll, "opt": [0x06, 0x3d],
                        "help": "poll UBX-CFG-TMODE2 time mode 2 config"},
