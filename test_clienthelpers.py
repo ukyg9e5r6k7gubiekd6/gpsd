@@ -43,6 +43,7 @@ test1 = [
 
 test2 = [
     # maidenhead
+    # keep in sync with tests/test_gpsdclient.c
     (48.86471, 2.37305, "JN18eu", "Paris"),
     (41.93498, 12.43652, "JN61fw", "Rome"),
     (39.9771, -75.1685, "FM29jx", "Philadelphia"),

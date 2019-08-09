@@ -165,6 +165,25 @@ struct test tests[] = {
 };
 
 
+struct test2 {
+    double lat;
+    double lon;
+    char *maidenhead;
+    char *name;
+};
+
+struct test2 tests2[] = {
+    /* maidenhead
+     * keep in sync with test_clienthelpers.py */
+    {48.86471, 2.37305, "JN18eu", "Paris"},
+    {41.93498, 12.43652, "JN61fw", "Rome"},
+    {39.9771, -75.1685, "FM29jx", "Philadelphia"},
+    {-23.4028, -50.9766, "GG46mo", "Sao Paulo"},
+    {90, 180, "RR99xx", "North Pole"},
+    {-90, -180, "AA00aa", "South Pole"},
+};
+
+
 int main(int argc, char **argv)
 {
     char buf[20];
@@ -175,78 +194,88 @@ int main(int argc, char **argv)
     int option;
 
     while ((option = getopt(argc, argv, "h?vV")) != -1) {
-	switch (option) {
-	default:
-		fail_count = 1;
-		/* FALLTHROUGH */
-	case '?':
-		/* FALLTHROUGH */
-	case 'h':
-	    (void)fputs("usage: test_gpsdclient [-v] [-V]\n", stderr);
-	    exit(fail_count);
-	case 'V':
-	    (void)fprintf( stderr, "test_gpsdclient %s\n",
-		VERSION);
-	    exit(EXIT_SUCCESS);
-	case 'v':
-	    verbose = 1;
-	    break;
-	}
+        switch (option) {
+        default:
+                fail_count = 1;
+                /* FALLTHROUGH */
+        case '?':
+                /* FALLTHROUGH */
+        case 'h':
+            (void)fputs("usage: test_gpsdclient [-v] [-V]\n", stderr);
+            exit(fail_count);
+        case 'V':
+            (void)fprintf( stderr, "test_gpsdclient %s\n",
+                VERSION);
+            exit(EXIT_SUCCESS);
+        case 'v':
+            verbose = 1;
+            break;
+        }
     }
 
 
-     for (i = 0; i < (sizeof(tests)/sizeof(struct test)); i++) {
-	 if (NANFLAG == tests[i].deg) {
-            /* make it a NaN */
-            tests[i].deg = nan("a");
-         }
-	 s = deg_to_str(deg_dd, tests[i].deg);
-	 if (0 != strcmp(s, tests[i].dd)) {
-	     printf("ERROR: %s s/b %s\n", s, tests[i].dd);
-	     fail_count++;
-         } else if (0 < verbose) {
-	     printf("%s s/b %s\n", s, tests[i].dd);
-         }
-	 s = deg_to_str2(deg_dd, tests[i].deg, buf,
-                         sizeof(buf), " E", " W");
-	 if (0 != strcmp(s, tests[i].dd2)) {
-	     printf("ERROR: %s s/b %s\n", s, tests[i].dd2);
-	     fail_count++;
-         } else if (0 < verbose) {
-	     printf("%s s/b %s\n", s, tests[i].dd2);
-         }
-	 s = deg_to_str(deg_ddmm, tests[i].deg);
-	 if (0 != strcmp(s, tests[i].ddmm)) {
-	     printf("ERROR: %s s/b %s\n", s, tests[i].ddmm);
-	     fail_count++;
-         } else if (0 < verbose) {
-	     printf("%s s/b %s\n", s, tests[i].ddmm);
-         }
-	 s = deg_to_str2(deg_ddmm, tests[i].deg, buf,
-                         sizeof(buf), " E", " W");
-	 if (0 != strcmp(s, tests[i].ddmm2)) {
-	     printf("ERROR: %s s/b %s\n", s, tests[i].ddmm2);
-	     fail_count++;
-         } else if (0 < verbose) {
-	     printf("%s s/b %s\n", s, tests[i].ddmm2);
-         }
-	 s = deg_to_str(deg_ddmmss, tests[i].deg);
-	 if (0 != strcmp(s, tests[i].ddmmss)) {
-	     printf("ERROR: %s s/b %s\n", s, tests[i].ddmmss);
-	     fail_count++;
-         } else if (0 < verbose) {
-	     printf("%s s/b %s\n", s, tests[i].ddmmss);
-         }
-	 s = deg_to_str2(deg_ddmmss, tests[i].deg, buf,
-                         sizeof(buf), " N", " S");
-	 if (0 != strcmp(s, tests[i].ddmmss2)) {
-	     printf("ERROR: %s s/b %s\n", s, tests[i].ddmmss2);
-	     fail_count++;
-         } else if (0 < verbose) {
-	     printf("%s s/b %s\n", s, tests[i].ddmmss2);
-         }
-     }
-     exit(fail_count);
+    for (i = 0; i < (sizeof(tests)/sizeof(struct test)); i++) {
+        if (NANFLAG == tests[i].deg) {
+           /* make it a NaN */
+           tests[i].deg = nan("a");
+        }
+        s = deg_to_str(deg_dd, tests[i].deg);
+        if (0 != strcmp(s, tests[i].dd)) {
+            printf("ERROR: %s s/b %s\n", s, tests[i].dd);
+            fail_count++;
+        } else if (0 < verbose) {
+            printf("%s s/b %s\n", s, tests[i].dd);
+        }
+        s = deg_to_str2(deg_dd, tests[i].deg, buf,
+                        sizeof(buf), " E", " W");
+        if (0 != strcmp(s, tests[i].dd2)) {
+            printf("ERROR: %s s/b %s\n", s, tests[i].dd2);
+            fail_count++;
+        } else if (0 < verbose) {
+            printf("%s s/b %s\n", s, tests[i].dd2);
+        }
+        s = deg_to_str(deg_ddmm, tests[i].deg);
+        if (0 != strcmp(s, tests[i].ddmm)) {
+            printf("ERROR: %s s/b %s\n", s, tests[i].ddmm);
+            fail_count++;
+        } else if (0 < verbose) {
+            printf("%s s/b %s\n", s, tests[i].ddmm);
+        }
+        s = deg_to_str2(deg_ddmm, tests[i].deg, buf,
+                        sizeof(buf), " E", " W");
+        if (0 != strcmp(s, tests[i].ddmm2)) {
+            printf("ERROR: %s s/b %s\n", s, tests[i].ddmm2);
+            fail_count++;
+        } else if (0 < verbose) {
+            printf("%s s/b %s\n", s, tests[i].ddmm2);
+        }
+        s = deg_to_str(deg_ddmmss, tests[i].deg);
+        if (0 != strcmp(s, tests[i].ddmmss)) {
+            printf("ERROR: %s s/b %s\n", s, tests[i].ddmmss);
+            fail_count++;
+        } else if (0 < verbose) {
+            printf("%s s/b %s\n", s, tests[i].ddmmss);
+        }
+        s = deg_to_str2(deg_ddmmss, tests[i].deg, buf,
+                        sizeof(buf), " N", " S");
+        if (0 != strcmp(s, tests[i].ddmmss2)) {
+            printf("ERROR: %s s/b %s\n", s, tests[i].ddmmss2);
+            fail_count++;
+        } else if (0 < verbose) {
+            printf("%s s/b %s\n", s, tests[i].ddmmss2);
+        }
+    }
 
+    for (i = 0; i < (sizeof(tests2)/sizeof(struct test2)); i++) {
+        s = maidenhead(tests2[i].lat, tests2[i].lon);
+        if (0 != strcmp(s, tests2[i].maidenhead)) {
+            printf("ERROR: %s s/b %s\n", s, tests2[i].maidenhead);
+            fail_count++;
+        } else if (0 < verbose) {
+            printf("%s s/b %s\n", s, tests2[i].maidenhead);
+        }
+    }
+
+    exit(fail_count);
 }
 
