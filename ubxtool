@@ -3358,7 +3358,7 @@ Save and Load non-volatile storage data"""
                0x0e: {'str': 'FXM', 'dec': cfg_fxn, 'name': 'UBX-CFG-FXM'},
                # u-blox 5, 6, 7, 8
                0x11: {'str': 'RXM', 'dec': cfg_rxm, 'name': 'UBX-CFG-RXM'},
-               # in u-blox 6.  Not in 5- or 7+
+               # in u-blox 6, SFDR only.  Not in 5- or 7+
                0x12: {'str': 'EKF', 'name': 'UBX-CFG-EKF'},
                # in u-blox 5+
                0x13: {'str': 'ANT', 'dec': cfg_ant, 'name': 'UBX-CFG-ANT'},
@@ -5232,6 +5232,8 @@ protVer 15+."""
                0x3B: {'str': 'SVIN', 'dec': nav_svin, 'name': 'UBX-NAV-SVIN'},
                0x3C: {'str': 'RELPOSNED', 'dec': nav_relposned,
                       'name': 'UBX-NAV-RELPOSNED'},
+               # u-blox 6, SFDR only
+               0x40: {'str': 'EKFSTATUS', 'name': 'UBX-NAV-EKFSTATUS'},
                0x42: {'str': 'SLAS', 'dec': nav_slas, 'name': 'UBX-NAV-SLAS'},
                0x43: {'str': 'SIG', 'dec': nav_sig, 'name': 'UBX-NAV-SIG'},
                0x60: {'str': 'AOPSTATUS', 'dec': nav_aopstatus,
