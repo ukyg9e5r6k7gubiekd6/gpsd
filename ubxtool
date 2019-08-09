@@ -1927,11 +1927,19 @@ class ubx(object):
         return s
 
     # All UBX-AID messages are deprecated; use UBX-MGA messages instead
-    aid_ids = {0x01: {'str': 'INI', 'dec': aid_ini, 'name': 'UBX-AID-INI'},
+    aid_ids = {
+               # u-blox 6
+               0x00: {'str': 'REQ', 'name': 'UBX-AID-REQ'},
+               0x01: {'str': 'INI', 'dec': aid_ini, 'name': 'UBX-AID-INI'},
                0x02: {'str': 'HUI', 'dec': aid_hui, 'name': 'UBX-AID-HUI'},
+               # u-blox 6
+               0x10: {'str': 'DATA', 'name': 'UBX-AID-DATA'},
                0x30: {'str': 'ALM', 'dec': aid_alm, 'name': 'UBX-AID-ALM'},
                0x31: {'str': 'EPH', 'dec': aid_eph, 'name': 'UBX-AID-EPH'},
+               # u-blox 6
+               0x32: {'str': 'ALPSRV', 'name': 'UBX-AID-ALPSRV'},
                0x33: {'str': 'AOP', 'dec': aid_aop, 'name': 'UBX-AID-AOP'},
+               0x50: {'str': 'ALP', 'name': 'UBX-AID-ALP'},
                }
 
     cfg_ant_pins = {
@@ -2527,6 +2535,35 @@ class ubx(object):
                    index_s(u[7], self.cfg_nmea_gtid)))
         return s
 
+    cfg_nvs_mask = {
+        0x20000: 'alm',
+        0x20000000: 'aop',
+        }
+
+    def cfg_nvs(self, buf):
+        """UBX-CFG-NVS decode, Clear,
+Save and Load non-volatile storage data"""
+
+        # u-blox 6, protVer 7.03
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 13 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<LLLB', buf, 0)
+        s = ('  clearMask: %#x (%s)\n' %
+             (u[0], flag_s(u[0], self.cfg_nvs_mask)))
+        s += ('  saveMask: %#x (%s)\n' %
+              (u[1], flag_s(u[1], self.cfg_nvs_mask)))
+        s += ('  loadMask: %#x (%s)\n' %
+              (u[2], flag_s(u[2], self.cfg_nvs_mask)))
+        s += ('  deviceMask: %#x (%s)\n' %
+              (u[3], flag_s(u[3], self.cfg_cfg_dev)))
+
+        return s
+
     cfg_odo_flags = {
         1: "useODO",
         2: "useCOG",
@@ -2787,6 +2824,7 @@ class ubx(object):
     def cfg_rinv(self, buf):
         """UBX-CFG-RINV decode, Contents of Remote Inventory"""
 
+        # u-blox 5, protVer 6.00 to 6.02
         m_len = len(buf)
         if 0 == m_len:
             return " Poll request"
@@ -3336,7 +3374,7 @@ class ubx(object):
                # in u-blox 8+. Not in u-blox 7-
                0x1e: {'str': 'ODO', 'dec': cfg_odo, 'name': 'UBX-CFG-ODO'},
                # in u-blox 6, not in u-blox 7+
-               0x22: {'str': 'NVS', 'name': 'UBX-CFG-NVS'},
+               0x22: {'str': 'NVS', 'dec': cfg_nvs, 'name': 'UBX-CFG-NVS'},
                # in u-blox 5+
                0x23: {'str': 'NAVX5', 'dec': cfg_navx5,
                       'name': 'UBX-CFG-NAVX5'},
@@ -5913,6 +5951,8 @@ protVer 15+."""
         0x21: {'str': 'LOG', 'ids': log_ids},
         0x27: {'str': 'SEC', 'ids': sec_ids},
         0x28: {'str': 'HNR', 'ids': hnr_ids},
+        # Antaris 4
+        # 0x4x USR, SCK Customer Messages
         0xf0: {'str': 'NMEA', 'ids': nmea_ids},
         0xf5: {'str': 'RTCM', 'ids': rtcm_ids},
     }
