@@ -2017,16 +2017,58 @@ class ubx(object):
         else:
             u = struct.unpack_from('<LLLB', buf, 0)
 
-        s = (' clearMask: %#x (%s)\n' %
+        s = ('  clearMask: %#x (%s)\n' %
              (u[0], flag_s(u[0], self.cfg_cfg_mask)))
-        s += (' saveMask: %#x (%s)\n' %
+        s += ('  saveMask: %#x (%s)\n' %
               (u[1], flag_s(u[1], self.cfg_cfg_mask)))
-        s += (' loadMask: %#x (%s)\n' %
+        s += ('  loadMask: %#x (%s)\n' %
               (u[2], flag_s(u[2], self.cfg_cfg_mask)))
 
         if 13 <= m_len:
-            s += (' deviceMask: %#x (%s)\n' %
+            s += ('  deviceMask: %#x (%s)\n' %
                   (u[3], flag_s(u[3], self.cfg_cfg_dev)))
+
+        return s
+
+    def cfg_dat(self, buf):
+        """UBX-CFG-DAT decode, Standard Datum configuration"""
+
+        # u-blox 5, protVet 4.00 to 6.02
+        m_len = len(buf)
+        if 0 == m_len:
+            s = "Poll request"
+
+        elif 2 > m_len:
+            s = "Bad Length %d" % m_len
+
+        elif 2 == m_len:
+            # standard datum
+            u = struct.unpack_from('<H', buf, 0)
+            s = "  datumNum %u" % u
+
+        elif 44 > m_len:
+            s = "Bad Length %d" % m_len
+
+        elif 44 == m_len:
+            # set user defined datum
+            u = struct.unpack_from('<ddfffffff', buf, 0)
+            s = ("  majA %.1f flat %.1f dX %.1f dY %.1f dZ %.1f\n"
+                 "  rotX %.1f rotY %.1f rotZ %.1f scale %.1f" % u)
+
+        elif 52 > m_len:
+            s = "Bad Length %d" % m_len
+
+        elif 52 <= m_len:
+            # get user defined datum
+            u = struct.unpack_from('<HBBBBBBddfffffff', buf, 0)
+            s = ("  datumNum %u datumNam %u %u %u %u %u %u\n"
+                 "  majA %.1f flat %.1f dX %.1f dY %.1f dZ %.1f\n"
+                 "  rotX %.1f rotY %.1f rotZ %.1f scale %.1f" % u)
+            if VERB_DECODE <= opts['verbosity']:
+                s += '\n   datumName (%s)' % gps.polystr(buf[2:8])
+
+        else:
+            s = "I'm confused..."
 
         return s
 
@@ -3160,7 +3202,7 @@ class ubx(object):
                # in u-blox 5+
                4: {'str': 'RST', 'dec': cfg_rst, 'name': 'UBX-CFG-RST'},
                # in u-blox 5+
-               6: {'str': 'DAT', 'name': 'UBX-CFG-DAT'},
+               6: {'str': 'DAT', 'dec': cfg_dat, 'name': 'UBX-CFG-DAT'},
                # u-blox 5, 6.  Not in u-blox 7+
                7: {'str': 'TP', 'name': 'UBX-CFG-TP'},
                # in u-blox 5+
@@ -6707,6 +6749,9 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         # UBX-CFG-BATCH
         "CFG-BATCH": {"command": send_poll, "opt": [0x06, 0x93],
                       "help": "poll UBX-CFG-BATCH data batching config"},
+        # UBX-CFG-DAT
+        "CFG-DAT": {"command": send_poll, "opt": [0x06, 0x06],
+                    "help": "poll UBX-CFG-DAT Datum Setting"},
         # UBX-CFG-DOSC
         "CFG-DOSC": {"command": send_poll, "opt": [0x06, 0x61],
                      "help": "poll UBX-CFG-DOSC Disciplined oscillator "
