@@ -290,6 +290,12 @@ char *maidenhead(double lat, double lon)
     int t1;
 
     /* longitude */
+    if (179.99999 < lon) {
+        /* force 180, just inside lon_sq 'R'
+         * otherwise we get illegal 'S' */
+        lon = 179.99999;
+    }
+
     lon += 180.0;
     t1 = (int)(lon / 20);
     buf[0] = (char)t1 + 'A';
@@ -304,6 +310,12 @@ char *maidenhead(double lat, double lon)
     buf[4] = (char) ((int)(lon * 12.0)) + 'a';
 
     /* latitude */
+    if (89.99999 < lat) {
+        /* force 90 to just inside lat_sq 'R'
+         * otherwise we get illegal 'S' */
+        lat = 89.99999;
+    }
+
     lat += 90.0;
     t1 = (int)(lat / 10.0);
     buf[1] = (char)t1 + 'A';
