@@ -811,8 +811,6 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
                                   unsigned char *buf, size_t len)
 {
     gps_mask_t mask = 0;
-    uint32_t solution_validity;
-    uint32_t solution_info;
     uint32_t gps_tow = 0;
     uint32_t gps_tow_sub_ms = 0;
     uint16_t gps_week = 0;
@@ -875,9 +873,6 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
              "msg_info %#02x, sats %u\n",
              time_bias, time_accuracy, time_source, msg_info,
              num_of_sats);
-        gpsd_log(&session->context->errout, LOG_IO,
-             "solution_info %08x solution_validity %08x\n",
-             solution_info, solution_validity);
     }
 
     session->gpsdata.satellites_visible = num_of_sats;
