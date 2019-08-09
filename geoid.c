@@ -371,6 +371,8 @@ const short geoid_delta[GEOID_ROW][GEOID_COL] = {
  *
  * magvar[][] has the magnetic variation (declination), in hundreths of
  * a degree, on a 5 degree by 5 * degree grid for the entire planet.
+ *
+ * This table is duplicated in gps/clienthelpers.py.  Keep them in sync.
  */
 /* *INDENT-OFF* */
 const short magvar[GEOID_ROW][GEOID_COL] = {
