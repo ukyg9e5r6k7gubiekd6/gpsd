@@ -1886,10 +1886,6 @@ class ubx(object):
 
     def aid_hui(self, buf):
         """UBX-AID-HUI decode, GPS Heatlh, UTC, Ionosphere"""
-        m_len = len(buf)
-
-        if 72 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LddlhhhhhhffffffffL', buf, 0)
         s = (' health x%x utcAo %e utcA1 %e utcTOW %d'
@@ -1902,10 +1898,6 @@ class ubx(object):
 
     def aid_ini(self, buf):
         """UBX-AID-INI decode, Aiding position, time, frequency, clock drift"""
-        m_len = len(buf)
-
-        if 48 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<lllLHHLlLLlLL', buf, 0)
         s = (' ecefXOrLat %d ecefYOrLon %d ecefZOrAlt %d posAcc %u'
@@ -1919,8 +1911,10 @@ class ubx(object):
     aid_ids = {
                # u-blox 6
                0x00: {'str': 'REQ', 'name': 'UBX-AID-REQ'},
-               0x01: {'str': 'INI', 'dec': aid_ini, 'name': 'UBX-AID-INI'},
-               0x02: {'str': 'HUI', 'dec': aid_hui, 'name': 'UBX-AID-HUI'},
+               0x01: {'str': 'INI', 'dec': aid_ini, 'minlen': 48,
+                      'name': 'UBX-AID-INI'},
+               0x02: {'str': 'HUI', 'dec': aid_hui, 'minlen': 72,
+                      'name': 'UBX-AID-HUI'},
                # u-blox 6
                0x10: {'str': 'DATA', 'name': 'UBX-AID-DATA'},
                0x30: {'str': 'ALM', 'dec': aid_alm, 'name': 'UBX-AID-ALM'},
