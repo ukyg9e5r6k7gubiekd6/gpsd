@@ -2864,6 +2864,31 @@ class ubx(object):
 
         return s
 
+    cfg_slas_mode = {
+        1: "enabled",
+        2: "test",
+        4: "raim",
+        }
+
+    def cfg_slas(self, buf):
+        """UBX-CFG-SLAS decode, SLAS configuration"""
+
+        # protVer 19.2 (ADR, UDR only)
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 4 > m_len:
+            return " Bad Length %s" % m_len
+
+        u = struct.unpack_from('<BBH', buf, 0)
+        s = " mode %u reserved1 %u %u" % u
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += "\n   mode (%s)" % (flag_s(u[0], self.cfg_slas_mode))
+
+        return s
+
     cfg_smgr_messageCfg = {
         1: "measInternal",
         2: "measGNSS",
@@ -3223,7 +3248,7 @@ class ubx(object):
                0x8c: {'str': 'VALDEL', 'dec': cfg_valdel,
                       'name': 'UBX-CFG-VALDEL'},
                # u-blox 8
-               0x8d: {'str': 'SLAS', 'name': 'UBX-CFG-SLAS'},
+               0x8d: {'str': 'SLAS', 'dec': cfg_slas, 'name': 'UBX-CFG-SLAS'},
                # only in u-blox 8
                0x93: {'str': 'BATCH', 'dec': cfg_batch,
                       'name': 'UBX-CFG-BATCH'},
@@ -6749,6 +6774,9 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         # UBX-CFG-SBAS
         "CFG-SBAS": {"command": send_poll, "opt": [0x06, 0x16],
                      "help": "poll UBX-CFG-SBAS SBAS settings"},
+        # UBX-CFG-SLAS
+        "CFG-SLAS": {"command": send_poll, "opt": [0x06, 0x8d],
+                     "help": "poll UBX-CFG-SLAS SLAS configuration"},
         # UBX-CFG-SMGR
         "CFG-SMGR": {"command": send_poll, "opt": [0x06, 0x62],
                      "help": "poll UBX-CFG-SMGR Synchronization manager "
