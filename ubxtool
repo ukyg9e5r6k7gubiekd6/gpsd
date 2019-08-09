@@ -2992,6 +2992,45 @@ class ubx(object):
 
         return s
 
+    cfg_tp_status = {
+        -1: "negative",
+        0: "off",
+        1: "positive",
+        }
+
+    cfg_tp_timeRef = {
+        0: "UTC",
+        1: "GPS",
+        2: "Local",
+        }
+
+    cfg_tp_flags = {
+        1: "syncMode",
+        }
+
+    def cfg_tp(self, buf):
+        """UBX-CFG-TMODE2 decode, Time Mode Settings"""
+
+        # protVer 4.00 to 6.02
+        m_len = len(buf)
+        if 0 == m_len:
+            return " Poll request"
+
+        if 28 > m_len:
+            return "Bad Length %s" % m_len
+
+        u = struct.unpack_from('<HHbBBBhhl', buf, 0)
+        s = (' interval %u length %u status %d timeRef %u flags x%x res x%x\n'
+             ' antennaCableDelay %u rfGroupDelay %d userDelay %d' % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n   flags (%s)" %
+                  (index_s(u[2], self.cfg_tp_status),
+                   index_s(u[3], self.cfg_tp_timeRef),
+                   flag_s(u[4], self.cfg_tp_flags)))
+
+        return s
+
     cfg_tp5_flags = {
         1: "Active",
         2: "lockGnssFreq",
@@ -3204,7 +3243,7 @@ class ubx(object):
                # in u-blox 5+
                6: {'str': 'DAT', 'dec': cfg_dat, 'name': 'UBX-CFG-DAT'},
                # u-blox 5, 6.  Not in u-blox 7+
-               7: {'str': 'TP', 'name': 'UBX-CFG-TP'},
+               7: {'str': 'TP', 'dec': cfg_tp, 'name': 'UBX-CFG-TP'},
                # in u-blox 5+
                8: {'str': 'RATE', 'dec': cfg_rate, 'name': 'UBX-CFG-RATE'},
                # in u-blox 5+
@@ -6829,6 +6868,9 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         # UBX-CFG-TMODE2
         "CFG-TMODE2": {"command": send_poll, "opt": [0x06, 0x3d],
                        "help": "poll UBX-CFG-TMODE2 time mode 2 config"},
+        # UBX-CFG-TP
+        "CFG-TP": {"command": send_poll, "opt": [0x06, 0x07],
+                   "help": "poll UBX-CFG-TP TimePulse Parameters"},
         # UBX-CFG-TP5
         "CFG-TP5": {"command": send_cfg_tp5,
                     "help": "poll UBX-TIM-TP5 time pulse decodes"},
