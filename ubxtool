@@ -3539,7 +3539,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
         if VERB_DECODE <= opts['verbosity']:
             # flags2 undocumented
             s += ("\n      contentValid (%s) valid (%s) fixType (%s) "
-                  "flags (%s)" %
+                  "flags (%s) psmState (%s)" %
                   (flag_s(u[1], self.log_batch_contentValid),
                    flag_s(u[10], self.log_batch_valid),
                    index_s(u[13], self.log_batch_fixType),
