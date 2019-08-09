@@ -435,18 +435,19 @@ def maidenhead(dec_lat, dec_lon):
     if 90 < math.fabs(dec_lat) or 180 < math.fabs(dec_lon):
         return ''
 
+    if 89.99999 < dec_lat:
+        # force North Pole, just inside lat_sq 'R'
+        dec_lat = 89.99999
+
+    if 179.99999 < dec_lon:
+        # force 180, just inside lon_sq 'R'
+        dec_lon = 179.99999
+
     adj_lat = dec_lat + 90.0
     adj_lon = dec_lon + 180.0
 
     grid_lat_sq = chr(int(adj_lat / 10) + 65)
-    if 'R' < grid_lat_sq:
-        # A to R
-        grid_lat_sq = 'R'
-
     grid_lon_sq = chr(int(adj_lon / 20) + 65)
-    if 'R' < grid_lon_sq:
-        # A to R
-        grid_lon_sq = 'R'
 
     grid_lat_field = str(int(adj_lat % 10))
     grid_lon_field = str(int((adj_lon / 2) % 10))
