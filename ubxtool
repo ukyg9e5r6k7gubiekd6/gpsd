@@ -3119,29 +3119,29 @@ Save and Load non-volatile storage data"""
 
     cfg_ids = {
                # in u-blox 5+
-               0: {'str': 'PRT', 'dec': cfg_prt, 'minlen': 1,
-                   'name': 'UBX-CFG-PRT'},
+               0x00: {'str': 'PRT', 'dec': cfg_prt, 'minlen': 1,
+                      'name': 'UBX-CFG-PRT'},
                # in u-blox 5+
-               1: {'str': 'MSG', 'dec': cfg_msg, 'minlen': 2,
-                   'name': 'UBX-CFG-MSG'},
+               0x01: {'str': 'MSG', 'dec': cfg_msg, 'minlen': 2,
+                      'name': 'UBX-CFG-MSG'},
                # in u-blox 5+
-               2: {'str': 'INF', 'dec': cfg_inf, 'minlen': 1,
-                   'name': 'UBX-CFG-INF'},
+               0x02: {'str': 'INF', 'dec': cfg_inf, 'minlen': 1,
+                      'name': 'UBX-CFG-INF'},
                # in u-blox 5+
-               4: {'str': 'RST', 'dec': cfg_rst, 'minlen': 4,
-                   'name': 'UBX-CFG-RST'},
+               0x04: {'str': 'RST', 'dec': cfg_rst, 'minlen': 4,
+                      'name': 'UBX-CFG-RST'},
                # in u-blox 5+
-               6: {'str': 'DAT', 'dec': cfg_dat, 'minlen': 2,
-                   'name': 'UBX-CFG-DAT'},
+               0x06: {'str': 'DAT', 'dec': cfg_dat, 'minlen': 2,
+                      'name': 'UBX-CFG-DAT'},
                # u-blox 5, 6.  Not in u-blox 7+
-               7: {'str': 'TP', 'dec': cfg_tp, 'minlen': 28,
-                   'name': 'UBX-CFG-TP'},
+               0x07: {'str': 'TP', 'dec': cfg_tp, 'minlen': 28,
+                      'name': 'UBX-CFG-TP'},
                # in u-blox 5+
-               8: {'str': 'RATE', 'dec': cfg_rate, 'minlen': 6,
-                   'name': 'UBX-CFG-RATE'},
+               0x08: {'str': 'RATE', 'dec': cfg_rate, 'minlen': 6,
+                      'name': 'UBX-CFG-RATE'},
                # in u-blox 5+
-               9: {'str': 'CFG', 'dec': cfg_cfg, 'minlen': 12,
-                   'name': 'UBX-CFG-CFG'},
+               0x09: {'str': 'CFG', 'dec': cfg_cfg, 'minlen': 12,
+                      'name': 'UBX-CFG-CFG'},
                # Antaris 4, deprecated in u-blox 5/6, gone in 7
                0x0e: {'str': 'FXM', 'dec': cfg_fxn, 'minlen': 36,
                       'name': 'UBX-CFG-FXM'},
@@ -3984,10 +3984,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def nav_aopstatus(self, buf):
         """UBX-NAV-AOPSTATUS decode, AssistNow Autonomous Status"""
-        m_len = len(buf)
-
-        if 16 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBLLH', buf, 0)
         s = '  iTOW %u aopCfg %u status %u reserved1 %u %u %u' % u
@@ -3999,10 +3995,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def nav_att(self, buf):
         """UBX-NAV-ATT decode, Attitude Solution"""
-        m_len = len(buf)
-
-        if 32 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBHBlllLLL', buf, 0)
         s = ("  iTOW %u version %u reserved1 %u %u\n"
@@ -4013,10 +4005,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def nav_clock(self, buf):
         """UBX-NAV-CLOCK decode, Clock Solution"""
-        m_len = len(buf)
-
-        if 20 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LllLL', buf, 0)
         return '  iTOW %u clkB %d clkD %d tAcc %u fAcc %u' % u
@@ -4030,11 +4018,6 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-NAV-DGPS decode, DGPS Data used for NAV"""
 
         # not present in protver 27+
-        m_len = len(buf)
-
-        if 16 > m_len:
-            return "  Bad Length %s" % m_len
-
         u = struct.unpack_from('<LlhhBBH', buf, 0)
         s = (' iTOW %u age %d baseID %d basehealth %d numCh %u\n'
              ' status x%x reserved1 %u' % u)
@@ -4053,10 +4036,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def nav_dop(self, buf):
         """UBX-NAV-DOP decode, Dilution of Precision"""
-        m_len = len(buf)
-
-        if 18 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<Lhhhhhhh', buf, 0)
         s = ('  iTOW %u gDOP %u pDOP %u tDOP %u vDOP %u\n'
@@ -4065,9 +4044,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def nav_eoe(self, buf):
         """UBX-NAV-EOE decode, End Of Epoch"""
-        m_len = len(buf)
-        if 4 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<L', buf, 0)
         return ' iTOW %u' % u
@@ -4084,10 +4060,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def nav_geofence(self, buf):
         """UBX-NAV-GEOFENCE decode, Geofencing status"""
-        m_len = len(buf)
-
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBBB', buf, 0)
         s = '  iTOW:%u version %u status %u numFences %u combState %u' % u
@@ -4107,10 +4079,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def nav_hpposecef(self, buf):
         """UBX-NAV-POSECEF decode, High Precision Position Solution in ECEF"""
-        m_len = len(buf)
-
-        if 28 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLlllbbbbL', buf, 0)
         return ('  version %u reserved1 %u %u %u iTOW %u\n'
@@ -4120,10 +4088,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def nav_hpposllh(self, buf):
         """UBX-NAV-HPPOSLLH decode, HP Geodetic Position Solution"""
-        m_len = len(buf)
-
-        if 36 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLllllbbbbLL', buf, 0)
         return ('  version %u reserved1 %u %u %u iTOW %u\n'
@@ -4133,10 +4097,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def nav_odo(self, buf):
         """UBX-NAV-ODO decode, Odometer Solution"""
-        m_len = len(buf)
-
-        if 20 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLLLL', buf, 0)
         return ("  version %u reserved1 %u %u %u iTOW %u\n"
@@ -4168,10 +4128,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def nav_orb(self, buf):
         """UBX-NAV-ORB decode, GNSS Orbit Database Info"""
-        m_len = len(buf)
-
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBH', buf, 0)
         s = "  iTOW %u version %u numSv %u reserved1 %u" % u
@@ -4214,20 +4170,12 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def nav_posecef(self, buf):
         """UBX-NAV-POSECEF decode, Position Solution in ECEF"""
-        m_len = len(buf)
-
-        if 20 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllL', buf, 0)
         return '  iTOW %u ecefX %d Y %d Z %d pAcc %u' % u
 
     def nav_posllh(self, buf):
         """UBX-NAV-POSLLH decode, Geodetic Position Solution"""
-        m_len = len(buf)
-
-        if 20 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LllllLL', buf, 0)
         return ('  iTOW %u lon %d lat %d height %d\n'
@@ -4284,8 +4232,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
         # 84 bytes long in protver 14.
         # 92 bytes long in protver 15.
-        if 84 > m_len:
-            return "  Bad Length %s" % m_len
 
         # flags2 is protver 27
         u = struct.unpack_from('<LHBBBBBBLlBBBBllllLLlllllLLHHHH', buf, 0)
@@ -4329,11 +4275,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 Relative Positioning Information in NED frame.
 protVer 20+
 High Precision GNSS products only."""
-
-        m_len = len(buf)
-
-        if 64 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHLlllllLbbbbLLLLLLL', buf, 0)
         s = ('  version %u reserved1 %u refStationId %u iTOW %u\n'
@@ -4411,10 +4352,6 @@ High Precision GNSS products only."""
 
     def nav_sat(self, buf):
         """UBX-NAV-SAT decode"""
-        m_len = len(buf)
-
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBBB', buf, 0)
         s = '  iTOW %u version %u numSvs %u reserved1 %u %u' % u
@@ -4460,11 +4397,7 @@ High Precision GNSS products only."""
     def nav_sbas(self, buf):
         """UBX-NAV-SBAS decode, SBAS Status Data"""
 
-        # undocuemnted, but present in protver 27+
-        m_len = len(buf)
-
-        if 12 > m_len:
-            return "  Bad Length %s" % m_len
+        # undocumented, but present in protver 27+
 
         u = struct.unpack_from('<LBBbBBBBB', buf, 0)
         s = (" iTOW %d geo %u mode x%x sys %d service x%x cnt %u "
@@ -4519,10 +4452,6 @@ High Precision GNSS products only."""
 
     def nav_sig(self, buf):
         """UBX-NAV-SIG decode, Signal Information"""
-        m_len = len(buf)
-
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBH', buf, 0)
         s = '  iTOW %u version %u numSigs %u reserved1 %u' % u
@@ -4555,10 +4484,6 @@ High Precision GNSS products only."""
 
     def nav_slas(self, buf):
         """UBX-NAV-SLAS decode, QZSS L1S SLAS Status Data"""
-        m_len = len(buf)
-
-        if 20 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBBBllBBBB', buf, 0)
         s = ('  iTOW %u version %u reserved1 %u %u %u'
@@ -4585,10 +4510,6 @@ High Precision GNSS products only."""
         """UBX-NAV-SOL decode, Navigation Solution Information"""
 
         #  deprecated by u-blox
-        m_len = len(buf)
-
-        if 52 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlhBBlllLlllLHBBL', buf, 0)
         s = ('  iTOW %u fTOW %d week %d gpsFix %u flags x%x\n'
@@ -4605,10 +4526,6 @@ High Precision GNSS products only."""
 
     def nav_status(self, buf):
         """UBX-NAV-STATUS decode"""
-        m_len = len(buf)
-
-        if 16 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBBBLL', buf, 0)
         return ('  iTOW:%d ms, fix:%d flags:%#x fixstat:%#x flags2:%#x\n'
@@ -4616,10 +4533,6 @@ High Precision GNSS products only."""
 
     def nav_svin(self, buf):
         """UBX-NAV-SVIN decode, Survey-in data"""
-        m_len = len(buf)
-
-        if 40 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLLlllbbbBLLBB', buf, 0)
         return ('  version %u reserved1[%u %u %u] iTOW %u dur %u\n'
@@ -4630,9 +4543,6 @@ High Precision GNSS products only."""
     def nav_svinfo(self, buf):
         """UBX-NAV-SVINFO decode"""
         m_len = len(buf)
-
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<Lbb', buf, 0)
         s = ' iTOW:%d ms, numCh:%d globalFlags:%d' % u
@@ -4674,10 +4584,6 @@ High Precision GNSS products only."""
 
     def nav_timebds(self, buf):
         """UBX-NAV-TIMEBDS decode"""
-        m_len = len(buf)
-
-        if 20 > m_len:
-            return ".Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlhbBL', buf, 0)
         s = ("  iTOW %d SOW %d fSOW %d week %d leapS %d\n"
@@ -4690,10 +4596,6 @@ High Precision GNSS products only."""
 
     def nav_timegal(self, buf):
         """UBX-NAV-TIMEGAL decode"""
-        m_len = len(buf)
-
-        if 20 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlhbBL', buf, 0)
         s = ("  iTOW %d galTOW %d fGalTow %d galWno %d leapS %d\n"
@@ -4706,10 +4608,6 @@ High Precision GNSS products only."""
 
     def nav_timeglo(self, buf):
         """UBX-NAV-TIMEGLO decode"""
-        m_len = len(buf)
-
-        if 20 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlhbBL', buf, 0)
         s = ("  iTOW %d TOD %d fTOD %d Nt %d  N4 %d\n"
@@ -4722,10 +4620,6 @@ High Precision GNSS products only."""
 
     def nav_timegps(self, buf):
         """UBX-NAV-TIMEGPS decode"""
-        m_len = len(buf)
-
-        if 16 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlhbBL', buf, 0)
         s = "  iTOW %u fTOW %u week %d leapS %d valid x%x tAcc %d" % u
@@ -4762,10 +4656,6 @@ High Precision GNSS products only."""
 
     def nav_timels(self, buf):
         """UBX-NAV-TIMELS decode, Leap second event information"""
-        m_len = len(buf)
-
-        if 24 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBBBBbBblHHBBBB', buf, 0)
         s = ('  iTOW %u version %u reserved2 %u %u %u srcOfCurrLs %u\n'
@@ -4788,10 +4678,6 @@ High Precision GNSS products only."""
 
     def nav_timeutc(self, buf):
         """UBX-NAV-TIMEUTC decode"""
-        m_len = len(buf)
-
-        if 20 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlHbbbbbB', buf, 0)
         s = ("  iTOW %d tAcc %d nano %d Time  %d/%d/%d %d:%d:%d\n"
@@ -4805,79 +4691,85 @@ High Precision GNSS products only."""
 
     def nav_velecef(self, buf):
         """UBX-NAV-VELECEF decode"""
-        m_len = len(buf)
-
-        if 20 != m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllL', buf, 0)
         return '  iTOW %d ecef: VX %d VY %d VZ %d vAcc:%u' % u
 
     def nav_velned(self, buf):
-        """UBX-NAV-VELNED decode.
-protVer 15+."""
-        m_len = len(buf)
+        """UBX-NAV-VELNED decode."""
 
-        if 36 > m_len:
-            return "  Bad Length %s" % m_len
-
+        # protVer 15+
         u = struct.unpack_from('<LlllLLlLL', buf, 0)
         return ('  iTOW %u vel: N %d E %d D %d speed %u\n'
                 '  gspeed %u heading %d sAcc %u cAcc %u' % u)
 
-    nav_ids = {1: {'str': 'POSECEF', 'dec': nav_posecef,
-                   'name': 'UBX-NAV-POSECEF'},
-               2: {'str': 'POSLLH', 'dec': nav_posllh,
-                   'name': 'UBX-NAV-POSLLH'},
-               3: {'str': 'STATUS', 'dec': nav_status,
-                   'name': 'UBX-NAV-STATUS'},
-               0x4: {'str': 'DOP', 'dec': nav_dop, 'name': 'UBX-NAV-DOP'},
-               0x5: {'str': 'ATT', 'dec': nav_att, 'name': 'UBX-NAV-ATT'},
-               0x6: {'str': 'SOL', 'dec': nav_sol, 'name': 'UBX-NAV-SOL'},
-               0x7: {'str': 'PVT', 'dec': nav_pvt, 'name': 'UBX-NAV-PVT'},
-               0x9: {'str': 'ODO', 'dec': nav_odo, 'name': 'UBX-NAV-ODO'},
+    nav_ids = {0x01: {'str': 'POSECEF', 'dec': nav_posecef, 'minlen': 20,
+                      'name': 'UBX-NAV-POSECEF'},
+               0x02: {'str': 'POSLLH', 'dec': nav_posllh, 'minlen': 20,
+                      'name': 'UBX-NAV-POSLLH'},
+               0x03: {'str': 'STATUS', 'dec': nav_status, 'minlen': 16,
+                      'name': 'UBX-NAV-STATUS'},
+               0x04: {'str': 'DOP', 'dec': nav_dop, 'minlen': 18,
+                      'name': 'UBX-NAV-DOP'},
+               0x05: {'str': 'ATT', 'dec': nav_att, 'minlen': 32,
+                      'name': 'UBX-NAV-ATT'},
+               0x06: {'str': 'SOL', 'dec': nav_sol, 'minlen': 52,
+                      'name': 'UBX-NAV-SOL'},
+               0x07: {'str': 'PVT', 'dec': nav_pvt, 'minlen': 84,
+                      'name': 'UBX-NAV-PVT'},
+               0x09: {'str': 'ODO', 'dec': nav_odo, 'minlen': 20,
+                      'name': 'UBX-NAV-ODO'},
                0x10: {'str': 'RESETODO', 'dec': nav_resetodo, 'minlen': 0,
                       'name': 'UBX-NAV-RESETODO'},
-               0x11: {'str': 'VELECEF', 'dec': nav_velecef,
+               0x11: {'str': 'VELECEF', 'dec': nav_velecef, 'minlen': 20,
                       'name': 'UBX-NAV-VELECEF'},
-               0x12: {'str': 'VELNED', 'dec': nav_velned,
+               0x12: {'str': 'VELNED', 'dec': nav_velned, 'minlen': 36,
                       'name': 'UBX-NAV-VELNED'},
-               0x13: {'str': 'HPPOSECEF', 'dec': nav_hpposecef,
+               0x13: {'str': 'HPPOSECEF', 'dec': nav_hpposecef, 'minlen': 28,
                       'name': 'UBX-NAV-HPPOSECEF'},
-               0x14: {'str': 'HPPOSLLH', 'dec': nav_hpposllh,
+               0x14: {'str': 'HPPOSLLH', 'dec': nav_hpposllh, 'minlen': 36,
                       'name': 'UBX-NAV-HPPOSLLH'},
-               0x20: {'str': 'TIMEGPS', 'dec': nav_timegps,
+               0x20: {'str': 'TIMEGPS', 'dec': nav_timegps, 'minlen': 16,
                       'name': 'UBX-NAV-TIMEGPS'},
-               0x21: {'str': 'TIMEUTC', 'dec': nav_timeutc,
+               0x21: {'str': 'TIMEUTC', 'dec': nav_timeutc, 'minlen': 20,
                       'name': 'UBX-NAV-TIMEUTC'},
-               0x22: {'str': 'CLOCK', 'dec': nav_clock,
+               0x22: {'str': 'CLOCK', 'dec': nav_clock, 'minlen': 20,
                       'name': 'UBX-NAV-CLOCK'},
-               0x23: {'str': 'TIMEGLO', 'dec': nav_timeglo,
+               0x23: {'str': 'TIMEGLO', 'dec': nav_timeglo, 'minlen': 20,
                       'name': 'UBX-NAV-TIMEGLO'},
-               0x24: {'str': 'TIMEBDS', 'dec': nav_timebds,
+               0x24: {'str': 'TIMEBDS', 'dec': nav_timebds, 'minlen': 20,
                       'name': 'UBX-NAV-TIMEBDS'},
-               0x25: {'str': 'TIMEGAL', 'dec': nav_timegal,
+               0x25: {'str': 'TIMEGAL', 'dec': nav_timegal, 'minlen': 20,
                       'name': 'UBX-NAV-TIMEGAL'},
-               0x26: {'str': 'TIMELS', 'dec': nav_timels,
+               0x26: {'str': 'TIMELS', 'dec': nav_timels, 'minlen': 24,
                       'name': 'UBX-NAV-TIMELS'},
-               0x30: {'str': 'SVINFO', 'dec': nav_svinfo,
+               0x30: {'str': 'SVINFO', 'dec': nav_svinfo, 'minlen': 8,
                       'name': 'UBX-NAV-SVINFO'},
-               0x31: {'str': 'DGPS', 'dec': nav_dgps, 'name': 'UBX-NAV-DGPS'},
-               0x32: {'str': 'SBAS', 'dec': nav_sbas, 'name': 'UBX-NAV-SBAS'},
-               0x34: {'str': 'ORB', 'dec': nav_orb, 'name': 'UBX-NAV-ORB'},
-               0x35: {'str': 'SAT', 'dec': nav_sat, 'name': 'UBX-NAV-SAT'},
-               0x39: {'str': 'GEOFENCE', 'dec': nav_geofence,
+               0x31: {'str': 'DGPS', 'dec': nav_dgps, 'minlen': 16,
+                      'name': 'UBX-NAV-DGPS'},
+               0x32: {'str': 'SBAS', 'dec': nav_sbas, 'minlen': 12,
+                      'name': 'UBX-NAV-SBAS'},
+               0x34: {'str': 'ORB', 'dec': nav_orb, 'minlen': 8,
+                      'name': 'UBX-NAV-ORB'},
+               0x35: {'str': 'SAT', 'dec': nav_sat, 'minlen': 8,
+                      'name': 'UBX-NAV-SAT'},
+               0x39: {'str': 'GEOFENCE', 'dec': nav_geofence, 'minlen': 8,
                       'name': 'UBX-NAV-GEOFENCE'},
-               0x3B: {'str': 'SVIN', 'dec': nav_svin, 'name': 'UBX-NAV-SVIN'},
-               0x3C: {'str': 'RELPOSNED', 'dec': nav_relposned,
+               0x3B: {'str': 'SVIN', 'dec': nav_svin, 'minlen': 40,
+                      'name': 'UBX-NAV-SVIN'},
+               0x3C: {'str': 'RELPOSNED', 'dec': nav_relposned, 'minlen': 64,
                       'name': 'UBX-NAV-RELPOSNED'},
                # u-blox 6, SFDR only
-               0x40: {'str': 'EKFSTATUS', 'name': 'UBX-NAV-EKFSTATUS'},
-               0x42: {'str': 'SLAS', 'dec': nav_slas, 'name': 'UBX-NAV-SLAS'},
-               0x43: {'str': 'SIG', 'dec': nav_sig, 'name': 'UBX-NAV-SIG'},
-               0x60: {'str': 'AOPSTATUS', 'dec': nav_aopstatus,
+               0x40: {'str': 'EKFSTATUS', 'minlen': 36,
+                      'name': 'UBX-NAV-EKFSTATUS'},
+               0x42: {'str': 'SLAS', 'dec': nav_slas, 'minlen': 20,
+                      'name': 'UBX-NAV-SLAS'},
+               0x43: {'str': 'SIG', 'dec': nav_sig, 'minlen': 8,
+                      'name': 'UBX-NAV-SIG'},
+               0x60: {'str': 'AOPSTATUS', 'dec': nav_aopstatus, 'minlen': 16,
                       'name': 'UBX-NAV-AOPSTATUS'},
-               0x61: {'str': 'EOE', 'dec': nav_eoe, 'name': 'UBX-NAV-EOE'},
+               0x61: {'str': 'EOE', 'dec': nav_eoe, 'minlen': 4,
+                      'name': 'UBX-NAV-EOE'},
                }
 
     # used for RTCM3 rate config
