@@ -5315,18 +5315,26 @@ High Precision GNSS products only."""
     # UBX-SEC-
     def sec_uniqid(self, buf):
         """UBX-SEC_UNIQID decode Unique chip ID"""
-        m_len = len(buf)
 
-        if 9 > m_len:
-            return "  Bad Length %s" % m_len
-
-        u = struct.unpack_from('<BBBBBBBBB', buf, 0)
-        s = (' version %u reserved %u %u %u uniqueId %#02x%02x%02x%02x%02x'
+        # protVer 18 to 23
+        u = struct.unpack_from('<BBHBBBBB', buf, 0)
+        s = ("  version %u reserved %u %u uniqueId %#02x%02x%02x%02x%02x"
              % u)
         return s
 
-    sec_ids = {0x01: {'str': 'SIGN', 'name': 'UBX-SEC-SIGN'},
-               0x03: {'str': 'UNIQID', 'dec': sec_uniqid,
+    def sec_sign(self, buf):
+        """UBX-SEC_SIGN decode, Signature of a previous message"""
+
+        # protVer 18 to 23
+        u = struct.unpack_from('<BBHBBH', buf, 0)
+        s = (" version %u reserved %u %u classId x%x messageID x%x "
+             " checksum %u\n  hash " % u)
+        s += gps.polystr(binascii.hexlify(buf[8:39]))
+        return s
+
+    sec_ids = {0x01: {'str': 'SIGN', 'minlen': 40,  'dec': sec_sign,
+                      'name': 'UBX-SEC-SIGN'},
+               0x03: {'str': 'UNIQID', 'minlen': 9, 'dec': sec_uniqid,
                       'name': 'UBX-SEC-UNIQID'},
                }
 
