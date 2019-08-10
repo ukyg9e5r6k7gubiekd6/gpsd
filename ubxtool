@@ -3573,10 +3573,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def mon_batch(self, buf):
         """UBX-MON-BATCH decode, Data batching buffer status"""
-        m_len = len(buf)
-
-        if 12 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBHHHH', buf, 0)
         s = ("   version %u reserved1 %u %u %u fillLevel %u\n"
@@ -3594,10 +3590,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def mon_comms(self, buf):
         """UBX-MON-COMMS decode, Comm port information"""
-        m_len = len(buf)
-
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
 
         # at least protver 27
         if 27 > opts['protver']:
@@ -3680,10 +3672,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def mon_hw(self, buf):
         """UBX-MON-HW decode, Hardware Status"""
-        m_len = len(buf)
-
-        if 60 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLLLHHBBBBLBBBBBBBBBBBBBBBBBBBBLLL', buf, 0)
         s = ('  pinSel %#x pinBank %#x pinDir %#x pinVal %#x noisePerRMS %u\n'
@@ -3710,10 +3698,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def mon_hw2(self, buf):
         """UBX-MON-HW2 decode, Extended Hardware Status"""
-        m_len = len(buf)
-
-        if 28 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<bBbBBBBBLLLLL', buf, 0)
         s = ('   ofsI %d magI %u ofsQ %d magQ %u cfgSource %u\n'
@@ -3734,10 +3718,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def mon_hw3(self, buf):
         """UBX-MON-HW3 decode, HW I/O pin information"""
-        m_len = len(buf)
-
-        if 22 > m_len:
-            return "  Bad Length %s" % m_len
 
         # at least protver 27
         if 27 > opts['protver']:
@@ -3777,10 +3757,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def mon_msgpp(self, buf):
         """UBX-MON-MSGPP decode, Message Parse and Process Status"""
-        m_len = len(buf)
-
-        if 120 > m_len:
-            return "  Bad Length %s" % m_len
 
         s = ''
         for i in range(1, 7):
@@ -3803,11 +3779,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def mon_patch(self, buf):
         """UBX-MON-PATCH decode, Output information about installed patches."""
-
-        m_len = len(buf)
-
-        if 4 > m_len:
-            return "  Bad Length %s" % m_len
 
         # first seen in protver 15
         u = struct.unpack_from('<HH', buf, 0)
@@ -3842,11 +3813,6 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MON-RF decode, RF Information"""
 
         # first seen in protver 27
-        m_len = len(buf)
-
-        if 4 > m_len:
-            return "  Bad Length %s" % m_len
-
         # at least protver 27
         if 27 > opts['protver']:
             opts['protver'] = 27
@@ -3869,10 +3835,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def mon_rxbuf(self, buf):
         """UBX-MON-RXBUF decode, Receiver Buffer Status"""
-        m_len = len(buf)
-
-        if 24 > m_len:
-            return "  Bad Length %s" % m_len
 
         rxbuf_name = {
            1: " pending   ",
@@ -3894,10 +3856,6 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MON-RXBUF decode, Receiver Status Information"""
 
         # No way to poll
-        m_len = len(buf)
-
-        if 1 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<B', buf, 0)
         s = "  flags: x%x" % u
@@ -3931,11 +3889,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def mon_smgr(self, buf):
         """UBX-MON-SMGR decode, Synchronization manager status"""
 
-        m_len = len(buf)
-
-        if 16 > m_len:
-            return "  Bad Length %s" % m_len
-
         u = struct.unpack_from('<BBBBLHHBBBB', buf, 0)
         s = (" version %u reserved1 %u %u %u iTOW %u intOsc x%x extOsc x%x\n"
              " discOsc %u gnss x%x extInt0 x%x extInt1 %x%x" % u)
@@ -3952,10 +3905,6 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def mon_txbuf(self, buf):
         """UBX-MON-TXBUF decode, Transmitter Buffer Status"""
-        m_len = len(buf)
-
-        if 28 > m_len:
-            return "  Bad Length %s" % m_len
 
         rxbuf_name = {
            1: " pending   ",
@@ -3985,9 +3934,6 @@ Oddly this is the poll for UBX-LOG-BATCH
         """UBX-MON-VER decode, Poll Receiver/Software Version"""
         m_len = len(buf)
 
-        if 40 > m_len:
-            return "  Bad Length %s" % m_len
-
         substr = buf.split(gps.polybytes('\0'))[0]
         substr1 = buf[30:39]
         substr1 = substr1.split(gps.polybytes('\0'))[0]
@@ -4004,24 +3950,36 @@ Oddly this is the poll for UBX-LOG-BATCH
             s += '\n  extension %s' % gps.polystr(substr)
         return s
 
-    mon_ids = {2: {'str': 'IO', 'dec': mon_io, 'name': 'UBX-MON-IO'},
-               4: {'str': 'VER', 'dec': mon_ver, 'name': 'UBX-MON-VER'},
-               6: {'str': 'MSGPP', 'dec': mon_msgpp, 'name': 'UBX-MON-MSGPP'},
-               7: {'str': 'RXBUF', 'dec': mon_rxbuf, 'name': 'UBX-MON-RXBUF'},
-               8: {'str': 'TXBUF', 'dec': mon_txbuf, 'name': 'UBX-MON-TXBUF'},
-               9: {'str': 'HW', 'dec': mon_hw, 'name': 'UBX-MON-HW'},
-               0x0b: {'str': 'HW2', 'dec': mon_hw2, 'name': 'UBX-MON-HW2'},
-               0x21: {'str': 'RXR', 'dec': mon_rxr, 'name': 'UBX-MON-RXR'},
-               0x27: {'str': 'PATCH', 'dec': mon_patch,
+    mon_ids = {0x02: {'str': 'IO', 'dec': mon_io, 'minlen': 20,
+                      'name': 'UBX-MON-IO'},
+               0x04: {'str': 'VER', 'dec': mon_ver, 'minlen': 40,
+                      'name': 'UBX-MON-VER'},
+               0x06: {'str': 'MSGPP', 'dec': mon_msgpp, 'minlen': 120,
+                      'name': 'UBX-MON-MSGPP'},
+               0x07: {'str': 'RXBUF', 'dec': mon_rxbuf, 'minlen': 24,
+                      'name': 'UBX-MON-RXBUF'},
+               0x08: {'str': 'TXBUF', 'dec': mon_txbuf, 'minlen': 28,
+                      'name': 'UBX-MON-TXBUF'},
+               0x09: {'str': 'HW', 'dec': mon_hw, 'minlen': 60,
+                      'name': 'UBX-MON-HW'},
+               0x0b: {'str': 'HW2', 'dec': mon_hw2, 'minlen': 28,
+                      'name': 'UBX-MON-HW2'},
+               0x21: {'str': 'RXR', 'dec': mon_rxr, 'minlen': 1,
+                      'name': 'UBX-MON-RXR'},
+               0x27: {'str': 'PATCH', 'dec': mon_patch, 'minlen': 4,
                       'name': 'UBX-MON-PATCH'},
-               0x28: {'str': 'GNSS', 'dec': mon_gnss, 'name': 'UBX-MON-GNSS'},
-               0x2e: {'str': 'SMGR', 'dec': mon_smgr, 'name': 'UBX-MON-SMGR'},
-               0x32: {'str': 'BATCH', 'dec': mon_batch,
+               0x28: {'str': 'GNSS', 'dec': mon_gnss, 'minlen': 8,
+                      'name': 'UBX-MON-GNSS'},
+               0x2e: {'str': 'SMGR', 'dec': mon_smgr, 'minlen': 16,
+                      'name': 'UBX-MON-SMGR'},
+               0x32: {'str': 'BATCH', 'dec': mon_batch, 'minlen': 12,
                       'name': 'UBX-MON-BATCH'},
-               0x36: {'str': 'COMMS', 'dec': mon_comms,
+               0x36: {'str': 'COMMS', 'dec': mon_comms, 'minlen': 8,
                       'name': 'UBX-MON-COMMS'},
-               0x37: {'str': 'HW3', 'dec': mon_hw3, 'name': 'UBX-MON-HW3'},
-               0x38: {'str': 'RF', 'dec': mon_rf, 'name': 'UBX-MON-RF'},
+               0x37: {'str': 'HW3', 'dec': mon_hw3, 'minlen': 22,
+                      'name': 'UBX-MON-HW3'},
+               0x38: {'str': 'RF', 'dec': mon_rf, 'minlen': 4,
+                      'name': 'UBX-MON-RF'},
                }
 
     def nav_aopstatus(self, buf):
