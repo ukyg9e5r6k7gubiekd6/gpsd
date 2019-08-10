@@ -3286,15 +3286,15 @@ Save and Load non-volatile storage data"""
         """UBX-INF-WARNING decode"""
         return ' Warning: ' + gps.polystr(buf)
 
-    inf_ids = {0x0: {'str': 'ERROR', 'dec': inf_error,
+    inf_ids = {0x0: {'str': 'ERROR', 'dec': inf_error, 'minlen': 0,
                      'name': 'UBX-INF-ERROR'},
-               0x1: {'str': 'WARNING', 'dec': inf_warning,
+               0x1: {'str': 'WARNING', 'dec': inf_warning, 'minlen': 0,
                      'name': 'UBX-INF-WARNING'},
-               0x2: {'str': 'NOTICE', 'dec': inf_notice,
+               0x2: {'str': 'NOTICE', 'dec': inf_notice, 'minlen': 0,
                      'name': 'UBX-INF-NOTICE'},
-               0x3: {'str': 'TEST', 'dec': inf_test,
+               0x3: {'str': 'TEST', 'dec': inf_test, 'minlen': 0,
                      'name': 'UBX-INF-TEST'},
-               0x4: {'str': 'DEBUG', 'dec': inf_debug,
+               0x4: {'str': 'DEBUG', 'dec': inf_debug, 'minlen': 0,
                      'name': 'UBX-INF-DEBUG'},
                }
 
