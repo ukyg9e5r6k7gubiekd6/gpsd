@@ -1935,10 +1935,6 @@ class ubx(object):
 
     def cfg_ant(self, buf):
         """UBX-CFG-ANT decode"""
-        m_len = len(buf)
-
-        if 4 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<HH', buf, 0)
         s = ' flags x%x pins x%x ' % u
@@ -1960,10 +1956,6 @@ class ubx(object):
 
     def cfg_batch(self, buf):
         """UBX-CFG-BATCH decode"""
-        m_len = len(buf)
-
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHHBB', buf, 0)
         s = ("  version %u flags x%x bufsize %u notifThrs %u\n"
@@ -1996,8 +1988,6 @@ class ubx(object):
     def cfg_cfg(self, buf):
         """UBX-CFG-CFG decode"""
         m_len = len(buf)
-        if 12 > m_len:
-            return "  Bad Length %s" % m_len
 
         if 12 == m_len:
             u = struct.unpack_from('<LLL', buf, 0)
@@ -2023,10 +2013,7 @@ class ubx(object):
         # u-blox 5, protVet 4.00 to 6.02
         m_len = len(buf)
 
-        if 2 > m_len:
-            s = "  Bad Length %d" % m_len
-
-        elif 2 == m_len:
+        if 2 == m_len:
             # standard datum
             u = struct.unpack_from('<H', buf, 0)
             s = "  datumNum %u" % u
@@ -2064,10 +2051,6 @@ class ubx(object):
 
     def cfg_dgnss(self, buf):
         """UBX-CFG-DGNSS decode, DGNSS configuration"""
-        m_len = len(buf)
-
-        if 4 > m_len:
-            return "  Bad Length %d" % m_len
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = (" dgnssMode %u (%s) reserved1 %u %u %u" % u
@@ -2077,11 +2060,6 @@ class ubx(object):
     def cfg_dosc(self, buf):
         """UBX-CFG-DOSC decode, Disciplined oscillator configuration"""
 
-        m_len = len(buf)
-
-        if 4 > m_len:
-            return "  Bad Length %s" % m_len
-
         u = struct.unpack_from('<BBBB', buf, 0)
         s = " version %u numOsc %u reserved1 %u" % u
         # FIXME, partial decode
@@ -2090,11 +2068,6 @@ class ubx(object):
     def cfg_esrc(self, buf):
         """UBX-CFG-ESRC decode, External synchronization source
         configuration"""
-
-        m_len = len(buf)
-
-        if 4 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = "  version %u numSources %u reserved1 %u" % u
@@ -2111,11 +2084,6 @@ class ubx(object):
         """UBX-CFG-FXN decode, FXN FixNOW configuration"""
 
         # Antaris 4, u-blox 5, protVer 6.00 to 6.02
-        m_len = len(buf)
-
-        if 36 > m_len:
-            return "  Bad Length %s" % m_len
-
         u = struct.unpack_from('<LLLLLLLLL', buf, 0)
         s = ("  flags x%x tReacq %u tAcq %u tReacqOff %u\n"
              "  tAcqOff %u tOn %u tOff %u res %u baseTow %u\n" % u)
@@ -2126,11 +2094,6 @@ class ubx(object):
 
     def cfg_geofence(self, buf):
         """UBX-CFG-GEOFENCE decode, Geofencing configuration"""
-
-        m_len = len(buf)
-
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBBBBB', buf, 0)
         s = (" version %u numFences %u confLvl %u reserved1 %u\n"
@@ -2161,10 +2124,6 @@ class ubx(object):
 
     def cfg_gnss(self, buf):
         """UBX-CFG-GNSS decode, GNSS system configuration"""
-        m_len = len(buf)
-
-        if 4 > m_len:
-            return "  Bad Length %d" % m_len
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = " msgVer %u  numTrkChHw %u numTrkChUse %u numConfigBlocks %u" % u
@@ -2189,10 +2148,6 @@ class ubx(object):
 
     def cfg_hnr(self, buf):
         """UBX-CFG-HNR decode, High Navigation Rate Settings"""
-
-        m_len = len(buf)
-        if 4 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBb', buf, 0)
         s = " highNavRate %u reserved %u %u" % u
@@ -2237,11 +2192,6 @@ class ubx(object):
     def cfg_itfm(self, buf):
         """UBX-CFG-ITFM decode, Jamming/Interference Monitor configuration"""
 
-        m_len = len(buf)
-
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
-
         u = struct.unpack_from('<LL', buf, 0)
         s = " config x%x config2 x%x" % u
         if VERB_DECODE <= opts['verbosity']:
@@ -2265,11 +2215,6 @@ class ubx(object):
         """UBX-CFG-LOGFILTER decode, Data Logger Configuration"""
 
         # protVer 15+
-        m_len = len(buf)
-
-        if 12 > m_len:
-            return "  Bad Length %s" % m_len
-
         u = struct.unpack_from('<BBHHHL', buf, 0)
         s = (" version %u flags x%x minInterval %u timeThreshold %u\n"
              " speedThreshold %u positionThreshold %u" % u)
@@ -2323,10 +2268,6 @@ class ubx(object):
 
     def cfg_nav5(self, buf):
         """UBX-CFG-NAV5 nav Engine Settings"""
-        m_len = len(buf)
-
-        if 36 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<HBBlLbBHHHHbbbbHHbBL', buf, 0)
         s = (' mask %#x dynModel %u fixmode %d fixedAlt %d FixedAltVar %u\n'
@@ -2368,9 +2309,6 @@ class ubx(object):
         # deprecated protver 23+
         # length == 20 case seems broken?
         m_len = len(buf)
-
-        if 20 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<HHLHBBBBBHBH', buf, 0)
         s = (" version %u mask1 x%x mask2 x%x reserved1 %u minSVs %u "
@@ -2466,10 +2404,6 @@ class ubx(object):
 
     def cfg_nmea(self, buf):
         """UBX-CFG-NMEA decode, Extended NMEA protocol configuration V1"""
-        m_len = len(buf)
-
-        if 20 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLBBBBBBBBBBBB', buf, 0)
         s = (" filter x%x nmeaVersion x%x numSv %u flags x%x "
@@ -2500,11 +2434,6 @@ class ubx(object):
 Save and Load non-volatile storage data"""
 
         # u-blox 6, protVer 7.03
-        m_len = len(buf)
-
-        if 13 > m_len:
-            return "  Bad Length %s" % m_len
-
         u = struct.unpack_from('<LLLB', buf, 0)
         s = ('  clearMask: %#x (%s)\n' %
              (u[0], flag_s(u[0], self.cfg_nvs_mask)))
@@ -2534,10 +2463,6 @@ Save and Load non-volatile storage data"""
 
     def cfg_odo(self, buf):
         """UBX-CFG-ODO decode, Odometer, Low-speed COG Engine Settings"""
-        m_len = len(buf)
-
-        if 20 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBBBBBBBBBBBBBBBBB', buf, 0)
         s = (" version %u reserved1 %u %u %u flags x%x odoCfg x%x\n"
@@ -2571,10 +2496,6 @@ Save and Load non-volatile storage data"""
         """UBX-CFG-PM decode, Poswer Management Configuration"""
 
         # u-blox 5, protVer 6.00 to 6.02
-        m_len = len(buf)
-
-        if 24 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLLLLHH', buf, 0)
         s = (" version %u res1 %u res2 %u res3 %u flags x%x updatePeriod %u\n"
@@ -2610,8 +2531,6 @@ Save and Load non-volatile storage data"""
         m_len = len(buf)
 
         # 48 bytes protver 18+
-        if 44 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLLLLHHLLLLL', buf, 0)
         s = (" version %u reserved1 %u maxStartupStateDur %u reserved2 %u\n"
@@ -2646,11 +2565,6 @@ Save and Load non-volatile storage data"""
 
     def cfg_pms(self, buf):
         """UBX-CFG-PMS decode, Power Mode Setup"""
-
-        m_len = len(buf)
-
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHHBB', buf, 0)
         s = (' version %u powerSetupValue %u'
@@ -2727,10 +2641,6 @@ Save and Load non-volatile storage data"""
     def cfg_pwr(self, buf):
         """UBX-CFG-PWR decode, Put receiver in a defined power state"""
 
-        m_len = len(buf)
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
-
         u = struct.unpack_from('<BBBBL', buf, 0)
         s = (" version %u reserved %u %u %u state %u" %
              (u + (index_s(u[0], self.cfg_pwr_state),)))
@@ -2746,11 +2656,6 @@ Save and Load non-volatile storage data"""
 
     def cfg_rate(self, buf):
         """UBX-CFG-RATE decode, Navigation/Measurement Rate Settings"""
-
-        m_len = len(buf)
-
-        if 6 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<HHH', buf, 0)
         s = (" measRate %u navRate %u timeRef %u (%s)" %
@@ -2810,11 +2715,6 @@ Save and Load non-volatile storage data"""
     def cfg_rst(self, buf):
         """"UBX-CFG-RST decode, Reset Receiver/Clear Backup Data Structures"""
 
-        m_len = len(buf)
-
-        if 4 > m_len:
-            return "  Bad Length %s" % m_len
-
         u = struct.unpack_from('<HBB', buf, 0)
         s = ' navBbrmask x%x resetMode %u reserved %u' % u
 
@@ -2839,11 +2739,6 @@ Save and Load non-volatile storage data"""
 
     def cfg_rxm(self, buf):
         """UBX-CFG-RXM decode, Navigation/Measurement"""
-
-        m_len = len(buf)
-
-        if 2 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BB', buf, 0)
         s = (" reserved1 %u lpMode %u (%s)" %
@@ -2908,10 +2803,6 @@ Save and Load non-volatile storage data"""
 
     def cfg_sbas(self, buf):
         """UBX-CFG-SBAS decode, SBAS Configuration"""
-        m_len = len(buf)
-
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBL', buf, 0)
         s = (" mode x%x usage x%x maxSBAS %u scanMode2 x%x"
@@ -2936,10 +2827,6 @@ Save and Load non-volatile storage data"""
         """UBX-CFG-SLAS decode, SLAS configuration"""
 
         # protVer 19.2 (ADR, UDR only)
-        m_len = len(buf)
-
-        if 4 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBH', buf, 0)
         s = " mode %u reserved1 %u %u" % u
@@ -2958,10 +2845,6 @@ Save and Load non-volatile storage data"""
 
     def cfg_smgr(self, buf):
         """UBX-CFG-SMGR decode, Synchronization manager configuration"""
-        m_len = len(buf)
-
-        if 20 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHHBBHHHHL', buf, 0)
         s = (" version %u minGNSSFix %u maxFreqChangeRate %u "
@@ -2986,10 +2869,6 @@ Save and Load non-volatile storage data"""
         """UBX-CFG-TMODE decode, Time Mode Settings"""
 
         # u-blox 5, protVer 5.00 to 6.02 (timing feature only)
-        m_len = len(buf)
-
-        if 28 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHlllLLL', buf, 0)
         s = ('  timeMode %u fixedPosX %d fixedPosY %d fixedPosZ %d\n'
@@ -3008,10 +2887,6 @@ Save and Load non-volatile storage data"""
 
     def cfg_tmode2(self, buf):
         """UBX-CFG-TMODE2 decode, Time Mode Settings 2"""
-        m_len = len(buf)
-
-        if 28 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHlllLLL', buf, 0)
         s = ('  timeMode %u reserved1 %u  usage %#x\n'
@@ -3045,14 +2920,10 @@ Save and Load non-volatile storage data"""
         """UBX-CFG-TP decode, Time Pulse Settings"""
 
         # protVer 4.00 to 6.02
-        m_len = len(buf)
-
-        if 28 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<HHbBBBhhl', buf, 0)
-        s = (' interval %u length %u status %d timeRef %u flags x%x res x%x\n'
-             ' antennaCableDelay %u rfGroupDelay %d userDelay %d' % u)
+        s = ('  interval %u length %u status %d timeRef %u flags x%x res x%x\n'
+             '  antennaCableDelay %u rfGroupDelay %d userDelay %d' % u)
 
         if VERB_DECODE <= opts['verbosity']:
             s += ("\n   flags (%s)" %
@@ -3108,10 +2979,6 @@ Save and Load non-volatile storage data"""
 
     def cfg_usb(self, buf):
         """UBX-CFG-USB decode, USB Configuration"""
-        m_len = len(buf)
-
-        if 108 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<HHHHHH', buf, 0)
         s = (' vendorID: %#x productID: %#x reserved1: %u'
@@ -3153,9 +3020,6 @@ Save and Load non-volatile storage data"""
         """"UBX-CFG-VALDEL decode, Delete configuration items"""
         m_len = len(buf)
 
-        if 4 > m_len:
-            return "  Bad Length %s" % m_len
-
         # this is a poll options, so does not set min protver
 
         u = struct.unpack_from('<BBBB', buf, 0)
@@ -3180,8 +3044,6 @@ Save and Load non-volatile storage data"""
 
         # version zero is a poll
         # version one is the response
-        if 4 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = ' version %u layer %u reserved %u,%u\n' % u
@@ -3228,9 +3090,6 @@ Save and Load non-volatile storage data"""
         """"UBX-CFG-VALSET decode, Set configuration items"""
         m_len = len(buf)
 
-        if 4 > m_len:
-            return "  Bad Length %s" % m_len
-
         # this is a poll option, so does not set min protver
 
         u = struct.unpack_from('<BBBB', buf, 0)
@@ -3260,84 +3119,112 @@ Save and Load non-volatile storage data"""
 
     cfg_ids = {
                # in u-blox 5+
-               0: {'str': 'PRT', 'dec': cfg_prt, 'name': 'UBX-CFG-PRT'},
+               0: {'str': 'PRT', 'dec': cfg_prt, 'minlen': 1,
+                   'name': 'UBX-CFG-PRT'},
                # in u-blox 5+
-               1: {'str': 'MSG', 'dec': cfg_msg, 'name': 'UBX-CFG-MSG'},
+               1: {'str': 'MSG', 'dec': cfg_msg, 'minlen': 2,
+                   'name': 'UBX-CFG-MSG'},
                # in u-blox 5+
-               2: {'str': 'INF', 'dec': cfg_inf, 'name': 'UBX-CFG-INF'},
+               2: {'str': 'INF', 'dec': cfg_inf, 'minlen': 1,
+                   'name': 'UBX-CFG-INF'},
                # in u-blox 5+
-               4: {'str': 'RST', 'dec': cfg_rst, 'name': 'UBX-CFG-RST'},
+               4: {'str': 'RST', 'dec': cfg_rst, 'minlen': 4,
+                   'name': 'UBX-CFG-RST'},
                # in u-blox 5+
-               6: {'str': 'DAT', 'dec': cfg_dat, 'name': 'UBX-CFG-DAT'},
+               6: {'str': 'DAT', 'dec': cfg_dat, 'minlen': 2,
+                   'name': 'UBX-CFG-DAT'},
                # u-blox 5, 6.  Not in u-blox 7+
-               7: {'str': 'TP', 'dec': cfg_tp, 'name': 'UBX-CFG-TP'},
+               7: {'str': 'TP', 'dec': cfg_tp, 'minlen': 28,
+                   'name': 'UBX-CFG-TP'},
                # in u-blox 5+
-               8: {'str': 'RATE', 'dec': cfg_rate, 'name': 'UBX-CFG-RATE'},
+               8: {'str': 'RATE', 'dec': cfg_rate, 'minlen': 6,
+                   'name': 'UBX-CFG-RATE'},
                # in u-blox 5+
-               9: {'str': 'CFG', 'dec': cfg_cfg, 'name': 'UBX-CFG-CFG'},
+               9: {'str': 'CFG', 'dec': cfg_cfg, 'minlen': 12,
+                   'name': 'UBX-CFG-CFG'},
                # Antaris 4, deprecated in u-blox 5/6, gone in 7
-               0x0e: {'str': 'FXM', 'dec': cfg_fxn, 'name': 'UBX-CFG-FXM'},
+               0x0e: {'str': 'FXM', 'dec': cfg_fxn, 'minlen': 36,
+                      'name': 'UBX-CFG-FXM'},
                # u-blox 5, 6, 7, 8
-               0x11: {'str': 'RXM', 'dec': cfg_rxm, 'name': 'UBX-CFG-RXM'},
+               0x11: {'str': 'RXM', 'dec': cfg_rxm, 'minlen': 2,
+                      'name': 'UBX-CFG-RXM'},
                # in u-blox 6, SFDR only.  Not in 5- or 7+
                0x12: {'str': 'EKF', 'name': 'UBX-CFG-EKF'},
                # in u-blox 5+
-               0x13: {'str': 'ANT', 'dec': cfg_ant, 'name': 'UBX-CFG-ANT'},
+               0x13: {'str': 'ANT', 'dec': cfg_ant, 'minlen': 4,
+                      'name': 'UBX-CFG-ANT'},
                # in u-blox 5+
-               0x16: {'str': 'SBAS', 'dec': cfg_sbas, 'name': 'UBX-CFG-SBAS'},
+               0x16: {'str': 'SBAS', 'dec': cfg_sbas, 'minlen': 8,
+                      'name': 'UBX-CFG-SBAS'},
                # in u-blox 5+
-               0x17: {'str': 'NMEA', 'dec': cfg_nmea, 'name': 'UBX-CFG-NMEA'},
+               0x17: {'str': 'NMEA', 'dec': cfg_nmea, 'minlen': 20,
+                      'name': 'UBX-CFG-NMEA'},
                # in u-blox 6+, Not in u-blox 5-
-               0x1b: {'str': 'USB', 'dec': cfg_usb, 'name': 'UBX-CFG-USB'},
+               0x1b: {'str': 'USB', 'dec': cfg_usb, 'minlen': 108,
+                      'name': 'UBX-CFG-USB'},
                # u-blox 5 and 6.  Not in u-blox 7+
-               0x1d: {'str': 'TMODE', 'dec': cfg_tmode,
+               0x1d: {'str': 'TMODE', 'dec': cfg_tmode, 'minlen': 28,
                       'name': 'UBX-CFG-TMODE'},
                # in u-blox 8+. Not in u-blox 7-
-               0x1e: {'str': 'ODO', 'dec': cfg_odo, 'name': 'UBX-CFG-ODO'},
+               0x1e: {'str': 'ODO', 'dec': cfg_odo, 'minlen': 20,
+                      'name': 'UBX-CFG-ODO'},
                # in u-blox 6, not in u-blox 7+
-               0x22: {'str': 'NVS', 'dec': cfg_nvs, 'name': 'UBX-CFG-NVS'},
+               0x22: {'str': 'NVS', 'dec': cfg_nvs, 'minlen': 13,
+                      'name': 'UBX-CFG-NVS'},
                # in u-blox 5+
-               0x23: {'str': 'NAVX5', 'dec': cfg_navx5,
+               0x23: {'str': 'NAVX5', 'dec': cfg_navx5, 'minlen': 20,
                       'name': 'UBX-CFG-NAVX5'},
                # in u-blox 6+.  Not in 5-
-               0x24: {'str': 'NAV5', 'dec': cfg_nav5, 'name': 'UBX-CFG-NAV5'},
+               0x24: {'str': 'NAV5', 'dec': cfg_nav5, 'minlen': 36,
+                      'name': 'UBX-CFG-NAV5'},
                # in u-blox 6.  Not in u-blox 5- or 7+
                0x29: {'str': 'ESFGWT', 'name': 'UBX-CFG-ESFGWT'},
                # in u-blox 6+, Not u-blox 5-
-               0x31: {'str': 'TP5', 'dec': cfg_tp5, 'name': 'UBX-CFG-TP5'},
+               0x31: {'str': 'TP5', 'dec': cfg_tp5, 'minlen': 1,
+                      'name': 'UBX-CFG-TP5'},
                # In u-blox 5, 6. Not in u-blox 7+
-               0x32: {'str': 'PM', 'dec': cfg_pm, 'name': 'UBX-CFG-PM'},
+               0x32: {'str': 'PM', 'dec': cfg_pm, 'minlen': 24,
+                      'name': 'UBX-CFG-PM'},
                # in u-blox 5+
-               0x34: {'str': 'RINV', 'dec': cfg_rinv, 'name': 'UBX-CFG-RINV'},
+               0x34: {'str': 'RINV', 'dec': cfg_rinv, 'minlen': 1,
+                      'name': 'UBX-CFG-RINV'},
                # in u-blox 6+.  Not in u-blox 5-
-               0x39: {'str': 'ITFM', 'dec': cfg_itfm, 'name': 'UBX-CFG-ITFM'},
+               0x39: {'str': 'ITFM', 'dec': cfg_itfm, 'minlen': 8,
+                      'name': 'UBX-CFG-ITFM'},
                # in u-blox 6+.  Not in u-blox 5-
-               0x3b: {'str': 'PM2', 'dec': cfg_pm2, 'name': 'UBX-CFG-PM2'},
+               0x3b: {'str': 'PM2', 'dec': cfg_pm2, 'minlen': 44,
+                      'name': 'UBX-CFG-PM2'},
                # in u-blox 6 and 7.  Not in u-blox 5- or 8+
-               0x3d: {'str': 'TMODE2', 'dec': cfg_tmode2,
+               0x3d: {'str': 'TMODE2', 'dec': cfg_tmode2, 'minlen': 28,
                       'name': 'UBX-CFG-TMODE2'},
                # in u-blox 7+  Not in u-blox 6-
-               0x3e: {'str': 'GNSS', 'dec': cfg_gnss, 'name': 'UBX-CFG-GNSS'},
+               0x3e: {'str': 'GNSS', 'dec': cfg_gnss, 'minlen': 4,
+                      'name': 'UBX-CFG-GNSS'},
                # in u-blox 7+  Not in u-blox 6-
-               0x47: {'str': 'LOGFILTER', 'dec': cfg_logfilter,
+               0x47: {'str': 'LOGFILTER', 'dec': cfg_logfilter, 'minlen': 12,
                       'name': 'UBX-CFG-LOGFILTER'},
                # Not in u-blox 8-
                0x53: {'str': 'TXSLOT', 'name': 'UBX-CFG-TXSLOT'},
                # Not in u-blox 7-
-               0x57: {'str': 'PWR', 'dec': cfg_pwr, 'name': 'UBX-CFG-PWR'},
+               0x57: {'str': 'PWR', 'dec': cfg_pwr, 'minlen': 8,
+                      'name': 'UBX-CFG-PWR'},
                # Not in u-blox 8-
-               0x5c: {'str': 'HNR', 'dec': cfg_hnr, 'name': 'UBX-CFG-HNR'},
+               0x5c: {'str': 'HNR', 'dec': cfg_hnr, 'minlen': 4,
+                      'name': 'UBX-CFG-HNR'},
                # Not in u-blox 7-
-               0x60: {'str': 'ESRC', 'dec': cfg_esrc, 'name': 'UBX-CFG-ESRC'},
+               0x60: {'str': 'ESRC', 'dec': cfg_esrc, 'minlen': 4,
+                      'name': 'UBX-CFG-ESRC'},
                # Not in u-blox 8-
-               0x61: {'str': 'DOSC', 'dec': cfg_dosc, 'name': 'UBX-CFG-DOSC'},
+               0x61: {'str': 'DOSC', 'dec': cfg_dosc, 'minlen': 4,
+                      'name': 'UBX-CFG-DOSC'},
                # Not in u-blox 8-
-               0x62: {'str': 'SMGR', 'dec': cfg_smgr, 'name': 'UBX-CFG-SMGR'},
+               0x62: {'str': 'SMGR', 'dec': cfg_smgr, 'minlen': 20,
+                      'name': 'UBX-CFG-SMGR'},
                # Not in u-blox 8-
-               0x69: {'str': 'GEOFENCE', 'dec': cfg_geofence,
+               0x69: {'str': 'GEOFENCE', 'dec': cfg_geofence, 'minlen': 8,
                       'name': 'UBX-CFG-GEOFENCE'},
                # Not in u-blox 8-
-               0x70: {'str': 'DGNSS', 'dec': cfg_dgnss,
+               0x70: {'str': 'DGNSS', 'dec': cfg_dgnss, 'minlen': 4,
                       'name': 'UBX-CFG-DGNSS'},
                # Not in u-blox 8-
                0x71: {'str': 'TMODE3', 'name': 'UBX-CFG-TMODE3'},
@@ -3346,20 +3233,22 @@ Save and Load non-volatile storage data"""
                # Not in u-blox 8-
                0x85: {'str': 'DYNSEED', 'name': 'UBX-CFG-DYNSEED'},
                # Not in u-blox 8-
-               0x86: {'str': 'PMS', 'dec': cfg_pms, 'name': 'UBX-CFG-PMS'},
+               0x86: {'str': 'PMS', 'dec': cfg_pms, 'minlen': 8,
+                      'name': 'UBX-CFG-PMS'},
                # in u-blox 9
-               0x8a: {'str': 'VALSET', 'dec': cfg_valset,
+               0x8a: {'str': 'VALSET', 'dec': cfg_valset, 'minlen': 4,
                       'name': 'UBX-CFG-VALSET'},
                # in u-blox 9
-               0x8b: {'str': 'VALGET', 'dec': cfg_valget,
+               0x8b: {'str': 'VALGET', 'dec': cfg_valget, 'minlen': 4,
                       'name': 'UBX-CFG-VALGET'},
                # in u-blox 9
-               0x8c: {'str': 'VALDEL', 'dec': cfg_valdel,
+               0x8c: {'str': 'VALDEL', 'dec': cfg_valdel, 'minlen': 4,
                       'name': 'UBX-CFG-VALDEL'},
                # u-blox 8
-               0x8d: {'str': 'SLAS', 'dec': cfg_slas, 'name': 'UBX-CFG-SLAS'},
+               0x8d: {'str': 'SLAS', 'dec': cfg_slas, 'minlen': 4,
+                      'name': 'UBX-CFG-SLAS'},
                # only in u-blox 8
-               0x93: {'str': 'BATCH', 'dec': cfg_batch,
+               0x93: {'str': 'BATCH', 'dec': cfg_batch, 'minlen': 8,
                       'name': 'UBX-CFG-BATCH'},
                }
 
