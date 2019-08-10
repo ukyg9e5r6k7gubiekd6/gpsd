@@ -2121,12 +2121,31 @@ class ubx(object):
         # FIXME, partial decode
         return s
 
+    def cfg_dynseed(self, buf):
+        """UBX-CFG-DYNSEED decode,
+Programming the dynamic seed for host interface signature"""
+
+        # u-blox 8 only, protVer 18 to 23
+        u = struct.unpack_from('<BBHLL', buf, 0)
+        s = " version %u reserved1 %u %u seedHi %u seedLo %u" % u
+        return s
+
     def cfg_esrc(self, buf):
         """UBX-CFG-ESRC decode, External synchronization source
         configuration"""
 
         u = struct.unpack_from('<BBBB', buf, 0)
         s = "  version %u numSources %u reserved1 %u" % u
+        # FIXME, partial decode
+        return s
+
+    def cfg_fixseed(self, buf):
+        """UBX-CFG-FIXSEED decode,
+Programming the fixed seed for host interface signature"""
+
+        # u-blox 8 only, protVer 18 to 23
+        u = struct.unpack_from('<BBHLL', buf, 0)
+        s = " version %u length %u reserved1 %u seedHi %u seedLo %u" % u
         # FIXME, partial decode
         return s
 
@@ -3205,7 +3224,7 @@ Save and Load non-volatile storage data"""
                0x11: {'str': 'RXM', 'dec': cfg_rxm, 'minlen': 2,
                       'name': 'UBX-CFG-RXM'},
                # in u-blox 6, SFDR only.  Not in 5- or 7+
-               0x12: {'str': 'EKF', 'name': 'UBX-CFG-EKF'},
+               0x12: {'str': 'EKF', 'minlen': 16, 'name': 'UBX-CFG-EKF'},
                # in u-blox 5+
                0x13: {'str': 'ANT', 'dec': cfg_ant, 'minlen': 4,
                       'name': 'UBX-CFG-ANT'},
@@ -3233,8 +3252,8 @@ Save and Load non-volatile storage data"""
                # in u-blox 6+.  Not in 5-
                0x24: {'str': 'NAV5', 'dec': cfg_nav5, 'minlen': 36,
                       'name': 'UBX-CFG-NAV5'},
-               # in u-blox 6.  Not in u-blox 5- or 7+
-               0x29: {'str': 'ESFGWT', 'name': 'UBX-CFG-ESFGWT'},
+               # in u-blox 6. SFDR only. Not in u-blox 5- or 7+
+               0x29: {'str': 'ESFGWT', 'minlen': 44, 'name': 'UBX-CFG-ESFGWT'},
                # in u-blox 6+, Not u-blox 5-
                0x31: {'str': 'TP5', 'dec': cfg_tp5, 'minlen': 1,
                       'name': 'UBX-CFG-TP5'},
@@ -3259,8 +3278,8 @@ Save and Load non-volatile storage data"""
                # in u-blox 7+  Not in u-blox 6-
                0x47: {'str': 'LOGFILTER', 'dec': cfg_logfilter, 'minlen': 12,
                       'name': 'UBX-CFG-LOGFILTER'},
-               # Not in u-blox 8-
-               0x53: {'str': 'TXSLOT', 'name': 'UBX-CFG-TXSLOT'},
+               # Not in u-blox 7-, FTS only
+               0x53: {'str': 'TXSLOT', 'minlen': 2, 'name': 'UBX-CFG-TXSLOT'},
                # Not in u-blox 7-
                0x57: {'str': 'PWR', 'dec': cfg_pwr, 'minlen': 8,
                       'name': 'UBX-CFG-PWR'},
@@ -3282,12 +3301,14 @@ Save and Load non-volatile storage data"""
                # Not in u-blox 8-
                0x70: {'str': 'DGNSS', 'dec': cfg_dgnss, 'minlen': 4,
                       'name': 'UBX-CFG-DGNSS'},
-               # Not in u-blox 8-
-               0x71: {'str': 'TMODE3', 'name': 'UBX-CFG-TMODE3'},
-               # Not in u-blox 8-
-               0x84: {'str': 'FIXSEED', 'name': 'UBX-CFG-FIXSEED'},
-               # Not in u-blox 8-
-               0x85: {'str': 'DYNSEED', 'name': 'UBX-CFG-DYNSEED'},
+               # Not in u-blox 7-, HP only
+               0x71: {'str': 'TMODE3', 'minlen': 40, 'name': 'UBX-CFG-TMODE3'},
+               # Not in u-blox 7-
+               0x84: {'str': 'FIXSEED', 'dec': cfg_fixseed, 'minlen': 12,
+                      'name': 'UBX-CFG-FIXSEED'},
+               # Not in u-blox 7-
+               0x85: {'str': 'DYNSEED', 'dec': cfg_dynseed, 'minlen': 12,
+                      'name': 'UBX-CFG-DYNSEED'},
                # Not in u-blox 8-
                0x86: {'str': 'PMS', 'dec': cfg_pms, 'minlen': 8,
                       'name': 'UBX-CFG-PMS'},
