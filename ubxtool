@@ -6756,6 +6756,12 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         # UBX-UPD-SOS
         "UPD-SOS": {"command": send_poll, "opt": [0x09, 0x14],
                     "help": "poll UBX-UPD-SOS Backup File restore Status"},
+        # UBX-UPD-SOS
+        "UPD-SOS0": {"command": send_poll, "opt": [0x09, 0x14, 0, 0, 0, 0],
+                     "help": "UBX-UPD-SOS Create Backup File in Flash"},
+        # UBX-UPD-SOS
+        "UPD-SOS1": {"command": send_poll, "opt": [0x09, 0x14, 1, 0, 0, 0],
+                     "help": "UBX-UPD-SOS Create Clear File in Flash"},
         # UBX-CFG-RST
         "WARMBOOT": {"command": send_cfg_rst,
                      "help": "UBX-CFG-RST warmboot the GPS",
