@@ -3254,16 +3254,16 @@ Save and Load non-volatile storage data"""
 
     # UBX-ESF-
     # only with ADR or UDR products
-    esf_ids = {0x02: {'str': 'MEAS', 'name': "UBX-ESF-MEAS"},
-               0x03: {'str': 'RAW', 'name': "UBX-ESF-RAW"},
-               0x10: {'str': 'STATUS', 'name': "UBX-ESF-STATUS"},
-               0x15: {'str': 'INS', 'name': "UBX-ESF-INS"},
+    esf_ids = {0x02: {'str': 'MEAS', 'minlen': 8, 'name': "UBX-ESF-MEAS"},
+               0x03: {'str': 'RAW',  'minlen': 4, 'name': "UBX-ESF-RAW"},
+               0x10: {'str': 'STATUS', 'minlen': 16, 'name': "UBX-ESF-STATUS"},
+               0x15: {'str': 'INS', 'minlen': 16, 'name': "UBX-ESF-INS"},
                }
 
     # UBX-HNR-
     # only with ADR or UDR products
-    hnr_ids = {0x00: {'str': 'PVT', 'name': "UBX-HNR-PVT"},
-               0x02: {'str': 'INS', 'name': "UBX-HNR-INS"},
+    hnr_ids = {0x00: {'str': 'PVT', 'minlen': 72, 'name': "UBX-HNR-PVT"},
+               0x02: {'str': 'INS', 'minlen': 36, 'name': "UBX-HNR-INS"},
                }
 
     def inf_debug(self, buf):
