@@ -1860,6 +1860,13 @@ class ubx(object):
 
         return s
 
+    def aid_data(self, buf):
+        """UBX-AID-DATA decode, Poll all GPS Initial Aiding Data"""
+
+        # If this poll is received, the messages AID-INI, AID-HUI,
+        # AID-EPH and AID-ALM are sent.
+        return "  Poll all GPS Initial Aiding Data"
+
     def aid_eph(self, buf):
         """UBX-AID-EPH decode, GPS Aiding Ephemeris Data"""
         m_len = len(buf)
@@ -1907,21 +1914,31 @@ class ubx(object):
 
         return s
 
+    def aid_req(self, buf):
+        """UBX-AID-REQ decode, Sends a poll for all GPS Aiding Data"""
+
+        return "  poll (AID-DATA) for all GPS Aiding Data"
+
     # All UBX-AID messages are deprecated; use UBX-MGA messages instead
     aid_ids = {
                # u-blox 6
-               0x00: {'str': 'REQ', 'name': 'UBX-AID-REQ'},
+               0x00: {'str': 'REQ', 'dec': aid_req, 'minlen': 0,
+                      'name': 'UBX-AID-REQ'},
                0x01: {'str': 'INI', 'dec': aid_ini, 'minlen': 48,
                       'name': 'UBX-AID-INI'},
                0x02: {'str': 'HUI', 'dec': aid_hui, 'minlen': 72,
                       'name': 'UBX-AID-HUI'},
                # u-blox 6
-               0x10: {'str': 'DATA', 'name': 'UBX-AID-DATA'},
-               0x30: {'str': 'ALM', 'dec': aid_alm, 'name': 'UBX-AID-ALM'},
-               0x31: {'str': 'EPH', 'dec': aid_eph, 'name': 'UBX-AID-EPH'},
+               0x10: {'str': 'DATA', 'dec': aid_data, 'minlen': 0,
+                      'name': 'UBX-AID-DATA'},
+               0x30: {'str': 'ALM', 'dec': aid_alm, 'minlen': 1,
+                      'name': 'UBX-AID-ALM'},
+               0x31: {'str': 'EPH', 'dec': aid_eph, 'minlen': 1,
+                      'name': 'UBX-AID-EPH'},
                # u-blox 6
                0x32: {'str': 'ALPSRV', 'name': 'UBX-AID-ALPSRV'},
-               0x33: {'str': 'AOP', 'dec': aid_aop, 'name': 'UBX-AID-AOP'},
+               0x33: {'str': 'AOP', 'dec': aid_aop, 'minlen': 1,
+                      'name': 'UBX-AID-AOP'},
                0x50: {'str': 'ALP', 'name': 'UBX-AID-ALP'},
                }
 
@@ -6424,6 +6441,9 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         "AID-AOP": {"command": send_poll, "opt": [0x0b, 0x33],
                     "help": "poll UBX-AID-AOP Poll Poll AssistNow "
                     "Autonomous data"},
+        # UBX-AID-DATA
+        "AID-DATA": {"command": send_poll, "opt": [0x0b, 0x10],
+                     "help": "Poll all GPS Initial Aiding Data"},
         # UBX-AID-EPH
         "AID-EPH": {"command": send_poll, "opt": [0x0b, 0x31],
                     "help": "poll UBX-AID-EPH Poll GPS Aiding Ephemeris Data"},
