@@ -4810,10 +4810,6 @@ High Precision GNSS products only."""
 
     def rxm_imes(self, buf):
         """UBX-RXM-IMES decode, Indoor Messaging System Information"""
-        m_len = len(buf)
-
-        if 4 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBH', buf, 0)
         s = ' numTx %u version %u reserved1 %u' % u
@@ -4830,9 +4826,6 @@ High Precision GNSS products only."""
     def rxm_measx(self, buf):
         """UBX-RXM-RAW decode"""
         m_len = len(buf)
-
-        if 44 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBLLLLLHHHHHBBLL', buf, 0)
         s = (' version %u reserved1 %u %u %u gpsTOW %u gloTOW %u\n'
@@ -4856,9 +4849,6 @@ High Precision GNSS products only."""
         """UBX-RXM-RAW decode"""
         m_len = len(buf)
 
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
-
         u = struct.unpack_from('<lhBB', buf, 0)
         s = ' iTOW %d weeks %d numSV %u res1 %u' % u
 
@@ -4881,9 +4871,6 @@ High Precision GNSS products only."""
     def rxm_rawx(self, buf):
         """UBX-RXM-RAWX decode"""
         m_len = len(buf)
-
-        if 16 > m_len:
-            return "  Bad Length %s" % m_len
 
         # version not here before protver 18, I hope it is zero.
         u = struct.unpack_from('<dHbBBBBB', buf, 0)
@@ -4912,9 +4899,6 @@ High Precision GNSS products only."""
         """UBX-RXM-RLM decode, Galileo SAR RLM report"""
         m_len = len(buf)
 
-        if 16 > m_len:
-            return "  Bad Length %s" % m_len
-
         # common to Short-RLM and Long-RLM report
         u = struct.unpack_from('<BBBBLLB', buf, 0)
         s = (" version %u type %u svId %u reserved1 %u beacon x%x %x "
@@ -4933,10 +4917,6 @@ High Precision GNSS products only."""
 
     def rxm_rtcm(self, buf):
         """UBX-RXM-RTCM decode, RTCM Input Status"""
-        m_len = len(buf)
-
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHHH', buf, 0)
         s = " version %u flags x%x subtype %u refstation %u msgtype %u" % u
@@ -4944,10 +4924,6 @@ High Precision GNSS products only."""
 
     def rxm_sfrb(self, buf):
         """UBX-RXM-SFRB decode, Subframe Buffer"""
-        m_len = len(buf)
-
-        if 42 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBLLLLLLLLLL', buf, 0)
         s = (' chn %d s svid %3d\n'
@@ -5101,10 +5077,6 @@ High Precision GNSS products only."""
 
         # The way u-blox packs the subfram data is perverse, and
         # undocuemnted.  Even more perverse than native subframes.
-        m_len = len(buf)
-
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBBBBB', buf, 0)
         svId = u[1]
@@ -5302,9 +5274,6 @@ High Precision GNSS products only."""
         """UBX-RXM-SVSI decode, SV Status Info"""
         m_len = len(buf)
 
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
-
         u = struct.unpack_from('<LhBB', buf, 0)
         s = ' iTOW %d week %d numVis %d numSV %d' % u
 
@@ -5318,24 +5287,29 @@ High Precision GNSS products only."""
 
         return s
 
-    rxm_ids = {0x10: {'str': 'RAW', 'dec': rxm_raw,
+    rxm_ids = {0x10: {'str': 'RAW', 'dec': rxm_raw, 'minlen': 8,
                       'name': 'UBX-RXM-RAW'},      # obsolete
-               0x11: {'str': 'SFRB', 'dec': rxm_sfrb,
+               0x11: {'str': 'SFRB', 'dec': rxm_sfrb, 'minlen': 42,
                       'name': 'UBX-RXM-SFRB'},
-               0x13: {'str': 'SFRBX', 'dec': rxm_sfrbx,
+               0x13: {'str': 'SFRBX', 'dec': rxm_sfrbx, 'minlen': 8,
                       'name': 'UBX-RXM-SFRBX'},
-               0x14: {'str': 'MEASX', 'dec': rxm_measx,
+               0x14: {'str': 'MEASX', 'dec': rxm_measx, 'minlen': 44,
                       'name': 'UBX-RXM-MEASX'},
-               0x15: {'str': 'RAWX', 'dec': rxm_rawx, 'name': 'UBX-RXM-RAWX'},
-               0x20: {'str': 'SVSI', 'dec': rxm_svsi, 'name': 'UBX-RXM-SVSI'},
+               0x15: {'str': 'RAWX', 'dec': rxm_rawx, 'minlen': 16,
+                      'name': 'UBX-RXM-RAWX'},
+               0x20: {'str': 'SVSI', 'dec': rxm_svsi, 'minlen': 8,
+                      'name': 'UBX-RXM-SVSI'},
                # u-blox 6, 7, raw option only
-               0x30: {'str': 'ALM', 'name': 'UBX-RXM-ALM'},
+               0x30: {'str': 'ALM', 'minlen': 1, 'name': 'UBX-RXM-ALM'},
                # u-blox 6, 7, raw option only
-               0x31: {'str': 'EPH', 'name': 'UBX-RXM-EPH'},
-               0x32: {'str': 'RTCM', 'dec': rxm_rtcm, 'name': 'UBX-RXM-RTCM'},
-               0x41: {'str': 'PMREQ', 'name': 'UBX-RXM-PMREQ'},
-               0x59: {'str': 'RLM', 'dec': rxm_rlm, 'name': 'UBX-RXM-RLM'},
-               0x61: {'str': 'IMES', 'dec': rxm_imes, 'name': 'UBX-RXM-IMES'},
+               0x31: {'str': 'EPH', 'minlen': 1, 'name': 'UBX-RXM-EPH'},
+               0x32: {'str': 'RTCM', 'dec': rxm_rtcm, 'minlen': 8,
+                      'name': 'UBX-RXM-RTCM'},
+               0x41: {'str': 'PMREQ', 'minlen': 8, 'name': 'UBX-RXM-PMREQ'},
+               0x59: {'str': 'RLM', 'dec': rxm_rlm, 'minlen': 16,
+                      'name': 'UBX-RXM-RLM'},
+               0x61: {'str': 'IMES', 'dec': rxm_imes, 'minlen': 4,
+                      'name': 'UBX-RXM-IMES'},
                }
 
     # UBX-SEC-
