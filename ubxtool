@@ -5416,7 +5416,49 @@ High Precision GNSS products only."""
                }
 
     # UBX-UPD-
-    upd_ids = {0x14: {'str': 'SOS', 'name': "UBX-UPD-SOS"},
+    upd_sos_cmd = {
+        0: "Create Backup File in Flash",
+        1: "Clear Backup in Flash",
+        2: "Backup File Creation Acknowledge",
+        3: "System Restored from Backup",
+        }
+
+    upd_sos_response2 = {
+        0: "Not Acknowledged",
+        1: "Acknowledged",
+        }
+
+    upd_sos_response3 = {
+        0: "Unknown",
+        1: "Failed restoring from backup fiil",
+        2: "Restored from backup file",
+        3: "Not restored (no backup)",
+        }
+
+    def upd_sos(self, buf):
+        """UBX-UPD-SOS decode, Backup File stuff"""
+
+        u = struct.unpack_from('<BBH', buf, 0)
+        s = '  command %u reserved1 x%x %x' % u
+
+        s1 = ""
+        if 2 == u[0]:
+            # Backup File Creation Acknowledge
+            u1 = struct.unpack_from('<BBH', buf, 4)
+            s += '\n  response %u reserved2 x%x %x' % u1
+            s1 = ' response (%s)' % index_s(u[2], self.upd_sos_response2)
+        elif 3 == u[0]:
+            # System Restored from Backup
+            u1 = struct.unpack_from('<BBH', buf, 4)
+            s += '\n  response %u reserved2 x%x %x' % u1
+            s1 = ' response (%s)' % index_s(u[2], self.upd_sos_response3)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += '\n    cmd (%s)%s' % (index_s(u[0], self.upd_sos_cmd), s1)
+        return s
+
+    upd_ids = {0x14: {'str': 'SOS', 'dec': upd_sos, 'minlen': 4,
+                      'name': "UBX-UPD-SOS"},
                }
 
     classes = {
@@ -6711,6 +6753,9 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         # UBX-TIM-VRFY
         "TIM-VRFY": {"command": send_poll, "opt": [0x0d, 0x06],
                      "help": "poll UBX-TIM-VRFY Sourced Time Verification"},
+        # UBX-UPD-SOS
+        "UPD-SOS": {"command": send_poll, "opt": [0x09, 0x14],
+                    "help": "poll UBX-UPD-SOS Backup File restore Status"},
         # UBX-CFG-RST
         "WARMBOOT": {"command": send_cfg_rst,
                      "help": "UBX-CFG-RST warmboot the GPS",
