@@ -4836,7 +4836,7 @@ High Precision GNSS products only."""
                       'name': 'UBX-NAV-SVIN'},
                0x3C: {'str': 'RELPOSNED', 'dec': nav_relposned, 'minlen': 64,
                       'name': 'UBX-NAV-RELPOSNED'},
-               # u-blox 6, SFDR only
+               # deprecated in u-blox 6, SFDR only
                0x40: {'str': 'EKFSTATUS', 'minlen': 36,
                       'name': 'UBX-NAV-EKFSTATUS'},
                0x42: {'str': 'SLAS', 'dec': nav_slas, 'minlen': 20,
@@ -5376,9 +5376,9 @@ High Precision GNSS products only."""
                       'name': 'UBX-RXM-RAWX'},
                0x20: {'str': 'SVSI', 'dec': rxm_svsi, 'minlen': 8,
                       'name': 'UBX-RXM-SVSI'},
-               # u-blox 6, 7, raw option only
+               # deprecated in u-blox 6, 7, raw option only
                0x30: {'str': 'ALM', 'minlen': 1, 'name': 'UBX-RXM-ALM'},
-               # u-blox 6, 7, raw option only
+               # deprecated in u-blox 6, 7, raw option only
                0x31: {'str': 'EPH', 'minlen': 1, 'name': 'UBX-RXM-EPH'},
                0x32: {'str': 'RTCM', 'dec': rxm_rtcm, 'minlen': 8,
                       'name': 'UBX-RXM-RTCM'},
@@ -5484,11 +5484,17 @@ High Precision GNSS products only."""
                       'name': 'UBX-TIM-SVIN'},
                0x06: {'str': 'VRFY', 'dec': tim_vrfy, 'minlen': 20,
                       'name': 'UBX-TIM-VRFY'},
+               # u-blox 8, FTS only
                0x11: {'str': 'DOSC', 'minlen': 8, 'name': 'UBX-TIM-DOSC'},
+               # u-blox 8, FTS only
                0x12: {'str': 'TOS', 'minlen': 56, 'name': 'UBX-TIM-TOS'},
+               # u-blox 8, FTS only
                0x13: {'str': 'SMEAS', 'minlen': 12, 'name': 'UBX-TIM-SMEAS'},
+               # u-blox 8, FTS only
                0x15: {'str': 'VCOCAL', 'minlen': 1, 'name': 'UBX-TIM-VCOCAL'},
+               # u-blox 8, FTS only
                0x16: {'str': 'FCHG', 'minlen': 32, 'name': 'UBX-TIM-FCHG'},
+               # u-blox 8, FTS only
                0x17: {'str': 'HOC', 'minlen': 8, 'name': 'UBX-TIM-HOC'},
                }
 
