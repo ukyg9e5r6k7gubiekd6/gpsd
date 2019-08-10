@@ -3550,11 +3550,7 @@ Oddly this is the poll for UBX-LOG-BATCH
     # UBX-MGA-
     def mga_dbd(self, buf):
         """UBX-MGA-DBD- decode, Navigation Database Dump Entry"""
-        m_len = len(buf)
-
         # max 172
-        if 12 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLL', buf, 0)
         s = ' reserved1 %u %u %u' % u
@@ -3562,16 +3558,17 @@ Oddly this is the poll for UBX-LOG-BATCH
 
         return s
 
-    mga_ids = {0x00: {'str': 'GPS', 'name': "UBX-MGA-GPS"},
-               0x02: {'str': 'GAL', 'name': "UBX-MGA-GAL"},
-               0x03: {'str': 'BDS', 'name': "UBX-MGA-BDS"},
-               0x05: {'str': 'QZSS', 'name': "UBX-MGA-QZSS"},
-               0x06: {'str': 'GLO', 'name': "UBX-MGA-GLO"},
-               0x20: {'str': 'ANO', 'name': "UBX-MGA-ANO"},
-               0x21: {'str': 'FLASH', 'name': "UBX-MGA-FLASH"},
-               0x40: {'str': 'INI', 'name': "UBX-MGA-INI"},
-               0x60: {'str': 'ACK', 'name': "UBX-MGA-ACK"},
-               0x80: {'str': 'DBD', 'dec': mga_dbd, 'name': "UBX-MGA-DBD"},
+    mga_ids = {0x00: {'str': 'GPS', 'minlen': 16, 'name': "UBX-MGA-GPS"},
+               0x02: {'str': 'GAL', 'minlen': 12, 'name': "UBX-MGA-GAL"},
+               0x03: {'str': 'BDS', 'minlen': 16, 'name': "UBX-MGA-BDS"},
+               0x05: {'str': 'QZSS', 'minlen': 12, 'name': "UBX-MGA-QZSS"},
+               0x06: {'str': 'GLO', 'minlen': 20, 'name': "UBX-MGA-GLO"},
+               0x20: {'str': 'ANO', 'minlen': 76, 'name': "UBX-MGA-ANO"},
+               0x21: {'str': 'FLASH', 'minlen': 2, 'name': "UBX-MGA-FLASH"},
+               0x40: {'str': 'INI', 'minlen': 12, 'name': "UBX-MGA-INI"},
+               0x60: {'str': 'ACK', 'minlen': 8, 'name': "UBX-MGA-ACK"},
+               0x80: {'str': 'DBD', 'dec': mga_dbd, 'minlen': 12,
+                      'name': "UBX-MGA-DBD"},
                }
 
     def mon_batch(self, buf):
