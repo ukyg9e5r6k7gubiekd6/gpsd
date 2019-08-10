@@ -3333,10 +3333,6 @@ Save and Load non-volatile storage data"""
         """UBX-LOG-BATCH decode
 Oddly this is polled with UBX-LOG-RETRIEVEBATCH
 """
-        m_len = len(buf)
-
-        if 100 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHLHBBBBBBLlBBBBllllHHlllllLLHHLLLL', buf, 0)
         s = ("  version %u contentValid x%x msgCnt %u iTow %u\n"
@@ -3370,10 +3366,6 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
 
     def log_create(self, buf):
         """UBX-LOG-CREATE decode"""
-        m_len = len(buf)
-
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBL', buf, 0)
         s = ("  version %u logCfg x%x reserved1 x%x logSize %u\n"
@@ -3387,7 +3379,6 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
 
     def log_erase(self, buf):
         """UBX-LOG-ERASE decode"""
-        m_len = len(buf)
 
         return "  Erase Logged Data"
 
@@ -3402,9 +3393,6 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
         m_len = len(buf)
 
         # length 8 is reponse, length 12 is request
-        if 8 > m_len:
-            return "  Bad Length %s" % m_len
-
         if 12 >= m_len:
             # request
             u = struct.unpack_from('<BBLLBBBBBB', buf, 0)
@@ -3431,10 +3419,6 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
     def log_info(self, buf):
         """UBX-LOG-INFO decode"""
         # protVer 15+
-        m_len = len(buf)
-
-        if 48 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHLLLLLLHBBBBBBHBBBBBBBBH', buf, 0)
         s = ("  version %u reserved1 x%x x%x filestoreCapacity %u "
@@ -3458,12 +3442,8 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
 
     def log_retrieve(self, buf):
         """UBX-LOG-RETRIEVE decode"""
+
         # protVer 15+
-        m_len = len(buf)
-
-        if 12 > m_len:
-            return "  Bad Length %s" % m_len
-
         u = struct.unpack_from('<LLBBH', buf, 0)
         s = "  startNumber %u entryCount %u version %u reserved1 x%x %x" % u
 
@@ -3473,10 +3453,6 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
         """UBX-LOG-RETRIEVEBATCH decode
 Oddly this is the poll for UBX-LOG-BATCH
 """
-        m_len = len(buf)
-
-        if 4 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBH', buf, 0)
         s = ("  version %u flags x%x reserved1 x%x" % u)
@@ -3490,10 +3466,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def log_retrievepos(self, buf):
         """UBX-LOG-RETRIEVEPOS decode"""
         # protVer 15+
-        m_len = len(buf)
-
-        if 40 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllLLLBBHBBBBBBBB', buf, 0)
         s = ("  entryIndex %u lon %d lat %d hMSL %d hAcc %u\n"
@@ -3509,10 +3481,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def log_retrieveposextra(eself, buf):
         """UBX-LOG-RETRIEVEPOSEXTRA decode"""
         # protVer 15+
-        m_len = len(buf)
-
-        if 32 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBHBBBBBBHLLLL', buf, 0)
         s = ("  version %u reserved1 x%x\n"
@@ -3524,10 +3492,6 @@ Oddly this is the poll for UBX-LOG-BATCH
     def log_retrievestring(self, buf):
         """UBX-LOG-RETRIEVESTRING decode"""
         # protVer 15+
-        m_len = len(buf)
-
-        if 16 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LBBHBBBBBBH', buf, 0)
         s = ("  entryIndex %u version %u reserved2 x%x\n"
@@ -3555,27 +3519,31 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     # UBX-LOG-
     log_ids = {
-               0x03: {'str': 'ERASE', 'dec': log_erase,
+               0x03: {'str': 'ERASE', 'dec': log_erase, 'minlen': 0,
                       'name': "UBX-LOG-ERASE"},
-               0x04: {'str': 'STRING', 'dec': log_string,
+               0x04: {'str': 'STRING', 'dec': log_string, 'minlen': 0,
                       'name': "UBX-LOG-STRING"},
-               0x07: {'str': 'CREATE', 'dec': log_create,
+               0x07: {'str': 'CREATE', 'dec': log_create, 'minlen': 8,
                       'name': "UBX-LOG-CREATE"},
-               0x08: {'str': 'INFO', 'dec': log_info,
+               0x08: {'str': 'INFO', 'dec': log_info, 'minlen': 48,
                       'name': "UBX-LOG-INFO"},
-               0x09: {'str': 'RETRIEVE', 'dec': log_retrieve,
+               0x09: {'str': 'RETRIEVE', 'dec': log_retrieve, 'minlen': 12,
                       'name': "UBX-LOG-RETRIEVE"},
                0x0b: {'str': 'RETRIEVEPOS', 'dec': log_retrievepos,
+                      'minlen': 40,
                       'name': "UBX-LOG-RETRIEVEPOS"},
                0x0d: {'str': 'RETRIEVESTRING', 'dec': log_retrievestring,
+                      'minlen': 16,
                       'name': "UBX-LOG-RETRIEVESTRING"},
-               0x0e: {'str': 'FINDTIME', 'dec': log_findtime,
+               0x0e: {'str': 'FINDTIME', 'dec': log_findtime, 'minlen': 8,
                       'name': "UBX-LOG-FINDTIME"},
                0x0f: {'str': 'RETRIEVEPOSEXTRA', 'dec': log_retrieveposextra,
+                      'minlen': 32,
                       'name': "UBX-LOG-RETRIEVEPOSEXTRA"},
                0x10: {'str': 'RETRIEVEBATCH', 'dec': log_retrievebatch,
+                      'minlen': 2,
                       'name': "UBX-LOG-RETRIEVEBATCH"},
-               0x11: {'str': 'BATCH', 'dec': log_batch,
+               0x11: {'str': 'BATCH', 'dec': log_batch, 'minlen': 100,
                       'name': "UBX-LOG-BATCH"},
                }
 
@@ -4431,7 +4399,6 @@ High Precision GNSS products only."""
 
         m_len = len(buf)
         if 0 == m_len:
-            # FIXME; this shows up as "  Poll request"
             s = " reset request"
         else:
             s = " unexpected data"
@@ -4914,7 +4881,7 @@ protVer 15+."""
                0x6: {'str': 'SOL', 'dec': nav_sol, 'name': 'UBX-NAV-SOL'},
                0x7: {'str': 'PVT', 'dec': nav_pvt, 'name': 'UBX-NAV-PVT'},
                0x9: {'str': 'ODO', 'dec': nav_odo, 'name': 'UBX-NAV-ODO'},
-               0x10: {'str': 'RESETODO', 'dec': nav_resetodo,
+               0x10: {'str': 'RESETODO', 'dec': nav_resetodo, 'minlen': 0,
                       'name': 'UBX-NAV-RESETODO'},
                0x11: {'str': 'VELECEF', 'dec': nav_velecef,
                       'name': 'UBX-NAV-VELECEF'},
@@ -5882,7 +5849,9 @@ protVer 15+."""
                             s_payload = this_class['ids'][m_id]['name']
                             s_payload += ':\n'
 
-                            if 0 == m_len:
+                            if ((('minlen' in this_class['ids'][m_id]) and
+                                 (0 == m_len) and
+                                 (0 != this_class['ids'][m_id]['minlen']))):
                                 s_payload += "  Poll request"
                             elif (('minlen' in this_class['ids'][m_id]) and
                                   (this_class['ids'][m_id]['minlen'] >
