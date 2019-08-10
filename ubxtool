@@ -7098,9 +7098,11 @@ for (opt, val) in options:
     if opt == '-c':
         opts['command'] = val
     elif opt == '-d':
-        opts['disable'] = val
+        # don't force the user to upper case
+        opts['disable'] = val.upper()
     elif opt == '-e':
-        opts['enable'] = val
+        # don't force the user to upper case
+        opts['enable'] = val.upper()
     elif opt == '-f':
         opts['input_file_name'] = val
     elif opt == '-g':
@@ -7119,7 +7121,8 @@ for (opt, val) in options:
         if 27 < opts['protver']:
             opts['protver'] = 27
     elif opt == '-p':
-        opts['poll'] = val
+        # don't force the user to upper case
+        opts['poll'] = val.upper()
     elif opt in '-R':
         # raw log file
         opts['raw_file'] = val
