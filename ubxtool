@@ -5341,10 +5341,6 @@ High Precision GNSS products only."""
     # UBX-TIM-
     def tim_svin(self, buf):
         """UBX-TIM-SVIN decode, Survey-in data"""
-        m_len = len(buf)
-
-        if 28 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LlllLLBB', buf, 0)
         s = ('  dur %u meanX %d meanY %d meanZ %d meanV %u\n'
@@ -5353,10 +5349,6 @@ High Precision GNSS products only."""
 
     def tim_tm2(self, buf):
         """UBX-TIM-TM2 decode, Time mark data"""
-        m_len = len(buf)
-
-        if 28 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHHHLLLLL', buf, 0)
         s = ('  ch %u flags %#x count %u wnR %u wnF %u\n'
@@ -5365,10 +5357,6 @@ High Precision GNSS products only."""
 
     def tim_tp(self, buf):
         """UBX-TIM-TP decode, Time Pulse Timedata"""
-        m_len = len(buf)
-
-        if 16 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<LLlHbb', buf, 0)
         s = ('  towMS %u towSubMS %u qErr %d week %d\n'
@@ -5402,10 +5390,6 @@ High Precision GNSS products only."""
 
     def tim_vrfy(self, buf):
         """UBX-TIM-VRFY decode, Sourced Time Verification"""
-        m_len = len(buf)
-
-        if 20 > m_len:
-            return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<llllHBB', buf, 0)
         s = ('  itow %d frac %d deltaMs %d deltaMs %d\n'
@@ -5415,16 +5399,20 @@ High Precision GNSS products only."""
                   index_s(u[5] & 3, self.tim_vrfy_flags))
         return s
 
-    tim_ids = {1: {'str': 'TP', 'dec': tim_tp, 'name': 'UBX-TIM-TP'},
-               3: {'str': 'TM2', 'dec': tim_tm2, 'name': 'UBX-TIM-TM2'},
-               4: {'str': 'SVIN', 'dec': tim_svin, 'name': 'UBX-TIM-SVIN'},
-               6: {'str': 'VRFY', 'dec': tim_vrfy, 'name': 'UBX-TIM-VRFY'},
-               0x11: {'str': 'DOSC', 'name': 'UBX-TIM-DOSC'},
-               0x12: {'str': 'TOS', 'name': 'UBX-TIM-TOS'},
-               0x13: {'str': 'SMEAS', 'name': 'UBX-TIM-SMEAS'},
-               0x15: {'str': 'VCOCAL', 'name': 'UBX-TIM-VCOCAL'},
-               0x16: {'str': 'FCHG', 'name': 'UBX-TIM-FCHG'},
-               0x17: {'str': 'HOC', 'name': 'UBX-TIM-HOC'},
+    tim_ids = {0x01: {'str': 'TP', 'dec': tim_tp, 'minlen': 16,
+                      'name': 'UBX-TIM-TP'},
+               0x03: {'str': 'TM2', 'dec': tim_tm2, 'minlen': 28,
+                      'name': 'UBX-TIM-TM2'},
+               0x04: {'str': 'SVIN', 'dec': tim_svin, 'minlen': 28,
+                      'name': 'UBX-TIM-SVIN'},
+               0x06: {'str': 'VRFY', 'dec': tim_vrfy, 'minlen': 20,
+                      'name': 'UBX-TIM-VRFY'},
+               0x11: {'str': 'DOSC', 'minlen': 8, 'name': 'UBX-TIM-DOSC'},
+               0x12: {'str': 'TOS', 'minlen': 56, 'name': 'UBX-TIM-TOS'},
+               0x13: {'str': 'SMEAS', 'minlen': 12, 'name': 'UBX-TIM-SMEAS'},
+               0x15: {'str': 'VCOCAL', 'minlen': 1, 'name': 'UBX-TIM-VCOCAL'},
+               0x16: {'str': 'FCHG', 'minlen': 32, 'name': 'UBX-TIM-FCHG'},
+               0x17: {'str': 'HOC', 'minlen': 8, 'name': 'UBX-TIM-HOC'},
                }
 
     # UBX-UPD-
