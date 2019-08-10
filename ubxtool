@@ -1843,6 +1843,42 @@ class ubx(object):
 
         return s
 
+    def aid_alp(self, buf):
+        """UBX-AID-ALP decode, AlmanacPlus"""
+
+        # u-blox 6, protVer 6 to 7
+
+        m_len = len(buf)
+        if 1 == m_len(buf):
+            # different meaning for in and out
+            u = struct.unpack_from('<B', buf, 0)
+            return '  dummy/ack  %u' % u
+
+        if 24 == m_len(buf):
+            # different meaning for in and out
+            u = struct.unpack_from('LLlHHLBBH', buf, 0)
+            return ('  predTow %u predDur %u age %d predWno %u almWno %u\n'
+                    '  res1 %u svs %u res23 %u %u' % u)
+
+        # else
+        s = '  alpData len %u' % u
+
+        # FIXME: partial decode
+
+        return s
+
+    def aid_alpsrv(self, buf):
+        """UBX-AID-ALPSRV decode, AlmanacPlus"""
+
+        # u-blox 6, protVer 6 to 7
+
+        u = struct.unpack_from('<BBHHH', buf, 0)
+        s = ' idSize %u type %u ofx %u size %u fileId %u' % u
+
+        # FIXME: partial decode
+
+        return s
+
     def aid_aop(self, buf):
         """UBX-AID-AOP decode, AssistNow Autonomous data"""
         m_len = len(buf)
@@ -1863,6 +1899,7 @@ class ubx(object):
     def aid_data(self, buf):
         """UBX-AID-DATA decode, Poll all GPS Initial Aiding Data"""
 
+        # u-blox 6
         # If this poll is received, the messages AID-INI, AID-HUI,
         # AID-EPH and AID-ALM are sent.
         return "  Poll all GPS Initial Aiding Data"
@@ -1936,10 +1973,12 @@ class ubx(object):
                0x31: {'str': 'EPH', 'dec': aid_eph, 'minlen': 1,
                       'name': 'UBX-AID-EPH'},
                # u-blox 6
-               0x32: {'str': 'ALPSRV', 'name': 'UBX-AID-ALPSRV'},
+               0x32: {'str': 'ALPSRV', 'dec': aid_alpsrv, 'minlen': 8,
+                      'name': 'UBX-AID-ALPSRV'},
                0x33: {'str': 'AOP', 'dec': aid_aop, 'minlen': 1,
                       'name': 'UBX-AID-AOP'},
-               0x50: {'str': 'ALP', 'name': 'UBX-AID-ALP'},
+               0x50: {'str': 'ALP', 'dec': aid_alp, 'minlen': 1,
+                      'name': 'UBX-AID-ALP'},
                }
 
     cfg_ant_pins = {
