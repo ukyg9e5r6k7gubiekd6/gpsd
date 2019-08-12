@@ -3470,16 +3470,18 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
         m_len = len(buf)
 
         # length 8 is reponse, length 12 is request
-        if 12 >= m_len:
+        if 8 == m_len:
+            # response
+            u = struct.unpack_from('<BBHL', buf, 0)
+            s = "  version %u type %u reserved1 x%x entryNumber %u" % u
+        elif 12 < m_len:
+            return "  Bad Length %s" % m_len
+        else:
             # request
-            u = struct.unpack_from('<BBLLBBBBBB', buf, 0)
+            u = struct.unpack_from('<BBHHBBBBBB', buf, 0)
             s = ("  version %u type %u reserved1 x%x\n"
                  "  year %u month %u day %u hour %u min %u sec %u "
                  "reserved2 x%x" % u)
-        else:
-            # response
-            u = struct.unpack_from('<BBLLBBBBBB', buf, 0)
-            s = ("  version %u type %u reserved1 x%x entryNumber %u" % u)
 
         if VERB_DECODE <= opts['verbosity']:
             s += ("\n      type (%s)" %
