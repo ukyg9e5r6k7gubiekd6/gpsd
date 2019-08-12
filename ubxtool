@@ -3411,6 +3411,7 @@ Save and Load non-volatile storage data"""
 Oddly this is polled with UBX-LOG-RETRIEVEBATCH
 """
 
+        # u-blox 8, protVer 23+
         u = struct.unpack_from('<BBHLHBBBBBBLlBBBBllllHHlllllLLHHLLLL', buf, 0)
         s = ("  version %u contentValid x%x msgCnt %u iTow %u\n"
              "  year %u month %u day %u hour %u min %u sec %u valid x%x\n"
@@ -3444,6 +3445,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
     def log_create(self, buf):
         """UBX-LOG-CREATE decode"""
 
+        # u-blox 8+, protVer 15+
         u = struct.unpack_from('<BBBBL', buf, 0)
         s = ("  version %u logCfg x%x reserved1 x%x logSize %u\n"
              "  userDefinedSize %u" % u)
@@ -3457,6 +3459,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
     def log_erase(self, buf):
         """UBX-LOG-ERASE decode"""
 
+        # u-blox 8+, protVer 15+
         return "  Erase Logged Data"
 
     log_findtime_type = {
@@ -3466,7 +3469,8 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
 
     def log_findtime(self, buf):
         """UBX-LOG-FINDIME decode"""
-        # protVer 15+
+
+        # u-blox 8, protVer 15+
         m_len = len(buf)
 
         # length 8 is reponse, length 12 is request
@@ -3499,6 +3503,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
         """UBX-LOG-INFO decode"""
         # protVer 15+
 
+        # u-blox 8+, protVer 15+
         u = struct.unpack_from('<BBHLLLLLLHBBBBBBHBBBBBBBBH', buf, 0)
         s = ("  version %u reserved1 x%x x%x filestoreCapacity %u "
              "reserved2 x%x x%x\n"
@@ -3533,6 +3538,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
 Oddly this is the poll for UBX-LOG-BATCH
 """
 
+        # u-blox 8, protVer 23+
         u = struct.unpack_from('<BBH', buf, 0)
         s = ("  version %u flags x%x reserved1 x%x" % u)
         if VERB_DECODE <= opts['verbosity']:
@@ -3544,8 +3550,8 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def log_retrievepos(self, buf):
         """UBX-LOG-RETRIEVEPOS decode"""
-        # protVer 15+
 
+        # u-blox 9, protVer 27+
         u = struct.unpack_from('<LlllLLLBBHBBBBBBBB', buf, 0)
         s = ("  entryIndex %u lon %d lat %d hMSL %d hAcc %u\n"
              "  gSpeed %u heading %u version %u fixType %u\n"
@@ -3559,8 +3565,8 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def log_retrieveposextra(eself, buf):
         """UBX-LOG-RETRIEVEPOSEXTRA decode"""
-        # protVer 15+
 
+        # u-blox 8+, protVer 15+
         u = struct.unpack_from('<LBBHBBBBBBHLLLL', buf, 0)
         s = ("  version %u reserved1 x%x\n"
              "  year %u month %u day %u hour %u minute %u seconds %u\n"
@@ -3570,8 +3576,8 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def log_retrievestring(self, buf):
         """UBX-LOG-RETRIEVESTRING decode"""
-        # protVer 15+
 
+        # u-blox 8+, protVer 15+
         u = struct.unpack_from('<LBBHBBBBBBH', buf, 0)
         s = ("  entryIndex %u version %u reserved2 x%x\n"
              "  year %u month %u day %u hour %u min %u sec %u\n"
@@ -3584,7 +3590,8 @@ Oddly this is the poll for UBX-LOG-BATCH
 
     def log_string(self, buf):
         """UBX-LOG-STRING decode"""
-        # protVer 15+
+
+        # u-blox 8+, protVer 15+
         m_len = len(buf)
 
         if 256 < m_len:
