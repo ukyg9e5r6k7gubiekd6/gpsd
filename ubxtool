@@ -3412,6 +3412,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
 """
 
         # u-blox 8, protVer 23+
+        # not in u-blox 9
         u = struct.unpack_from('<BBHLHBBBBBBLlBBBBllllHHlllllLLHHLLLL', buf, 0)
         s = ("  version %u contentValid x%x msgCnt %u iTow %u\n"
              "  year %u month %u day %u hour %u min %u sec %u valid x%x\n"
@@ -3527,7 +3528,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
     def log_retrieve(self, buf):
         """UBX-LOG-RETRIEVE decode"""
 
-        # protVer 15+
+        # u-blox 8+, protVer 15+
         u = struct.unpack_from('<LLBBH', buf, 0)
         s = "  startNumber %u entryCount %u version %u reserved1 x%x %x" % u
 
@@ -3539,6 +3540,7 @@ Oddly this is the poll for UBX-LOG-BATCH
 """
 
         # u-blox 8, protVer 23+
+        # not in u-blox 9
         u = struct.unpack_from('<BBH', buf, 0)
         s = ("  version %u flags x%x reserved1 x%x" % u)
         if VERB_DECODE <= opts['verbosity']:
