@@ -5551,10 +5551,12 @@ High Precision GNSS products only."""
             s += '\n    cmd (%s)%s' % (index_s(u[0], self.upd_sos_cmd), s1)
         return s
 
-    upd_ids = {0x14: {'str': 'SOS', 'dec': upd_sos, 'minlen': 4,
+    upd_ids = {# undocumented firmware update message
+               0x0c: {'str': 'undoc1', 'minlen': 13 'name': "UBX-UPD-undoc1"},
+               0x14: {'str': 'SOS', 'dec': upd_sos, 'minlen': 4,
                       'name': "UBX-UPD-SOS"},
                # undocumented firmware update message
-               0x25: {'str': 'undoc', 'minlen': 20 'name': "UBX-UPD-undoc"},
+               0x25: {'str': 'undoc2', 'minlen': 20 'name': "UBX-UPD-undoc2"},
                }
 
     classes = {
