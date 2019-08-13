@@ -5553,6 +5553,8 @@ High Precision GNSS products only."""
 
     upd_ids = {0x14: {'str': 'SOS', 'dec': upd_sos, 'minlen': 4,
                       'name': "UBX-UPD-SOS"},
+               # undocumented firmware update message
+               0x25: {'str': 'undoc', 'minlen': 20 'name': "UBX-UPD-undoc"},
                }
 
     classes = {
