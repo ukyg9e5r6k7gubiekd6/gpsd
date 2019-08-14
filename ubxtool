@@ -3584,8 +3584,8 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
 Oddly this is the poll for UBX-LOG-BATCH
 """
 
-        # u-blox 8, protVer 23+
-        # not in u-blox 9
+        # u-blox 8, protVer 23.01 to 23.99
+        # not in u-blox 7 or 9
         u = struct.unpack_from('<BBH', buf, 0)
         s = ("  version %u flags x%x reserved1 x%x" % u)
         if VERB_DECODE <= opts['verbosity']:
@@ -6714,7 +6714,9 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         # UBX-LOG-RETRIEVEBATCH
         "LOG-RETRIEVEBATCH": {"command": send_poll,
                               "opt": [0x21, 0x10, 0, 1, 0, 0],
-                              "help": "send UBX-LOG-RETRIEVEBATCH"},
+                              "help": "send UBX-LOG-RETRIEVEBATCH",
+                              "maxVer": 23.99,
+                              "minVer": 23.01},
         # UBX-LOG-STRING
         "LOG-STRING": {"command": send_poll,
                        "opt": [0x21, 4, ord("H"), ord("i")],
