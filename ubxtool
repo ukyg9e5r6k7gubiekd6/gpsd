@@ -2969,7 +2969,7 @@ Save and Load non-volatile storage data"""
         """UBX-CFG-TMODE2 decode, Time Mode Settings 2"""
 
         u = struct.unpack_from('<BBHlllLLL', buf, 0)
-        s = ('  timeMode %u reserved1 %u  usage %#x\n'
+        s = ('  timeMode %u reserved1 %u usage %#x\n'
              '  ecefXOrLat %d ecefYOrLon %d ecefZOrAlt %d\n'
              '  fixedPosAcc %u svinMinDur %u svinAccLimit %u' % u)
 
@@ -2977,6 +2977,29 @@ Save and Load non-volatile storage data"""
             s += ("\n    timeMode (%s) flags (%s)" %
                   (index_s(u[0], self.cfg_tmode_timeMode),
                    flag_s(u[2], self.cfg_tmode2_flags)))
+
+        return s
+
+    cfg_tmode3_flags = {
+        0x100: "lla",
+        }
+
+    def cfg_tmode3(self, buf):
+        """UBX-CFG-TMODE3 decode, Time Mode Settings 3"""
+
+       # Not in u-blox 7-, HP only
+       # undocumented, but present in ZED-F9T
+        u = struct.unpack_from('<BBHlllbbbBLLLLL', buf, 0)
+        s = ('  version %u reserved1 %u flags x%x\n'
+             '  ecefXOrLat %d ecefYOrLon %d ecefZOrAlt %d\n'
+             '  ecefXOrLatHP %d ecefYOrLonHP %d ecefZOrAltHP %d\n'
+             '  reserved2 %u fixedPosAcc %u svinMinDur %u svinAccLimit %u\n'
+             '  reserved3 %u %u' % u)
+
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n    flags (%s %s)" %
+                  (index_s(u[2], self.cfg_tmode_timeMode),
+                   flag_s(u[2] & 0x100, self.cfg_tmode3_flags)))
 
         return s
 
@@ -3307,7 +3330,9 @@ Save and Load non-volatile storage data"""
                0x70: {'str': 'DGNSS', 'dec': cfg_dgnss, 'minlen': 4,
                       'name': 'UBX-CFG-DGNSS'},
                # Not in u-blox 7-, HP only
-               0x71: {'str': 'TMODE3', 'minlen': 40, 'name': 'UBX-CFG-TMODE3'},
+               # undocumented, but present in ZED-F9T
+               0x71: {'str': 'TMODE3', 'dec': cfg_tmode3, 'minlen': 40,
+                      'name': 'UBX-CFG-TMODE3'},
                # Not in u-blox 7-
                0x84: {'str': 'FIXSEED', 'dec': cfg_fixseed, 'minlen': 12,
                       'name': 'UBX-CFG-FIXSEED'},
