@@ -6046,7 +6046,7 @@ High Precision GNSS products only."""
                                 0, 0,   # minInterval
                                 0, 0,   # timeThreshold
                                 0, 0,   # speedThreshold
-                                1, 0, 0, 0    # positionThreshold
+                                0, 0, 0, 0    # positionThreshold
                                 ])
 
         # set UBX-CFG-LOGFILTER
