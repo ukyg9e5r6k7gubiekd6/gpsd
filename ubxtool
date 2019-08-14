@@ -3491,7 +3491,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
     def log_create(self, buf):
         """UBX-LOG-CREATE decode"""
 
-        # u-blox 8+, protVer 15+
+        # u-blox 7+, protVer 14+
         u = struct.unpack_from('<BBBBL', buf, 0)
         s = ("  version %u logCfg x%x reserved1 x%x logSize %u\n"
              "  userDefinedSize %u" % u)
@@ -3505,7 +3505,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
     def log_erase(self, buf):
         """UBX-LOG-ERASE decode"""
 
-        # u-blox 8+, protVer 15+
+        # u-blox 7+, protVer 14+
         return "  Erase Logged Data"
 
     log_findtime_type = {
@@ -3516,7 +3516,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
     def log_findtime(self, buf):
         """UBX-LOG-FINDTIME decode"""
 
-        # u-blox 8+, protVer 15+
+        # u-blox 7+, protVer 14+
         m_len = len(buf)
 
         # length 8 is reponse, length 12 is request
@@ -3547,9 +3547,8 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
 
     def log_info(self, buf):
         """UBX-LOG-INFO decode"""
-        # protVer 15+
 
-        # u-blox 8+, protVer 15+
+        # u-blox 7+, protVer 14+
         u = struct.unpack_from('<BBHLLLLLLHBBBBBBHBBBBBBBBH', buf, 0)
         s = ("  version %u reserved1 x%x x%x filestoreCapacity %u "
              "reserved2 x%x x%x\n"
@@ -3573,7 +3572,7 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
     def log_retrieve(self, buf):
         """UBX-LOG-RETRIEVE decode"""
 
-        # u-blox 8+, protVer 15+
+        # u-blox 7+, protVer 14+
         u = struct.unpack_from('<LLBBH', buf, 0)
         s = "  startNumber %u entryCount %u version %u reserved1 x%x %x" % u
 
@@ -3598,7 +3597,7 @@ Oddly this is the poll for UBX-LOG-BATCH
     def log_retrievepos(self, buf):
         """UBX-LOG-RETRIEVEPOS decode"""
 
-        # u-blox 9, protVer 27+
+        # u-blox 7+, protVer 14+
         u = struct.unpack_from('<LlllLLLBBHBBBBBBBB', buf, 0)
         s = ("  entryIndex %u lon %d lat %d hMSL %d hAcc %u\n"
              "  gSpeed %u heading %u version %u fixType %u\n"
@@ -3624,7 +3623,7 @@ Oddly this is the poll for UBX-LOG-BATCH
     def log_retrievestring(self, buf):
         """UBX-LOG-RETRIEVESTRING decode"""
 
-        # u-blox 8+, protVer 15+
+        # u-blox 7+, protVer 14+
         u = struct.unpack_from('<LBBHBBBBBBH', buf, 0)
         s = ("  entryIndex %u version %u reserved2 x%x\n"
              "  year %u month %u day %u hour %u min %u sec %u\n"
@@ -3638,7 +3637,7 @@ Oddly this is the poll for UBX-LOG-BATCH
     def log_string(self, buf):
         """UBX-LOG-STRING decode"""
 
-        # u-blox 8+, protVer 15+
+        # u-blox 7+, protVer 14+
         m_len = len(buf)
 
         if 256 < m_len:
@@ -6699,18 +6698,22 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         # UBX-LOG-CREATE
         "LOG-CREATE": {"command": send_poll,
                        "opt": [0x21, 0x07, 0, 1, 0, 0, 0, 0, 0, 0],
-                       "help": "send UBX-LOG-CREATE"},
+                       "help": "send UBX-LOG-CREATE",
+                       "minVer": 14},
         # UBX-LOG-ERASE
         "LOG-ERASE": {"command": send_poll, "opt": [0x21, 0x03],
-                      "help": "send UBX-LOG-ERASE"},
+                      "help": "send UBX-LOG-ERASE",
+                      "minVer": 14},
         # UBX-LOG-INFO
         "LOG-INFO": {"command": send_poll, "opt": [0x21, 0x08],
-                     "help": "poll UBX-LOG-INFO"},
+                     "help": "poll UBX-LOG-INFO",
+                     "minVer": 14},
         # UBX-LOG-RETRIEVE
         "LOG-RETRIEVE": {"command": send_poll,
                          "opt": [0x21, 9, 0, 0, 0, 0, 0, 1, 0, 0,
                                  0, 0, 0, 0, 0],
-                         "help": "send UBX-LOG-RETRIEVE"},
+                         "help": "send UBX-LOG-RETRIEVE"
+                         "minVer": 14},
         # UBX-LOG-RETRIEVEBATCH
         "LOG-RETRIEVEBATCH": {"command": send_poll,
                               "opt": [0x21, 0x10, 0, 1, 0, 0],
@@ -6720,7 +6723,8 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         # UBX-LOG-STRING
         "LOG-STRING": {"command": send_poll,
                        "opt": [0x21, 4, ord("H"), ord("i")],
-                       "help": "send UBX-LOG-STRING"},
+                       "help": "send UBX-LOG-STRING",
+                       "minVer": 14},
         # UBX-CFG-NAV5
         "MODEL": {"command": send_cfg_nav5_model,
                   "help": "set UBX-CFG-NAV5 Dynamic Platform Model"},
