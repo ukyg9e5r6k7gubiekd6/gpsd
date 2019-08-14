@@ -5621,12 +5621,12 @@ High Precision GNSS products only."""
     def class_id_s(self, m_class, m_id):
         """Return class and ID numbers as a string."""
 
-        s = 'Class x%x' % (m_class)
+        s = 'Class x%02x' % (m_class)
         if (((m_class in self.classes and
               'str' in self.classes[m_class]))):
             s += ' (%s)' % (self.classes[m_class]['str'])
 
-        s += ' ID x%x' % (m_id)
+        s += ' ID x%02x' % (m_id)
         if (((m_class in self.classes and
               'ids' in self.classes[m_class] and
               m_id in self.classes[m_class]['ids'] and
