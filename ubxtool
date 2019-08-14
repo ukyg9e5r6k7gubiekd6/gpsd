@@ -7372,7 +7372,7 @@ try:
 
     if opts['disable'] is not None:
         if VERB_QUIET < opts['verbosity']:
-            sys.stderr.write('%s: disable %s\n' % (PROG_NAME, opts['disable']))
+            print('%s: disable %s\n' % (PROG_NAME, opts['disable']))
         if opts['disable'] in gps_model.able_commands:
             command = gps_model.able_commands[opts['disable']]
             command["command"](gps, 0)
@@ -7383,7 +7383,7 @@ try:
 
     elif opts['enable'] is not None:
         if VERB_QUIET < opts['verbosity']:
-            sys.stderr.write('%s: enable %s\n' % (PROG_NAME, opts['enable']))
+            print('%s: enable %s\n' % (PROG_NAME, opts['enable']))
         if opts['enable'] in gps_model.able_commands:
             command = gps_model.able_commands[opts['enable']]
             command["command"](gps, 1)
@@ -7394,7 +7394,7 @@ try:
 
     elif opts['poll'] is not None:
         if VERB_QUIET < opts['verbosity']:
-            sys.stderr.write('%s: poll %s\n' % (PROG_NAME, opts['poll']))
+            print('%s: poll %s\n' % (PROG_NAME, opts['poll']))
 
         if 'MODEL' == opts["poll"]:
             if opts["mode"] is None:
@@ -7429,7 +7429,7 @@ try:
             sys.exit(1)
         payload = bytearray(cmd_data[2:])
         if VERB_QUIET < opts['verbosity']:
-            sys.stderr.write('%s: command %s\n' % (PROG_NAME, opts['command']))
+            print('%s: command %s\n' % (PROG_NAME, opts['command']))
         gps_model.gps_send(cmd_data[0], cmd_data[1], payload)
 
     elif opts['del_item']:
