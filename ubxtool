@@ -3707,6 +3707,8 @@ Oddly this is the poll for UBX-LOG-BATCH
     def mon_batch(self, buf):
         """UBX-MON-BATCH decode, Data batching buffer status"""
 
+        # in u-blox 8 only, not in 7 or 9.
+        # protVer 23.01, gone in 24
         u = struct.unpack_from('<BBBBHHHH', buf, 0)
         s = ("   version %u reserved1 %u %u %u fillLevel %u\n"
              "   dropsAll %u dropsSinceMon %u nextMsgCnt %u" % u)
@@ -6587,7 +6589,7 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         # UBX-CFG-BATCH
         "CFG-BATCH": {"command": send_poll, "opt": [0x06, 0x93],
                       "help": "poll UBX-CFG-BATCH data batching config",
-                      "minVer": 23},
+                      "minVer": 23.01},
         # UBX-CFG-DAT
         "CFG-DAT": {"command": send_poll, "opt": [0x06, 0x06],
                     "help": "poll UBX-CFG-DAT Datum Setting"},
@@ -6726,7 +6728,8 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         # UBX-MON-BATCH
         "MON-BATCH": {"command": send_poll, "opt": [0x0a, 0x32],
                       "help": "poll UBX-MON-BATCH Data batching "
-                      "buffer status"},
+                      "buffer status",
+                      "minVer": 23.01},
         # UBX-MON-COMMS
         "MON-COMMS": {"command": send_poll, "opt": [0x0a, 0x36],
                       "help": "poll UBX-MON-COMMS Comm port "
@@ -7269,7 +7272,8 @@ for (opt, val) in options:
     elif opt == '-m':
         opts['mode'] = int(val)
     elif opt == '-P':
-        opts['protver'] = int(val)
+        # to handle vesion like 23.01
+        opts['protver'] = float(val)
         if 10 > opts['protver']:
             opts['protver'] = 10
         if 27 < opts['protver']:
