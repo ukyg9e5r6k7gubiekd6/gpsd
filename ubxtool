@@ -2418,18 +2418,18 @@ Programming the fixed seed for host interface signature"""
         m_len = len(buf)
         if 2 == m_len:
             u = struct.unpack_from('<BB', buf, 0)
-            return ' Rate request: %s' % self.class_id_s(u[0], u[1])
+            return '  Rate request %s' % self.class_id_s(u[0], u[1])
 
         if 3 == m_len:
             u = struct.unpack_from('<BBB', buf, 0)
-            return (' Rate set: %s Rate:%d' %
+            return ('  Rate set %s Rate %d' %
                     (self.class_id_s(u[0], u[1]), u[2]))
 
         if 8 != m_len:
             return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBBBBBBB', buf, 0)
-        s = (' %s Rates: %u %u %u %u %u %u' %
+        s = (' %s Rates %u %u %u %u %u %u' %
              (self.class_id_s(u[0], u[1]), u[2], u[3], u[4], u[5], u[6], u[7]))
         return s
 
@@ -3066,15 +3066,15 @@ Save and Load non-volatile storage data"""
             return "  Bad Length %s" % m_len
 
         u = struct.unpack_from('<BBHhhLLLLlL', buf, 0)
-        s = ("tpIdx %u version %u reserved1 %u\n"
-             " antCableDelay %d rfGroupDelay %d freqPeriod %u "
+        s = ("  tpIdx %u version %u reserved1 %u\n"
+             "  antCableDelay %d rfGroupDelay %d freqPeriod %u "
              "freqPeriodLock %u\n"
-             " pulseLenRatio %u pulseLenRatioLock %u userConfigDelay %d\n"
-             " Flags %#x" % u)
+             "  pulseLenRatio %u pulseLenRatioLock %u userConfigDelay %d\n"
+             "  flags x%x" % u)
 
         if VERB_DECODE <= opts['verbosity']:
-            s += ("\n   Flags (%s)"
-                  "\n   gridToGps (%s) syncMode %d" %
+            s += ("\n    flags (%s)"
+                  "\n    gridToGps (%s) syncMode %d" %
                   (flag_s(u[10] & 0x7f, self.cfg_tp5_flags),
                    index_s((u[10] >> 7) & 0x0f, self.cfg_tp5_grid),
                    (u[10] >> 11) & 0x03))
