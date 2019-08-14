@@ -3514,9 +3514,9 @@ Oddly this is polled with UBX-LOG-RETRIEVEBATCH
         }
 
     def log_findtime(self, buf):
-        """UBX-LOG-FINDIME decode"""
+        """UBX-LOG-FINDTIME decode"""
 
-        # u-blox 8, protVer 15+
+        # u-blox 8+, protVer 15+
         m_len = len(buf)
 
         # length 8 is reponse, length 12 is request
