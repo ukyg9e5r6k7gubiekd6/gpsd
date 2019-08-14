@@ -2987,8 +2987,8 @@ Save and Load non-volatile storage data"""
     def cfg_tmode3(self, buf):
         """UBX-CFG-TMODE3 decode, Time Mode Settings 3"""
 
-       # Not in u-blox 7-, HP only
-       # undocumented, but present in ZED-F9T
+        # Not in u-blox 7-, HP only
+        # undocumented, but present in ZED-F9T
         u = struct.unpack_from('<BBHlllbbbBLLLLL', buf, 0)
         s = ('  version %u reserved1 %u flags x%x\n'
              '  ecefXOrLat %d ecefYOrLon %d ecefZOrAlt %d\n'
@@ -3080,23 +3080,29 @@ Save and Load non-volatile storage data"""
 
         return s
 
+    cfg_usb_flags = {1: "reEnum "}
+
+    cfg_usb_powerMode = {0: "self-powered",
+                         2: "bus-powered",
+                         }
+
     def cfg_usb(self, buf):
         """UBX-CFG-USB decode, USB Configuration"""
 
         u = struct.unpack_from('<HHHHHH', buf, 0)
-        s = (' vendorID: %#x productID: %#x reserved1: %u'
-             ' reserved2: %u\n'
-             '  powerConsumption %u mA flags: %#x ' % tuple(u[:6]))
-        if 0x01 & u[5]:
-            s += "reEnum, "
-        if 0x02 & u[5]:
-            s += "self-powered"
-        else:
-            s += "bus-powered"
+        s = ('  vendorID %#x productID %#x reserved1 %u reserved2 %u\n'
+             '  powerConsumption %u mA flags %#x' % u)
+        if VERB_DECODE <= opts['verbosity']:
+            s += ("\n    flags (%s%s)" %
+                  (flag_s(u[5] & 1, self.cfg_usb_flags),
+                   index_s(u[5] & 2, self.cfg_usb_powerMode)))
 
-        s += '\n vendorString: %s\n' % gps.polystr(buf[12:43])
-        s += ' productString: %s\n' % gps.polystr(buf[44:75])
-        s += ' serialNumber: %s' % gps.polystr(buf[76:107])
+        s += ('\n  vendorString %s\n'
+              '  productString %s\n'
+              '  serialNumber %s' %
+              (gps.polystr(buf[12:43]).rstrip('\0'),
+               gps.polystr(buf[44:75]).rstrip('\0'),
+               gps.polystr(buf[76:107]).rstrip('\0')))
         return s
 
     cfg_valdel_layers = {
@@ -5581,7 +5587,8 @@ High Precision GNSS products only."""
             s += '\n    cmd (%s)%s' % (index_s(u[0], self.upd_sos_cmd), s1)
         return s
 
-    upd_ids = {# undocumented firmware update message
+    upd_ids = {
+               # undocumented firmware update message
                0x0c: {'str': 'undoc1', 'minlen': 13, 'name': "UBX-UPD-undoc1"},
                0x14: {'str': 'SOS', 'dec': upd_sos, 'minlen': 4,
                       'name': "UBX-UPD-SOS"},
