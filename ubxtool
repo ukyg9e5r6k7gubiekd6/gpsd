@@ -2066,7 +2066,7 @@ class ubx(object):
     def cfg_dat(self, buf):
         """UBX-CFG-DAT decode, Standard Datum configuration"""
 
-        # u-blox 5, protVet 4.00 to 6.02
+        # u-blox 5 to 9, protVer 4.00 to 29
         m_len = len(buf)
 
         if 2 == m_len:
@@ -2231,6 +2231,11 @@ Programming the fixed seed for host interface signature"""
     cfg_inf_protid = {
         0: "UBX",
         1: "NMEA",
+        3: "Unk3",      # undocumented, used by u-center
+        12: "Unk12",    # undocumented, used by u-center
+        13: "Unk13",    # undocumented, used by u-center
+        14: "Unk14",    # undocumented, used by u-center
+        15: "Unk15",    # undocumented, used by u-center
         }
 
     def cfg_inf(self, buf):
@@ -3205,7 +3210,7 @@ Save and Load non-volatile storage data"""
                # in u-blox 5+
                0x04: {'str': 'RST', 'dec': cfg_rst, 'minlen': 4,
                       'name': 'UBX-CFG-RST'},
-               # in u-blox 5+
+               # in u-blox 5 to 9
                0x06: {'str': 'DAT', 'dec': cfg_dat, 'minlen': 2,
                       'name': 'UBX-CFG-DAT'},
                # u-blox 5, 6.  Not in u-blox 7+
