@@ -6586,7 +6586,8 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
                     "help": "poll UBX-CFG-ANT antenna config"},
         # UBX-CFG-BATCH
         "CFG-BATCH": {"command": send_poll, "opt": [0x06, 0x93],
-                      "help": "poll UBX-CFG-BATCH data batching config"},
+                      "help": "poll UBX-CFG-BATCH data batching config",
+                      "minVer": 23},
         # UBX-CFG-DAT
         "CFG-DAT": {"command": send_poll, "opt": [0x06, 0x06],
                     "help": "poll UBX-CFG-DAT Datum Setting"},
@@ -7410,6 +7411,12 @@ try:
 
         if opts['poll'] in gps_model.commands:
             command = gps_model.commands[opts['poll']]
+            if (('minVer' in command and
+                 opts['protver'] < command['minVer'])):
+                print('%s: WARNING poll %s requires protVer %s you have %s\n' %
+                      (PROG_NAME, opts['poll'], command['minVer'],
+                       opts['protver']))
+
             if 'opt' in command:
                 command["command"](gps, command["opt"])
             else:
