@@ -1816,8 +1816,16 @@ class ubx(object):
         u = struct.unpack_from('<BB', buf, 0)
         return '  ACK to %s' % self.class_id_s(u[0], u[1])
 
+    def ack_nak(self, buf):
+        """UBX-ACK-NAK decode"""
+
+        # NOTE: Not all messages to u-blox GPS are ACKed...
+
+        u = struct.unpack_from('<BB', buf, 0)
+        return '  NAK to %s' % self.class_id_s(u[0], u[1])
+
     # UBX-ACK-
-    ack_ids = {0: {'str': 'NAK', 'dec': ack_ack, 'minlen': 2,
+    ack_ids = {0: {'str': 'NAK', 'dec': ack_nak, 'minlen': 2,
                    'name': 'UBX-ACK-NAK'},
                1: {'str': 'ACK', 'dec': ack_ack, 'minlen': 2,
                    'name': 'UBX-ACK-ACK'}}
