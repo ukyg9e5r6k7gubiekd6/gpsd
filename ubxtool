@@ -2093,7 +2093,8 @@ class ubx(object):
                  "  majA %.1f flat %.1f dX %.1f dY %.1f dZ %.1f\n"
                  "  rotX %.1f rotY %.1f rotZ %.1f scale %.1f" % u)
             if VERB_DECODE <= opts['verbosity']:
-                s += '\n   datumName (%s)' % gps.polystr(buf[2:8])
+                s += ('\n   datumName (%s)' %
+                      gps.polystr(buf[2:8]).rstrip('\0'))
 
         else:
             s = "I'm confused..."
