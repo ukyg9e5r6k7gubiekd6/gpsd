@@ -187,6 +187,7 @@ class gpsjson(object):
     def __init__(self):
         self.data = None
         self.stream_command = None
+        self.enqueued = None
         self.verbose = -1
 
     def __iter__(self):
