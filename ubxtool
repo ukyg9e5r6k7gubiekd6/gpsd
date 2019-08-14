@@ -6729,6 +6729,7 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         "MON-BATCH": {"command": send_poll, "opt": [0x0a, 0x32],
                       "help": "poll UBX-MON-BATCH Data batching "
                       "buffer status",
+                      "maxVer": 23.99,
                       "minVer": 23.01},
         # UBX-MON-COMMS
         "MON-COMMS": {"command": send_poll, "opt": [0x0a, 0x36],
@@ -7417,8 +7418,16 @@ try:
             command = gps_model.commands[opts['poll']]
             if (('minVer' in command and
                  opts['protver'] < command['minVer'])):
-                print('%s: WARNING poll %s requires protVer %s you have %s\n' %
+                print('%s: WARNING poll %s requires protVer >= %s '
+                      'you have %s\n' %
                       (PROG_NAME, opts['poll'], command['minVer'],
+                       opts['protver']))
+
+            if (('maxVer' in command and
+                 opts['protver'] > command['maxVer'])):
+                print('%s: WARNING poll %s requires protVer <= %s '
+                      'you have %s\n' %
+                      (PROG_NAME, opts['poll'], command['maxVer'],
                        opts['protver']))
 
             if 'opt' in command:
