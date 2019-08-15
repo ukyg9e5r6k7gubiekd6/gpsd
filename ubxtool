@@ -6044,10 +6044,11 @@ High Precision GNSS products only."""
         if able:
             m_data = bytearray([1,            # version
                                 5,            # flags
-                                1, 0,         # minInterval
-                                1, 0,         # timeThreshold
-                                1, 0,         # speedThreshold
-                                1, 0, 0, 0    # positionThreshold
+                                # All zeros below == log all
+                                0, 0,         # minInterval
+                                0, 0,         # timeThreshold
+                                0, 0,         # speedThreshold
+                                0, 0, 0, 0    # positionThreshold
                                 ])
         else:
             m_data = bytearray([1,      # version
@@ -6712,7 +6713,7 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         "LOG-RETRIEVE": {"command": send_poll,
                          "opt": [0x21, 9, 0, 0, 0, 0, 0, 1, 0, 0,
                                  0, 0, 0, 0, 0],
-                         "help": "send UBX-LOG-RETRIEVE"
+                         "help": "send UBX-LOG-RETRIEVE",
                          "minVer": 14},
         # UBX-LOG-RETRIEVEBATCH
         "LOG-RETRIEVEBATCH": {"command": send_poll,
