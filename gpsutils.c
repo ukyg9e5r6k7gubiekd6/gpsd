@@ -279,6 +279,8 @@ void gps_clear_fix(struct gps_fix_t *fixp)
     fixp->NED.velE = NAN;
     fixp->NED.velD = NAN;
     fixp->geoid_sep = NAN;
+    fixp->dgps_age = -1;
+    fixp->dgps_station = -1;
 }
 
 void gps_clear_att(struct attitude_t *attp)
