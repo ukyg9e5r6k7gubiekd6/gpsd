@@ -158,7 +158,8 @@ struct gps_fix_t {
     /* quantization error adjustment to PPS. aka "sawtooth" correction */
     long qErr;                  /* offset in picoseconds (ps) */
     /* DGPS stuff, often from xxGGA, or xxGNS */
-    int dgps_age;               /* age of DGPS data in seconds, -1 invalid */
+    double dgps_age;            /* age of DGPS data in tenths of seconds,
+                                 * -1 invalid */
     /* DGPS Station used, max size is a guess
      * NMEA 2 says 0000-1023
      * RTCM 3, station ID is 0 to 4095.

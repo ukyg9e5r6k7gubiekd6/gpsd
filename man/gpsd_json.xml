@@ -181,7 +181,7 @@ and is often inacurate.  See the comments below on geoidSep.  Present if
 	<entry>dgpsAge</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Age of DGPS data.</entry>
+        <entry>Age of DGPS data. In seconds</entry>
 </row>
 <row>
 	<entry>dgpsSta</entry>

@@ -277,12 +277,14 @@ void json_tpv_dump(const struct gps_device_t *session,
 	if (0 != isfinite(gpsdata->fix.depth))
 	    str_appendf(reply, replylen,
 			   "\"depth\":%.3f,", gpsdata->fix.depth);
-	if (0 <= gpsdata->fix.dgps_age)
+	if (0 != isfinite(gpsdata->fix.dgps_age) &&
+	    0 <= gpsdata->fix.dgps_station) {
+            /* both, or none */
 	    str_appendf(reply, replylen,
-			   "\"dgpsAge\":%d,", gpsdata->fix.dgps_age);
-	if (0 <= gpsdata->fix.dgps_station)
+			   "\"dgpsAge\":%.1f,", gpsdata->fix.dgps_age);
 	    str_appendf(reply, replylen,
 			   "\"dgpsSta\":%d,", gpsdata->fix.dgps_station);
+        }
     }
     str_rstrip_char(reply, ',');
     (void)strlcat(reply, "}\r\n", replylen);

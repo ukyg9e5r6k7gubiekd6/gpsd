@@ -279,7 +279,7 @@ void gps_clear_fix(struct gps_fix_t *fixp)
     fixp->NED.velE = NAN;
     fixp->NED.velD = NAN;
     fixp->geoid_sep = NAN;
-    fixp->dgps_age = -1;
+    fixp->dgps_age = NAN;
     fixp->dgps_station = -1;
 }
 
@@ -408,10 +408,10 @@ void gps_merge_fix(struct gps_fix_t *to,
     if (0 != from->qErr) {
 	to->qErr = from->qErr;
     }
-    if (0 <= from->dgps_age) {
+    if (0 != isfinite(from->dgps_age) &&
+        0 <= from->dgps_station) {
+        /* both, or neither */
 	to->dgps_age = from->dgps_age;
-    }
-    if (0 <= from->dgps_station) {
 	to->dgps_station = from->dgps_station;
     }
 }
