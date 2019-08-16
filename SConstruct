@@ -699,7 +699,6 @@ else:
     # clang accepts -pthread, then warns it is unused.
     if (not config.CheckCC()):
         announce("ERROR: CC doesn't work")
-        Exit(1)
 
     if ((config.CheckCompilerOption("-pthread") and
 	not sys.platform.startswith('darwin'))):
