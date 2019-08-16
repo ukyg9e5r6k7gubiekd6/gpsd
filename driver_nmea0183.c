@@ -711,6 +711,14 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
     session->gpsdata.status = newstatus;
     mask |= MODE_SET;
 
+    /* get DGPS stuff */
+    if ('\0' != field[11][0] &&
+        '\0' != field[12][0]) {
+        /* both, or neither */
+        session->newdata.dgps_age = atoi(field[11]);
+        session->newdata.dgps_station = atoi(field[12]);
+    }
+
     gpsd_log(&session->context->errout, LOG_DATA,
              "GNS: hhmmss=%s lat=%.2f lon=%.2f mode=%d status=%d\n",
              field[1],
@@ -903,9 +911,26 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
     mask |= MODE_SET;
 
     if ('\0' != field[8][0]) {
+        /* why not to newdata? */
         session->gpsdata.dop.hdop = safe_atof(field[8]);
     }
 
+    /* get DGPS stuff */
+    if ('\0' != field[13][0] &&
+        '\0' != field[14][0]) {
+        /* both, or neither */
+        double age;
+        int station;
+
+        age = safe_atof(field[13]);
+        station = atoi(field[14]);
+        if (0.09 < age ||
+            0 < station) {
+            /* ignore both zeros */
+	    session->newdata.dgps_age = age;
+	    session->newdata.dgps_station = station;
+        }
+    }
 
     gpsd_log(&session->context->errout, LOG_DATA,
              "GGA: hhmmss=%s lat=%.2f lon=%.2f altMSL=%.2f mode=%d status=%d\n",
