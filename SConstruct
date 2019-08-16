@@ -1197,7 +1197,7 @@ else:
 
 PYTHON_LIBDIR_CALL = 'sysconfig.get_python_lib()'
 
-PYTHON_CONFIG_NAMES = ['CC', 'CXX', 'OPT', 'BASECFLAGS',
+PYTHON_CONFIG_NAMES = ['CC', 'CXX', 'OPT', 'CFLAGS',
                        'CCSHARED', 'LDSHARED', 'SO', 'INCLUDEPY', 'LDFLAGS']
 PYTHON_CONFIG_QUOTED = ["'%s'" % s for s in PYTHON_CONFIG_NAMES]
 PYTHON_CONFIG_CALL = ('sysconfig.get_config_vars(%s)'
@@ -1774,14 +1774,17 @@ else:
     ldshared = ldshared.replace('-fPIE', '')
     ldshared = ldshared.replace('-pie', '')
     python_env.Replace(SHLINKFLAGS=[],
-                       LDFLAGS=python_config['LDFLAGS'],
+                       LDFLAGS=[],
                        LINK=ldshared,
                        SHLIBPREFIX="",
                        SHLIBSUFFIX=python_config['SO'],
                        CPPPATH=[python_config['INCLUDEPY']],
-                       CPPFLAGS=python_config['OPT'],
-                       CFLAGS=python_config['BASECFLAGS'],
-                       CXXFLAGS=python_config['BASECFLAGS'])
+                       CPPFLAGS=[],
+                       CFLAGS=[],
+                       CXXFLAGS=[])
+
+    for flag in ['CFLAGS','LDFLAGS','OPT']:
+        python_env.MergeFlags(Split(python_config[flag]))
 
     python_objects = {}
     python_compiled_libs = {}
