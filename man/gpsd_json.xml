@@ -178,6 +178,18 @@ and is often inacurate.  See the comments below on geoidSep.  Present if
         <entry>Depth in meters.  Probably depth below the keel..</entry>
 </row>
 <row>
+	<entry>dgpsAge</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Age of DGPS data.</entry>
+</row>
+<row>
+	<entry>dgpsSta</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Station of DGPS data.</entry>
+</row>
+<row>
 	<entry>epc</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>

@@ -123,6 +123,10 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
 			         .dflt.real = NAN},
 	{"depth", t_real,  .addr.real = &gpsdata->fix.depth,
 			         .dflt.real = NAN},
+	{"dgpsAge", t_integer, .addr.integer = &gpsdata->fix.dgps_age,
+			         .dflt.integer = -1},
+	{"dgpsSta", t_integer, .addr.integer = &gpsdata->fix.dgps_station,
+			         .dflt.integer = -1},
 	{NULL},
 	/* *INDENT-ON* */
     };

@@ -408,6 +408,12 @@ void gps_merge_fix(struct gps_fix_t *to,
     if (0 != from->qErr) {
 	to->qErr = from->qErr;
     }
+    if (0 <= from->dgps_age) {
+	to->dgps_age = from->dgps_age;
+    }
+    if (0 <= from->dgps_station) {
+	to->dgps_station = from->dgps_station;
+    }
 }
 
 /* NOTE: timestamp_t is a double, so this is only precise to
