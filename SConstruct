@@ -1178,6 +1178,10 @@ else:
                                                PYTHON_CONFIG_CALL,
                                                brief=True)
 
+if config.env['python']:  # May have been turned off by error
+    if config.CheckHeader(["Python1.h"]):
+        announce("Python.h doesn't exist - disabling Python.")
+        config.env['python'] = False
 
 if config.env['python']:  # May have been turned off by error
     config.env['PYTHON'] = polystr(target_python_path)

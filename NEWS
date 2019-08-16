@@ -20,6 +20,7 @@
   Remove TIMEHINT_ENABLE.  It only worked when enabled.
   Remove NTP_ENABLE and NTPSHM_ENABLE.  It only worked when enabled.
   Remove PPS_ENABLE and TIMING_ENABLE.
+  add dgps_age and dgps_station to gps_fix_t
 
 3.19: 2019-07-01
   Rearrange rawdata_t.  Bump the API because gps_data_t changed.

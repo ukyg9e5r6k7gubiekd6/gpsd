@@ -58,6 +58,7 @@ extern "C" {
  *       add altMSL, and depth, to gps_fix_t
  *       change altitude to altHAE to gps_fix_t
  *       Move mag_var from gps_device_t to magnetic_var gps_data_t.
+ *       add dgps_age and dgps_station, to gps_fix_t
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -156,6 +157,13 @@ struct gps_fix_t {
     char datum[40];             /* map datum */
     /* quantization error adjustment to PPS. aka "sawtooth" correction */
     long qErr;                  /* offset in picoseconds (ps) */
+    /* DGPS stuff, often from xxGGA, or xxGNS */
+    int dgps_age;               /* age of DGPS data in seconds, -1 invalid */
+    /* DGPS Station used, max size is a guess
+     * NMEA 2 says 0000-1023
+     * RTCM 3, station ID is 0 to 4095.
+     * u-blox UBX-NAV-DGPS is 16 bit integer */
+    int dgps_station;           /* DGPS station ID, -1 invalid */
 };
 
 /*
