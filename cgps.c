@@ -203,7 +203,7 @@ static char *ecef_to_str(double pos, double vel, double factor, char *units)
 
     if (isfinite(pos) == 0) {
         if (isfinite(vel) == 0) {
-            return "  n/a    n/a ";
+            return "    n/a    n/a ";
         } else {
             (void)snprintf(buf, sizeof(buf), "  n/a %8.3f%.4s/s",
                            vel * factor, units);
