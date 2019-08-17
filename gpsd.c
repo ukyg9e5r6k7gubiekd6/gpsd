@@ -1487,13 +1487,14 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	    for (dp = devices; dp < devices+MAX_DEVICES; dp++) {
 		if (allocated_device(dp)) {
 /* *INDENT-OFF* */
-		    if (dp->device_type->rtcm_writer != NULL) {
+		    if (NULL != dp->device_type &&
+		        NULL != dp->device_type->rtcm_writer) {
 			if (dp->device_type->rtcm_writer(dp,
-							     (const char *)device->lexer.outbuffer,
-							     device->lexer.outbuflen) == 0)
+			        (const char *)device->lexer.outbuffer,
+			        device->lexer.outbuflen) == 0) {
 			    gpsd_log(&context.errout, LOG_ERROR,
 				     "Write to RTCM sink failed\n");
-			else {
+			} else {
 			    gpsd_log(&context.errout, LOG_IO,
 				     "<= DGPS: %zd bytes of RTCM relayed.\n",
 				     device->lexer.outbuflen);
