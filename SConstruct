@@ -691,6 +691,7 @@ if cleaning or helping:
     manbuilder = False
     ncurseslibs = []
     rtlibs = []
+    mathlibs = []
     tiocmiwait = True  # For cleaning, which works on any OS
     usbflags = []
 else:
@@ -878,6 +879,14 @@ else:
         confdefs.append("/* #undef HAVE_LIBRT */\n")
         rtlibs = []
 
+    # The main reason we check for libm explicitly is to set up the config
+    # environment for CheckFunc for sincos().  But it doesn't hurt to omit
+    # the '-lm' when it isn't appropriate.
+    if config.CheckLib('libm'):
+        mathlibs = ['-lm']
+    else:
+        mathlibs = []
+
     # FreeBSD uses -lthr for pthreads
     if config.CheckLib('libthr'):
         confdefs.append("#define HAVE_LIBTHR 1\n")
@@ -1002,6 +1011,14 @@ else:
             confdefs.append("#define HAVE_%s 1\n" % f.upper())
         else:
             confdefs.append("/* #undef HAVE_%s */\n" % f.upper())
+
+    # Apple may supply sincos() as __sincos(), or not at all
+    if config.CheckFunc('sincos'):
+        confdefs.append('#define HAVE_SINCOS\n')
+    elif config.CheckFunc('__sincos'):
+        confdefs.append('#define sincos __sincos\n#define HAVE_SINCOS\n')
+    else:
+        confdefs.append('/* #undef HAVE_SINCOS */\n')
 
     if config.CheckHeader(["sys/types.h", "sys/time.h", "sys/timepps.h"]):
         confdefs.append("#define HAVE_SYS_TIMEPPS_H 1\n")
@@ -1412,7 +1429,7 @@ if qt_env:
 # The libraries have dependencies on system libraries
 # libdbus appears multiple times because the linker only does one pass.
 
-gpsflags = ["-lm"] + rtlibs + dbusflags
+gpsflags = mathlibs + rtlibs + dbusflags
 gpsdflags = usbflags + bluezflags + gpsflags
 
 # Source groups
@@ -1516,7 +1533,7 @@ test_matrix = env.Program('tests/test_matrix', ['tests/test_matrix.c'],
                           LIBS=['gpsd', 'gps_static'],
                           parse_flags=gpsdflags)
 test_mktime = env.Program('tests/test_mktime', ['tests/test_mktime.c'],
-                          LIBS=['gps_static'], parse_flags=["-lm"] + rtlibs)
+                          LIBS=['gps_static'], parse_flags=mathlibs + rtlibs)
 test_packet = env.Program('tests/test_packet', ['tests/test_packet.c'],
                           LIBS=['gpsd', 'gps_static'],
                           parse_flags=gpsdflags)
@@ -1524,11 +1541,11 @@ test_timespec = env.Program('tests/test_timespec', ['tests/test_timespec.c'],
                             LIBS=['gpsd', 'gps_static'],
                             parse_flags=gpsdflags)
 test_trig = env.Program('tests/test_trig', ['tests/test_trig.c'],
-                        parse_flags=["-lm"])
+                        parse_flags=mathlibs)
 # test_libgps for glibc older than 2.17
 test_libgps = env.Program('tests/test_libgps', ['tests/test_libgps.c'],
                           LIBS=['gps_static'],
-                          parse_flags=["-lm"] + rtlibs + dbusflags)
+                          parse_flags=mathlibs + rtlibs + dbusflags)
 
 if not env['socket_export']:
     announce("test_json not building because socket_export is disabled")
@@ -1537,12 +1554,12 @@ else:
     test_json = env.Program(
         'tests/test_json', ['tests/test_json.c'],
         LIBS=['gps_static'],
-        parse_flags=["-lm"] + rtlibs + usbflags + dbusflags)
+        parse_flags=mathlibs + rtlibs + usbflags + dbusflags)
 
 # duplicate below?
 test_gpsmm = env.Program('tests/test_gpsmm', ['tests/test_gpsmm.cpp'],
                          LIBS=['gps_static'],
-                         parse_flags=["-lm"] + rtlibs + dbusflags)
+                         parse_flags=mathlibs + rtlibs + dbusflags)
 testprogs = [test_bits,
              test_float,
              test_geoid,

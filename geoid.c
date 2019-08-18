@@ -13,6 +13,7 @@
 
 #include <math.h>
 #include "gpsd.h"
+#include "os_compat.h"
 
 #ifdef __UNUSED
 static double fix_minuz(double d);

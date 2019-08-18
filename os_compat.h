@@ -120,6 +120,12 @@ size_t strlcpy(char *dst, const char *src, size_t size);
 #define O_NOCTTY   0400
 #endif
 
+/* Provide missing sincos() if needed */
+
+#ifndef HAVE_SINCOS
+void sincos(double x, double *sinp, double *cosp);
+#endif
+
 # ifdef __cplusplus
 }
 # endif

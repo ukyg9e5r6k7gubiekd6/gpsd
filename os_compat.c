@@ -293,3 +293,24 @@ size_t strlcpy(char *dst, const char *src, size_t siz)
 #endif /* !HAVE_STRLCPY */
 
 /* End of strlcat()/strlcpy() section */
+
+/*
+ * Provide sincos() on platforms that don't have it.
+ * This just uses the usual sin() and cos(), with no speed benefit.
+ * It doesn't worry about the corner case where the +-infinity argument
+ * may raise the "invalid" exception before storing both NaN results.
+ */
+
+#ifndef HAVE_SINCOS
+
+#include <math.h>
+
+void sincos(double x, double *sinp, double *cosp)
+{
+    *sinp = sin(x);
+    *cosp = cos(x);
+}
+
+#endif /* !HAVE_SINCOS */
+
+/* End of sincos() section. */
