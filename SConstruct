@@ -743,10 +743,11 @@ else:
     # glibc 2.10+ needs 700+ for strnlen()
     # Python.h wants 600 or 700
 
-    # removed 2 Jul 2018 to see if anything breaks...
+    # removed 2 Jul 2019 to see if anything breaks...
     # confdefs.append('#if !defined(_XOPEN_SOURCE)')
     # confdefs.append('#define _XOPEN_SOURCE 700')
     # confdefs.append('#endif\n')
+    # Reinstated for FreeBSD (below) 16-Aug-2019
 
     if sys.platform.startswith('linux'):
         # for cfmakeraw(), strsep(), etc. on CentOS 7
@@ -775,8 +776,20 @@ else:
                         "-Wl,-compatibility_version,%s" % libgps_version,
                         "-Wl,-install_name,%s/$TARGET" %
                         installdir('libdir', add_destdir=False)]
-    elif (sys.platform.startswith('freebsd') or
-          sys.platform.startswith('openbsd')):
+    elif sys.platform.startswith('freebsd'):
+        # for isascii(), putenv(), nice(), strptime()
+        confdefs.append('#if !defined(_XOPEN_SOURCE)')
+        confdefs.append('#define _XOPEN_SOURCE 700')
+        confdefs.append('#endif\n')
+        # required to define u_int in sys/time.h
+        confdefs.append('#if !defined(_BSD_SOURCE)')
+        confdefs.append("#define _BSD_SOURCE 1\n")
+        confdefs.append('#endif\n')
+        # required to get strlcpy(), and more, from string.h
+        confdefs.append('#if !defined(__BSD_VISIBLE)')
+        confdefs.append("#define __BSD_VISIBLE 1\n")
+        confdefs.append('#endif\n')
+    elif sys.platform.startswith('openbsd'):
         # required to define u_int in sys/time.h
         confdefs.append('#if !defined(_BSD_SOURCE)')
         confdefs.append("#define _BSD_SOURCE 1\n")
