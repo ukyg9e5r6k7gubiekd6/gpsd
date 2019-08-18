@@ -18,6 +18,7 @@
 #include "ntpshm.h"
 #include "revision.h"
 #include "timespec.h"
+#include "os_compat.h"
 
 #define NTPSEGMENTS	256	/* NTPx for x any byte */
 
