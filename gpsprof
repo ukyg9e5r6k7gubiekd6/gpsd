@@ -476,6 +476,10 @@ class spaceplot(plotter):
         alt_fixes_r = []
         latlon_data = ""
         alt_data = ""
+        # init calcualted hep, sep and mrse
+        calc_hep = gps.NaN
+        calc_sep = gps.NaN
+        calc_mrse = gps.NaN
 
         # grab and format the fixes as gnuplot will use them
         for i in range(len(self.recentered)):
@@ -537,10 +541,6 @@ class spaceplot(plotter):
             calc_mrse = math.sqrt(stat_lat_r.sigma ** 2 +
                                   stat_lon_r.sigma ** 2 +
                                   stat_alt_r.sigma ** 2)
-        else:
-            calc_hep = gps.NaN
-            calc_sep = gps.NaN
-            calc_mrse = gps.NaN
 
         fmt_lab11a = ('hep = %.3f meters\\n'
                       'sep = %.3f meters\\n'
