@@ -537,11 +537,15 @@ class spaceplot(plotter):
             calc_mrse = math.sqrt(stat_lat_r.sigma ** 2 +
                                   stat_lon_r.sigma ** 2 +
                                   stat_alt_r.sigma ** 2)
+        else:
+            calc_hep = gps.NaN
+            calc_sep = gps.NaN
+            calc_mrse = gps.NaN
 
-            fmt_lab11a = ('hep = %.3f meters\\n'
-                          'sep = %.3f meters\\n'
-                          'mrse = %.3f meters\\n'
-                          ) % (calc_hep, calc_sep, calc_mrse)
+        fmt_lab11a = ('hep = %.3f meters\\n'
+                      'sep = %.3f meters\\n'
+                      'mrse = %.3f meters\\n'
+                      ) % (calc_hep, calc_sep, calc_mrse)
 
         if self.centroid[0] < 0.0:
             latstring = "%.9fS" % -self.centroid[0]
