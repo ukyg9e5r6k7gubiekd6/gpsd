@@ -1211,9 +1211,10 @@ else:
                                                PYTHON_CONFIG_CALL,
                                                brief=True)
 
-if config.env['python']:  # May have been turned off by error
-    if config.CheckHeader(["Python1.h"]):
+if config.env['python']:
+    if config.CheckHeader(["Python.h"]):
         announce("Python.h doesn't exist - disabling Python.")
+        # FIXME: not turning off python...
         config.env['python'] = False
 
 if config.env['python']:  # May have been turned off by error
