@@ -360,12 +360,12 @@ class spaceplot(plotter):
                 if sat.used:
                     sats_used += 1
 
-            if 'alt' not in self.session.data:
-                self.session.data['alt'] = gps.NaN
+            if 'altHAE' not in self.session.data:
+                self.session.data['altHAE'] = gps.NaN
 
             self.fixes.append((self.session.data['lat'],
                                self.session.data['lon'],
-                               self.session.data['alt'], sats_used))
+                               self.session.data['altHAE'], sats_used))
         return True
 
     def header(self):
@@ -612,7 +612,7 @@ class spaceplot(plotter):
                 '\\n'
                 'Lat\\n'
                 'Lon\\n'
-                'Alt\\n'
+                'AltHAE\\n'
                 'Used"\n')
 
         # mean
@@ -686,7 +686,7 @@ class spaceplot(plotter):
             fmt += ('set ytics nomirror\n'
                     'set y2tics\n'
                     'set format y2 "%.3f"\n')
-            fmt += (('set y2label "Altitude from %.3f meters"\n') %
+            fmt += (('set y2label "AltHAE from %.3f meters"\n') %
                     (stat_alt.mean))
 
             # add ep(50)s
@@ -725,7 +725,7 @@ class spaceplot(plotter):
             # add plot of altitude
             fmt += (', "-" using ( %.3f ):( $1 - %.3f ) '
                     'axes x1y2 with points ls 2 lc "green"'
-                    ' title " %d Altitude fixes"'
+                    ' title " %d AltHAE fixes"'
                     ) % (cep100_meters * 1.1, stat_alt.mean, len(alt_fixes))
 
             # altitude EPs
