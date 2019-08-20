@@ -1211,12 +1211,6 @@ else:
                                                PYTHON_CONFIG_CALL,
                                                brief=True)
 
-if config.env['python']:
-    if config.CheckHeader(["Python.h"]):
-        announce("Python.h doesn't exist - disabling Python.")
-        # FIXME: not turning off python...
-        config.env['python'] = False
-
 if config.env['python']:  # May have been turned off by error
     config.env['PYTHON'] = polystr(target_python_path)
     # For regress-driver
@@ -1224,6 +1218,7 @@ if config.env['python']:  # May have been turned off by error
     py_config_vars = ast.literal_eval(py_config_text.decode())
     py_config_vars = [[] if x is None else x for x in py_config_vars]
     python_config = dict(zip(PYTHON_CONFIG_NAMES, py_config_vars))
+    print(python_config)
 
 
 env = config.Finish()
