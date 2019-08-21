@@ -2573,7 +2573,7 @@ Utility("validation-list", [www], validation_list)
 upload_web = Utility("website", [www],
                      ['rsync --exclude="*.in" -avz www/ ' +
                       os.environ.get('WEBSITE', '.public'),
-                      'cp README TODO NEWS ' +
+                      'cp README.adoc TODO NEWS ' +
                       os.environ.get('WEBSITE', '.public')])
 
 # When the URL declarations change, so must the generated web pages
