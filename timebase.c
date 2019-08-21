@@ -126,10 +126,11 @@ divergence will normally be only one second or less.
 
 GPS date and time are subject to a rollover problem in the 10-bit week
 number counter, which will re-zero every 1024 weeks (roughly every 20
-years). The last rollover (and the first since GPS went live in 1980)
-was 1999-08-22T00:00:00Z; the next would fall in 2019, but plans are
-afoot to upgrade the satellite counters to 13 bits; this will delay
-the next rollover until 2173.
+years). The first rollover was 1999-08-22T00:00:00; the most recent
+was 2019-04-07T00:00:00.  Note that both these time stamps are in GPS
+Time, not UTC (the recent rollover occurred at 2019-04-06T23:59:42Z).
+Plans are afoot to upgrade the message format to 13 bits; this
+will delay the next rollover until 2173.
 
 For accurate time reporting, therefore, a GPS requires a supplemental
 time reference sufficient to identify the current rollover period,
