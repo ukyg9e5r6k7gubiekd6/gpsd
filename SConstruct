@@ -1218,7 +1218,7 @@ if config.env['python']:  # May have been turned off by error
     py_config_vars = ast.literal_eval(py_config_text.decode())
     py_config_vars = [[] if x is None else x for x in py_config_vars]
     python_config = dict(zip(PYTHON_CONFIG_NAMES, py_config_vars))
-    print(python_config)
+    announce(python_config)
 
 
 env = config.Finish()
