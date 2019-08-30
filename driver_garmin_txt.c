@@ -320,10 +320,8 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 				buf + 10, 2, 0, 60, &result))
 	    break;
 	session->driver.garmintxt.date.tm_sec = (int)result;
-	session->driver.garmintxt.subseconds = 0;
 	session->newdata.time =
-	    (timestamp_t)mkgmtime(&session->driver.garmintxt.date) +
-	    session->driver.garmintxt.subseconds;
+	    (timestamp_t)mkgmtime(&session->driver.garmintxt.date);
 	mask |= TIME_SET;
     } while (0);
 

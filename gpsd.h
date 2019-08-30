@@ -588,7 +588,6 @@ struct gps_device_t {
 #ifdef GARMINTXT_ENABLE
 	struct {
 	    struct tm date;		/* date part of last sentence time */
-	    double subseconds;		/* subsec part of last sentence time */
 	} garmintxt;
 #endif /* GARMINTXT_ENABLE */
 #ifdef BINARY_ENABLE
