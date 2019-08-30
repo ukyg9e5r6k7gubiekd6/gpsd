@@ -585,11 +585,6 @@ struct gps_device_t {
      * mode switch.
      */
     union {
-#ifdef GARMINTXT_ENABLE
-	struct {
-	    struct tm date;		/* date part of last sentence time */
-	} garmintxt;
-#endif /* GARMINTXT_ENABLE */
 #ifdef BINARY_ENABLE
 #ifdef GEOSTAR_ENABLE
 	struct {
