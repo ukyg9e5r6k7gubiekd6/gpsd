@@ -4,6 +4,8 @@
 # Date: 2007-12-23
 # Location: Playa del Carmen, Mexico. 20.63N/87.07W
 #
+# Note the crazy times in the RMC, ZDA GGA messages.
+#
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
