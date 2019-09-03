@@ -2,7 +2,9 @@
 # Submitter: "Carl Brown"<cbsled@verizon.net>
 # Date: 2006-09-16
 # Location: Connecticut River, New Hampshire, USA, 44N71W
-# Comments: Powerboat track with NMEA depth (DPT) and water temperature (MTW) sentences
+# Comments: Powerboat track with NMEA depth (DPT) and water temperature
+#           (MTW) sentences
+# Note: Time goes backward 194124 to 194111
 #
 # This file is Copyright (c) 2010 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
