@@ -2302,7 +2302,9 @@ extern double mag_var(double, double);
 extern void datum_code_string(int code, char *buffer, size_t len);
 
 /* some multipliers for interpreting GPS output */
-#define METERS_TO_FEET	3.2808399	/* Meters to U.S./British feet */
+#define METERS_TO_FEET	(1 / 0.3048)	/* Meters to International Foot */
+/* Note: not the same as the USA Survey Foot: (3937 / 1200)
+ * Some states use the International Foot, not the USA Survey Foot */
 #define METERS_TO_MILES	0.00062137119	/* Meters to miles */
 #define METERS_TO_FATHOMS	0.54680665	/* Meters to fathoms */
 #define KNOTS_TO_MPH	1.1507794	/* Knots to miles per hour */

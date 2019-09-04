@@ -152,10 +152,12 @@ option.</para>
 
 <para>Where present, the <option>-u</option> option can be used to set
 the system units for display; follow the keyword with 'i' for
-'imperial' for American units (feet in altitude and error estimates,
-miles per hour in speeds), 'n' for 'nautical' (feet in altitude and
-error estimates, knots in speed) or 'm' for 'metric' (meters in
-altitude and error estimates, kilometers per hour in speeds). </para>
+'imperial' for American units (International Feet in altitude and error
+estimates, miles per hour in speeds), 'n' for 'nautical' (feet in altitude
+and error estimates, knots in speed) or 'm' for 'metric' (meters in
+altitude and error estimates, kilometers per hour in speeds).</para>
+
+<para>Note: The USA Survey Foot is not supported.</para>
 
 <para> The <option>-D</option> option, when present, sets a debug
 level; it is primarily for use by GPSD developers.  It enables
