@@ -19,7 +19,7 @@ unset LANG
 
 # Arrange to call a gpsfake in the source directory without fuss.
 if [ -z ${PYTHON} ]; then
-    PYTHON="python2"
+    PYTHON="python"
 fi
 # Define the directories we ask setup.py to install the
 # modules/extensions and scripts to. The way chosen here reproduces
