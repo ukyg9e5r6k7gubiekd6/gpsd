@@ -108,9 +108,9 @@ clang produces a gpsd that passes all regression tests.
 
 If you get a build failure including the text "error adding symbols:
 DSO missing from command line" or the complaint "ERROR: CC doesn't
-work", you nay havr tripped over stale data in the builder's
-configuration cache.  Manually remove .sconsign.dblite and retry
-your build.
+work", you nay have tripped over stale data in the builder's
+configuration cache.  Clean the directory with "scons -c" then manually
+remove .sconsign.dblite and retry your build.
 
 === Python ===
 
