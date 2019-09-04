@@ -124,6 +124,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     time_t now;
     unsigned char buf[BUFSIZ];
     char buf2[BUFSIZ];
+    timespec_t ts_tow;
 
     if (session->lexer.type != TSIP_PACKET) {
 	gpsd_log(&session->context->errout, LOG_INF,
@@ -248,8 +249,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	if (f1 >= 0.0 && f2 > 10.0) {
 	    session->context->leap_seconds = (int)round(f2);
 	    session->context->valid |= LEAP_SECOND_VALID;
+	    DTOTS(&ts_tow, f1);
 	    session->newdata.time =
-		gpsd_gpstime_resolve(session, (unsigned short)s1, (double)f1);
+		gpsd_gpstime_resolv(session, (unsigned short)s1, ts_tow);
 	    mask |= TIME_SET | NTPTIME_IS;
 	}
 	gpsd_log(&session->context->errout, LOG_INF,
@@ -353,16 +355,18 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	//f1 = getbef32((char *)buf, 12);	clock bias */
 	f2 = getbef32((char *)buf, 16);	/* time-of-fix */
 	if ((session->context->valid & GPS_TIME_VALID)!=0) {
+	    DTOTS(&ts_tow, f2);
 	    session->newdata.time =
-		gpsd_gpstime_resolve(session,
+		gpsd_gpstime_resolv(session,
 				  (unsigned short)session->context->gps_week,
-				  (double)f2);
+				  ts_tow);
 	    mask |= TIME_SET | NTPTIME_IS;
 	}
 	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_IS | REPORT_IS;
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "SPPLLA 0x4a time=%.2f lat=%.2f lon=%.2f altMSL=%.2f\n",
-		 session->newdata.time,
+		 "SPPLLA 0x4a time=%ld.%09ld lat=%.2f lon=%.2f altMSL=%.2f\n",
+		 session->newdata.time.tv_sec,
+		 session->newdata.time.tv_nsec,
 		 session->newdata.latitude,
 		 session->newdata.longitude,
 		 session->newdata.altHAE);
@@ -432,9 +436,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	gpsd_log(&session->context->errout, LOG_INF,
 		 "GPS Velocity ENU %f %f %f %f %f\n", f1, f2, f3, f4, f5);
 	mask |= VNED_SET;
-	gpsd_log(&session->context->errout, LOG_DATA,
-		 "VFENU 0x56 time=%.2f\n",
-		 session->newdata.time);
+	gpsd_log(&session->context->errout, LOG_DATA, "VFENU 0x56\n");
 	break;
     case 0x57:			/* Information About Last Computed Fix */
 	if (len != 8)
@@ -720,21 +722,24 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	//d1 = getbed64((char *)buf, 24);	clock bias */
 	f1 = getbef32((char *)buf, 32);	/* time-of-fix */
 	if ((session->context->valid & GPS_TIME_VALID)!=0) {
+	    DTOTS(&ts_tow, f1);
 	    session->newdata.time =
-		gpsd_gpstime_resolve(session,
+		gpsd_gpstime_resolv(session,
 				  (unsigned short)session->context->gps_week,
-				  (double)f1);
+				  ts_tow);
 	    mask |= TIME_SET | NTPTIME_IS;
 	}
 	gpsd_log(&session->context->errout, LOG_INF,
-		 "GPS DP LLA %f %f %f %f\n",
-		 session->newdata.time,
+		 "GPS DP LLA %ld.%09ld %f %f %f\n",
+		 session->newdata.time.tv_sec,
+		 session->newdata.time.tv_nsec,
 		 session->newdata.latitude,
 		 session->newdata.longitude, session->newdata.altMSL);
 	mask |= LATLON_SET | CLEAR_IS | REPORT_IS;
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "DPPLLA 0x84 time=%.2f lat=%.2f lon=%.2f altMSL=%.2f\n",
-		 session->newdata.time,
+		 "DPPLLA 0x84 time=%ld.%09ld lat=%.2f lon=%.2f altMSL=%.2f\n",
+		 session->newdata.time.tv_sec,
+		 session->newdata.time.tv_nsec,
 		 session->newdata.latitude,
 		 session->newdata.longitude,
 		 session->newdata.altMSL);
@@ -815,16 +820,19 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		session->context->leap_seconds = (int)u4;
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
-	    session->newdata.time = gpsd_gpstime_resolve(session,
+	    ts_tow.tv_sec = (time_t)(ul1 / 1000);
+	    ts_tow.tv_nsec = (long)((ul1 % 1000) * 1000000L);
+	    session->newdata.time = gpsd_gpstime_resolv(session,
 						      (unsigned short)s4,
-						      (double)ul1 *1e-3);
+						      ts_tow);
 	    mask |= TIME_SET | NTPTIME_IS | LATLON_SET |
 		    STATUS_SET | MODE_SET | CLEAR_IS |
 		    REPORT_IS | VNED_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
-		     "SP-LFEI 0x20: time=%.2f lat=%.2f lon=%.2f altMSL=%.2f "
-		     "mode=%d status=%d\n",
-		     session->newdata.time,
+		     "SP-LFEI 0x20: time=%ld.%09ld lat=%.2f lon=%.2f "
+                     "altMSL=%.2f mode=%d status=%d\n",
+		     session->newdata.time.tv_sec,
+		     session->newdata.time.tv_nsec,
 		     session->newdata.latitude, session->newdata.longitude,
 		     session->newdata.altHAE,
 		     session->newdata.mode, session->gpsdata.status);
@@ -854,9 +862,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		session->context->leap_seconds = (int)u1;
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
+	    ts_tow.tv_sec = (time_t)(ul1 / 1000);
+	    ts_tow.tv_nsec = (long)((ul1 % 1000) * 1000000L);
 	    session->newdata.time =
-		gpsd_gpstime_resolve(session,
-				  (unsigned short)s1, (double)ul1 *1e-3);
+		gpsd_gpstime_resolv(session, (unsigned short)s1, ts_tow);
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->newdata.mode = MODE_NO_FIX;
 	    if ((u2 & 0x01) == (uint8_t) 0) {	/* Fix Available */
@@ -891,9 +900,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		    STATUS_SET | MODE_SET | CLEAR_IS |
 		    REPORT_IS | VNED_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
-		     "SP-CSP 0x23: time=%.2f lat=%.2f lon=%.2f altHAE=%.2f "
-		     "mode=%d status=%d\n",
-		     session->newdata.time,
+		     "SP-CSP 0x23: time=%ld.%09ld lat=%.2f lon=%.2f "
+                     "altHAE=%.2f mode=%d status=%d\n",
+		     session->newdata.time.tv_sec,
+		     session->newdata.time.tv_nsec,
 		     session->newdata.latitude, session->newdata.longitude,
 		     session->newdata.altHAE,
 		     session->newdata.mode, session->gpsdata.status);
@@ -921,16 +931,19 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    if ((int)ul1 > 10) {
 		session->context->leap_seconds = (int)s2;
 		session->context->valid |= LEAP_SECOND_VALID;
+		ts_tow.tv_sec = (time_t)(ul1 / 1000);
+		ts_tow.tv_nsec = (long)((ul1 % 1000) * 1000000L);
 		session->newdata.time =
-		    gpsd_gpstime_resolve(session, (unsigned short)s1, (double)ul1);
+		    gpsd_gpstime_resolv(session, (unsigned short)s1, ts_tow);
 		mask |= TIME_SET | NTPTIME_IS | CLEAR_IS;
 		gpsd_log(&session->context->errout, LOG_DATA,
-			 "SP-TTS 0xab time=%.2f mask={TIME}\n",
-			 session->newdata.time);
+			 "SP-TTS 0xab time=%ld.%09ld mask={TIME}\n",
+			 session->newdata.time.tv_sec,
+			 session->newdata.time.tv_nsec);
 	    }
 
-	    gpsd_log(&session->context->errout, 4,
-		     "GPS Time %u %d %d\n", ul1, s1, s2);
+	    gpsd_log(&session->context->errout, LOG_PROG,
+		     "SP-TTS 0xab GPS Time %u %d %d\n", ul1, s1, s2);
 	    break;
 
 
@@ -1005,8 +1018,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
 	    mask |= LATLON_SET | ALTITUDE_SET | MODE_SET | REPORT_IS;
 	    gpsd_log(&session->context->errout, LOG_DATA,
-		     "SP-TPS 0xac time=%.2f lat=%.2f lon=%.2f altHAE=%.2f\n",
-		     session->newdata.time,
+		     "SP-TPS 0xac lat=%.2f lon=%.2f altHAE=%.2f\n",
 		     session->newdata.latitude,
 		     session->newdata.longitude,
 		     session->newdata.altHAE);

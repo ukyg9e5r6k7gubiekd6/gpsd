@@ -36,6 +36,7 @@
 #include "gpsd.h"
 #include "matrix.h"
 #include "strfuncs.h"
+#include "timespec.h"
 #if defined(NMEA2000_ENABLE)
 #include "driver_nmea2000.h"
 #endif /* defined(NMEA2000_ENABLE) */
@@ -881,17 +882,24 @@ static void gpsd_error_model(struct gps_device_t *session)
     lastfix = &session->lastfix;
     oldfix = &session->oldfix;
 
-    if (0 != isfinite(fix->time)) {
-        if (0 != isfinite(lastfix->time) &&
-            fix->time > lastfix->time) {
-	    /* time just moved forward, lastfix is now the previous (old) fix */
+    if (0 < fix->time.tv_sec) {
+        /* we have a time for this merge data */
+        timespec_t ts_delta;
+
+        TS_SUB(&ts_delta, &fix->time, &lastfix->time);
+        deltatime = TSTONS(&ts_delta);
+
+        if (0.01 <= fabs(deltatime)) {
+	    /* Time just moved, probably forward.
+             * Lastfix is now the previous (old) fix. */
 	    *oldfix = *lastfix;
-        }
-        if (0 != isfinite(oldfix->time) &&
-            fix->time > oldfix->time) {
-	    deltatime = fix->time - oldfix->time;
+        } else {
+            // compute delta from old fix
+	    TS_SUB(&ts_delta, &fix->time, &oldfix->time);
+	    deltatime = TSTONS(&ts_delta);
         }
     }
+    /* Sanity check for negative delta? */
 
     h_uere =
 	(session->gpsdata.status ==
@@ -1012,6 +1020,7 @@ static void gpsd_error_model(struct gps_device_t *session)
      */
     if (0 < deltatime) {
         /* have a valid time duration */
+        /* FIXME! ignore if large.  maybe > 1 hour? */
 
 	if (MODE_2D <= fix->mode &&
 	    MODE_2D <= oldfix->mode) {
@@ -1053,7 +1062,7 @@ static void gpsd_error_model(struct gps_device_t *session)
      * opened.  Also, some devices (notably plain NMEA0183 receivers)
      * never ship an indication of when they have valid leap second.
      */
-    if (0 != isfinite(fix->time) &&
+    if (0 < fix->time.tv_sec &&
         0 == isfinite(fix->ept)) {
         /* can we compute ept from tdop? */
 	fix->ept = 0.005;
@@ -1143,7 +1152,20 @@ static void gpsd_error_model(struct gps_device_t *session)
 	}
     }
 
-    if (0 != isfinite(fix->time)) {
+#ifdef  __UNUSED__
+    {
+        // Debug code.
+	char tbuf[JSON_DATE_MAX+1];
+	gpsd_log(&session->context->errout, 0,
+		 "DEBUG: %s deltatime %.3f, speed %0.3f climb %.3f "
+                 "epc %.3f fixHAE %.3f oldHAE %.3f\n",
+		 timespec_to_iso8601(fix->time, tbuf, sizeof(tbuf)),
+		 deltatime, fix->speed, fix->climb, fix->epc,
+                 fix->altHAE, oldfix->altHAE);
+    }
+#endif // __UNUSED__
+
+    if (0 < fix->time.tv_sec) {
 	/* save lastfix, not yet oldfix, for later error computations */
 	*lastfix = *fix;
     }
@@ -1591,14 +1613,16 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * driver errors, including 32-vs.-64-bit problems.
 	 */
 	if ((session->gpsdata.set & TIME_SET) != 0) {
-	    if (session->newdata.time > time(NULL) + (60 * 60 * 24 * 365))
+	    if (session->newdata.time.tv_sec >
+                (time(NULL) + (60 * 60 * 24 * 365))) {
 		gpsd_log(&session->context->errout, LOG_WARN,
-			 "date (%.3f) more than a year in the future!\n",
-			 session->newdata.time);
-	    else if (session->newdata.time < 0)
+			 "date (%ld) more than a year in the future!\n",
+			 session->newdata.time.tv_sec);
+	    } else if (session->newdata.time.tv_sec < 0) {
 		gpsd_log(&session->context->errout, LOG_ERROR,
-			 "date (%.3f) is negative!\n",
-			 session->newdata.time);
+			 "date (%ld) is negative!\n",
+			 session->newdata.time.tv_sec);
+            }
 	}
 
 	return session->gpsdata.set;
@@ -1791,31 +1815,31 @@ void gpsd_zero_satellites( struct gps_data_t *out)
 #endif
 }
 
+/* Latch the fact that we've saved a fix.
+ * And add in the device fudge */
 void ntp_latch(struct gps_device_t *device, struct timedelta_t *td)
-/* latch the fact that we've saved a fix */
 {
-    double fix_time, integral, fractional;
 
     /* this should be an invariant of the way this function is called */
-    assert(isfinite(device->newdata.time)!=0);
+    if (0 >= device->newdata.time.tv_sec) {
+        return;
+    }
 
     (void)clock_gettime(CLOCK_REALTIME, &td->clock);
-    fix_time = device->newdata.time;
+    /* structure copy of time from GPS */
+    td->real = device->newdata.time;
 
-    /* assume zero when there's no offset method */
-    if (device->device_type == NULL
-	|| device->device_type->time_offset == NULL)
-	fix_time += 0.0;
-    else
-	fix_time += device->device_type->time_offset(device);
-    /* it's ugly but timestamp_t is double */
-    /* note loss of precision here
-     * td->clock is in nanoSec
-     * fix_time is in microSec
-     * OK since GPS timestamps are millSec or worse */
-    fractional = modf(fix_time, &integral);
-    td->real.tv_sec = (time_t)integral;
-    td->real.tv_nsec = (long)(fractional * 1e+9);
+    /* is there an offset method? */
+    if (NULL != device->device_type &&
+	NULL != device->device_type->time_offset) {
+	double integral;
+        double offset = device->device_type->time_offset(device);
+
+	/* add in offset which is double */
+	td->real.tv_nsec += (long)(modf(offset, &integral) * 1e9);
+	td->real.tv_sec += (time_t)integral;
+        TS_NORM(&td->real);
+    }
 
     /* thread-safe update */
     pps_thread_fixin(&device->pps_thread, td);

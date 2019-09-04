@@ -132,11 +132,12 @@ void json_tpv_dump(const struct gps_device_t *session,
 	str_appendf(reply, replylen, "\"status\":%d,", gpsdata->status);
     }
     str_appendf(reply, replylen, "\"mode\":%d,", gpsdata->fix.mode);
-    if (isfinite(gpsdata->fix.time) != 0) {
+    if (0 < gpsdata->fix.time.tv_sec) {
 	char tbuf[JSON_DATE_MAX+1];
 	str_appendf(reply, replylen,
 		       "\"time\":\"%s\",",
-		       unix_to_iso8601(gpsdata->fix.time, tbuf, sizeof(tbuf)));
+		       timespec_to_iso8601(gpsdata->fix.time,
+                                      tbuf, sizeof(tbuf)));
     }
     if (LEAP_SECOND_VALID == (session->context->valid & LEAP_SECOND_VALID)) {
 	str_appendf(reply, replylen, "\"leapseconds\":%d,",
@@ -297,7 +298,8 @@ void json_noise_dump(const struct gps_data_t *gpsdata,
     (void)strlcpy(reply, "{\"class\":\"GST\",", replylen);
     if (gpsdata->dev.path[0] != '\0')
 	str_appendf(reply, replylen, "\"device\":\"%s\",", gpsdata->dev.path);
-    if (isfinite(gpsdata->fix.time) != 0) {
+    if (0 != isfinite(gpsdata->gst.utctime) &&
+        0 < gpsdata->gst.utctime) {
 	char tbuf[JSON_DATE_MAX+1];
 	str_appendf(reply, replylen,
 		   "\"time\":\"%s\",",

@@ -585,6 +585,7 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     uint32_t solution_validity;
     uint32_t solution_info;
     uint32_t gps_tow = 0;
+    uint32_t msecs;                      /* tow in ms */
     uint32_t gps_tow_sub_ms = 0;
     uint16_t gps_week = 0;
     timespec_t gps_tow_ns = {0};
@@ -626,14 +627,16 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
 
     solution_info = getbeu32(buf, 6);
     gps_week = getbeu16(buf, 10);
-    gps_tow = getbeu32(buf, 12) / 1000;
-    /* get ms part, conver to ns */
-    gps_tow_sub_ms = 1000000 * (getbeu32(buf, 12) % 1000);
-    gps_tow_sub_ms += getbeu32(buf, 16);    /* add in the ns */
+    msecs = getbeu32(buf, 12);
+    gps_tow = msecs / 1000;
     gps_tow_ns.tv_sec = gps_tow;
-    gps_tow_ns.tv_nsec = gps_tow_sub_ms;
+    /* get ms part */
+    gps_tow_sub_ms = msecs % 1000;
+    /* add in the ns */
+    gps_tow_ns.tv_nsec = (gps_tow_sub_ms * 1000000L) + getbeu32(buf, 16);
     now = gpsd_gpstime_resolv(session, gps_week, gps_tow_ns);
-    /* we'll not use this time, instead the unpacked date below */
+    /* we'll not use this time, instead the unpacked date below,
+     * to get the right epoch */
 
     time_bias = getbes16(buf, 20);    /* add in the ns */
     /* time_accuracy is an odd 8 bit float */
@@ -647,11 +650,10 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
     unpacked_date.tm_hour = (int)getub(buf, 28);
     unpacked_date.tm_min = (int)getub(buf, 29);
     unpacked_date.tm_sec = (int)getbeu16(buf, 30) / 1000;
-    session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date);
-    /* add back in the fractional seconds */
-    session->newdata.time += (timestamp_t)gps_tow_sub_ms / NS_IN_SEC;
     session->context->leap_seconds = (int)getub(buf, 32);
     session->context->valid |= LEAP_SECOND_VALID;
+    session->newdata.time.tv_sec = mkgmtime(&unpacked_date);
+    session->newdata.time.tv_nsec = gps_tow_ns.tv_nsec;
     /* got time now */
     mask |= TIME_SET;
 
@@ -759,8 +761,10 @@ static gps_mask_t sirf_msg_67_1(struct gps_device_t *session,
                  gps_week, gps_tow, gps_tow_sub_ms,
                  (long)now.tv_sec, now.tv_nsec);
         gpsd_log(&session->context->errout, debug_base,
-                 "UTC time %.9f leaps %u, datum %s\n",
-                 session->newdata.time, session->context->leap_seconds,
+                 "UTC time %ld.%09ld leaps %u, datum %s\n",
+                 session->newdata.time.tv_sec,
+                 session->newdata.time.tv_nsec,
+                 session->context->leap_seconds,
                  session->newdata.datum);
         gpsd_log(&session->context->errout, debug_base,
                  "packed: %02d%02d%02d %02d:%02d:%02d\n",
@@ -839,9 +843,8 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
     gps_tow_sub_ms += getbeu32(buf, 8);    /* add in the ns */
     gps_tow_ns.tv_sec = gps_tow;
     gps_tow_ns.tv_nsec = gps_tow_sub_ms;
-    now = gpsd_gpstime_resolv(session, gps_week, gps_tow_ns);
-    session->newdata.time = now.tv_sec + (now.tv_nsec * 1e-9);
-    session->gpsdata.skyview_time = session->newdata.time;
+    session->newdata.time = gpsd_gpstime_resolv(session, gps_week, gps_tow_ns);
+    session->gpsdata.skyview_time = TSTONS(&session->newdata.time);
     time_bias = getbes16(buf, 12);
     /* time_accuracy is an odd 8 bit float */
     time_accuracy = getub(buf, 14);
@@ -1204,9 +1207,9 @@ static gps_mask_t sirf_msg_tcxo(struct gps_device_t *session,
         clock_offset = getsb(buf, 9);  /* looks like leapseconds? */
         temp = getub(buf, 22);
         gps_tow_ns.tv_sec = gps_tow / 100;
-        gps_tow_ns.tv_nsec = (gps_tow % 100) * 10000000LL;
-        now = gpsd_gpstime_resolv(session, gps_week, gps_tow_ns);
-        session->newdata.time = now.tv_sec + (now.tv_nsec * 1e-9);
+        gps_tow_ns.tv_nsec = (gps_tow % 100) * 10000000L;
+        session->newdata.time = gpsd_gpstime_resolv(session, gps_week,
+                                                    gps_tow_ns);
 
         /* skip all the debug pushing and popping, unless needed */
         if (session->context->errout.debug >= LOG_PROG) {
@@ -1480,7 +1483,6 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
     uint32_t iTOW;
     timespec_t tow;
     gps_mask_t mask = 0;
-    timespec_t now = {0};
 
     /* later versions are 47 bytes long */
     if (41 > len)
@@ -1525,9 +1527,8 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
     /* Gack.  The doc says early SiRF scales iTOW by 100, later ones
      * by 1000.  But that does not seem to be true in sirfstar V. */
     tow.tv_sec = iTOW / 100;
-    tow.tv_nsec = (iTOW % 100) * 10000000;
-    now = gpsd_gpstime_resolv(session, gps_week, tow);
-    session->newdata.time = now.tv_sec + (now.tv_nsec * 1e-9);
+    tow.tv_nsec = (iTOW % 100) * 10000000L;
+    session->newdata.time = gpsd_gpstime_resolv(session, gps_week, tow);
 
     if (session->newdata.mode <= MODE_NO_FIX) {
         gpsd_log(&session->context->errout, LOG_PROG,
@@ -1535,10 +1536,11 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
                  session->newdata.mode);
     } else {
         gpsd_log(&session->context->errout, LOG_PROG,
-                 "SiRF: MID 0x02  NTPD valid time, seen %#02x, time %.3lf, "
-                 "leap:%d nav_mode2 %#x\n",
+                 "SiRF: MID 0x02  NTPD valid time, seen %#02x time %ld.%09ld "
+                 "leap %d nav_mode2 %#x\n",
                  session->driver.sirf.time_seen,
-                 session->newdata.time, session->context->leap_seconds,
+                 session->newdata.time.tv_sec, session->newdata.time.tv_nsec,
+                 session->context->leap_seconds,
                  nav_mode2);
     }
     /* clear computed DOPs so they get recomputed. */
@@ -1555,9 +1557,10 @@ static gps_mask_t sirf_msg_navsol(struct gps_device_t *session,
              "SiRF: MND 0x02: gpsd_week %u iTOW %u\n",
              gps_week, iTOW);
     gpsd_log(&session->context->errout, LOG_DATA,
-             "SiRF: MND 0x02: time %.2f ecef x: %.2f y: %.2f z: %.2f "
+             "SiRF: MND 0x02: time %ld.%09ld ecef x: %.2f y: %.2f z: %.2f "
              "mode %d status %d hdop %.2f used %d\n",
-             session->newdata.time, session->newdata.ecef.x,
+             session->newdata.time.tv_sec, session->newdata.time.tv_nsec,
+             session->newdata.ecef.x,
              session->newdata.ecef.y, session->newdata.ecef.z,
              session->newdata.mode, session->gpsdata.status,
              session->gpsdata.dop.hdop, session->gpsdata.satellites_used);
@@ -1679,8 +1682,11 @@ static gps_mask_t sirf_msg_geodetic(struct gps_device_t *session,
         unpacked_date.tm_mday = (int)getub(buf, 14);
         unpacked_date.tm_hour = (int)getub(buf, 15);
         unpacked_date.tm_min = (int)getub(buf, 16);
-        subseconds = getbeu16(buf, 17) * 1e-3;
-        session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + subseconds;
+        subseconds = getbeu16(buf, 17);
+        unpacked_date.tm_sec = subseconds / 1000;
+        session->newdata.time.tv_sec = mkgmtime(&unpacked_date);
+        session->newdata.time.tv_nsec = (long)((subseconds % 1000) * 1000000L);
+
         gpsd_log(&session->context->errout, LOG_PROG,
                  "SiRF: GND 0x29 UTC: %lf\n",
                  session->newdata.time);
@@ -1798,7 +1804,8 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
 
     if (navtype & 0x40) {       /* UTC corrected timestamp? */
         struct tm unpacked_date;
-        double subseconds;
+        uint32_t msec;
+
         mask |= TIME_SET;
         if ( 3 <= session->gpsdata.satellites_visible ) {
             mask |= NTPTIME_IS;
@@ -1809,8 +1816,11 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
         unpacked_date.tm_mday = (int)getub(buf, 29);
         unpacked_date.tm_hour = (int)getub(buf, 30);
         unpacked_date.tm_min = (int)getub(buf, 31);
-        subseconds = ((unsigned short)getbeu16(buf, 32)) * 1e-3;
-        session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + subseconds;
+        msec = getbeu16(buf, 32);
+        unpacked_date.tm_sec = msec / 1000;
+        session->newdata.time.tv_sec = mkgmtime(&unpacked_date);
+        /* ms to ns */
+        session->newdata.time.tv_nsec = (msec % 1000) * 1000000L;
         if (0 == (session->driver.sirf.time_seen & TIME_SEEN_UTC_2)) {
             gpsd_log(&session->context->errout, LOG_RAW,
                      "SiRF: NTPD just SEEN_UTC_2\n");
@@ -1819,7 +1829,10 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
                  "SiRF: NTPD valid time MID 0x62, seen=%#02x\n",
                  session->driver.sirf.time_seen);
         session->driver.sirf.time_seen |= TIME_SEEN_UTC_2;
-        session->context->valid |= LEAP_SECOND_VALID;
+        /* The mode byte, bit 6 tells us if leap second is valid.
+         * But not what the leap second is.
+         * session->context->valid |= LEAP_SECOND_VALID;
+         */
     }
 
     session->gpsdata.dop.gdop = (int)getub(buf, 34) / 5.0;
@@ -1829,10 +1842,11 @@ static gps_mask_t sirf_msg_ublox(struct gps_device_t *session,
     session->gpsdata.dop.tdop = (int)getub(buf, 38) / 5.0;
     session->driver.sirf.driverstate |= UBLOX;
     gpsd_log(&session->context->errout, LOG_DATA,
-             "SiRF: EMD 0x62: time=%.2f lat=%.2f lon=%.2f altHAE=%.2f "
+             "SiRF: EMD 0x62: time=%ld.%09ld lat=%.2f lon=%.2f altHAE=%.2f "
              "speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f "
              "pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f\n",
-             session->newdata.time, session->newdata.latitude,
+             session->newdata.time.tv_sec, session->newdata.time.tv_nsec,
+             session->newdata.latitude,
              session->newdata.longitude, session->newdata.altHAE,
              session->newdata.speed, session->newdata.track,
              session->newdata.climb, session->newdata.mode,
@@ -1863,8 +1877,10 @@ static gps_mask_t sirf_msg_ppstime(struct gps_device_t *session,
         unpacked_date.tm_mday = (int)getub(buf, 4);
         unpacked_date.tm_mon = (int)getub(buf, 5) - 1;
         unpacked_date.tm_year = (int)getbeu16(buf, 6) - 1900;
-        session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date);
+        session->newdata.time.tv_sec = mkgmtime(&unpacked_date);
+        session->newdata.time.tv_nsec = 0;
         session->context->leap_seconds = (int)getbeu16(buf, 8);
+        // Ignore UTCOffsetFrac1
         session->context->valid |= LEAP_SECOND_VALID;
         if (0 == (session->driver.sirf.time_seen & TIME_SEEN_UTC_2)) {
             gpsd_log(&session->context->errout, LOG_RAW,
@@ -1980,7 +1996,7 @@ gps_mask_t sirf_parse(struct gps_device_t * session, unsigned char *buf,
     len -= 8;
     /* cast for 32/64 bit compatiility */
     gpsd_log(&session->context->errout, LOG_RAW,
-             "SiRF: Raw packet type %#02x len %ld\n", buf[0],
+             "SiRF: Raw packet type %#04x len %ld\n", buf[0],
              (long)len);
     session->driver.sirf.lastid = buf[0];
 

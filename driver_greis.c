@@ -168,8 +168,8 @@ static gps_mask_t greis_msg_UO(struct gps_device_t *session,
 static gps_mask_t greis_msg_GT(struct gps_device_t *session,
 			       unsigned char *buf, size_t len)
 {
-    double t_intp;
-    uint32_t tow;	     /* Time of week [ms] */
+    timespec_t ts_tow;
+    long tow;	             /* Time of week [ms] */
     uint16_t wn;	     /* GPS week number (modulo 1024) [dimensionless] */
 
     if (len < 7) {
@@ -184,24 +184,21 @@ static gps_mask_t greis_msg_GT(struct gps_device_t *session,
 	return 0;
     }
 
-    tow = getleu32(buf, 0);
+    tow = (long)getleu32(buf, 0);
     wn = getleu16(buf, 4);
 
-    session->newdata.time = gpsd_gpstime_resolve(session, wn, tow / 1000.0);
+    ts_tow.tv_sec = tow / 1000;
+    ts_tow.tv_nsec = (tow % 1000) * 1000000L;
+    session->newdata.time = gpsd_gpstime_resolv(session, wn, ts_tow);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GREIS: GT, tow: %u, wn: %u, time: %.2f\n", tow, wn,
-	     session->newdata.time);
+	     "GREIS: GT, tow: %lu, wn: %u, time: %ld.%09ld Leap:%u\n", tow, wn,
+	     session->newdata.time.tv_sec, session->newdata.time.tv_nsec,
+             session->context->leap_seconds);
+
 
     /* save raw.mtime, just in case */
-    session->gpsdata.raw.mtime.tv_nsec =
-	modf(session->newdata.time, &t_intp) * 1e9;
-    session->gpsdata.raw.mtime.tv_sec = (time_t)t_intp + \
-	session->context->leap_seconds;
-    gpsd_log(&session->context->errout, LOG_DATA,
-	     "GREIS: GT, RAW @ %ld.%09ld\n",
-	     (long)session->gpsdata.raw.mtime.tv_sec,
-	     session->gpsdata.raw.mtime.tv_nsec);
+    session->gpsdata.raw.mtime = session->newdata.time;
 
     return TIME_SET | NTPTIME_IS | ONLINE_SET;
 }

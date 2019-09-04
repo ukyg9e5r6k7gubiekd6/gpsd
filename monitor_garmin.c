@@ -175,7 +175,7 @@ static void garmin_bin_update(uint16_t pkt_id, uint32_t pkt_size UNUSED, unsigne
     case 0x33:	/* Position Record */
 	/* coverity_submit[tainted_data] */
 	display(miscwin, 0, 6, "%-24s",
-		unix_to_iso8601(session.gpsdata.fix.time, tbuf, sizeof(tbuf)));
+		timespec_to_iso8601(session.gpsdata.fix.time, tbuf, sizeof(tbuf)));
 	pvt = (cpo_pvt_data *)pkt_data;
 	display(mid51win, 1, 7, "%s",
 		(CHECK_RANGE(fixdesc, (uint8_t)GPSD_LE16TOH(pvt->fix)) ? \

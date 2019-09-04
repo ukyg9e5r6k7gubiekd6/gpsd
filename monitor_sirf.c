@@ -287,9 +287,9 @@ static void sirf_update(void)
 								  17) / 8);
 	/* line 3 */
 	(void)wmove(mid2win, 3, 7);
-        if (isfinite(session.gpsdata.fix.time)) {
+        if (0 < session.gpsdata.fix.time.tv_sec) {
             (void)wprintw(mid2win, "%-24s",
-			  unix_to_iso8601(session.gpsdata.fix.time, tbuf,
+			  timespec_to_iso8601(session.gpsdata.fix.time, tbuf,
                           sizeof(tbuf)));
         }
 	(void)wmove(mid2win, 3, 38);

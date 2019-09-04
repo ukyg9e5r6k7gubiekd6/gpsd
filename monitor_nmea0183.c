@@ -151,8 +151,8 @@ static void cooked_pvt(void)
 {
     char scr[128];
 
-    if (isfinite(session.gpsdata.fix.time) != 0) {
-	(void)unix_to_iso8601(session.gpsdata.fix.time, scr, sizeof(scr));
+    if (0 < session.gpsdata.fix.time.tv_sec) {
+	(void)timespec_to_iso8601(session.gpsdata.fix.time, scr, sizeof(scr));
     } else
 	(void)snprintf(scr, sizeof(scr), "n/a");
     (void)mvwprintw(cookedwin, 1, 7, "%-24s", scr);

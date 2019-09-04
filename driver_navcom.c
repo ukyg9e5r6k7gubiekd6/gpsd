@@ -358,6 +358,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     unsigned char *buf = session->lexer.outbuffer + 3;
     uint16_t week;
     uint32_t tow;
+    timespec_t ts_tow;
     int32_t lat, lon;
     /* Resolution of lat/lon values (2^-11) */
 #define LL_RES (0.00048828125)
@@ -393,8 +394,10 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 
     /* Timestamp */
     week = (uint16_t) getleu16(buf, 3);
-    tow = (uint32_t) getleu32(buf, 5);
-    session->newdata.time = gpsd_gpstime_resolve(session, week, tow / 1000.0);
+    tow = (uint32_t) getleu32(buf, 5);        /* tow in ms */
+    ts_tow.tv_sec = tow / 1000;
+    ts_tow.tv_nsec = (tow % 1000) * 1000000L;
+    session->newdata.time = gpsd_gpstime_resolv(session, week, ts_tow);
 
     /* Get latitude, longitude */
     lat = getles32(buf, 13);
@@ -485,10 +488,11 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     mask = LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | USED_IS |
            HERR_SET | TIMERR_SET | DOP_SET | VNED_SET | TIME_SET | NTPTIME_IS;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "PVT 0xb1: time=%.2f, lat=%.2f lon=%.2f altHAE=%.2f altMSL %.2f "
-             "mode=%d status=%d gdop=%.2f pdop=%.2f hdop=%.2f vdop=%.2f "
-             "tdop=%.2f mask={%s}\n",
-	     session->newdata.time,
+	     "PVT 0xb1: time=%ld.%09ld, lat=%.2f lon=%.2f altHAE=%.2f "
+             "altMSL %.2f mode=%d status=%d gdop=%.2f pdop=%.2f hdop=%.2f "
+             "vdop=%.2f tdop=%.2f mask={%s}\n",
+	     session->newdata.time.tv_sec,
+	     session->newdata.time.tv_nsec,
 	     session->newdata.latitude,
 	     session->newdata.longitude,
 	     session->newdata.altHAE,
@@ -678,7 +682,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     /* Timestamp */
     session->gpsdata.skyview_time = gpsd_gpstime_resolve(session,
 						      (unsigned short)week,
-						      (double)tow / 1000.0f);
+						      (double)tow / 1000.0);
 
     /* Give this driver a single point of truth about DOPs */
     //session->gpsdata.dop.pdop = (int)pdop / 10.0;
@@ -863,6 +867,7 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	char *buf = (char *)session->lexer.outbuffer + 3;
 	uint16_t week = getleu16(buf, 3);
 	uint32_t tow = getleu32(buf, 5);
+        timespec_t ts_tow;
 #ifdef __UNUSED__
 	double rms = getled64(buf, 9);
 	/* Reason why it's unused is these figures do not agree
@@ -883,9 +888,11 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	session->newdata.epv = alt_sd * 1.96;
 	mask |= HERR_SET;
 #endif /*  __UNUSED__ */
-	session->newdata.time = gpsd_gpstime_resolve(session,
+	ts_tow.tv_sec = tow / 1000;
+	ts_tow.tv_nsec = (tow % 1000) * 1000000L;
+	session->newdata.time = gpsd_gpstime_resolv(session,
 						  (unsigned short)week,
-						  (double)tow / 1000.0f);
+						  ts_tow);
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "Navcom: received packet type 0xb5 (Pseudorange Noise Statistics)\n");
 	gpsd_log(&session->context->errout, LOG_DATA,
@@ -1071,7 +1078,8 @@ static gps_mask_t handle_0xef(struct gps_device_t *session)
 	     osc_temp, nav_status, nav_clock_offset, nav_clock_drift,
 	     osc_filter_drift_est, time_slew);
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "CDO 0xef: time=%.2f mask={TIME}\n", session->newdata.time);
+	     "CDO 0xef: time=%ld.%09ld mask={TIME}\n",
+             session->newdata.time.tv_sec, session->newdata.time.tv_nsec);
     return 0;
 }
 

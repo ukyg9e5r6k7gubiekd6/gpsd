@@ -320,7 +320,8 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
 				buf + 10, 2, 0, 60, &result))
 	    break;
 	gdate.tm_sec = (int)result;
-	session->newdata.time = (timestamp_t)mkgmtime(&gdate);
+	session->newdata.time.tv_sec = mkgmtime(&gdate);
+	session->newdata.time.tv_nsec = 0;
 	mask |= TIME_SET;
     } while (0);
 
@@ -450,9 +451,9 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
     } while (0);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GTXT: time=%.2f, lat=%.2f lon=%.2f altMSL=%.2f "
+	     "GTXT: time=%ld, lat=%.2f lon=%.2f altMSL=%.2f "
              "climb=%.2f eph=%.2f mode=%d status=%d\n",
-	     session->newdata.time, session->newdata.latitude,
+	     session->newdata.time.tv_sec, session->newdata.latitude,
 	     session->newdata.longitude, session->newdata.altMSL,
 	     session->newdata.climb, session->newdata.eph,
 	     session->newdata.mode,

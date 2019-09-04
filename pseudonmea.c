@@ -50,29 +50,30 @@ static char *f_str(double f, const char *fmt, char *buf)
     return buf;
 }
 
-/* convert UTC to time str (hh:mm:ss) and tm */
-static void utc_to_hhmmss(timestamp_t time, char *buf, ssize_t buf_sz,
+/* convert UTC to time str (hh:mm:ss.ss) and tm */
+static void utc_to_hhmmss(timespec_t time, char *buf, ssize_t buf_sz,
                           struct tm *tm)
 {
-    double integral;
-    double fractional;
-    time_t integral_time;
-    unsigned frac;
+    time_t integer;
+    long fractional;
 
-    if (0 == isfinite(time)) {
+    if (0 >= time.tv_sec) {
         buf[0] = '\0';
         return;
     }
 
+    integer = time.tv_sec;
     /* round to 100ths */
-    fractional = modf(time + 0.005, &integral);
-    integral_time = (time_t)integral;
-    frac = (unsigned)(fractional * 100.0);
+    fractional = (time.tv_nsec + 5000000L) / 10000000L;
+    if (99 < fractional) {
+        integer++;
+        fractional = 0;
+    }
 
-    (void)gmtime_r(&integral_time, tm);
+    (void)gmtime_r(&integer, tm);
 
-    (void)snprintf(buf, buf_sz, "%02d%02d%02d.%02d",
-                   tm->tm_hour, tm->tm_min, tm->tm_sec, frac);
+    (void)snprintf(buf, buf_sz, "%02d%02d%02d.%02ld",
+                   tm->tm_hour, tm->tm_min, tm->tm_sec, fractional);
     return;
 }
 
@@ -311,7 +312,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
      */
     if (0 != isfinite(session->gpsdata.fix.epx) &&
         0 != isfinite(session->gpsdata.fix.epy) &&
-        0 != isfinite(session->gpsdata.fix.time)) {
+        0 != session->gpsdata.fix.time.tv_sec) {
 
         struct tm tm;
         char time_str[20];
@@ -337,7 +338,7 @@ static void gpsd_binary_time_dump(struct gps_device_t *session,
 {
 
     if (MODE_NO_FIX < session->newdata.mode &&
-        0 != isfinite(session->gpsdata.fix.time)) {
+        0 <= session->gpsdata.fix.time.tv_sec) {
         struct tm tm;
         char time_str[20];
 

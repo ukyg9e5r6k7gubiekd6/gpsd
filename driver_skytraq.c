@@ -22,6 +22,7 @@
 #include "bits.h"
 #include "strfuncs.h"
 #if defined(SKYTRAQ_ENABLE)
+#include "timespec.h"
 
 #define HI(n)		((n) >> 8)
 #define LO(n)		((n) & 0xff)
@@ -208,7 +209,6 @@ static gps_mask_t sky_msg_DD(struct gps_device_t *session,
     unsigned int iod;   /* Issue of data 0 - 255 */
     unsigned int nmeas; /* number of measurements */
     unsigned int i;     /* generic loop variable */
-    double t_intp;
 
     iod = (unsigned int)getub(buf, 1);
     nmeas = (unsigned int)getub(buf, 2);
@@ -218,9 +218,7 @@ static gps_mask_t sky_msg_DD(struct gps_device_t *session,
 	     iod, nmeas);
 
     /* check IOD? */
-    session->gpsdata.raw.mtime.tv_nsec = \
-        modf(session->gpsdata.skyview_time, &t_intp) * 10e9;
-    session->gpsdata.raw.mtime.tv_sec = (time_t)t_intp;
+    DTOTS(&session->gpsdata.raw.mtime, session->gpsdata.skyview_time);
 
     /* zero the measurement data */
     /* so we can tell which meas never got set */
@@ -417,6 +415,7 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
     double clock_bias;
     double clock_drift;
     gps_mask_t mask = 0;
+    timespec_t ts_tow;
 
     if ( 81 != len)
 	return 0;
@@ -449,6 +448,7 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
 
     wn = getbeu16(buf, 3);
     f_tow = getbed64((const char *)buf, 5);
+    DTOTS(&ts_tow, f_tow);
 
     /* position/velocity is bytes 13-48, meters and m/s */
     session->newdata.ecef.x = (double)getbed64((const char *)buf, 13),
@@ -468,14 +468,15 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
     session->gpsdata.dop.vdop = getbef32((const char *)buf, 73);
     session->gpsdata.dop.tdop = getbef32((const char *)buf, 77);
 
-    session->newdata.time = gpsd_gpstime_resolve(session, wn, f_tow );
+    session->newdata.time = gpsd_gpstime_resolv(session, wn, ts_tow );
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	    "Skytraq: MID 0xDF: iod=%u, stat=%u, wn=%u, tow=%f, t=%.6f "
+	    "Skytraq: MID 0xDF: iod=%u, stat=%u, wn=%u, tow=%f, t=%ld.%09ld "
 	    "cb: %f, cd: %f "
 	    "gdop: %.2f, pdop: %.2f, hdop: %.2f, vdop: %.2f, tdop: %.2f\n",
 	    iod, navstat, wn, f_tow,
-	    session->newdata.time,
+	    session->newdata.time.tv_sec,
+	    session->newdata.time.tv_nsec,
 	    clock_bias, clock_drift,
 	    session->gpsdata.dop.gdop,
 	    session->gpsdata.dop.pdop,

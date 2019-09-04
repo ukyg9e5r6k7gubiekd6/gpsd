@@ -172,7 +172,9 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
     case 0x20:
 	d1 = getled64(buf, OFFSET(1)); /* time */
 
-	session->newdata.time = d1 + JAN_2008;
+        DTOTS(&session->newdata.time, d1);
+        session->newdata.time.tv_sec += JAN_2008;
+
 	session->newdata.latitude = getled64(buf, OFFSET(3)) * RAD_2_DEG;
 	session->newdata.longitude = getled64(buf, OFFSET(5)) * RAD_2_DEG;
         /* altitude above ellipsoid */

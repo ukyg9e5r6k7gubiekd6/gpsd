@@ -101,6 +101,14 @@ static inline void TS_NORM( struct timespec *ts)
  * WARNING replacing 1e9 with NS_IN_SEC causes loss of precision */
 #define TSTONS(ts) ((double)((ts)->tv_sec + ((ts)->tv_nsec / 1e9)))
 
+/* convert a timestamp_t (double) to a timespec_t */
+#define DTOTS(ts, d) \
+    do { \
+        double int_part; \
+	(ts)->tv_nsec = (long)(modf(d, &int_part) * 1e9); \
+	(ts)->tv_sec = (time_t)int_part; \
+    } while (0)
+
 #define TIMESPEC_LEN	22	/* required length of a timespec buffer */
 
 extern void timespec_str(const struct timespec *, char *, size_t);

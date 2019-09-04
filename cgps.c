@@ -109,6 +109,7 @@
 #include "gpsdclient.h"
 #include "revision.h"
 #include "os_compat.h"
+#include "timespec.h"
 
 static struct gps_data_t gpsdata;
 static time_t status_timer;     /* Time of last state change. */
@@ -492,8 +493,8 @@ static void update_compass_panel(struct gps_data_t *gpsdata)
     char scr[128];
     int row = 1;
     /* Print time/date. */
-    if (isfinite(gpsdata->fix.time) != 0) {
-        (void)unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr));
+    if (0 < gpsdata->fix.time.tv_sec) {
+        (void)timespec_to_iso8601(gpsdata->fix.time, scr, sizeof(scr));
     } else
         (void)strlcpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET, "%-*s", 27, scr);
@@ -692,8 +693,8 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
     curs_set(0);
 
     /* Print time/date. */
-    if (isfinite(gpsdata->fix.time) != 0) {
-        (void)unix_to_iso8601(gpsdata->fix.time, scr, sizeof(scr));
+    if (0 < gpsdata->fix.time.tv_sec) {
+        (void)timespec_to_iso8601(gpsdata->fix.time, scr, sizeof(scr));
     } else
         (void)strlcpy(scr, "  n/a", sizeof(scr));
     (void)mvwprintw(datawin, 1, DATAWIN_VALUE_OFFSET, "%-*s", 26, scr);
@@ -930,9 +931,9 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
                         14, ep_str);
 
         /* Fill in the time offset, milliseconds. */
-        if (isfinite(gpsdata->fix.time) != 0)
+        if (0 < gpsdata->fix.time.tv_sec)
             (void)snprintf(scr, sizeof(scr), "%6.3f sec",
-                           (double)(timestamp()-gpsdata->fix.time));
+                           (double)(timestamp() - TSTONS(&gpsdata->fix.time)));
         else
             (void)strlcpy(scr, " n/a", sizeof(scr));
         (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET + 8, "%-*s", 18,

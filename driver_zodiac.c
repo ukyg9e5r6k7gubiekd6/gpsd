@@ -141,7 +141,6 @@ static gps_mask_t handle1000(struct gps_device_t *session)
 /* time-position-velocity report */
 {
     gps_mask_t mask;
-    double subseconds;
     struct tm unpacked_date;
     int datum;
 
@@ -167,8 +166,8 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     unpacked_date.tm_min = (int)getzword(23);
     unpacked_date.tm_sec = (int)getzword(24);
     unpacked_date.tm_isdst = 0;
-    subseconds = (int)getzlong(25) / 1e9;
-    session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + subseconds;
+    session->newdata.time.tv_sec = mkgmtime(&unpacked_date);
+    session->newdata.time.tv_nsec = getzlong(25);
     session->newdata.latitude = ((long)getzlong(27)) * RAD_2_DEG * 1e-8;
     session->newdata.longitude = ((long)getzlong(29)) * RAD_2_DEG * 1e-8;
     /*
@@ -203,9 +202,10 @@ static gps_mask_t handle1000(struct gps_device_t *session)
            SPEED_SET | TRACK_SET | STATUS_SET | MODE_SET |
            HERR_SET | SPEEDERR_SET | VERR_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "1000: time=%.2f lat=%.2f lon=%.2f altHAE=%.2f track=%.2f "
+	     "1000: time=%ld.%09ld lat=%.2f lon=%.2f altHAE=%.2f track=%.2f "
              "speed=%.2f climb=%.2f mode=%d status=%d\n",
-	     session->newdata.time, session->newdata.latitude,
+	     session->newdata.time.tv_sec,
+	     session->newdata.time.tv_nsec, session->newdata.latitude,
 	     session->newdata.longitude, session->newdata.altHAE,
 	     session->newdata.track, session->newdata.speed,
 	     session->newdata.climb, session->newdata.mode,

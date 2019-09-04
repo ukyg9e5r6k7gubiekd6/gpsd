@@ -2359,8 +2359,7 @@ static gps_mask_t processHDG(int c UNUSED, char *field[],
 
 
     gpsd_log(&session->context->errout, LOG_RAW,
-             "time %.3f, heading %lf var %.1f\n",
-             session->newdata.time,
+             "$SDHDG heading %lf var %.1f\n",
              session->newdata.magnetic_track,
              session->newdata.magnetic_var);
     return mask;
@@ -2396,8 +2395,7 @@ static gps_mask_t processHDT(int c UNUSED, char *field[],
     mask |= (ATTITUDE_SET);
 
     gpsd_log(&session->context->errout, LOG_RAW,
-             "time %.3f, heading %lf.\n",
-             session->newdata.time,
+             "$HEHDT heading %lf.\n",
              session->gpsdata.attitude.heading);
     return mask;
 }
@@ -2540,8 +2538,7 @@ static gps_mask_t processTNTHTM(int c UNUSED, char *field[],
     mask |= (ATTITUDE_SET);
 
     gpsd_log(&session->context->errout, LOG_RAW,
-             "time %.3f, heading %lf (%c).\n",
-             session->newdata.time,
+             "$PTNTHTM heading %lf (%c).\n",
              session->gpsdata.attitude.heading,
              session->gpsdata.attitude.mag_st);
     return mask;
@@ -2788,8 +2785,9 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
         session->gpsdata.attitude.pitch = safe_atof(field[5]);
         /* mask |= ATTITUDE_SET;  * confuses cycle order ?? */
         gpsd_log(&session->context->errout, LOG_RAW,
-            "PASHR (OxTS) time %.3f, heading %lf.\n",
-            session->newdata.time,
+            "PASHR (OxTS) time %ld.%09ld, heading %lf.\n",
+            session->newdata.time.tv_sec,
+            session->newdata.time.tv_nsec,
             session->gpsdata.attitude.heading);
     }
     return mask;
@@ -3263,6 +3261,12 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     /* sentences handlers will tell us when they have fractional time */
     session->nmea.latch_frac_time = false;
 
+#ifdef __UNUSED
+    // debug
+    gpsd_log(&session->context->errout, 0,
+	     "NMEA0183: got %s\n", session->nmea.field[0]);
+#endif // __UNUSED
+
     /* dispatch on field zero, the sentence tag */
     for (thistag = i = 0;
          i < (unsigned)(sizeof(nmea_phrase) / sizeof(nmea_phrase[0])); ++i) {
@@ -3315,8 +3319,10 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
         session->newdata.time = gpsd_utc_resolve(session);
 
         gpsd_log(&session->context->errout, LOG_DATA,
-                 "%s time is %.3f = %d-%02d-%02dT%02d:%02d:%.3fZ\n",
-                 session->nmea.field[0], session->newdata.time,
+                 "%s time is %ld.%09ld = %d-%02d-%02dT%02d:%02d:%.3fZ\n",
+                 session->nmea.field[0],
+                 session->newdata.time.tv_sec,
+                 session->newdata.time.tv_nsec,
                  1900 + session->nmea.date.tm_year,
                  session->nmea.date.tm_mon + 1,
                  session->nmea.date.tm_mday,

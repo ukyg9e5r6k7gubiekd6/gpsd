@@ -21,28 +21,31 @@ PERMISSIONS
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <stdbool.h>
 #include <math.h>
-#include <string.h>
+#include <stdbool.h>
 #include <stddef.h>
+#include <string.h>
 
 #include "gpsd.h"
 #include "strfuncs.h"
 #ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
+#include "timespec.h"
 
 static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
 			 const char **endptr)
 {
     int leapseconds; /* FIXME, unused... */
     double epe;      /* obsolete, for back compatibility */
+    timestamp_t fixtime;
+    int ret;
 
     const struct json_attr_t json_attrs_1[] = {
 	/* *INDENT-OFF* */
 	{"class",  t_check,   .dflt.check = "TPV"},
 	{"device", t_string,  .addr.string = gpsdata->dev.path,
 			         .len = sizeof(gpsdata->dev.path)},
-	{"time",   t_time,    .addr.real = &gpsdata->fix.time,
+	{"time",   t_time,    .addr.real = &fixtime,
 			         .dflt.real = NAN},
 	{"leapseconds",   t_integer, .addr.integer = &leapseconds,
 			         .dflt.integer = 0},
@@ -129,7 +132,16 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
 	/* *INDENT-ON* */
     };
 
-    return json_read_object(buf, json_attrs_1, endptr);
+    ret = json_read_object(buf, json_attrs_1, endptr);
+    // convert time back to timespec_t
+    if (0 == isfinite(fixtime)) {
+	gpsdata->fix.time.tv_sec = 0;
+	gpsdata->fix.time.tv_nsec = 0;
+    } else {
+	DTOTS(&gpsdata->fix.time, fixtime);
+    }
+
+    return ret;
 }
 
 static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
@@ -582,7 +594,7 @@ int libgps_json_unpack(const char *buf,
     if (str_starts_with(classtag, "\"class\":\"TPV\"")) {
 	status = json_tpv_read(buf, gpsdata, end);
 	gpsdata->set = STATUS_SET;
-	if (isfinite(gpsdata->fix.time) != 0)
+	if (0 != gpsdata->fix.time.tv_sec)
 	    gpsdata->set |= TIME_SET;
 	if (isfinite(gpsdata->fix.ept) != 0)
 	    gpsdata->set |= TIMERR_SET;

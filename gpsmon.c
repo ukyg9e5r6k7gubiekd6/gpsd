@@ -834,9 +834,10 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 
     /* Update the last fix time seen for PPS if we've actually seen one,
      * and it is a new second. */
-    if ( 0 == isfinite(device->newdata.time)) {
+    if (0 >= device->newdata.time.tv_sec) {
 	// "NTP: bad new time
-    } else if (device->newdata.time <= device->pps_thread.fix_in.real.tv_sec) {
+    } else if (device->newdata.time.tv_sec <=
+               device->pps_thread.fix_in.real.tv_sec) {
 	// "NTP: Not a new time
     } else
 	ntp_latch(device, &time_offset);

@@ -263,7 +263,7 @@ void gpsd_set_century(struct gps_device_t *session)
 }
 
 #ifdef NMEA0183_ENABLE
-timestamp_t gpsd_utc_resolve(struct gps_device_t *session)
+timespec_t gpsd_utc_resolve(struct gps_device_t *session)
 /* resolve a UTC date, checking for rollovers */
 {
     /*
@@ -272,10 +272,10 @@ timestamp_t gpsd_utc_resolve(struct gps_device_t *session)
      * allow us to compute the device's epoch assumption.  In practice,
      * this will be hairy and risky.
      */
-    timestamp_t t;
+    timespec_t t;
 
-    t = (timestamp_t)mkgmtime(&session->nmea.date) +
-	session->nmea.subseconds;
+    t.tv_sec = (timestamp_t)mkgmtime(&session->nmea.date);
+    t.tv_nsec = (long)(session->nmea.subseconds * 1e9);
     session->context->valid &=~ GPS_TIME_VALID;
 
     /*
@@ -289,12 +289,13 @@ timestamp_t gpsd_utc_resolve(struct gps_device_t *session)
      * If the GPS is reporting a time from before the daemon started, we've
      * had a rollover event while the daemon was running.
      */
-    if (session->newdata.time < (timestamp_t)session->context->start_time) {
+    if (session->newdata.time.tv_sec <
+        (timestamp_t)session->context->start_time) {
 	char scr[128];
-	(void)unix_to_iso8601(session->newdata.time, scr, sizeof(scr));
+	(void)timespec_to_iso8601(session->newdata.time, scr, sizeof(scr));
 	gpsd_log(&session->context->errout, LOG_WARN,
-		 "GPS week rollover makes time %s (%f) invalid\n",
-		 scr, session->newdata.time);
+		 "GPS week rollover makes time %s (%ld) invalid\n",
+		 scr, session->newdata.time.tv_sec);
     }
 
     return t;
@@ -408,6 +409,16 @@ timespec_t gpsd_gpstime_resolv(struct gps_device_t *session,
     t.tv_sec = GPS_EPOCH + (week * SECS_PER_WEEK) + tow.tv_sec;
     t.tv_sec -= session->context->leap_seconds;
     t.tv_nsec = tow.tv_nsec;
+
+    // FIXME! 2038 rollover hack.
+    if (0 > t.tv_sec) {
+        // recompute for previous EPOCH
+        week -= 1024;
+	t.tv_sec = GPS_EPOCH + (week * SECS_PER_WEEK) + tow.tv_sec;
+	t.tv_sec -= session->context->leap_seconds;
+	gpsd_log(&session->context->errout, LOG_WARN,
+		 "2038 rollover. Adjusting to %ld\n", t.tv_sec);
+    }
 
     session->context->gps_week = week;
     session->context->gps_tow = tow.tv_sec + (tow.tv_nsec * 10e-9);

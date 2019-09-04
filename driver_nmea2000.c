@@ -309,17 +309,21 @@ static gps_mask_t hnd_129026(unsigned char *bu, int len, PGN *pgn, struct gps_de
  */
 static gps_mask_t hnd_126992(unsigned char *bu, int len, PGN *pgn, struct gps_device_t *session)
 {
-    //uint8_t        sid;
-    //uint8_t        source;
+    // uint8_t        sid;
+    // uint8_t        source;
+    uint32_t msecs;       /* time in ms */
 
     print_data(session->context, bu, len, pgn);
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "pgn %6d(%3d):\n", pgn->pgn, session->driver.nmea2000.unit);
 
-    //sid        = bu[0];
-    //source     = bu[1] & 0x0f;
+    // sid        = bu[0];
+    // source     = bu[1] & 0x0f;
 
-    session->newdata.time = getleu16(bu, 2)*24*60*60 + getleu32(bu, 4)/1e4;
+    session->newdata.time.tv_sec = (time_t)(getleu16(bu, 2) * 24 * 60 * 60);
+    msecs = getleu32(bu, 4);
+    session->newdata.time.tv_sec += msecs / 1000;
+    session->newdata.time.tv_nsec = (long)((msecs % 1000) * 1000000L);
 
     return TIME_SET | get_mode(session);
 }
@@ -440,6 +444,7 @@ static gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_de
      * [ last 3 repeated]
      */
     gps_mask_t mask;
+    uint32_t msecs;    /* time in ms */
 
     print_data(session->context, bu, len, pgn);
     gpsd_log(&session->context->errout, LOG_DATA,
@@ -448,7 +453,10 @@ static gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_de
     mask                             = 0;
     session->driver.nmea2000.sid[3]  = bu[0];
 
-    session->newdata.time            = getleu16(bu,1) * 24*60*60 + getleu32(bu, 3)/1e4;
+    session->newdata.time.tv_sec = (time_t)(getleu16(bu,1) * 24 * 60 * 60);
+    msecs = getleu32(bu, 3);
+    session->newdata.time.tv_sec += msecs / 1000;
+    session->newdata.time.tv_nsec = (long)((msecs % 1000) * 1000000L);
     mask                            |= TIME_SET;
 
     session->newdata.latitude        = getles64(bu, 7) * 1e-16;

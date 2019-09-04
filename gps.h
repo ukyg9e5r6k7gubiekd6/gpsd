@@ -59,6 +59,7 @@ extern "C" {
  *       change altitude to altHAE to gps_fix_t
  *       Move mag_var from gps_device_t to magnetic_var gps_data_t.
  *       add dgps_age and dgps_station, to gps_fix_t
+ *       Change gps_fix_t.time from timestamp_t to timespec_t
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -103,7 +104,7 @@ typedef struct timespec timespec_t;	/* Unix time as sec, nsec */
 /* GPS error estimates are all over the map, and often unspecified.
  * try for 1-sigma if we can... */
 struct gps_fix_t {
-    timestamp_t time;	/* Time of update */
+    timespec_t time;	/* Time of update */
     int    mode;	/* Mode of fix */
 #define MODE_NOT_SEEN	0	/* mode update not seen yet */
 #define MODE_NO_FIX	1	/* none */
@@ -2290,6 +2291,7 @@ extern double safe_atof(const char *);
 extern time_t mkgmtime(struct tm *);
 extern timestamp_t timestamp(void);
 extern timestamp_t iso8601_to_unix(char *);
+extern char *timespec_to_iso8601(timespec_t t, char[], size_t len);
 extern char *unix_to_iso8601(timestamp_t t, char[], size_t len);
 extern double earth_distance(double, double, double, double);
 extern double earth_distance_and_bearings(double, double, double, double,

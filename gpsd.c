@@ -1525,9 +1525,10 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
         /* many GPS spew random times until a valid GPS fix */
         /* allow override with -r optin */
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: no fix\n");
-    } else if (0 == isfinite(device->newdata.time)) {
+    } else if (0 == device->newdata.time.tv_sec) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: bad new time\n");
-    } else if (device->newdata.time <= device->pps_thread.fix_in.real.tv_sec) {
+    } else if (device->newdata.time.tv_sec <=
+               device->pps_thread.fix_in.real.tv_sec) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: Not a new time\n");
     } else if (!device->ship_to_ntpd) {
 	//gpsd_log(&context.errout, LOG_PROG, "NTP: No precision time report\n");

@@ -872,7 +872,7 @@ extern timestamp_t gpsd_gpstime_resolve(struct gps_device_t *,
 			      const unsigned short, const double);
 extern timespec_t gpsd_gpstime_resolv(struct gps_device_t *,
 			      const unsigned short, const timespec_t);
-extern timestamp_t gpsd_utc_resolve(struct gps_device_t *);
+extern timespec_t gpsd_utc_resolve(struct gps_device_t *);
 extern void gpsd_century_update(struct gps_device_t *, int);
 
 extern void gpsd_zero_satellites(struct gps_data_t *sp);

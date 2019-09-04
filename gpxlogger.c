@@ -21,6 +21,7 @@
 #include "gpsdclient.h"
 #include "revision.h"
 #include "os_compat.h"
+#include "timespec.h"
 
 static char *progname;
 static struct fixsource_t source;
@@ -134,7 +135,7 @@ static void conditionally_log_fix(struct gps_data_t *gpsdata)
     static double old_lat, old_lon;
     static bool first = true;
 
-    int_time = gpsdata->fix.time;
+    int_time = TSTONS(&gpsdata->fix.time);
     if ((int_time == old_int_time) || gpsdata->fix.mode < MODE_2D)
 	return;
 

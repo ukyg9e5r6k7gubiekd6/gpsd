@@ -313,7 +313,8 @@ void libgps_dump_state(struct gps_data_t *collect)
     if (collect->set & ONLINE_SET)
 	(void)fprintf(debugfp, "ONLINE: %lf\n", collect->online);
     if (collect->set & TIME_SET)
-	(void)fprintf(debugfp, "TIME: %lf\n", collect->fix.time);
+	(void)fprintf(debugfp, "TIME: %ld.%09ld\n",
+                      collect->fix.time.tv_sec, collect->fix.time.tv_nsec);
     /* NOTE: %.7f needed for cm level accurate GPS */
     if (collect->set & LATLON_SET)
 	(void)fprintf(debugfp, "LATLON: lat/lon: %.7lf %.7lf\n",

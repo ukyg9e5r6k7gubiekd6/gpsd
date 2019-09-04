@@ -5,12 +5,13 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 #include "gpsd.h"
 
 #if defined(ONCORE_ENABLE) && defined(BINARY_ENABLE)
 #include "bits.h"
+#include "timespec.h"
 
 static char enableEa[] = { 'E', 'a', 1 };
 static char enableBb[] = { 'B', 'b', 1 };
@@ -206,7 +207,8 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	unpacked_date.tm_wday = unpacked_date.tm_yday = 0;
 	nsec = (unsigned int) getbeu32(buf, 11);
 
-	session->newdata.time = (timestamp_t)mkgmtime(&unpacked_date) + nsec * 1e-9;
+	session->newdata.time.tv_sec = mkgmtime(&unpacked_date);
+	session->newdata.time.tv_nsec = nsec;
 	mask |= TIME_SET;
 	gpsd_log(&session->context->errout, LOG_DATA,
 		 "oncore NAVSOL - time: %04d-%02d-%02d %02d:%02d:%02d.%09d\n",
@@ -292,7 +294,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 		(double)session->driver.oncore.azimuth[j];
 	    st++;
 	}
-    session->gpsdata.skyview_time = session->newdata.time;
+    session->gpsdata.skyview_time = TSTONS(&session->newdata.time);
     session->gpsdata.satellites_used = (int)nsv;
     session->gpsdata.satellites_visible = (int)st;
 
@@ -308,9 +310,10 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     (void)oncore_control_send(session, (char *)pollEn, sizeof(pollEn));
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "NAVSOL: time=%.2f lat=%.2f lon=%.2f altMSL=%.2f speed=%.2f "
+	     "NAVSOL: time=%ld.%09ld lat=%.2f lon=%.2f altMSL=%.2f speed=%.2f "
              "track=%.2f mode=%d status=%d visible=%d used=%d\n",
-	     session->newdata.time, session->newdata.latitude,
+	     session->newdata.time.tv_sec, session->newdata.time.tv_nsec,
+             session->newdata.latitude,
 	     session->newdata.longitude, session->newdata.altHAE,
 	     session->newdata.speed, session->newdata.track,
 	     session->newdata.mode, session->gpsdata.status,

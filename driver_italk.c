@@ -40,6 +40,8 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
                                     unsigned char *buf, size_t len)
 {
     unsigned short flags, pflags;
+    timespec_t ts_tow;
+    uint32_t tow;	     /* Time of week [ms] */
 
     gps_mask_t mask = 0;
     if (len != 296) {
@@ -62,9 +64,11 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
         || 0 == (flags & FIXINFO_FLAG_VALID))
         return mask;
 
-    session->newdata.time = gpsd_gpstime_resolve(session,
-        (unsigned short) getles16(buf, 7 + 82),
-        (unsigned int)getleu32(buf, 7 + 84) / 1000.0);
+    tow = getleu32(buf, 7 + 84);   /* tow in ms */
+    ts_tow.tv_sec = tow / 1000;
+    ts_tow.tv_nsec = (tow % 1000) * 1000000L;
+    session->newdata.time = gpsd_gpstime_resolv(session,
+        (unsigned short) getles16(buf, 7 + 82), ts_tow);
     mask |= TIME_SET | NTPTIME_IS;
 
     session->newdata.ecef.x = (double)(getles32(buf, 7 + 96) / 100.0);
@@ -110,10 +114,11 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
-             "NAV_FIX: time=%.2f, ecef x:%.2f y:%.2f z:%.2f altHAE=%.2f "
+             "NAV_FIX: time=%ld.%09ld, ecef x:%.2f y:%.2f z:%.2f altHAE=%.2f "
              "speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f "
              "pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f\n",
-             session->newdata.time, session->newdata.ecef.x,
+             session->newdata.time.tv_sec,
+             session->newdata.time.tv_nsec, session->newdata.ecef.x,
              session->newdata.ecef.y, session->newdata.ecef.z,
              session->newdata.altHAE, session->newdata.speed,
              session->newdata.track, session->newdata.climb,
@@ -169,8 +174,9 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
         mask = USED_IS | SATELLITE_SET;;
 
         gpsd_log(&session->context->errout, LOG_DATA,
-                 "PRN_STATUS: time=%.2f visible=%d used=%d mask={USED|SATELLITE}\n",
-                 session->newdata.time,
+                 "PRN_STATUS: time=%ld.%09ld visible=%d used=%d "
+                 "mask={USED|SATELLITE}\n",
+                 session->newdata.time.tv_sec, session->newdata.time.tv_nsec,
                  session->gpsdata.satellites_visible,
                  session->gpsdata.satellites_used);
     }
@@ -183,6 +189,8 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
 {
     int leap;
     unsigned short flags;
+    timespec_t ts_tow;
+    uint32_t tow;	     /* Time of week [ms] */
 
     if (len != 64) {
         gpsd_log(&session->context->errout, LOG_PROG,
@@ -199,12 +207,14 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
     if (session->context->leap_seconds < leap)
         session->context->leap_seconds = leap;
 
-    session->newdata.time = gpsd_gpstime_resolve(session,
-        (unsigned short) getleu16(buf, 7 + 36),
-        (unsigned int)getleu32(buf, 7 + 38)  / 1000.0);
+    tow = getleu32(buf, 7 + 38);    /* in ms */
+    ts_tow.tv_sec = tow / 1000;
+    ts_tow.tv_nsec = (tow % 1000) * 1000000L;
+    session->newdata.time = gpsd_gpstime_resolv(session,
+        (unsigned short) getleu16(buf, 7 + 36), ts_tow);
     gpsd_log(&session->context->errout, LOG_DATA,
-             "UTC_IONO_MODEL: time=%.2f mask={TIME}\n",
-             session->newdata.time);
+             "UTC_IONO_MODEL: time=%ld.%09ld mask={TIME}\n",
+             session->newdata.time.tv_sec, session->newdata.time.tv_nsec);
     return TIME_SET | NTPTIME_IS;
 }
 
@@ -247,6 +257,7 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
 {
     unsigned short flags, n, i;
     unsigned int tow;             /* time of week, in ms */
+    timespec_t ts_tow;
 
     n = (unsigned short) getleu16(buf, 7 + 4);
     if ((n < 1) || (n > MAXCHANNELS)){
@@ -266,11 +277,12 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
         return 0; // bail if measurement time not valid.
 
     tow = (unsigned int)getleu32(buf, 7 + 38);
-    session->newdata.time = gpsd_gpstime_resolve(session,
-        (unsigned short int)getleu16((char *)buf, 7 + 8), tow / 1000.0);
+    ts_tow.tv_sec = tow / 1000;
+    ts_tow.tv_nsec = (tow % 1000) * 1000000L;
+    session->newdata.time = gpsd_gpstime_resolv(session,
+        (unsigned short int)getleu16((char *)buf, 7 + 8), ts_tow);
 
-    session->gpsdata.raw.mtime.tv_sec = (time_t)session->newdata.time;
-    session->gpsdata.raw.mtime.tv_nsec = (tow % 1000) * 1000000;
+    session->gpsdata.raw.mtime = session->newdata.time;
 
     /* this is so we can tell which never got set */
     for (i = 0; i < MAXCHANNELS; i++)

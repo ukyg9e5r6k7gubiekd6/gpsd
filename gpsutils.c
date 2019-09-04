@@ -261,7 +261,6 @@ void gps_clear_fix(struct gps_fix_t *fixp)
     fixp->mode = MODE_NOT_SEEN;
     fixp->sep = NAN;
     fixp->speed = NAN;
-    fixp->time = NAN;
     fixp->track = NAN;
     /* clear ECEF too */
     fixp->ecef.x = NAN;
@@ -462,6 +461,8 @@ time_t mkgmtime(struct tm * t)
 timestamp_t iso8601_to_unix(char *isotime)
 /* ISO8601 UTC to Unix UTC, no leapsecond correction. */
 {
+    timestamp_t ret;
+
 #ifndef __clang_analyzer__
 #ifndef USE_QT
     char *dp = NULL;
@@ -565,7 +566,7 @@ timestamp_t iso8601_to_unix(char *isotime)
      * can be wrong; you have to do a redirect through the IANA historical
      * timezone database to get it right.
      */
-    return (timestamp_t)mkgmtime(&tm) + usec;
+    ret = (timestamp_t)mkgmtime(&tm) + usec;
 #else
     double usec = 0;
 
@@ -574,50 +575,60 @@ timestamp_t iso8601_to_unix(char *isotime)
     QStringList sl = t.split(".");
     if (sl.size() > 1)
 	usec = sl[1].toInt() / pow(10., (double)sl[1].size());
-    return (timestamp_t)(d.toTime_t() + usec);
+    ret = (timestamp_t)(d.toTime_t() + usec);
 #endif
 #endif /* __clang_analyzer__ */
+    return ret;
+}
+
+/* Unix timespec UTC time to ISO8601, no timezone adjustment */
+/* example: 2007-12-11T23:38:51.033Z */
+char *timespec_to_iso8601(timespec_t fixtime, char isotime[], size_t len)
+{
+    struct tm when;
+    char timestr[30];
+    long fracsec;
+
+    if (0 > fixtime.tv_sec) {
+        // Allow 0 for testing of 1970-01-01T00:00:00.000Z
+        return strncpy(isotime, "NaN", len);
+    }
+    if (999499999 < fixtime.tv_nsec) {
+        /* round up */
+        fixtime.tv_sec++;
+        fixtime.tv_nsec = 0;
+    }
+#ifdef HAVE_GMTIME_R
+    (void)gmtime_r(&fixtime.tv_sec, &when);
+#else
+    /* Fallback to try with gmtime_s - primarily for Windows */
+    (void)gmtime_s(&when, &fixtime.tv_sec);
+#endif
+
+    /*
+     * Do not mess casually with the number of decimal digits in the
+     * format!  Most GPSes report over serial links at 0.01s or 0.001s
+     * precision.  Round to 0.001s
+     */
+    fracsec = (fixtime.tv_nsec + 500000) / 1000000;
+
+    (void)strftime(timestr, sizeof(timestr), "%Y-%m-%dT%H:%M:%S", &when);
+    (void)snprintf(isotime, len, "%s.%03ldZ",timestr, fracsec);
+
+    return isotime;
 }
 
 /* Unix UTC time to ISO8601, no timezone adjustment */
 /* example: 2007-12-11T23:38:51.033Z */
 char *unix_to_iso8601(timestamp_t fixtime, char isotime[], size_t len)
 {
-    struct tm when;
-    double integral, fractional;
-    time_t intfixtime;
-    char timestr[30];
-    char fractstr[10];
+    timespec_t ts_fixtime;
 
-    if (!isfinite(fixtime)) {
+    if (0 == isfinite(fixtime)) {
         return strncpy(isotime, "NaN", len);
     }
-    fractional = modf(fixtime, &integral);
-    /* snprintf rounding of %3f can get ugly, so pre-round */
-    if ( 0.999499999 < fractional) {
-        /* round up */
-        integral++;
-        /* give the fraction a nudge to ensure rounding */
-        fractional += 0.0005;
-    }
-    intfixtime = (time_t) integral;
-#ifdef HAVE_GMTIME_R
-    (void)gmtime_r(&intfixtime, &when);
-#else
-    /* Fallback to try with gmtime_s - primarily for Windows */
-    (void)gmtime_s(&when, &intfixtime);
-#endif
-
-    (void)strftime(timestr, sizeof(timestr), "%Y-%m-%dT%H:%M:%S", &when);
-    /*
-     * Do not mess casually with the number of decimal digits in the
-     * format!  Most GPSes report over serial links at 0.01s or 0.001s
-     * precision.
-     */
-    (void)snprintf(fractstr, sizeof(fractstr), "%.3f", fractional);
-    /* add fractional part, ignore leading 0; "0.2" -> ".2" */
-    (void)snprintf(isotime, len, "%s%sZ",timestr, strchr(fractstr,'.'));
-    return isotime;
+    DTOTS(&ts_fixtime, fixtime);
+    return timespec_to_iso8601(ts_fixtime, isotime, len);
 }
 
 #define Deg2Rad(n)	((n) * DEG_2_RAD)

@@ -376,10 +376,12 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	time_l -= GPSD_LE16TOH(pvt->leap_sec);
 	session->context->leap_seconds = (int)GPSD_LE16TOH(pvt->leap_sec);
 	session->context->valid = LEAP_SECOND_VALID;
-	// gps_tow is always like x.999 or x.998 so just round it
+	// gps_tow is always like x.999 or x.998 just round it to nearest sec
+        // FIXME! this will break 5Hz garmins...
 	time_l += (time_t) round(pvt->gps_tow);
 	session->context->gps_tow = pvt->gps_tow;
-	session->newdata.time = (timestamp_t)time_l;
+	session->newdata.time.tv_sec = time_l;
+	session->newdata.time.tv_nsec = 0;
 	gpsd_log(&session->context->errout, LOG_PROG,
 		 "Garmin: time_l: %ld\n", (long int)time_l);
 
@@ -447,8 +449,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
         if (session->context->errout.debug >= LOG_INF) {
 
 	    gpsd_log(&session->context->errout, LOG_INF,
-		     "Garmin: UTC Time: %lf\n",
-		     session->newdata.time);
+		     "Garmin: UTC Time: %ld\n",
+		     session->newdata.time.tv_sec);
 	    gpsd_log(&session->context->errout, LOG_INF,
 		     "Garmin: Geoid Separation (MSL-WGS84): from garmin %lf, "
                      "calculated %lf\n",
@@ -483,9 +485,9 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		mask |= NTPTIME_IS;
 	}
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "Garmin: PVT_DATA: time=%.2f, lat=%.2f lon=%.2f "
+		 "Garmin: PVT_DATA: time=%ld, lat=%.2f lon=%.2f "
 		 "eph=%.2f sep=%.2f epv=%.2f  mode=%d status=%d\n",
-		 session->newdata.time,
+		 session->newdata.time.tv_sec,
 		 session->newdata.latitude,
 		 session->newdata.longitude,
 		 session->newdata.eph,

@@ -49,8 +49,8 @@ static void assert_integer(char *attr, int fld, int val)
     if (fld != val) {
 	(void)fprintf(stderr, "case %d FAILED\n", current_test);
 	(void)fprintf(stderr,
-		      "'%s' integer attribute eval failed, value = %d.\n",
-		      attr, fld);
+		      "'%s' integer attribute eval failed, value = %d s/b %d.\n",
+		      attr, fld, val);
 	exit(EXIT_FAILURE);
     }
 }
@@ -343,7 +343,8 @@ static void jsontest(int i)
 	assert_case(status);
 	assert_string("device", gpsdata.dev.path, "GPS#1");
 	assert_integer("mode", gpsdata.fix.mode, 3);
-	assert_real("time", gpsdata.fix.time, 1119168761.8900001);
+	assert_integer("time.tv_sec", gpsdata.fix.time.tv_sec, 1119168761);
+	assert_integer("time.tv_nsec", gpsdata.fix.time.tv_nsec / 10000000, 89);
 	assert_real("lon", gpsdata.fix.longitude, 46.498203637);
 	assert_real("lat", gpsdata.fix.latitude, 7.568074350);
 	break;

@@ -35,6 +35,7 @@
 #include "driver_ubx.h"
 
 #include "bits.h"
+#include "timespec.h"
 
 /*
  * A ubx packet looks like this:
@@ -439,7 +440,7 @@ ubx_msg_nav_posecef(struct gps_device_t *session, unsigned char *buf,
  * Navigation Position Velocity Time solution message
  * UBX-NAV-PVT Class 1, ID 7
  *
- * Not in u-blox 5
+ * Not in u-blox 5 or 6, present in u-blox 7
  */
 static gps_mask_t
 ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
@@ -529,7 +530,6 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     }
 
     if ((valid & UBX_NAV_PVT_VALID_DATE_TIME) == UBX_NAV_PVT_VALID_DATE_TIME) {
-        double subseconds;
         unpacked_date.tm_year = (uint16_t)getleu16(buf, 4) - 1900;
         unpacked_date.tm_mon = (uint8_t)getub(buf, 6) - 1;
         unpacked_date.tm_mday = (uint8_t)getub(buf, 7);
@@ -539,9 +539,10 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
         unpacked_date.tm_isdst = 0;
         unpacked_date.tm_wday = 0;
         unpacked_date.tm_yday = 0;
-        subseconds = 1e-9 * (int32_t)getles32(buf, 16);
-        session->newdata.time = \
-            (timestamp_t)mkgmtime(&unpacked_date) + subseconds;
+        session->newdata.time.tv_sec = mkgmtime(&unpacked_date);
+        /* field 16, nano, can be negative! So normalize */
+        session->newdata.time.tv_nsec = getles32(buf, 16);
+        TS_NORM(&session->newdata.time);
         mask |= TIME_SET | NTPTIME_IS | GOODTIME_IS;
     }
 
@@ -569,10 +570,11 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     mask |= HERR_SET | SPEEDERR_SET | VERR_SET;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-         "NAV-PVT: flags=%02x time=%.2f lat=%.2f lon=%.2f altHAE=%.2f "
+         "NAV-PVT: flags=%02x time=%ld.%09ld lat=%.2f lon=%.2f altHAE=%.2f "
          "track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
          flags,
-         session->newdata.time,
+         session->newdata.time.tv_sec,
+         session->newdata.time.tv_nsec,
          session->newdata.latitude,
          session->newdata.longitude,
          session->newdata.altHAE,
@@ -688,13 +690,13 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
 #define DATE_VALID      (UBX_SOL_VALID_WEEK | UBX_SOL_VALID_TIME)
     if ((flags & DATE_VALID) == DATE_VALID) {
         unsigned short week;
-        int32_t fTOW;      /* fractional part of TOW in ns */
-        double TOW;       /* complete TOW in seconds */
+        timespec_t ts_tow;
 
-        fTOW = (double)getles32(buf, 4);      /* Fractional part of TOW */
-        TOW = (session->driver.ubx.iTOW * 1e-3) + (fTOW * 1e-9);
+        ts_tow.tv_sec = (timestamp_t)(session->driver.ubx.iTOW / 1000);
+        ts_tow.tv_nsec = (long)getles32(buf, 4);
+        ts_tow.tv_nsec += (long)((session->driver.ubx.iTOW % 1000) * 1000000);
         week = (unsigned short)getles16(buf, 8);
-        session->newdata.time = gpsd_gpstime_resolve(session, week, TOW);
+        session->newdata.time = gpsd_gpstime_resolv(session, week, ts_tow);
         mask |= TIME_SET | NTPTIME_IS | GOODTIME_IS;
     }
 #undef DATE_VALID
@@ -751,9 +753,10 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     mask |= MODE_SET | STATUS_SET;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-             "UBX-NAV-SOL: time=%.2f ecef x:%.2f y:%.2f z:%.2f track=%.2f "
+             "UBX-NAV-SOL: time=%ld.%09ld ecef x:%.2f y:%.2f z:%.2f track=%.2f "
              "speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
-             session->newdata.time,
+             session->newdata.time.tv_sec,
+             session->newdata.time.tv_nsec,
              session->newdata.ecef.x,
              session->newdata.ecef.y,
              session->newdata.ecef.z,
@@ -1014,22 +1017,24 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
     if ((valid & VALID_TIME) == VALID_TIME) {
 #undef VALID_TIME
         uint16_t week;
-        double fTOW;      /* fractional part of TOW in ns */
-        double TOW;       /* complete TOW in seconds */
         double tAcc;      /* Time Accuracy Estimate in ns */
+        timespec_t ts_tow;
 
-        fTOW = (double)getles32(buf, 4);      /* Fractional part of TOW */
         week = getles16(buf, 8);
+        ts_tow.tv_sec = (timestamp_t)(session->driver.ubx.iTOW / 1000);
+        ts_tow.tv_nsec = (long)((session->driver.ubx.iTOW % 1000) * 1000000L);
+        ts_tow.tv_nsec += (long)getles32(buf, 4);
+        session->newdata.time = gpsd_gpstime_resolv(session, week, ts_tow);
+
         tAcc = (double)getleu32(buf, 12);     /* tAcc in ms */
-        TOW = (session->driver.ubx.iTOW * 1e-3) + (fTOW * 1e-9);
-        session->newdata.time = gpsd_gpstime_resolve(session, week, TOW);
         session->newdata.ept = tAcc * 1e-9;
         mask |= (TIME_SET | NTPTIME_IS);
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
-             "TIMEGPS: time=%.2f mask={TIME}\n",
-             session->newdata.time);
+             "TIMEGPS: time=%ld.%09ld mask={TIME}\n",
+             session->newdata.time.tv_sec,
+             session->newdata.time.tv_nsec);
     return mask;
 }
 
@@ -1332,13 +1337,14 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
                                const unsigned char *buf,
                                size_t data_len)
 {
-    double rcvTow, t_intp;
+    double rcvTow;
     uint16_t week;
     int8_t leapS;
     uint8_t numMeas;
     uint8_t recStat;
     int i;
     const char * obs_code;
+    timespec_t ts_tow;
 
     if (16 > data_len) {
         gpsd_log(&session->context->errout, LOG_WARN,
@@ -1363,12 +1369,9 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
         session->context->valid |= LEAP_SECOND_VALID;
     }
     /* convert GPS weeks and "approximately" GPS TOW to UTC */
-    session->newdata.time = gpsd_gpstime_resolve(session, week, rcvTow);
-    /* get mtime in GPS time, not UTC */
-    session->gpsdata.raw.mtime.tv_nsec =
-        modf(session->newdata.time, &t_intp) * 10e8;
-    /* u-blox says to add in leapS, valid or not */
-    session->gpsdata.raw.mtime.tv_sec = (time_t)t_intp + leapS;
+    DTOTS(&ts_tow, rcvTow);
+    // Do not set newdata.time.  set gpsdata.raw.mtime
+    session->gpsdata.raw.mtime = gpsd_gpstime_resolv(session, week, ts_tow);
 
     /* zero the measurement data */
     /* so we can tell which meas never got set */
@@ -2021,7 +2024,7 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
              */
         }
         session->driver.ubx.last_msgid = msgid;
-        session->driver.ubx.last_time = session->newdata.time;
+        session->driver.ubx.last_time = TSTONS(&session->newdata.time);
     } else {
         /* no time */
         /* debug
