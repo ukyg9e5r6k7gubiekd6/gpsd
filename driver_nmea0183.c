@@ -1766,7 +1766,8 @@ static gps_mask_t processGSV(int count, char *field[],
     gpsd_zero_satellites(&session->gpsdata);
     return ONLINE_SET;
   sane:
-    session->gpsdata.skyview_time = NAN;
+    session->gpsdata.skyview_time.tv_sec = 0;
+    session->gpsdata.skyview_time.tv_nsec = 0;
     gpsd_log(&session->context->errout, LOG_DATA,
              "xxGSV: Satellite data OK (%d of %d).\n",
              session->nmea.part, session->nmea.await);
@@ -1780,8 +1781,9 @@ static gps_mask_t processGSV(int count, char *field[],
 #if __UNUSED
     /* debug code */
     gpsd_log(&session->context->errout, LOG_ERROR,
-        "x%cGSV: set skyview_time %.2f frac_time %.2f\n", GSV_TALKER,
-        session->gpsdata.skyview_time,
+        "x%cGSV: set skyview_time %ld.%09ld frac_time %.2f\n", GSV_TALKER,
+        session->gpsdata.skyview_time.tv_sec,
+        session->gpsdata.skyview_time.tv_nsec,
         session->nmea.this_frac_time);
 #endif
 
@@ -2771,7 +2773,8 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
         gpsd_log(&session->context->errout, LOG_DATA,
                  "PASHR,SAT: used=%d\n",
                  session->gpsdata.satellites_used);
-        session->gpsdata.skyview_time = NAN;
+	session->gpsdata.skyview_time.tv_sec = 0;
+	session->gpsdata.skyview_time.tv_nsec = 0;
         mask |= SATELLITE_SET | USED_IS;
 
     } else if (0 == strcmp("T", field[3])) { /* Assume OxTS PASHR */

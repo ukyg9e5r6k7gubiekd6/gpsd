@@ -140,10 +140,13 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
         mask = 0;
     } else {
         unsigned int i, nsv, nchan, st;
+        uint32_t msec = getleu32(buf, 7 + 6);
+        timespec_t ts_tow;
 
-        session->gpsdata.skyview_time = gpsd_gpstime_resolve(session,
-            (unsigned short)getleu16(buf, 7 + 4),
-            (unsigned int)getleu32(buf, 7 + 6) / 1000.0),
+        MSTOTS(&ts_tow, msec);
+
+        session->gpsdata.skyview_time = gpsd_gpstime_resolv(session,
+            (unsigned short)getleu16(buf, 7 + 4), ts_tow);
         gpsd_zero_satellites(&session->gpsdata);
         nchan = (unsigned int)getleu16(buf, 7 + 50);
         if (nchan > MAX_NR_VISIBLE_PRNS)

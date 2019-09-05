@@ -801,7 +801,8 @@ static gps_mask_t greis_msg_ET(struct gps_device_t *session,
     }
 
     /* Skyview time does not differ from time in GT message */
-    session->gpsdata.skyview_time = NAN;
+    session->gpsdata.skyview_time.tv_sec = 0;
+    session->gpsdata.skyview_time.tv_nsec = 0;
 
     gpsd_log(&session->context->errout, LOG_DEBUG,
 	     "GREIS: ET, seen: az %d, ec %d, el %d, rt %d, si %d, uo %d\n",

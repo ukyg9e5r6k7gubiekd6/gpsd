@@ -262,7 +262,8 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	    session->gpsdata.skyview[i].ss = (double)s3*0.1;
 	    session->gpsdata.skyview[i].used = (bool)(ul2 & (1<<27));
 	}
-	session->gpsdata.skyview_time = NAN;
+	session->gpsdata.skyview_time.tv_sec = 0;
+	session->gpsdata.skyview_time.tv_nsec = 0;
 	mask |= SATELLITE_SET | USED_IS;
 	break;
     case 0x3e:

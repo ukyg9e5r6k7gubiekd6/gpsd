@@ -678,11 +678,14 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
     //uint8_t sats_tracked = getub(buf, 13);
     //uint8_t used_sats = getub(buf, 14);
     //uint8_t pdop = getub(buf, 15);
+    timespec_t ts_tow;
+
+    MSTOTS(&ts_tow, tow);
 
     /* Timestamp */
-    session->gpsdata.skyview_time = gpsd_gpstime_resolve(session,
+    session->gpsdata.skyview_time = gpsd_gpstime_resolv(session,
 						      (unsigned short)week,
-						      (double)tow / 1000.0);
+						      ts_tow);
 
     /* Give this driver a single point of truth about DOPs */
     //session->gpsdata.dop.pdop = (int)pdop / 10.0;

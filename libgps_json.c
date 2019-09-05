@@ -244,6 +244,8 @@ static int json_raw_read(const char *buf, struct gps_data_t *gpsdata,
 static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 			 const char **endptr)
 {
+    timestamp_t skytime;
+
     const struct json_attr_t json_attrs_satellites[] = {
 	/* *INDENT-OFF* */
 	{"PRN",	   t_short,   STRUCTOBJECT(struct satellite_t, PRN)},
@@ -269,9 +271,7 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 	{"class",      t_check,   .dflt.check = "SKY"},
 	{"device",     t_string,  .addr.string  = gpsdata->dev.path,
 	                             .len = sizeof(gpsdata->dev.path)},
-	{"time",       t_time,    .addr.real = &gpsdata->skyview_time,
-	      	                     .dflt.real = NAN},
-	{"time",       t_real,    .addr.real = &gpsdata->skyview_time,
+	{"time",       t_time,    .addr.real = &skytime,
 	      	                     .dflt.real = NAN},
 	{"hdop",       t_real,    .addr.real    = &gpsdata->dop.hdop,
 	                             .dflt.real = NAN},
@@ -310,6 +310,14 @@ static int json_sky_read(const char *buf, struct gps_data_t *gpsdata,
 	if (gpsdata->skyview[i].used) {
 	    gpsdata->satellites_used++;
 	}
+    }
+
+    // convert skytime back to timespec_t
+    if (0 == isfinite(skytime)) {
+	gpsdata->skyview_time.tv_sec = 0;
+	gpsdata->skyview_time.tv_nsec = 0;
+    } else {
+	DTOTS(&gpsdata->skyview_time, skytime);
     }
 
     return 0;

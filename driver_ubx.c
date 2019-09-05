@@ -1118,7 +1118,8 @@ ubx_msg_nav_sat(struct gps_device_t *session, unsigned char *buf,
     /* UBX does not give us these, so recompute */
     session->gpsdata.dop.xdop = NAN;
     session->gpsdata.dop.ydop = NAN;
-    session->gpsdata.skyview_time = NAN;
+    session->gpsdata.skyview_time.tv_sec = 0;
+    session->gpsdata.skyview_time.tv_nsec = 0;
     session->gpsdata.satellites_visible = (int)st;
     session->gpsdata.satellites_used = (int)nsv;
     gpsd_log(&session->context->errout, LOG_DATA,
@@ -1209,7 +1210,8 @@ ubx_msg_nav_svinfo(struct gps_device_t *session, unsigned char *buf,
     /* UBX does not give us these, so recompute */
     session->gpsdata.dop.xdop = NAN;
     session->gpsdata.dop.ydop = NAN;
-    session->gpsdata.skyview_time = NAN;
+    session->gpsdata.skyview_time.tv_sec = 0;
+    session->gpsdata.skyview_time.tv_nsec = 0;
     session->gpsdata.satellites_visible = (int)st;
     session->gpsdata.satellites_used = (int)nsv;
     gpsd_log(&session->context->errout, LOG_DATA,

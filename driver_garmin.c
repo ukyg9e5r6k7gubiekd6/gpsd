@@ -562,7 +562,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    j++;
 
 	}
-	session->gpsdata.skyview_time = NAN;
+	session->gpsdata.skyview_time.tv_sec = 0;
+	session->gpsdata.skyview_time.tv_nsec = 0;
 	if (session->gpsdata.satellites_visible > 0)
 	    mask |= SATELLITE_SET;
 	if (session->gpsdata.satellites_used > 0)

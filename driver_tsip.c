@@ -501,7 +501,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		session->gpsdata.skyview[i].used = false;
 	    }
 	    if (++i == session->gpsdata.satellites_visible) {
-		session->gpsdata.skyview_time = NAN;
+		session->gpsdata.skyview_time.tv_sec = 0;
+		session->gpsdata.skyview_time.tv_nsec = 0;
 		mask |= SATELLITE_SET;	/* last of the series */
 	    }
 	    if (i > session->gpsdata.satellites_visible)
@@ -548,7 +549,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		session->gpsdata.skyview[i].used = false;
 	    }
 	    if (++i == session->gpsdata.satellites_visible) {
-		session->gpsdata.skyview_time = NAN;
+		session->gpsdata.skyview_time.tv_sec = 0;
+		session->gpsdata.skyview_time.tv_nsec = 0;
 		mask |= SATELLITE_SET;	/* last of the series */
 	    }
 	    if (i > session->gpsdata.satellites_visible)

@@ -213,16 +213,18 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     return mask;
 }
 
+/* Message 1002: Channel Summary Message */
 static gps_mask_t handle1002(struct gps_device_t *session)
-/* satellite signal quality report */
 {
     int i;
+    timespec_t ts_tow;
 
     /* ticks                      = getzlong(6); */
     /* sequence                   = getzword(8); */
     /* measurement_sequence       = getzword(9); */
     int gps_week = getzword(10);
     int gps_seconds = getzlong(11);
+    // FIXME! do not ignore ns!
     /* gps_nanoseconds            = getzlong(13); */
     /* Note: this week counter is not limited to 10 bits. */
     session->context->gps_week = (unsigned short)gps_week;
@@ -239,9 +241,11 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	session->gpsdata.skyview[i].ss = (float)getzword(17 + (3 * i));
 	session->gpsdata.skyview[i].used = (bool)(status & 1);
     }
-    session->gpsdata.skyview_time = gpsd_gpstime_resolve(session,
+    ts_tow.tv_sec = (time_t)gps_seconds;
+    ts_tow.tv_nsec = 0;    /* FIXME! Add in ns! */
+    session->gpsdata.skyview_time = gpsd_gpstime_resolv(session,
 						      (unsigned short)gps_week,
-						      (double)gps_seconds);
+						      ts_tow);
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "1002: visible=%d used=%d mask={SATELLITE|USED}\n",
 	     session->gpsdata.satellites_visible,
@@ -288,7 +292,8 @@ static gps_mask_t handle1003(struct gps_device_t *session)
 	    session->gpsdata.skyview[i].ss = NAN;
 	}
     }
-    session->gpsdata.skyview_time = NAN;
+    session->gpsdata.skyview_time.tv_sec = 0;
+    session->gpsdata.skyview_time.tv_nsec = 0;
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "NAVDOP: visible=%d gdop=%.2f pdop=%.2f "
 	     "hdop=%.2f vdop=%.2f tdop=%.2f mask={SATELLITE|DOP}\n",

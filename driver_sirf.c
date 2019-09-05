@@ -844,7 +844,7 @@ static gps_mask_t sirf_msg_67_16(struct gps_device_t *session,
     gps_tow_ns.tv_sec = gps_tow;
     gps_tow_ns.tv_nsec = gps_tow_sub_ms;
     session->newdata.time = gpsd_gpstime_resolv(session, gps_week, gps_tow_ns);
-    session->gpsdata.skyview_time = TSTONS(&session->newdata.time);
+    session->gpsdata.skyview_time = session->newdata.time;
     time_bias = getbes16(buf, 12);
     /* time_accuracy is an odd 8 bit float */
     time_accuracy = getub(buf, 14);
@@ -1337,13 +1337,17 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
                                   unsigned char *buf, size_t len)
 {
     int st, i, j, nsv;
+    uint32_t hsec;        /* TOW in hundredths of seconds */
+    timespec_t ts_tow;
 
     if (len != 188)
         return 0;
 
-    session->gpsdata.skyview_time = gpsd_gpstime_resolve(session,
-        (unsigned short)getbes16(buf, 1),
-        (unsigned int)getbeu32(buf, 3) * 1e-2);
+    hsec = getbeu32(buf, 3);
+    ts_tow.tv_sec = hsec / 100;
+    ts_tow.tv_nsec = (long)((hsec % 100) * 10000000L);
+    session->gpsdata.skyview_time = gpsd_gpstime_resolv(session,
+        (unsigned short)getbes16(buf, 1), ts_tow);
 
     gpsd_zero_satellites(&session->gpsdata);
     for (i = st = nsv = 0; i < SIRF_CHANNELS; i++) {
@@ -1407,10 +1411,11 @@ static gps_mask_t sirf_msg_svinfo(struct gps_device_t *session,
     } else {
         /* SiRF says if 3 sats in view the time is good */
         gpsd_log(&session->context->errout, LOG_PROG,
-                 "SiRF: NTPD valid time MID 0x04, seen=%#02x, time:%.2lf, "
+                 "SiRF: NTPD valid time MID 0x04, seen=%#02x, time:%ld.%09ld, "
                  "leap:%d\n",
                  session->driver.sirf.time_seen,
-                 session->gpsdata.skyview_time,
+                 session->gpsdata.skyview_time.tv_sec,
+                 session->gpsdata.skyview_time.tv_nsec,
                  session->context->leap_seconds);
     }
     gpsd_log(&session->context->errout, LOG_DATA,

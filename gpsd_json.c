@@ -333,11 +333,12 @@ void json_sky_dump(const struct gps_data_t *datap,
     (void)strlcpy(reply, "{\"class\":\"SKY\",", replylen);
     if (datap->dev.path[0] != '\0')
 	str_appendf(reply, replylen, "\"device\":\"%s\",", datap->dev.path);
-    if (isfinite(datap->skyview_time) != 0) {
+    if (0 < datap->skyview_time.tv_sec) {
 	char tbuf[JSON_DATE_MAX+1];
 	str_appendf(reply, replylen,
 		       "\"time\":\"%s\",",
-		       unix_to_iso8601(datap->skyview_time, tbuf, sizeof(tbuf)));
+		       timespec_to_iso8601(datap->skyview_time,
+                                      tbuf, sizeof(tbuf)));
     }
     if (isfinite(datap->dop.xdop) != 0)
 	str_appendf(reply, replylen, "\"xdop\":%.2f,", datap->dop.xdop);

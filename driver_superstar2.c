@@ -208,7 +208,8 @@ superstar2_msg_svinfo(struct gps_device_t *session,
 	if (session->gpsdata.skyview[i].PRN)
 	    st++;
     }
-    session->gpsdata.skyview_time = NAN;
+    session->gpsdata.skyview_time.tv_sec = 0;
+    session->gpsdata.skyview_time.tv_nsec = 0;
     session->gpsdata.satellites_used = nsv;
     session->gpsdata.satellites_visible = st;
     gpsd_log(&session->context->errout, LOG_DATA,

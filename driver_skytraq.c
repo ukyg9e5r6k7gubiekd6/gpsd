@@ -176,8 +176,7 @@ static gps_mask_t sky_msg_DC(struct gps_device_t *session,
     unsigned int tow;   /* receiver tow 0 - 604799999 in mS */
     unsigned int mp;    /* measurement period 1 - 1000 ms */
     /* calculated */
-    double	f_tow;  /* tow in seconds */
-    unsigned int msec;  /* mSec part of tow */
+    timespec_t ts_tow;
 
     if ( 10 != len)
 	return 0;
@@ -185,17 +184,17 @@ static gps_mask_t sky_msg_DC(struct gps_device_t *session,
     iod = (unsigned int)getub(buf, 1);
     wn = getbeu16(buf, 2);
     tow = getbeu32(buf, 4);
-    f_tow = (double)(tow / 1000);
-    msec = tow % 1000;
     mp = getbeu16(buf, 8);
+    MSTOTS(&ts_tow, tow);
 
     /* should this be newdata.skyview_time? */
-    session->gpsdata.skyview_time = gpsd_gpstime_resolve(session, wn, f_tow );
+    session->gpsdata.skyview_time = gpsd_gpstime_resolv(session, wn, ts_tow);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "Skytraq: MID 0xDC: iod=%u, wn=%u, tow=%u, mp=%u, t=%lld.%03u\n",
+	     "Skytraq: MID 0xDC: iod=%u, wn=%u, tow=%u, mp=%u, t=%ld.%09ld\n",
 	     iod, wn, tow, mp,
-	     (long long)session->gpsdata.skyview_time, msec);
+	     (long)session->gpsdata.skyview_time.tv_sec,
+	     session->gpsdata.skyview_time.tv_nsec);
     return 0;
 }
 
@@ -218,7 +217,7 @@ static gps_mask_t sky_msg_DD(struct gps_device_t *session,
 	     iod, nmeas);
 
     /* check IOD? */
-    DTOTS(&session->gpsdata.raw.mtime, session->gpsdata.skyview_time);
+    session->gpsdata.raw.mtime = session->gpsdata.skyview_time;
 
     /* zero the measurement data */
     /* so we can tell which meas never got set */

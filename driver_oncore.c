@@ -294,7 +294,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 		(double)session->driver.oncore.azimuth[j];
 	    st++;
 	}
-    session->gpsdata.skyview_time = TSTONS(&session->newdata.time);
+    session->gpsdata.skyview_time = session->newdata.time;
     session->gpsdata.satellites_used = (int)nsv;
     session->gpsdata.satellites_visible = (int)st;
 

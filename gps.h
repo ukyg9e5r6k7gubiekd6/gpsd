@@ -60,6 +60,7 @@ extern "C" {
  *       Move mag_var from gps_device_t to magnetic_var gps_data_t.
  *       add dgps_age and dgps_station, to gps_fix_t
  *       Change gps_fix_t.time from timestamp_t to timespec_t
+ *       Change gps_data_t.skyview_time from timestamp_t to timespec_t
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -2214,7 +2215,7 @@ struct gps_data_t {
     struct dop_t dop;
 
     /* satellite status -- valid when satellites_visible > 0 */
-    timestamp_t skyview_time;	/* skyview timestamp */
+    timespec_t skyview_time;	/* skyview timestamp */
     int satellites_visible;	/* # of satellites in view */
     struct satellite_t skyview[MAXCHANNELS];
 
