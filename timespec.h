@@ -109,6 +109,13 @@ static inline void TS_NORM( struct timespec *ts)
 	(ts)->tv_sec = (time_t)int_part; \
     } while (0)
 
+/* convert integer (long) ms to a timespec_t */
+#define MSTOTS(ts, ms) \
+    do { \
+	(ts)->tv_sec = (time_t)(ms / 1000); \
+	(ts)->tv_nsec = (long)((ms % 1000) * 1000000L); \
+    } while (0)
+
 #define TIMESPEC_LEN	22	/* required length of a timespec buffer */
 
 extern void timespec_str(const struct timespec *, char *, size_t);

@@ -692,9 +692,8 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
         unsigned short week;
         timespec_t ts_tow;
 
-        ts_tow.tv_sec = (timestamp_t)(session->driver.ubx.iTOW / 1000);
-        ts_tow.tv_nsec = (long)getles32(buf, 4);
-        ts_tow.tv_nsec += (long)((session->driver.ubx.iTOW % 1000) * 1000000);
+        MSTOTS(&ts_tow, session->driver.ubx.iTOW);
+        ts_tow.tv_nsec += (long)getles32(buf, 4);
         week = (unsigned short)getles16(buf, 8);
         session->newdata.time = gpsd_gpstime_resolv(session, week, ts_tow);
         mask |= TIME_SET | NTPTIME_IS | GOODTIME_IS;
