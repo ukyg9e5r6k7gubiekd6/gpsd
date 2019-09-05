@@ -223,9 +223,8 @@ static gps_mask_t handle1002(struct gps_device_t *session)
     /* sequence                   = getzword(8); */
     /* measurement_sequence       = getzword(9); */
     int gps_week = getzword(10);
-    int gps_seconds = getzlong(11);
-    // FIXME! do not ignore ns!
-    /* gps_nanoseconds            = getzlong(13); */
+    time_t gps_seconds = getzlong(11);
+    long gps_nanoseconds = getzlong(13);
     /* Note: this week counter is not limited to 10 bits. */
     session->context->gps_week = (unsigned short)gps_week;
     session->gpsdata.satellites_used = 0;
@@ -241,15 +240,17 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 	session->gpsdata.skyview[i].ss = (float)getzword(17 + (3 * i));
 	session->gpsdata.skyview[i].used = (bool)(status & 1);
     }
-    ts_tow.tv_sec = (time_t)gps_seconds;
-    ts_tow.tv_nsec = 0;    /* FIXME! Add in ns! */
+    ts_tow.tv_sec = gps_seconds;
+    ts_tow.tv_nsec = gps_nanoseconds;
     session->gpsdata.skyview_time = gpsd_gpstime_resolv(session,
 						      (unsigned short)gps_week,
 						      ts_tow);
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "1002: visible=%d used=%d mask={SATELLITE|USED}\n",
+	     "1002: visible=%d used=%d mask={SATELLITE|USED} time %ld.09ld\n",
 	     session->gpsdata.satellites_visible,
-	     session->gpsdata.satellites_used);
+	     session->gpsdata.satellites_used,
+	     session->gpsdata.skyview_time.tv_sec,
+	     session->gpsdata.skyview_time.tv_nsec);
     return SATELLITE_SET | USED_IS;
 }
 
