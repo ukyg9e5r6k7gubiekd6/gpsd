@@ -852,7 +852,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    /* depending on GPS config, could be either WGS84 or MSL
 	     * default differs by model, usually WGS84 */
 	    sl3 = getbes32(buf, 17);	/* altitude */
-            /* FIXME: set VNED here */
+            /* set xNED here */
 	    s2 = getbes16(buf, 21);	/* east velocity */
 	    s3 = getbes16(buf, 23);	/* north velocity */
 	    s4 = getbes16(buf, 25);	/* up velocity */
