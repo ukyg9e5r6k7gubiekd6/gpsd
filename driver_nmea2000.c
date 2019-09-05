@@ -29,6 +29,7 @@
 #include "libgps.h"
 #include "driver_nmea2000.h"
 #include "bits.h"
+#include "timespec.h"
 
 
 #define LOG_FILE 1
@@ -320,10 +321,9 @@ static gps_mask_t hnd_126992(unsigned char *bu, int len, PGN *pgn, struct gps_de
     // sid        = bu[0];
     // source     = bu[1] & 0x0f;
 
-    session->newdata.time.tv_sec = (time_t)(getleu16(bu, 2) * 24 * 60 * 60);
     msecs = getleu32(bu, 4);
-    session->newdata.time.tv_sec += msecs / 1000;
-    session->newdata.time.tv_nsec = (long)((msecs % 1000) * 1000000L);
+    MSTOTS(&session->newdata.time, msecs);
+    session->newdata.time.tv_sec += (time_t)(getleu16(bu, 2) * 24 * 60 * 60);
 
     return TIME_SET | get_mode(session);
 }
@@ -453,10 +453,9 @@ static gps_mask_t hnd_129029(unsigned char *bu, int len, PGN *pgn, struct gps_de
     mask                             = 0;
     session->driver.nmea2000.sid[3]  = bu[0];
 
-    session->newdata.time.tv_sec = (time_t)(getleu16(bu,1) * 24 * 60 * 60);
     msecs = getleu32(bu, 3);
-    session->newdata.time.tv_sec += msecs / 1000;
-    session->newdata.time.tv_nsec = (long)((msecs % 1000) * 1000000L);
+    MSTOTS(&session->newdata.time, msecs);
+    session->newdata.time.tv_sec += (time_t)(getleu16(bu,1) * 24 * 60 * 60);
     mask                            |= TIME_SET;
 
     session->newdata.latitude        = getles64(bu, 7) * 1e-16;

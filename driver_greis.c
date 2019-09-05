@@ -31,6 +31,7 @@
 #include "bits.h"
 #include "driver_greis.h"
 #include "gpsd.h"
+#include "timespec.h"
 
 #if defined(GREIS_ENABLE) && defined(BINARY_ENABLE)
 
@@ -187,8 +188,7 @@ static gps_mask_t greis_msg_GT(struct gps_device_t *session,
     tow = (long)getleu32(buf, 0);
     wn = getleu16(buf, 4);
 
-    ts_tow.tv_sec = tow / 1000;
-    ts_tow.tv_nsec = (tow % 1000) * 1000000L;
+    MSTOTS(&ts_tow, tow);
     session->newdata.time = gpsd_gpstime_resolv(session, wn, ts_tow);
 
     gpsd_log(&session->context->errout, LOG_DATA,

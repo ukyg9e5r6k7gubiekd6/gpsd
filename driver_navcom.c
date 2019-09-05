@@ -45,6 +45,7 @@
 
 #if defined(NAVCOM_ENABLE)
 #include "bits.h"
+#include "timespec.h"
 
 /* Have data which is 24 bits long */
 #define getles3224(buf,off)  (int32_t)(((uint32_t)getub((buf), (off)+2)<<24 | (uint32_t)getub((buf), (off)+1)<<16 | (uint32_t)getub((buf), (off))<<8)>>8)
@@ -395,8 +396,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     /* Timestamp */
     week = (uint16_t) getleu16(buf, 3);
     tow = (uint32_t) getleu32(buf, 5);        /* tow in ms */
-    ts_tow.tv_sec = tow / 1000;
-    ts_tow.tv_nsec = (tow % 1000) * 1000000L;
+    MSTOTS(&ts_tow, tow);
     session->newdata.time = gpsd_gpstime_resolv(session, week, ts_tow);
 
     /* Get latitude, longitude */
@@ -888,8 +888,7 @@ static gps_mask_t handle_0xb5(struct gps_device_t *session)
 	session->newdata.epv = alt_sd * 1.96;
 	mask |= HERR_SET;
 #endif /*  __UNUSED__ */
-	ts_tow.tv_sec = tow / 1000;
-	ts_tow.tv_nsec = (tow % 1000) * 1000000L;
+	MSTOTS(&ts_tow, tow);
 	session->newdata.time = gpsd_gpstime_resolv(session,
 						  (unsigned short)week,
 						  ts_tow);

@@ -820,8 +820,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		session->context->leap_seconds = (int)u4;
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
-	    ts_tow.tv_sec = (time_t)(ul1 / 1000);
-	    ts_tow.tv_nsec = (long)((ul1 % 1000) * 1000000L);
+	    MSTOTS(&ts_tow, ul1);
 	    session->newdata.time = gpsd_gpstime_resolv(session,
 						      (unsigned short)s4,
 						      ts_tow);
@@ -862,8 +861,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		session->context->leap_seconds = (int)u1;
 		session->context->valid |= LEAP_SECOND_VALID;
 	    }
-	    ts_tow.tv_sec = (time_t)(ul1 / 1000);
-	    ts_tow.tv_nsec = (long)((ul1 % 1000) * 1000000L);
+	    MSTOTS(&ts_tow, ul1);
 	    session->newdata.time =
 		gpsd_gpstime_resolv(session, (unsigned short)s1, ts_tow);
 	    session->gpsdata.status = STATUS_NO_FIX;
@@ -931,8 +929,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    if ((int)ul1 > 10) {
 		session->context->leap_seconds = (int)s2;
 		session->context->valid |= LEAP_SECOND_VALID;
-		ts_tow.tv_sec = (time_t)(ul1 / 1000);
-		ts_tow.tv_nsec = (long)((ul1 % 1000) * 1000000L);
+		MSTOTS(&ts_tow, ul1);
 		session->newdata.time =
 		    gpsd_gpstime_resolv(session, (unsigned short)s1, ts_tow);
 		mask |= TIME_SET | NTPTIME_IS | CLEAR_IS;

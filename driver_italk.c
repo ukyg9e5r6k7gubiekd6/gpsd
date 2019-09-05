@@ -24,6 +24,7 @@
 
 #include "bits.h"
 #include "driver_italk.h"
+#include "timespec.h"
 
 static gps_mask_t italk_parse(struct gps_device_t *, unsigned char *, size_t);
 static gps_mask_t decode_itk_navfix(struct gps_device_t *, unsigned char *,
@@ -65,8 +66,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
         return mask;
 
     tow = getleu32(buf, 7 + 84);   /* tow in ms */
-    ts_tow.tv_sec = tow / 1000;
-    ts_tow.tv_nsec = (tow % 1000) * 1000000L;
+    MSTOTS(&ts_tow, tow);
     session->newdata.time = gpsd_gpstime_resolv(session,
         (unsigned short) getles16(buf, 7 + 82), ts_tow);
     mask |= TIME_SET | NTPTIME_IS;
@@ -208,8 +208,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
         session->context->leap_seconds = leap;
 
     tow = getleu32(buf, 7 + 38);    /* in ms */
-    ts_tow.tv_sec = tow / 1000;
-    ts_tow.tv_nsec = (tow % 1000) * 1000000L;
+    MSTOTS(&ts_tow, tow);
     session->newdata.time = gpsd_gpstime_resolv(session,
         (unsigned short) getleu16(buf, 7 + 36), ts_tow);
     gpsd_log(&session->context->errout, LOG_DATA,
@@ -277,8 +276,7 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
         return 0; // bail if measurement time not valid.
 
     tow = (unsigned int)getleu32(buf, 7 + 38);
-    ts_tow.tv_sec = tow / 1000;
-    ts_tow.tv_nsec = (tow % 1000) * 1000000L;
+    MSTOTS(&ts_tow, tow);
     session->newdata.time = gpsd_gpstime_resolv(session,
         (unsigned short int)getleu16((char *)buf, 7 + 8), ts_tow);
 
