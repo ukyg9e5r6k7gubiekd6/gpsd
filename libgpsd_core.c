@@ -362,7 +362,8 @@ void gpsd_deactivate(struct gps_device_t *session)
     /* tell any PPS-watcher thread to die */
     session->pps_thread.report_hook = NULL;
     /* mark it inactivated */
-    session->gpsdata.online = (timestamp_t)0;
+    session->gpsdata.online.tv_sec = 0;
+    session->gpsdata.online.tv_nsec = 0;
 }
 
 static void ppsthread_log(volatile struct pps_thread_t *pps_thread,
@@ -401,7 +402,7 @@ static void ppsthread_log(volatile struct pps_thread_t *pps_thread,
 void gpsd_clear(struct gps_device_t *session)
 /* device has been opened - clear its storage for use */
 {
-    session->gpsdata.online = timestamp();
+    (void)clock_gettime(CLOCK_REALTIME, &session->gpsdata.online);
     lexer_init(&session->lexer);
     session->lexer.errout = session->context->errout;
     // session->gpsdata.online = 0;
@@ -1281,6 +1282,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 {
     ssize_t newlen;
     bool driver_change = false;
+    timespec_t ts_now;
+    timespec_t delta;
 
     gps_clear_fix(&session->newdata);
 
@@ -1320,10 +1323,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
      * with the data they transmit.
      */
 #define MINIMUM_QUIET_TIME	0.25
-    if (session->lexer.outbuflen == 0)
-    {
+    if (session->lexer.outbuflen == 0) {
 	/* beginning of a new packet */
-	timestamp_t now = timestamp();
+	(void)clock_gettime(CLOCK_REALTIME, &ts_now);
 	if (session->device_type != NULL && session->lexer.start_time > 0) {
 #ifdef RECONFIGURE_ENABLE
 	    const double min_cycle = session->device_type->min_cycle;
@@ -1331,7 +1333,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    const double min_cycle = 1;
 #endif /* RECONFIGURE_ENABLE */
 	    double quiet_time = (MINIMUM_QUIET_TIME * min_cycle);
-	    double gap = now - session->lexer.start_time;
+	    double gap = TSTONS(&ts_now) - session->lexer.start_time;
 
 	    if (gap > min_cycle)
 		gpsd_log(&session->context->errout, LOG_WARN,
@@ -1339,11 +1341,11 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    else if (gap > quiet_time) {
 		gpsd_log(&session->context->errout, LOG_PROG,
 			 "transmission pause of %f\n", gap);
-		session->sor = now;
+		session->sor = TSTONS(&ts_now);
 		session->lexer.start_char = session->lexer.char_counter;
 	    }
 	}
-	session->lexer.start_time = now;
+	session->lexer.start_time = TSTONS(&ts_now);
     }
 
     if (session->lexer.type >= COMMENT_PACKET) {
@@ -1366,24 +1368,30 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     gpsd_log(&session->context->errout, LOG_RAW + 2,
 	     "%s sent %zd new characters\n",
 	     session->gpsdata.dev.path, newlen);
+
+    (void)clock_gettime(CLOCK_REALTIME, &ts_now);
+    TS_SUB(&delta, &ts_now, &session->gpsdata.online);
     if (newlen < 0) {		/* read error */
 	gpsd_log(&session->context->errout, LOG_INF,
-		 "GPS on %s returned error %zd (%lf sec since data)\n",
-		 session->gpsdata.dev.path, newlen,
-		 timestamp() - session->gpsdata.online);
-	session->gpsdata.online = (timestamp_t)0;
+		 "GPS on %s returned error %zd (%ld.%09ld sec since data)\n",
+		 session->gpsdata.dev.path, newlen, delta.tv_sec, delta.tv_nsec);
+	session->gpsdata.online.tv_sec = 0;
+	session->gpsdata.online.tv_nsec = 0;
 	return ERROR_SET;
     } else if (newlen == 0) {		/* zero length read, possible EOF */
 	/*
 	 * Multiplier is 2 to avoid edge effects due to sampling at the exact
 	 * wrong time...
 	 */
-	if (session->gpsdata.online > 0 && timestamp() - session->gpsdata.online >= session->gpsdata.dev.cycle * 2) {
+	if (0 < session->gpsdata.online.tv_sec &&
+            TSTONS(&delta) >= (session->gpsdata.dev.cycle * 2)) {
 	    gpsd_log(&session->context->errout, LOG_INF,
-		     "GPS on %s is offline (%lf sec since data)\n",
+		     "GPS on %s is offline (%ld.%09ld sec since data)\n",
 		     session->gpsdata.dev.path,
-		     timestamp() - session->gpsdata.online);
-	    session->gpsdata.online = (timestamp_t)0;
+                     delta.tv_sec,
+                     delta.tv_nsec);
+	    session->gpsdata.online.tv_sec = 0;
+	    session->gpsdata.online.tv_nsec = 0;
 	}
 	return NODATA_IS;
     } else /* (newlen > 0) */ {
@@ -1419,8 +1427,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		 * NMEA).
 		 */
 #ifdef RECONFIGURE_ENABLE
-		bool dependent_nmea = (newtype == NMEA_PACKET
-				       && session->device_type->mode_switcher!=NULL);
+		bool dependent_nmea = (newtype == NMEA_PACKET &&
+				   session->device_type->mode_switcher != NULL);
 #else
 		bool dependent_nmea = false;
 #endif /* RECONFIGURE_ENABLE */
@@ -1445,13 +1453,15 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		    }
 	    }
 	    session->badcount = 0;
-	    session->gpsdata.dev.driver_mode = (session->lexer.type > NMEA_PACKET) ? MODE_BINARY : MODE_NMEA;
+	    session->gpsdata.dev.driver_mode =
+                (session->lexer.type > NMEA_PACKET) ? MODE_BINARY : MODE_NMEA;
 	    /* FALL THROUGH */
 	} else if (hunt_failure(session) && !gpsd_next_hunt_setting(session)) {
+	    (void)clock_gettime(CLOCK_REALTIME, &ts_now);
+	    TS_SUB(&delta, &ts_now, &session->gpsdata.online);
 	    gpsd_log(&session->context->errout, LOG_INF,
-		     "hunt on %s failed (%lf sec since data)\n",
-		     session->gpsdata.dev.path,
-		     timestamp() - session->gpsdata.online);
+		     "hunt on %s failed (%ld.%09ld sec since data)\n",
+		     session->gpsdata.dev.path, delta.tv_sec, delta.tv_nsec);
 	    return ERROR_SET;
 	}
     }
@@ -1463,7 +1473,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	return ONLINE_SET;
     } else {			/* we have recognized a packet */
 	gps_mask_t received = PACKET_SET;
-	session->gpsdata.online = timestamp();
+	(void)clock_gettime(CLOCK_REALTIME, &session->gpsdata.online);
 
 	gpsd_log(&session->context->errout, LOG_RAW + 3,
 		 "Accepted packet on %s.\n",

@@ -311,7 +311,8 @@ void libgps_dump_state(struct gps_data_t *collect)
 		  (unsigned int)collect->set, gps_maskdump(collect->set));
 #endif
     if (collect->set & ONLINE_SET)
-	(void)fprintf(debugfp, "ONLINE: %lf\n", collect->online);
+	(void)fprintf(debugfp, "ONLINE: %ld.%09ld\n",
+                      collect->online.tv_sec, collect->online.tv_nsec);
     if (collect->set & TIME_SET)
 	(void)fprintf(debugfp, "TIME: %ld.%09ld\n",
                       collect->fix.time.tv_sec, collect->fix.time.tv_nsec);

@@ -251,7 +251,7 @@ int gps_sock_read(struct gps_data_t *gpsdata, char *message, int message_len)
     if (NULL != message) {
         strlcpy(message, PRIVATE(gpsdata)->buffer, message_len);
     }
-    gpsdata->online = timestamp();
+    (void)clock_gettime(CLOCK_REALTIME, &gpsdata->online);
     /* unpack the JSON message */
     status = gps_unpack(PRIVATE(gpsdata)->buffer, gpsdata);
 

@@ -437,10 +437,10 @@ void json_device_dump(const struct gps_device_t *device,
      * There's an assumption here: Anything that we type service_sensor is
      * a serial device with the usual control parameters.
      */
-    if (device->gpsdata.online > 0) {	
-	str_appendf(reply, replylen,
-		       "\"activated\":\"%s\",",
-		       unix_to_iso8601(device->gpsdata.online, buf1, sizeof(buf1)));
+    if (0 < device->gpsdata.online.tv_sec) {
+	str_appendf(reply, replylen, "\"activated\":\"%s\",",
+		    timespec_to_iso8601(device->gpsdata.online,
+                                        buf1, sizeof(buf1)));
 	if (device->observed != 0) {
 	    int mask = 0;
 	    for (cmp = classmap; cmp < classmap + NITEMS(classmap); cmp++)

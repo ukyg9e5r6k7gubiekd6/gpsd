@@ -786,7 +786,8 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 
     /* Fill in the GPS status and the time since the last state
      * change. */
-    if (gpsdata->online == 0) {
+    if (0 == gpsdata->online.tv_sec &&
+        0 == gpsdata->online.tv_nsec) {
         newstate = 0;
         (void)strlcpy(scr, "OFFLINE", sizeof(scr));
     } else {

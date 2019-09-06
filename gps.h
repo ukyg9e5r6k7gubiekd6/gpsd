@@ -61,6 +61,7 @@ extern "C" {
  *       add dgps_age and dgps_station, to gps_fix_t
  *       Change gps_fix_t.time from timestamp_t to timespec_t
  *       Change gps_data_t.skyview_time from timestamp_t to timespec_t
+ *       Change gps_data_t.online from timestamp_t to timespec_t
  *       Change gpsta_t.utctime from double to timespec_t
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
@@ -2182,7 +2183,7 @@ struct gps_data_t {
 #define NED_SET         (1llu<<40)
 #define VNED_SET        (1llu<<41)
 #define SET_HIGH_BIT	42
-    timestamp_t online;		/* NZ if GPS is on line, 0 if not.
+    timespec_t online;		/* NZ if GPS is on line, 0 if not.
 				 *
 				 * Note: gpsd clears this time when sentences
 				 * fail to show up within the GPS's normal

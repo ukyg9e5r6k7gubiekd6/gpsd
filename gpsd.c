@@ -1701,7 +1701,7 @@ static void ship_pps_message(struct gps_device_t *session,
      * PPS receipt resets the device's timeout.  This keeps PPS-only
      * devices, which never deliver in-band data, from timing out.
      */
-    session->gpsdata.online = timestamp();
+    (void)clock_gettime(CLOCK_REALTIME, &session->gpsdata.online);
 }
 #endif
 
