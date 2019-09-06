@@ -1732,7 +1732,8 @@ void lexer_init(struct gps_lexer_t *lexer)
 #ifdef PASSTHROUGH_ENABLE
     lexer->json_depth = 0;
 #endif /* PASSTHROUGH_ENABLE */
-    lexer->start_time = 0.0;
+    lexer->start_time.tv_sec = 0;
+    lexer->start_time.tv_nsec = 0;
     packet_reset(lexer);
     errout_reset(&lexer->errout);
 }

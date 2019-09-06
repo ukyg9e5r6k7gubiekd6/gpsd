@@ -1329,15 +1329,20 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     if (session->lexer.outbuflen == 0) {
 	/* beginning of a new packet */
 	(void)clock_gettime(CLOCK_REALTIME, &ts_now);
-	if (session->device_type != NULL && session->lexer.start_time > 0) {
+	if (NULL != session->device_type &&
+            (0 < session->lexer.start_time.tv_sec ||
+             0 < session->lexer.start_time.tv_nsec)) {
 #ifdef RECONFIGURE_ENABLE
 	    const double min_cycle = TSTONS(&session->device_type->min_cycle);
 #else
 	    const double min_cycle = 1;
 #endif /* RECONFIGURE_ENABLE */
 	    double quiet_time = (MINIMUM_QUIET_TIME * min_cycle);
-	    double gap = TSTONS(&ts_now) - session->lexer.start_time;
+	    double gap;
+	    timespec_t ts_gap;
+	    TS_SUB(&ts_gap, &ts_now, &session->lexer.start_time);
 
+            gap = TSTONS(&ts_gap);
 	    if (gap > min_cycle)
 		gpsd_log(&session->context->errout, LOG_WARN,
 			 "cycle-start detector failed.\n");
@@ -1348,7 +1353,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		session->lexer.start_char = session->lexer.char_counter;
 	    }
 	}
-	session->lexer.start_time = TSTONS(&ts_now);
+	session->lexer.start_time = ts_now;
     }
 
     if (session->lexer.type >= COMMENT_PACKET) {

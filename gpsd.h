@@ -67,6 +67,7 @@ extern "C" {
  *      Remove NTP_ENABLE and NTPSHM_ENABLE.  It only worked when enabled.
  *      Change gps_type_t.min_cycle from double to timespec_t
  *      Change gps_device_t.last_time from double to timespec_t
+ *      Change gps_lexer_t.start_time from timestamp_t to timespec_t
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -217,7 +218,7 @@ struct gps_lexer_t {
     unsigned long retry_counter;	/* count sniff retries */
     unsigned counter;			/* packets since last driver switch */
     struct gpsd_errout_t errout;		/* how to report errors */
-    timestamp_t start_time;		/* timestamp of first input */
+    timespec_t start_time;		/* timestamp of first input */
     unsigned long start_char;		/* char counter at first input */
     /*
      * ISGPS200 decoding context.
