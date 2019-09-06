@@ -23,21 +23,21 @@ PERMISSIONS
 #include "gpsd.h"
 #ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
+#include "timespec.h"
 
 int json_device_read(const char *buf,
 		     struct devconfig_t *dev,
 		     const char **endptr)
 {
-    char tbuf[JSON_DATE_MAX+1];
+    timestamp_t acttime;
     /* *INDENT-OFF* */
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      t_check,      .dflt.check = "DEVICE"},
 
         {"path",       t_string,     .addr.string  = dev->path,
 	                                .len = sizeof(dev->path)},
-	{"activated",  t_string,     .addr.string = tbuf,
-			                .len = sizeof(tbuf)},
-	{"activated",  t_real,       .addr.real = &dev->activated},
+	{"activated",  t_time,       .addr.real = &acttime,
+				        .dflt.real = NAN},
 	{"flags",      t_integer,    .addr.integer = &dev->flags},
 	{"driver",     t_string,     .addr.string  = dev->driver,
 	                                .len = sizeof(dev->driver)},
@@ -62,16 +62,17 @@ int json_device_read(const char *buf,
     /* *INDENT-ON* */
     int status;
 
-    tbuf[0] = '\0';
     status = json_read_object(buf, json_attrs_device, endptr);
     if (status != 0)
 	return status;
 
-    if (isfinite(dev->activated) == 0) {
-	if (tbuf[0] == '\0')
-	    dev->activated = NAN;
-	else
-	    dev->activated = iso8601_to_unix(tbuf);
+    // convert acttime back to timespec_t
+    // odd, device->gpsdata.online is sent, but put in dev->activated?
+    if (0 == isfinite(acttime)) {
+	dev->activated.tv_sec = 0;
+	dev->activated.tv_nsec = 0;
+    } else {
+	DTOTS(&dev->activated, acttime);
     }
 
     return 0;

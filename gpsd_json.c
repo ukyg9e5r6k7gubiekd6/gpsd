@@ -438,6 +438,7 @@ void json_device_dump(const struct gps_device_t *device,
      * a serial device with the usual control parameters.
      */
     if (0 < device->gpsdata.online.tv_sec) {
+        /* odd, using online, not activated, time */
 	str_appendf(reply, replylen, "\"activated\":\"%s\",",
 		    timespec_to_iso8601(device->gpsdata.online,
                                         buf1, sizeof(buf1)));

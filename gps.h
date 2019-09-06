@@ -65,6 +65,7 @@ extern "C" {
  *       Change gpst_t.utctime from double to timespec_t
  *       Change devices.time from timestamp_t to timespec_t
  *       Change sub4_18.d_tot from timestamp_t to time_t t_tot
+ *       Change devconfig_t.activated from double to timespec_t
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -2076,7 +2077,7 @@ struct devconfig_t {
     char subtype[128];                  /* 96 too small for ZED-F9 */
     /* a buffer to hold data to output to GPS */
     char hexdata[HEXDATA_MAX];
-    double activated;
+    timespec_t activated;
     unsigned int baudrate, stopbits;	/* RS232 link parameters */
     char parity;			/* 'N', 'O', or 'E' */
     double cycle, mincycle;     	/* refresh cycle time in seconds */
