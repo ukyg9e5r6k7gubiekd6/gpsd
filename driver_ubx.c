@@ -2006,8 +2006,9 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
                  "UBX:      time %.2f      msgid %x\n",
                  session->newdata.time, msgid);
         gpsd_log(&session->context->errout, LOG_ERROR,
-                 "     last_time %.2f last_msgid %x\n",
-                 session->driver.ubx.last_time,
+                 "     last_time %ld.%09ld last_msgid %x\n",
+                 session->driver.ubx.last_time.tv_sec,
+                 session->driver.ubx.last_time.tv_nsec,
                  session->driver.ubx.last_msgid);
          */
         /* iTOW is to ms, can go forward or backwards */
@@ -2024,7 +2025,8 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
              */
         }
         session->driver.ubx.last_msgid = msgid;
-        session->driver.ubx.last_time = TSTONS(&session->newdata.time);
+        /* FIXME: last_time never used... */
+        session->driver.ubx.last_time = session->newdata.time;
     } else {
         /* no time */
         /* debug

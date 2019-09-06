@@ -66,6 +66,7 @@ extern "C" {
  *      Remove TIMEHINT_ENABLE.  It only worked when enabled.
  *      Remove NTP_ENABLE and NTPSHM_ENABLE.  It only worked when enabled.
  *      Change gps_type_t.min_cycle from double to timespec_t
+ *      Change gps_device_t.last_time from double to timespec_t
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -683,7 +684,8 @@ struct gps_device_t {
 	    unsigned char sbas_in_use;
 	    unsigned char protver;              /* u-blox protocol version */
 	    unsigned int last_msgid;            /* last class/ID */
-            timestamp_t last_time;              /* time of last_msgid */
+            /* FIXME: last_time set but never used? */
+            timespec_t last_time;               /* time of last_msgid */
 	    unsigned int end_msgid;             /* cycle ender class/ID */
             /* iTOW, and last_iTOW, in ms, used for cycle end detect. */
             int64_t iTOW;
