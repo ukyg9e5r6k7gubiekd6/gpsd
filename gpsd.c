@@ -1221,6 +1221,7 @@ static void handle_request(struct subscriber_t *sub,
 				   "{\"class\":\"ERROR\",\"message\":\"Type of %s is unknown.\"}\r\n",
 				   device->gpsdata.dev.path);
 		else {
+                    timespec_t delta;
 		    const struct gps_type_t *dt = device->device_type;
 		    bool no_serial_change =
 			(devconf.baudrate == DEVDEFAULT_BPS)
@@ -1235,8 +1236,10 @@ static void handle_request(struct subscriber_t *sub,
 			devconf.stopbits = device->gpsdata.dev.stopbits;
 		    if (devconf.stopbits == DEVDEFAULT_STOPBITS)
 			devconf.stopbits = device->gpsdata.dev.stopbits;
-		    if (0 == isfinite(devconf.cycle))
+		    if (0 < devconf.cycle.tv_sec ||
+		        0 < devconf.cycle.tv_nsec) {
 			devconf.cycle = device->gpsdata.dev.cycle;
+                    }
 
 		    /* now that channel is selected, apply changes */
 		    if (devconf.driver_mode != device->gpsdata.dev.driver_mode
@@ -1251,11 +1254,14 @@ static void handle_request(struct subscriber_t *sub,
 			set_serial(device,
 				   (speed_t) devconf.baudrate, serialmode);
 		    }
-		    if (devconf.cycle != device->gpsdata.dev.cycle
-			&& devconf.cycle >= dt->min_cycle
-			&& dt->rate_switcher != NULL)
-			if (dt->rate_switcher(device, devconf.cycle))
+		    TS_SUB(&delta, &devconf.cycle, &device->gpsdata.dev.cycle);
+		    if ((0 != delta.tv_sec || 0 != delta.tv_nsec) &&
+			TSTONS(&devconf.cycle) >= dt->min_cycle &&
+			dt->rate_switcher != NULL) {
+			if (dt->rate_switcher(device, TSTONS(&devconf.cycle))) {
 			    device->gpsdata.dev.cycle = devconf.cycle;
+                        }
+                    }
 	            if ('\0' != devconf.hexdata[0]) {
 			write_gps(device->gpsdata.dev.path, devconf.hexdata);
 		    }
@@ -1267,7 +1273,7 @@ static void handle_request(struct subscriber_t *sub,
 #endif /* RECONFIGURE_ENABLE */
 	}
 	/* dump a response for each selected channel */
-	for (devp = devices; devp < devices + MAX_DEVICES; devp++)
+	for (devp = devices; devp < devices + MAX_DEVICES; devp++) {
 	    if (!allocated_device(devp))
 		continue;
 	    else if (devconf.path[0] != '\0'
@@ -1278,6 +1284,7 @@ static void handle_request(struct subscriber_t *sub,
 				 reply + strlen(reply),
 				 replylen - strlen(reply));
 	    }
+        }
     } else if (str_starts_with(buf, "?POLL;")) {
 	char tbuf[JSON_DATE_MAX+1];
 	int active = 0;

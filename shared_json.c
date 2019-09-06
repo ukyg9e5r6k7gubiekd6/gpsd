@@ -30,6 +30,7 @@ int json_device_read(const char *buf,
 		     const char **endptr)
 {
     timestamp_t acttime;
+    timestamp_t d_cycle, d_mincycle;
     /* *INDENT-OFF* */
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      t_check,      .dflt.check = "DEVICE"},
@@ -53,9 +54,9 @@ int json_device_read(const char *buf,
                                         .dflt.character = DEVDEFAULT_PARITY},
 	{"stopbits",   t_uinteger,   .addr.uinteger = &dev->stopbits,
 				        .dflt.uinteger = DEVDEFAULT_STOPBITS},
-	{"cycle",      t_real,       .addr.real = &dev->cycle,
+	{"cycle",      t_real,       .addr.real = &d_cycle,
 				        .dflt.real = NAN},
-	{"mincycle",   t_real,       .addr.real = &dev->mincycle,
+	{"mincycle",   t_real,       .addr.real = &d_mincycle,
 				        .dflt.real = NAN},
 	{NULL},
     };
@@ -73,6 +74,18 @@ int json_device_read(const char *buf,
 	dev->activated.tv_nsec = 0;
     } else {
 	DTOTS(&dev->activated, acttime);
+    }
+    if (0 == isfinite(d_cycle)) {
+	dev->cycle.tv_sec = 0;
+	dev->cycle.tv_nsec = 0;
+    } else {
+	DTOTS(&dev->cycle, d_cycle);
+    }
+    if (0 == isfinite(d_mincycle)) {
+	dev->mincycle.tv_sec = 0;
+	dev->mincycle.tv_nsec = 0;
+    } else {
+	DTOTS(&dev->cycle, d_mincycle);
     }
 
     return 0;

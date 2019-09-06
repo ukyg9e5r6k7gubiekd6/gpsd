@@ -30,6 +30,7 @@ extern "C" {
 
 #include "gps.h"
 #include "os_compat.h"
+#include "timespec.h"
 
 /*
  * Constants for the VERSION response

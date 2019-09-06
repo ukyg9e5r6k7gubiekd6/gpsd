@@ -262,7 +262,8 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 	    session->device_type = *dp;
 	    session->driver_index = i;
 #ifdef RECONFIGURE_ENABLE
-	    session->gpsdata.dev.mincycle = session->device_type->min_cycle;
+	    DTOTS(&session->gpsdata.dev.mincycle,
+                  session->device_type->min_cycle);
 #endif /* RECONFIGURE_ENABLE */
 	    /* reconfiguration might be required */
 	    if (first_sync && session->device_type->event_hook != NULL)
@@ -319,7 +320,10 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     session->gpsdata.set = 0;
     gps_clear_att(&session->gpsdata.attitude);
     gps_clear_dop(&session->gpsdata.dop);
-    session->gpsdata.dev.cycle = session->gpsdata.dev.mincycle = 1;
+    session->gpsdata.dev.mincycle.tv_sec = 1;
+    session->gpsdata.dev.mincycle.tv_nsec = 0;
+    session->gpsdata.dev.cycle.tv_sec = 1;
+    session->gpsdata.dev.cycle.tv_nsec = 0;
     session->sor = 0.0;
     session->chars = 0;
     /* tty-level initialization */
@@ -1384,7 +1388,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	 * wrong time...
 	 */
 	if (0 < session->gpsdata.online.tv_sec &&
-            TSTONS(&delta) >= (session->gpsdata.dev.cycle * 2)) {
+            // FIXME: do this with integer math...
+            TSTONS(&delta) >= (TSTONS(&session->gpsdata.dev.cycle) * 2)) {
 	    gpsd_log(&session->context->errout, LOG_INF,
 		     "GPS on %s is offline (%ld.%09ld sec since data)\n",
 		     session->gpsdata.dev.path,

@@ -1048,8 +1048,9 @@ static void greis_event_hook(struct gps_device_t *session, event_t event)
 	(void)greis_write(session, enable_messages_4hz,
 			  sizeof(enable_messages_4hz) - 1);
 
-	/* Store cycle time (seconds) */
-	session->gpsdata.dev.cycle = 0.25;
+	/* Store (expected) cycle time (seconds) */
+	session->gpsdata.dev.cycle.tv_sec = 0;
+	session->gpsdata.dev.cycle.tv_nsec = 250000000L;
     } else if (event == event_driver_switch) {
 	/*
 	 * Fires when the driver on a device is changed *after* it

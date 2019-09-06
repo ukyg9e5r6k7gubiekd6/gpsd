@@ -455,12 +455,14 @@ void json_device_dump(const struct gps_device_t *device,
 	    speed_t speed = gpsd_get_speed(device);
 	    if (speed != 0)
 		str_appendf(reply, replylen,
-			       "\"native\":%d,\"bps\":%d,\"parity\":\"%c\",\"stopbits\":%u,\"cycle\":%2.2f,",
-			       device->gpsdata.dev.driver_mode,
-			       (int)speed,
-			       device->gpsdata.dev.parity,
-			       device->gpsdata.dev.stopbits,
-			       device->gpsdata.dev.cycle);
+			    "\"native\":%d,\"bps\":%d,\"parity\":\"%c\","
+                            "\"stopbits\":%u,\"cycle\":%ld.%02ld,",
+			    device->gpsdata.dev.driver_mode,
+			    (int)speed,
+			    device->gpsdata.dev.parity,
+			    device->gpsdata.dev.stopbits,
+			    device->gpsdata.dev.cycle.tv_sec,
+			    device->gpsdata.dev.cycle.tv_nsec / 10000000);
 #ifdef RECONFIGURE_ENABLE
 	    if (device->device_type != NULL
 		&& device->device_type->rate_switcher != NULL)
