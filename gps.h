@@ -62,7 +62,8 @@ extern "C" {
  *       Change gps_fix_t.time from timestamp_t to timespec_t
  *       Change gps_data_t.skyview_time from timestamp_t to timespec_t
  *       Change gps_data_t.online from timestamp_t to timespec_t
- *       Change gpsta_t.utctime from double to timespec_t
+ *       Change gpst_t.utctime from double to timespec_t
+ *       Change devices.time from timestamp_t to timespec_t
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -2217,7 +2218,7 @@ struct gps_data_t {
     struct dop_t dop;
 
     /* satellite status -- valid when satellites_visible > 0 */
-    timespec_t skyview_time;	/* skyview timestamp */
+    timespec_t skyview_time;	/* skyview time */
     int satellites_visible;	/* # of satellites in view */
     struct satellite_t skyview[MAXCHANNELS];
 
@@ -2226,7 +2227,7 @@ struct gps_data_t {
     struct gps_policy_t policy;	/* our listening policy */
 
     struct {
-	timestamp_t time;
+	timespec_t time;
 	int ndevices;
 	struct devconfig_t list[MAXUSERDEVS];
     } devices;

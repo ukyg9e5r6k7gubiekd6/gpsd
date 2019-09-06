@@ -435,7 +435,7 @@ static int json_devicelist_read(const char *buf, struct gps_data_t *gpsdata,
 	return status;
     }
 
-    gpsdata->devices.time = timestamp();
+    (void)clock_gettime(CLOCK_REALTIME, &gpsdata->devices.time);
     return 0;
 }
 
