@@ -982,9 +982,15 @@ static gps_mask_t processGST(int count, char *field[],
     session->gpsdata.gst.lon_err_deviation   = PARSE_FIELD(7);
     session->gpsdata.gst.alt_err_deviation   = PARSE_FIELD(8);
 #undef PARSE_FIELD
-    /* add in the time of start of today */
-    /* since it is NOT current time, do not register_fractional_time() */
-    session->gpsdata.gst.utctime.tv_sec += mkgmtime(&session->nmea.date);
+    if (0 < session->nmea.date.tm_year) {
+        /* add in the time of start of today */
+        /* since it is NOT current time, do not register_fractional_time() */
+        session->gpsdata.gst.utctime.tv_sec += mkgmtime(&session->nmea.date);
+    } else {
+        /* no idea of UTC time now */
+        session->gpsdata.gst.utctime.tv_sec = 0;
+        session->gpsdata.gst.utctime.tv_nsec = 0;
+    }
 
     gpsd_log(&session->context->errout, LOG_DATA,
              "GST: utc = %ld.%09ld, rms = %.2f, maj = %.2f, min = %.2f,"
