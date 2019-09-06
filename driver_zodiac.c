@@ -246,7 +246,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 						      (unsigned short)gps_week,
 						      ts_tow);
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "1002: visible=%d used=%d mask={SATELLITE|USED} time %ld.09ld\n",
+	     "1002: visible=%d used=%d mask={SATELLITE|USED} time %ld.%09ld\n",
 	     session->gpsdata.satellites_visible,
 	     session->gpsdata.satellites_used,
 	     session->gpsdata.skyview_time.tv_sec,
