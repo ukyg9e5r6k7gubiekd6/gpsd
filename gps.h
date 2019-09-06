@@ -64,6 +64,7 @@ extern "C" {
  *       Change gps_data_t.online from timestamp_t to timespec_t
  *       Change gpst_t.utctime from double to timespec_t
  *       Change devices.time from timestamp_t to timespec_t
+ *       Change sub4_18.d_tot from timestamp_t to time_t t_tot
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -865,7 +866,7 @@ struct subframe_t {
 	    /* tot, reference time for UTC data,
 	     * 8 bits unsigned, scale 2**12, seconds */
 	    uint8_t tot;
-	    double d_tot;
+	    time_t t_tot;
 
 	    /* WNt, UTC reference week number, 8 bits unsigned, scale 1,
 	     * weeks */

@@ -685,7 +685,7 @@ void json_subframe_dump(const struct gps_data_t *datap,
 		str_appendf(buf, buflen,
 			",\"IONO\":{\"a0\":%.5g,\"a1\":%.5g,\"a2\":%.5g,"
 			"\"a3\":%.5g,\"b0\":%.5g,\"b1\":%.5g,\"b2\":%.5g,"
-			"\"b3\":%.5g,\"A1\":%.11e,\"A0\":%.11e,\"tot\":%.5g,"
+			"\"b3\":%.5g,\"A1\":%.11e,\"A0\":%.11e,\"tot\":%ld,"
 			"\"WNt\":%u,\"ls\":%d,\"WNlsf\":%u,\"DN\":%u,"
 			"\"lsf\":%d}",
 			    subframe->sub4_18.d_alpha0,
@@ -698,7 +698,7 @@ void json_subframe_dump(const struct gps_data_t *datap,
 			    subframe->sub4_18.d_beta3,
 			    subframe->sub4_18.d_A1,
 			    subframe->sub4_18.d_A0,
-			    subframe->sub4_18.d_tot,
+			    subframe->sub4_18.t_tot,
 			    (unsigned int)subframe->sub4_18.WNt,
 			    (int)subframe->sub4_18.leap,
 			    (unsigned int)subframe->sub4_18.WNlsf,
