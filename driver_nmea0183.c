@@ -18,6 +18,7 @@
 #include "strfuncs.h"
 
 #ifdef NMEA0183_ENABLE
+#include "timespec.h"
 /**************************************************************************
  *
  * Parser helpers begin here
@@ -960,6 +961,7 @@ static gps_mask_t processGST(int count, char *field[],
      * 8 Standard deviation (meters) of altitude error
      * 9 Checksum
      */
+    double tod;
     gps_mask_t mask = ONLINE_SET;
     if (count < 8) {
       return mask;
@@ -970,7 +972,8 @@ static gps_mask_t processGST(int count, char *field[],
     /* this is not the current time,
      * it references another GPA of the same stamp. So do not set
      * any time stamps with it */
-    session->gpsdata.gst.utctime             = PARSE_FIELD(1);
+    tod = PARSE_FIELD(1);
+    DTOTS(&session->gpsdata.gst.utctime, tod);
     session->gpsdata.gst.rms_deviation       = PARSE_FIELD(2);
     session->gpsdata.gst.smajor_deviation    = PARSE_FIELD(3);
     session->gpsdata.gst.sminor_deviation    = PARSE_FIELD(4);
@@ -981,12 +984,13 @@ static gps_mask_t processGST(int count, char *field[],
 #undef PARSE_FIELD
     /* add in the time of start of today */
     /* since it is NOT current time, do not register_fractional_time() */
-    session->gpsdata.gst.utctime += mkgmtime(&session->nmea.date);
+    session->gpsdata.gst.utctime.tv_sec += mkgmtime(&session->nmea.date);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-             "GST: utc = %.3f, rms = %.2f, maj = %.2f, min = %.2f,"
+             "GST: utc = %ld.%09ld, rms = %.2f, maj = %.2f, min = %.2f,"
              " ori = %.2f, lat = %.2f, lon = %.2f, alt = %.2f\n",
-             session->gpsdata.gst.utctime,
+             session->gpsdata.gst.utctime.tv_sec,
+             session->gpsdata.gst.utctime.tv_nsec,
              session->gpsdata.gst.rms_deviation,
              session->gpsdata.gst.smajor_deviation,
              session->gpsdata.gst.sminor_deviation,

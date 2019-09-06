@@ -147,14 +147,15 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
 static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
                            const char **endptr)
 {
+    timestamp_t gsttime;
+    int ret;
+
     const struct json_attr_t json_attrs_1[] = {
 	/* *INDENT-OFF* */
 	{"class",  t_check,   .dflt.check = "GST"},
 	{"device", t_string,  .addr.string = gpsdata->dev.path,
 			         .len = sizeof(gpsdata->dev.path)},
-	{"time",   t_time,    .addr.real = &gpsdata->gst.utctime,
-			         .dflt.real = NAN},
-	{"time",   t_real,    .addr.real = &gpsdata->gst.utctime,
+	{"time",   t_time,    .addr.real = &gsttime,
 			         .dflt.real = NAN},
 	{"rms",    t_real,    .addr.real = &gpsdata->gst.rms_deviation,
 			         .dflt.real = NAN},
@@ -174,7 +175,16 @@ static int json_noise_read(const char *buf, struct gps_data_t *gpsdata,
 	/* *INDENT-ON* */
     };
 
-    return json_read_object(buf, json_attrs_1, endptr);
+    ret = json_read_object(buf, json_attrs_1, endptr);
+    // convert time back to timespec_t
+    if (0 == isfinite(gsttime)) {
+	gpsdata->gst.utctime.tv_sec = 0;
+	gpsdata->gst.utctime.tv_nsec = 0;
+    } else {
+	DTOTS(&gpsdata->gst.utctime, gsttime);
+    }
+
+    return ret;
 }
 
 /* decode a RAW messages into gpsdata.raw */

@@ -61,6 +61,7 @@ extern "C" {
  *       add dgps_age and dgps_station, to gps_fix_t
  *       Change gps_fix_t.time from timestamp_t to timespec_t
  *       Change gps_data_t.skyview_time from timestamp_t to timespec_t
+ *       Change gpsta_t.utctime from double to timespec_t
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -181,7 +182,7 @@ struct gps_fix_t {
  * The structure describing the pseudorange errors (GPGST)
  */
 struct gst_t {
-    double utctime;
+    timespec_t utctime;
     double rms_deviation;
     double smajor_deviation;
     double sminor_deviation;
