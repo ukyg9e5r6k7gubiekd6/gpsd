@@ -50,6 +50,9 @@ static char *f_str(double f, const char *fmt, char *buf)
     return buf;
 }
 
+/* make size of time string buffer large to shut up paranoid cc's */
+#define TIMESTR_SZ 48
+
 /* convert UTC to time str (hh:mm:ss.ss) and tm */
 static void utc_to_hhmmss(timespec_t time, char *buf, ssize_t buf_sz,
                           struct tm *tm)
@@ -97,7 +100,7 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
                             char bufp[], size_t len)
 {
     struct tm tm;
-    char time_str[20];
+    char time_str[TIMESTR_SZ];
     char lat_str[BUF_SZ];
     char lon_str[BUF_SZ];
 
@@ -129,8 +132,8 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
 static void gpsd_transit_fix_dump(struct gps_device_t *session,
                                   char bufp[], size_t len)
 {
-    char time_str[20];
-    char time2_str[20];
+    char time_str[TIMESTR_SZ];
+    char time2_str[TIMESTR_SZ];
     char lat_str[BUF_SZ];
     char lon_str[BUF_SZ];
     char speed_str[BUF_SZ];
@@ -315,7 +318,7 @@ static void gpsd_binary_quality_dump(struct gps_device_t *session,
         0 != session->gpsdata.fix.time.tv_sec) {
 
         struct tm tm;
-        char time_str[20];
+        char time_str[TIMESTR_SZ];
         char epv_str[BUF_SZ];
 
         (void)utc_to_hhmmss(session->gpsdata.fix.time,
@@ -340,7 +343,7 @@ static void gpsd_binary_time_dump(struct gps_device_t *session,
     if (MODE_NO_FIX < session->newdata.mode &&
         0 <= session->gpsdata.fix.time.tv_sec) {
         struct tm tm;
-        char time_str[20];
+        char time_str[TIMESTR_SZ];
 
         utc_to_hhmmss(session->gpsdata.fix.time, time_str, sizeof(time_str),
                       &tm);
