@@ -576,7 +576,8 @@ const struct gps_type_t driver_superstar2 = {
     /* Message delivery rate switcher (not active) */
     .rate_switcher	= NULL,
     /* Minimum cycle time (not used) */
-    .min_cycle	        = 1,
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     /* Control string sender - should provide checksum and trailer */

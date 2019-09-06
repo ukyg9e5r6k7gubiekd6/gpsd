@@ -467,8 +467,10 @@ void json_device_dump(const struct gps_device_t *device,
 	    if (device->device_type != NULL
 		&& device->device_type->rate_switcher != NULL)
 		str_appendf(reply, replylen,
-			       "\"mincycle\":%2.2f,",
-			       device->device_type->min_cycle);
+			       "\"mincycle\":%ld.%02ld,",
+			       device->device_type->min_cycle.tv_sec,
+			       device->device_type->min_cycle.tv_nsec /
+                               10000000);
 #endif /* RECONFIGURE_ENABLE */
 	}
     }

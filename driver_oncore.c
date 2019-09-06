@@ -594,7 +594,8 @@ const struct gps_type_t driver_oncore = {
     .speed_switcher   = NULL,			/* no speed setter */
     .mode_switcher    = NULL,			/* no mode setter */
     .rate_switcher    = NULL,			/* no speed setter */
-    .min_cycle        = 1,			/* 1Hz */
+    .min_cycle.tv_sec  = 1,                     /* 1Hz */
+    .min_cycle.tv_nsec = 0,
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     /* Control string sender - should provide checksum and headers/trailer */

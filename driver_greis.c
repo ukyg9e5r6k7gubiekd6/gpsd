@@ -1196,7 +1196,8 @@ const struct gps_type_t driver_greis = {
     .rate_switcher    = NULL,
     /* Minimum cycle time of the device.
      * Default is 1/100, but this is tunable using /par/raw/msint . */
-    .min_cycle        = 0.01,
+    .min_cycle.tv_sec  = 0,
+    .min_cycle.tv_nsec = 10000000,
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     /* Control string sender - should provide checksum and headers/trailer */

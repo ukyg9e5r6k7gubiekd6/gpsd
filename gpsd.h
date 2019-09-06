@@ -65,6 +65,7 @@ extern "C" {
  * 3.19.1
  *      Remove TIMEHINT_ENABLE.  It only worked when enabled.
  *      Remove NTP_ENABLE and NTPSHM_ENABLE.  It only worked when enabled.
+ *      Change gps_type_t.min_cycle from double to timespec_t
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -393,7 +394,7 @@ struct gps_type_t {
 				     speed_t speed, char parity, int stopbits);
     void (*mode_switcher)(struct gps_device_t *session, int mode);
     bool (*rate_switcher)(struct gps_device_t *session, double rate);
-    double min_cycle;
+    timespec_t min_cycle;
 #endif /* HAVE_TERMIOS_H */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE

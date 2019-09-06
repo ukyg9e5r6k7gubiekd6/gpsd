@@ -1221,7 +1221,7 @@ static void handle_request(struct subscriber_t *sub,
 				   "{\"class\":\"ERROR\",\"message\":\"Type of %s is unknown.\"}\r\n",
 				   device->gpsdata.dev.path);
 		else {
-                    timespec_t delta;
+                    timespec_t delta1, delta2;
 		    const struct gps_type_t *dt = device->device_type;
 		    bool no_serial_change =
 			(devconf.baudrate == DEVDEFAULT_BPS)
@@ -1254,9 +1254,10 @@ static void handle_request(struct subscriber_t *sub,
 			set_serial(device,
 				   (speed_t) devconf.baudrate, serialmode);
 		    }
-		    TS_SUB(&delta, &devconf.cycle, &device->gpsdata.dev.cycle);
-		    if ((0 != delta.tv_sec || 0 != delta.tv_nsec) &&
-			TSTONS(&devconf.cycle) >= dt->min_cycle &&
+		    TS_SUB(&delta1, &devconf.cycle, &device->gpsdata.dev.cycle);
+		    TS_SUB(&delta2, &devconf.cycle, &dt->min_cycle);
+		    if ((0 != delta1.tv_sec || 0 != delta1.tv_nsec) &&
+			0 <= TSTONS(&delta2) &&
 			dt->rate_switcher != NULL) {
 			if (dt->rate_switcher(device, TSTONS(&devconf.cycle))) {
 			    device->gpsdata.dev.cycle = devconf.cycle;

@@ -2523,7 +2523,8 @@ const struct gps_type_t driver_ubx = {
     .speed_switcher   = ubx_speed,      /* Speed (baudrate) switch */
     .mode_switcher    = ubx_mode,       /* Mode switcher */
     .rate_switcher    = ubx_rate,       /* Message delivery rate switcher */
-    .min_cycle        = 0.25,           /* Maximum 4Hz sample rate */
+    .min_cycle.tv_sec  = 0,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 250000000,     /* Maximum 4Hz sample rate */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send     = ubx_control_send,/* how to send a control string */

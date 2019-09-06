@@ -262,8 +262,7 @@ int gpsd_switch_driver(struct gps_device_t *session, char *type_name)
 	    session->device_type = *dp;
 	    session->driver_index = i;
 #ifdef RECONFIGURE_ENABLE
-	    DTOTS(&session->gpsdata.dev.mincycle,
-                  session->device_type->min_cycle);
+	    session->gpsdata.dev.mincycle = session->device_type->min_cycle;
 #endif /* RECONFIGURE_ENABLE */
 	    /* reconfiguration might be required */
 	    if (first_sync && session->device_type->event_hook != NULL)
@@ -1332,7 +1331,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	(void)clock_gettime(CLOCK_REALTIME, &ts_now);
 	if (session->device_type != NULL && session->lexer.start_time > 0) {
 #ifdef RECONFIGURE_ENABLE
-	    const double min_cycle = session->device_type->min_cycle;
+	    const double min_cycle = TSTONS(&session->device_type->min_cycle);
 #else
 	    const double min_cycle = 1;
 #endif /* RECONFIGURE_ENABLE */

@@ -618,7 +618,8 @@ const struct gps_type_t driver_evermore =
     .speed_switcher = evermore_speed,		/* we can change baud rates */
     .mode_switcher  = evermore_mode,		/* there is a mode switcher */
     .rate_switcher  = evermore_rate_switcher,	/* change sample rate */
-    .min_cycle      = 1,			/* ignore, no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = evermore_control_send,	/* how to send a control string */

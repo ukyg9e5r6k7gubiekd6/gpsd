@@ -96,7 +96,8 @@ const struct gps_type_t driver_unknown = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .min_cycle      = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
@@ -275,7 +276,8 @@ const struct gps_type_t driver_nmea0183 = {
     .mode_switcher  = NULL,		/* no binary mode to revert to */
 #endif /* BINARY_ENABLE */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .min_cycle      = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
@@ -380,7 +382,8 @@ const struct gps_type_t driver_garmin = {
     .speed_switcher = NULL,			/* no speed switcher */
     .mode_switcher  = garmin_mode_switch,	/* mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .min_cycle      = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /*RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
@@ -441,7 +444,8 @@ const struct gps_type_t driver_ashtech = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .min_cycle      = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
@@ -491,7 +495,8 @@ const struct gps_type_t driver_fv18 = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .min_cycle      = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
@@ -529,7 +534,8 @@ const struct gps_type_t driver_gpsclock = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* sample rate is fixed */
-    .min_cycle      = 1,		/* sample rate is fixed */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
@@ -583,7 +589,8 @@ static const struct gps_type_t driver_tripmate = {
     .speed_switcher= NULL,			/* no speed switcher */
     .mode_switcher = NULL,			/* no mode switcher */
     .rate_switcher = NULL,			/* no sample-rate switcher */
-    .min_cycle     = 1,				/* no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send  = nmea_write,	/* how to send control strings */
@@ -638,7 +645,8 @@ static const struct gps_type_t driver_earthmate = {
     .speed_switcher= NULL,			/* no speed switcher */
     .mode_switcher = NULL,			/* no mode switcher */
     .rate_switcher = NULL,			/* no sample-rate switcher */
-    .min_cycle     = 1,				/* no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send  = nmea_write,	/* never actually used. */
@@ -761,7 +769,8 @@ const struct gps_type_t driver_trueNorth = {
     .speed_switcher = tnt_speed,	/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no wrapup */
-    .min_cycle      = 0.5,		/* fixed at 20 samples per second */
+    .min_cycle.tv_sec  = 0,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 500000000,	/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = tnt_control_send,	/* how to send control strings */
@@ -839,7 +848,8 @@ static const struct gps_type_t driver_oceanServer = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no wrapup */
-    .min_cycle      = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
@@ -905,7 +915,8 @@ static const struct gps_type_t driver_fury = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = fury_rate_switcher,
-    .min_cycle      = 1,		/* has rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
@@ -958,7 +969,8 @@ static const struct gps_type_t driver_rtcm104v2 = {
     .speed_switcher= NULL,		/* no speed switcher */
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = NULL,		/* no sample-rate switcher */
-    .min_cycle     = 1,			/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
@@ -1003,7 +1015,8 @@ static const struct gps_type_t driver_rtcm104v3 = {
     .speed_switcher= NULL,		/* no speed switcher */
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = NULL,		/* no sample-rate switcher */
-    .min_cycle     = 1,			/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
@@ -1037,7 +1050,8 @@ static const struct gps_type_t driver_garmintxt = {
     .speed_switcher= NULL,		/* no speed switcher */
     .mode_switcher = NULL,		/* no mode switcher */
     .rate_switcher = NULL,		/* no sample-rate switcher */
-    .min_cycle     = 1,			/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
@@ -1143,8 +1157,9 @@ const struct gps_type_t driver_mtk3301 = {
 #ifdef RECONFIGURE_ENABLE
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
-    .rate_switcher  = mtk3301_rate_switcher,		/* sample rate switcher */
-    .min_cycle      = 0.2,		/* max 5Hz */
+    .rate_switcher  = mtk3301_rate_switcher,	/* sample rate switcher */
+    .min_cycle.tv_sec  = 0,
+    .min_cycle.tv_nsec = 200000000,     /* max 5Hz */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
@@ -1309,7 +1324,8 @@ const struct gps_type_t driver_isync = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .min_cycle      = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
@@ -1566,7 +1582,8 @@ const struct gps_type_t driver_aivdm = {
     .speed_switcher   = NULL,		/* no speed switcher */
     .mode_switcher    = NULL,		/* no mode switcher */
     .rate_switcher    = NULL,		/* no rate switcher */
-    .min_cycle        = 1,		/* max 1Hz */
+    .min_cycle.tv_sec  = 1,		/* max 1Hz */
+    .min_cycle.tv_nsec = 0,
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send     = NULL,		/* no control sender */
@@ -1676,7 +1693,8 @@ const struct gps_type_t driver_json_passthrough = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .min_cycle      = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */
@@ -1704,7 +1722,8 @@ const struct gps_type_t driver_pps = {
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .min_cycle      = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = NULL,		/* how to send control strings */

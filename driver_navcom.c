@@ -1254,7 +1254,8 @@ const struct gps_type_t driver_navcom =
     .speed_switcher = navcom_speed,		/* we do change baud rates */
     .mode_switcher  = NULL,			/* there is not a mode switcher */
     .rate_switcher  = NULL,			/* no sample-rate switcher */
-    .min_cycle      = 1,			/* ignore, no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = navcom_control_send,	/* how to send a control string */

@@ -1360,7 +1360,8 @@ const struct gps_type_t driver_garmin_usb_binary_old =
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .min_cycle      = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 0,
+    .min_cycle.tv_nsec = 10000000,      /* 10Hz */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = garmin_control_send,	/* send raw bytes */
@@ -1388,7 +1389,8 @@ const struct gps_type_t driver_garmin_usb_binary =
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = NULL,	        /* Garmin USB Binary has no NMEA */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .min_cycle      = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 0,
+    .min_cycle.tv_nsec = 10000000,	/* 10Hz */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = garmin_control_send,	/* send raw bytes */
@@ -1415,7 +1417,8 @@ const struct gps_type_t driver_garmin_ser_binary =
     .speed_switcher = NULL,		/* no speed switcher */
     .mode_switcher  = garmin_switcher,	/* how to change modes */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .min_cycle      = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 0,
+    .min_cycle.tv_nsec = 10000000,      /* 10Hz */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = garmin_control_send,	/* send raw bytes */

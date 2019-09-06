@@ -482,7 +482,8 @@ const struct gps_type_t driver_zodiac =
     .speed_switcher = zodiac_speed_switch,/* we can change baud rate */
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = NULL,		/* no sample-rate switcher */
-    .min_cycle      = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_sec  = 1,		/* not relevant, no rate switch */
+    .min_cycle.tv_nsec = 0,		/* not relevant, no rate switch */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = zodiac_control_send,	/* for gpsctl and friends */
