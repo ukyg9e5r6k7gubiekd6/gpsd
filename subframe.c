@@ -164,6 +164,7 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
     /* FIXME!! I really doubt this is Big Endian compatible */
     uint8_t preamble;
     struct subframe_t *subp = &session->gpsdata.subframe;
+    timestamp_t f_tow;
     gpsd_log(&session->context->errout, LOG_DATA,
 	     "50B: gpsd_interpret_subframe: (%d) "
 	     "%06x %06x %06x %06x %06x %06x %06x %06x %06x %06x\n",
@@ -726,10 +727,12 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 
 		/* IS-GPS-200 Revision E, paragraph 20.3.3.5.2.4 */
                 /* FIXME: only allow LEAPs in June and December */
+		f_tow = TSTONS(&session->context->gps_tow);
 		if (((session->context->gps_week % 256) == (unsigned short)subp->sub4_18.WNlsf) &&
-		    /* notify the leap seconds correction in the end of current day */
-		    ((double)((subp->sub4_18.DN - 1) * SECS_PER_DAY) < session->context->gps_tow) &&
-		    ((double)(subp->sub4_18.DN * SECS_PER_DAY) > session->context->gps_tow)) {
+		    /* notify the leap seconds correction in the end
+                     * of current day */
+		    ((double)((subp->sub4_18.DN - 1) * SECS_PER_DAY) < f_tow) &&
+		    ((double)(subp->sub4_18.DN * SECS_PER_DAY) > f_tow)) {
 		   if ( subp->sub4_18.leap < subp->sub4_18.lsf )
 			session->context->leap_notify = LEAP_ADDSECOND;
 		   else if ( subp->sub4_18.leap > subp->sub4_18.lsf )

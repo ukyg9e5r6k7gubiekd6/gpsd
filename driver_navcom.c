@@ -600,15 +600,17 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
     int16_t idot = (int16_t) (((getles16_be(buf, 82) & 0xfffc) / 4) |
                               ((getub(buf, 82) & 80) ? 0xc000 : 0x0000));
     session->context->gps_week = (unsigned short)wn;
-    session->context->gps_tow = (double)(toc * SF_TOC);
+    DTOTS(&session->context->gps_tow, (double)(toc * SF_TOC));
     /* leap second? */
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "Navcom: received packet type 0x81 (Packed Ephemeris Data)\n");
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "Navcom: PRN: %u, Week: %u, TOW: %.3f SV clock bias/drift/drift rate: %#19.12E/%#19.12E/%#19.12E\n",
+	     "Navcom: PRN: %u, Week: %u, TOW: %ld.%09ld "
+             "SV clock bias/drift/drift rate: %#19.12E/%#19.12E/%#19.12E\n",
 	     prn,
 	     session->context->gps_week,
-	     session->context->gps_tow,
+	     session->context->gps_tow.tv_sec,
+	     session->context->gps_tow.tv_nsec,
 	     ((double)af0) * SF_AF0,
 	     ((double)af1) * SF_AF1, ((double)af2) * SF_AF2);
     gpsd_log(&session->context->errout, LOG_DATA,
@@ -803,15 +805,17 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
     uint8_t status = getub(buf, 10);
 
     session->context->gps_week = (unsigned short)week;
-    session->context->gps_tow = (double)tow / 1000.0;
+    MSTOTS(&session->context->gps_tow, tow);
 
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "Navcom: received packet type 0xb0 (Raw Meas. Data Block)\n");
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "Navcom: week = %u, tow = %.3f, time slew accumulator = %u (1/1023mS), status = 0x%02x "
+	     "Navcom: week = %u, tow = %ld.%09ld "
+             "time slew accumulator = %u (1/1023mS), status = 0x%02x "
 	     "(%sclock %s - %u blocks follow)\n",
 	     session->context->gps_week,
-	     session->context->gps_tow,
+	     session->context->gps_tow.tv_sec,
+	     session->context->gps_tow.tv_nsec,
 	     tm_slew_acc, status,
 	     ((status & 0x80) ? "channel time set - " : ""),
 	     ((status & 0x40) ? "stable" : "not stable"), status & 0x0f);

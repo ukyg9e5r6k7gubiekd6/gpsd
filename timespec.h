@@ -6,6 +6,7 @@
 #ifndef GPSD_TIMESPEC_H
 #define GPSD_TIMESPEC_H
 
+#include <math.h>          /* for modf() */
 #include <stdbool.h>       /* for bool */
 
 /* normalize a timespec

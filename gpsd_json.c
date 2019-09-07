@@ -259,12 +259,13 @@ void json_tpv_dump(const struct gps_device_t *session,
 	    }
 	    str_appendf(reply, replylen,
 			"\"sor\":%.9f,\"chars\":%lu,\"sats\":%2d,"
-			"\"week\":%u,\"tow\":%.3f,\"rollovers\":%d",
+			"\"week\":%u,\"tow\":%ld.%03ld,\"rollovers\":%d",
 			session->sor,
 			session->chars,
 			gpsdata->satellites_used,
 			session->context->gps_week,
-			session->context->gps_tow,
+			session->context->gps_tow.tv_sec,
+			session->context->gps_tow.tv_nsec / 1000000L,
 			session->context->rollovers);
 	}
         /* at the end because it is new and microjson chokes on new items */

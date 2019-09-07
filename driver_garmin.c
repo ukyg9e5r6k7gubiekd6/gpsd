@@ -93,6 +93,7 @@
 
 #include "gpsd.h"
 #include "bits.h"
+#include "timespec.h"
 
 #define GPSD_LE16TOH(x) getles16((char *)(&(x)), 0)
 #define GPSD_LE32TOH(x) getles32((char *)(&(x)), 0)
@@ -379,7 +380,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	// gps_tow is always like x.999 or x.998 just round it to nearest sec
         // FIXME! this will break 5Hz garmins...
 	time_l += (time_t) round(pvt->gps_tow);
-	session->context->gps_tow = pvt->gps_tow;
+	DTOTS(&session->context->gps_tow, pvt->gps_tow);
 	session->newdata.time.tv_sec = time_l;
 	session->newdata.time.tv_nsec = 0;
 	gpsd_log(&session->context->errout, LOG_PROG,

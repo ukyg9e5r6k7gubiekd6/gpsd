@@ -369,7 +369,7 @@ timestamp_t gpsd_gpstime_resolve(struct gps_device_t *session,
     t -= session->context->leap_seconds;
 
     session->context->gps_week = week;
-    session->context->gps_tow = tow;
+    DTOTS(&session->context->gps_tow, tow);
     session->context->valid |= GPS_TIME_VALID;
 
     return t;
@@ -421,7 +421,7 @@ timespec_t gpsd_gpstime_resolv(struct gps_device_t *session,
     }
 
     session->context->gps_week = week;
-    session->context->gps_tow = tow.tv_sec + (tow.tv_nsec * 10e-9);
+    session->context->gps_tow = tow;
     session->context->valid |= GPS_TIME_VALID;
 
     return t;

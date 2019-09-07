@@ -68,6 +68,7 @@ extern "C" {
  *      Change gps_type_t.min_cycle from double to timespec_t
  *      Change gps_device_t.last_time from double to timespec_t
  *      Change gps_lexer_t.start_time from timestamp_t to timespec_t
+ *      Change gps_context_t.gps_tow from double to timespec_t
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -287,8 +288,8 @@ struct gps_context_t {
     /* timekeeping */
     time_t start_time;			/* local time of daemon startup */
     int leap_seconds;			/* Unix seconds to UTC (GPS-UTC offset) */
-    unsigned short gps_week;            /* GPS week, actually 10 bits */
-    double gps_tow;                     /* GPS time of week, actually 19 bits */
+    unsigned short gps_week;            /* GPS week, usually 10 bits */
+    timespec_t gps_tow;                 /* GPS time of week */
     int century;			/* for NMEA-only devices without ZDA */
     int rollovers;			/* rollovers since start of run */
     int leap_notify;			/* notification state from subframe */
