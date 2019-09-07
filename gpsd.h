@@ -70,6 +70,7 @@ extern "C" {
  *      Change gps_lexer_t.start_time from timestamp_t to timespec_t
  *      Change gps_context_t.gps_tow from double to timespec_t
  *      Change gps_device_t.sor from timestamp_t to timespec_t
+ *      Change gps_device_t.this_frac_time, last_frac_time to timespec_t
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -220,7 +221,7 @@ struct gps_lexer_t {
     unsigned long retry_counter;	/* count sniff retries */
     unsigned counter;			/* packets since last driver switch */
     struct gpsd_errout_t errout;		/* how to report errors */
-    timespec_t start_time;		/* timestamp of first input */
+    timespec_t start_time;		/* time of first input */
     unsigned long start_char;		/* char counter at first input */
     /*
      * ISGPS200 decoding context.
@@ -521,7 +522,7 @@ struct gps_device_t {
     time_t releasetime;
     bool zerokill;
     time_t reawake;
-    timespec_t sor;	/* timestamp start of this reporting cycle */
+    timespec_t sor;	        /* time start of this reporting cycle */
     unsigned long chars;	/* characters in the cycle */
     bool ship_to_ntpd;
     volatile struct shmTime *shm_clock;
@@ -576,7 +577,7 @@ struct gps_device_t {
 	 * end-cycle recognition, even if we don't have a previous
 	 * RMC or ZDA that lets us get full time from it.
 	 */
-	timestamp_t this_frac_time, last_frac_time;
+	timespec_t this_frac_time, last_frac_time;
 	bool latch_frac_time;
 	int lasttag;              /* index into nmea_phrase[] */
 	uint64_t cycle_enders;    /* bit map into nmea_phrase{} */

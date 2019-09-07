@@ -249,26 +249,14 @@ static void register_fractional_time(const char *tag, const char *fld,
 {
     if (fld[0] != '\0') {
         session->nmea.last_frac_time = session->nmea.this_frac_time;
-        session->nmea.this_frac_time = safe_atof(fld);
+        DTOTS(&session->nmea.this_frac_time, safe_atof(fld));
         session->nmea.latch_frac_time = true;
         gpsd_log(&session->context->errout, LOG_DATA,
-                 "%s: registers fractional time %.3f\n",
-                 tag, session->nmea.this_frac_time);
+                 "%s: registers fractional time %ld.%09ld\n",
+                 tag, session->nmea.this_frac_time.tv_sec,
+                 session->nmea.this_frac_time.tv_nsec);
     }
 }
-
-/**************************************************************************
- *
- * Compare GPS timestamps for equality.  Depends on the fact that the
- * timestamp granularity of GPS is 1/100th of a second.  Use this to avoid
- * naive float comparisons.
- *
- * WARNING: many GPS now report time to .sss.  1/1000th.  But so far
- * no GPS reports fixes faster than 20Hz.
- *
- **************************************************************************/
-
-#define GPS_TIME_EQUAL(a, b) (fabs((a) - (b)) < 0.01)
 
 /**************************************************************************
  *
@@ -3364,10 +3352,12 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
      */
     /* cast for 32/64 bit compat */
     gpsd_log(&session->context->errout, LOG_DATA,
-             "%s time %.3f last %.3f latch %d cont %d enders %#llx\n",
+             "%s time %ld.%09ld last %ld.%09ld latch %d cont %d enders %#llx\n",
              session->nmea.field[0],
-             session->nmea.this_frac_time,
-             session->nmea.last_frac_time,
+             session->nmea.this_frac_time.tv_sec,
+             session->nmea.this_frac_time.tv_nsec,
+             session->nmea.last_frac_time.tv_sec,
+             session->nmea.last_frac_time.tv_nsec,
              session->nmea.latch_frac_time,
              session->nmea.cycle_continue,
              (unsigned long long)session->nmea.cycle_enders);
@@ -3379,9 +3369,11 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
         thistag_mask = (uint64_t)1 << thistag;
     }
     if (session->nmea.latch_frac_time) {
-        if (!GPS_TIME_EQUAL(session->nmea.this_frac_time,
-                            session->nmea.last_frac_time)) {
-
+        timespec_t ts_delta;
+        TS_SUB(&ts_delta, &session->nmea.this_frac_time,
+                          &session->nmea.last_frac_time);
+        if (0.01 < fabs(TSTONS(&ts_delta))) {
+            /* time changed */
             mask |= CLEAR_IS;
             gpsd_log(&session->context->errout, LOG_PROG,
                      "%s starts a reporting cycle. lasttag %d\n",
