@@ -258,9 +258,10 @@ void json_tpv_dump(const struct gps_device_t *session,
                 /* TODO: add PPS precision to JSON output */
 	    }
 	    str_appendf(reply, replylen,
-			"\"sor\":%.9f,\"chars\":%lu,\"sats\":%2d,"
+			"\"sor\":%ld.%09ld,\"chars\":%lu,\"sats\":%2d,"
 			"\"week\":%u,\"tow\":%ld.%03ld,\"rollovers\":%d",
-			session->sor,
+			session->sor.tv_sec,
+			session->sor.tv_nsec,
 			session->chars,
 			gpsdata->satellites_used,
 			session->context->gps_week,

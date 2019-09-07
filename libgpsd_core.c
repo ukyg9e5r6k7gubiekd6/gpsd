@@ -323,7 +323,8 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     session->gpsdata.dev.mincycle.tv_nsec = 0;
     session->gpsdata.dev.cycle.tv_sec = 1;
     session->gpsdata.dev.cycle.tv_nsec = 0;
-    session->sor = 0.0;
+    session->sor.tv_sec = 0;
+    session->sor.tv_nsec = 0;
     session->chars = 0;
     /* tty-level initialization */
     gpsd_tty_init(session);
@@ -1349,7 +1350,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    else if (gap > quiet_time) {
 		gpsd_log(&session->context->errout, LOG_PROG,
 			 "transmission pause of %f\n", gap);
-		session->sor = TSTONS(&ts_now);
+		session->sor = ts_now;
 		session->lexer.start_char = session->lexer.char_counter;
 	    }
 	}

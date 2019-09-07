@@ -69,6 +69,7 @@ extern "C" {
  *      Change gps_device_t.last_time from double to timespec_t
  *      Change gps_lexer_t.start_time from timestamp_t to timespec_t
  *      Change gps_context_t.gps_tow from double to timespec_t
+ *      Change gps_device_t.sor from timestamp_t to timespec_t
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -520,7 +521,7 @@ struct gps_device_t {
     time_t releasetime;
     bool zerokill;
     time_t reawake;
-    timestamp_t sor;	/* timestamp start of this reporting cycle */
+    timespec_t sor;	/* timestamp start of this reporting cycle */
     unsigned long chars;	/* characters in the cycle */
     bool ship_to_ntpd;
     volatile struct shmTime *shm_clock;
