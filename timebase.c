@@ -274,7 +274,7 @@ timespec_t gpsd_utc_resolve(struct gps_device_t *session)
      */
     timespec_t t;
 
-    t.tv_sec = (timestamp_t)mkgmtime(&session->nmea.date);
+    t.tv_sec = (time_t)mkgmtime(&session->nmea.date);
     t.tv_nsec = (long)(session->nmea.subseconds * 1e9);
     session->context->valid &=~ GPS_TIME_VALID;
 
@@ -289,8 +289,7 @@ timespec_t gpsd_utc_resolve(struct gps_device_t *session)
      * If the GPS is reporting a time from before the daemon started, we've
      * had a rollover event while the daemon was running.
      */
-    if (session->newdata.time.tv_sec <
-        (timestamp_t)session->context->start_time) {
+    if (session->newdata.time.tv_sec < (time_t)session->context->start_time) {
 	char scr[128];
 	(void)timespec_to_iso8601(session->newdata.time, scr, sizeof(scr));
 	gpsd_log(&session->context->errout, LOG_WARN,
