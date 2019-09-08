@@ -7212,7 +7212,6 @@ def usage():
           '                     default: %s seconds\n'
           '       -x I          delete config item I\n'
           '       -z I,v        set config item I to v\n'
-          '       -?            print help\n'
           '\n' %
           (PROG_NAME, opts['input_file_name'],
            opts['protver'], opts['raw_file'],
