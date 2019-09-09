@@ -231,14 +231,16 @@ static int merge_hhmmss(char *hhmmss, struct gps_device_t *session)
     session->nmea.date.tm_min = DD(hhmmss + 2);
     session->nmea.date.tm_sec = DD(hhmmss + 4);
 
+    session->nmea.subseconds.tv_sec = 0;
     if ('.' == hhmmss[6] &&
         /* NetBSD 6 wants the cast */
         0 != isdigit((int)hhmmss[7])) {
         i = atoi(hhmmss + 7);
         sublen = strlen(hhmmss + 7);
-        session->nmea.subseconds = i / pow(10.0, sublen);
+        session->nmea.subseconds.tv_nsec = (timestamp_t)i *
+                                           (timestamp_t)pow(10.0, 9 - sublen);
     } else {
-        session->nmea.subseconds = 0.0;
+        session->nmea.subseconds.tv_nsec = 0;
     }
 
     return 0;
@@ -3320,7 +3322,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
         session->newdata.time = gpsd_utc_resolve(session);
 
         gpsd_log(&session->context->errout, LOG_DATA,
-                 "%s time is %ld.%09ld = %d-%02d-%02dT%02d:%02d:%.3fZ\n",
+                 "%s time is %ld.%09ld = %d-%02d-%02dT%02d:%02d:%02d.%03ldZ\n",
                  session->nmea.field[0],
                  session->newdata.time.tv_sec,
                  session->newdata.time.tv_nsec,
@@ -3329,7 +3331,8 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
                  session->nmea.date.tm_mday,
                  session->nmea.date.tm_hour,
                  session->nmea.date.tm_min,
-                 session->nmea.date.tm_sec + session->nmea.subseconds);
+                 session->nmea.date.tm_sec,
+                 session->nmea.subseconds.tv_nsec / 1000000L);
         /*
          * If we have time and PPS is available, assume we have good time.
          * Because this is a generic driver we don't really have enough

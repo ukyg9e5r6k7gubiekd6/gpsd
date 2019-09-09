@@ -71,6 +71,7 @@ extern "C" {
  *      Change gps_context_t.gps_tow from double to timespec_t
  *      Change gps_device_t.sor from timestamp_t to timespec_t
  *      Change gps_device_t.this_frac_time, last_frac_time to timespec_t
+ *      Change nmea.subseconds from double to timespec_t
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -546,8 +547,8 @@ struct gps_device_t {
     struct {
 	unsigned short sats_used[MAXCHANNELS];
 	int part, await;		/* for tracking GSV parts */
-	struct tm date;		/* date part of last sentence time */
-	double subseconds;		/* subsec part of last sentence time */
+	struct tm date;	                /* date part of last sentence time */
+	timespec_t subseconds;		/* subsec part of last sentence time */
 	char *field[NMEA_MAX];
 	unsigned char fieldcopy[NMEA_MAX+1];
 	/* detect receivers that ship GGA with non-advancing timestamp */

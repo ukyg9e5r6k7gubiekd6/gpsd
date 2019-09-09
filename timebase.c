@@ -275,7 +275,7 @@ timespec_t gpsd_utc_resolve(struct gps_device_t *session)
     timespec_t t;
 
     t.tv_sec = (time_t)mkgmtime(&session->nmea.date);
-    t.tv_nsec = (long)(session->nmea.subseconds * 1e9);
+    t.tv_nsec = session->nmea.subseconds.tv_nsec;
     session->context->valid &=~ GPS_TIME_VALID;
 
     /*
