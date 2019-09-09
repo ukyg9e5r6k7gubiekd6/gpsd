@@ -161,6 +161,39 @@ struct test3 tests3[] = {
     {0, -180, 21.28, 9.75, "Away far from Google default"},
 };
 
+struct test4 {
+    double lat1;
+    double lon1;
+    double lat2;
+    double lon2;
+    double distance;    /* distance in meters */
+    double ib;          /* initial bearina, radiansg */
+    double fb;          /* final bearina, radiansg */
+};
+
+// tests for earth_distance_and_bearings()
+// Online distance calculators give different answers.
+// This seems to match the "Vincenty Formula"
+struct test4 tests4[] = {
+    // zero
+    {0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+    // about 1 cm
+    {0.00000009, 0.0, 0.0, 0.0, 0.0100, GPS_PI, GPS_PI},
+    {0.0, 0.00000009, 0.0, 0.0, 0.0100, -(GPS_PI / 2), -(GPS_PI / 2)},
+    {0.0, 0.0, 0.00000009, 0.0, 0.0100, -GPS_PI, -GPS_PI},
+    {0.0, 0.0, 0.0, 0.00000009, 0.0100, GPS_PI / 2, GPS_PI / 2},
+    // one degree
+    {1.0, 0.0, 0.0, 0.0, 110574.3886, GPS_PI, GPS_PI},
+    {0.0, 1.0, 0.0, 0.0, 111319.4908, -(GPS_PI / 2), -(GPS_PI / 2)},
+    {0.0, 0.0, 1.0, 0.0, 110574.3886, -GPS_PI, -GPS_PI},
+    {0.0, 0.0, 0.0, 1.0, 111319.4908, GPS_PI / 2, GPS_PI / 2},
+    // 90 degrees
+    {90.0, 0.0, 0.0, 0.0, 10001965.7293, GPS_PI, GPS_PI},
+    {0.0, 90.0, 0.0, 0.0, 10018754.1714, -(GPS_PI / 2), -(GPS_PI / 2)},
+    {0.0, 0.0, 90.0, 0.0, 10001965.7293, -GPS_PI, -GPS_PI},
+    {0.0, 0.0, 0.0, 90.0, 10018754.1714, GPS_PI / 2, GPS_PI / 2},
+};
+
 int main(int argc, char **argv)
 {
     int verbose = 0;
@@ -225,9 +258,32 @@ int main(int argc, char **argv)
 	    fail_count++;
 	} else if (0 < verbose) {
 	    printf("%.2f %.2f mag_var was %.2f s/b %.2f, %s\n",
-	    tests3[i].lat, tests3[i].lon,
-	    result, tests3[i].variation, tests3[i].desc);
+	           tests3[i].lat, tests3[i].lon,
+	           result, tests3[i].variation, tests3[i].desc);
 	}
+    }
+
+    for (i = 0; i < (sizeof(tests4)/sizeof(struct test4)); i++) {
+	double result, ib, fb;
+
+        result = earth_distance_and_bearings(tests4[i].lat1, tests4[i].lon1,
+                                            tests4[i].lat2, tests4[i].lon2,
+                                            &ib, &fb);
+	if (0 == isfinite(result) ||
+	    0.001 < fabs(tests4[i].distance - result)) {
+	    printf("ERROR earth_distance_and bearings(%.8f, %.8f, %.8f, "
+                   "%.8f,,) = %.4f, %.2f, %.2f s/b %.4f, %.2f, %.2f\n",
+		   tests4[i].lat1, tests4[i].lon1,
+		   tests4[i].lat2, tests4[i].lon2,
+                   result, ib, fb,
+		   tests4[i].distance, tests4[i].ib, tests4[i].fb);
+	} else if (0 < verbose) {
+	    printf("earth_distance_and_bearings(%.8f, %.8f, %.8f, %.8f) = "
+                   "%.4f, %.2f, %.2f\n",
+		   tests4[i].lat1, tests4[i].lon1,
+		   tests4[i].lat2, tests4[i].lon2,
+		   tests4[i].distance, tests4[i].ib, tests4[i].fb);
+        }
     }
 
     exit(fail_count);
