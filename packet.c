@@ -426,14 +426,19 @@ static bool nextstate(struct gps_lexer_t *lexer, unsigned char c)
 	    lexer->state = TRANSDUCER_LEAD_1;
 	else if (c == 'B')
 	    lexer->state = BEIDOU_LEAD_1;
-	else if (c == 'Q')
+	else if (c == 'Q') {
 	    lexer->state = QZSS_LEAD_1;
 #ifdef OCEANSERVER_ENABLE
-	else if (c == 'C')
+	} else if (c == 'C') {
+            // is this ever used?
+	    lexer->state = NMEA_LEADER_END;
+	} else if (c == 'O') {
+            // for $OHPR
 	    lexer->state = NMEA_LEADER_END;
 #endif /* OCEANSERVER_ENABLE */
-	else
+	} else {
 	    (void) character_pushback(lexer, GROUND_STATE);
+        }
 	break;
     case NMEA_PUB_LEAD:
 	/*
