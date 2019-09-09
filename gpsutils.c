@@ -37,7 +37,6 @@
  * with the decimal point and stripped down to an atof()-equivalent.
  */
 
-double safe_atof(const char *string)
 /* Takes a decimal ASCII floating-point number, optionally
  * preceded by white space.  Must have form "-I.FE-X",
  * where I is the integer part of the mantissa, F is
@@ -47,7 +46,10 @@ double safe_atof(const char *string)
  * The decimal point isn't necessary unless F is
  * present.  The "E" may actually be an "e".  E and X
  * may both be omitted (but not just one).
+ *
+ * returns NaN if *string is zero length
  */
+double safe_atof(const char *string)
 {
     static int maxExponent = 511;   /* Largest possible base 10 exponent.  Any
 				     * exponent larger than this will already
@@ -94,7 +96,9 @@ double safe_atof(const char *string)
     while (isspace((unsigned char) *p)) {
 	p += 1;
     }
-    if (*p == '-') {
+    if (*p == '\0') {
+        return NAN;
+    } else if (*p == '-') {
 	sign = true;
 	p += 1;
     } else {
