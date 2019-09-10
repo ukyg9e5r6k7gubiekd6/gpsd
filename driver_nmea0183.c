@@ -237,8 +237,8 @@ static int merge_hhmmss(char *hhmmss, struct gps_device_t *session)
         0 != isdigit((int)hhmmss[7])) {
         i = atoi(hhmmss + 7);
         sublen = strlen(hhmmss + 7);
-        session->nmea.subseconds.tv_nsec = (timestamp_t)i *
-                                           (timestamp_t)pow(10.0, 9 - sublen);
+        session->nmea.subseconds.tv_nsec = (long)i *
+                                           (long)pow(10.0, 9 - sublen);
     } else {
         session->nmea.subseconds.tv_nsec = 0;
     }
