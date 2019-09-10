@@ -100,7 +100,7 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     tm.tm_hour = (int)getub(buf, 4) & 0x1f;
     tm.tm_min = (int)getub(buf, 5);
     d = getled64((char *)buf, 6);           /* seconds as a double */
-    session->newdata.time.tv_nsec = (timestamp_t)(modf(d, &int_part) * 1e9);
+    session->newdata.time.tv_nsec = (long)(modf(d, &int_part) * 1e9);
     tm.tm_sec = (int)int_part;
     tm.tm_mday = (int)getub(buf, 14);
     tm.tm_mon = (int)getub(buf, 15) - 1;
