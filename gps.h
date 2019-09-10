@@ -1946,7 +1946,7 @@ struct satellite_t {
 };
 
 struct attitude_t {
-    struct timespec	mtime;  /* time of measurement */
+    timespec_t	mtime;  /* time of measurement */
     double acc_len; /* unitvector sqrt(x^2 + y^2 +z^2) */
     double acc_x;
     double acc_y;
@@ -2102,8 +2102,8 @@ struct gps_policy_t {
 #define TIMEDELTA_DEFINED
 
 struct timedelta_t {
-    struct timespec	real;
-    struct timespec	clock;
+    timespec_t	real;
+    timespec_t	clock;
 };
 #endif /* TIMEDELTA_DEFINED */
 
