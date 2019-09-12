@@ -202,6 +202,49 @@ static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
     return 0;
 }
 
+/* decode an hhmmss.ss string into struct tm data and nsecs
+ *
+ * return: 0 == OK,  otherwise failure
+ */
+static int decode_hhmmss(struct tm *date, long *nsec, char *hhmmss,
+                         struct gps_device_t *session)
+{
+    int old_hour = date->tm_hour;
+    int i, sublen;
+
+    if (NULL == hhmmss) {
+        return 1;
+    }
+    for (i = 0; i < 6; i++) {
+        /* NetBSD 6 wants the cast */
+        if (0 == isdigit((int)hhmmss[i])) {
+            /* catches NUL and non-digits */
+            gpsd_log(&session->context->errout, LOG_WARN,
+                     "decode_hhmmss(%s), malformed time\n",  hhmmss);
+            return 2;
+        }
+    }
+    /* don't check for termination, might have fractional seconds */
+
+    date->tm_hour = DD(hhmmss);
+    if (date->tm_hour < old_hour)  /* midnight wrap */
+        date->tm_mday++;
+    date->tm_min = DD(hhmmss + 2);
+    date->tm_sec = DD(hhmmss + 4);
+
+    if ('.' == hhmmss[6] &&
+        /* NetBSD 6 wants the cast */
+        0 != isdigit((int)hhmmss[7])) {
+        i = atoi(hhmmss + 7);
+        sublen = strlen(hhmmss + 7);
+        *nsec = (long)i * (long)pow(10.0, 9 - sublen);
+    } else {
+        *nsec = 0;
+    }
+
+    return 0;
+}
+
 /* update from a UTC time
  *
  * return: 0 == OK,  greater than zero on failure
@@ -951,36 +994,41 @@ static gps_mask_t processGST(int count, char *field[],
      * 8 Standard deviation (meters) of altitude error
      * 9 Checksum
      */
-    double tod;
+    struct tm date;
+    timespec_t ts;
+    int ret;
     gps_mask_t mask = ONLINE_SET;
     if (count < 8) {
       return mask;
     }
 
-#define PARSE_FIELD(n) (*field[n]!='\0' ? safe_atof(field[n]) : NAN)
+    /* since it is NOT current time, do not register_fractional_time() */
+    // compute start of today
+    memset(&date, 0, sizeof(date));
+    date.tm_year = session->nmea.date.tm_year;
+    date.tm_mon = session->nmea.date.tm_mon;
+    date.tm_mday = session->nmea.date.tm_mday;
+
     /* note this is not full UTC, just HHMMSS.ss */
     /* this is not the current time,
      * it references another GPA of the same stamp. So do not set
      * any time stamps with it */
-    tod = PARSE_FIELD(1);
-    DTOTS(&session->gpsdata.gst.utctime, tod);
-    session->gpsdata.gst.rms_deviation       = PARSE_FIELD(2);
-    session->gpsdata.gst.smajor_deviation    = PARSE_FIELD(3);
-    session->gpsdata.gst.sminor_deviation    = PARSE_FIELD(4);
-    session->gpsdata.gst.smajor_orientation  = PARSE_FIELD(5);
-    session->gpsdata.gst.lat_err_deviation   = PARSE_FIELD(6);
-    session->gpsdata.gst.lon_err_deviation   = PARSE_FIELD(7);
-    session->gpsdata.gst.alt_err_deviation   = PARSE_FIELD(8);
-#undef PARSE_FIELD
-    if (0 < session->nmea.date.tm_year) {
-        /* add in the time of start of today */
-        /* since it is NOT current time, do not register_fractional_time() */
-        session->gpsdata.gst.utctime.tv_sec += mkgmtime(&session->nmea.date);
+    ret = decode_hhmmss(&date, &ts.tv_nsec, field[1], session);
+    if (0 == ret) {
+        // convert to timespec_t , tv_nsec already set
+        session->gpsdata.gst.utctime.tv_sec = mkgmtime(&date);
     } else {
         /* no idea of UTC time now */
         session->gpsdata.gst.utctime.tv_sec = 0;
         session->gpsdata.gst.utctime.tv_nsec = 0;
     }
+    session->gpsdata.gst.rms_deviation       = safe_atof(field[2]);
+    session->gpsdata.gst.smajor_deviation    = safe_atof(field[3]);
+    session->gpsdata.gst.sminor_deviation    = safe_atof(field[4]);
+    session->gpsdata.gst.smajor_orientation  = safe_atof(field[5]);
+    session->gpsdata.gst.lat_err_deviation   = safe_atof(field[6]);
+    session->gpsdata.gst.lon_err_deviation   = safe_atof(field[7]);
+    session->gpsdata.gst.alt_err_deviation   = safe_atof(field[8]);
 
     gpsd_log(&session->context->errout, LOG_DATA,
              "GST: utc = %ld.%09ld, rms = %.2f, maj = %.2f, min = %.2f,"
