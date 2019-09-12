@@ -472,30 +472,30 @@ static gps_mask_t processRMC(int count, char *field[],
         }
 
         /* get magnetic variation */
-	if ('\0' != field[10][0] &&
-	    '\0' != field[11][0]) {
-	    session->newdata.magnetic_var = safe_atof(field[10]);
+        if ('\0' != field[10][0] &&
+            '\0' != field[11][0]) {
+            session->newdata.magnetic_var = safe_atof(field[10]);
 
             switch (field[11][0]) {
             case 'E':
                 /* no change */
                 break;
             case 'W':
-		session->newdata.magnetic_var = -session->newdata.magnetic_var;
+                session->newdata.magnetic_var = -session->newdata.magnetic_var;
                 break;
             default:
                 /* huh? */
-		session->newdata.magnetic_var = NAN;
+                session->newdata.magnetic_var = NAN;
                 break;
             }
-	    if (0 == isfinite(session->newdata.magnetic_var) ||
-		0.09 >= fabs(session->newdata.magnetic_var)) {
-		/* some GPS set 0.0,E, or 0,w instead of blank */
-		session->newdata.magnetic_var = NAN;
+            if (0 == isfinite(session->newdata.magnetic_var) ||
+                0.09 >= fabs(session->newdata.magnetic_var)) {
+                /* some GPS set 0.0,E, or 0,w instead of blank */
+                session->newdata.magnetic_var = NAN;
             } else {
-		mask |= MAGNETIC_TRACK_SET;
+                mask |= MAGNETIC_TRACK_SET;
             }
-	}
+        }
 
         if (count >= 12) {
             newstatus = faa_mode(field[12][0]);
@@ -961,8 +961,8 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
         if (0.09 < age ||
             0 < station) {
             /* ignore both zeros */
-	    session->newdata.dgps_age = age;
-	    session->newdata.dgps_station = station;
+            session->newdata.dgps_age = age;
+            session->newdata.dgps_station = station;
         }
     }
 
@@ -2388,23 +2388,23 @@ static gps_mask_t processHDG(int c UNUSED, char *field[],
 
     /* get magnetic variation */
     if ('\0' != field[3][0] &&
-	'\0' != field[4][0]) {
-	session->newdata.magnetic_var = safe_atof(field[3]);
+        '\0' != field[4][0]) {
+        session->newdata.magnetic_var = safe_atof(field[3]);
 
-	switch (field[4][0]) {
-	case 'E':
-	    /* no change */
-	    mask |= MAGNETIC_TRACK_SET;
-	    break;
-	case 'W':
-	    session->newdata.magnetic_var = -session->newdata.magnetic_var;
-	    mask |= MAGNETIC_TRACK_SET;
-	    break;
-	default:
-	    /* huh? */
-	    session->newdata.magnetic_var = NAN;
-	    break;
-	}
+        switch (field[4][0]) {
+        case 'E':
+            /* no change */
+            mask |= MAGNETIC_TRACK_SET;
+            break;
+        case 'W':
+            session->newdata.magnetic_var = -session->newdata.magnetic_var;
+            mask |= MAGNETIC_TRACK_SET;
+            break;
+        default:
+            /* huh? */
+            session->newdata.magnetic_var = NAN;
+            break;
+        }
     }
 
 
@@ -2821,8 +2821,8 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
         gpsd_log(&session->context->errout, LOG_DATA,
                  "PASHR,SAT: used=%d\n",
                  session->gpsdata.satellites_used);
-	session->gpsdata.skyview_time.tv_sec = 0;
-	session->gpsdata.skyview_time.tv_nsec = 0;
+        session->gpsdata.skyview_time.tv_sec = 0;
+        session->gpsdata.skyview_time.tv_nsec = 0;
         mask |= SATELLITE_SET | USED_IS;
 
     } else if (0 == strcmp("T", field[3])) { /* Assume OxTS PASHR */
@@ -3315,7 +3315,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
 #ifdef __UNUSED
     // debug
     gpsd_log(&session->context->errout, 0,
-	     "NMEA0183: got %s\n", session->nmea.field[0]);
+             "NMEA0183: got %s\n", session->nmea.field[0]);
 #endif // __UNUSED
 
     /* dispatch on field zero, the sentence tag */
