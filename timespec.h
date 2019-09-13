@@ -109,6 +109,9 @@ static inline void TS_NORM( struct timespec *ts)
                          ((ts1)->tv_sec == (ts2)->tv_sec && \
                           (ts1)->tv_nsec >= (ts2)->tv_nsec))
 
+// true if normalized timespec1 equal to timespec2
+#define TS_EQ(ts1, ts2) ((ts1)->tv_sec == (ts2)->tv_sec && \
+                         (ts1)->tv_nsec == (ts2)->tv_nsec)
 
 /* convert a timespec to a double.
  * if tv_sec > 2, then inevitable loss of precision in tv_nsec
