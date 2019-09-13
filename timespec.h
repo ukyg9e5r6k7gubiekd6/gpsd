@@ -96,6 +96,15 @@ static inline void TS_NORM( struct timespec *ts)
         TS_NORM( r ); \
     } while (0)
 
+// true if normalized timespec greater than zero
+#define TS_GZ(ts) (0 <= (ts)->tv_sec && 0 <= (ts)->tv_nsec)
+
+// true if normalized timespec1 greater than timespec2
+#define TS_GT(ts1, ts2) ((ts1)->tv_sec > (ts2)->tv_sec || \
+                         ((ts1)->tv_sec == (ts2)->tv_sec && \
+                          (ts1)->tv_nsec > (ts2)->tv_nsec))
+
+
 /* convert a timespec to a double.
  * if tv_sec > 2, then inevitable loss of precision in tv_nsec
  * so best to NEVER use TSTONS() 
