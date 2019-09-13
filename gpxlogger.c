@@ -57,9 +57,8 @@ static void print_gpx_header(void)
     (void)fprintf(logfile
          ,"        http://www.topografix.com/GPX/1/1/gpx.xsd\">\n");
     (void)fprintf(logfile, " <metadata>\n");
-    (void)fprintf(logfile,
-         "  <time>%s</time>\n",
-         unix_to_iso8601((timestamp_t)time(NULL), tbuf, sizeof(tbuf)));
+    (void)fprintf(logfile, "  <time>%s</time>\n",
+         now_to_iso8601(tbuf, sizeof(tbuf)));
     (void)fprintf(logfile," </metadata>\n");
     (void)fflush(logfile);
 }
