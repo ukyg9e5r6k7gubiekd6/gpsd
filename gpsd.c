@@ -724,7 +724,6 @@ bool gpsd_add_device(const char *device_name, bool flag_nowait)
     struct gps_device_t *devp;
     bool ret = false;
 #ifdef SOCKET_EXPORT_ENABLE
-    timespec_t ts_now;
     char tbuf[JSON_DATE_MAX+1];
 #endif /* SOCKET_EXPORT_ENABLE */
 
@@ -750,12 +749,11 @@ bool gpsd_add_device(const char *device_name, bool flag_nowait)
 		ret = open_device(devp);
 	    }
 #ifdef SOCKET_EXPORT_ENABLE
-	    (void)clock_gettime(CLOCK_REALTIME, &ts_now);
 	    notify_watchers(devp, true, false,
 			    "{\"class\":\"DEVICE\",\"path\":\"%s\","
                             "\"activated\":%s}\r\n",
 			    devp->gpsdata.dev.path,
-		            timespec_to_iso8601(ts_now, tbuf, sizeof(tbuf)));
+		            now_to_iso8601(tbuf, sizeof(tbuf)));
 #endif /* SOCKET_EXPORT_ENABLE */
 	    break;
 	}
@@ -1297,7 +1295,6 @@ static void handle_request(struct subscriber_t *sub,
     } else if (str_starts_with(buf, "?POLL;")) {
 	char tbuf[JSON_DATE_MAX+1];
 	int active = 0;
-        timespec_t ts_now;
 
 	buf += 6;
 	for (devp = devices; devp < devices + MAX_DEVICES; devp++) {
@@ -1306,12 +1303,10 @@ static void handle_request(struct subscriber_t *sub,
 		    active++;
         }
 
-        (void)clock_gettime(CLOCK_REALTIME, &ts_now);
 	(void)snprintf(reply, replylen,
 		       "{\"class\":\"POLL\",\"time\":\"%s\",\"active\":%d, "
                        "\"tpv\":[",
-		       timespec_to_iso8601(ts_now, tbuf, sizeof(tbuf)),
-                       active);
+		       now_to_iso8601(tbuf, sizeof(tbuf)), active);
 	for (devp = devices; devp < devices + MAX_DEVICES; devp++) {
 	    if (allocated_device(devp) && subscribed(sub, devp)) {
 		if ((devp->observed & GPS_TYPEMASK) != 0) {
