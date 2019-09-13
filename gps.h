@@ -66,6 +66,7 @@ extern "C" {
  *       Change devices.time from timestamp_t to timespec_t
  *       Change sub4_18.d_tot from timestamp_t to time_t t_tot
  *       Change devconfig_t.activated, cycle & mincycle to timespec_t
+ *       Remove unused timestamp()
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -968,7 +969,7 @@ struct ais_t
 #define AIS_COURSE_NOT_AVAILABLE	3600
 	    unsigned int heading;		/* true heading */
 #define AIS_HEADING_NOT_AVAILABLE	511
-	    unsigned int second;		/* seconds of UTC timestamp */
+	    unsigned int second;		/* seconds of UTC time */
 #define AIS_SEC_NOT_AVAILABLE	60
 #define AIS_SEC_MANUAL		61
 #define AIS_SEC_ESTIMATED	62
@@ -1617,7 +1618,7 @@ struct ais_t
 	    int lon;			/* longitude */
 	    int lat;			/* latitude */
 	    unsigned int course;	/* course over ground */
-	    unsigned int second;	/* seconds of UTC timestamp */
+	    unsigned int second;	/* seconds of UTC time */
 	    unsigned int regional;	/* regional reserved */
 	    unsigned int dte;		/* data terminal enable */
 	    //unsigned int spare;	spare bits */
@@ -1693,7 +1694,7 @@ struct ais_t
 #define AIS_GNS_LAT_NOT_AVAILABLE	0xd548
 	    unsigned int course;	/* course over ground */
 	    unsigned int heading;	/* true heading */
-	    unsigned int second;	/* seconds of UTC timestamp */
+	    unsigned int second;	/* seconds of UTC time */
 	    unsigned int regional;	/* regional reserved */
 	    bool cs;     		/* carrier sense unit flag */
 	    bool display;		/* unit has attached display? */
@@ -1713,7 +1714,7 @@ struct ais_t
 	    int lat;			/* latitude */
 	    unsigned int course;	/* course over ground */
 	    unsigned int heading;	/* true heading */
-	    unsigned int second;	/* seconds of UTC timestamp */
+	    unsigned int second;	/* seconds of UTC time */
 	    unsigned int regional;	/* regional reserved */
 	    // cppcheck-suppress arrayIndexOutOfBounds
 	    char shipname[AIS_SHIPNAME_MAXLEN+1];		/* ship name */
@@ -1760,7 +1761,7 @@ struct ais_t
 	    unsigned int to_port;	/* dimension to port */
 	    unsigned int to_starboard;	/* dimension to starboard */
 	    unsigned int epfd;		/* type of EPFD */
-	    unsigned int second;	/* second of UTC timestamp */
+	    unsigned int second;	/* second of UTC time */
 	    bool off_position;		/* off-position indicator */
 	    unsigned int regional;	/* regional reserved field */
 	    bool raim;			/* RAIM flag */
@@ -2295,7 +2296,6 @@ extern const char *gps_maskdump(gps_mask_t);
 
 extern double safe_atof(const char *);
 extern time_t mkgmtime(struct tm *);
-extern timestamp_t timestamp(void);
 extern timestamp_t iso8601_to_unix(char *);
 extern char *timespec_to_iso8601(timespec_t t, char[], size_t len);
 extern char *unix_to_iso8601(timestamp_t t, char[], size_t len);

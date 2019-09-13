@@ -419,15 +419,6 @@ void gps_merge_fix(struct gps_fix_t *to,
     }
 }
 
-/* NOTE: timestamp_t is a double, so this is only precise to
- * near microSec.  Do not use near PPS which is nanoSec precise */
-timestamp_t timestamp(void)
-{
-     struct timespec ts;
-     (void)clock_gettime(CLOCK_REALTIME, &ts);
-     return (timestamp_t)(ts.tv_sec + ts.tv_nsec * 1e-9);
-}
-
 /* mkgmtime(tm)
  * convert struct tm, as UTC, to seconds since Unix epoch
  * This differs from mktime() from libc.
