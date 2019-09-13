@@ -72,26 +72,38 @@ int gps_shm_open(struct gps_data_t *gpsdata)
     return 0;
 }
 
-bool gps_shm_waiting(const struct gps_data_t *gpsdata, int timeout)
 /* check to see if new data has been written */
 /* timeout is in uSec */
+bool gps_shm_waiting(const struct gps_data_t *gpsdata, int timeout)
 {
-    volatile struct shmexport_t *shared = (struct shmexport_t *)PRIVATE(gpsdata)->shmseg;
+    volatile struct shmexport_t *shared =
+            (struct shmexport_t *)PRIVATE(gpsdata)->shmseg;
     volatile bool newdata = false;
-    timestamp_t endtime = timestamp() + (((double)timeout)/1000000);
+    timespec_t endtime;
+
+    (void)clock_gettime(CLOCK_REALTIME, &endtime);
+    endtime.tv_sec += timeout / 1000000;
+    endtime.tv_nsec += (timeout % 1000000) * 1000;
+    TS_NORM(&endtime);
 
     /* busy-waiting sucks, but there's not really an alternative */
     for (;;) {
 	volatile int bookend1, bookend2;
+	timespec_t now;
+
 	memory_barrier();
 	bookend1 = shared->bookend1;
 	memory_barrier();
 	bookend2 = shared->bookend2;
 	memory_barrier();
-	if (bookend1 == bookend2 && bookend1 > PRIVATE(gpsdata)->tick)
+	if (bookend1 == bookend2 && bookend1 > PRIVATE(gpsdata)->tick) {
 	    newdata = true;
-	if (newdata || (timestamp() >= endtime))
+            break;
+        }
+	(void)clock_gettime(CLOCK_REALTIME, &now);
+	if (TS_GT(&now, &endtime)) {
 	    break;
+        }
     }
 
     return newdata;
