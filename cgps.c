@@ -932,11 +932,16 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
                         14, ep_str);
 
         /* Fill in the time offset, milliseconds. */
-        if (0 < gpsdata->fix.time.tv_sec)
-            (void)snprintf(scr, sizeof(scr), "%6.3f sec",
-                           (double)(timestamp() - TSTONS(&gpsdata->fix.time)));
-        else
+        if (0 < gpsdata->fix.time.tv_sec) {
+            timespec_t ts_now, ts_diff;
+	    (void)clock_gettime(CLOCK_REALTIME, &ts_now);
+            TS_SUB(&ts_diff, &ts_now, &gpsdata->fix.time);
+
+            (void)snprintf(scr, sizeof(scr), "%ld.%03ld sec",
+                           ts_diff.tv_sec, ts_diff.tv_nsec / 1000000);
+        } else {
             (void)strlcpy(scr, " n/a", sizeof(scr));
+        }
         (void)mvwprintw(datawin, row++, DATAWIN_VALUE_OFFSET + 8, "%-*s", 18,
                         scr);
         /* Fill in the grid square (esr thought *this* one was interesting). */
