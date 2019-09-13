@@ -26,7 +26,7 @@
 extern const struct gps_type_t driver_nmea0183;
 
 static WINDOW *cookedwin, *nmeawin, *satwin, *gprmcwin, *gpggawin, *gpgsawin, *gpgstwin;
-static timestamp_t last_tick, tick_interval;
+static timespec_t last_tick, tick_interval;
 static char sentences[NMEA_MAX * 2];
 
 /*****************************************************************************
@@ -140,7 +140,7 @@ static bool nmea_initialize(void)
     (void)wattrset(gpgstwin, A_NORMAL);
 
 
-    last_tick = timestamp();
+    (void)clock_gettime(CLOCK_REALTIME, &last_tick);
 
     sentences[0] = '\0';
 
@@ -217,7 +217,9 @@ static void nmea_update(void)
     if (session.lexer.outbuffer[0] == (unsigned char)'$'
 		&& fields != NULL && fields[0] != NULL) {
 	int ymax, xmax;
-	timestamp_t now;
+	timespec_t now;
+	timespec_t ts_diff;
+
 	getmaxyx(nmeawin, ymax, xmax);
 	assert(ymax > 0);
 	if (strstr(sentences, fields[0]) == NULL) {
@@ -238,11 +240,12 @@ static void nmea_update(void)
 	 * the longest we've seen yet, boldify the corresponding
 	 * tag.
 	 */
-	now = timestamp();
-	if (now > last_tick && (now - last_tick) > tick_interval) {
+	(void)clock_gettime(CLOCK_REALTIME, &now);
+        TS_SUB(&ts_diff, &now, &last_tick);
+	if (TS_GZ(&ts_diff) && TS_GT(&ts_diff, &tick_interval)) {
 	    char *findme = strstr(sentences, fields[0]);
 
-	    tick_interval = now - last_tick;
+	    tick_interval = ts_diff;
 	    if (findme != NULL) {
 		(void)mvwchgat(nmeawin, SENTENCELINE, 1, xmax - 13, A_NORMAL, 0,
 			       NULL);
