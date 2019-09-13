@@ -614,6 +614,16 @@ char *timespec_to_iso8601(timespec_t fixtime, char isotime[], size_t len)
     return isotime;
 }
 
+/* return time now as ISO8601, no timezone adjustment */
+/* example: 2007-12-11T23:38:51.033Z */
+char *now_to_iso8601(char *tbuf, size_t tbuf_sz)
+{
+    timespec_t ts_now;
+
+    (void)clock_gettime(CLOCK_REALTIME, &ts_now);
+    return timespec_to_iso8601(ts_now, tbuf, tbuf_sz);
+}
+
 /* Unix UTC time to ISO8601, no timezone adjustment */
 /* example: 2007-12-11T23:38:51.033Z */
 char *unix_to_iso8601(timestamp_t fixtime, char isotime[], size_t len)

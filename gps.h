@@ -2297,6 +2297,7 @@ extern const char *gps_maskdump(gps_mask_t);
 extern double safe_atof(const char *);
 extern time_t mkgmtime(struct tm *);
 extern timestamp_t iso8601_to_unix(char *);
+extern char *now_to_iso8601(char[], size_t len);
 extern char *timespec_to_iso8601(timespec_t t, char[], size_t len);
 extern char *unix_to_iso8601(timestamp_t t, char[], size_t len);
 extern double earth_distance(double, double, double, double);
