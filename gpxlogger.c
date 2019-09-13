@@ -86,7 +86,7 @@ static void print_gpx_trk_start(void)
     (void)fflush(logfile);
 }
 
-static void print_fix(struct gps_data_t *gpsdata, double time)
+static void print_fix(struct gps_data_t *gpsdata, timespec_t ts_time)
 {
     char tbuf[CLIENT_DATE_MAX+1];
 
@@ -96,7 +96,7 @@ static void print_fix(struct gps_data_t *gpsdata, double time)
     if ((isfinite(gpsdata->fix.altHAE) != 0))
 	(void)fprintf(logfile,"    <ele>%f</ele>\n", gpsdata->fix.altHAE);
     (void)fprintf(logfile,"    <time>%s</time>\n",
-		 unix_to_iso8601(time, tbuf, sizeof(tbuf)));
+		 timespec_to_iso8601(ts_time, tbuf, sizeof(tbuf)));
     if (gpsdata->status == STATUS_DGPS_FIX)
 	(void)fprintf(logfile,"    <fix>dgps</fix>\n");
     else
@@ -130,16 +130,16 @@ static void print_fix(struct gps_data_t *gpsdata, double time)
 
 static void conditionally_log_fix(struct gps_data_t *gpsdata)
 {
-    static double int_time, old_int_time;
+    static timespec_t ts_time, old_ts_time, ts_diff;
     static double old_lat, old_lon;
     static bool first = true;
 
-    int_time = TSTONS(&gpsdata->fix.time);
-    if ((int_time == old_int_time) || gpsdata->fix.mode < MODE_2D)
+    ts_time = gpsdata->fix.time;
+    if (TS_EQ(&ts_time, &old_ts_time) || gpsdata->fix.mode < MODE_2D)
 	return;
 
     /* may not be worth logging if we've moved only a very short distance */
-    if (minmove>0 && !first && earth_distance(
+    if (0 < minmove && !first && earth_distance(
 					gpsdata->fix.latitude,
 					gpsdata->fix.longitude,
 					old_lat, old_lon) < minmove)
@@ -152,7 +152,8 @@ static void conditionally_log_fix(struct gps_data_t *gpsdata)
      * backward when gpsd is submitting junk on the
      * dbus.
      */
-    if (fabs(int_time - old_int_time) > timeout && !first) {
+    TS_SUB(&ts_diff, &ts_time, &old_ts_time);
+    if (labs((long)ts_diff.tv_sec) > timeout && !first) {
 	print_gpx_trk_end();
 	intrack = false;
     }
@@ -164,12 +165,12 @@ static void conditionally_log_fix(struct gps_data_t *gpsdata)
 	    first = false;
     }
 
-    old_int_time = int_time;
-    if (minmove > 0) {
+    old_ts_time = ts_time;
+    if (0 < minmove) {
 	old_lat = gpsdata->fix.latitude;
 	old_lon = gpsdata->fix.longitude;
     }
-    print_fix(gpsdata, int_time);
+    print_fix(gpsdata, ts_time);
 }
 
 static void quit_handler(int signum)
