@@ -1227,6 +1227,8 @@ int gpsd_await_data(fd_set *rfds,
     if (errout->debug >= LOG_SPIN) {
 	int i;
 	char dbuf[BUFSIZ];
+        timespec_t ts_now;
+
 	dbuf[0] = '\0';
 	for (i = 0; i < (int)FD_SETSIZE; i++)
 	    if (FD_ISSET(i, all_fds))
@@ -1236,9 +1238,13 @@ int gpsd_await_data(fd_set *rfds,
 	for (i = 0; i < (int)FD_SETSIZE; i++)
 	    if (FD_ISSET(i, rfds))
 		str_appendf(dbuf, sizeof(dbuf), " %d ", i);
+
+	(void)clock_gettime(CLOCK_REALTIME, &ts_now);
 	gpsd_log(errout, LOG_SPIN,
-		 "pselect() {%s} at %f (errno %d)\n",
-		 dbuf, timestamp(), errno);
+		 "pselect() {%s} at %ld.%03ld (errno %d)\n",
+		 dbuf,
+                 ts_now.tv_sec, ts_now.tv_nsec / 1000000,
+                 errno);
     }
 
     return AWAIT_GOT_INPUT;
