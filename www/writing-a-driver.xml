@@ -937,7 +937,7 @@ allow a full 2 seconds before scanning for output.</para>
 <para>When I found that my initial scanning method was not viable,
 I experimented and eventually settled on a loop using a
 <function>while</function> statement that checked
-<function>timestamp()</function> values and was set
+time stamp values and was set
 to time out at 2 seconds maximum duration, with an early exit on
 successfully finding the wanted data. Within the loop, I tested
 the serial port for an available character. If one was available,

@@ -29,10 +29,6 @@
   <entry><para>Clears certain status flags, depending if the associated fields are invalid.</para></entry>
 </row>
 <row>
-  <entry><function>double timestamp(void)</function></entry>
-  <entry><para>Returns the number of seconds and microseconds since the UNIX Epoch (00:00:00 UTC, January 1, 1970); i.e. a unique value which can be used to timestamp any event.</para></entry>
-</row>
-<row>
   <entry><function>time_t mkgmtime(register struct tm *t)</function></entry>
   <entry><para>Convert a struct <function>tm {}</function> (see <function>time.h</function>) to seconds since UNIX Epoch.</para></entry>
 </row>
