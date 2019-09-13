@@ -223,23 +223,27 @@ void gpsd_time_init(struct gps_context_t *context, time_t starttime)
 
     context->rollovers = (int)((context->start_time-GPS_EPOCH) / GPS_ROLLOVER);
 
-    if (context->start_time < GPS_EPOCH)
+    if (GPS_EPOCH > context->start_time) {
 	gpsd_log(&context->errout, LOG_ERROR,
 		 "system time looks bogus, dates may not be reliable.\n");
-    else {
+    } else {
 	/* we've forced the UTC timezone, so this is actually UTC */
 	struct tm *now = localtime(&context->start_time);
 	char scr[128];
+        timespec_t ts_start_time;
+
+        ts_start_time.tv_sec = context->start_time;
+        ts_start_time.tv_nsec = 0;
+
 	/*
 	 * This is going to break our regression-test suite once a century.
 	 * I think we can live with that consequence.
 	 */
 	now->tm_year += 1900;
 	context->century = now->tm_year - (now->tm_year % 100);
-	(void)unix_to_iso8601((timestamp_t)context->start_time, scr, sizeof(scr));
-	gpsd_log(&context->errout, LOG_INF,
-		 "startup at %s (%d)\n",
-		 scr, (int)context->start_time);
+	gpsd_log(&context->errout, LOG_INF, "startup at %s (%ld)\n",
+	         timespec_to_iso8601(ts_start_time, scr, sizeof(scr)),
+		 (long)context->start_time);
     }
 }
 
