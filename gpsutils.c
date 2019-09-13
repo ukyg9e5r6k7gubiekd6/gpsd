@@ -534,7 +534,8 @@ timestamp_t iso8601_to_unix(char *isotime)
 	case 6: // Seconds token
 	  sec = safe_atof(pch);
 	  // NB To handle timestamps with leap seconds
-	  if (sec >= 0.0 && sec < 61.5 ) {
+	  if (0 == isfinite(sec) &&
+	      sec >= 0.0 && sec < 61.5 ) {
 	    tm.tm_sec = (unsigned int)sec; // Truncate to get integer value
 	    usec = sec - (unsigned int)sec; // Get the fractional part (if any)
 	  }
