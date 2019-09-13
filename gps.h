@@ -969,7 +969,10 @@ struct ais_t
 #define AIS_COURSE_NOT_AVAILABLE	3600
 	    unsigned int heading;		/* true heading */
 #define AIS_HEADING_NOT_AVAILABLE	511
-	    unsigned int second;		/* seconds of UTC time */
+            /* seconds of UTC time, 0 to 59.
+             * 60 == N/A, 61 == manual, 62 == dead reckoning,
+             * 63 == inoperative */
+	    unsigned int second;
 #define AIS_SEC_NOT_AVAILABLE	60
 #define AIS_SEC_MANUAL		61
 #define AIS_SEC_ESTIMATED	62
@@ -1618,6 +1621,9 @@ struct ais_t
 	    int lon;			/* longitude */
 	    int lat;			/* latitude */
 	    unsigned int course;	/* course over ground */
+            /* seconds of UTC time, 0 to 59.
+             * 60 == N/A, 61 == manual, 62 == dead reckoning,
+             * 63 == inoperative */
 	    unsigned int second;	/* seconds of UTC time */
 	    unsigned int regional;	/* regional reserved */
 	    unsigned int dte;		/* data terminal enable */
@@ -1694,7 +1700,10 @@ struct ais_t
 #define AIS_GNS_LAT_NOT_AVAILABLE	0xd548
 	    unsigned int course;	/* course over ground */
 	    unsigned int heading;	/* true heading */
-	    unsigned int second;	/* seconds of UTC time */
+            /* seconds of UTC time, 0 to 59.
+             * 60 == N/A, 61 == manual, 62 == dead reckoning,
+             * 63 == inoperative */
+	    unsigned int second;
 	    unsigned int regional;	/* regional reserved */
 	    bool cs;     		/* carrier sense unit flag */
 	    bool display;		/* unit has attached display? */
@@ -1714,7 +1723,10 @@ struct ais_t
 	    int lat;			/* latitude */
 	    unsigned int course;	/* course over ground */
 	    unsigned int heading;	/* true heading */
-	    unsigned int second;	/* seconds of UTC time */
+            /* seconds of UTC time, 0 to 59.
+             * 60 == N/A, 61 == manual, 62 == dead reckoning,
+             * 63 == inoperative */
+	    unsigned int second;
 	    unsigned int regional;	/* regional reserved */
 	    // cppcheck-suppress arrayIndexOutOfBounds
 	    char shipname[AIS_SHIPNAME_MAXLEN+1];		/* ship name */
@@ -1761,7 +1773,10 @@ struct ais_t
 	    unsigned int to_port;	/* dimension to port */
 	    unsigned int to_starboard;	/* dimension to starboard */
 	    unsigned int epfd;		/* type of EPFD */
-	    unsigned int second;	/* second of UTC time */
+            /* seconds of UTC time, 0 to 59.
+             * 60 == N/A, 61 == manual, 62 == dead reckoning,
+             * 63 == inoperative */
+	    unsigned int second;
 	    bool off_position;		/* off-position indicator */
 	    unsigned int regional;	/* regional reserved field */
 	    bool raim;			/* RAIM flag */
