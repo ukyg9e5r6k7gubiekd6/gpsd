@@ -219,13 +219,18 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     for (i = 0; i < (int)(sizeof(tests1) / sizeof(tests1[0])); i++) {
         timespec_to_iso8601(tests1[i].ts_time, tbuf, sizeof(tbuf));
         if (0 != strcmp(tests1[i].iso8601, tbuf)) {
-            failed = true;
-            (void)printf("test_mktime: timespec_to_iso8601() "
-                         "test %ld.%09ld failed.\n"
-                         "  Got %s, s/b %s\n",
-                         tests1[i].ts_time.tv_sec,
-                         tests1[i].ts_time.tv_nsec,
-                         tbuf, tests1[i].iso8601);
+            if ( 4 >= sizeof(time_t)) {
+                (void)printf("WARNING: time_t too small.  This gpsd binary "
+                             "will fail at the 2038 roll over\n");
+            } else {
+                failed = true;
+                (void)printf("test_mktime: timespec_to_iso8601() "
+                             "test %ld.%09ld failed.\n"
+                             "  Got %s, s/b %s\n",
+                             tests1[i].ts_time.tv_sec,
+                             tests1[i].ts_time.tv_nsec,
+                             tbuf, tests1[i].iso8601);
+            }
         }
     }
 
