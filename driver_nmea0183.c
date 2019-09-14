@@ -1004,16 +1004,21 @@ static gps_mask_t processGST(int count, char *field[],
 
     /* since it is NOT current time, do not register_fractional_time() */
     // compute start of today
-    memset(&date, 0, sizeof(date));
-    date.tm_year = session->nmea.date.tm_year;
-    date.tm_mon = session->nmea.date.tm_mon;
-    date.tm_mday = session->nmea.date.tm_mday;
+    if (0 < session->nmea.date.tm_year) {
+        // Do not bother if no current year
+	memset(&date, 0, sizeof(date));
+	date.tm_year = session->nmea.date.tm_year;
+	date.tm_mon = session->nmea.date.tm_mon;
+	date.tm_mday = session->nmea.date.tm_mday;
 
-    /* note this is not full UTC, just HHMMSS.ss */
-    /* this is not the current time,
-     * it references another GPA of the same stamp. So do not set
-     * any time stamps with it */
-    ret = decode_hhmmss(&date, &ts.tv_nsec, field[1], session);
+	/* note this is not full UTC, just HHMMSS.ss */
+	/* this is not the current time,
+	 * it references another GPA of the same stamp. So do not set
+	 * any time stamps with it */
+	ret = decode_hhmmss(&date, &ts.tv_nsec, field[1], session);
+    } else {
+        ret = 1;
+    }
     if (0 == ret) {
         // convert to timespec_t , tv_nsec already set
         session->gpsdata.gst.utctime.tv_sec = mkgmtime(&date);
