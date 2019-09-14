@@ -45,10 +45,6 @@
   <entry><para>Convert gps time to UNIX time, allowing for the gps week number rollover.</para></entry>
 </row>
 <row>
-  <entry><function>void unix_to_gpstime(double unixtime, int *week, double *tow)</function></entry>
-  <entry><para>Reverse of the above.</para></entry>
-</row>
-<row>
   <entry><function>static double CalcRad(double lat)</function></entry>
   <entry><para>Return the earth's radius of curvature in meters at specified latitude.</para></entry>
 </row>
