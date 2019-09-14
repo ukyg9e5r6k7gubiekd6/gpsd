@@ -624,19 +624,6 @@ char *now_to_iso8601(char *tbuf, size_t tbuf_sz)
     return timespec_to_iso8601(ts_now, tbuf, tbuf_sz);
 }
 
-/* Unix UTC time to ISO8601, no timezone adjustment */
-/* example: 2007-12-11T23:38:51.033Z */
-char *unix_to_iso8601(timestamp_t fixtime, char isotime[], size_t len)
-{
-    timespec_t ts_fixtime;
-
-    if (0 == isfinite(fixtime)) {
-        return strncpy(isotime, "NaN", len);
-    }
-    DTOTS(&ts_fixtime, fixtime);
-    return timespec_to_iso8601(ts_fixtime, isotime, len);
-}
-
 #define Deg2Rad(n)	((n) * DEG_2_RAD)
 
 /* Distance in meters between two points specified in degrees, optionally

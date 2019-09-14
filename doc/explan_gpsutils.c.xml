@@ -34,11 +34,11 @@
 </row>
 <row>
   <entry><function>double iso8601_to_unix(char *isotime)</function></entry>
-  <entry><para>Convert an ISO8601 UTC string (like 2006-01-25T13:15:22.9) to Unix UTC.</para></entry>
+  <entry><para>Convert an ISO8601 UTC string (like 2006-01-25T13:15:22.9Z) to a timestamp_t (double).</para></entry>
 </row>
 <row>
-  <entry><function>char *unix_to_iso8601(double fixtime, char isotime[], int len)</function></entry>
-  <entry><para>Reverse of the above, no timezone adjustment.</para></entry>
+  <entry><function>char *timespec_to_iso8601(timespec_t ts, char isotime[], int len)</function></entry>
+  <entry><para>Convert a struct timepsec into an  ISO8601 UTC string (like 2006-01-25T13:15:22.9Z).</para></entry>
 </row>
 <row>
   <entry><function>double gpstime_to_unix(int week, double tow)</function></entry>

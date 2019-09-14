@@ -66,7 +66,7 @@ extern "C" {
  *       Change devices.time from timestamp_t to timespec_t
  *       Change sub4_18.d_tot from timestamp_t to time_t t_tot
  *       Change devconfig_t.activated, cycle & mincycle to timespec_t
- *       Remove unused timestamp()
+ *       Remove unused timestamp() and unix_to_iso8601().
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -2314,7 +2314,6 @@ extern time_t mkgmtime(struct tm *);
 extern timestamp_t iso8601_to_unix(char *);
 extern char *now_to_iso8601(char[], size_t len);
 extern char *timespec_to_iso8601(timespec_t t, char[], size_t len);
-extern char *unix_to_iso8601(timestamp_t t, char[], size_t len);
 extern double earth_distance(double, double, double, double);
 extern double earth_distance_and_bearings(double, double, double, double,
 					  double *,
