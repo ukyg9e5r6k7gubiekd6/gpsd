@@ -41,10 +41,6 @@
   <entry><para>Convert a struct timepsec into an  ISO8601 UTC string (like 2006-01-25T13:15:22.9Z).</para></entry>
 </row>
 <row>
-  <entry><function>double gpstime_to_unix(int week, double tow)</function></entry>
-  <entry><para>Convert gps time to UNIX time, allowing for the gps week number rollover.</para></entry>
-</row>
-<row>
   <entry><function>static double CalcRad(double lat)</function></entry>
   <entry><para>Return the earth's radius of curvature in meters at specified latitude.</para></entry>
 </row>
