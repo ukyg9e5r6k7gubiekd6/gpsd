@@ -330,54 +330,6 @@ void gpsd_century_update(struct gps_device_t *session, int century)
 }
 #endif /* NMEA0183_ENABLE */
 
-/* gpsd_gpstime_resolve() convert week/tow to UTC as a double
- * deprecated, use gpsd_gpstime_resolv()
- */
-timestamp_t gpsd_gpstime_resolve(struct gps_device_t *session,
-			 unsigned short week, double tow)
-{
-    timestamp_t t;
-
-    /*
-     * This code detects and compensates for week counter rollovers that
-     * happen while gpsd is running. It will not save you if there was a
-     * rollover that confused the receiver before gpsd booted up.  It *will*
-     * work even when Block IIF satellites increase the week counter width
-     * to 13 bits.
-     */
-    if ((int)week < (session->context->gps_week & 0x3ff)) {
-	gpsd_log(&session->context->errout, LOG_INF,
-		 "GPS week 10-bit rollover detected.\n");
-	++session->context->rollovers;
-    }
-
-    if ((967 < week) && (2 == session->context->rollovers)) {
-        /* week 968 in GPS epoch 2, is 2038-01-18.
-         * This hits time_t rollover bug.
-         * Must be a regression from epoch 1 */
-	session->context->rollovers = 1;
-    }
-    /*
-     * This guard copes with both conventional GPS weeks and the "extended"
-     * 15-or-16-bit version with no wraparound that appears in Zodiac
-     * chips and is supposed to appear in the Geodetic Navigation
-     * Information (0x29) packet of SiRF chips.  Some SiRF firmware versions
-     * (notably 231) actually ship the wrapped 10-bit week, despite what
-     * the protocol reference claims.
-     */
-    if (week < 1024)
-	week += session->context->rollovers * 1024;
-
-    t = GPS_EPOCH + (week * SECS_PER_WEEK) + tow;
-    t -= session->context->leap_seconds;
-
-    session->context->gps_week = week;
-    DTOTS(&session->context->gps_tow, tow);
-    session->context->valid |= GPS_TIME_VALID;
-
-    return t;
-}
-
 /* gpsd_gpstime_resolv() convert week/tow to UTC as a timespec
  */
 timespec_t gpsd_gpstime_resolv(struct gps_device_t *session,

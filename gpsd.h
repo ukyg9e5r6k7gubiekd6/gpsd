@@ -72,6 +72,7 @@ extern "C" {
  *      Change gps_device_t.sor from timestamp_t to timespec_t
  *      Change gps_device_t.this_frac_time, last_frac_time to timespec_t
  *      Change nmea.subseconds from double to timespec_t
+ *      Remove gpsd_gpstime_resolve()
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -877,8 +878,6 @@ extern ssize_t gpsd_write(struct gps_device_t *, const char *, const size_t);
 
 extern void gpsd_time_init(struct gps_context_t *, time_t);
 extern void gpsd_set_century(struct gps_device_t *);
-extern timestamp_t gpsd_gpstime_resolve(struct gps_device_t *,
-			      const unsigned short, const double);
 extern timespec_t gpsd_gpstime_resolv(struct gps_device_t *,
 			      const unsigned short, const timespec_t);
 extern timespec_t gpsd_utc_resolve(struct gps_device_t *);
