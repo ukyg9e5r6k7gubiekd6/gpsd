@@ -350,11 +350,6 @@ def iso_to_unix(tv):
     return calendar.timegm(time.strptime(tv, "%Y-%m-%dT%H:%M:%S"))
 
 
-def unix_to_iso(tv):
-    "ISO date to UTC Unix time."
-    return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(tv))
-
-
 def graph_history(filename):
     "Generate a GNUPLOT plot of the leap-second history."
     raw = fetch_leapsecs(filename)
