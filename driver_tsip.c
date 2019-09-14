@@ -445,8 +445,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	u2 = getub(buf, 1);	/* Mfg. diagnostic */
 	f1 = getbef32((char *)buf, 2);	/* gps_time */
 	s1 = getbes16(buf, 6);	/* tsip.gps_week */
-	if (getub(buf, 0) == 0x01)	/* good current fix? */
-	    (void)gpsd_gpstime_resolve(session, (unsigned short)s1, (double)f1);
+	if (getub(buf, 0) == 0x01) {
+            /* good current fix */
+	    DTOTS(&ts_tow, f1);
+	    (void)gpsd_gpstime_resolv(session, (unsigned short)s1, ts_tow);
+        }
 	gpsd_log(&session->context->errout, LOG_INF,
 		 "Fix info %02x %02x %d %f\n", u1, u2, s1, f1);
 	break;
