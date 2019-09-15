@@ -305,7 +305,6 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
 {
     char real_str[TIMESPEC_LEN];
     char clock_str[TIMESPEC_LEN];
-    struct timespec offset;
     struct sock_sample sample;
     struct tm tm;
     int leap_notify = session->context->leap_notify;
@@ -334,10 +333,9 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
      * just the top of the second */
     TSTOTV(&sample.tv, &td->clock);
     /* calculate the offset as a timespec to not lose precision */
-    TS_SUB( &offset, &td->real, &td->clock);
     /* if tv_sec greater than 2 then tv_nsec loses precision, but
      * not a big deal as slewing will be required */
-    sample.offset = TSTONS( &offset );
+    sample.offset = TS_SUB_D(&td->real, &td->clock);
     sample._pad = 0;
 
     timespec_str( &td->real, real_str, sizeof(real_str) );
