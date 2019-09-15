@@ -1261,12 +1261,16 @@ static void handle_request(struct subscriber_t *sub,
 				   (speed_t) devconf.baudrate, serialmode);
 		    }
 		    TS_SUB(&delta1, &devconf.cycle, &device->gpsdata.dev.cycle);
-		    TS_SUB(&delta2, &devconf.cycle, &dt->min_cycle);
-		    if ((0 != delta1.tv_sec || 0 != delta1.tv_nsec) &&
-			0 <= TSTONS(&delta2) &&
-			dt->rate_switcher != NULL) {
-			if (dt->rate_switcher(device, TSTONS(&devconf.cycle))) {
-			    device->gpsdata.dev.cycle = devconf.cycle;
+		    if (TS_NZ(&delta1)) {
+                        /* different cycle time than before */
+			TS_SUB(&delta2, &devconf.cycle, &dt->min_cycle);
+			if (TS_GZ(&delta2) &&
+			    dt->rate_switcher != NULL) {
+			    /* longer than minimum cycle time */
+			    if (dt->rate_switcher(device,
+                                                  TSTONS(&devconf.cycle))) {
+				device->gpsdata.dev.cycle = devconf.cycle;
+			    }
                         }
                     }
 	            if ('\0' != devconf.hexdata[0]) {
