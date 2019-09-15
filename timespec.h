@@ -96,6 +96,11 @@ static inline void TS_NORM( struct timespec *ts)
         TS_NORM( r ); \
     } while (0)
 
+/* subtract two timespec, return a double */
+#define TS_SUB_D(ts1, ts2) \
+    ((double)((ts1)->tv_sec - (ts2)->tv_sec) + \
+      ((double)((ts1)->tv_nsec - (ts2)->tv_nsec) * 1e-9))
+
 // true if normalized timespec is non zero
 #define TS_NZ(ts) (0 != (ts)->tv_sec || 0 != (ts)->tv_nsec)
 
