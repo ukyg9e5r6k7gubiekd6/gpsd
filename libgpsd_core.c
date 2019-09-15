@@ -1342,6 +1342,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 #ifdef RECONFIGURE_ENABLE
 	    const double min_cycle = TSTONS(&session->device_type->min_cycle);
 #else
+            // Assume that all GNSS receivers are 1Hz
 	    const double min_cycle = 1;
 #endif /* RECONFIGURE_ENABLE */
 	    double quiet_time = (MINIMUM_QUIET_TIME * min_cycle);
