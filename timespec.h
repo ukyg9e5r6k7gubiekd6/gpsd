@@ -96,6 +96,9 @@ static inline void TS_NORM( struct timespec *ts)
         TS_NORM( r ); \
     } while (0)
 
+// true if normalized timespec is non zero
+#define TS_NZ(ts) (0 != (ts)->tv_sec || 0 != (ts)->tv_nsec)
+
 // true if normalized timespec greater than zero
 #define TS_GZ(ts) (0 <= (ts)->tv_sec && 0 <= (ts)->tv_nsec)
 
