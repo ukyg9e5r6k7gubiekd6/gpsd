@@ -889,19 +889,16 @@ static void gpsd_error_model(struct gps_device_t *session)
 
     if (0 < fix->time.tv_sec) {
         /* we have a time for this merge data */
-        timespec_t ts_delta;
 
-        TS_SUB(&ts_delta, &fix->time, &lastfix->time);
-        deltatime = TSTONS(&ts_delta);
+        deltatime = TS_SUB_D(&fix->time, &lastfix->time);
 
-        if (0.01 <= fabs(deltatime)) {
-	    /* Time just moved, probably forward.
+        if (0.0099 < fabs(deltatime)) {
+	    /* Time just moved, probably forward at least 10 ms.
              * Lastfix is now the previous (old) fix. */
 	    *oldfix = *lastfix;
         } else {
             // compute delta from old fix
-	    TS_SUB(&ts_delta, &fix->time, &oldfix->time);
-	    deltatime = TSTONS(&ts_delta);
+	    deltatime = TS_SUB_D(&fix->time, &oldfix->time);
         }
     }
     /* Sanity check for negative delta? */
@@ -1023,6 +1020,18 @@ static void gpsd_error_model(struct gps_device_t *session)
      * place in the architecture for it.  Compute speed over ground
      * and climb/sink in the simplest possible way.
      */
+
+#ifdef  __UNUSED__
+    // debug code
+    {
+	char tbuf[JSON_DATE_MAX+1];
+	gpsd_log(&session->context->errout, 0,
+		 "time %s deltatime %f\n",
+		 timespec_to_iso8601(fix->time, tbuf, sizeof(tbuf)),
+		 deltatime);
+    }
+#endif // __UNUSED__
+
     if (0 < deltatime) {
         /* have a valid time duration */
         /* FIXME! ignore if large.  maybe > 1 hour? */
@@ -1347,10 +1356,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 #endif /* RECONFIGURE_ENABLE */
 	    double quiet_time = (MINIMUM_QUIET_TIME * min_cycle);
 	    double gap;
-	    timespec_t ts_gap;
-	    TS_SUB(&ts_gap, &ts_now, &session->lexer.start_time);
 
-            gap = TSTONS(&ts_gap);
+            gap = TS_SUB_D(&ts_now, &session->lexer.start_time);
+
 	    if (gap > min_cycle)
 		gpsd_log(&session->context->errout, LOG_WARN,
 			 "cycle-start detector failed.\n");
