@@ -20,6 +20,7 @@
 
 #include "ntpshm.h"
 #include "compiler.h"
+#include "timespec.h"
 
 #define LEAP_NOWARNING  0x0     /* normal, no leap second warning */
 
@@ -58,6 +59,10 @@ void ntp_write(volatile struct shmTime *shmseg,
      *    clear valid
      *
      */
+
+    // should not be needed, but sometimes is...
+    TS_NORM(&td->real);
+    TS_NORM(&td->clock);
 
     shmseg->valid = 0;
     shmseg->count++;
