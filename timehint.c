@@ -212,8 +212,9 @@ void ntpshm_session_init(struct gps_device_t *session)
     session->shm_pps = NULL;
 }
 
-int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, struct timedelta_t *td)
 /* put a received fix time into shared memory for NTP */
+int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg,
+               struct timedelta_t *td)
 {
     char real_str[TIMESPEC_LEN];
     char clock_str[TIMESPEC_LEN];
@@ -226,6 +227,7 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg, st
 	return 0;
     }
 
+    // FIXME: make NMEA precision -1
     if (shmseg == session->shm_pps) {
         /* precision is a floor so do not make it tight */
         if ( source_usb == session->sourcetype ) {
