@@ -6175,6 +6175,8 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         m_data[29] = 0        # flags
         m_data[30] = 0        # flags
         m_data[31] = 0        # flags
+        if not able:
+            m_data[28] &= ~1  # bit 0 is active
 
         gps_model.gps_send(6, 0x31, m_data)
 
