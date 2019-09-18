@@ -206,7 +206,7 @@ class gps(gpscommon, gpsdata, gpsjson):
         if mode:
             self.stream(mode)
 
-    def __oldstyle_shim(self):
+    def _oldstyle_shim(self):
         # The rest is backwards compatibility for the old interface
         def default(k, dflt, vbit=0):
             "Return default for key"

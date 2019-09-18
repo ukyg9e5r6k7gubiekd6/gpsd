@@ -6,9 +6,14 @@
 # This code runs compatibly under Python 2 and 3.x for x >= 2.
 # Preserve this property!
 from __future__ import absolute_import  # Ensure Python2 behaves like Python 3
+import sys
 
 from .gps import *
 from .misc import *
+
+# aiogps only available on Python >= 3.6
+if sys.version_info[0] >= 3 and sys.version_info[1] >= 6:
+    from .aiogps import *
 
 # Keep in sync with GPSD_PROTO_MAJOR_VERSION and GPSD_PROTO_MINOR_VERSION in
 # gpsd.h
