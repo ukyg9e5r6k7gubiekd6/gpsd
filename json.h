@@ -4,8 +4,9 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
-#include <stdbool.h>
 #include <ctype.h>
+#include <stdbool.h>
+#include <sys/time.h>      // for struct timespec
 
 /* the json_type is the type of the C variable the JSON
  * value gets placed in.  It is NOT the JSON type as used
@@ -64,6 +65,9 @@ struct json_array_t {
 	struct {
 	    bool *store;
 	} booleans;
+	struct {
+	    struct timespec *store;
+	} timespecs;
     } arr;
     int *count, maxlen;
 };
@@ -84,6 +88,7 @@ struct json_attr_t {
 	unsigned char *ubyte;
 	unsigned int *uinteger;
 	unsigned short *ushortint;
+        struct timespec *ts;
     } addr;
     union {
 	bool boolean;
@@ -96,6 +101,7 @@ struct json_attr_t {
 	unsigned char ubyte;
 	unsigned int uinteger;
 	unsigned short ushortint;
+        struct timespec ts;
     } dflt;
     size_t len;
     const struct json_enum_t *map;
