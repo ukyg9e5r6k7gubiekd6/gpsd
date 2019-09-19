@@ -10,15 +10,15 @@
 extern "C" {
 #endif
 
-#include <sys/types.h>
-#include <sys/time.h>
-#include <stdbool.h>
 #include <inttypes.h>	/* stdint.h would be smaller but not all have it */
 #include <limits.h>
-#include <time.h>
-#include <signal.h>
-#include <stdio.h>
 #include <pthread.h>	/* pacifies OpenBSD's compiler */
+#include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <sys/time.h>   // for struct timespec
+#include <sys/types.h>
+#include <time.h>
 
 /*
  * 4.1 - Base version for initial JSON protocol (Dec 2009, release 2.90)
