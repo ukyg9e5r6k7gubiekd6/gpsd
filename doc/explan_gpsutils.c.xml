@@ -33,8 +33,9 @@
   <entry><para>Convert a struct <function>tm {}</function> (see <function>time.h</function>) to seconds since UNIX Epoch.</para></entry>
 </row>
 <row>
-  <entry><function>double iso8601_to_unix(char *isotime)</function></entry>
-  <entry><para>Convert an ISO8601 UTC string (like 2006-01-25T13:15:22.9Z) to a timestamp_t (double).</para></entry>
+  <entry><function>timespec_t iso8601_to_timespec(char *isotime)</function></entry>
+  <entry><para>Convert an ISO8601 UTC string (like 2006-01-25T13:15:22.9Z) to a
+timespec_t (time_t,long).</para></entry>
 </row>
 <row>
   <entry><function>char *timespec_to_iso8601(timespec_t ts, char isotime[], int len)</function></entry>
