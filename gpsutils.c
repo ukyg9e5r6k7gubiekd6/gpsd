@@ -453,10 +453,10 @@ time_t mkgmtime(struct tm * t)
     return (result);
 }
 
-timestamp_t iso8601_to_unix(char *isotime)
-/* ISO8601 UTC to Unix UTC, no leapsecond correction. */
+timespec_t iso8601_to_timespec(char *isotime)
+/* ISO8601 UTC to Unix timespec, no leapsecond correction. */
 {
-    timestamp_t ret;
+    timespec_t ret;
 
 #ifndef __clang_analyzer__
 #ifndef USE_QT
@@ -562,7 +562,8 @@ timestamp_t iso8601_to_unix(char *isotime)
      * can be wrong; you have to do a redirect through the IANA historical
      * timezone database to get it right.
      */
-    ret = (timestamp_t)mkgmtime(&tm) + usec;
+    ret.tv_sec = mkgmtime(&tm);
+    ret.tv_nsec = usec * 1e9;;
 #else
     double usec = 0;
 
@@ -571,10 +572,21 @@ timestamp_t iso8601_to_unix(char *isotime)
     QStringList sl = t.split(".");
     if (sl.size() > 1)
 	usec = sl[1].toInt() / pow(10., (double)sl[1].size());
-    ret = (timestamp_t)(d.toTime_t() + usec);
+    ret.tv_sec = d.toTime_t();
+    ret.tv_nsec = usec * 1e9;;
 #endif
 #endif /* __clang_analyzer__ */
     return ret;
+}
+
+
+timestamp_t iso8601_to_unix(char *isotime)
+/* ISO8601 UTC to Unix UTC, no leapsecond correction. */
+{
+    timespec_t ts;
+
+    ts = iso8601_to_timespec(isotime);
+    return TSTONS(&ts);
 }
 
 /* Unix timespec UTC time to ISO8601, no timezone adjustment */
