@@ -858,7 +858,7 @@ static void gpsd_error_model(struct gps_device_t *session)
     struct gps_fix_t *fix;           /* current fix */
     struct gps_fix_t *lastfix;       /* last fix, maybe same time stamp */
     struct gps_fix_t *oldfix;        /* old fix, previsou time stamp */
-    timestamp_t deltatime = -1.0;    /* time span to compute rates */
+    double deltatime = -1.0;         /* time span to compute rates */
 
     /*
      * Now we compute derived quantities.  This is where the tricky error-

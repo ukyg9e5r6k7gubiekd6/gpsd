@@ -68,6 +68,7 @@ extern "C" {
  *       Change devconfig_t.activated, cycle & mincycle to timespec_t
  *       Remove unused timestamp() and unix_to_iso8601().
  *       Remove unused iso8601_to_unix().
+ *       Remove unused struct timestamp_t entirely
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -88,12 +89,12 @@ extern "C" {
  *
  * Error estimates are at 95% confidence.
  */
-/* WARNING!  potential loss of precision in timestamp_t
- * a double is 53 significant bits.
+/* WARNING!  loss of precision telling timme as a double.
+ * A double is 53 significant bits.
  * UNIX time to nanoSec precision is 62 significant bits
  * UNIX time to nanoSec precision after 2038 is 63 bits
- * timestamp_t is only microSec precision
- * timestamp_t and PPS do not play well together
+ * UNIX time as a double is only microSec precision
+ * UNIX time as a double and PPS do not play well together
  */
 
 /* we want cm accuracy and 0.0000001 degrees is 1.11 cm at the equator
@@ -106,7 +107,6 @@ extern "C" {
  *
  * ref: https://en.wikipedia.org/wiki/Decimal_degrees
  */
-typedef double timestamp_t;	/* Unix time in seconds with fractional part */
 typedef struct timespec timespec_t;	/* Unix time as sec, nsec */
 
 /* GPS error estimates are all over the map, and often unspecified.
