@@ -579,16 +579,6 @@ timespec_t iso8601_to_timespec(char *isotime)
     return ret;
 }
 
-
-timestamp_t iso8601_to_unix(char *isotime)
-/* ISO8601 UTC to Unix UTC, no leapsecond correction. */
-{
-    timespec_t ts;
-
-    ts = iso8601_to_timespec(isotime);
-    return TSTONS(&ts);
-}
-
 /* Unix timespec UTC time to ISO8601, no timezone adjustment */
 /* example: 2007-12-11T23:38:51.033Z */
 char *timespec_to_iso8601(timespec_t fixtime, char isotime[], size_t len)

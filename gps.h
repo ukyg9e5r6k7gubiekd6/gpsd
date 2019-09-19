@@ -67,6 +67,7 @@ extern "C" {
  *       Change sub4_18.d_tot from timestamp_t to time_t t_tot
  *       Change devconfig_t.activated, cycle & mincycle to timespec_t
  *       Remove unused timestamp() and unix_to_iso8601().
+ *       Remove unused iso8601_to_unix().
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -2311,7 +2312,6 @@ extern const char *gps_maskdump(gps_mask_t);
 
 extern double safe_atof(const char *);
 extern time_t mkgmtime(struct tm *);
-extern timestamp_t iso8601_to_unix(char *);
 extern timespec_t iso8601_to_timespec(char *);
 extern char *now_to_iso8601(char[], size_t len);
 extern char *timespec_to_iso8601(timespec_t t, char[], size_t len);
