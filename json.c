@@ -64,13 +64,13 @@ PERMISSIONS
 ***************************************************************************/
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <stdarg.h>
 #include <ctype.h>
 #include <math.h>	/* for HUGE_VAL */
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "os_compat.h"
 #ifdef SOCKET_EXPORT_ENABLE
@@ -78,6 +78,7 @@ PERMISSIONS
 
 #include "gps.h"		/* for safe_atof() prototype */
 #include "strfuncs.h"
+#include "timespec.h"
 
 #ifdef CLIENTDEBUG_ENABLE
 static int debuglevel = 0;
@@ -540,7 +541,8 @@ static int json_internal_read_object(const char *cp,
 		    break;
 		case t_time:
 		    {
-			double tmp = iso8601_to_unix(valbuf);
+                        timespec_t ts_tmp = iso8601_to_timespec(valbuf);
+			double tmp = TSTONS(&ts_tmp);
 			memcpy(lptr, &tmp, sizeof(double));
 		    }
 		    break;
@@ -728,19 +730,23 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 		cp = ep;
 	    break;
 	case t_time:
-	    if (*cp != '"')
-		return JSON_ERR_BADSTRING;
-	    else
-		++cp;
-	    arr->arr.reals.store[offset] = iso8601_to_unix((char *)cp);
-	    if (arr->arr.reals.store[offset] >= HUGE_VAL)
-		return JSON_ERR_BADNUM;
-	    while (*cp && *cp != '"')
-		cp++;
-	    if (*cp != '"')
-		return JSON_ERR_BADSTRING;
-	    else
-		++cp;
+            {
+                timespec_t ts_tmp;
+		if (*cp != '"')
+		    return JSON_ERR_BADSTRING;
+		else
+		    ++cp;
+		ts_tmp = iso8601_to_timespec((char *)cp);
+		arr->arr.reals.store[offset] = TSTONS(&ts_tmp);
+		if (arr->arr.reals.store[offset] >= HUGE_VAL)
+		    return JSON_ERR_BADNUM;
+		while (*cp && *cp != '"')
+		    cp++;
+		if (*cp != '"')
+		    return JSON_ERR_BADSTRING;
+		else
+		    ++cp;
+            }
 	    break;
 	case t_real:
 	    arr->arr.reals.store[offset] = strtod(cp, &ep);
