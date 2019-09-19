@@ -1022,6 +1022,7 @@ static gps_mask_t processGST(int count, char *field[],
     if (0 == ret) {
         // convert to timespec_t , tv_nsec already set
         session->gpsdata.gst.utctime.tv_sec = mkgmtime(&date);
+        session->gpsdata.gst.utctime.tv_nsec = ts.tv_nsec;
     } else {
         /* no idea of UTC time now */
         session->gpsdata.gst.utctime.tv_sec = 0;
