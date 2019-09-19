@@ -1,6 +1,6 @@
 /*
  * tests for mktime(), mkgmtime(), timestamp_to_iso8601() and
- * iso8601_to_unix().
+ * iso8601_to_timestamp().
  * mktime() is a libc function, why test it?
  *
  * This file is Copyright (c) 2010-2019 by the GPSD project
@@ -183,7 +183,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     int i;
     char tbuf[128];
     bool failed = false;
-    timestamp_t ttime;
+    timespec_t ts_time;
 
     (void)setenv("TZ", "GMT", 1);
 
@@ -234,14 +234,17 @@ int main(int argc UNUSED, char *argv[] UNUSED)
         }
     }
 
-    /* test iso8601_to_unix() */
+    /* test iso8601_to_timestamp() */
     for (i = 0; i < (int)(sizeof(tests1) / sizeof(tests1[0])); i++) {
-        ttime = iso8601_to_unix(tests1[i].iso8601);
-        if (0.001 <= fabs(ttime - TSTONS(&tests1[i].ts_time))) {
+        timespec_t ts_tmp;
+        ts_time = iso8601_to_timespec(tests1[i].iso8601);
+        TS_SUB(&ts_tmp, &ts_time, &tests1[i].ts_time);
+        if (0.001 <= fabs(TSTONS(&ts_tmp))) {
             failed = true;
-            (void)printf("test_mktime: iso8601_to_unix() test %s failed.\n"
+            (void)printf("test_mktime: iso8601_to_timespec() test %s failed.\n"
                          "  Got %.3f, s/b %.3f\n",
-                         tests1[i].iso8601, ttime, TSTONS(&tests1[i].ts_time));
+                         tests1[i].iso8601, TSTONS(&ts_time),
+                         TSTONS(&tests1[i].ts_time));
         }
     }
 
