@@ -1,6 +1,6 @@
 /*
- * tests for mktime(), mkgmtime(), timestamp_to_iso8601() and
- * iso8601_to_timestamp().
+ * tests for mktime(), mkgmtime(), timespec_to_iso8601() and
+ * iso8601_to_timespec().
  * mktime() is a libc function, why test it?
  *
  * This file is Copyright (c) 2010-2019 by the GPSD project
@@ -234,7 +234,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
         }
     }
 
-    /* test iso8601_to_timestamp() */
+    /* test iso8601_to_timespec() */
     for (i = 0; i < (int)(sizeof(tests1) / sizeof(tests1[0])); i++) {
         timespec_t ts_tmp;
         ts_time = iso8601_to_timespec(tests1[i].iso8601);
