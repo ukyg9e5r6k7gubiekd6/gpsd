@@ -142,6 +142,8 @@ static char *json_target_address(const struct json_attr_t *cursor,
 	    targetaddr = (char *)&cursor->addr.ushortint[offset];
 	    break;
 	case t_time:
+	    targetaddr = (char *)&cursor->addr.ts[offset];
+	    break;
 	case t_real:
 	    targetaddr = (char *)&cursor->addr.real[offset];
 	    break;
@@ -224,6 +226,8 @@ static int json_internal_read_object(const char *cp,
 		           sizeof(unsigned short));
 		    break;
 		case t_time:
+		    memcpy(lptr, &cursor->dflt.ts, sizeof(timespec_t));
+		    break;
 		case t_real:
 		    memcpy(lptr, &cursor->dflt.real, sizeof(double));
 		    break;
@@ -542,8 +546,7 @@ static int json_internal_read_object(const char *cp,
 		case t_time:
 		    {
                         timespec_t ts_tmp = iso8601_to_timespec(valbuf);
-			double tmp = TSTONS(&ts_tmp);
-			memcpy(lptr, &tmp, sizeof(double));
+			memcpy(lptr, &ts_tmp, sizeof(timespec_t));
 		    }
 		    break;
 		case t_real:
@@ -737,9 +740,7 @@ int json_read_array(const char *cp, const struct json_array_t *arr,
 		else
 		    ++cp;
 		ts_tmp = iso8601_to_timespec((char *)cp);
-		arr->arr.reals.store[offset] = TSTONS(&ts_tmp);
-		if (arr->arr.reals.store[offset] >= HUGE_VAL)
-		    return JSON_ERR_BADNUM;
+		arr->arr.timespecs.store[offset] = ts_tmp;
 		while (*cp && *cp != '"')
 		    cp++;
 		if (*cp != '"')

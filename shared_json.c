@@ -29,16 +29,16 @@ int json_device_read(const char *buf,
 		     struct devconfig_t *dev,
 		     const char **endptr)
 {
-    timestamp_t acttime;
-    timestamp_t d_cycle, d_mincycle;
+    double d_cycle, d_mincycle;
     /* *INDENT-OFF* */
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      t_check,      .dflt.check = "DEVICE"},
 
         {"path",       t_string,     .addr.string  = dev->path,
 	                                .len = sizeof(dev->path)},
-	{"activated",  t_time,       .addr.real = &acttime,
-				        .dflt.real = NAN},
+        // odd, device->gpsdata.online is sent, but put in dev->activated?
+	{"activated",  t_time,       .addr.ts = &dev->activated,
+				        .dflt.ts = {0, 0}},
 	{"flags",      t_integer,    .addr.integer = &dev->flags},
 	{"driver",     t_string,     .addr.string  = dev->driver,
 	                                .len = sizeof(dev->driver)},
@@ -67,14 +67,6 @@ int json_device_read(const char *buf,
     if (status != 0)
 	return status;
 
-    // convert acttime back to timespec_t
-    // odd, device->gpsdata.online is sent, but put in dev->activated?
-    if (0 == isfinite(acttime)) {
-	dev->activated.tv_sec = 0;
-	dev->activated.tv_nsec = 0;
-    } else {
-	DTOTS(&dev->activated, acttime);
-    }
     if (0 == isfinite(d_cycle)) {
 	dev->cycle.tv_sec = 0;
 	dev->cycle.tv_nsec = 0;
