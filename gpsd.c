@@ -1911,8 +1911,15 @@ int main(int argc, char *argv[])
     /* sanity check */
     if (argc - optind > MAX_DEVICES) {
 	gpsd_log(&context.errout, LOG_ERROR,
-		 "too many devices on command line\n");
+		 "Too many devices on command line.\n");
 	exit(1);
+    }
+
+    if (8 > sizeof(time_t)) {
+	gpsd_log(&context.errout, LOG_WARN,
+		 "This system has a 32-bit time_t.\n");
+	gpsd_log(&context.errout, LOG_WARN,
+		 "This gpsd will fail on 2038-01-19T03:14:07Z.\n");
     }
 
 #if defined(SYSTEMD_ENABLE) && defined(CONTROL_SOCKET_ENABLE)
