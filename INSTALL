@@ -9,7 +9,7 @@ Here are the steps for installing GPSD and verifying its performance.
 They assume you have GPSD available as an installable binary package,
 
 Instructions for building GPSD from source (including cross-building)
-are in the file "build.txt" in the source distribution.
+are in the file "build.adoc" in the source distribution.
 
 Most of these installation instructions are generic to Linux (inc
 There are some special notes on installation for OS X and the Raspberry Pi
@@ -44,7 +44,7 @@ adapter chips found in GPSes require specific drivers.
 
 Under a stock Linux kernel these will all be loaded on demand when
 the USB system sees the appropriate vendor/product ID combinations.
-See build.txt for instructions relating to custom kernels.
+See build.adoc for instructions relating to custom kernels.
 
 == Check that your system configuration will allow GPSD to work ==
 
@@ -122,7 +122,7 @@ repository index for anything with gpsd as a prefix.
 
 === Install from source code ===
 
-Directions for installing from source are in the file build.txt found
+Directions for installing from source are in the file build.adoc found
 in the source distribution.
 
 == How to test the software ==
@@ -253,7 +253,7 @@ Git-core is only required to build from a git repository.  pps-tools is for
 testing PPS inputs.
 
 The rest of the installation is just as for any other source based
-install, as noted in the file *build.txt* .
+install, as noted in the file *build.adoc* .
 
 === Other Debian derivatives (including stock) ===
 ==== Jessie ====
@@ -266,7 +266,7 @@ Git-core is only required to build from a git repository.  pps-tools is for
 testing PPS inputs.
 
 The rest of the installation is just as for any other source based
-install, as noted in the file *build.txt* .
+install, as noted in the file *build.adoc* .
 
 
 ==== Wheezy ====
@@ -331,7 +331,7 @@ Git-core is only required to build from a git repository.  pps-tools is for
 testing PPS inputs.
 
 The rest of the installation is just as for any other source based
-install, as noted in the file *build.txt* .
+install, as noted in the file *build.adoc* .
 
 === Other Raspberry Pi tips ===
 

@@ -3,7 +3,8 @@
 This is a guide to building GPSD from a bare source tree.  It includes
 guidance on how to cross-build the package.
 
-Some hints for people building binary packages are in packaging/readme.txt.
+Some hints for people building binary packages are in
+packaging/README.PACKAGERS.
 
 (This file is marked up in asciidoc.)
 
