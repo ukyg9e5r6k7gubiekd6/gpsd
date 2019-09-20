@@ -122,6 +122,15 @@ some code generators in Python), it is not required to run the service
 daemon.  In particular, you can cross-compile onto an embedded system
 without having to take Python with you.
 
+scons finds the python used for scons separately from the python that
+should be used for the target.  It seems to look for the target python
+as "python", which as above is supposed to exist per python norms.
+However, some packaging systems avoid a bare python, preferring to
+bind a program to a particular release as it is built.  On systems
+without a "python" command, invoking scons as:
+  scons target_python=python3.7
+seems to help.
+
 You will need both basic Python and (if your package system makes the
 distinction) the Python development package used for building C
 extensions.  Usually these are called "python" and "python-dev". You
