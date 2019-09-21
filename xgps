@@ -55,6 +55,7 @@ from gi.repository import GObject  # pylint: disable=wrong-import-position
 from gi.repository import Gtk  # pylint: disable=wrong-import-position
 from gi.repository import Gdk  # pylint: disable=wrong-import-position
 from gi.repository import Pango  # pylint: disable=wrong-import-position
+from gi.repository import GLib  # pylint: disable=wrong-import-position
 
 # pylint wants local modules last
 try:
@@ -545,7 +546,7 @@ class NoiseView(object):
 
     def __init__(self):
         "Initialize class NoiseView"
-        self.widget = Gtk.Table(NoiseView.COLUMNS, NoiseView.ROWS, False)
+        self.widget = Gtk.Table(n_columns=NoiseView.COLUMNS, n_rows=NoiseView.ROWS, homogeneous=False)
         self.noisewidgets = []
         for i in range(len(NoiseView.noisefields)):
             colbase = (i // NoiseView.ROWS) * 2
@@ -765,7 +766,7 @@ class Base(object):
         self.daemon = None
         self.device = None
 
-        self.window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
+        self.window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
         if not self.window.get_display():
             raise Exception("Can't open display")
         if title:
@@ -774,7 +775,7 @@ class Base(object):
         self.window.connect("delete-event", self.delete_event)
         self.window.set_resizable(False)
 
-        vbox = Gtk.VBox(False, 0)
+        vbox = Gtk.VBox(homogeneous=False, spacing=0)
         self.window.add(vbox)
 
         self.window.connect("destroy", lambda _unused: Gtk.main_quit())
@@ -782,7 +783,7 @@ class Base(object):
         self.uimanager = Gtk.UIManager()
         self.accelgroup = self.uimanager.get_accel_group()
         self.window.add_accel_group(self.accelgroup)
-        self.actiongroup = Gtk.ActionGroup('xgps')
+        self.actiongroup = Gtk.ActionGroup(name='xgps')
         self.actiongroup.add_actions(
             [('Quit', Gtk.STOCK_QUIT, '_Quit', None,
               'Quit the Program', lambda _unused: Gtk.main_quit()),
@@ -856,7 +857,7 @@ class Base(object):
         menubar = self.uimanager.get_widget('/MenuBar')
         vbox.pack_start(menubar, expand=False, fill=True, padding=0)
 
-        self.satbox = Gtk.HBox(False, 0)
+        self.satbox = Gtk.HBox(homogeneous=False, spacing=0)
         vbox.add(self.satbox)
 
         skyframe = Gtk.Frame(label="Satellite List")
@@ -900,7 +901,7 @@ class Base(object):
         vbox.add(self.rawdisplay)
 
         self.dataframe = Gtk.Frame(label="GPS data")
-        datatable = Gtk.Table(Base.COLUMNS, Base.ROWS, False)
+        datatable = Gtk.Table(n_columns=Base.COLUMNS, n_rows=Base.ROWS, homogeneous=False)
         self.dataframe.add(datatable)
         gpswidgets = []
         for i in range(len(Base.gpsfields)):
@@ -920,21 +921,21 @@ class Base(object):
             gpswidgets.append(entry)
         vbox.add(self.dataframe)
 
-        self.noisebox = Gtk.HBox(False, 0)
+        self.noisebox = Gtk.HBox(homogeneous=False, spacing=0)
         vbox.add(self.noisebox)
         noiseframe = Gtk.Frame(label="Noise Statistics")
         self.noisebox.add(noiseframe)
         self.noiseview = NoiseView()
         noiseframe.add(self.noiseview.widget)
 
-        self.gsbox = Gtk.HBox(False, 0)
+        self.gsbox = Gtk.HBox(homogeneous=False, spacing=0)
         vbox.add(self.gsbox)
         gsframe = Gtk.Frame(label="Maidenhead Grid Square")
         self.gsbox.add(gsframe)
         self.gsview = MaidenheadView()
         gsframe.add(self.gsview.widget)
 
-        self.aisbox = Gtk.HBox(False, 0)
+        self.aisbox = Gtk.HBox(homogeneous=False, spacing=0)
         vbox.add(self.aisbox)
         aisframe = Gtk.Frame(label="AIS Data")
         self.aisbox.add(aisframe)
@@ -1255,9 +1256,9 @@ class Base(object):
         "Set up monitoring of a daemon instance."
         self.daemon = daem
         self.device = dev
-        GObject.io_add_watch(daemon.sock, GObject.IO_IN, self.handle_response)
-        GObject.io_add_watch(daemon.sock, GObject.IO_ERR, self.handle_hangup)
-        GObject.io_add_watch(daemon.sock, GObject.IO_HUP, self.handle_hangup)
+        GLib.io_add_watch(daemon.sock, GLib.IO_IN, self.handle_response)
+        GLib.io_add_watch(daemon.sock, GLib.IO_ERR, self.handle_hangup)
+        GLib.io_add_watch(daemon.sock, GLib.IO_HUP, self.handle_hangup)
 
     def handle_response(self, source, condition):
         "Handle ordinary I/O ready condition from the daemon."
