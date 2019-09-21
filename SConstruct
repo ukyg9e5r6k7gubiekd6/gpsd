@@ -2515,7 +2515,7 @@ if env.WhereIs('asciidoc'):
                  'time-service-intro',
                  ]
     asciidocs = ["www/" + stem + ".html" for stem in adocfiles] \
-        + ["www/installation.html"]
+        + ["www/installation.html"] + ["www/README.html"]
     for stem in adocfiles:
         env.Command('www/%s.html' % stem, 'www/%s.adoc' % stem,
                     ['asciidoc -b html5 -a toc -o www/%s.html www/%s.adoc'
@@ -2523,6 +2523,9 @@ if env.WhereIs('asciidoc'):
     env.Command("www/installation.html",
                 "INSTALL",
                 ["asciidoc -o www/installation.html INSTALL"])
+    env.Command("www/README.html",
+                "README.adoc",
+                ["asciidoc -o www/README.html README.adoc"])
 else:
     announce("Part of the website build requires asciidoc, not installed.")
     asciidocs = []
@@ -2583,7 +2586,7 @@ Utility("validation-list", [www], validation_list)
 upload_web = Utility("website", [www],
                      ['rsync --exclude="*.in" -avz www/ ' +
                       os.environ.get('WEBSITE', '.public'),
-                      'cp README.adoc TODO NEWS ' +
+                      'cp TODO NEWS ' +
                       os.environ.get('WEBSITE', '.public')])
 
 # When the URL declarations change, so must the generated web pages
