@@ -7,15 +7,24 @@ manage connections over unreliable networks through timeouts, keepalive and
 automatic reconnection.
 
 Examples:
-    // using default parameters
+    import logging
+    import gps
+
+    # configuring logging
+    logging.basicConfig()
+    logging.root.setLevel(logging.INFO)
+    # Example of setting up logging level for the aiogps logger
+    logging.getLogger('gps.aiogps').setLevel(logging.ERROR)
+
+    # using default parameters
     async with gps.aiogps() as gpsd:
         async for msg in gpsd:
-            # Print last message
-            print(msg)
-            # Print updated GPS info
-            print(gpsd)
+            # Log last message
+            logging.info(f'Received: {msg}')
+            # Log updated GPS status
+            logging.info(f'\nGPS status:\n{gpsd}')
 
-    // using custom parameters
+    # using custom parameters
     try:
         async with gps.aiogps(
                 connection_args = {
@@ -29,30 +38,43 @@ Examples:
                 }
             ) as gpsd:
             async for msg in gpsd:
-                print(msg)
+                logging.info(msg)
     except asyncio.CancelledError:
         return
     except asyncio.IncompleteReadError:
-        print('Connection closed by server')
+        logging.info('Connection closed by server')
     except asyncio.TimeoutError:
-        print('Timeout waiting for gpsd to respond')
+        logging.error('Timeout waiting for gpsd to respond')
     except Exception as exc:
-        print(f'Error: {exc}')
+        logging.error(f'Error: {exc}')
 
 """
 
-# This code is compatible with Python 3.x for x >= 6.
+# Copyright (c) 2019 Grand Joldes (grandwork2@yahoo.com)
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+# This file is Copyright (c) 2019 by the GPSD project
+# BSD terms apply: see the file COPYING in the distribution root for details.
 
-__author__ = "Grand Joldes"
-__copyright__ = "Copyright 2019, The GPSD Project"
-__license__ = "BSD"
-__version__ = "0.1"
-__email__ = "grandwork2@yahoo.com"
+# This code run compatibly under  Python 3.x for x >= 6.
+
+__all__ = ['aiogps',]
 
 import logging
 import asyncio
 import socket
-from typing import Optional, Union, AnyStr
+from typing import Optional, Union, Awaitable
 
 from .client import gpsjson, dictwrapper
 from .gps import gps, gpsdata, WATCH_ENABLE, PACKET_SET
@@ -64,6 +86,10 @@ class aiogps(gps):  # pylint: disable=R0902
 
     Reimplements all gps IO methods using asyncio coros.
     Adds connection management, an asyncio context manager and an asyncio iterator.
+
+    The class uses a logger named 'gps.aiogps' to record events. The logger is
+    configured with a NullHandler to disable any message logging until the application
+    configures another handler.
     """
 
     def __init__(self, connection_args: Optional[dict] = None,  # pylint: disable=W0231
@@ -107,8 +133,13 @@ class aiogps(gps):  # pylint: disable=R0902
                 'TCP_KEEPCNT': 3
             }
         # Connection access streams
-        self.reader = None
-        self.writer = None
+        self.reader: Optional[asyncio.StreamReader] = None
+        self.writer: Optional[asyncio.StreamWriter] = None
+        # Set up logging
+        self.logger = logging.getLogger(__name__)
+        # Set the Null handler - prevents logging message handling unless the application
+        # sets up a handler.
+        self.logger.addHandler(logging.NullHandler())
         # Init gps parents
         gpsdata.__init__(self) # pylint: disable=W0233
         gpsjson.__init__(self) # pylint: disable=W0233
@@ -125,12 +156,12 @@ class aiogps(gps):  # pylint: disable=R0902
 
     async def _open_connection(self) -> None:
         """ Opens a connection to the GPSD server and configures the TCP socket """
-        logging.info(f"Connecting to gpsd at {self.connection_args['host']}" +
+        self.logger.info(f"Connecting to gpsd at {self.connection_args['host']}" +
                      (f":{self.connection_args['port']}" if self.connection_args['port'] else ''))
-        conn = asyncio.open_connection(**self.connection_args)
-        self.reader, self.writer = await asyncio.wait_for(conn,
-                                                          self.connection_timeout,
-                                                          loop=self.loop)
+        self.reader, self.writer = await asyncio.wait_for(
+            asyncio.open_connection(**self.connection_args),
+            self.connection_timeout,
+            loop=self.loop)
         # Set socket options
         sock = self.writer.get_extra_info('socket')
         if sock is not None:
@@ -160,6 +191,10 @@ class aiogps(gps):  # pylint: disable=R0902
                 pass
             self.writer = None
 
+    def waiting(self) -> bool:   # pylint: disable=W0221
+        """ Mask the blocking waiting method from gpscommon """
+        return True
+
     async def read(self) -> Union[dictwrapper, str]:
         """ Reads data from GPSD server """
         while True:
@@ -182,7 +217,7 @@ class aiogps(gps):  # pylint: disable=R0902
                 raise
             except Exception as exc:    # pylint: disable=W0703
                 error = 'timeout' if isinstance(exc, asyncio.TimeoutError) else exc
-                logging.warning(f'Failed to get message from GPSD: {error}')
+                self.logger.warning(f'Failed to get message from GPSD: {error}')
                 self.close()
                 if self.reconnect:
                     # Try again later
@@ -196,13 +231,13 @@ class aiogps(gps):  # pylint: disable=R0902
             try:
                 await self._open_connection()
                 await self.stream()
-                logging.info('Connected to gpsd')
+                self.logger.info('Connected to gpsd')
             except asyncio.CancelledError:
                 self.close()
                 raise
             except Exception as exc:    # pylint: disable=W0703
                 error = 'timeout' if isinstance(exc, asyncio.TimeoutError) else exc
-                logging.error(f'Failed to connect to GPSD: {error}')
+                self.logger.error(f'Failed to connect to GPSD: {error}')
                 self.close()
                 if self.reconnect:
                     # Try again later
@@ -210,16 +245,11 @@ class aiogps(gps):  # pylint: disable=R0902
                 else:
                     raise
 
-    async def send(self, commands: AnyStr) -> None:
+    async def send(self, commands) -> None:
         """ Sends commands """
-        lineend = "\n"
-        if isinstance(commands, bytes):
-            lineend = polybytes("\n")
-        if not commands.endswith(lineend):
-            commands += lineend
-
+        bcommands = polybytes(commands + "\n")
         if self.writer:
-            self.writer.write(polybytes(commands))
+            self.writer.write(bcommands)
             await self.writer.drain()
 
     async def stream(self, flags: Optional[int] = 0, devpath: Optional[str] = None) -> None:
@@ -229,14 +259,13 @@ class aiogps(gps):  # pylint: disable=R0902
             self.stream_command = self.generate_stream_command(flags, devpath)
 
         if self.stream_command:
-            logging.info(f'Send: stream as: {self.stream_command}')
+            self.logger.info(f'Sent stream as: {self.stream_command}')
             await self.send(self.stream_command)
         else:
             raise TypeError(f'Invalid streaming command: {flags}')
 
     async def __aenter__(self) -> 'aiogps':
-        """ Context manager entry: open connection """
-        await self.connect()
+        """ Context manager entry """
         return self
 
     async def __aexit__(self, exc_type, exc, traceback) -> None:
@@ -247,7 +276,14 @@ class aiogps(gps):  # pylint: disable=R0902
         """ Async iterator interface """
         return self
 
-    async def __anext__(self) -> None:
+    async def __anext__(self) -> Union[dictwrapper, str]:
         """ Returns next message from GPSD """
         data = await self.read()
         return data
+
+    def __next__(self) -> Awaitable:
+        """
+        Reimplementation of the blocking iterator from gps.
+        Returns an awaitable which returns the next message from GPSD.
+        """
+        return self.read()
