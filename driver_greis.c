@@ -172,6 +172,7 @@ static gps_mask_t greis_msg_GT(struct gps_device_t *session,
     timespec_t ts_tow;
     long tow;	             /* Time of week [ms] */
     uint16_t wn;	     /* GPS week number (modulo 1024) [dimensionless] */
+    char ts_buf[TIMESPEC_LEN];
 
     if (len < 7) {
 	gpsd_log(&session->context->errout, LOG_WARN,
@@ -192,8 +193,8 @@ static gps_mask_t greis_msg_GT(struct gps_device_t *session,
     session->newdata.time = gpsd_gpstime_resolv(session, wn, ts_tow);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "GREIS: GT, tow: %lu, wn: %u, time: %ld.%09ld Leap:%u\n", tow, wn,
-	     session->newdata.time.tv_sec, session->newdata.time.tv_nsec,
+	     "GREIS: GT, tow: %lu, wn: %u, time: %s Leap:%u\n", tow, wn,
+             timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
              session->context->leap_seconds);
 
 
