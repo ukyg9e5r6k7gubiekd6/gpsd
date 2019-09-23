@@ -43,6 +43,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
     unsigned short flags, pflags;
     timespec_t ts_tow;
     uint32_t tow;	     /* Time of week [ms] */
+    char ts_buf[TIMESPEC_LEN];
 
     gps_mask_t mask = 0;
     if (len != 296) {
@@ -114,11 +115,11 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
-             "NAV_FIX: time=%ld.%09ld, ecef x:%.2f y:%.2f z:%.2f altHAE=%.2f "
+             "NAV_FIX: time=%s, ecef x:%.2f y:%.2f z:%.2f altHAE=%.2f "
              "speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f "
              "pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f\n",
-             session->newdata.time.tv_sec,
-             session->newdata.time.tv_nsec, session->newdata.ecef.x,
+             timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
+             session->newdata.ecef.x,
              session->newdata.ecef.y, session->newdata.ecef.z,
              session->newdata.altHAE, session->newdata.speed,
              session->newdata.track, session->newdata.climb,
@@ -142,6 +143,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
         unsigned int i, nsv, nchan, st;
         uint32_t msec = getleu32(buf, 7 + 6);
         timespec_t ts_tow;
+        char ts_buf[TIMESPEC_LEN];
 
         MSTOTS(&ts_tow, msec);
 
@@ -177,9 +179,9 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
         mask = USED_IS | SATELLITE_SET;;
 
         gpsd_log(&session->context->errout, LOG_DATA,
-                 "PRN_STATUS: time=%ld.%09ld visible=%d used=%d "
+                 "PRN_STATUS: time=%s visible=%d used=%d "
                  "mask={USED|SATELLITE}\n",
-                 session->newdata.time.tv_sec, session->newdata.time.tv_nsec,
+                 timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
                  session->gpsdata.satellites_visible,
                  session->gpsdata.satellites_used);
     }
@@ -194,6 +196,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
     unsigned short flags;
     timespec_t ts_tow;
     uint32_t tow;	     /* Time of week [ms] */
+    char ts_buf[TIMESPEC_LEN];
 
     if (len != 64) {
         gpsd_log(&session->context->errout, LOG_PROG,
@@ -215,8 +218,8 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
     session->newdata.time = gpsd_gpstime_resolv(session,
         (unsigned short) getleu16(buf, 7 + 36), ts_tow);
     gpsd_log(&session->context->errout, LOG_DATA,
-             "UTC_IONO_MODEL: time=%ld.%09ld mask={TIME}\n",
-             session->newdata.time.tv_sec, session->newdata.time.tv_nsec);
+             "UTC_IONO_MODEL: time=%s mask={TIME}\n",
+             timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)));
     return TIME_SET | NTPTIME_IS;
 }
 
