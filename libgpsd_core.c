@@ -1303,6 +1303,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     bool driver_change = false;
     timespec_t ts_now;
     timespec_t delta;
+    char ts_buf[TIMESPEC_LEN];
 
     gps_clear_fix(&session->newdata);
 
@@ -1397,8 +1398,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
     TS_SUB(&delta, &ts_now, &session->gpsdata.online);
     if (newlen < 0) {		/* read error */
 	gpsd_log(&session->context->errout, LOG_INF,
-		 "GPS on %s returned error %zd (%ld.%09ld sec since data)\n",
-		 session->gpsdata.dev.path, newlen, delta.tv_sec, delta.tv_nsec);
+		 "GPS on %s returned error %zd (%s sec since data)\n",
+		 session->gpsdata.dev.path, newlen,
+                 timespec_str(&delta, ts_buf, sizeof(ts_buf)));
 	session->gpsdata.online.tv_sec = 0;
 	session->gpsdata.online.tv_nsec = 0;
 	return ERROR_SET;
@@ -1411,10 +1413,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
             // FIXME: do this with integer math...
             TSTONS(&delta) >= (TSTONS(&session->gpsdata.dev.cycle) * 2)) {
 	    gpsd_log(&session->context->errout, LOG_INF,
-		     "GPS on %s is offline (%ld.%09ld sec since data)\n",
+		     "GPS on %s is offline (%s sec since data)\n",
 		     session->gpsdata.dev.path,
-                     delta.tv_sec,
-                     delta.tv_nsec);
+                     timespec_str(&delta, ts_buf, sizeof(ts_buf)));
 	    session->gpsdata.online.tv_sec = 0;
 	    session->gpsdata.online.tv_nsec = 0;
 	}
@@ -1485,8 +1486,9 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    (void)clock_gettime(CLOCK_REALTIME, &ts_now);
 	    TS_SUB(&delta, &ts_now, &session->gpsdata.online);
 	    gpsd_log(&session->context->errout, LOG_INF,
-		     "hunt on %s failed (%ld.%09ld sec since data)\n",
-		     session->gpsdata.dev.path, delta.tv_sec, delta.tv_nsec);
+		     "hunt on %s failed (%s sec since data)\n",
+		     session->gpsdata.dev.path,
+                     timespec_str(&delta, ts_buf, sizeof(ts_buf)));
 	    return ERROR_SET;
 	}
     }
