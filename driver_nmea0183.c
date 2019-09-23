@@ -292,14 +292,17 @@ static int merge_hhmmss(char *hhmmss, struct gps_device_t *session)
 static void register_fractional_time(const char *tag, const char *fld,
                                      struct gps_device_t *session)
 {
+    char ts_buf[TIMESPEC_LEN];
+
     if (fld[0] != '\0') {
         session->nmea.last_frac_time = session->nmea.this_frac_time;
         DTOTS(&session->nmea.this_frac_time, safe_atof(fld));
         session->nmea.latch_frac_time = true;
         gpsd_log(&session->context->errout, LOG_DATA,
-                 "%s: registers fractional time %ld.%09ld\n",
-                 tag, session->nmea.this_frac_time.tv_sec,
-                 session->nmea.this_frac_time.tv_nsec);
+                 "%s: registers fractional time %s\n",
+                 tag,
+                 timespec_str(&session->nmea.this_frac_time, ts_buf,
+                              sizeof(ts_buf)));
     }
 }
 
@@ -997,8 +1000,10 @@ static gps_mask_t processGST(int count, char *field[],
     struct tm date;
     timespec_t ts;
     int ret;
+    char ts_buf[TIMESPEC_LEN];
     gps_mask_t mask = ONLINE_SET;
-    if (count < 8) {
+
+    if (0 > count) {
       return mask;
     }
 
@@ -1037,10 +1042,10 @@ static gps_mask_t processGST(int count, char *field[],
     session->gpsdata.gst.alt_err_deviation   = safe_atof(field[8]);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-             "GST: utc = %ld.%09ld, rms = %.2f, maj = %.2f, min = %.2f,"
+             "GST: utc = %s, rms = %.2f, maj = %.2f, min = %.2f,"
              " ori = %.2f, lat = %.2f, lon = %.2f, alt = %.2f\n",
-             session->gpsdata.gst.utctime.tv_sec,
-             session->gpsdata.gst.utctime.tv_nsec,
+             timespec_str(&session->gpsdata.gst.utctime, ts_buf,
+                          sizeof(ts_buf)),
              session->gpsdata.gst.rms_deviation,
              session->gpsdata.gst.smajor_deviation,
              session->gpsdata.gst.sminor_deviation,
@@ -1736,11 +1741,14 @@ static gps_mask_t processGSV(int count, char *field[],
                                        &sp->gnssid, &sp->svid);
 
 #ifdef __UNUSED__
+        {
         /* debug */
-        gpsd_log(&session->context->errout, LOG_ERROR,
-                 "%s nmeaid_to_prn: nmea_gnssid %d nmea_satnum %d "
-                 "ubx_gnssid %d ubx_svid %d nmea2_prn %d\n", field[0],
-                 nmea_gnssid, nmea_svid, sp->gnssid, sp->svid, sp->PRN);
+            char ts_buf[TIMESPEC_LEN];
+            gpsd_log(&session->context->errout, LOG_ERROR,
+                     "%s nmeaid_to_prn: nmea_gnssid %d nmea_satnum %d "
+                     "ubx_gnssid %d ubx_svid %d nmea2_prn %d\n", field[0],
+                     nmea_gnssid, nmea_svid, sp->gnssid, sp->svid, sp->PRN);
+        }
 #endif  /* __UNUSED__ */
 
         sp->elevation = (double)atoi(field[fldnum++]);
@@ -1835,9 +1843,8 @@ static gps_mask_t processGSV(int count, char *field[],
 #if __UNUSED
     /* debug code */
     gpsd_log(&session->context->errout, LOG_ERROR,
-        "x%cGSV: set skyview_time %ld.%09ld frac_time %.2f\n", GSV_TALKER,
-        session->gpsdata.skyview_time.tv_sec,
-        session->gpsdata.skyview_time.tv_nsec,
+        "x%cGSV: set skyview_time %s frac_time %.2f\n", GSV_TALKER,
+         timespec_str(&session->gpsdata.skyview_time, ts_buf, sizeof(ts_buf)),
         session->nmea.this_frac_time);
 #endif
 
@@ -2722,6 +2729,7 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
                                struct gps_device_t *session)
 {
     gps_mask_t mask = ONLINE_SET;
+    char ts_buf[TIMESPEC_LEN];
 
     if (0 == strcmp("ACK", field[1])) {
         /* ACK */
@@ -2842,9 +2850,8 @@ static gps_mask_t processPASHR(int c UNUSED, char *field[],
         session->gpsdata.attitude.pitch = safe_atof(field[5]);
         /* mask |= ATTITUDE_SET;  * confuses cycle order ?? */
         gpsd_log(&session->context->errout, LOG_RAW,
-            "PASHR (OxTS) time %ld.%09ld, heading %lf.\n",
-            session->newdata.time.tv_sec,
-            session->newdata.time.tv_nsec,
+            "PASHR (OxTS) time %s, heading %lf.\n",
+             timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
             session->gpsdata.attitude.heading);
     }
     return mask;
@@ -3256,6 +3263,8 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
     volatile char *t;
     uint64_t lasttag_mask = 0;
     uint64_t thistag_mask = 0;
+    char ts_buf1[TIMESPEC_LEN];
+    char ts_buf2[TIMESPEC_LEN];
 #ifdef SKYTRAQ_ENABLE
     bool skytraq_sti = false;
 #endif
@@ -3376,10 +3385,9 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
         session->newdata.time = gpsd_utc_resolve(session);
 
         gpsd_log(&session->context->errout, LOG_DATA,
-                 "%s time is %ld.%09ld = %d-%02d-%02dT%02d:%02d:%02d.%03ldZ\n",
+                 "%s time is %s = %d-%02d-%02dT%02d:%02d:%02d.%03ldZ\n",
                  session->nmea.field[0],
-                 session->newdata.time.tv_sec,
-                 session->newdata.time.tv_nsec,
+                 timespec_str(&session->newdata.time, ts_buf1, sizeof(ts_buf1)),
                  1900 + session->nmea.date.tm_year,
                  session->nmea.date.tm_mon + 1,
                  session->nmea.date.tm_mday,
@@ -3409,12 +3417,12 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
      */
     /* cast for 32/64 bit compat */
     gpsd_log(&session->context->errout, LOG_DATA,
-             "%s time %ld.%09ld last %ld.%09ld latch %d cont %d enders %#llx\n",
+             "%s time %s last %s latch %d cont %d enders %#llx\n",
              session->nmea.field[0],
-             session->nmea.this_frac_time.tv_sec,
-             session->nmea.this_frac_time.tv_nsec,
-             session->nmea.last_frac_time.tv_sec,
-             session->nmea.last_frac_time.tv_nsec,
+             timespec_str(&session->nmea.this_frac_time, ts_buf1,
+                          sizeof(ts_buf1)),
+             timespec_str(&session->nmea.last_frac_time, ts_buf2,
+                          sizeof(ts_buf2)),
              session->nmea.latch_frac_time,
              session->nmea.cycle_continue,
              (unsigned long long)session->nmea.cycle_enders);
