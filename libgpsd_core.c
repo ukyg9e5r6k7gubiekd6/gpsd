@@ -111,10 +111,10 @@ static void visibilize(char *outbuf, size_t outlen,
 #endif /* !SQUELCH_ENABLE */
 
 
-void gpsd_vlog(const struct gpsd_errout_t *errout,
-			 const int errlevel,
-			 char *outbuf, size_t outlen,
-			 const char *fmt, va_list ap)
+static void gpsd_vlog(const int errlevel,
+                      const struct gpsd_errout_t *errout,
+                      char *outbuf, size_t outlen,
+                      const char *fmt, va_list ap)
 /* assemble msg in vprintf(3) style, use errout hook or syslog for delivery */
 {
 #ifdef SQUELCH_ENABLE
@@ -196,7 +196,7 @@ void gpsd_log(const struct gpsd_errout_t *errout,
 
     buf[0] = '\0';
     va_start(ap, fmt);
-    gpsd_vlog(errout, errlevel, buf, sizeof(buf), fmt, ap);
+    gpsd_vlog(errlevel, errout, buf, sizeof(buf), fmt, ap);
     va_end(ap);
 }
 
@@ -398,7 +398,7 @@ static void ppsthread_log(volatile struct pps_thread_t *pps_thread,
 
     buf[0] = '\0';
     va_start(ap, fmt);
-    gpsd_vlog(&device->context->errout, loglevel, buf, sizeof(buf), fmt, ap);
+    gpsd_vlog(loglevel, &device->context->errout, buf, sizeof(buf), fmt, ap);
     va_end(ap);
 }
 

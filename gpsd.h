@@ -1006,8 +1006,6 @@ extern bool ais_binary_decode(const struct gpsd_errout_t *errout,
 
 void gpsd_labeled_report(const int, const int,
 			 const char *, const char *, va_list);
-void gpsd_vlog(const struct gpsd_errout_t *,
-	       const int, char *, size_t, const char *, va_list ap);
 PRINTF_FUNC(3, 4) void gpsd_log(const struct gpsd_errout_t *, const int, const char *, ...);
 
 #define NITEMS(x) ((int) (sizeof(x) / sizeof(x[0]) + COMPILE_CHECK_IS_ARRAY(x)))
