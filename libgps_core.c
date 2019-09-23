@@ -305,17 +305,19 @@ extern const char *gps_errstr(const int err)
 #ifdef LIBGPS_DEBUG
 void libgps_dump_state(struct gps_data_t *collect)
 {
+    char ts_buf[TIMESPEC_LEN];
+
     /* no need to dump the entire state, this is a sanity check */
 #ifndef USE_QT
     (void)fprintf(debugfp, "flags: (0x%04x) %s\n",
 		  (unsigned int)collect->set, gps_maskdump(collect->set));
 #endif
     if (collect->set & ONLINE_SET)
-	(void)fprintf(debugfp, "ONLINE: %ld.%09ld\n",
-                      collect->online.tv_sec, collect->online.tv_nsec);
+	(void)fprintf(debugfp, "ONLINE: %s\n",
+                      timespec_str(&collect->online, ts_buf, sizeof(ts_buf)));
     if (collect->set & TIME_SET)
-	(void)fprintf(debugfp, "TIME: %ld.%09ld\n",
-                      collect->fix.time.tv_sec, collect->fix.time.tv_nsec);
+	(void)fprintf(debugfp, "TIME: %s\n",
+                     timespec_str(&collect->fix.time, ts_buf, sizeof(ts_buf)));
     /* NOTE: %.7f needed for cm level accurate GPS */
     if (collect->set & LATLON_SET)
 	(void)fprintf(debugfp, "LATLON: lat/lon: %.7lf %.7lf\n",
