@@ -453,6 +453,7 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     int *status = &session->gpsdata.status;
     int *mode = &session->newdata.mode;
     gps_mask_t mask = 0;
+    char ts_buf[TIMESPEC_LEN];
 
     /* u-blox 6 and 7 are 84 bytes, u-blox 8 and 9 are 92 bytes  */
     if (84 > data_len) {
@@ -570,11 +571,10 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     mask |= HERR_SET | SPEEDERR_SET | VERR_SET;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-         "NAV-PVT: flags=%02x time=%ld.%09ld lat=%.2f lon=%.2f altHAE=%.2f "
+         "NAV-PVT: flags=%02x time=%s lat=%.2f lon=%.2f altHAE=%.2f "
          "track=%.2f speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
          flags,
-         session->newdata.time.tv_sec,
-         session->newdata.time.tv_nsec,
+         timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
          session->newdata.latitude,
          session->newdata.longitude,
          session->newdata.altHAE,
@@ -677,6 +677,7 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     unsigned int flags;
     unsigned char navmode;
     gps_mask_t mask;
+    char ts_buf[TIMESPEC_LEN];
 
     if (52 > data_len) {
         gpsd_log(&session->context->errout, LOG_WARN,
@@ -752,10 +753,9 @@ ubx_msg_nav_sol(struct gps_device_t *session, unsigned char *buf,
     mask |= MODE_SET | STATUS_SET;
 
     gpsd_log(&session->context->errout, LOG_DATA,
-             "UBX-NAV-SOL: time=%ld.%09ld ecef x:%.2f y:%.2f z:%.2f track=%.2f "
+             "UBX-NAV-SOL: time=%s ecef x:%.2f y:%.2f z:%.2f track=%.2f "
              "speed=%.2f climb=%.2f mode=%d status=%d used=%d\n",
-             session->newdata.time.tv_sec,
-             session->newdata.time.tv_nsec,
+             timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
              session->newdata.ecef.x,
              session->newdata.ecef.y,
              session->newdata.ecef.z,
@@ -996,6 +996,7 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
 {
     uint8_t valid;         /* Validity Flags */
     gps_mask_t mask = 0;
+    char ts_buf[TIMESPEC_LEN];
 
     if (16 > data_len) {
         gpsd_log(&session->context->errout, LOG_WARN,
@@ -1030,9 +1031,8 @@ ubx_msg_nav_timegps(struct gps_device_t *session, unsigned char *buf,
     }
 
     gpsd_log(&session->context->errout, LOG_DATA,
-             "TIMEGPS: time=%ld.%09ld mask={TIME}\n",
-             session->newdata.time.tv_sec,
-             session->newdata.time.tv_nsec);
+             "TIMEGPS: time=%s mask={TIME}\n",
+             timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)));
     return mask;
 }
 
@@ -2006,9 +2006,9 @@ gps_mask_t ubx_parse(struct gps_device_t * session, unsigned char *buf,
                  "UBX:      time %.2f      msgid %x\n",
                  session->newdata.time, msgid);
         gpsd_log(&session->context->errout, LOG_ERROR,
-                 "     last_time %ld.%09ld last_msgid %x\n",
-                 session->driver.ubx.last_time.tv_sec,
-                 session->driver.ubx.last_time.tv_nsec,
+                 "     last_time %s last_msgid %x\n",
+                 timespec_str(&session->driver.ubx.last_time, ts_buf,
+                              sizeof(ts_buf)),
                  session->driver.ubx.last_msgid);
          */
         /* iTOW is to ms, can go forward or backwards */
