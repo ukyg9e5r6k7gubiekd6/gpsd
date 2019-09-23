@@ -21,7 +21,7 @@
 
 <tbody>
 <row>
-  <entry><function>void gpsd_log(const struct errout_t, int errlevel, const char *fmt, ... )</function></entry>
+  <entry><function>void gpsd_log(int errlevel, const struct errout_t, const char *fmt, ... )</function></entry>
   <entry><para>This code is used for error reporting, but is dependant
   on SQUELCH_DISABLE so that embedded systems (for example) are not
   burdened with unnecessary noise. The first thing to check is if the

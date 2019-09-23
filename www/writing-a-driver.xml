@@ -830,7 +830,7 @@ requests.</para>
 
 <!-- ESR: gpsd_log had a different name when this was written -->
 <para>As I hinted earlier, I found that support code like <quote>
-<userinput>gpsd_log(..., LOG_WARN, "satellites tracked = %d, seen =
+<userinput>gpsd_log(LOG_WARN, ..., "satellites tracked = %d, seen =
 %d\n", tracked, seen);</userinput></quote> was very helpful in the
 early stages. Once the driver reached a production stage, much of the
 support code was removed and that which was retained had the first

@@ -37,7 +37,7 @@ int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
     // cppcheck-suppress pointerPositive
     if (device->gpsdata.gps_fd >= 0) {
 	char hn[256], buf[BUFSIZ];
-	gpsd_log(&device->context->errout, LOG_PROG,
+	gpsd_log(LOG_PROG, &device->context->errout,
 		 "connection to DGPS server %s established.\n",
 		 dgpsserver);
 	(void)gethostname(hn, sizeof(hn));
@@ -45,11 +45,11 @@ int dgpsip_open(struct gps_device_t *device, const char *dgpsserver)
 	(void)snprintf(buf, sizeof(buf), "HELO %s gpsd %s\r\nR\r\n", hn,
 		       VERSION);
 	if (write(device->gpsdata.gps_fd, buf, strlen(buf)) != (ssize_t) strlen(buf))
-	    gpsd_log(&device->context->errout, LOG_ERROR,
+	    gpsd_log(LOG_ERROR, &device->context->errout,
 		     "hello to DGPS server %s failed\n",
 		     dgpsserver);
     } else
-	gpsd_log(&device->context->errout, LOG_ERROR,
+	gpsd_log(LOG_ERROR, &device->context->errout,
 		 "can't connect to DGPS server %s, netlib error %d.\n",
 		 dgpsserver, device->gpsdata.gps_fd);
     opts = fcntl(device->gpsdata.gps_fd, F_GETFL);
@@ -79,9 +79,9 @@ void dgpsip_report(struct gps_context_t *context,
 			   gps->gpsdata.fix.altMSL);
 	    if (write(dgpsip->gpsdata.gps_fd, buf, strlen(buf)) ==
 		(ssize_t) strlen(buf))
-		gpsd_log(&context->errout, LOG_IO, "=> dgps %s\n", buf);
+		gpsd_log(LOG_IO, &context->errout, "=> dgps %s\n", buf);
 	    else
-		gpsd_log(&context->errout, LOG_IO, "write to dgps FAILED\n");
+		gpsd_log(LOG_IO, &context->errout, "write to dgps FAILED\n");
 	}
     }
 }

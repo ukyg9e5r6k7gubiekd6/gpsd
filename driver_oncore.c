@@ -174,7 +174,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	return 0;
 
     mask = ONLINE_SET;
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
 	     "oncore NAVSOL - navigation data\n");
 
     flags = (unsigned char)getub(buf, 72);
@@ -186,7 +186,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	session->gpsdata.status = STATUS_FIX;
 	session->newdata.mode = MODE_2D;
     } else {
-	gpsd_log(&session->context->errout, LOG_WARN,
+	gpsd_log(LOG_WARN, &session->context->errout,
 		 "oncore NAVSOL no fix - flags 0x%02x\n", flags);
 	session->newdata.mode = MODE_NO_FIX;
 	session->gpsdata.status = STATUS_NO_FIX;
@@ -211,7 +211,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	session->newdata.time.tv_sec = mkgmtime(&unpacked_date);
 	session->newdata.time.tv_nsec = nsec;
 	mask |= TIME_SET;
-	gpsd_log(&session->context->errout, LOG_DATA,
+	gpsd_log(LOG_DATA, &session->context->errout,
 		 "oncore NAVSOL - time: %04d-%02d-%02d %02d:%02d:%02d.%09d\n",
 		 unpacked_date.tm_year + 1900, unpacked_date.tm_mon + 1,
 		 unpacked_date.tm_mday, unpacked_date.tm_hour,
@@ -225,7 +225,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     track = getbeu16(buf, 33) / 10.0f;
     dop = getbeu16(buf, 35) / 10.0f;
 
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
 	     "oncore NAVSOL - %lf %lf %.2lfm | %.2fm/s %.1fdeg dop=%.1f\n",
 	     lat, lon, alt, speed, track,
 	     (float)dop);
@@ -252,7 +252,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
 	sn = (int)getub(buf, off + 2);
 	status = (int)getub(buf, off + 3);
 
-	gpsd_log(&session->context->errout, LOG_DATA,
+	gpsd_log(LOG_DATA, &session->context->errout,
 		 "%2d %2d %2d %3d %02x\n", i, sv, mode, sn, status);
 
 	if (sn) {
@@ -310,7 +310,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     (void)oncore_control_send(session, (char *)pollBo, sizeof(pollBo));
     (void)oncore_control_send(session, (char *)pollEn, sizeof(pollEn));
 
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
 	     "NAVSOL: time=%s lat=%.2f lon=%.2f altMSL=%.2f speed=%.2f "
              "track=%.2f mode=%d status=%d visible=%d used=%d\n",
              timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
@@ -335,7 +335,7 @@ oncore_msg_utc_offset(struct gps_device_t *session, unsigned char *buf,
     if (data_len != 8)
 	return 0;
 
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
 	     "oncore UTCTIME - leap seconds\n");
     utc_offset = (int)getub(buf, 4);
     if (utc_offset == 0)
@@ -358,7 +358,7 @@ oncore_msg_pps_offset(struct gps_device_t *session, unsigned char *buf,
     if (data_len != 11)
 	return 0;
 
-    gpsd_log(&session->context->errout, LOG_DATA, "oncore PPS offset\n");
+    gpsd_log(LOG_DATA, &session->context->errout, "oncore PPS offset\n");
     pps_offset_ns = (int)getbes32(buf, 4);
 
     session->driver.oncore.pps_offset_ns = pps_offset_ns;
@@ -378,10 +378,10 @@ oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf,
     if (data_len != 92)
 	return 0;
 
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
 	     "oncore SVINFO - satellite data\n");
     nchan = (unsigned int)getub(buf, 4);
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
 	     "oncore SVINFO - %d satellites:\n", nchan);
     /* Then we clamp the value to not read outside the table. */
     if (nchan > 12)
@@ -395,7 +395,7 @@ oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf,
 	int el = (int)getub(buf, off + 3);
 	int az = (int)getbeu16(buf, off + 4);
 
-	gpsd_log(&session->context->errout, LOG_DATA,
+	gpsd_log(LOG_DATA, &session->context->errout,
 		 "%2d %2d %2d %3d\n", i, sv, el, az);
 
 	/* Store for use when Ea messages come. */
@@ -410,7 +410,7 @@ oncore_msg_svinfo(struct gps_device_t *session, unsigned char *buf,
 	    }
     }
 
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
 	     "SVINFO: mask={SATELLITE}\n");
     return SATELLITE_SET;
 }
@@ -428,7 +428,7 @@ oncore_msg_time_raim(struct gps_device_t *session UNUSED,
 	return 0;
 
     sawtooth_ns = (int)getub(buf, 25);
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
 	     "oncore PPS sawtooth: %d\n",sawtooth_ns);
 
     /* session->driver.oncore.traim_sawtooth_ns = sawtooth_ns; */
@@ -462,7 +462,7 @@ gps_mask_t oncore_dispatch(struct gps_device_t * session, unsigned char *buf,
     type = ONCTYPE(buf[2], buf[3]);
 
     /* we may need to dump the raw packet */
-    gpsd_log(&session->context->errout, LOG_RAW,
+    gpsd_log(LOG_RAW, &session->context->errout,
 	     "raw Oncore packet type 0x%04x\n", type);
 
     session->cycle_end_reliable = true;
@@ -487,7 +487,7 @@ gps_mask_t oncore_dispatch(struct gps_device_t * session, unsigned char *buf,
 
     default:
 	/* FIX-ME: This gets noisy in a hurry. Change once your driver works */
-	gpsd_log(&session->context->errout, LOG_WARN,
+	gpsd_log(LOG_WARN, &session->context->errout,
 		 "unknown packet id @@%c%c length %zd\n",
 		 type >> 8, type & 0xff, len);
 	return 0;
@@ -520,7 +520,7 @@ static ssize_t oncore_control_send(struct gps_device_t *session,
     session->msgbuf[msglen + 4] = '\n';
     session->msgbuflen = msglen + 5;
 
-    gpsd_log(&session->context->errout, LOG_PROG,
+    gpsd_log(LOG_PROG, &session->context->errout,
 	     "writing oncore control type %c%c\n", msg[0], msg[1]);
     return gpsd_write(session, session->msgbuf, session->msgbuflen);
 }

@@ -19,7 +19,7 @@
 
 <tbody>
 <row>
-  <entry><function>void gpsd_log(struct gpsd_errout_t, int errlevel, const char *fmt, ... )</function></entry>
+  <entry><function>void gpsd_log(int errlevel, struct gpsd_errout_t, const char *fmt, ... )</function></entry>
   <entry><para>Provides the outputting of strings to stderr or through a
   specified hook function in the errout structure for anyone
   who needs it. Used extensively by many functions to log errors or

@@ -72,7 +72,7 @@ static bool sky_write(struct gps_device_t *session, unsigned char *msg)
     /* enter CRC after payload */
     msg[len + 4] = (unsigned char)(crc & 0x00ff);
 
-    gpsd_log(&session->context->errout, LOG_PROG,
+    gpsd_log(LOG_PROG, &session->context->errout,
 	     "Skytraq: Writing control type %02x:\n", type);
     ok = (gpsd_write(session, (const char *)msg, len+7) == (ssize_t) (len+7));
 
@@ -155,7 +155,7 @@ static gps_mask_t sky_msg_80(struct gps_device_t *session,
 	    over_x, over_y, over_z,
 	    rev_yy, rev_mm, rev_dd);
 
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
 	     "Skytraq: MID 0x80: kver=%u.%u,%u, over=%u.%u,%u, rev=%u.%u.%u\n",
 	    kver_x, kver_y, kver_z,
 	    over_x, over_y, over_z,
@@ -190,7 +190,7 @@ static gps_mask_t sky_msg_DC(struct gps_device_t *session,
     /* should this be newdata.skyview_time? */
     session->gpsdata.skyview_time = gpsd_gpstime_resolv(session, wn, ts_tow);
 
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
 	     "Skytraq: MID 0xDC: iod %u wn %u tow %u mp %u t%s\n",
 	     iod, wn, tow, mp,
              timespec_str(&session->gpsdata.skyview_time, ts_buf,
@@ -212,7 +212,7 @@ static gps_mask_t sky_msg_DD(struct gps_device_t *session,
     iod = (unsigned int)getub(buf, 1);
     nmeas = (unsigned int)getub(buf, 2);
 
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
 	     "Skytraq: MID 0xDD: iod=%u, nmeas=%u\n",
 	     iod, nmeas);
 
@@ -306,7 +306,7 @@ static gps_mask_t sky_msg_DD(struct gps_device_t *session,
             /* possible slip */
 	    session->gpsdata.raw.meas[i].lli = 2;
         }
-	gpsd_log(&session->context->errout, LOG_DATA,
+	gpsd_log(LOG_DATA, &session->context->errout,
 		 "PRN %u (%u:%u) prMes %f cpMes %f doMes %f\n"
 		 "cno %u  rtkStat %u\n", PRN,
 		 gnssId, svId, prMes, cpMes, doMes, cno, trkStat);
@@ -373,7 +373,7 @@ static gps_mask_t sky_msg_DE(struct gps_device_t *session,
 	    session->gpsdata.skyview[st].azimuth != 0 &&
 	    session->gpsdata.skyview[st].elevation != 0;
 
-	gpsd_log(&session->context->errout, LOG_DATA,
+	gpsd_log(LOG_DATA, &session->context->errout,
 		 "Skytraq: PRN=%2d El=%4.0f Az=%5.0f ss=%3.2f stat=%02x,%02x "
                  "ura=%d %c\n",
 		 session->gpsdata.skyview[st].PRN,
@@ -393,7 +393,7 @@ static gps_mask_t sky_msg_DE(struct gps_device_t *session,
     session->gpsdata.satellites_visible = st;
     session->gpsdata.satellites_used = nsv;
 
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
 	     "Skytraq: MID 0xDE: nsvs=%u visible=%u iod=%u\n", nsvs,
 	     session->gpsdata.satellites_visible, iod);
     return SATELLITE_SET | USED_IS;
@@ -470,7 +470,7 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
 
     session->newdata.time = gpsd_gpstime_resolv(session, wn, ts_tow );
 
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
 	    "Skytraq: MID 0xDF: iod=%u, stat=%u, wn=%u, tow=%f, t=%s "
 	    "cb: %f, cd: %f "
 	    "gdop: %.2f, pdop: %.2f, hdop: %.2f, vdop: %.2f, tdop: %.2f\n",
@@ -511,7 +511,7 @@ static gps_mask_t sky_msg_E0(struct gps_device_t *session,
 	words[i] = (uint32_t)getbeu24(buf, 3 + (i * 3));
     }
 
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
 	     "Skytraq: 50B MID 0xE0: prn=%u, subf=%u\n",
 	     prn, subf);
 
@@ -547,7 +547,7 @@ static gps_mask_t sky_msg_E2(struct gps_device_t *session,
 
     /* extra guard prevents expensive hexdump calls */
     if (session->context->errout.debug >= LOG_PROG) {
-	gpsd_log(&session->context->errout, LOG_PROG,
+	gpsd_log(LOG_PROG, &session->context->errout,
 		 "Skytraq: Beidou D1 subframe PRN %d Subframe %d "
 	         "length %zd byte:%s\n",
 		 prn, subf,
@@ -588,7 +588,7 @@ static gps_mask_t sky_msg_E3(struct gps_device_t *session,
 
     /* extra guard prevents expensive hexdump calls */
     if (session->context->errout.debug >= LOG_PROG) {
-	gpsd_log(&session->context->errout, LOG_PROG,
+	gpsd_log(LOG_PROG, &session->context->errout,
 		 "Skytraq: Beidou D2 subframe PRN %d Subframe %d "
 	         "length %zd byte:%s\n",
 		 prn, subf,
@@ -626,12 +626,12 @@ static gps_mask_t sky_parse(struct gps_device_t * session, unsigned char *buf,
 
     case 0x83:
 	/* 131 - ACK */
-	gpsd_log(&session->context->errout, LOG_PROG,
+	gpsd_log(LOG_PROG, &session->context->errout,
 		 "Skytraq: ACK to MID %#02x\n", buf[1]);
 	break;
     case 0x84:
 	/* 132 - NACK */
-	gpsd_log(&session->context->errout, LOG_INF,
+	gpsd_log(LOG_INF, &session->context->errout,
 		 "Skytraq: NACK to MID %#02x\n", buf[1]);
 	break;
     case 0xDC:
@@ -663,7 +663,7 @@ static gps_mask_t sky_parse(struct gps_device_t * session, unsigned char *buf,
 	return sky_msg_E3(session, buf, len);
 
     default:
-	gpsd_log(&session->context->errout, LOG_PROG,
+	gpsd_log(LOG_PROG, &session->context->errout,
 		 "Skytraq: Unknown packet id %#02x length %zd\n",
 		 buf[0], len);
     }

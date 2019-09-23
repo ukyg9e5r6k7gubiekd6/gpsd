@@ -47,7 +47,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
 
     gps_mask_t mask = 0;
     if (len != 296) {
-        gpsd_log(&session->context->errout, LOG_PROG,
+        gpsd_log(LOG_PROG, &session->context->errout,
                  "ITALK: bad NAV_FIX (len %zu, should be 296)\n",
                  len);
         return -1;
@@ -114,7 +114,7 @@ static gps_mask_t decode_itk_navfix(struct gps_device_t *session,
             session->gpsdata.status = STATUS_FIX;
     }
 
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
              "NAV_FIX: time=%s, ecef x:%.2f y:%.2f z:%.2f altHAE=%.2f "
              "speed=%.2f track=%.2f climb=%.2f mode=%d status=%d gdop=%.2f "
              "pdop=%.2f hdop=%.2f vdop=%.2f tdop=%.2f\n",
@@ -136,7 +136,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
     gps_mask_t mask;
 
     if (len < 62) {
-        gpsd_log(&session->context->errout, LOG_PROG,
+        gpsd_log(LOG_PROG, &session->context->errout,
                  "ITALK: runt PRN_STATUS (len=%zu)\n", len);
         mask = 0;
     } else {
@@ -178,7 +178,7 @@ static gps_mask_t decode_itk_prnstatus(struct gps_device_t *session,
         session->gpsdata.satellites_used = (int)nsv;
         mask = USED_IS | SATELLITE_SET;;
 
-        gpsd_log(&session->context->errout, LOG_DATA,
+        gpsd_log(LOG_DATA, &session->context->errout,
                  "PRN_STATUS: time=%s visible=%d used=%d "
                  "mask={USED|SATELLITE}\n",
                  timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
@@ -199,7 +199,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
     char ts_buf[TIMESPEC_LEN];
 
     if (len != 64) {
-        gpsd_log(&session->context->errout, LOG_PROG,
+        gpsd_log(LOG_PROG, &session->context->errout,
                  "ITALK: bad UTC_IONO_MODEL (len %zu, should be 64)\n",
                  len);
         return 0;
@@ -217,7 +217,7 @@ static gps_mask_t decode_itk_utcionomodel(struct gps_device_t *session,
     MSTOTS(&ts_tow, tow);
     session->newdata.time = gpsd_gpstime_resolv(session,
         (unsigned short) getleu16(buf, 7 + 36), ts_tow);
-    gpsd_log(&session->context->errout, LOG_DATA,
+    gpsd_log(LOG_DATA, &session->context->errout,
              "UTC_IONO_MODEL: time=%s mask={TIME}\n",
              timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)));
     return TIME_SET | NTPTIME_IS;
@@ -231,7 +231,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
     uint32_t words[10];
 
     if (len != 64) {
-        gpsd_log(&session->context->errout, LOG_PROG,
+        gpsd_log(LOG_PROG, &session->context->errout,
                  "ITALK: bad SUBFRAME (len %zu, should be 64)\n", len);
         return 0;
     }
@@ -239,7 +239,7 @@ static gps_mask_t decode_itk_subframe(struct gps_device_t *session,
     flags = (unsigned short) getleu16(buf, 7 + 4);
     prn = (unsigned short) getleu16(buf, 7 + 6);
     sf = (unsigned short) getleu16(buf, 7 + 8);
-    gpsd_log(&session->context->errout, LOG_PROG,
+    gpsd_log(LOG_PROG, &session->context->errout,
              "iTalk 50B SUBFRAME prn %u sf %u - decode %s %s\n",
              prn, sf,
              (flags & SUBFRAME_WORD_FLAG_MASK) ? "error" : "ok",
@@ -266,17 +266,17 @@ static gps_mask_t decode_itk_pseudo(struct gps_device_t *session,
 
     n = (unsigned short) getleu16(buf, 7 + 4);
     if ((n < 1) || (n > MAXCHANNELS)){
-        gpsd_log(&session->context->errout, LOG_INF,
+        gpsd_log(LOG_INF, &session->context->errout,
                  "ITALK: bad PSEUDO channel count\n");
         return 0;
     }
 
     if (len != (size_t)((n+1)*36)) {
-        gpsd_log(&session->context->errout, LOG_PROG,
+        gpsd_log(LOG_PROG, &session->context->errout,
                  "ITALK: bad PSEUDO len %zu\n", len);
     }
 
-    gpsd_log(&session->context->errout, LOG_PROG, "iTalk PSEUDO [%u]\n", n);
+    gpsd_log(LOG_PROG, &session->context->errout, "iTalk PSEUDO [%u]\n", n);
     flags = (unsigned short)getleu16(buf, 7 + 6);
     if ((flags & 0x3) != 0x3)
         return 0; // bail if measurement time not valid.
@@ -323,54 +323,54 @@ static gps_mask_t italk_parse(struct gps_device_t *session,
 
     type = (unsigned int) getub(buf, 4);
     /* we may need to dump the raw packet */
-    gpsd_log(&session->context->errout, LOG_RAW,
+    gpsd_log(LOG_RAW, &session->context->errout,
              "raw italk packet type 0x%02x\n", type);
 
     session->cycle_end_reliable = true;
 
     switch (type) {
     case ITALK_NAV_FIX:
-        gpsd_log(&session->context->errout, LOG_DATA,
+        gpsd_log(LOG_DATA, &session->context->errout,
                  "iTalk NAV_FIX len %zu\n", len);
         mask = decode_itk_navfix(session, buf, len) | (CLEAR_IS | REPORT_IS);
         break;
     case ITALK_PRN_STATUS:
-        gpsd_log(&session->context->errout, LOG_DATA,
+        gpsd_log(LOG_DATA, &session->context->errout,
                  "iTalk PRN_STATUS len %zu\n", len);
         mask = decode_itk_prnstatus(session, buf, len);
         break;
     case ITALK_UTC_IONO_MODEL:
-        gpsd_log(&session->context->errout, LOG_DATA,
+        gpsd_log(LOG_DATA, &session->context->errout,
                  "iTalk UTC_IONO_MODEL len %zu\n", len);
         mask = decode_itk_utcionomodel(session, buf, len);
         break;
 
     case ITALK_ACQ_DATA:
-        gpsd_log(&session->context->errout, LOG_DATA,
+        gpsd_log(LOG_DATA, &session->context->errout,
                  "iTalk ACQ_DATA len %zu\n", len);
         break;
     case ITALK_TRACK:
-        gpsd_log(&session->context->errout, LOG_DATA,
+        gpsd_log(LOG_DATA, &session->context->errout,
                  "iTalk TRACK len %zu\n", len);
         break;
     case ITALK_PSEUDO:
-        gpsd_log(&session->context->errout, LOG_DATA,
+        gpsd_log(LOG_DATA, &session->context->errout,
                  "iTalk PSEUDO len %zu\n", len);
         mask = decode_itk_pseudo(session, buf, len);
         break;
     case ITALK_RAW_ALMANAC:
-        gpsd_log(&session->context->errout, LOG_DATA,
+        gpsd_log(LOG_DATA, &session->context->errout,
                  "iTalk RAW_ALMANAC len %zu\n", len);
         break;
     case ITALK_RAW_EPHEMERIS:
-        gpsd_log(&session->context->errout, LOG_DATA,
+        gpsd_log(LOG_DATA, &session->context->errout,
                  "iTalk RAW_EPHEMERIS len %zu\n", len);
         break;
     case ITALK_SUBFRAME:
         mask = decode_itk_subframe(session, buf, len);
         break;
     case ITALK_BIT_STREAM:
-        gpsd_log(&session->context->errout, LOG_DATA,
+        gpsd_log(LOG_DATA, &session->context->errout,
                  "iTalk BIT_STREAM len %zu\n", len);
         break;
 
@@ -405,12 +405,12 @@ static gps_mask_t italk_parse(struct gps_device_t *session,
     case ITALK_PULL_FIX:
     case ITALK_MEMCTRL:
     case ITALK_STOP_TASK:
-        gpsd_log(&session->context->errout, LOG_DATA,
+        gpsd_log(LOG_DATA, &session->context->errout,
                  "iTalk not processing packet: id 0x%02x length %zu\n",
                  type, len);
         break;
     default:
-        gpsd_log(&session->context->errout, LOG_DATA,
+        gpsd_log(LOG_DATA, &session->context->errout,
                  "iTalk unknown packet: id 0x%02x length %zu\n",
                  type, len);
     }

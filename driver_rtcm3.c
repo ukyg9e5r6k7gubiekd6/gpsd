@@ -104,7 +104,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
     rtcm->length = (unsigned int)ugrab(10);
     rtcm->type = (unsigned int)ugrab(12);
 
-    gpsd_log(&context->errout, LOG_RAW, "RTCM3: type %d payload length %d\n",
+    gpsd_log(LOG_RAW, &context->errout, "RTCM3: type %d payload length %d\n",
 	     rtcm->type, rtcm->length);
 
     switch (rtcm->type) {
@@ -585,8 +585,9 @@ void rtcm3_unpack(const struct gps_context_t *context,
 	 * The first 12 bits of the copied payload will be the type field.
 	 */
 	memcpy(rtcm->rtcmtypes.data, buf+3, rtcm->length);
-	gpsd_log(&context->errout, LOG_PROG, "RTCM3: unknown type %d, length %d\n",
-	     rtcm->type, rtcm->length);
+	gpsd_log(LOG_PROG, &context->errout,
+                 "RTCM3: unknown type %d, length %d\n",
+	         rtcm->type, rtcm->length);
     }
 
 }
