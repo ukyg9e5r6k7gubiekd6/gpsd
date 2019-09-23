@@ -143,6 +143,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     gps_mask_t mask;
     struct tm unpacked_date;
     int datum;
+    char ts_buf[TIMESPEC_LEN];
 
     /* ticks                      = getzlong(6); */
     /* sequence                   = getzword(8); */
@@ -202,10 +203,10 @@ static gps_mask_t handle1000(struct gps_device_t *session)
            SPEED_SET | TRACK_SET | STATUS_SET | MODE_SET |
            HERR_SET | SPEEDERR_SET | VERR_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "1000: time=%ld.%09ld lat=%.2f lon=%.2f altHAE=%.2f track=%.2f "
+	     "1000: time=%s lat=%.2f lon=%.2f altHAE=%.2f track=%.2f "
              "speed=%.2f climb=%.2f mode=%d status=%d\n",
-	     session->newdata.time.tv_sec,
-	     session->newdata.time.tv_nsec, session->newdata.latitude,
+             timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
+	     session->newdata.latitude,
 	     session->newdata.longitude, session->newdata.altHAE,
 	     session->newdata.track, session->newdata.speed,
 	     session->newdata.climb, session->newdata.mode,
@@ -225,6 +226,8 @@ static gps_mask_t handle1002(struct gps_device_t *session)
     int gps_week = getzword(10);
     time_t gps_seconds = getzlong(11);
     long gps_nanoseconds = getzlong(13);
+    char ts_buf[TIMESPEC_LEN];
+
     /* Note: this week counter is not limited to 10 bits. */
     session->context->gps_week = (unsigned short)gps_week;
     session->gpsdata.satellites_used = 0;
@@ -246,11 +249,11 @@ static gps_mask_t handle1002(struct gps_device_t *session)
 						      (unsigned short)gps_week,
 						      ts_tow);
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "1002: visible=%d used=%d mask={SATELLITE|USED} time %ld.%09ld\n",
+	     "1002: visible=%d used=%d mask={SATELLITE|USED} time %s\n",
 	     session->gpsdata.satellites_visible,
 	     session->gpsdata.satellites_used,
-	     session->gpsdata.skyview_time.tv_sec,
-	     session->gpsdata.skyview_time.tv_nsec);
+             timespec_str(&session->gpsdata.skyview_time, ts_buf,
+                          sizeof(ts_buf)));
     return SATELLITE_SET | USED_IS;
 }
 
