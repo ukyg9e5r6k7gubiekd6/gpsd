@@ -525,10 +525,11 @@ static int get_edge_tiocmiwait( volatile struct pps_thread_t *thread_context,
 
     *state &= PPS_LINE_TIOC;
 
-    timespec_str( clock_ts, ts_str, sizeof(ts_str) );
     thread_context->log_hook(thread_context, THREAD_PROG,
 		"TPPS:%s ioctl(TIOCMIWAIT) succeeded, time:%s,  state: %d\n",
-		thread_context->devicename, ts_str, *state);
+		thread_context->devicename,
+                timespec_str(clock_ts, ts_str, sizeof(ts_str)),
+                *state);
 
     return 0;
 }
@@ -648,15 +649,13 @@ static int get_edge_rfc2783(struct inner_context_t *inner_context,
      * unsigned long as a wider-or-equal type to
      * accomodate Linux's type.
      */
-    timespec_str( &pi.assert_timestamp, ts_str1, sizeof(ts_str1) );
-    timespec_str( &pi.clear_timestamp, ts_str2, sizeof(ts_str2) );
     thread_context->log_hook(thread_context, THREAD_PROG,
 		"KPPS:%s assert %s, sequence: %lu, "
 		"clear  %s, sequence: %lu - using: %.10s\n",
 		thread_context->devicename,
-		ts_str1,
+                timespec_str(&pi.assert_timestamp, ts_str1, sizeof(ts_str1)),
 		(unsigned long) pi.assert_sequence,
-		ts_str2,
+                timespec_str(&pi.clear_timestamp, ts_str2, sizeof(ts_str2)),
 		(unsigned long) pi.clear_sequence,
 		*edge ? "assert" : "clear");
 
@@ -836,11 +835,10 @@ static void *gpsd_ppsmonitor(void *arg)
 	    cycle = cycle_tio;
 	    duration = duration_tio;
 
-	    timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	    thread_context->log_hook(thread_context, THREAD_PROG,
 		    "TPPS:%s %.10s, cycle: %lld, duration: %lld @ %s\n",
 		    thread_context->devicename, edge_str, cycle, duration,
-                    ts_str1);
+                    timespec_str(&clock_ts, ts_str1, sizeof(ts_str1)));
 
         }
 #endif /* TIOCMIWAIT */
@@ -903,12 +901,12 @@ static void *gpsd_ppsmonitor(void *arg)
 	    cycle = cycle_kpps;
 	    duration = duration_kpps;
 
-	    timespec_str( &clock_ts_kpps, ts_str1, sizeof(ts_str1) );
 	    thread_context->log_hook(thread_context, THREAD_PROG,
 		"KPPS:%s %.10s cycle: %7lld, duration: %7lld @ %s\n",
 		thread_context->devicename,
 		edge_str,
-		cycle_kpps, duration_kpps, ts_str1);
+		cycle_kpps, duration_kpps,
+                timespec_str(&clock_ts_kpps, ts_str1, sizeof(ts_str1)));
 
 	}
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
@@ -961,12 +959,12 @@ static void *gpsd_ppsmonitor(void *arg)
         /* else, unchannged state, and weird cycle time */
 
 	state_last = state;
-	timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
 	thread_context->log_hook(thread_context, THREAD_PROG,
 	    "PPS:%s %.10s cycle: %7lld, duration: %7lld @ %s\n",
 	    thread_context->devicename,
 	    edge_str,
-	    cycle, duration, ts_str1);
+	    cycle, duration,
+            timespec_str(&clock_ts, ts_str1, sizeof(ts_str1)));
 	if (unchanged) {
 	    // strange, try again
 	    continue;
@@ -1163,7 +1161,7 @@ static void *gpsd_ppsmonitor(void *arg)
 
 	TS_SUB( &offset, &ppstimes.real, &ppstimes.clock);
 	TS_SUB( &delay, &ppstimes.clock, &last_fixtime.clock);
-	timespec_str( &delay, delay_str, sizeof(delay_str) );
+	timespec_str(&delay, delay_str, sizeof(delay_str));
 
 	/* end Stage Three: now known about the exact edge moment:
 	 *	UTC time of PPS edge
@@ -1175,15 +1173,15 @@ static void *gpsd_ppsmonitor(void *arg)
 	 *       call the report hook with our PPS report
          */
 
-	if ( 0> delay.tv_sec || 0 > delay.tv_nsec ) {
+	if (0 > delay.tv_sec || 0 > delay.tv_nsec) {
 	    thread_context->log_hook(thread_context, THREAD_RAW,
 			"PPS:%s %.10s system clock went backwards: %.20s\n",
 			thread_context->devicename,
 			edge_str,
 			delay_str);
 	    log1 = "system clock went backwards";
-	} else if ( ( 2 < delay.tv_sec)
-	  || ( 1 == delay.tv_sec && 100000000 < delay.tv_nsec ) ) {
+	} else if ((2 < delay.tv_sec)
+	  || (1 == delay.tv_sec && 100000000 < delay.tv_nsec)) {
 	    /* system clock could be slewing so allow up to 1.1 sec delay */
 	    /* chronyd can slew +/-8.33% */
 	    thread_context->log_hook(thread_context, THREAD_RAW,
@@ -1202,21 +1200,21 @@ static void *gpsd_ppsmonitor(void *arg)
 	    thread_context->pps_out = ppstimes;
 	    thread_context->ppsout_count++;
 	    thread_unlock(thread_context);
-	    timespec_str( &ppstimes.clock, ts_str1, sizeof(ts_str1) );
-	    timespec_str( &ppstimes.real, ts_str2, sizeof(ts_str2) );
 	    thread_context->log_hook(thread_context, THREAD_INF,
 		"PPS:%s %.10s hooks called clock: %s real: %s: %.20s\n",
 		thread_context->devicename,
 		edge_str,
-		ts_str1, ts_str2, log1);
+                timespec_str(&ppstimes.clock, ts_str1, sizeof(ts_str1)),
+                timespec_str(&ppstimes.real, ts_str2, sizeof(ts_str2)),
+                log1);
 	}
-	timespec_str( &clock_ts, ts_str1, sizeof(ts_str1) );
-	timespec_str( &offset, offset_str, sizeof(offset_str) );
 	thread_context->log_hook(thread_context, THREAD_PROG,
 		"PPS:%s %.10s %.30s @ %s offset %.20s\n",
 		thread_context->devicename,
 		edge_str,
-		log1, ts_str1, offset_str);
+		log1,
+                timespec_str(&clock_ts, ts_str1, sizeof(ts_str1)),
+                timespec_str(&offset, offset_str, sizeof(offset_str)));
         /* end Stage four, end of the loop, do it again */
     }
 #if defined(HAVE_SYS_TIMEPPS_H)
