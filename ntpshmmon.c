@@ -118,6 +118,9 @@ int main(int argc, char **argv)
 	/* the current segment */
 	struct shm_stat_t	shm_stat;
 	struct timespec delay;
+        char ts_buf1[TIMESPEC_LEN];
+        char ts_buf2[TIMESPEC_LEN];
+        char ts_buf3[TIMESPEC_LEN];
 
 	for (i = 0; i < NTPSEGMENTS; i++) {
 	    long long diff;  /* 32 bit long is too short for a timespec */
@@ -144,18 +147,23 @@ int main(int argc, char **argv)
 		clock_gettime(CLOCK_REALTIME, &shm_stat.tvc);
                 if (offset) {
 		    diff = timespec_diff_ns(shm_stat.tvr, shm_stat.tvt);
-		    printf("sample %s %20.9f %ld.%09ld %ld.%09ld %d %3d\n",
+		    printf("sample %s %20.9f %s %s %d %3d\n",
 			   ntp_name(i),
 			   (double)diff * 1e-9,
-			   (long)shm_stat.tvr.tv_sec, shm_stat.tvr.tv_nsec,
-			   (long)shm_stat.tvt.tv_sec, shm_stat.tvt.tv_nsec,
+                           timespec_str(&shm_stat.tvr, ts_buf1,
+                                        sizeof(ts_buf1)),
+                           timespec_str(&shm_stat.tvt, ts_buf2,
+                                        sizeof(ts_buf2)),
 			   shm_stat.leap, shm_stat.precision);
                 } else {
-		    printf("sample %s %ld.%09ld %ld.%09ld %ld.%09ld %d %3d\n",
+		    printf("sample %s %s %s %s %d %3d\n",
 			   ntp_name(i),
-			   (long)shm_stat.tvc.tv_sec, shm_stat.tvc.tv_nsec,
-			   (long)shm_stat.tvr.tv_sec, shm_stat.tvr.tv_nsec,
-			   (long)shm_stat.tvt.tv_sec, shm_stat.tvt.tv_nsec,
+                           timespec_str(&shm_stat.tvc, ts_buf1,
+                                        sizeof(ts_buf1)),
+                           timespec_str(&shm_stat.tvr, ts_buf2,
+                                        sizeof(ts_buf2)),
+                           timespec_str(&shm_stat.tvt, ts_buf3,
+                                        sizeof(ts_buf3)),
 			   shm_stat.leap, shm_stat.precision);
                 }
 		--nsamples;
