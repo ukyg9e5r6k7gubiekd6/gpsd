@@ -168,6 +168,7 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     unsigned int i, j, st, nsv;
     int Bbused;
     struct tm unpacked_date;
+    char ts_buf[TIMESPEC_LEN];
 
     if (data_len != 76)
 	return 0;
@@ -310,9 +311,9 @@ oncore_msg_navsol(struct gps_device_t *session, unsigned char *buf,
     (void)oncore_control_send(session, (char *)pollEn, sizeof(pollEn));
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "NAVSOL: time=%ld.%09ld lat=%.2f lon=%.2f altMSL=%.2f speed=%.2f "
+	     "NAVSOL: time=%s lat=%.2f lon=%.2f altMSL=%.2f speed=%.2f "
              "track=%.2f mode=%d status=%d visible=%d used=%d\n",
-	     session->newdata.time.tv_sec, session->newdata.time.tv_nsec,
+             timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
              session->newdata.latitude,
 	     session->newdata.longitude, session->newdata.altHAE,
 	     session->newdata.speed, session->newdata.track,
