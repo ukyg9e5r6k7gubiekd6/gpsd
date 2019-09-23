@@ -83,6 +83,7 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
     double d;
     struct tm tm;
     double int_part;
+    char ts_buf[TIMESPEC_LEN];
 
     if (data_len != 77)
 	return 0;
@@ -151,11 +152,10 @@ superstar2_msg_navsol_lla(struct gps_device_t *session,
 
     mask |= MODE_SET | STATUS_SET;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "NAVSOL_LLA: time=%ld.%09ld lat=%.2f lon=%.2f altHAE=%.2f "
+	     "NAVSOL_LLA: time=%s lat=%.2f lon=%.2f altHAE=%.2f "
              "track=%.2f speed=%.2f climb=%.2f mode=%d status=%d hdop=%.2f "
              "hdop=%.2f used=%d\n",
-	     session->newdata.time.tv_sec,
-	     session->newdata.time.tv_nsec,
+             timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
 	     session->newdata.latitude,
 	     session->newdata.longitude,
 	     session->newdata.altHAE,
