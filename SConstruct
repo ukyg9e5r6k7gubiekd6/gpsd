@@ -1490,7 +1490,9 @@ cgps = env.Program('cgps', ['cgps.c'],
 ntpshmmon = env.Program('ntpshmmon', ['ntpshmmon.c'],
                         LIBS=['gpsd', 'gps_static'],
                         parse_flags=gpsflags)
-ppscheck = env.Program('ppscheck', ['ppscheck.c'], parse_flags=gpsflags)
+ppscheck = env.Program('ppscheck', ['ppscheck.c'],
+                       LIBS=['gps_static'],
+                       parse_flags=gpsflags)
 
 bin_binaries = []
 sbin_binaries = []
