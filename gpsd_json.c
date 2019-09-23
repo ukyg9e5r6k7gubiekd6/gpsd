@@ -56,7 +56,7 @@ struct classmap_t classmap[CLASSMAP_NITEMS] = {
 };
 /* *INDENT-ON* */
 
-char *json_stringify( char *to,
+char *json_stringify(char *to,
 		     size_t len,
 		     const char *from)
 /* escape double quotes and control characters inside a JSON string */
@@ -245,16 +245,18 @@ void json_tpv_dump(const struct gps_device_t *session,
 	    char rtime_str[TIMESPEC_LEN];
 	    struct timespec rtime_tmp;
 	    (void)clock_gettime(CLOCK_REALTIME, &rtime_tmp);
-	    timespec_str(&rtime_tmp, rtime_str, sizeof(rtime_str));
-	    str_appendf(reply, replylen, "\"rtime\":%s,", rtime_str);
+	    str_appendf(reply, replylen, "\"rtime\":%s,",
+                        timespec_str(&rtime_tmp, rtime_str,
+                                     sizeof(rtime_str)));
 	    if (session->pps_thread.ppsout_count) {
 		char ts_str[TIMESPEC_LEN];
 		struct timedelta_t timedelta;
 		/* ugh - de-consting this might get us in trouble someday */
 		pps_thread_ppsout(&((struct gps_device_t *)session)->pps_thread,
 				  &timedelta);
-		timespec_str(&timedelta.clock, ts_str, sizeof(ts_str) );
-		str_appendf(reply, replylen, "\"pps\":%s,", ts_str);
+		str_appendf(reply, replylen, "\"pps\":%s,",
+                            timespec_str(&timedelta.clock, ts_str,
+                                         sizeof(ts_str)));
                 /* TODO: add PPS precision to JSON output */
 	    }
 	    str_appendf(reply, replylen,
