@@ -1297,6 +1297,7 @@ libgps_sources = [
     "rtcm2_json.c",
     "rtcm3_json.c",
     "shared_json.c",
+    "timespec_str.c",
 ]
 
 if env['libgpsmm']:
@@ -1344,7 +1345,6 @@ libgpsd_sources = [
     "serial.c",
     "subframe.c",
     "timebase.c",
-    "timespec_str.c",
 ]
 
 if not env["shared"]:
