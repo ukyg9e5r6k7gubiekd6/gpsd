@@ -24,17 +24,19 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
+#include <errno.h>
+#include <fcntl.h>	/* needed for open() and friends */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <fcntl.h>	/* needed for open() and friends */
 #include <sys/ioctl.h>
-#include <errno.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
+
 #include "revision.h"
+#include "timespec.h"
 
 struct assoc {
     int mask;
@@ -81,6 +83,7 @@ int main(int argc, char *argv[])
     struct timespec ts;
     int fd;
     int c;
+    char ts_buf[TIMESPEC_LEN];
 
     while((c = getopt(argc, argv, "hV")) != -1) {
 	    switch(c){
@@ -121,7 +124,8 @@ int main(int argc, char *argv[])
 
 	    (void)clock_gettime(CLOCK_REALTIME, &ts);
 	    (void)ioctl(fd, TIOCMGET, &handshakes);
-	    (void)fprintf(stdout, "%10ld %09ld", (long)ts.tv_sec, ts.tv_nsec);
+	    (void)fprintf(stdout, "%s",
+                          timespec_str(&ts, ts_buf, sizeof(ts_buf)));
 	    for (sp = hlines;
 		 sp < hlines + sizeof(hlines)/sizeof(hlines[0]);
 		 sp++)
