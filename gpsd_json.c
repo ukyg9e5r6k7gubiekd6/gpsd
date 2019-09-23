@@ -243,6 +243,7 @@ void json_tpv_dump(const struct gps_device_t *session,
         }
 	if (policy->timing) {
 	    char rtime_str[TIMESPEC_LEN];
+            char ts_buf[TIMESPEC_LEN];
 	    struct timespec rtime_tmp;
 	    (void)clock_gettime(CLOCK_REALTIME, &rtime_tmp);
 	    str_appendf(reply, replylen, "\"rtime\":%s,",
@@ -260,10 +261,9 @@ void json_tpv_dump(const struct gps_device_t *session,
                 /* TODO: add PPS precision to JSON output */
 	    }
 	    str_appendf(reply, replylen,
-			"\"sor\":%ld.%09ld,\"chars\":%lu,\"sats\":%2d,"
+			"\"sor\":%s,\"chars\":%lu,\"sats\":%2d,"
 			"\"week\":%u,\"tow\":%ld.%03ld,\"rollovers\":%d",
-			session->sor.tv_sec,
-			session->sor.tv_nsec,
+                        timespec_str(&session->sor, ts_buf, sizeof(ts_buf)),
 			session->chars,
 			gpsdata->satellites_used,
 			session->context->gps_week,
