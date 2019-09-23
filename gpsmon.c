@@ -719,6 +719,8 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 /* per-packet hook */
 {
     char buf[BUFSIZ];
+    char ts_buf1[TIMESPEC_LEN];
+    char ts_buf2[TIMESPEC_LEN];
 
 /* FIXME:  If the following condition is false, the display is screwed up. */
 #if defined(SOCKET_EXPORT_ENABLE) && defined(PPS_DISPLAY_ENABLE)
@@ -733,12 +735,11 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 	    return;
 	} else {
 	    if (!curses_active)
-		(void)fprintf(stderr,
-			      "TOFF=%ld.%09ld real=%ld.%09ld\n",
-			      (long)session.gpsdata.toff.clock.tv_sec,
-			      (long)session.gpsdata.toff.clock.tv_nsec,
-			      (long)session.gpsdata.toff.real.tv_sec,
-			      (long)session.gpsdata.toff.real.tv_nsec);
+		(void)fprintf(stderr, "TOFF=%s real=%s\n",
+                              timespec_str(&session.gpsdata.toff.clock,
+                                           ts_buf1, sizeof(ts_buf1)),
+                              timespec_str(&session.gpsdata.toff.real,
+                                           ts_buf2, sizeof(ts_buf2)));
 	    time_offset = session.gpsdata.toff;
 	    return;
 	}
