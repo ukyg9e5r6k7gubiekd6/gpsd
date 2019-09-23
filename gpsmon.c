@@ -242,8 +242,8 @@ void toff_update(WINDOW *win, int y, int x)
 	    (void)mvwaddstr(win, y, x, "> 1 day");
 	} else {
 	    char buf[TIMESPEC_LEN];
-	    timespec_str(&timedelta, buf, sizeof(buf));
-	    (void)mvwaddstr(win, y, x, buf);
+	    (void)mvwaddstr(win, y, x,
+                            timespec_str(&timedelta, buf, sizeof(buf)));
 	}
     }
 }
@@ -271,8 +271,8 @@ void pps_update(WINDOW *win, int y, int x)
 	    (void)mvwaddstr(win, y, x, "> 1 day");
         } else {
 	    char buf[TIMESPEC_LEN];
-	    timespec_str(&timedelta, buf, sizeof(buf));
-	    (void)mvwaddstr(win, y, x, buf);
+	    (void)mvwaddstr(win, y, x,
+	                    timespec_str(&timedelta, buf, sizeof(buf)));
         }
 	(void)wnoutrefresh(win);
     }
@@ -728,7 +728,8 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 				   &session.gpsdata,
 				   &end);
 	if (status != 0) {
-	    complain("Ill-formed TOFF packet: %d (%s)", status, json_error_string(status));
+	    complain("Ill-formed TOFF packet: %d (%s)", status,
+                     json_error_string(status));
 	    return;
 	} else {
 	    if (!curses_active)
@@ -748,23 +749,24 @@ static void gpsmon_hook(struct gps_device_t *device, gps_mask_t changed UNUSED)
 				   &noclobber,
 				   &end);
 	if (status != 0) {
-	    complain("Ill-formed PPS packet: %d (%s)", status, json_error_string(status));
+	    complain("Ill-formed PPS packet: %d (%s)", status,
+                     json_error_string(status));
 	    return;
 	} else {
 	    struct timespec timedelta;
 	    char timedelta_str[TIMESPEC_LEN];
 
 	    TS_SUB( &timedelta, &noclobber.pps.clock, &noclobber.pps.real);
-	    timespec_str( &timedelta, timedelta_str, sizeof(timedelta_str) );
+	    timespec_str(&timedelta, timedelta_str, sizeof(timedelta_str));
 
 	    if (!curses_active) {
 		char pps_clock_str[TIMESPEC_LEN];
 		char pps_real_str[TIMESPEC_LEN];
 
-		timespec_str( &noclobber.pps.clock, pps_clock_str,
-			sizeof(pps_clock_str) );
-		timespec_str( &noclobber.pps.real, pps_real_str,
-			sizeof(pps_real_str) );
+		timespec_str(&noclobber.pps.clock, pps_clock_str,
+			     sizeof(pps_clock_str));
+		timespec_str(&noclobber.pps.real, pps_real_str,
+			     sizeof(pps_real_str));
 
 		(void)fprintf(stderr,
 			      "PPS=%.20s clock=%.20s offset=%.20s\n",
