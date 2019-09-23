@@ -361,6 +361,7 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     uint32_t tow;
     timespec_t ts_tow;
     int32_t lat, lon;
+    char ts_buf[TIMESPEC_LEN];
     /* Resolution of lat/lon values (2^-11) */
 #define LL_RES (0.00048828125)
     uint8_t lat_fraction, lon_fraction;
@@ -383,9 +384,8 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
 
 #ifdef __UNUSED__
     /* Other values provided by the PVT block which we
-     * may want to provide in the future.  At the present
-     * moment, the gpsd protocol does not have a mechanism
-     * to make this available to the user */
+     * may want to provide in the future.
+     */
     uint8_t dgps_conf;
     uint16_t max_dgps_age;
     uint8_t ext_nav_mode;
@@ -488,11 +488,10 @@ static gps_mask_t handle_0xb1(struct gps_device_t *session)
     mask = LATLON_SET | ALTITUDE_SET | STATUS_SET | MODE_SET | USED_IS |
            HERR_SET | TIMERR_SET | DOP_SET | VNED_SET | TIME_SET | NTPTIME_IS;
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "PVT 0xb1: time=%ld.%09ld, lat=%.2f lon=%.2f altHAE=%.2f "
+	     "PVT 0xb1: time=%s, lat=%.2f lon=%.2f altHAE=%.2f "
              "altMSL %.2f mode=%d status=%d gdop=%.2f pdop=%.2f hdop=%.2f "
              "vdop=%.2f tdop=%.2f mask={%s}\n",
-	     session->newdata.time.tv_sec,
-	     session->newdata.time.tv_nsec,
+             timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
 	     session->newdata.latitude,
 	     session->newdata.longitude,
 	     session->newdata.altHAE,
@@ -554,6 +553,7 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
     /* 2^-43 */
 #define SF_IDOT      (.000000000000113686837721616029)
 
+    char ts_buf[TIMESPEC_LEN];
     unsigned char *buf = session->lexer.outbuffer + 3;
     uint8_t prn = getub(buf, 3);
     uint16_t week = getleu16(buf, 4);
@@ -605,12 +605,11 @@ static gps_mask_t handle_0x81(struct gps_device_t *session)
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "Navcom: received packet type 0x81 (Packed Ephemeris Data)\n");
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "Navcom: PRN: %u, Week: %u, TOW: %ld.%09ld "
+	     "Navcom: PRN: %u, Week: %u, TOW: %s "
              "SV clock bias/drift/drift rate: %#19.12E/%#19.12E/%#19.12E\n",
 	     prn,
 	     session->context->gps_week,
-	     session->context->gps_tow.tv_sec,
-	     session->context->gps_tow.tv_nsec,
+             timespec_str(&session->context->gps_tow, ts_buf, sizeof(ts_buf)),
 	     ((double)af0) * SF_AF0,
 	     ((double)af1) * SF_AF1, ((double)af2) * SF_AF2);
     gpsd_log(&session->context->errout, LOG_DATA,
@@ -794,6 +793,7 @@ static gps_mask_t handle_0x86(struct gps_device_t *session)
 /* Raw Meas. Data Block */
 static gps_mask_t handle_0xb0(struct gps_device_t *session)
 {
+    char ts_buf[TIMESPEC_LEN];
     /* L1 wavelength (299792458m/s / 1575420000Hz) */
 #define LAMBDA_L1 (.190293672798364880476317426464)
     size_t n;
@@ -810,12 +810,11 @@ static gps_mask_t handle_0xb0(struct gps_device_t *session)
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "Navcom: received packet type 0xb0 (Raw Meas. Data Block)\n");
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "Navcom: week = %u, tow = %ld.%09ld "
+	     "Navcom: week = %u, tow = %s "
              "time slew accumulator = %u (1/1023mS), status = 0x%02x "
 	     "(%sclock %s - %u blocks follow)\n",
 	     session->context->gps_week,
-	     session->context->gps_tow.tv_sec,
-	     session->context->gps_tow.tv_nsec,
+             timespec_str(&session->context->gps_tow, ts_buf, sizeof(ts_buf)),
 	     tm_slew_acc, status,
 	     ((status & 0x80) ? "channel time set - " : ""),
 	     ((status & 0x40) ? "stable" : "not stable"), status & 0x0f);
@@ -1063,6 +1062,7 @@ static gps_mask_t handle_0xef(struct gps_device_t *session)
     double nav_clock_offset;
     float nav_clock_drift;
     float osc_filter_drift_est;
+    char ts_buf[TIMESPEC_LEN];
     int32_t time_slew = (int32_t) getles32(buf, 27);
     if (sizeof(double) == 8) {
 	nav_clock_offset = getled64((char *)buf, 11);
@@ -1084,8 +1084,8 @@ static gps_mask_t handle_0xef(struct gps_device_t *session)
 	     osc_temp, nav_status, nav_clock_offset, nav_clock_drift,
 	     osc_filter_drift_est, time_slew);
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "CDO 0xef: time=%ld.%09ld mask={TIME}\n",
-             session->newdata.time.tv_sec, session->newdata.time.tv_nsec);
+	     "CDO 0xef: time=%s mask={TIME}\n",
+             timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)));
     return 0;
 }
 
