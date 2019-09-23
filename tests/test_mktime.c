@@ -184,6 +184,7 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     char tbuf[128];
     bool failed = false;
     timespec_t ts_time;
+    char ts_buf[TIMESPEC_LEN];
 
     (void)setenv("TZ", "GMT", 1);
 
@@ -225,10 +226,10 @@ int main(int argc UNUSED, char *argv[] UNUSED)
             } else {
                 failed = true;
                 (void)printf("test_mktime: timespec_to_iso8601() "
-                             "test %ld.%09ld failed.\n"
+                             "test %s failed.\n"
                              "  Got %s, s/b %s\n",
-                             tests1[i].ts_time.tv_sec,
-                             tests1[i].ts_time.tv_nsec,
+                             timespec_str(&tests1[i].ts_time, ts_buf,
+                                          sizeof(ts_buf)),
                              tbuf, tests1[i].iso8601);
             }
         }
