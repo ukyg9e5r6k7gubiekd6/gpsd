@@ -241,13 +241,12 @@ int ntpshm_put(struct gps_device_t *session, volatile struct shmTime *shmseg,
 
     ntp_write(shmseg, td, precision, session->context->leap_notify);
 
-    timespec_str( &td->real, real_str, sizeof(real_str) );
-    timespec_str( &td->clock, clock_str, sizeof(clock_str) );
     gpsd_log(&session->context->errout, LOG_PROG,
 	     "NTP: ntpshm_put(%s,%d) %s @ %s\n",
 	     session->gpsdata.dev.path,
 	     precision,
-	     real_str, clock_str);
+             timespec_str(&td->real, real_str, sizeof(real_str)),
+             timespec_str(&td->clock, clock_str, sizeof(clock_str)));
 
     return 1;
 }
@@ -340,11 +339,11 @@ static void chrony_send(struct gps_device_t *session, struct timedelta_t *td)
     sample.offset = TS_SUB_D(&td->real, &td->clock);
     sample._pad = 0;
 
-    timespec_str( &td->real, real_str, sizeof(real_str) );
-    timespec_str( &td->clock, clock_str, sizeof(clock_str) );
     gpsd_log(&session->context->errout, LOG_RAW,
 	     "PPS chrony_send %s @ %s Offset: %0.9f\n",
-	     real_str, clock_str, sample.offset);
+             timespec_str(&td->real, real_str, sizeof(real_str)),
+             timespec_str(&td->clock, clock_str, sizeof(clock_str)),
+             sample.offset);
     (void)send(session->chronyfd, &sample, sizeof (sample), 0);
 }
 
