@@ -149,7 +149,7 @@ static inline void TS_NORM( struct timespec *ts)
 
 #define TIMESPEC_LEN	22	/* required length of a timespec buffer */
 
-extern void timespec_str(const struct timespec *, char *, size_t);
+extern const char *timespec_str(const struct timespec *, char *, size_t);
 
 bool nanowait(int, int);
 

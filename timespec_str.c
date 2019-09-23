@@ -39,7 +39,7 @@
  * date --date='@9999999999' is: Sat Nov 20 09:46:39 PST 2286
  *
  */
-void timespec_str(const struct timespec *ts, char *buf, size_t buf_size)
+const char *timespec_str(const struct timespec *ts, char *buf, size_t buf_size)
 {
     char sign = ' ';
 
@@ -53,6 +53,7 @@ void timespec_str(const struct timespec *ts, char *buf, size_t buf_size)
 		   sign,
 		   (long long)llabs(ts->tv_sec),
 		   (long)labs(ts->tv_nsec));
+    return  buf;
 }
 
 /* end */
