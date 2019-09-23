@@ -175,7 +175,7 @@ static gps_mask_t sky_msg_DC(struct gps_device_t *session,
     unsigned int wn;    /* week number 0 - 65535 */
     unsigned int tow;   /* receiver tow 0 - 604799999 in mS */
     unsigned int mp;    /* measurement period 1 - 1000 ms */
-    /* calculated */
+    char ts_buf[TIMESPEC_LEN];
     timespec_t ts_tow;
 
     if ( 10 != len)
@@ -191,10 +191,10 @@ static gps_mask_t sky_msg_DC(struct gps_device_t *session,
     session->gpsdata.skyview_time = gpsd_gpstime_resolv(session, wn, ts_tow);
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	     "Skytraq: MID 0xDC: iod=%u, wn=%u, tow=%u, mp=%u, t=%ld.%09ld\n",
+	     "Skytraq: MID 0xDC: iod %u wn %u tow %u mp %u t%s\n",
 	     iod, wn, tow, mp,
-	     (long)session->gpsdata.skyview_time.tv_sec,
-	     session->gpsdata.skyview_time.tv_nsec);
+             timespec_str(&session->gpsdata.skyview_time, ts_buf,
+                          sizeof(ts_buf)));
     return 0;
 }
 
@@ -415,6 +415,7 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
     double clock_drift;
     gps_mask_t mask = 0;
     timespec_t ts_tow;
+    char ts_buf[TIMESPEC_LEN];
 
     if ( 81 != len)
 	return 0;
@@ -470,12 +471,11 @@ static gps_mask_t sky_msg_DF(struct gps_device_t *session,
     session->newdata.time = gpsd_gpstime_resolv(session, wn, ts_tow );
 
     gpsd_log(&session->context->errout, LOG_DATA,
-	    "Skytraq: MID 0xDF: iod=%u, stat=%u, wn=%u, tow=%f, t=%ld.%09ld "
+	    "Skytraq: MID 0xDF: iod=%u, stat=%u, wn=%u, tow=%f, t=%s "
 	    "cb: %f, cd: %f "
 	    "gdop: %.2f, pdop: %.2f, hdop: %.2f, vdop: %.2f, tdop: %.2f\n",
 	    iod, navstat, wn, f_tow,
-	    session->newdata.time.tv_sec,
-	    session->newdata.time.tv_nsec,
+             timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
 	    clock_bias, clock_drift,
 	    session->gpsdata.dop.gdop,
 	    session->gpsdata.dop.pdop,
