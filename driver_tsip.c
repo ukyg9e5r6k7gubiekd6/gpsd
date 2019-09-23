@@ -125,6 +125,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     unsigned char buf[BUFSIZ];
     char buf2[BUFSIZ];
     timespec_t ts_tow;
+    char ts_buf[TIMESPEC_LEN];
 
     if (session->lexer.type != TSIP_PACKET) {
 	gpsd_log(&session->context->errout, LOG_INF,
@@ -364,9 +365,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	}
 	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_IS | REPORT_IS;
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "SPPLLA 0x4a time=%ld.%09ld lat=%.2f lon=%.2f altMSL=%.2f\n",
-		 session->newdata.time.tv_sec,
-		 session->newdata.time.tv_nsec,
+		 "SPPLLA 0x4a time=%s lat=%.2f lon=%.2f altMSL=%.2f\n",
+                 timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
 		 session->newdata.latitude,
 		 session->newdata.longitude,
 		 session->newdata.altHAE);
@@ -735,16 +735,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    mask |= TIME_SET | NTPTIME_IS;
 	}
 	gpsd_log(&session->context->errout, LOG_INF,
-		 "GPS DP LLA %ld.%09ld %f %f %f\n",
-		 session->newdata.time.tv_sec,
-		 session->newdata.time.tv_nsec,
+		 "GPS DP LLA %s %f %f %f\n",
+                 timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
 		 session->newdata.latitude,
 		 session->newdata.longitude, session->newdata.altMSL);
 	mask |= LATLON_SET | CLEAR_IS | REPORT_IS;
 	gpsd_log(&session->context->errout, LOG_DATA,
-		 "DPPLLA 0x84 time=%ld.%09ld lat=%.2f lon=%.2f altMSL=%.2f\n",
-		 session->newdata.time.tv_sec,
-		 session->newdata.time.tv_nsec,
+		 "DPPLLA 0x84 time=%s lat=%.2f lon=%.2f altMSL=%.2f\n",
+                 timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
 		 session->newdata.latitude,
 		 session->newdata.longitude,
 		 session->newdata.altMSL);
@@ -833,10 +831,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		    STATUS_SET | MODE_SET | CLEAR_IS |
 		    REPORT_IS | VNED_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
-		     "SP-LFEI 0x20: time=%ld.%09ld lat=%.2f lon=%.2f "
+		     "SP-LFEI 0x20: time=%s lat=%.2f lon=%.2f "
                      "altMSL=%.2f mode=%d status=%d\n",
-		     session->newdata.time.tv_sec,
-		     session->newdata.time.tv_nsec,
+                     timespec_str(&session->newdata.time, ts_buf,
+                                  sizeof(ts_buf)),
 		     session->newdata.latitude, session->newdata.longitude,
 		     session->newdata.altHAE,
 		     session->newdata.mode, session->gpsdata.status);
@@ -903,10 +901,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		    STATUS_SET | MODE_SET | CLEAR_IS |
 		    REPORT_IS | VNED_SET;
 	    gpsd_log(&session->context->errout, LOG_DATA,
-		     "SP-CSP 0x23: time=%ld.%09ld lat=%.2f lon=%.2f "
-                     "altHAE=%.2f mode=%d status=%d\n",
-		     session->newdata.time.tv_sec,
-		     session->newdata.time.tv_nsec,
+		     "SP-CSP 0x23: time %s lat %.2f lon %.2f "
+                     "altHAE %.2f mode %d status %d\n",
+                     timespec_str(&session->newdata.time, ts_buf,
+                                  sizeof(ts_buf)),
 		     session->newdata.latitude, session->newdata.longitude,
 		     session->newdata.altHAE,
 		     session->newdata.mode, session->gpsdata.status);
@@ -939,9 +937,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		    gpsd_gpstime_resolv(session, (unsigned short)s1, ts_tow);
 		mask |= TIME_SET | NTPTIME_IS | CLEAR_IS;
 		gpsd_log(&session->context->errout, LOG_DATA,
-			 "SP-TTS 0xab time=%ld.%09ld mask={TIME}\n",
-			 session->newdata.time.tv_sec,
-			 session->newdata.time.tv_nsec);
+			 "SP-TTS 0xab time=%s mask={TIME}\n",
+                         timespec_str(&session->newdata.time, ts_buf,
+                                      sizeof(ts_buf)));
 	    }
 
 	    gpsd_log(&session->context->errout, LOG_PROG,
