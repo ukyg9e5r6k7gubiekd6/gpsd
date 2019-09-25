@@ -297,8 +297,8 @@ timespec_t gpsd_utc_resolve(struct gps_device_t *session)
 	char scr[128];
 	(void)timespec_to_iso8601(session->newdata.time, scr, sizeof(scr));
 	GPSD_LOG(LOG_WARN, &session->context->errout,
-		 "GPS week rollover makes time %s (%ld) invalid\n",
-		 scr, session->newdata.time.tv_sec);
+		 "GPS week rollover makes time %s (%lld) invalid\n",
+		 scr, (long long)session->newdata.time.tv_sec);
     }
 
     return t;
