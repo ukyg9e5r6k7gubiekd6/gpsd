@@ -219,7 +219,7 @@ boolopts = (
     ("clientdebug",   True,  "client debugging support"),
     ("libgpsmm",      True,  "build C++ bindings"),
     ("ncurses",       True,  "build with ncurses"),
-    ("qt",            True,  "build QT bindings"),
+    ("qt",            True,  "build Qt bindings"),
     # Daemon options
     ("controlsend",   True,  "allow gpsctl/gpsmon to change device settings"),
     ("reconfigure",   True,  "allow gpsd to change device settings"),
