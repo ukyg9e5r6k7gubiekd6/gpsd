@@ -371,8 +371,8 @@ int main(int argc, char **argv)
 			    tmstr[written+1] = '\0';
 			}
 			(void)snprintf(tmstr_u, sizeof(tmstr_u),
-				       " %ld.%06ld",
-				       (long)now.tv_sec,
+				       " %lld.%06ld",
+				       (long long)now.tv_sec,
 				       (long)now.tv_nsec/1000);
 			break;
 		    case 1:
