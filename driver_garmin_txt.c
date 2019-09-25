@@ -451,9 +451,9 @@ gps_mask_t garmintxt_parse(struct gps_device_t * session)
     } while (0);
 
     GPSD_LOG(LOG_DATA, &session->context->errout,
-	     "GTXT: time=%ld, lat=%.2f lon=%.2f altMSL=%.2f "
+	     "GTXT: time=%lld, lat=%.2f lon=%.2f altMSL=%.2f "
              "climb=%.2f eph=%.2f mode=%d status=%d\n",
-	     session->newdata.time.tv_sec, session->newdata.latitude,
+	     (long long)session->newdata.time.tv_sec, session->newdata.latitude,
 	     session->newdata.longitude, session->newdata.altMSL,
 	     session->newdata.climb, session->newdata.eph,
 	     session->newdata.mode,
