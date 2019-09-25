@@ -372,7 +372,8 @@ timespec_t gpsd_gpstime_resolv(struct gps_device_t *session,
 	t.tv_sec = GPS_EPOCH + (week * SECS_PER_WEEK) + tow.tv_sec;
 	t.tv_sec -= session->context->leap_seconds;
 	GPSD_LOG(LOG_WARN, &session->context->errout,
-		 "2038 rollover. Adjusting to %ld\n", t.tv_sec);
+		 "2038 rollover. Adjusting to %lld\n",
+                 (long long)t.tv_sec);
     }
 
     session->context->gps_week = week;
