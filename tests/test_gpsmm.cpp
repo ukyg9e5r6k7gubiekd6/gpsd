@@ -12,6 +12,7 @@
 #include <getopt.h>
 
 #include "../libgpsmm.h"
+#include "../timespec.h"
 #include "../gpsdclient.c"
 /*     YES   --->  ^^^^
  Using .c rather than the .h to embed gpsd_source_spec() source here
@@ -36,15 +37,20 @@ void printfinite(double val)
  */
 static void libgps_dump_state(struct gps_data_t *collect)
 {
+    char ts_str[TIMESPEC_LEN];
+
     /* no need to dump the entire state, this is a sanity check */
 #ifndef USE_QT
     (void)fprintf(stdout, "flags: (0x%04x) %s\n",
                   (unsigned int)collect->set, gps_maskdump(collect->set));
 #endif
     if (collect->set & ONLINE_SET)
-        (void)fprintf(stdout, "ONLINE: %lf\n", collect->online);
+        (void)fprintf(stdout, "ONLINE: %s\n",
+                      timespec_str(&collect->online, ts_str, sizeof(ts_str)));
     if (collect->set & TIME_SET)
-        (void)fprintf(stdout, "TIME: %lf\n", collect->fix.time);
+        (void)fprintf(stdout, "TIME: %s\n",
+                      timespec_str(&collect->fix.time, ts_str, sizeof(ts_str)));
+
     if (collect->set & LATLON_SET)
         (void)fprintf(stdout, "LATLON: lat/lon: %lf %lf\n",
                       collect->fix.latitude, collect->fix.longitude);
