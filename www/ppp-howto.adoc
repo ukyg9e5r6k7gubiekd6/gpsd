@@ -2,7 +2,12 @@
 :description: This document is a guide getting high accuracy from your GPS using Precise Point Positioning (PPP).
 :keywords: Precise Point Positioning, PPP, GPSD, GPS
 Gary E. Miller <gem@rellim.com>
-V0.99, Nov 2018
+V1.00, 25 Sep 2019
+
+== WARNING ==
+
+This document assumes you are using gpsd version 3.19 or 3.20.  Using
+other versions will fail in strange ways.
 
 == Introduction ==
 
@@ -26,27 +31,27 @@ base using PPP before sending the RTK data from the base to its rovers.
 
 == Requirements ==
 
-This document assumes that you have basic knowledge of how to use
-_gpsd_.  Before continuing you should know how to start and stop
-_gpsd_, and how to use _cgps_ to see you current position and fix
-status.
+This document assumes that you have installed gpsd version 3.19, basic
+knowledge of how to use _gpsd_.  Before continuing you should know how
+to start and stop _gpsd_, and how to use _cgps_ to see you current
+position and fix status.
 
-This document also assumes that you have a GPS connected to a local GPSD
-demon and that _cgps_ shows a stable 3D fix. This will allow Simple
-Averaging. You will also need Python and _gnuplot_ installed. The Python
-and _gnuplot_ do not need to be installed on the host that is connected
-to the GPS, they are merely needed for post processing.
+This document also assumes that you have a GNSS receiver connected to a
+local GPSD demon and that _cgps_ shows a stable 3D fix. This will allow
+Simple Averaging. You will also need Python and _gnuplot_ installed. The
+Python and _gnuplot_ do not need to be installed on the host that is
+connected to the GPS, they are merely needed for post processing.
 
 For basic PPP (0.5 m) you will need a GPS that outputs L1 raw
-measurement data that GPS understands. Currently that limits you to a
+measurement data that _gpsd_ understands. Currently that limits you to a
 Javad GPS that support the GREIS language, or a u-blox GPS that support
 the UBX-RXM-RAWX messages.
 
-u-blox GPS known to support UBX-RXM-RAW are: -M8T,-M8F, ZED-F9P and
+u-blox GPS known to support UBX-RXM-RAWX are: -M8T,-M8F, ZED-F9P and
 ZED-F9T.
 
 For advanced PPP (3 cm) you will need a GPS that outputs L1 and L2 raw
-measurement data that GPS understands. Currently that limits you to a
+measurement data that _gpsd_ understands. Currently that limits you to a
 Javad GPS that support the GREIS language or the u-blox 9 series.
 
 Finally, patience is required.
@@ -100,9 +105,26 @@ for the purposes here. ITRF2014 and WGS84(G1762) differ by a few
 centimeters.
 
 It gets worse.  Two expensive GPS often differ in altitude by over 60
-feet. Altitude is calculated as height above Mean Sea Level (MSL). But
-the Earth is not a perfect sphere. It is more pear shaped. In addition
-gravitational anomalies affect 'sea level'.
+feet.  The Earth is not a perfect sphere. It is more pear shaped.  GPS
+approximate this with an ellipsoid, usually some version WGS84.  Then
+altitude is calculated as height above the ellipsoid (HAE).
+
+Most people do not consider the altitude as the height above the
+ellipsoid, but as the height above Mean Sea Level.  MSL is the same
+as pressure altitude (when corrected for temperature and barometric
+pressure), but different than HAE.
+
+Mean Sea Level has had nothing to with the level of the sea, it relates
+to some stakes driven into the ground 100 hundred years ago that seemed
+at the time to be roughly mean sea level at that point.
+
+Pressure altitude is not some sort of absolute geometric altitude,
+it is related to the gravity under the position being measured.  So
+local gravity affects local MSL, but not local HAE.  If the measured
+position is over a high density rock, like iron ore, then the gravity is
+higher, and the pressure is increased over the simple HAE.  Conversely
+ocean water is less dense and has the opposite effect.  This is very
+noticeable in the Hawaiian Islands.
 
 Fun fact: gravity is at its maximum at 'sea level'.
 
@@ -114,6 +136,9 @@ North American Vertical Datum of 1988 (NAVD 88). Many GPS use the WGS84
 Ellipsoid as the vertical datum. The WGS84 Ellipsoid is from the same
 organization as the WGS84 coordinate system, but not part of WGS84.
 
+More refined datums, like the World Gravity Model, WGM2012, also take
+into account more gravitation effects.
+
 Clearly there is no point knowing your precise position to a few cm
 if you are not certain of your datum and vertical datum (ellipsoid),
 with epoch. This will be important later as you are asked to input your
@@ -121,8 +146,8 @@ choice of horizontal and vertical datums to your PPP service.
 
 == Averaging ==
 
-The first technique covered, Simple Averaging, works with any GPS
-that is supported by GPSD.  For best results a minimum of 6 hours, and
+The first technique covered, Simple Averaging, works with any GPS that
+is supported by _gpsd_.  For best results a minimum of 6 hours, and
 preferably 24 hours, of continuous observations are required.
 
 _gpsprof_ will be used to gather 24 hours of position data and then
@@ -204,7 +229,6 @@ Many of the configuration steps are order dependent. If in doubt, start
 over from the beginning. Be sure that _gpsd_ is running and that _cgps_
 shows that you have a stable 3D fix.
 
-
 === u-blox configuration ===
 
 This section is only for u-blox users.
@@ -237,7 +261,7 @@ not output raw measurement data.  You may enable the other constellations
 with a u-blox 9, but support for non-GPS in PPP services is limited.
 
 ...................................
-$ ubxtool -p GNSS
+$ ubxtool -p CFG-GNSS
 [...]
 UBX-CFG-GNSS:
  Ver: 0 ChHw; 20 ChUse: 20, Blocks: 7
@@ -277,6 +301,9 @@ data from the GPS:
 UBX-RXM-RAWX:
 UBX-RXM-RAWX:
 ...................................
+
+After you have completed these steps, do not restart _gpsd_.  If you restart
+_gpsd_ then you must restart the configuration from the beginning.
 
 === Javad (GREIS) configuration ===
 
@@ -329,6 +356,9 @@ data from the GPS:
 [PC] cp 199266957.2307 113917941.9777 122453730.9966 108761050.8140 105892190.3611 199725013.5654 117456220.7611 125484683.4227 199977132.8627 126963987.0936 121945102.6244 114688862.4874 140928054.2405 128350477.4361 129924383.6416 199424925.2522 126077127.2204 126780423.4782 120799412.3999
 [PC] cp 199266051.1359 113915242.3018 122452018.0540 108761104.8641 105890706.6420 199724109.4819 117454519.9705 125481341.1019 199976227.8647 126966862.6124 121942821.9832 114690162.3442 140924407.3081 128351475.5908 129920370.5866 199424017.5063 126073289.2387 126782833.2288 120800324.7775
 ...................................
+
+After you have completed these steps, do not retart _gpsd_.  If you restart
+_gpsd_ then you must restart the configuration from the beginning.
 
 == Acquire the Raw Data ==
 
