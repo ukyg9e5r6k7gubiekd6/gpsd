@@ -1976,7 +1976,7 @@ if qt_env:
     test_qgpsmm = env.Program('tests/test_qgpsmm', ['tests/test_gpsmm.cpp'],
                               LIBPATH=['.'],
                               OBJPREFIX='qt-',
-                              LIBS=['Qgpsmm'])
+                              LIBS=['Qgpsmm', 'gps'])
     build_qt = qt_env.Alias('build', [compiled_qgpsmmlib, test_qgpsmm])
     qt_env.Default(*build_qt)
     testprogs.append(test_qgpsmm)
