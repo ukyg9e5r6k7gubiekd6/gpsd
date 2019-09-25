@@ -714,14 +714,14 @@ gps_mask_t gpsd_interpret_subframe(struct gps_device_t *session,
 		GPSD_LOG(LOG_PROG, &session->context->errout,
 			 "50B: SF:4-18 a0:%.5g a1:%.5g a2:%.5g a3:%.5g "
 			 "b0:%.5g b1:%.5g b2:%.5g b3:%.5g "
-			 "A1:%.11e A0:%.11e tot:%ld WNt:%u "
+			 "A1:%.11e A0:%.11e tot:%lld WNt:%u "
 			 "ls: %d WNlsf:%u DN:%u, lsf:%d\n",
 			 subp->sub4_18.d_alpha0, subp->sub4_18.d_alpha1,
 			 subp->sub4_18.d_alpha2, subp->sub4_18.d_alpha3,
 			 subp->sub4_18.d_beta0, subp->sub4_18.d_beta1,
 			 subp->sub4_18.d_beta2, subp->sub4_18.d_beta3,
 			 subp->sub4_18.d_A1, subp->sub4_18.d_A0,
-			 subp->sub4_18.t_tot, subp->sub4_18.WNt,
+			 (long long)subp->sub4_18.t_tot, subp->sub4_18.WNt,
 			 subp->sub4_18.leap, subp->sub4_18.WNlsf,
 			 subp->sub4_18.DN, subp->sub4_18.lsf);
 
