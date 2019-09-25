@@ -262,12 +262,12 @@ void json_tpv_dump(const struct gps_device_t *session,
 	    }
 	    str_appendf(reply, replylen,
 			"\"sor\":%s,\"chars\":%lu,\"sats\":%2d,"
-			"\"week\":%u,\"tow\":%ld.%03ld,\"rollovers\":%d",
+			"\"week\":%u,\"tow\":%lld.%03ld,\"rollovers\":%d",
                         timespec_str(&session->sor, ts_buf, sizeof(ts_buf)),
 			session->chars,
 			gpsdata->satellites_used,
 			session->context->gps_week,
-			session->context->gps_tow.tv_sec,
+			(long long)session->context->gps_tow.tv_sec,
 			session->context->gps_tow.tv_nsec / 1000000L,
 			session->context->rollovers);
 	}
@@ -460,19 +460,19 @@ void json_device_dump(const struct gps_device_t *device,
 	    if (speed != 0)
 		str_appendf(reply, replylen,
 			    "\"native\":%d,\"bps\":%d,\"parity\":\"%c\","
-                            "\"stopbits\":%u,\"cycle\":%ld.%02ld,",
+                            "\"stopbits\":%u,\"cycle\":%lld.%02ld,",
 			    device->gpsdata.dev.driver_mode,
 			    (int)speed,
 			    device->gpsdata.dev.parity,
 			    device->gpsdata.dev.stopbits,
-			    device->gpsdata.dev.cycle.tv_sec,
+			    (long long)device->gpsdata.dev.cycle.tv_sec,
 			    device->gpsdata.dev.cycle.tv_nsec / 10000000);
 #ifdef RECONFIGURE_ENABLE
 	    if (device->device_type != NULL
 		&& device->device_type->rate_switcher != NULL)
 		str_appendf(reply, replylen,
-			       "\"mincycle\":%ld.%02ld,",
-			       device->device_type->min_cycle.tv_sec,
+			       "\"mincycle\":%lld.%02ld,",
+			       (long long)device->device_type->min_cycle.tv_sec,
 			       device->device_type->min_cycle.tv_nsec /
                                10000000);
 #endif /* RECONFIGURE_ENABLE */
@@ -801,8 +801,9 @@ void json_raw_dump(const struct gps_data_t *gpsdata,
     if (gpsdata->dev.path[0] != '\0')
 	str_appendf(reply, replylen, "\"device\":\"%s\",", gpsdata->dev.path);
 
-    str_appendf(reply, replylen, "\"time\":%ld,\"nsec\":%ld,\"rawdata\":[",
-                (long)gpsdata->raw.mtime.tv_sec, gpsdata->raw.mtime.tv_nsec);
+    str_appendf(reply, replylen, "\"time\":%lld,\"nsec\":%ld,\"rawdata\":[",
+                (long long)gpsdata->raw.mtime.tv_sec,
+                gpsdata->raw.mtime.tv_nsec);
 
     for (i = 0; i < MAXCHANNELS; i++) {
         bool comma = false;
