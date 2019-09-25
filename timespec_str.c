@@ -9,14 +9,14 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
+#include <ctype.h>
+#include <errno.h>
+#include <math.h>
 #include <stdio.h>
-#include <time.h>
-#include <sys/time.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <errno.h>
-#include <ctype.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include "timespec.h"
 
