@@ -7,22 +7,22 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <ctype.h>
 #include <assert.h>
-#include <setjmp.h>
+#include <ctype.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <math.h>
+#include <setjmp.h>
 #include <signal.h>
 #include <stdarg.h>
-#include <time.h>
-#include <math.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <sys/select.h>
-#include <fcntl.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "gpsd.h"
@@ -236,7 +236,8 @@ void toff_update(WINDOW *win, int y, int x)
 	for (i = 0; i < TIMESPEC_LEN-4 && x + i < xmax - 1; i++)
 	    (void)waddch(win, ' ');
 	TS_SUB(&timedelta, &time_offset.clock, &time_offset.real);
-	if ( 86400 < (long)labs(timedelta.tv_sec) ) {
+        // (long long) for 32-bit CPU with 64-bit time_t
+	if ( 86400 < llabs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
 	    /* need a bigger field to show it */
 	    (void)mvwaddstr(win, y, x, "> 1 day");
@@ -265,7 +266,8 @@ void pps_update(WINDOW *win, int y, int x)
 	for (i = 0; i < TIMESPEC_LEN-4 && x + i < xmax - 1; i++)
 	    (void)waddch(win, ' ');
 	TS_SUB( &timedelta, &ppstimes.clock, &ppstimes.real);
-        if ( 86400 < (long)labs(timedelta.tv_sec) ) {
+        // (long long) for 32-bit CPU with 64-bit time_t
+        if ( 86400 < llabs(timedelta.tv_sec) ) {
 	    /* more than one day off, overflow */
             /* need a bigger field to show it */
 	    (void)mvwaddstr(win, y, x, "> 1 day");
