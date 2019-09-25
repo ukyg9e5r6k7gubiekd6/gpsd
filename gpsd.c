@@ -1583,10 +1583,12 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 
 #ifdef SOCKET_EXPORT_ENABLE
 	notify_watchers(device, false, true,
-			"{\"class\":\"TOFF\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld}\r\n",
+			"{\"class\":\"TOFF\",\"device\":\"%s\",\"real_sec\":"
+                        "%lld, \"real_nsec\":%ld,\"clock_sec\":%lld,"
+                        "\"clock_nsec\":%ld}\r\n",
 			device->gpsdata.dev.path,
-			td.real.tv_sec, td.real.tv_nsec,
-			td.clock.tv_sec, td.clock.tv_nsec);
+			(long long)td.real.tv_sec, td.real.tv_nsec,
+			(long long)td.clock.tv_sec, td.clock.tv_nsec);
 #endif /* SOCKET_EXPORT_ENABLE */
 
     }
@@ -1726,10 +1728,12 @@ static void ship_pps_message(struct gps_device_t *session,
     /* real_XXX - the time the GPS thinks it is at the PPS edge */
     /* clock_XXX - the time the system clock thinks it is at the PPS edge */
     notify_watchers(session, true, true,
-		    "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%ld, \"real_nsec\":%ld,\"clock_sec\":%ld,\"clock_nsec\":%ld,\"precision\":%d}\r\n",
+		    "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%lld,"
+                    "\"real_nsec\":%ld,\"clock_sec\":%lld,\"clock_nsec\":%ld,"
+                    "\"precision\":%d}\r\n",
 		    session->gpsdata.dev.path,
-		    td->real.tv_sec, td->real.tv_nsec,
-		    td->clock.tv_sec, td->clock.tv_nsec,
+		    (long long)td->real.tv_sec, td->real.tv_nsec,
+		    (long long)td->clock.tv_sec, td->clock.tv_nsec,
                     precision);
 
     /*
