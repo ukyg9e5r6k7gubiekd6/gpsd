@@ -283,8 +283,8 @@ superstar2_msg_timing(struct gps_device_t *session, unsigned char *buf,
 	mask = TIME_SET | NTPTIME_IS;
     }
     GPSD_LOG(LOG_DATA, &session->context->errout,
-	     "TIMING: time=%ld mask={TIME}\n",
-	     session->newdata.time.tv_sec);
+	     "TIMING: time=%lld mask={TIME}\n",
+	     (long long)session->newdata.time.tv_sec);
     return mask;
 }
 
