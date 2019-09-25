@@ -450,8 +450,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
         if (session->context->errout.debug >= LOG_INF) {
 
 	    GPSD_LOG(LOG_INF, &session->context->errout,
-		     "Garmin: UTC Time: %ld\n",
-		     session->newdata.time.tv_sec);
+		     "Garmin: UTC Time: %lld\n",
+		     (long long)session->newdata.time.tv_sec);
 	    GPSD_LOG(LOG_INF, &session->context->errout,
 		     "Garmin: Geoid Separation (MSL-WGS84): from garmin %lf, "
                      "calculated %lf\n",
@@ -486,9 +486,9 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		mask |= NTPTIME_IS;
 	}
 	GPSD_LOG(LOG_DATA, &session->context->errout,
-		 "Garmin: PVT_DATA: time=%ld, lat=%.2f lon=%.2f "
+		 "Garmin: PVT_DATA: time=%lld, lat=%.2f lon=%.2f "
 		 "eph=%.2f sep=%.2f epv=%.2f  mode=%d status=%d\n",
-		 session->newdata.time.tv_sec,
+		 (long long)session->newdata.time.tv_sec,
 		 session->newdata.latitude,
 		 session->newdata.longitude,
 		 session->newdata.eph,
