@@ -142,7 +142,7 @@ unsigned int isgps_parity(isgps30bits_t th)
 								  0xff]);
 
 #ifdef __UNUSED__
-    gpsd_log(ISGPS_ERRLEVEL_BASE + 2, errout, "ISGPS parity %u\n", p);
+    GPSD_LOG(ISGPS_ERRLEVEL_BASE + 2, errout, "ISGPS parity %u\n", p);
 #endif /* __UNUSED__ */
     return (p);
 }
@@ -186,7 +186,7 @@ enum isgpsstat_t isgps_decode(struct gps_lexer_t *lexer,
 {
     /* ASCII characters 64-127, @ through DEL */
     if ((c & MAG_TAG_MASK) != MAG_TAG_DATA) {
-	gpsd_log(ISGPS_ERRLEVEL_BASE + 1, &lexer->errout,
+	GPSD_LOG(ISGPS_ERRLEVEL_BASE + 1, &lexer->errout,
 		 "ISGPS word tag not correct, skipping byte\n");
 	return ISGPS_SKIP;
     }
@@ -205,18 +205,18 @@ enum isgpsstat_t isgps_decode(struct gps_lexer_t *lexer,
 		lexer->isgps.curr_word |=
 		    c >> -(lexer->isgps.curr_offset);
 	    }
-	    gpsd_log(ISGPS_ERRLEVEL_BASE + 2, &lexer->errout,
+	    GPSD_LOG(ISGPS_ERRLEVEL_BASE + 2, &lexer->errout,
 		     "ISGPS syncing at byte %lu: 0x%08x\n",
 		     lexer->char_counter, lexer->isgps.curr_word);
 
 	    if (preamble_match(&lexer->isgps.curr_word)) {
 		if (isgps_parityok(lexer->isgps.curr_word)) {
-		    gpsd_log(ISGPS_ERRLEVEL_BASE + 1, &lexer->errout,
+		    GPSD_LOG(ISGPS_ERRLEVEL_BASE + 1, &lexer->errout,
 			     "ISGPS preamble ok, parity ok -- locked\n");
 		    lexer->isgps.locked = true;
 		    break;
 		}
-		gpsd_log(ISGPS_ERRLEVEL_BASE + 1, &lexer->errout,
+		GPSD_LOG(ISGPS_ERRLEVEL_BASE + 1, &lexer->errout,
 			 "ISGPS preamble ok, parity fail\n");
 	    }
 	    lexer->isgps.curr_offset++;
@@ -245,13 +245,13 @@ enum isgpsstat_t isgps_decode(struct gps_lexer_t *lexer,
 		 * another preamble pattern in the data stream. -wsr
 		 */
 		if (preamble_match(&lexer->isgps.curr_word)) {
-		    gpsd_log(ISGPS_ERRLEVEL_BASE + 2, &lexer->errout,
+		    GPSD_LOG(ISGPS_ERRLEVEL_BASE + 2, &lexer->errout,
 			     "ISGPS preamble spotted (index: %u)\n",
 			     lexer->isgps.bufindex);
 		    lexer->isgps.bufindex = 0;
 		}
 #endif
-		gpsd_log(ISGPS_ERRLEVEL_BASE + 2, &lexer->errout,
+		GPSD_LOG(ISGPS_ERRLEVEL_BASE + 2, &lexer->errout,
 			 "ISGPS processing word %u (offset %d)\n",
 			 lexer->isgps.bufindex,
 			 lexer->isgps.curr_offset);
@@ -262,7 +262,7 @@ enum isgpsstat_t isgps_decode(struct gps_lexer_t *lexer,
 		     */
 		    if (lexer->isgps.bufindex >= (unsigned)maxlen) {
 			lexer->isgps.bufindex = 0;
-			gpsd_log(ISGPS_ERRLEVEL_BASE + 1, &lexer->errout,
+			GPSD_LOG(ISGPS_ERRLEVEL_BASE + 1, &lexer->errout,
 				 "ISGPS buffer overflowing -- resetting\n");
 			return ISGPS_NO_SYNC;
 		    }
@@ -273,7 +273,7 @@ enum isgpsstat_t isgps_decode(struct gps_lexer_t *lexer,
 		    /* *INDENT-OFF* */
 		    if ((lexer->isgps.bufindex == 0) &&
 			!preamble_match((isgps30bits_t *) lexer->isgps.buf)) {
-			gpsd_log(ISGPS_ERRLEVEL_BASE + 1, &lexer->errout,
+			GPSD_LOG(ISGPS_ERRLEVEL_BASE + 1, &lexer->errout,
 				 "ISGPS word 0 not a preamble- punting\n");
 			return ISGPS_NO_SYNC;
 		    }
@@ -297,20 +297,20 @@ enum isgpsstat_t isgps_decode(struct gps_lexer_t *lexer,
 			c >> -(lexer->isgps.curr_offset);
 		}
 	    } else {
-		gpsd_log(ISGPS_ERRLEVEL_BASE, &lexer->errout,
+		GPSD_LOG(ISGPS_ERRLEVEL_BASE, &lexer->errout,
 			 "ISGPS parity failure, lost lock\n");
 		lexer->isgps.locked = false;
 	    }
 	}
 	lexer->isgps.curr_offset -= 6;
-	gpsd_log(ISGPS_ERRLEVEL_BASE + 2, &lexer->errout,
+	GPSD_LOG(ISGPS_ERRLEVEL_BASE + 2, &lexer->errout,
 		 "ISGPS residual %d\n",
 		 lexer->isgps.curr_offset);
 	return res;
     }
 
     /* never achieved lock */
-    gpsd_log(ISGPS_ERRLEVEL_BASE + 1, &lexer->errout,
+    GPSD_LOG(ISGPS_ERRLEVEL_BASE + 1, &lexer->errout,
 	     "ISGPS lock never achieved\n");
     return ISGPS_NO_SYNC;
 }

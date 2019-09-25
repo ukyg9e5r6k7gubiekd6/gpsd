@@ -200,7 +200,7 @@ static bool evermore_protocol(struct gps_device_t *session, int protocol)
 	(char)0x00,		/* 2: reserved */
 	(char)0x00,		/* 3: reserved */
     };
-    gpsd_log(LOG_PROG, &session->context->errout,
+    GPSD_LOG(LOG_PROG, &session->context->errout,
 	     "evermore_protocol(%d)\n", protocol);
     tmp8 = (protocol != 0) ? 1 : 0;
     /* NMEA : binary */
@@ -229,7 +229,7 @@ static bool evermore_nmea_config(struct gps_device_t *session, int mode)
 	0,			/*  9: PEMT,101, interval 0-255s */
 	0, 0, 0, 0, 0, 0,	/* 10-15: reserved */
     };
-    gpsd_log(LOG_PROG, &session->context->errout,
+    GPSD_LOG(LOG_PROG, &session->context->errout,
 	     "evermore_nmea_config(%d)\n", mode);
     tmp8 = (mode == 1) ? 5 : 1;
     /* NMEA GPGSV, gpsd  */
@@ -243,7 +243,7 @@ static bool evermore_nmea_config(struct gps_device_t *session, int mode)
 
 static void evermore_mode(struct gps_device_t *session, int mode)
 {
-    gpsd_log(LOG_PROG, &session->context->errout,
+    GPSD_LOG(LOG_PROG, &session->context->errout,
 	     "evermore_mode(%d), %d\n", mode,
 	     session->back_to_nmea ? 1 : 0);
     if (mode == MODE_NMEA) {
@@ -286,7 +286,7 @@ static void evermore_event_hook(struct gps_device_t *session, event_t event)
 static bool evermore_speed(struct gps_device_t *session,
 			   speed_t speed, char parity, int stopbits)
 {
-    gpsd_log(LOG_PROG, &session->context->errout,
+    GPSD_LOG(LOG_PROG, &session->context->errout,
 	     "evermore_speed(%u%c%d)\n", (unsigned int)speed, parity,
 	     stopbits);
     /* parity and stopbit switching aren't available on this chip */
@@ -327,7 +327,7 @@ static bool evermore_rate_switcher(struct gps_device_t *session, double rate)
 /* change the sample rate of the GPS */
 {
     if (rate < 1 || rate > 10) {
-	gpsd_log(LOG_ERROR, &session->context->errout,
+	GPSD_LOG(LOG_ERROR, &session->context->errout,
 		 "valid rate range is 1-10.\n");
 	return false;
     } else {

@@ -87,7 +87,7 @@ static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type,
 	if (end_write(session->gpsdata.gps_fd, &h, hlen) != (ssize_t) hlen ||
 	    end_write(session->gpsdata.gps_fd, dat,
 		      datlen) != (ssize_t) datlen) {
-	    gpsd_log(LOG_INFO, &session->context->errout,
+	    GPSD_LOG(LOG_INFO, &session->context->errout,
 		     "Reconfigure write failed\n");
 	    return -1;
 	}
@@ -99,7 +99,7 @@ static ssize_t zodiac_spew(struct gps_device_t *session, unsigned short type,
     for (i = 0; i < dlen; i++)
 	str_appendf(buf, sizeof(buf), " %04x", dat[i]);
 
-    gpsd_log(LOG_RAW, &session->context->errout,
+    GPSD_LOG(LOG_RAW, &session->context->errout,
 	     "Sent Zodiac packet: %s\n", buf);
 
     return 0;
@@ -202,7 +202,7 @@ static gps_mask_t handle1000(struct gps_device_t *session)
     mask = TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET | CLIMB_SET |
            SPEED_SET | TRACK_SET | STATUS_SET | MODE_SET |
            HERR_SET | SPEEDERR_SET | VERR_SET;
-    gpsd_log(LOG_DATA, &session->context->errout,
+    GPSD_LOG(LOG_DATA, &session->context->errout,
 	     "1000: time=%s lat=%.2f lon=%.2f altHAE=%.2f track=%.2f "
              "speed=%.2f climb=%.2f mode=%d status=%d\n",
              timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
@@ -248,7 +248,7 @@ static gps_mask_t handle1002(struct gps_device_t *session)
     session->gpsdata.skyview_time = gpsd_gpstime_resolv(session,
 						      (unsigned short)gps_week,
 						      ts_tow);
-    gpsd_log(LOG_DATA, &session->context->errout,
+    GPSD_LOG(LOG_DATA, &session->context->errout,
 	     "1002: visible=%d used=%d mask={SATELLITE|USED} time %s\n",
 	     session->gpsdata.satellites_visible,
 	     session->gpsdata.satellites_used,
@@ -298,7 +298,7 @@ static gps_mask_t handle1003(struct gps_device_t *session)
     }
     session->gpsdata.skyview_time.tv_sec = 0;
     session->gpsdata.skyview_time.tv_nsec = 0;
-    gpsd_log(LOG_DATA, &session->context->errout,
+    GPSD_LOG(LOG_DATA, &session->context->errout,
 	     "NAVDOP: visible=%d gdop=%.2f pdop=%.2f "
 	     "hdop=%.2f vdop=%.2f tdop=%.2f mask={SATELLITE|DOP}\n",
 	     session->gpsdata.satellites_visible,
@@ -333,7 +333,7 @@ static gps_mask_t handle1011(struct gps_device_t *session)
      * The Zodiac is supposed to send one of these messages on startup.
      */
     getstringz(session->subtype, session->lexer.outbuffer, 19, 28);	/* software version field */
-    gpsd_log(LOG_DATA, &session->context->errout,
+    GPSD_LOG(LOG_DATA, &session->context->errout,
 	     "1011: subtype=%s mask={DEVICEID}\n",
 	     session->subtype);
     return DEVICEID_SET;
@@ -364,7 +364,7 @@ static gps_mask_t zodiac_analyze(struct gps_device_t *session)
      * level does not actually require it.
      */
     if (session->context->errout.debug >= LOG_RAW)
-	gpsd_log(LOG_RAW, &session->context->errout,
+	GPSD_LOG(LOG_RAW, &session->context->errout,
 		 "Raw Zodiac packet type %d length %zd: %s\n",
 		 id, session->lexer.outbuflen, gpsd_prettydump(session));
 

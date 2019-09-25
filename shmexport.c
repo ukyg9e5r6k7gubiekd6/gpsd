@@ -19,13 +19,13 @@ PERMISSIONS
 
 #ifdef SHM_EXPORT_ENABLE
 
-#include <stddef.h>
-#include <string.h>
 #include <errno.h>
+#include <stddef.h>
 #include <stdlib.h>
-#include <sys/time.h>
+#include <string.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
+#include <sys/time.h>
 
 #include "gpsd.h"
 #include "libgps.h" /* for SHM_PSEUDO_FD */
@@ -38,28 +38,28 @@ bool shm_acquire(struct gps_context_t *context)
 
     int shmid = shmget((key_t)shmkey, sizeof(struct shmexport_t), (int)(IPC_CREAT|0666));
     if (shmid == -1) {
-	gpsd_log(LOG_ERROR, &context->errout,
+	GPSD_LOG(LOG_ERROR, &context->errout,
 		 "shmget(0x%lx, %zd, 0666) for SHM export failed: %s\n",
 		 shmkey,
 		 sizeof(struct shmexport_t),
 		 strerror(errno));
 	return false;
     } else
-	gpsd_log(LOG_PROG, &context->errout,
+	GPSD_LOG(LOG_PROG, &context->errout,
 		 "shmget(0x%lx, %zd, 0666) for SHM export succeeded\n",
 		 shmkey,
 		 sizeof(struct shmexport_t));
 
     context->shmexport = (void *)shmat(shmid, 0, 0);
     if ((int)(long)context->shmexport == -1) {
-	gpsd_log(LOG_ERROR, &context->errout,
+	GPSD_LOG(LOG_ERROR, &context->errout,
 		 "shmat failed: %s\n", strerror(errno));
 	context->shmexport = NULL;
 	return false;
     }
     context->shmid = shmid;
 
-    gpsd_log(LOG_PROG, &context->errout,
+    GPSD_LOG(LOG_PROG, &context->errout,
 	     "shmat() for SHM export succeeded, segment %d\n", shmid);
     return true;
 }
@@ -75,7 +75,7 @@ void shm_release(struct gps_context_t *context)
      * it can no longer be opened
      */
     if (shmctl(context->shmid, IPC_RMID, NULL) == -1) {
-	gpsd_log(LOG_WARN, &context->errout,
+	GPSD_LOG(LOG_WARN, &context->errout,
 		 "shmctl for IPC_RMID failed, errno = %d (%s)\n",
 		 errno, strerror(errno));
     }

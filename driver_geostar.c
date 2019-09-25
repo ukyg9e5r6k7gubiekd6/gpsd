@@ -67,7 +67,7 @@ static int geostar_write(struct gps_device_t *session,
 
     session->msgbuflen = len * 4;
 
-    gpsd_log(LOG_PROG, &session->context->errout,
+    GPSD_LOG(LOG_PROG, &session->context->errout,
 	     "Sent GeoStar packet id 0x%x\n", id);
     if (gpsd_write(session, session->msgbuf, session->msgbuflen) !=
 	(ssize_t) session->msgbuflen)
@@ -98,7 +98,7 @@ static bool geostar_detect(struct gps_device_t *session)
 		break;
 	    if (generic_get(session) >= 0) {
 		if (session->lexer.type == GEOSTAR_PACKET) {
-		    gpsd_log(LOG_RAW, &session->context->errout,
+		    GPSD_LOG(LOG_RAW, &session->context->errout,
 			     "geostar_detect found\n");
 		    ret = true;
 		    break;
@@ -122,7 +122,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
     char buf2[BUFSIZ];
 
     if (session->lexer.type != GEOSTAR_PACKET) {
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "geostar_analyze packet type %d\n",
 		 session->lexer.type);
 	return 0;
@@ -145,20 +145,20 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 
     id = (unsigned int)getleu16(session->lexer.outbuffer, OFFSET(0));
 
-    gpsd_log(LOG_DATA, &session->context->errout,
+    GPSD_LOG(LOG_DATA, &session->context->errout,
 	     "GeoStar packet id 0x%02x length %d: %s\n", id, len, buf2);
 
     session->cycle_end_reliable = true;
 
     switch (id) {
     case 0x10:
-	gpsd_log(LOG_INF, &session->context->errout, "Raw measurements\n");
+	GPSD_LOG(LOG_INF, &session->context->errout, "Raw measurements\n");
 	break;
     case 0x11:
-	gpsd_log(LOG_INF, &session->context->errout, "GPS sub-frame data\n");
+	GPSD_LOG(LOG_INF, &session->context->errout, "GPS sub-frame data\n");
 	break;
     case 0x12:
-	gpsd_log(LOG_INF, &session->context->errout, "GLONASS sub-frame data\n");
+	GPSD_LOG(LOG_INF, &session->context->errout, "GLONASS sub-frame data\n");
 	break;
     case 0x13:
 	d1 = getled64(buf, OFFSET(1));
@@ -166,7 +166,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	d3 = getled64(buf, OFFSET(5));
 	d4 = getled64(buf, OFFSET(29)); /* GPS time */
 	d5 = getled64(buf, OFFSET(31)); /* GLONASS time */
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "ECEF coordinates %g %g %g %f %f\n", d1, d2, d3, d4, d5);
 	break;
     case 0x20:
@@ -203,7 +203,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	mask |= TIME_SET | NTPTIME_IS | LATLON_SET | ALTITUDE_SET |
                 SPEED_SET | TRACK_SET | DOP_SET | USED_IS | REPORT_IS;
 
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Geographic coordinates %f %g %g %g %g %g\n",
 		 d1,
 		 session->newdata.latitude,
@@ -211,7 +211,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 		 session->newdata.altHAE,
 		 session->newdata.speed,
 		 session->newdata.track);
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Dilution of precision %g %g %g %g %g\n",
 		 session->gpsdata.dop.gdop,
 		 session->gpsdata.dop.pdop,
@@ -224,7 +224,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	ul2 = getleu32(buf, OFFSET(2));
 	uw1 = getleu16(buf, OFFSET(3));
 	uw2 = getleu16(buf, OFFSET(3) + 2);
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Current receiver telemetry %x %d %d %d\n",
 		 ul1, ul2, uw1, uw2);
 	if(ul1 & (1<<3)) {
@@ -245,7 +245,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	break;
     case 0x22:
 	ul1 = getleu32(buf, OFFSET(1));
-	gpsd_log(LOG_INF, &session->context->errout, "SVs in view %d\n", ul1);
+	GPSD_LOG(LOG_INF, &session->context->errout, "SVs in view %d\n", ul1);
 	session->gpsdata.satellites_visible = (int)ul1;
 	if(ul1 > GEOSTAR_CHANNELS) ul1 = GEOSTAR_CHANNELS;
 	for(i = 0; (uint32_t)i < ul1; i++) {
@@ -254,7 +254,7 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	    s1 = getles16(buf, OFFSET(3) + i * 3 * 4);
 	    s2 = getles16(buf, OFFSET(3) + 2 + i * 3 * 4);
 	    s3 = getles16(buf, OFFSET(4) + 2 + i * 3 * 4);
-	    gpsd_log(LOG_INF, &session->context->errout,
+	    GPSD_LOG(LOG_INF, &session->context->errout,
                      "ID %d Az %g El %g SNR %g\n",
 		     decode_channel_id(ul2), s1*0.001*RAD_2_DEG,
                      s2*0.001*RAD_2_DEG, s3*0.1);
@@ -272,57 +272,57 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	ul1 = getleu32(buf, OFFSET(1));
 	ul2 = getleu32(buf, OFFSET(2));
 	ul3 = getleu32(buf, OFFSET(3));
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Receiver power-up message %d %d %d\n", ul1, ul2, ul3);
 	break;
     case 0x3f:
 	ul1 = getleu32(buf, OFFSET(1));
 	ul2 = getleu32(buf, OFFSET(2));
-	gpsd_log(LOG_WARN, &session->context->errout,
+	GPSD_LOG(LOG_WARN, &session->context->errout,
 		 "Negative acknowledge %x %d\n", ul1, ul2);
 	break;
     case 0x40:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Set initial parameters\n");
 	break;
     case 0x41:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Set serial ports parameters\n");
 	break;
     case 0x42:
 	ul1 = getleu32(buf, OFFSET(1));
 	ul2 = getleu32(buf, OFFSET(2));
 	ul3 = getleu32(buf, OFFSET(3));
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Set receiver operation mode %d %d %d\n",
 		 ul1, ul2, ul3);
 	break;
     case 0x43:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Set navigation task solution parameters\n");
 	break;
     case 0x44:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Set output data rate\n");
 	break;
     case 0x46:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Assign data protocol to communication port\n");
 	break;
     case 0x48:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Set GPS almanac\n");
 	break;
     case 0x49:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Set GLONASS almanac\n");
 	break;
     case 0x4a:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Set GPS ephemeris\n");
 	break;
     case 0x4b:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Set GLONASS ephemeris\n");
 	break;
     case 0x4c:
@@ -331,74 +331,74 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	ul3 = getleu32(buf, OFFSET(3));
 	ul4 = getleu32(buf, OFFSET(4));
 	ul5 = getleu32(buf, OFFSET(5));
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Set PPS parameters %d %d %d %d %d\n",
 		 ul1, ul2, ul3, ul4, ul5);
 	break;
     case 0x4d:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Enable/disable SV in position fix\n");
 	break;
     case 0x4e:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Enable/disable NMEA messages\n");
 	break;
     case 0x4f:
 	ul1 = getleu32(buf, OFFSET(1));
 	ul2 = getleu32(buf, OFFSET(2));
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Enable/disable binary messages %x %x\n",
 		 ul1, ul2);
 	break;
     case 0x80:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Query initial parameters\n");
 	break;
     case 0x81:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Query serial ports parameters\n");
 	break;
     case 0x82:
 	ul1 = getleu32(buf, OFFSET(1));
 	ul2 = getleu32(buf, OFFSET(2));
 	ul3 = getleu32(buf, OFFSET(3));
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Query receiver operation mode %d %d %d\n",
 		 ul1, ul2, ul3);
 	break;
     case 0x83:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Query navigation task solution parameters\n");
 	break;
     case 0x84:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Query output data rate\n");
 	break;
     case 0x86:
 	session->driver.geostar.physical_port = (unsigned int)getleu32(buf, OFFSET(1));
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Query data protocol assignment to communication port\n");
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Connected to physical port %d\n",
 		 session->driver.geostar.physical_port);
 	break;
     case 0x88:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Query GPS almanac\n");
 	break;
     case 0x89:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Query GLONASS almanac\n");
 	break;
     case 0x8a:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Query GPS ephemerides\n");
 	break;
     case 0x8b:
 	d1 = getled64(buf, OFFSET(23));
 	d2 = getled64(buf, OFFSET(25));
 	d3 = getled64(buf, OFFSET(27));
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Query GLONASS ephemerides %g %g %g\n",
 		 d1, d2, d3);
 	break;
@@ -408,27 +408,27 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
 	ul3 = getleu32(buf, OFFSET(3));
 	ul4 = getleu32(buf, OFFSET(4));
 	ul5 = getleu32(buf, OFFSET(5));
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Query PPS parameters %d %d %d %d %d\n",
 		 ul1, ul2, ul3, ul4, ul5);
 	break;
     case 0x8d:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Query enable/disable status of the SV in position fix\n");
 	break;
     case 0x8e:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Query enable NMEA messages\n");
 	break;
     case 0x8f:
 	ul1 = getleu32(buf, OFFSET(1));
 	ul2 = getleu32(buf, OFFSET(2));
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Query enable binary messages %x %x\n",
 		 ul1, ul2);
 	break;
     case 0xc0:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Change operation mode command\n");
 	break;
     case 0xc1:
@@ -440,33 +440,33 @@ static gps_mask_t geostar_analyze(struct gps_device_t *session)
                 "%u.%u %u.%u.%u %x %c-%u\n",
                 ul4>>16, ul4&0xFFFF, ul1>>9, (ul1>>5)&0xF, ul1&0x1F, ul2,
                 ul3>>24, ul3&0x00FFFFFF);
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Request FW version command: %s\n",
 		 session->subtype);
 	mask |= DEVICEID_SET;
 	break;
     case 0xc2:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Restart receiver command\n");
 	break;
     case 0xc3:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Store parameters to Flash command\n");
 	break;
     case 0xd0:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Erase Flash sector command\n");
 	break;
     case 0xd1:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Write data to Flash command\n");
 	break;
     case 0xd2:
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Response to Store Serial Number command\n");
 	break;
     default:
-	gpsd_log(LOG_WARN, &session->context->errout,
+	GPSD_LOG(LOG_WARN, &session->context->errout,
 		 "Unhandled GeoStar packet type 0x%02x\n", id);
 	break;
     }
@@ -588,7 +588,7 @@ static void geostar_mode(struct gps_device_t *session, int mode)
 	/* Switch to binary mode */
 	(void)nmea_send(session, "$GPSGG,SWPROT");
     } else {
-	gpsd_log(LOG_ERROR, &session->context->errout,
+	GPSD_LOG(LOG_ERROR, &session->context->errout,
 		 "unknown mode %i requested\n", mode);
     }
 }

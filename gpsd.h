@@ -1007,8 +1007,28 @@ extern bool ais_binary_decode(const struct gpsd_errout_t *errout,
 
 void gpsd_labeled_report(const int, const int,
 			 const char *, const char *, va_list);
+
+// do not call gpsd_log() directly, use GPSD_LOG() to save a lot of cpu time
 PRINTF_FUNC(3, 4) void gpsd_log(const int, const struct gpsd_errout_t *,
                                 const char *, ...);
+
+/*
+ * GPSD_LOG() is the new one debug logger to rule them all.
+ *
+ * The calling convention is not attractive:
+ *     GPSD_LOG(debuglevel, (fmt, ...));
+ *     GPSD_LOG(2, ("this will appear on stdout if debug >= %d\n", 2));
+ *
+ * This saves significant pushing, popping, hexification, etc. when
+ * the debug level does not require it.
+ */
+#define GPSD_LOG(lvl, eo, ...)           \
+    do {                                 \
+        if ((eo)->debug >= (lvl))        \
+            gpsd_log(lvl, eo, __VA_ARGS__);   \
+    } while (0)
+
+
 
 #define NITEMS(x) ((int) (sizeof(x) / sizeof(x[0]) + COMPILE_CHECK_IS_ARRAY(x)))
 

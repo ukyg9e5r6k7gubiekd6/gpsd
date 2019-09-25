@@ -252,7 +252,7 @@ bool gpsd_set_raw(struct gps_device_t * session)
 {
     (void)cfmakeraw(&session->ttyset);
     if (tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) == -1) {
-	gpsd_log(LOG_ERROR, &session->context->errout,
+	GPSD_LOG(LOG_ERROR, &session->context->errout,
 		 "SER: error changing port attributes: %s\n", strerror(errno));
 	return false;
     }
@@ -344,7 +344,7 @@ void gpsd_set_speed(struct gps_device_t *session,
              * so ignore for now, as we always have, until it can
              * be nailed down.
              *
-	     * gpsd_log(&session->context->errout, LOG_ERROR,
+	     * GPSD_LOG(&session->context->errout, LOG_ERROR,
 	     *	     "SER: error setting port attributes: %s, sourcetype: %d\n",
 	     *	     strerror(errno), session->sourcetype);
 	     * return;
@@ -408,7 +408,7 @@ void gpsd_set_speed(struct gps_device_t *session,
 	nanosleep(&delay, NULL);
 	(void)tcflush(session->gpsdata.gps_fd, TCIOFLUSH);
     }
-    gpsd_log(LOG_INF, &session->context->errout,
+    GPSD_LOG(LOG_INF, &session->context->errout,
 	     "SER: speed %lu, %d%c%d\n",
 	     (unsigned long)gpsd_get_speed(session), 9 - stopbits, parity,
 	     stopbits);
@@ -464,11 +464,11 @@ int gpsd_serial_open(struct gps_device_t *session)
     if (session->context->readonly
 	|| (session->sourcetype <= source_blockdev)) {
 	mode = (mode_t) O_RDONLY;
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "SER: opening read-only GPS data source type %d and at '%s'\n",
 		 (int)session->sourcetype, session->gpsdata.dev.path);
     } else {
-	gpsd_log(LOG_INF, &session->context->errout,
+	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "SER: opening GPS data source type %d at '%s'\n",
 		 (int)session->sourcetype, session->gpsdata.dev.path);
     }
@@ -484,17 +484,17 @@ int gpsd_serial_open(struct gps_device_t *session)
         if (connect(session->gpsdata.gps_fd, (struct sockaddr *) &addr, sizeof (addr)) == -1) {
 	    if (errno != EINPROGRESS && errno != EAGAIN) {
 		(void)close(session->gpsdata.gps_fd);
-		gpsd_log(LOG_ERROR, &session->context->errout,
+		GPSD_LOG(LOG_ERROR, &session->context->errout,
 			 "SER: bluetooth socket connect failed: %s\n",
 			 strerror(errno));
 		return UNALLOCATED_FD;
 	    }
-	    gpsd_log(LOG_ERROR, &session->context->errout,
+	    GPSD_LOG(LOG_ERROR, &session->context->errout,
 		     "SER: bluetooth socket connect in progress or again : %s\n",
 		     strerror(errno));
         }
 	(void)fcntl(session->gpsdata.gps_fd, F_SETFL, (int)mode);
-	gpsd_log(LOG_PROG, &session->context->errout,
+	GPSD_LOG(LOG_PROG, &session->context->errout,
 		 "SER: bluez device open success: %s %s\n",
 		 session->gpsdata.dev.path, strerror(errno));
     } else
@@ -507,21 +507,21 @@ int gpsd_serial_open(struct gps_device_t *session)
 	errno = 0;
         if ((session->gpsdata.gps_fd =
 	     open(session->gpsdata.dev.path, (int)(mode | O_NONBLOCK | O_NOCTTY))) == -1) {
-            gpsd_log(LOG_ERROR, &session->context->errout,
+            GPSD_LOG(LOG_ERROR, &session->context->errout,
 		     "SER: device open of %s failed: %s - "
                      "retrying read-only\n",
 		     session->gpsdata.dev.path,
 		     strerror(errno));
 	    if ((session->gpsdata.gps_fd =
 		 open(session->gpsdata.dev.path, O_RDONLY | O_NONBLOCK | O_NOCTTY)) == -1) {
-		gpsd_log(LOG_ERROR, &session->context->errout,
+		GPSD_LOG(LOG_ERROR, &session->context->errout,
 			 "SER: read-only device open of %s failed: %s\n",
 			 session->gpsdata.dev.path,
 			 strerror(errno));
 		return UNALLOCATED_FD;
 	    }
 
-	    gpsd_log(LOG_PROG, &session->context->errout,
+	    GPSD_LOG(LOG_PROG, &session->context->errout,
 		     "SER: file device open of %s succeeded\n",
 		     session->gpsdata.dev.path);
 	}
@@ -553,7 +553,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 	 * Don't touch devices already opened by another process.
 	 */
 	if (fusercount(session->gpsdata.dev.path) > 1) {
-            gpsd_log(LOG_ERROR, &session->context->errout,
+            GPSD_LOG(LOG_ERROR, &session->context->errout,
 		     "SER: %s already opened by another process\n",
 		     session->gpsdata.dev.path);
 	    (void)close(session->gpsdata.gps_fd);
@@ -571,7 +571,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 	(void)cfsetispeed(&session->ttyset, (speed_t)session->saved_baud);
 	(void)cfsetospeed(&session->ttyset, (speed_t)session->saved_baud);
 	if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) != 0) {
-	    gpsd_log(LOG_ERROR, &session->context->errout,
+	    GPSD_LOG(LOG_ERROR, &session->context->errout,
 		     "SER: Error setting port attributes: %s\n",
 		     strerror(errno));
 	}
@@ -637,7 +637,7 @@ int gpsd_serial_open(struct gps_device_t *session)
 	session->gpsdata.dev.stopbits = 1;
     }
 
-    gpsd_log(LOG_SPIN, &session->context->errout,
+    GPSD_LOG(LOG_SPIN, &session->context->errout,
 	     "SER: open(%s) -> %d in gpsd_serial_open()\n",
 	     session->gpsdata.dev.path, session->gpsdata.gps_fd);
     return session->gpsdata.gps_fd;
@@ -657,7 +657,7 @@ ssize_t gpsd_serial_write(struct gps_device_t * session,
     /* extra guard prevents expensive hexdump calls */
     if (session->context->errout.debug >= LOG_IO) {
 	char scratchbuf[MAX_PACKET_LENGTH*2+1];
-	gpsd_log(LOG_IO, &session->context->errout,
+	GPSD_LOG(LOG_IO, &session->context->errout,
 		 "SER: => GPS: %s%s\n",
 		 gpsd_packetdump(scratchbuf, sizeof(scratchbuf),
 				 (char *)buf, len), ok ? "" : " FAILED");
@@ -771,7 +771,7 @@ void gpsd_close(struct gps_device_t *session)
 	    (void)tcsetattr(session->gpsdata.gps_fd, TCSANOW,
 			    &session->ttyset_old);
 	}
-	gpsd_log(LOG_SPIN, &session->context->errout,
+	GPSD_LOG(LOG_SPIN, &session->context->errout,
 		 "SER: close(%d) in gpsd_close(%s)\n",
 		 session->gpsdata.gps_fd, session->gpsdata.dev.path);
 	(void)close(session->gpsdata.gps_fd);
