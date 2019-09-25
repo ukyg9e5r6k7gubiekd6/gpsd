@@ -1231,6 +1231,7 @@ int gpsd_await_data(fd_set *rfds,
 	int i;
 	char dbuf[BUFSIZ];
         timespec_t ts_now;
+        char ts_str[TIMESPEC_LEN];
 
 	dbuf[0] = '\0';
 	for (i = 0; i < (int)FD_SETSIZE; i++)
@@ -1244,9 +1245,9 @@ int gpsd_await_data(fd_set *rfds,
 
 	(void)clock_gettime(CLOCK_REALTIME, &ts_now);
 	GPSD_LOG(LOG_SPIN, errout,
-		 "pselect() {%s} at %ld.%03ld (errno %d)\n",
+		 "pselect() {%s} at %s (errno %d)\n",
 		 dbuf,
-                 ts_now.tv_sec, ts_now.tv_nsec / 1000000,
+                 timespec_str(&ts_now, ts_str, sizeof(ts_str)),
                  errno);
     }
 
@@ -1647,12 +1648,12 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	    if (session->newdata.time.tv_sec >
                 (time(NULL) + (60 * 60 * 24 * 365))) {
 		GPSD_LOG(LOG_WARN, &session->context->errout,
-			 "date (%ld) more than a year in the future!\n",
-			 session->newdata.time.tv_sec);
+			 "date (%lld) more than a year in the future!\n",
+			 (long long)session->newdata.time.tv_sec);
 	    } else if (session->newdata.time.tv_sec < 0) {
 		GPSD_LOG(LOG_ERROR, &session->context->errout,
-			 "date (%ld) is negative!\n",
-			 session->newdata.time.tv_sec);
+			 "date (%lld) is negative!\n",
+			 (long long)session->newdata.time.tv_sec);
             }
 	}
 
