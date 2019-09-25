@@ -91,17 +91,17 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
+#include <ctype.h>
+#include <curses.h>
+#include <errno.h>
+#include <math.h>
+#include <signal.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
-#include <math.h>
-#include <errno.h>
-#include <curses.h>
 #include <time.h>
-#include <signal.h>
 #include <unistd.h>
-#include <ctype.h>
 
 #include "gps.h"
 #include "gps_json.h"   /* for GPS_JSON_RESPONSE_MAX */
