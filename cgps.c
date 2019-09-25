@@ -937,8 +937,9 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 	    (void)clock_gettime(CLOCK_REALTIME, &ts_now);
             TS_SUB(&ts_diff, &ts_now, &gpsdata->fix.time);
 
-            (void)snprintf(scr, sizeof(scr), "%ld.%03ld sec",
-                           ts_diff.tv_sec, ts_diff.tv_nsec / 1000000);
+            (void)snprintf(scr, sizeof(scr), "%lld.%03ld sec",
+                           (long long)ts_diff.tv_sec,
+                           ts_diff.tv_nsec / 1000000);
         } else {
             (void)strlcpy(scr, " n/a", sizeof(scr));
         }
