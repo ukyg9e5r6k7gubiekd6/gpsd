@@ -12,25 +12,24 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <stdbool.h>
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <fcntl.h>
 #include <libgen.h>
 #include <math.h>
-#include <string.h>
 #include <stdarg.h>
-#include <fcntl.h>
-#include <ctype.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <syslog.h>
-#include <errno.h>
-#include <sys/types.h>
 #include <sys/select.h>
-#include <sys/stat.h>
-#include <assert.h>
-#include <sys/wait.h>
 #include <sys/socket.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "gpsd.h"
@@ -329,8 +328,8 @@ void gpsd_init(struct gps_device_t *session, struct gps_context_t *context,
     packet_reset(&session->lexer);
 }
 
-void gpsd_deactivate(struct gps_device_t *session)
 /* temporarily release the GPS device */
+void gpsd_deactivate(struct gps_device_t *session)
 {
 #ifdef RECONFIGURE_ENABLE
     if (!session->context->readonly
