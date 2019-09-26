@@ -902,7 +902,9 @@ class Base(object):
         vbox.add(self.rawdisplay)
 
         self.dataframe = Gtk.Frame(label="GPS data")
-        datatable = Gtk.Table(n_columns=Base.COLUMNS, n_rows=Base.ROWS, homogeneous=False)
+        datatable = Gtk.Table(n_columns=Base.COLUMNS,
+                              n_rows=Base.ROWS,
+                              homogeneous=False)
         self.dataframe.add(datatable)
         gpswidgets = []
         for i in range(len(Base.gpsfields)):
@@ -914,7 +916,7 @@ class Base(object):
                              i % Base.ROWS, i % Base.ROWS + 1)
             entry = Gtk.Entry()
             # The right size for the ISO8601 timestamp
-            entry.modify_font(Pango.FontDescription("Monospace 10"))
+            entry.override_font(Pango.FontDescription("Monospace 10"))
             entry.set_width_chars(24)
             entry.set_text("n/a")
             datatable.attach(entry, colbase + 1, colbase + 2,
@@ -1257,9 +1259,12 @@ class Base(object):
         "Set up monitoring of a daemon instance."
         self.daemon = daem
         self.device = dev
-        GLib.io_add_watch(daemon.sock, GLib.IO_IN, self.handle_response)
-        GLib.io_add_watch(daemon.sock, GLib.IO_ERR, self.handle_hangup)
-        GLib.io_add_watch(daemon.sock, GLib.IO_HUP, self.handle_hangup)
+        GLib.io_add_watch(daemon.sock, GLib.PRIORITY_DEFAULT,
+                          GLib.IO_IN, self.handle_response)
+        GLib.io_add_watch(daemon.sock, GLib.PRIORITY_DEFAULT,
+                          GLib.IO_ERR, self.handle_hangup)
+        GLib.io_add_watch(daemon.sock, GLib.PRIORITY_DEFAULT,
+                          GLib.IO_HUP, self.handle_hangup)
 
     def handle_response(self, source, condition):
         "Handle ordinary I/O ready condition from the daemon."
