@@ -255,7 +255,7 @@ class SkyView(Gtk.DrawingArea):
                      (sat.PRN, gnss_str,
                       sat.el, sat.az, sat.ss, 'Yes' if sat.used else 'No',
                       health))
-                label = Gtk.Label(s)
+                label = Gtk.Label(str=s)
                 rectangle = Gdk.Rectangle()
                 rectangle.x = x - 25
                 rectangle.y = y - 25
