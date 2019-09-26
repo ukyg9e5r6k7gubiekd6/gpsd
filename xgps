@@ -232,7 +232,7 @@ class SkyView(Gtk.DrawingArea):
                 if "gnssid" in sat and "svid" in sat:
                     # gnssid:svid in gpsd 3.18 and up
                     constellation = gnssid_str(sat)
-                    gnss_str = "%s:%d\n" % (constellation, sat.svid)
+                    gnss_str = "%s  %10d\n" % (constellation, sat.svid)
                 else:
                     gnss_str = ''
 
@@ -245,17 +245,18 @@ class SkyView(Gtk.DrawingArea):
                 else:
                     health = "Unk"
 
-                s = ("PRN %d\n"
+                label = Gtk.Label()
+                s = ("<span font_desc='monospace 10'>PRN %10d\n"
                      "%s"
                      "Elevation %4.1f\n"
                      "Azimuth  %5.1f\n"
                      "SNR       %4.1f\n"
-                     "Used %8s\n"
-                     "Health %7s" %
+                     "Used %9s\n"
+                     "Health %7s</span>" %
                      (sat.PRN, gnss_str,
                       sat.el, sat.az, sat.ss, 'Yes' if sat.used else 'No',
                       health))
-                label = Gtk.Label(str=s)
+                label.set_markup(s)
                 rectangle = Gdk.Rectangle()
                 rectangle.x = x - 25
                 rectangle.y = y - 25
@@ -268,8 +269,8 @@ class SkyView(Gtk.DrawingArea):
                 self.popover.add(label)
                 self.popover.popup()
                 self.popover.show_all()
-                # remove popup after 5 seconds
-                GObject.timeout_add(5000, self.popdown)
+                # remove popup after 15 seconds
+                GLib.timeout_add(15000, self.popdown)
                 return
 
         if self.popover:
