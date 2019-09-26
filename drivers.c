@@ -180,7 +180,6 @@ static void nmea_event_hook(struct gps_device_t *session, event_t event)
 			    session->gpsdata.dev.baudrate,
 			    9 - session->gpsdata.dev.stopbits,
 			    session->gpsdata.dev.stopbits);
-	    session->back_to_nmea = true;
 	    break;
 #endif /* SIRF_ENABLE */
 #ifdef NMEA0183_ENABLE

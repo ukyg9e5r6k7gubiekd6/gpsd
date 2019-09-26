@@ -422,7 +422,6 @@ static void sirfbin_mode(struct gps_device_t *session, int mode)
         session->cfg_stage = 0;
         session->cfg_step = 0;
     }
-    session->back_to_nmea = false;
 }
 #endif /* RECONFIGURE_ENABLE */
 

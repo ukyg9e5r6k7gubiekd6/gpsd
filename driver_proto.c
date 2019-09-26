@@ -458,7 +458,6 @@ static void _proto__set_mode(struct gps_device_t *session, int mode)
 	/* send a mode switch control string */
     } else {
 	/* send a mode switch control string */
-	session->back_to_nmea = false;
     }
 }
 #endif /* RECONFIGURE_ENABLE */

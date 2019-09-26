@@ -538,8 +538,6 @@ static void superstar2_set_mode(struct gps_device_t *session, int mode)
 	/* high bit 0 in the mode word means set NMEA mode */
 	mode_msg[4] = (unsigned char)(session->gpsdata.dev.baudrate / 300);
 	(void)superstar2_write(session, (char *)mode_msg, 7);
-    } else {
-	session->back_to_nmea = false;
     }
 }
 #endif /* RECONFIGURE_ENABLE */

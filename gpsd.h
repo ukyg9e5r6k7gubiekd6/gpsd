@@ -73,7 +73,8 @@ extern "C" {
  *      Change gps_device_t.this_frac_time, last_frac_time to timespec_t
  *      Change nmea.subseconds from double to timespec_t
  *      Remove gpsd_gpstime_resolve()
- *      Changed order of gpsd_log() arguments.
+ *      Changed order of gpsd_log() arguments.  Add GPSD_LOG().
+ *      Remove gps_device_t.back_to_nmea.
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -532,7 +533,6 @@ struct gps_device_t {
     volatile struct shmTime *shm_pps;
     int chronyfd;			/* for talking to chrony */
     volatile struct pps_thread_t pps_thread;
-    bool back_to_nmea;			/* back to NMEA on revert? */
     /*
      * msgbuf needs to hold the hex decode of inbuffer
      * so msgbuf must be 2x the size of inbuffer

@@ -244,8 +244,7 @@ static bool evermore_nmea_config(struct gps_device_t *session, int mode)
 static void evermore_mode(struct gps_device_t *session, int mode)
 {
     GPSD_LOG(LOG_PROG, &session->context->errout,
-	     "evermore_mode(%d), %d\n", mode,
-	     session->back_to_nmea ? 1 : 0);
+	     "evermore_mode(%d)\n", mode);
     if (mode == MODE_NMEA) {
 	/* NMEA */
 	(void)evermore_protocol(session, 1);
@@ -253,7 +252,6 @@ static void evermore_mode(struct gps_device_t *session, int mode)
     } else {
 	/* binary */
 	(void)evermore_protocol(session, 0);
-	session->back_to_nmea = false;
     }
 }
 
@@ -276,7 +274,6 @@ static void evermore_event_hook(struct gps_device_t *session, event_t event)
 	 */
 	(void)evermore_mode(session, 0);	/* switch GPS to NMEA mode */
 	(void)evermore_nmea_config(session, 1);	/* configure NMEA messages for gpsd (GPGSV every 5s) */
-	session->back_to_nmea = false;
     } else if (event == event_deactivate) {
 	(void)evermore_nmea_config(session, 0);	/* configure NMEA messages to default */
     }
