@@ -830,7 +830,7 @@ else:
     # are like FreeBSD.
     ncurseslibs = []
     if config.env['ncurses']:
-        if config.CheckHeader(["curses.h"]):
+        if not config.CheckHeader(["curses.h"]):
             announce('Turning off ncurses support, curses.h not found.')
             config.env['ncurses'] = False
         elif config.CheckPKG('ncurses'):
