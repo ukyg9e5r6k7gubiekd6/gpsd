@@ -338,11 +338,6 @@ void gpsd_deactivate(struct gps_device_t *session)
 	&& session->device_type->event_hook != NULL) {
 	session->device_type->event_hook(session, event_deactivate);
     }
-    if (session->device_type != NULL) {
-	if (session->back_to_nmea
-	    && session->device_type->mode_switcher != NULL)
-	    session->device_type->mode_switcher(session, 0);
-    }
 #endif /* RECONFIGURE_ENABLE */
     GPSD_LOG(LOG_INF, &session->context->errout,
 	     "closing GPS=%s (%d)\n",
