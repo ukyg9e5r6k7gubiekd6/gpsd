@@ -830,7 +830,10 @@ else:
     # are like FreeBSD.
     ncurseslibs = []
     if config.env['ncurses']:
-        if config.CheckPKG('ncurses'):
+        if config.CheckHeader(["curses.h"]):
+            announce('Turning off ncurses support, curses.h not found.')
+            config.env['ncurses'] = False
+        elif config.CheckPKG('ncurses'):
             ncurseslibs = pkg_config('ncurses', rpath_hack=True)
             if config.CheckPKG('tinfo'):
                 ncurseslibs += pkg_config('tinfo', rpath_hack=True)
@@ -1498,6 +1501,7 @@ bin_binaries = []
 sbin_binaries = []
 if env["gpsd"]:
     sbin_binaries += [gpsd]
+
 if env["gpsdclients"]:
     sbin_binaries += [gpsdctl]
     bin_binaries += [
@@ -1509,13 +1513,16 @@ if env["gpsdclients"]:
         gpxlogger,
         lcdgps
     ]
+
 if env["timeservice"] or env["gpsdclients"]:
     bin_binaries += [ntpshmmon]
     if tiocmiwait:
         bin_binaries += [ppscheck]
-if env["ncurses"]:
-    if env["timeservice"] or env["gpsdclients"]:
-        bin_binaries += [cgps, gpsmon]
+
+if env["ncurses"] and (env["timeservice"] or env["gpsdclients"]):
+    bin_binaries += [cgps, gpsmon]
+else:
+    announce("WARNING: not building cgps or gpsmon")
 
 # Test programs - always link locally and statically
 test_bits = env.Program('tests/test_bits', ['tests/test_bits.c'],
