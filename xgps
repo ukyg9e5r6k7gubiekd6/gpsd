@@ -906,12 +906,7 @@ class Base(object):
         vbox.add(self.rawdisplay)
 
         self.dataframe = Gtk.Frame(label="GPS data")
-        datatable = Gtk.Table(n_columns=Base.COLUMNS,
-                              n_rows=Base.ROWS,
-                              homogeneous=False)
-        # datatable = Gtk.Grid(n_columns=Base.COLUMNS,
-        #                     n_rows=Base.ROWS,
-        #                     homogeneous=False)
+        datatable = Gtk.Grid()
         self.dataframe.add(datatable)
         gpswidgets = []
         for i in range(len(Base.gpsfields)):
@@ -919,15 +914,14 @@ class Base(object):
             label = Gtk.Label(label=Base.gpsfields[i][0] + ": ")
             # force right alignment
             label.set_halign(Gtk.Align.END)
-            datatable.attach(label, colbase, colbase + 1,
-                             i % Base.ROWS, i % Base.ROWS + 1)
+            datatable.attach(label, colbase, i % Base.ROWS, 1, 1)
             entry = Gtk.Entry()
             # The right size for the ISO8601 timestamp
             entry.override_font(Pango.FontDescription("Monospace 10"))
             entry.set_width_chars(24)
             entry.set_text("n/a")
-            datatable.attach(entry, colbase + 1, colbase + 2,
-                             i % Base.ROWS, i % Base.ROWS + 1)
+            datatable.attach_next_to(entry, label,
+                                     Gtk.PositionType.RIGHT, 1, 1)
             gpswidgets.append(entry)
         vbox.add(self.dataframe)
 
