@@ -99,7 +99,7 @@ SKY_VIEW_SORT_FIELDS = ('-used', 'PRN')
 
 
 def gnssid_str(sat):
-    "convert gnssid:svid to string"
+    "convert gnssid:svid to short and long strings"
 
     # gnssid:svid appeared in gpsd 3.18
     # allow for old servers
@@ -107,21 +107,21 @@ def gnssid_str(sat):
         return '  '
 
     if 0 >= sat.svid:
-        return '  '
+        return ['  ', '']
     if 0 == sat.gnssid:
-        return 'GP'
+        return ['GP', 'GPS']
     if 1 == sat.gnssid:
-        return 'SB'
+        return ['SB', 'SBAS']
     if 2 == sat.gnssid:
-        return 'GA'
+        return ['GA', 'Galileo']
     if 3 == sat.gnssid:
-        return 'BD'
+        return ['BD', 'BeiDou']
     if 4 == sat.gnssid:
-        return 'IM'
+        return ['IM', 'IMES']
     if 5 == sat.gnssid:
-        return 'QZ'
+        return ['QZ', 'QZSS']
     if 6 == sat.gnssid:
-        return 'GL'
+        return ['GL', 'GLONASS']
 
     return '  '
 
@@ -231,8 +231,8 @@ class SkyView(Gtk.DrawingArea):
                 self.popover = Gtk.Popover()
                 if "gnssid" in sat and "svid" in sat:
                     # gnssid:svid in gpsd 3.18 and up
-                    constellation = gnssid_str(sat)
-                    gnss_str = "%s  %10d\n" % (constellation, sat.svid)
+                    constellation = gnssid_str(sat)[1]
+                    gnss_str = "%-8s  %4d\n" % (constellation, sat.svid)
                 else:
                     gnss_str = ''
 
@@ -502,7 +502,7 @@ class SkyView(Gtk.DrawingArea):
                 self.set_color(0, 255, 180)        # green and some blue
 
             # shape by constellation
-            constellation = gnssid_str(sat)
+            constellation = gnssid_str(sat)[0]
             if constellation in ('GP', '  '):
                 self.draw_circle(x, y, SkyView.SAT_RADIUS, sat.used)
             elif constellation == 'SB':
@@ -909,6 +909,9 @@ class Base(object):
         datatable = Gtk.Table(n_columns=Base.COLUMNS,
                               n_rows=Base.ROWS,
                               homogeneous=False)
+        # datatable = Gtk.Grid(n_columns=Base.COLUMNS,
+        #                     n_rows=Base.ROWS,
+        #                     homogeneous=False)
         self.dataframe.add(datatable)
         gpswidgets = []
         for i in range(len(Base.gpsfields)):
@@ -1211,7 +1214,7 @@ class Base(object):
                     # more than can be displaced
                     continue
 
-                self.set_satlist_field(i, 0, gnssid_str(satellite))
+                self.set_satlist_field(i, 0, gnssid_str(satellite)[0])
                 # NMEA uses PRN up to 437
                 self.set_satlist_field(i, 1,
                                        self._int_to_str(satellite.PRN, 1, 437))
