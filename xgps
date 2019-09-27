@@ -551,24 +551,21 @@ class NoiseView(object):
 
     def __init__(self):
         "Initialize class NoiseView"
-        self.widget = Gtk.Table(n_columns=NoiseView.COLUMNS, n_rows=NoiseView.ROWS, homogeneous=False)
+        self.widget = Gtk.Grid()
         self.noisewidgets = []
         for i in range(len(NoiseView.noisefields)):
             colbase = (i // NoiseView.ROWS) * 2
             label = Gtk.Label(label=NoiseView.noisefields[i][0] + ": ")
-            # Wacky way to force right alignment
-            label.set_alignment(xalign=1, yalign=0.5)
-            self.widget.attach(
-                label, colbase, colbase + 1,
-                i % NoiseView.ROWS, i % NoiseView.ROWS + 1)
+            # force right alignment
+            label.set_halign(Gtk.Align.END)
+            self.widget.attach(label, colbase, i % NoiseView.ROWS, 1, 1)
             entry = Gtk.Entry()
             # The right size for the ISO8601 timestamp
             entry.modify_font(Pango.FontDescription("Monospace 10"))
             entry.set_width_chars(24)
             entry.set_text("n/a")
-            self.widget.attach(
-                entry, colbase + 1, colbase + 2,
-                i % NoiseView.ROWS, i % NoiseView.ROWS + 1)
+            self.widget.attach_next_to(entry, label,
+                                       Gtk.PositionType.RIGHT, 1, 1)
             self.noisewidgets.append((NoiseView.noisefields[i][1], entry))
 
     def update(self, noise):
