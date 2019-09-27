@@ -914,8 +914,8 @@ class Base(object):
         for i in range(len(Base.gpsfields)):
             colbase = (i // Base.ROWS) * 2
             label = Gtk.Label(label=Base.gpsfields[i][0] + ": ")
-            # Wacky way to force right alignment
-            label.set_alignment(xalign=1, yalign=0.5)
+            # force right alignment
+            label.set_halign(Gtk.Align.END)
             datatable.attach(label, colbase, colbase + 1,
                              i % Base.ROWS, i % Base.ROWS + 1)
             entry = Gtk.Entry()
