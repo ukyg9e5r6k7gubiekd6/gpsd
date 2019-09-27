@@ -555,26 +555,29 @@ class NoiseView(object):
         self.noisewidgets = []
         for i in range(len(NoiseView.noisefields)):
             colbase = (i // NoiseView.ROWS) * 2
-            label = Gtk.Label(label=NoiseView.noisefields[i][0] + ": ")
+            label = Gtk.Label()
+            label.set_markup("<span font_desc='monospace 10'> %s:</span>" %
+                             NoiseView.noisefields[i][0])
             # force right alignment
             label.set_halign(Gtk.Align.END)
             self.widget.attach(label, colbase, i % NoiseView.ROWS, 1, 1)
-            entry = Gtk.Entry()
-            # The right size for the ISO8601 timestamp
-            entry.modify_font(Pango.FontDescription("Monospace 10"))
-            entry.set_width_chars(24)
-            entry.set_text("n/a")
+            entry = Gtk.Label()
+            # span gets lost later
+            entry.set_markup("<span font_desc='monospace 10'> n/a </span>")
             self.widget.attach_next_to(entry, label,
                                        Gtk.PositionType.RIGHT, 1, 1)
             self.noisewidgets.append((NoiseView.noisefields[i][1], entry))
 
     def update(self, noise):
         "Update the GPGST data fields."
+
+        markup = "<span font_desc='monospace 10'>%s </span>"
         for (attrname, widget) in self.noisewidgets:
             if hasattr(noise, attrname):
-                widget.set_text(str(getattr(noise, attrname)))
+                s = str(getattr(noise, attrname))
             else:
-                widget.set_text("n/a")
+                s = " n/a "
+            widget.set_markup(markup % s)
 
 
 class MaidenheadView(object):
@@ -907,11 +910,11 @@ class Base(object):
         self.dataframe.add(datatable)
         gpswidgets = []
         # min col widths
-        widths = [0, 24, 0, 24, 0, 17, 0, 17]
+        widths = [0, 25, 0, 24, 0, 18, 0, 17]
         for i in range(len(Base.gpsfields)):
             colbase = (i // Base.ROWS) * 2
             label = Gtk.Label()
-            label.set_markup("<span font_desc='monospace 10'>%s:</span>" %
+            label.set_markup("<span font_desc='monospace 10'> %s:</span>" %
                              Base.gpsfields[i][0])
             # force right alignment
             label.set_halign(Gtk.Align.END)
@@ -920,7 +923,7 @@ class Base(object):
             if 0 < widths[colbase + 1]:
                 entry.set_width_chars(widths[colbase + 1])
             entry.set_selectable(True)
-            # span gets lost here...
+            # span gets lost later
             entry.set_markup("<span font_desc='monospace 10'> n/a </span>")
             datatable.attach_next_to(entry, label,
                                      Gtk.PositionType.RIGHT, 1, 1)
