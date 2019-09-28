@@ -1877,6 +1877,7 @@ def substituter(target, source, env):
         ('@MASTER@',     'DO NOT HAND_HACK! THIS FILE IS GENERATED'),
         ('@prefix@',     env['prefix']),
         ('@PROJECTPAGE@', projectpage),
+        ('@QTVERSIONED@', env['qt_versioned']),
         ('@SCPUPLOAD@',  scpupload),
         ('@SITENAME@',   sitename),
         ('@SITESEARCH@', sitesearch),
