@@ -785,81 +785,95 @@ class Base(object):
 
         self.window.connect("destroy", lambda _unused: Gtk.main_quit())
 
-        self.uimanager = Gtk.UIManager()
-        self.accelgroup = self.uimanager.get_accel_group()
-        self.window.add_accel_group(self.accelgroup)
-        self.actiongroup = Gtk.ActionGroup(name='xgps')
-        self.actiongroup.add_actions(
-            [('Quit', Gtk.STOCK_QUIT, '_Quit', None,
-              'Quit the Program', lambda _unused: Gtk.main_quit()),
-             ('File', None, '_File'),
-             ('View', None, '_View'),
-             ('Units', None, '_Units'),
-             ('Step of grid', None, '_Step of grid')])
-        self.actiongroup.add_toggle_actions(
-            [('Skyview', None, '_Skyview', '<Control>s',
-              'Enable Skyview', self.view_toggle),
-             ('Responses', None, '_Responses', '<Control>r',
-              'Enable Response Reports', self.view_toggle),
-             ('GPS', None, '_GPS Data', '<Control>g',
-              'Enable GPS Data', self.view_toggle),
-             ('Noise', None, '_Noise Statistics', '<Control>n',
-              'Enable Noise Statistics', self.view_toggle),
-             ('Maidenhead', None, '_Maidenhead', '<Control>m',
-              'Enable Maidenhead locator', self.view_toggle),
-             ('AIS', None, '_AIS Data', '<Control>a',
-              'Enable AIS Data', self.view_toggle),
-             ])
-        self.actiongroup.add_radio_actions(
-            [('Imperial', None, '_Imperial', '<Control>i',
-              'Imperial units', 0),
-             ('Nautical', None, '_Nautical', '<Control>n',
-              'Nautical units', 1),
-             ('Metric', None, '_Metric', '<Control>m',
-              'Metric Units', 2),
-             ], 0, lambda a, _unused: self.set_units(
-                 ['i', 'n', 'm'][a.get_current_value()]))
-        self.actiongroup.add_radio_actions(
-            [('30deg', None, '30°', None, '30°', 30),
-             ('45deg', None, '45°', None, '45°', 45),
-             ('Off', None, 'Off', None, 'Off', 0),
-             ], 45, lambda a, _unused: self.set_step_of_grid(
-                 a.get_current_value()))
-        self.uimanager.insert_action_group(self.actiongroup, 0)
-        self.uimanager.add_ui_from_string('''
-<ui>
-    <menubar name="MenuBar">
-      <menu action="File">
-        <menuitem action="Quit"/>
-      </menu>
-      <menu action="View">
-        <menuitem action="Skyview"/>
-        <menuitem action="Responses"/>
-        <menuitem action="GPS"/>
-        <menuitem action="Noise"/>
-        <menuitem action="Maidenhead"/>
-        <menuitem action="AIS"/>
-      </menu>
-      <menu action="Units">
-        <menuitem action="Imperial"/>
-        <menuitem action="Nautical"/>
-        <menuitem action="Metric"/>
-      </menu>
-      <menu action="Step of grid">
-        <menuitem action="30deg"/>
-        <menuitem action="45deg"/>
-        <menuitem action="Off"/>
-      </menu>
-    </menubar>
-</ui>
-''')
-        self.uimanager.get_widget('/MenuBar/View/Skyview').set_active(True)
-        self.uimanager.get_widget('/MenuBar/View/Responses').set_active(True)
-        self.uimanager.get_widget('/MenuBar/View/GPS').set_active(True)
-        self.uimanager.get_widget('/MenuBar/View/Noise').set_active(True)
-        self.uimanager.get_widget('/MenuBar/View/Maidenhead').set_active(True)
-        self.uimanager.get_widget('/MenuBar/View/AIS').set_active(True)
-        menubar = self.uimanager.get_widget('/MenuBar')
+        menubar = Gtk.MenuBar()
+        agr = Gtk.AccelGroup()
+        self.window.add_accel_group(agr)
+
+        # File
+        topmenu = Gtk.MenuItem(label="File")
+        menubar.append(topmenu)
+        submenu = Gtk.Menu()
+        topmenu.set_submenu(submenu)
+
+        menui = Gtk.MenuItem(label="Quit")
+        # exit = Gtk.MenuItem(label="_Quit")
+        # exit.set_use_underline(True)
+        # exit = Gtk.ImageMenuItem(Gtk.STOCK_QUIT)
+
+        key, mod = Gtk.accelerator_parse("<Control>Q")
+        menui.add_accelerator("activate", agr, key, mod,
+                              Gtk.AccelFlags.VISIBLE)
+        menui.connect("activate", Gtk.main_quit)
+        submenu.append(menui)
+
+        # View
+        topmenu = Gtk.MenuItem(label="View")
+        menubar.append(topmenu)
+        submenu = Gtk.Menu()
+        topmenu.set_submenu(submenu)
+
+        views = [["Skyview", True, "<Control>S", "Skyview"],
+                 ["Responses", True, "<Control>R", "Responses"],
+                 ["GPS Data", True, "<Control>G", "GPS"],
+                 ["Noise Statistics", False, "<Control>N", "Noise"],
+                 ["Maidenhead", False, "<Control>M", "Maidenhead"],
+                 ["AIS Data", False, "<Control>A", "AIS"],
+                 ]
+
+        for name, active, acc, handle in views:
+            menui = Gtk.CheckMenuItem(label=name)
+            menui.set_active(active)
+            menui.connect("activate", self.view_toggle, handle)
+            if acc:
+                key, mod = Gtk.accelerator_parse(acc)
+                menui.add_accelerator("activate", agr, key, mod,
+                                      Gtk.AccelFlags.VISIBLE)
+            submenu.append(menui)
+
+        # Units
+        topmenu = Gtk.MenuItem(label="Units")
+        menubar.append(topmenu)
+        submenu = Gtk.Menu()
+        topmenu.set_submenu(submenu)
+
+        units = [["Imperial", True, "i", 'i'],
+                 ["Nautical", False, "n", 'n'],
+                 ["Metric", False, "m", 'm'],
+                 ]
+
+        menui = None
+        for name, active, acc, handle in units:
+            menui = Gtk.RadioMenuItem(group=menui, label=name)
+            menui.set_active(active)
+            menui.connect("activate", self.set_units, handle)
+            if acc:
+                key, mod = Gtk.accelerator_parse(acc)
+                menui.add_accelerator("activate", agr, key, mod,
+                                      Gtk.AccelFlags.VISIBLE)
+            submenu.append(menui)
+
+        # Step of Grid
+        topmenu = Gtk.MenuItem(label="Step of Grid")
+        menubar.append(topmenu)
+        submenu = Gtk.Menu()
+        topmenu.set_submenu(submenu)
+
+        grid = [["30\xb0", True, None, 30],
+                ["45\xb0", False, None, 45],
+                ["Off", False, None, 0],
+                ]
+
+        menui = None
+        for name, active, acc, handle in grid:
+            menui = Gtk.RadioMenuItem(group=menui, label=name)
+            menui.set_active(active)
+            menui.connect("activate", self.set_step_of_grid, handle)
+            if acc:
+                key, mod = Gtk.accelerator_parse(acc)
+                menui.add_accelerator("activate", agr, key, mod,
+                                      Gtk.AccelFlags.VISIBLE)
+            submenu.append(menui)
+
         vbox.pack_start(menubar, expand=False, fill=True, padding=0)
 
         self.satbox = Gtk.HBox(homogeneous=False, spacing=0)
@@ -905,12 +919,12 @@ class Base(object):
         self.rawdisplay.set_editable(False)
         vbox.add(self.rawdisplay)
 
-        self.dataframe = Gtk.Frame(label="GPS data")
+        self.dataframe = Gtk.Frame(label="GPS Data")
         datatable = Gtk.Grid()
         self.dataframe.add(datatable)
         gpswidgets = []
         # min col widths
-        widths = [0, 25, 0, 24, 0, 18, 0, 17]
+        widths = [0, 25, 0, 24, 0, 20, 0, 18]
         for i in range(len(Base.gpsfields)):
             colbase = (i // Base.ROWS) * 2
             label = Gtk.Label()
@@ -953,13 +967,12 @@ class Base(object):
 
         self.window.show_all()
         # Hide the Noise Statistics window until user selects it.
-        self.uimanager.get_widget('/MenuBar/View/Noise').set_active(False)
         self.noisebox.hide()
+
         # Hide the Maidenhead window until user selects it.
-        self.uimanager.get_widget('/MenuBar/View/Maidenhead').set_active(False)
         self.gsbox.hide()
+
         # Hide the AIS window until user selects it.
-        self.uimanager.get_widget('/MenuBar/View/AIS').set_active(False)
         self.aisbox.hide()
 
         self.view_name_to_widget = {
@@ -975,14 +988,15 @@ class Base(object):
                           for label_hook_widget
                           in zip(Base.gpsfields, gpswidgets)]
 
-    def view_toggle(self, action):
+    def view_toggle(self, action, name):
         "Toggle widget view"
-        # print("View toggle:", action.get_active(), action.get_name())
+
+        # print("View toggle:", action.get_active(), name)
         if hasattr(self, 'view_name_to_widget'):
             if action.get_active():
-                self.view_name_to_widget[action.get_name()].show()
+                self.view_name_to_widget[name].show()
             else:
-                self.view_name_to_widget[action.get_name()].hide()
+                self.view_name_to_widget[name].hide()
         # The effect we're after is to make the top-level window
         # resize itself to fit when we show or hide widgets.
         # This is undocumented magic to do that.
@@ -1254,13 +1268,17 @@ class Base(object):
 
     # Preferences
 
-    def set_units(self, system):
+    def set_units(self, _unused, handle):
         "Change the display units."
-        self.conversions = unit_adjustments(system)
 
-    def set_step_of_grid(self, system):
+        # print("set_units:", handle)
+        self.conversions = unit_adjustments(handle)
+
+    def set_step_of_grid(self, system, handle):
         "Change the step of grid."
-        self.skyview.step_of_grid = system
+
+        # print("set_step_of_grid:", system, handle)
+        self.skyview.step_of_grid = handle
 
     # I/O monitoring and gtk housekeeping
 
@@ -1380,7 +1398,7 @@ if __name__ == "__main__":
             exit(1)
 
         base = Base(deg_type=degreefmt, rotation=rotate, title=target)
-        base.set_units(unit_system)
+        base.set_units(None, unit_system)
         try:
             sys.stderr.write("xgps: host %s port %s\n" % (host, port))
             daemon = gps.gps(host=host,
