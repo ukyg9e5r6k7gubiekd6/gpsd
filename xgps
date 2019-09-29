@@ -615,7 +615,7 @@ class AISView(object):
                                Gtk.PolicyType.AUTOMATIC)
         self.view = Gtk.TreeView(model=self.store)
         self.widget.set_size_request(-1, 300)
-        self.widget.add_with_viewport(self.view)
+        self.widget.add(self.view)
 
         for (i, label) in enumerate(('#', 'Name:', 'Callsign:',
                                      'Destination:', "Lat/Lon:",
