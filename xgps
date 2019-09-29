@@ -665,7 +665,7 @@ class AISView(object):
             lonsuff = "E"
         else:
             lonsuff = ""
-        lon = gps.clienthelpers.deg_to_str(gps.clienthelpers.deg_ddmmss, lon)
+        lon = gps.clienthelpers.deg_to_str(self.deg_type, lon)
         return lat + latsuff + "/" + lon + lonsuff
 
     def update(self, ais):
@@ -869,6 +869,25 @@ class Base(object):
                 menui.add_accelerator("activate", agr, key, mod,
                                       Gtk.AccelFlags.VISIBLE)
             submenu.append(menui)
+
+        submenu.append(Gtk.SeparatorMenuItem())
+
+        units = [["DD.dd", True, "0", gps.clienthelpers.deg_dd],
+                 ["DD MM.mm", False, "1", gps.clienthelpers.deg_ddmm],
+                 ["DD MM SS.ss", False, "2", gps.clienthelpers.deg_ddmmss],
+                 ]
+
+        menui = None
+        for name, active, acc, handle in units:
+            menui = Gtk.RadioMenuItem(group=menui, label=name)
+            menui.set_active(active)
+            menui.connect("activate", self.set_deg, handle)
+            if acc:
+                key, mod = Gtk.accelerator_parse(acc)
+                menui.add_accelerator("activate", agr, key, mod,
+                                      Gtk.AccelFlags.VISIBLE)
+            submenu.append(menui)
+
 
         # Step of Grid
         topmenu = Gtk.MenuItem(label="Step of Grid")
@@ -1122,7 +1141,7 @@ class Base(object):
     def update_track(self, data):
         "Update track"
         if hasattr(data, "track"):
-            return "%14s °" % (
+            return "%14s " % (
                 gps.clienthelpers.deg_to_str(self.deg_type, data.track))
 
         return "n/a"
@@ -1177,7 +1196,9 @@ class Base(object):
     def update_err_degrees(self, data, errtype):
         "update heading error estimate in the GPS Data window"
         if hasattr(data, errtype):
-            return "%8.3f °" % (getattr(data, errtype))
+            return ("%s " %
+                    (gps.clienthelpers.deg_to_str(self.deg_type,
+                                                  getattr(data, errtype))))
 
         return "n/a"
 
@@ -1314,17 +1335,23 @@ class Base(object):
 
     # Preferences
 
-    def set_units(self, _unused, handle):
-        "Change the display units."
-
-        # print("set_units:", handle)
-        self.conversions = unit_adjustments(handle)
-
     def set_step_of_grid(self, system, handle):
         "Change the step of grid."
 
         # print("set_step_of_grid:", system, handle)
         self.skyview.step_of_grid = handle
+
+    def set_deg(self, _unused, handle):
+        "Change the degree format."
+
+        # print("set_deg:", _unused, handle)
+        self.deg_type = handle
+
+    def set_units(self, _unused, handle):
+        "Change the display units."
+
+        # print("set_units:", handle)
+        self.conversions = unit_adjustments(handle)
 
     # I/O monitoring and gtk housekeeping
 
