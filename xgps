@@ -882,10 +882,11 @@ class Base(object):
         skyframe = Gtk.Frame(label="Satellite List")
         self.satbox.add(skyframe)
 
-        self.satlist = Gtk.ListStore(str, str, str, str, str, str)
+        self.satlist = Gtk.ListStore(str, str, str, str, str, str, str)
         view = Gtk.TreeView(model=self.satlist)
 
         satcols = [['', 0],
+                   ['svid', 1],
                    ['PRN', 1],
                    ['Elev', 1],
                    ['Azim', 1],
@@ -901,7 +902,7 @@ class Base(object):
 
         self.row_iters = []
         for i in range(MAXCHANDISP):
-            self.satlist.append(["", "", "", "", "", ""])
+            self.satlist.append(["", "", "", "", "", "", ""])
             self.row_iters.append(self.satlist.get_iter(i))
 
         skyframe.add(view)
@@ -1218,6 +1219,7 @@ class Base(object):
                     satellites[:],
                     key=lambda x: x[fld], reverse=rev)
 
+            # print("Sats: ", satellites)
             for (i, satellite) in enumerate(satellites):
                 yesno = 'N'
                 data.satellites_seen += 1
@@ -1236,20 +1238,24 @@ class Base(object):
                     continue
 
                 self.set_satlist_field(i, 0, gnssid_str(satellite)[0])
-                # NMEA uses PRN up to 437
+                # SBAS is in the 100's...
                 self.set_satlist_field(i, 1,
+                                       self._int_to_str(satellite.svid,
+                                                        1, 199))
+                # NMEA uses PRN up to 437
+                self.set_satlist_field(i, 2,
                                        self._int_to_str(satellite.PRN, 1, 437))
                 # allow satellites 10 degree below horizon
-                self.set_satlist_field(i, 2,
+                self.set_satlist_field(i, 3,
                                        self._tenth_to_str(satellite.el,
                                                           -10, 90))
-                self.set_satlist_field(i, 3,
+                self.set_satlist_field(i, 4,
                                        self._tenth_to_str(satellite.az,
                                                           0, 359))
-                self.set_satlist_field(i, 4,
+                self.set_satlist_field(i, 5,
                                        self._tenth_to_str(satellite.ss,
                                                           0, 100))
-                self.set_satlist_field(i, 5, yesno)
+                self.set_satlist_field(i, 6, yesno)
 
             # clear rest of the list
             for i in range(data.satellites_seen, MAXCHANDISP):
