@@ -762,6 +762,21 @@ class Base(object):
         ("GDOP", lambda s, r: s.update_dop(r, "gdop")),
     )
 
+
+    def about(self, _unused):
+        "Show about dialog"
+
+        about = Gtk.AboutDialog()
+        about.set_program_name("xgps")
+        about.set_version("Version " + gps_version)
+        about.set_copyright("Copyright 2004-2019 by The GPSD Project")
+        about.set_website("https://www.gpsd.io")
+        about.set_license("BSD-2-clause")
+
+        about.run()
+        about.destroy()
+
+
     def __init__(self, deg_type, rotation=0.0, title=""):
         "Initialize class Base"
         self.deg_type = deg_type
@@ -876,6 +891,16 @@ class Base(object):
                 menui.add_accelerator("activate", agr, key, mod,
                                       Gtk.AccelFlags.VISIBLE)
             submenu.append(menui)
+
+        # Help
+        topmenu = Gtk.MenuItem(label="Help")
+        menubar.append(topmenu)
+        submenu = Gtk.Menu()
+        topmenu.set_submenu(submenu)
+
+        menui = Gtk.MenuItem(label="About")
+        menui.connect("activate", self.about)
+        submenu.append(menui)
 
         vbox.pack_start(menubar, expand=False, fill=True, padding=0)
 
