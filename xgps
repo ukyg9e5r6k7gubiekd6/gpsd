@@ -556,7 +556,7 @@ class NoiseView(object):
         for i in range(len(NoiseView.noisefields)):
             colbase = (i // NoiseView.ROWS) * 2
             label = Gtk.Label()
-            label.set_markup("<span font_desc='monospace 10'> %s:</span>" %
+            label.set_markup("<span font_desc='sans 10'> %s:</span>" %
                              NoiseView.noisefields[i][0])
             # force right alignment
             label.set_halign(Gtk.Align.END)
