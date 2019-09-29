@@ -885,11 +885,17 @@ class Base(object):
         self.satlist = Gtk.ListStore(str, str, str, str, str, str)
         view = Gtk.TreeView(model=self.satlist)
 
-        for (i, label) in enumerate(('', 'PRN', 'Elev', 'Azim', 'SNR',
-                                     'Used')):
-            column = Gtk.TreeViewColumn(label)
-            renderer = Gtk.CellRendererText(xalign=1.0)
-            column.pack_start(renderer, expand=True)
+        satcols = [['', 0],
+                   ['PRN', 1],
+                   ['Elev', 1],
+                   ['Azim', 1],
+                   ['SNR', 1],
+                   ['Used', 0],
+                   ]
+
+        for (i, satcol) in enumerate(satcols):
+            renderer = Gtk.CellRendererText(xalign=satcol[1])
+            column = Gtk.TreeViewColumn(satcol[0], renderer)
             column.add_attribute(renderer, 'text', i)
             view.append_column(column)
 
@@ -1219,11 +1225,11 @@ class Base(object):
                     yesno = 'Y'
                     data.satellites_used += 1
                 if 'health' not in satellite:
-                    yesno = ' ' + yesno
+                    yesno = '   ' + yesno
                 elif 2 == satellite.health:
-                    yesno = 'u' + yesno
+                    yesno = '  u' + yesno
                 else:
-                    yesno = ' ' + yesno
+                    yesno = '   ' + yesno
 
                 if i >= MAXCHANDISP:
                     # more than can be displaced
