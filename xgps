@@ -722,19 +722,20 @@ class AISView(object):
 
 class Base(object):
     "Base class for all the output"
-    COLUMNS = 3
-    ROWS = 7
+    ROWS = 8
     gpsfields = (
         # First column
         ("Time", lambda s, r: s.update_time(r)),
         ("Latitude", lambda s, r: s.update_latitude(r)),
         ("Longitude", lambda s, r: s.update_longitude(r)),
-        ("   Altitude\n(HAE, MSL)", lambda s, r: s.update_altitude(r)),
+        ("Altitude HAE", lambda s, r: s.update_altitude(r, 0)),
+        ("Altitude MSL", lambda s, r: s.update_altitude(r, 1)),
         ("Speed", lambda s, r: s.update_speed(r)),
         ("Climb", lambda s, r: s.update_climb(r)),
         ("Track", lambda s, r: s.update_track(r)),
         # Second column
-        ("Status", lambda s, r: s.update_status(r)),
+        ("Status", lambda s, r: s.update_status(r, 0)),
+        ("For", lambda s, r: s.update_status(r, 1)),
         ("EPX", lambda s, r: s.update_err(r, "epx")),
         ("EPY", lambda s, r: s.update_err(r, "epy")),
         ("EPV", lambda s, r: s.update_err(r, "epv")),
@@ -745,12 +746,14 @@ class Base(object):
         ("ECEF X", lambda s, r: s.update_ecef(r, "ecefx")),
         ("ECEF Y", lambda s, r: s.update_ecef(r, "ecefy")),
         ("ECEF Z", lambda s, r: s.update_ecef(r, "ecefz")),
+        ("ECEF pAcc", lambda s, r: s.update_ecef(r, "ecefpAcc")),
         ("ECEF VX", lambda s, r: s.update_ecef(r, "ecefvx", "/s")),
         ("ECEF VY", lambda s, r: s.update_ecef(r, "ecefvy", "/s")),
         ("ECEF VZ", lambda s, r: s.update_ecef(r, "ecefvz", "/s")),
-        ("ECEF pAcc", lambda s, r: s.update_ecef(r, "ecefpAcc")),
+        ("ECEF vAcc", lambda s, r: s.update_ecef(r, "ecefvAcc", "/s")),
         # fourth column
-        ("Sats", lambda s, r: s.update_seen(r)),
+        ("Sats Seen", lambda s, r: s.update_seen(r, 0)),
+        ("Sats Used", lambda s, r: s.update_seen(r, 1)),
         ("XDOP", lambda s, r: s.update_dop(r, "xdop")),
         ("YDOP", lambda s, r: s.update_dop(r, "ydop")),
         ("VDOP", lambda s, r: s.update_dop(r, "vdop")),
@@ -931,11 +934,11 @@ class Base(object):
         self.dataframe.add(datatable)
         gpswidgets = []
         # min col widths
-        widths = [0, 25, 0, 24, 0, 20, 0, 18]
+        widths = [0, 25, 0, 20, 0, 23, 0, 8]
         for i in range(len(Base.gpsfields)):
             colbase = (i // Base.ROWS) * 2
             label = Gtk.Label()
-            label.set_markup("<span font_desc='monospace 10'> %s:</span>" %
+            label.set_markup("<span font_desc='sans 10'> %s:</span>" %
                              Base.gpsfields[i][0])
             # force right alignment
             label.set_halign(Gtk.Align.END)
@@ -1056,21 +1059,22 @@ class Base(object):
 
         return "n/a"
 
-    def update_altitude(self, data):
+    def update_altitude(self, data, item):
         "Update altitude"
+
+        ret = "n/a"
         if data.mode >= gps.MODE_3D:
-            if hasattr(data, "altHAE"):
-                altHAE = "%10.3f" % (data.altHAE * self.conversions.altfactor)
-            else:
-                altHAE = "    n/a   "
-            if hasattr(data, "altMSL"):
-                altMSL = "%10.3f" % (data.altMSL * self.conversions.altfactor)
-            else:
-                altMSL = "    n/a   "
+            if 0 == item and hasattr(data, "altHAE"):
+                ret = ("%10.3f %s" %
+                       ((data.altHAE * self.conversions.altfactor),
+                        self.conversions.altunits))
 
-            return "%s,%s %s" % (altHAE, altMSL, self.conversions.altunits)
+            if 1 == item and hasattr(data, "altMSL"):
+                ret = ("%10.3f %s" %
+                       ((data.altMSL * self.conversions.altfactor),
+                        self.conversions.altunits))
 
-        return "    n/a       n/a   "
+        return ret
 
     def update_speed(self, data):
         "Update speed"
@@ -1098,13 +1102,15 @@ class Base(object):
 
         return "n/a"
 
-    def update_seen(self, data):
+    def update_seen(self, data, item):
         "Update sats seen"
+
         # update sats seen/used in the GPS Data window
-        if hasattr(data, 'satellites_seen'):
-            return ("Seen %d, Used %d" % (
-                    getattr(data, 'satellites_seen'),
-                    getattr(data, 'satellites_used')))
+        if 0 == item and hasattr(data, 'satellites_seen'):
+            return getattr(data, 'satellites_seen')
+
+        if 1 == item and hasattr(data, 'satellites_used'):
+            return getattr(data, 'satellites_used')
 
         return "n/a"
 
@@ -1150,8 +1156,11 @@ class Base(object):
 
         return "n/a"
 
-    def update_status(self, data):
+    def update_status(self, data, item):
         "Update the status window"
+
+        if 1 == item:
+            return "%d secs" % (time.time() - self.last_transition)
 
         if data.mode == gps.MODE_2D:
             status = "2D FIX"
@@ -1165,15 +1174,15 @@ class Base(object):
         if data.mode != self.saved_mode:
             self.last_transition = time.time()
             self.saved_mode = data.mode
-        return status + " (%d secs)" % (time.time() - self.last_transition)
+        return status
 
     def update_gpsdata(self, tpv):
         "Update the GPS data fields."
-        # the first 21 fields are updated using TPV data
-        # the next 7 fields are updated using SKY data
+        # the first 24 fields are updated using TPV data
+        # the next 8 fields are updated using SKY data
 
         markup = "<span font_desc='monospace 10'>%s </span>"
-        for (hook, widget) in Base.gpsfields[:21]:
+        for (hook, widget) in Base.gpsfields[:24]:
             if hook:  # Remove this guard when we have all hooks
                 widget.set_markup(markup % hook(self, tpv))
         self.gsview.update(tpv)
@@ -1272,9 +1281,9 @@ class Base(object):
         self.skyview.redraw(satellites)
 
         markup = "<span font_desc='monospace 10'>%s </span>"
-        # the first 21 fields are updated using TPV data
-        # the next 7 fields are updated using SKY data
-        for (hook, widget) in Base.gpsfields[21:28]:
+        # the first 24 fields are updated using TPV data
+        # the next 8 fields are updated using SKY data
+        for (hook, widget) in Base.gpsfields[24:32]:
             if hook:  # Remove this guard when we have all hooks
                 widget.set_markup(markup % hook(self, data))
 
