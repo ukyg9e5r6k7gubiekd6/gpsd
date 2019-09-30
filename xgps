@@ -43,6 +43,10 @@ import time
 
 # Gtk3 imports.  Gtk3 requires the require_version(), which then causes
 # pylint to complain about the subsequent "non-top" imports.
+# On gentoo these are from the dev-python/pygobject package.
+# "Python bindings for GObject Introspection"
+# It looks like PyGTK, but it is not.  PyGTK is unmaintained.
+
 import gi
 try:
     gi.require_version('Gtk', '3.0')
@@ -798,6 +802,25 @@ class Base(object):
         self.window.connect("delete-event", self.delete_event)
         self.window.set_resizable(False)
 
+        # do the CSS thing
+        style_provider = Gtk.CssProvider()
+
+        css = b"""
+frame * {
+    background-color: #FFF;
+    color: #000;
+}
+"""
+        # font-desc: "Comic Sans 12";
+
+        style_provider.load_from_data(css)
+
+        Gtk.StyleContext.add_provider_for_screen(
+            Gdk.Screen.get_default(),
+            style_provider,
+            Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        )
+
         vbox = Gtk.VBox(homogeneous=False, spacing=0)
         self.window.add(vbox)
 
@@ -969,11 +992,15 @@ class Base(object):
 
         viewframe.add(self.skyview)
 
+        # Display area for incoming JSON
         self.rawdisplay = Gtk.Entry()
         self.rawdisplay.set_editable(False)
         vbox.add(self.rawdisplay)
 
+        # Display area for GPS Data
         self.dataframe = Gtk.Frame(label="GPS Data")
+        # print("GPS Data css:", self.dataframe.get_css_name())
+
         datatable = Gtk.Grid()
         self.dataframe.add(datatable)
         gpswidgets = []
@@ -998,6 +1025,7 @@ class Base(object):
             gpswidgets.append(entry)
         vbox.add(self.dataframe)
 
+        # Add noise box
         self.noisebox = Gtk.HBox(homogeneous=False, spacing=0)
         vbox.add(self.noisebox)
         noiseframe = Gtk.Frame(label="Noise Statistics")
