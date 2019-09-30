@@ -201,7 +201,7 @@ class SkyView(Gtk.DrawingArea):
         self.sat_xy = []
         self.center_x = self.center_y = self.radius = None
         self.rotate = rotation
-        if self.rotate == None:
+        if self.rotate is None:
             self.rotate = 0
         self.connect('motion_notify_event', self.popup)
         self.popover = None
@@ -895,7 +895,6 @@ frame * {
                                       Gtk.AccelFlags.VISIBLE)
             submenu.append(menui)
 
-
         # Step of Grid
         topmenu = Gtk.MenuItem(label="Step of Grid")
         menubar.append(topmenu)
@@ -1210,9 +1209,9 @@ frame * {
 
     def update_mag_dec(self, data):
         "update magnetic declination in the GPS Data window"
-        if data.mode >= gps.MODE_2D and \
-             hasattr(data, "lat") and \
-             hasattr(data, "lon"):
+        if ((data.mode >= gps.MODE_2D and
+             hasattr(data, "lat") and
+             hasattr(data, "lon"))):
             off = gps.clienthelpers.mag_var(data.lat, data.lon)
             off2 = gps.clienthelpers.deg_to_str(self.deg_type, off)
             return off2
@@ -1220,9 +1219,9 @@ frame * {
 
     def update_maidenhead(self, data):
         "update maidenhead grid square in the GPS Data window"
-        if data.mode >= gps.MODE_2D and \
-             hasattr(data, "lat") and \
-             hasattr(data, "lon"):
+        if ((data.mode >= gps.MODE_2D and
+             hasattr(data, "lat") and
+             hasattr(data, "lon"))):
             return gps.clienthelpers.maidenhead(data.lat, data.lon)
         return "n/a"
 
@@ -1255,7 +1254,7 @@ frame * {
         for (hook, widget) in Base.gpsfields[:28]:
             if hook:  # Remove this guard when we have all hooks
                 widget.set_markup(markup % hook(self, tpv))
-        if self.rotate == None and self.skyview is not None:
+        if self.rotate is None and self.skyview:
             self.skyview.rotate = gps.clienthelpers.mag_var(tpv.lat, tpv.lon)
 
     def update_version(self, ver):
