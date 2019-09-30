@@ -188,7 +188,7 @@ class SkyView(Gtk.DrawingArea):
     HORIZON_PAD = 50    # How much whitespace to leave around horizon
     SAT_RADIUS = 5      # Diameter of satellite circle
 
-    def __init__(self, rotation=0.0):
+    def __init__(self, rotation=None):
         "Initialize class SkyView"
         Gtk.DrawingArea.__init__(self)
         # GObject.GObject.__init__(self)
@@ -201,6 +201,8 @@ class SkyView(Gtk.DrawingArea):
         self.sat_xy = []
         self.center_x = self.center_y = self.radius = None
         self.rotate = rotation
+        if self.rotate == None:
+            self.rotate = 0
         self.connect('motion_notify_event', self.popup)
         self.popover = None
         self.pop_xy = (None, None)
@@ -584,25 +586,6 @@ class NoiseView(object):
             widget.set_markup(markup % s)
 
 
-class MaidenheadView(object):
-    "Encapsulate view object for watching Maidenhead grid location."
-
-    def __init__(self):
-        "Initialize class MaidenheadView"
-        self.widget = Gtk.Entry()
-        self.widget.set_editable(False)
-
-    def update(self, tpv):
-        "Update class MaidenheadView"
-        if ((tpv.mode >= gps.MODE_2D and
-             hasattr(tpv, "lat") and
-             hasattr(tpv, "lon"))):
-            self.widget.set_text(gps.clienthelpers.maidenhead(tpv.lat,
-                                                              tpv.lon))
-        else:
-            self.widget.set_text("n/a")
-
-
 class AISView(object):
     "Encapsulate store and view objects for watching AIS data."
     AIS_ENTRIES = 10
@@ -726,7 +709,7 @@ class AISView(object):
 
 class Base(object):
     "Base class for all the output"
-    ROWS = 8
+    ROWS = 9
     gpsfields = (
         # First column
         ("Time", lambda s, r: s.update_time(r)),
@@ -737,6 +720,7 @@ class Base(object):
         ("Speed", lambda s, r: s.update_speed(r)),
         ("Climb", lambda s, r: s.update_climb(r)),
         ("Track", lambda s, r: s.update_track(r)),
+        ('Maidenhead', lambda s, r: s.update_maidenhead(r)),
         # Second column
         ("Status", lambda s, r: s.update_status(r, 0)),
         ("For", lambda s, r: s.update_status(r, 1)),
@@ -746,6 +730,7 @@ class Base(object):
         ("EPS", lambda s, r: s.update_err_speed(r, "eps")),
         ("EPC", lambda s, r: s.update_err_speed(r, "epc")),
         ("EPD", lambda s, r: s.update_err_degrees(r, "epd")),
+        ("Mag Dec", lambda s, r: s.update_mag_dec(r)),
         # third column
         ("ECEF X", lambda s, r: s.update_ecef(r, "ecefx")),
         ("ECEF Y", lambda s, r: s.update_ecef(r, "ecefy")),
@@ -755,6 +740,7 @@ class Base(object):
         ("ECEF VY", lambda s, r: s.update_ecef(r, "ecefvy", "/s")),
         ("ECEF VZ", lambda s, r: s.update_ecef(r, "ecefvz", "/s")),
         ("ECEF vAcc", lambda s, r: s.update_ecef(r, "ecefvAcc", "/s")),
+        ('', ''),
         # fourth column
         ("Sats Seen", lambda s, r: s.update_seen(r, 0)),
         ("Sats Used", lambda s, r: s.update_seen(r, 1)),
@@ -764,8 +750,8 @@ class Base(object):
         ("HDOP", lambda s, r: s.update_dop(r, "hdop")),
         ("TDOP", lambda s, r: s.update_dop(r, "tdop")),
         ("GDOP", lambda s, r: s.update_dop(r, "gdop")),
+        ('', ''),
     )
-
 
     def about(self, _unused):
         "Show about dialog"
@@ -780,8 +766,7 @@ class Base(object):
         about.run()
         about.destroy()
 
-
-    def __init__(self, deg_type, rotation=0.0, title=""):
+    def __init__(self, deg_type, rotation=None, title=""):
         "Initialize class Base"
         self.deg_type = deg_type
         self.rotate = rotation
@@ -857,7 +842,6 @@ frame * {
                  ["Responses", True, "<Control>R", "Responses"],
                  ["GPS Data", True, "<Control>G", "GPS"],
                  ["Noise Statistics", False, "<Control>N", "Noise"],
-                 ["Maidenhead", False, "<Control>M", "Maidenhead"],
                  ["AIS Data", False, "<Control>A", "AIS"],
                  ]
 
@@ -1033,13 +1017,6 @@ frame * {
         self.noiseview = NoiseView()
         noiseframe.add(self.noiseview.widget)
 
-        self.gsbox = Gtk.HBox(homogeneous=False, spacing=0)
-        vbox.add(self.gsbox)
-        gsframe = Gtk.Frame(label="Maidenhead Grid Square")
-        self.gsbox.add(gsframe)
-        self.gsview = MaidenheadView()
-        gsframe.add(self.gsview.widget)
-
         self.aisbox = Gtk.HBox(homogeneous=False, spacing=0)
         vbox.add(self.aisbox)
         aisframe = Gtk.Frame(label="AIS Data")
@@ -1051,9 +1028,6 @@ frame * {
         # Hide the Noise Statistics window until user selects it.
         self.noisebox.hide()
 
-        # Hide the Maidenhead window until user selects it.
-        self.gsbox.hide()
-
         # Hide the AIS window until user selects it.
         self.aisbox.hide()
 
@@ -1062,7 +1036,6 @@ frame * {
             "Responses": self.rawdisplay,
             "GPS": self.dataframe,
             "Noise": self.noisebox,
-            "Maidenhead": self.gsbox,
             "AIS": self.aisbox}
 
         # Discard field labels and associate data hooks with their widgets
@@ -1230,6 +1203,24 @@ frame * {
 
         return "n/a"
 
+    def update_mag_dec(self, data):
+        "update magnetic declination in the GPS Data window"
+        if data.mode >= gps.MODE_2D and \
+             hasattr(data, "lat") and \
+             hasattr(data, "lon"):
+            off = gps.clienthelpers.mag_var(data.lat, data.lon)
+            off2 = gps.clienthelpers.deg_to_str(self.deg_type, off)
+            return off2
+        return "n/a"
+
+    def update_maidenhead(self, data):
+        "update maidenhead grid square in the GPS Data window"
+        if data.mode >= gps.MODE_2D and \
+             hasattr(data, "lat") and \
+             hasattr(data, "lon"):
+            return gps.clienthelpers.maidenhead(data.lat, data.lon)
+        return "n/a"
+
     def update_status(self, data, item):
         "Update the status window"
 
@@ -1252,14 +1243,15 @@ frame * {
 
     def update_gpsdata(self, tpv):
         "Update the GPS data fields."
-        # the first 24 fields are updated using TPV data
+        # the first 26 fields are updated using TPV data
         # the next 8 fields are updated using SKY data
 
         markup = "<span font_desc='monospace 10'>%s </span>"
         for (hook, widget) in Base.gpsfields[:24]:
             if hook:  # Remove this guard when we have all hooks
                 widget.set_markup(markup % hook(self, tpv))
-        self.gsview.update(tpv)
+        if self.rotate == None and self.skyview is not None:
+            self.skyview.rotate = gps.clienthelpers.mag_var(tpv.lat, tpv.lon)
 
     def update_version(self, ver):
         "Update the Version"
@@ -1374,6 +1366,8 @@ frame * {
 
         # print("set_deg:", _unused, handle)
         self.deg_type = handle
+        if hasattr(self, 'mvview') and self.mvview is not None:
+            self.mvview.deg_type = handle
 
     def set_units(self, _unused, handle):
         "Change the display units."
@@ -1457,7 +1451,7 @@ if __name__ == "__main__":
         debug = 0
         degreefmt = 'd'
         unit_system = None
-        rotate = 0.0
+        rotate = None
         for (opt, val) in options:
             if opt in '-D':
                 debug = int(val)
@@ -1469,7 +1463,7 @@ if __name__ == "__main__":
                 try:
                     rotate = float(val)
                 except ValueError:
-                    rotate = 0.0
+                    rotate = None
             elif opt in ('-?', '-h', '--help'):
                 print(__doc__)
                 sys.exit(0)
