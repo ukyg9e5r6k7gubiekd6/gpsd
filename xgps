@@ -730,7 +730,7 @@ class Base(object):
         ("EPS", lambda s, r: s.update_err_speed(r, "eps")),
         ("EPC", lambda s, r: s.update_err_speed(r, "epc")),
         ("EPD", lambda s, r: s.update_err_degrees(r, "epd")),
-        ('Grid', lambda s, r: s.update_maidenhead(r)),
+        ("Mag Dec", lambda s, r: s.update_mag_dec(r)),
         # third column
         ("ECEF X", lambda s, r: s.update_ecef(r, "ecefx")),
         ("ECEF Y", lambda s, r: s.update_ecef(r, "ecefy")),
@@ -740,7 +740,7 @@ class Base(object):
         ("ECEF VY", lambda s, r: s.update_ecef(r, "ecefvy", "/s")),
         ("ECEF VZ", lambda s, r: s.update_ecef(r, "ecefvz", "/s")),
         ("ECEF vAcc", lambda s, r: s.update_ecef(r, "ecefvAcc", "/s")),
-        ("Mag Dec", lambda s, r: s.update_mag_dec(r)),
+        ('Grid', lambda s, r: s.update_maidenhead(r)),
         # fourth column
         ("Sats Seen", lambda s, r: s.update_seen(r, 0)),
         ("Sats Used", lambda s, r: s.update_seen(r, 1)),
@@ -758,7 +758,12 @@ class Base(object):
 
         about = Gtk.AboutDialog()
         about.set_program_name("xgps")
-        about.set_version("Version " + gps_version)
+        print(gi.version_info)
+        about.set_version("Versions:\n"
+                          "xgps %s\n"
+                          "PyGObject Version %d.%d.%d" %
+                          (gps_version,  gi.version_info[0],
+                           gi.version_info[1], gi.version_info[2]))
         about.set_copyright("Copyright 2004-2019 by The GPSD Project")
         about.set_website("https://www.gpsd.io")
         about.set_license("BSD-2-clause")
