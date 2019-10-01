@@ -586,12 +586,13 @@ class Main(object):
             target = " " + target
         self.window.set_title('xgpsspeed' + target)
         if self.nautical:
-            self.window.set_size_request(500, 550)
+            self.window.set_size_request(400, 450)
             self.widget = NauticalSpeedometer(
                 speed_unit=self.speed_unit,
                 maxspeed=self.maxspeed,
                 rotate=self.rotate)
         else:
+            self.window.set_size_request(300, 350)
             self.widget = LandSpeedometer(speed_unit=self.speed_unit)
         self.window.connect('delete-event', self.delete_event)
         self.window.connect('destroy', self.destroy)
