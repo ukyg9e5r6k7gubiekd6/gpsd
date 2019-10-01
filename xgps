@@ -79,12 +79,6 @@ if gps.__version__ != gps_version:
     sys.exit(1)
 
 
-gui_about = '''\
-This is xgps, a test client for the gpsd daemon.
-
-By Eric S. Raymond for the GPSD project, December 2009
-'''
-
 # MAXCHANNELS, from gps.h, currently 120
 MAXCHANNELS = 120
 # MAXCHANDISP, max channels to display
@@ -758,7 +752,6 @@ class Base(object):
 
         about = Gtk.AboutDialog()
         about.set_program_name("xgps")
-        print(gi.version_info)
         about.set_version("Versions:\n"
                           "xgps %s\n"
                           "PyGObject Version %d.%d.%d" %
@@ -766,6 +759,7 @@ class Base(object):
                            gi.version_info[1], gi.version_info[2]))
         about.set_copyright("Copyright 2004-2019 by The GPSD Project")
         about.set_website("https://www.gpsd.io")
+        about.set_website_label("https://www.gpsd.io")
         about.set_license("BSD-2-clause")
 
         about.run()
