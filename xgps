@@ -917,6 +917,22 @@ frame * {
                                       Gtk.AccelFlags.VISIBLE)
             submenu.append(menui)
 
+        submenu.append(Gtk.SeparatorMenuItem())
+        skymr = [["Mag North  Up", True, "M", None],
+                 ['Track Up', False, 'H', True],
+                 ["True North Up", False, "T", 0],
+                 ]
+        menui = None
+        for name, active, acc, handle in skymr:
+            menui = Gtk.RadioMenuItem(group=menui, label=name)
+            menui.set_active(active)
+            menui.connect("activate", self.set_skyview_n, handle)
+            #if acc:
+                #key, mod = Gtk.accelerator_parse(acc)
+                #menui.add_accelerator("activate", agr, key, mod,
+                                      #Gtk.AccelFlags.VISIBLE)
+            submenu.append(menui)
+
         # Help
         topmenu = Gtk.MenuItem(label="Help")
         menubar.append(topmenu)
@@ -1256,6 +1272,8 @@ frame * {
                 widget.set_markup(markup % hook(self, tpv))
         if self.rotate is None and self.skyview:
             self.skyview.rotate = gps.clienthelpers.mag_var(tpv.lat, tpv.lon)
+        elif self.rotate is True and 'track' in tpv:
+            self.skyview.rotate = tpv.track
 
     def update_version(self, ver):
         "Update the Version"
@@ -1358,6 +1376,12 @@ frame * {
                 widget.set_markup(markup % hook(self, data))
 
     # Preferences
+
+    def set_skyview_n(self, system, handle):
+        "Change the step of grid."
+        self.rotate = handle
+        if handle is not None:
+            self.skyview.rotate = handle
 
     def set_step_of_grid(self, system, handle):
         "Change the step of grid."
