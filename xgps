@@ -821,11 +821,21 @@ frame * {
         submenu = Gtk.Menu()
         topmenu.set_submenu(submenu)
 
-        menui = Gtk.MenuItem(label="Quit")
-        # exit = Gtk.MenuItem(label="_Quit")
-        # exit.set_use_underline(True)
-        # exit = Gtk.ImageMenuItem(Gtk.STOCK_QUIT)
+        menui = Gtk.MenuItem(label="Connect")
+        # key, mod = Gtk.accelerator_parse("<Control>Q")
+        # menui.add_accelerator("activate", agr, key, mod,
+        #                      Gtk.AccelFlags.VISIBLE)
+        # menui.connect("activate", Gtk.main_quit)
+        submenu.append(menui)
 
+        menui = Gtk.MenuItem(label="Disconnect")
+        # key, mod = Gtk.accelerator_parse("<Control>Q")
+        # menui.add_accelerator("activate", agr, key, mod,
+        #                      Gtk.AccelFlags.VISIBLE)
+        # menui.connect("activate", Gtk.main_quit)
+        submenu.append(menui)
+
+        menui = Gtk.MenuItem(label="Quit")
         key, mod = Gtk.accelerator_parse("<Control>Q")
         menui.add_accelerator("activate", agr, key, mod,
                               Gtk.AccelFlags.VISIBLE)
