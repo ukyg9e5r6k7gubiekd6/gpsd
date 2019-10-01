@@ -1338,12 +1338,12 @@ frame * {
 
             # clear rest of the list
             for i in range(data.satellites_seen, MAXCHANDISP):
-                for j in range(0, 6):
+                for j in range(0, 7):
                     self.set_satlist_field(i, j, "")
         else:
             # clear all of the list
             for i in range(0, MAXCHANDISP):
-                for j in range(0, 6):
+                for j in range(0, 7):
                     self.set_satlist_field(i, j, "")
             satellites = ()
 
