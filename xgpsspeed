@@ -600,58 +600,55 @@ class Main(object):
         self.window.add(vbox)
 
         self.window.present()
-        self.uimanager = Gtk.UIManager()
-        self.accelgroup = self.uimanager.get_accel_group()
-        self.window.add_accel_group(self.accelgroup)
-        self.actiongroup = Gtk.ActionGroup('gpsspeed-ng')
-        self.actiongroup.add_actions(
-            [
-                ('Quit', Gtk.STOCK_QUIT, '_Quit', None,
-                    'Quit the Program', lambda unused: Gtk.main_quit()),
-                ('File', None, '_File'),
-                ('Units', None, '_Units')]
-        )
-        self.actiongroup.add_radio_actions(
-            [
-                ('Imperial', None, '_Imperial', '<Control>i',
-                    'Imperial Units', 0),
-                ('Metric', None, '_Metric', '<Control>m',
-                    'Metrical Units', 1),
-                ('Nautical', None, '_Nautical', '<Control>n',
-                    'Nautical Units', 2)
-            ],
-            0, lambda a, unused: setattr(
-                self.widget, 'speed_unit',
-                ['mph', 'kmh', 'knots'][a.get_current_value()])
-        )
 
-        self.uimanager.insert_action_group(self.actiongroup, 0)
-        self.uimanager.add_ui_from_string('''
-<ui>
-    <menubar name='MenuBar'>
-        <menu action='File'>
-            <menuitem action='Quit'/>
-        </menu>
-        <menu action='Units'>
-            <menuitem action='Imperial'/>
-            <menuitem action='Metric'/>
-            <menuitem action='Nautical'/>
-        </menu>
-    </menubar>
-</ui>
-''')
-        self.active_unit_map = {
-            'mph': '/MenuBar/Units/Imperial',
-            'kmh': '/MenuBar/Units/Metric',
-            'knots': '/MenuBar/Units/Nautical'
-        }
-        menubar = self.uimanager.get_widget('/MenuBar')
-        self.uimanager.get_widget(
-            self.active_unit_map.get(self.speed_unit)
-        ).set_active(True)
+        # menubar
+        menubar = Gtk.MenuBar()
+        agr = Gtk.AccelGroup()
+        self.window.add_accel_group(agr)
+
+        # File
+        topmenu = Gtk.MenuItem(label="File")
+        menubar.append(topmenu)
+        submenu = Gtk.Menu()
+        topmenu.set_submenu(submenu)
+        menui = Gtk.MenuItem(label="Quit")
+        key, mod = Gtk.accelerator_parse("<Control>Q")
+        menui.add_accelerator("activate", agr, key, mod,
+                              Gtk.AccelFlags.VISIBLE)
+        menui.connect("activate", Gtk.main_quit)
+        submenu.append(menui)
+
+        # Units
+        topmenu = Gtk.MenuItem(label="Units")
+        menubar.append(topmenu)
+        submenu = Gtk.Menu()
+        topmenu.set_submenu(submenu)
+
+        units = [["Imperial", True, "i", 'mph'],
+                 ["Nautical", False, "n", 'knots'],
+                 ["Metric", False, "m", 'kmh'],
+                 ]
+
+        menui = None
+        for name, active, acc, handle in units:
+            menui = Gtk.RadioMenuItem(group=menui, label=name)
+            menui.set_active(active)
+            menui.connect("activate", self.set_units, handle)
+            if acc:
+                key, mod = Gtk.accelerator_parse(acc)
+                menui.add_accelerator("activate", agr, key, mod,
+                                      Gtk.AccelFlags.VISIBLE)
+            submenu.append(menui)
+
         vbox.pack_start(menubar, False, False, 0)
         vbox.add(self.widget)
         self.window.show_all()
+
+    def set_units(self, _unused, handle):
+        "Change the display units."
+
+        # print("set_units:", handle, self)
+        self.widget.speed_unit = handle
 
     def watch(self, daemon, device):
         self.daemon = daemon
