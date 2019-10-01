@@ -69,6 +69,7 @@ extern "C" {
  *       Remove unused timestamp() and unix_to_iso8601().
  *       Remove unused iso8601_to_unix().
  *       Remove unused struct timestamp_t entirely
+ *       Add DEG_NORM()
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -76,6 +77,10 @@ extern "C" {
 #define MAXCHANNELS	140	/* u-blox 9 tracks 140 signals */
 #define MAXUSERDEVS	4	/* max devices per user */
 #define GPS_PATH_MAX	128	/* for names like /dev/serial/by-id/... */
+
+// normalize degrees to 0 to 359
+#define DEG_NORM(deg) \
+    if (0 > (deg)) {(deg) += 360;} else if (360 <= (deg)) {(deg) -= 360;};
 
 /*
  * The structure describing an uncertainty volume in kinematic space.
