@@ -684,9 +684,12 @@ class Main(object):
     def watch(self, daemon, device):
         self.daemon = daemon
         self.device = device
-        GLib.io_add_watch(daemon.sock, GLib.IO_IN, self.handle_response)
-        GLib.io_add_watch(daemon.sock, GLib.IO_ERR, self.handle_hangup)
-        GLib.io_add_watch(daemon.sock, GLib.IO_HUP, self.handle_hangup)
+        GLib.io_add_watch(daemon.sock, GLib.PRIORITY_DEFAULT,
+                          GLib.IO_IN, self.handle_response)
+        GLib.io_add_watch(daemon.sock, GLib.PRIORITY_DEFAULT,
+                         GLib.IO_ERR, self.handle_hangup)
+        GLib.io_add_watch(daemon.sock, GLib.PRIORITY_DEFAULT,
+                          GLib.IO_HUP, self.handle_hangup)
         return True
 
     def handle_response(self, source, condition):
