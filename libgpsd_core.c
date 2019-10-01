@@ -992,18 +992,31 @@ static void gpsd_error_model(struct gps_device_t *session)
         }
     }
 
-    if (0 == isfinite(fix->magnetic_track) &&
-        0 != isfinite(fix->track) &&
-        0 != isfinite(fix->magnetic_var)) {
+    if (0 != isfinite(fix->magnetic_var)) {
+        if (0 == isfinite(fix->magnetic_track) &&
+            0 != isfinite(fix->track)) {
 
-        // caculate mag track
-        fix->magnetic_track = fix->track + fix->magnetic_var;
+            // calculate mag track
+            fix->magnetic_track = fix->track + fix->magnetic_var;
 
-        // normalize mag track
-        if (0 > fix->magnetic_track) {
-            fix->magnetic_track += 360;
-        } else if (359 < fix->magnetic_track) {
-            fix->magnetic_track -= 360;
+            // normalize mag track
+            if (0 > fix->magnetic_track) {
+                fix->magnetic_track += 360;
+            } else if (359 < fix->magnetic_track) {
+                fix->magnetic_track -= 360;
+            }
+        } else if (0 != isfinite(fix->magnetic_track) &&
+                   0 == isfinite(fix->track)) {
+
+            // calculate true track
+            fix->track = fix->magnetic_track - fix->magnetic_var;
+
+            // normalize mag track
+            if (0 > fix->track) {
+                fix->track += 360;
+            } else if (359 < fix->magnetic_track) {
+                fix->track -= 360;
+            }
         }
     }
 
