@@ -640,9 +640,39 @@ class Main(object):
                                       Gtk.AccelFlags.VISIBLE)
             submenu.append(menui)
 
+        # Help
+        topmenu = Gtk.MenuItem(label="Help")
+        menubar.append(topmenu)
+        submenu = Gtk.Menu()
+        topmenu.set_submenu(submenu)
+
+        menui = Gtk.MenuItem(label="About")
+        menui.connect("activate", self.about)
+        submenu.append(menui)
+
         vbox.pack_start(menubar, False, False, 0)
         vbox.add(self.widget)
         self.window.show_all()
+
+    def about(self, _unused):
+        "Show about dialog"
+
+        print("SNARD")
+        about = Gtk.AboutDialog()
+        about.set_program_name("xgpsspeed")
+        about.set_version("Versions:\n"
+                          "xgpspeed %s\n"
+                          "PyGObject Version %d.%d.%d" %
+                          (gps_version,  gi.version_info[0],
+                           gi.version_info[1], gi.version_info[2]))
+        about.set_copyright("Copyright 2004-2019 by The GPSD Project")
+        about.set_website("https://www.gpsd.io")
+        about.set_website_label("https://www.gpsd.io")
+        about.set_license("BSD-2-clause")
+
+        about.run()
+        about.destroy()
+
 
     def set_units(self, _unused, handle):
         "Change the display units."
