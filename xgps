@@ -901,9 +901,9 @@ frame * {
         submenu = Gtk.Menu()
         topmenu.set_submenu(submenu)
 
-        grid = [["30\xb0", True, None, 30],
-                ["45\xb0", False, None, 45],
-                ["Off", False, None, 0],
+        grid = [["30\xb0", True, "3", 30],
+                ["45\xb0", False, "4", 45],
+                ["Off", False, "5", 0],
                 ]
 
         menui = None
@@ -918,19 +918,19 @@ frame * {
             submenu.append(menui)
 
         submenu.append(Gtk.SeparatorMenuItem())
-        skymr = [["Mag North  Up", True, "M", None],
-                 ['Track Up', False, 'H', True],
-                 ["True North Up", False, "T", 0],
+        skymr = [["Mag North  Up", True, "6", None],
+                 ["Track Up", False, "7", True],
+                 ["True North Up", False, "8", 0],
                  ]
         menui = None
         for name, active, acc, handle in skymr:
             menui = Gtk.RadioMenuItem(group=menui, label=name)
             menui.set_active(active)
             menui.connect("activate", self.set_skyview_n, handle)
-            #if acc:
-                #key, mod = Gtk.accelerator_parse(acc)
-                #menui.add_accelerator("activate", agr, key, mod,
-                                      #Gtk.AccelFlags.VISIBLE)
+            if acc:
+                key, mod = Gtk.accelerator_parse(acc)
+                menui.add_accelerator("activate", agr, key, mod,
+                                      Gtk.AccelFlags.VISIBLE)
             submenu.append(menui)
 
         # Help
