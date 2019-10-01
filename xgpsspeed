@@ -109,8 +109,14 @@ class LandSpeedometer(Speedometer):
         self.width = allocation.width
         self.height = allocation.height
 
-    def draw_s(self, _unused, _event, _empty=None):
-        self.cr = self.get_window().cairo_create()
+    def draw_s(self, widget, _event, _empty=None):
+        "Top level draw"
+
+        window = widget.get_window()
+        region = window.get_clip_region()
+        context = window.begin_draw_frame(region)
+        self.cr = context.get_cairo_context()
+
         self.cr.rectangle(0, 0, self.width, self.height)
         self.cr.clip()
         x, y = self.get_x_y()
@@ -120,6 +126,8 @@ class LandSpeedometer(Speedometer):
         self.draw_arc_and_ticks(width, height, radius, x, y)
         self.draw_needle(self.last_speed, radius, x, y)
         self.draw_speed_text(self.last_speed, radius, x, y)
+        self.cr = None
+        window.end_draw_frame(context)
 
     def draw_arc_and_ticks(self, width, height, radius, x, y):
         self.cr.set_source_rgb(1.0, 1.0, 1.0)
@@ -283,6 +291,7 @@ class NauticalSpeedometer(Speedometer):
         self.last_heading = 0
         self.maxspeed = int(maxspeed)
         self.rotate = radians(rotate)
+        self.cr = None
 
     def polar2xy(self, radius, angle, polex, poley):
         '''convert Polar coordinate to Cartesian coordinate system
@@ -303,8 +312,14 @@ class NauticalSpeedometer(Speedometer):
         self.width = allocation.width
         self.height = allocation.height
 
-    def draw_s(self, _unused, _event, _empty=None):
-        self.cr = self.get_window().cairo_create()
+    def draw_s(self, widget, _event, _empty=None):
+        "Top level draw"
+
+        window = widget.get_window()
+        region = window.get_clip_region()
+        context = window.begin_draw_frame(region)
+        self.cr = context.get_cairo_context()
+
         self.cr.rectangle(0, 0, self.width, self.height)
         self.cr.clip()
         x, y = self.get_x_y()
@@ -317,6 +332,8 @@ class NauticalSpeedometer(Speedometer):
             self.draw_sat(sat, radius * NauticalSpeedometer.HEADING_SAT_GAP,
                           x, y)
         self.draw_speed(radius, x, y)
+        self.cr = None
+        window.end_draw_frame(context)
 
     def draw_text(self, x, y, text, fontsize=10):
         '''draw text at given location
@@ -674,7 +691,6 @@ class Main(object):
         about.run()
         about.destroy()
 
-
     def set_units(self, _unused, handle):
         "Change the display units."
 
@@ -687,7 +703,7 @@ class Main(object):
         GLib.io_add_watch(daemon.sock, GLib.PRIORITY_DEFAULT,
                           GLib.IO_IN, self.handle_response)
         GLib.io_add_watch(daemon.sock, GLib.PRIORITY_DEFAULT,
-                         GLib.IO_ERR, self.handle_hangup)
+                          GLib.IO_ERR, self.handle_hangup)
         GLib.io_add_watch(daemon.sock, GLib.PRIORITY_DEFAULT,
                           GLib.IO_HUP, self.handle_hangup)
         return True
