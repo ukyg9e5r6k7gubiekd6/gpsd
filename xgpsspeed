@@ -23,10 +23,18 @@ import cairo
 # Gtk3 imports.  Gtk3 requires the require_version(), which then causes
 # pylint to complain about the subsequent "non-top" imports.
 import gi
-gi.require_version('Gtk', '3.0')
+try:
+    gi.require_version('Gtk', '3.0')
+except ValueError:
+    # Gtk2 may be installed, has no require_version()
+    sys.stderr.write("xgps: ERROR Unsupported Gtk version\n")
+    exit(1)
+
 from gi.repository import Gtk      # pylint: disable=wrong-import-position
 from gi.repository import Gdk      # pylint: disable=wrong-import-position
 from gi.repository import GObject  # pylint: disable=wrong-import-position
+from gi.repository import GLib  # pylint: disable=wrong-import-position
+
 
 # pylint wants local modules last
 try:
@@ -571,7 +579,7 @@ class Main(object):
         self.maxspeed = maxspeed
         self.nautical = nautical
         self.rotate = rotate
-        self.window = Gtk.Window(Gtk.WindowType.TOPLEVEL)
+        self.window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
         if not self.window.get_display():
             raise Exception("Can't open display")
         if len(target):
@@ -588,7 +596,7 @@ class Main(object):
         self.window.connect('delete-event', self.delete_event)
         self.window.connect('destroy', self.destroy)
         self.widget.show()
-        vbox = Gtk.VBox(False, 0)
+        vbox = Gtk.VBox(homogeneous=False, spacing=0)
         self.window.add(vbox)
 
         self.window.present()
@@ -648,9 +656,9 @@ class Main(object):
     def watch(self, daemon, device):
         self.daemon = daemon
         self.device = device
-        GObject.io_add_watch(daemon.sock, GObject.IO_IN, self.handle_response)
-        GObject.io_add_watch(daemon.sock, GObject.IO_ERR, self.handle_hangup)
-        GObject.io_add_watch(daemon.sock, GObject.IO_HUP, self.handle_hangup)
+        GLib.io_add_watch(daemon.sock, GObject.IO_IN, self.handle_response)
+        GLib.io_add_watch(daemon.sock, GObject.IO_ERR, self.handle_hangup)
+        GLib.io_add_watch(daemon.sock, GObject.IO_HUP, self.handle_hangup)
         return True
 
     def handle_response(self, source, condition):
