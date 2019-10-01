@@ -38,7 +38,7 @@ $GPRMC,194911.00,A,5241.99772,N,00517.56430,E,0.020,229.98,010809,,,A*66
 !AIVDO,1,1,,,B3aC3LP00063aeWRNpV?gwUUwP06,0*4B
 {"class":"AIS","type":18,"repeat":0,"mmsi":244630386,"scaled":false,"reserved":0,"speed":0,"accuracy":false,"lon":3175643,"lat":31619977,"course":2299,"heading":511,"second":11,"regional":0,"cs":true,"display":false,"dsc":true,"band":true,"msg22":true,"raim":true,"radio":917510}
 $GPGBS,194911.00,3.0,1.9,4.2,,,,*49
-{"class":"TPV","mode":2,"time":"2009-08-01T19:49:11.000Z","ept":0.005,"lat":52.699962000,"lon":5.292738333,"epx":1.900,"epy":3.000,"epv":4.200,"track":229.9800,"magvar":1.6,"speed":0.010,"eps":6.00}
+{"class":"TPV","mode":2,"time":"2009-08-01T19:49:11.000Z","ept":0.005,"lat":52.699962000,"lon":5.292738333,"epx":1.900,"epy":3.000,"epv":4.200,"track":229.9800,"magtrack":231.5488,"magvar":1.6,"speed":0.010,"eps":6.00}
 !AIVDM,1,1,,B,13bf9v00010IaB<N8IK3uSvH00SC,0*44
 {"class":"AIS","type":1,"repeat":0,"mmsi":246123000,"scaled":false,"status":0,"status_text":"Under way using engine","turn":0,"speed":1,"accuracy":false,"lon":3361350,"lat":31594860,"course":1014,"heading":127,"second":12,"maneuver":0,"raim":false,"radio":2259}
 $GPRMC,194912.00,A,5241.99761,N,00517.56408,E,0.012,,010809,,,A*7B

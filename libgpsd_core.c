@@ -986,11 +986,27 @@ static void gpsd_error_model(struct gps_device_t *session)
         }
         if (0 == isfinite(fix->magnetic_var) ||
             0.09 >= fabs(fix->magnetic_var)) {
-            /* some GPS set 0.0,E, or 0,w instead of blank */
+            /* some GPS set 0.0,E, or 0,W instead of blank */
             fix->magnetic_var = mag_var(fix->latitude,
                                         fix->longitude);
         }
     }
+
+    if (0 == isfinite(fix->magnetic_track) &&
+        0 != isfinite(fix->track) &&
+        0 != isfinite(fix->magnetic_var)) {
+
+        // caculate mag track
+        fix->magnetic_track = fix->track + fix->magnetic_var;
+
+        // normalize mag track
+        if (0 > fix->magnetic_track) {
+            fix->magnetic_track += 360;
+        } else if (359 < fix->magnetic_track) {
+            fix->magnetic_track -= 360;
+        }
+    }
+
     if (0 != isfinite(fix->geoid_sep)) {
 	if (0 != isfinite(fix->altHAE) &&
 	    0 == isfinite(fix->altMSL)) {
