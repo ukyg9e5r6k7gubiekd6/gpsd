@@ -603,27 +603,34 @@ class Main(object):
         self.window.set_title('xgpsspeed' + target)
         self.window.connect("delete-event", self.delete_event)
 
+        vbox = Gtk.VBox(homogeneous=False, spacing=0)
+        self.window.add(vbox)
+
+        # menubar
+        menubar = Gtk.MenuBar()
+        vbox.pack_start(menubar, False, False, 0)
+        agr = Gtk.AccelGroup()
+        self.window.add_accel_group(agr)
+
+        # need the widget before the menu as the menu building
+        # calls the widget
+        self.window.set_size_request(400, 450)
         if self.nautical:
-            self.window.set_size_request(400, 450)
             self.widget = NauticalSpeedometer(
                 speed_unit=self.speed_unit,
                 maxspeed=self.maxspeed,
                 rotate=self.rotate)
         else:
-            self.window.set_size_request(300, 350)
             self.widget = LandSpeedometer(speed_unit=self.speed_unit)
+
+        self.speedframe = Gtk.Frame()
+        self.speedframe.add(self.widget)
+        vbox.add(self.speedframe)
+
         self.window.connect('delete-event', self.delete_event)
         self.window.connect('destroy', self.destroy)
-        self.widget.show()
-        vbox = Gtk.VBox(homogeneous=False, spacing=0)
-        self.window.add(vbox)
-
         self.window.present()
 
-        # menubar
-        menubar = Gtk.MenuBar()
-        agr = Gtk.AccelGroup()
-        self.window.add_accel_group(agr)
 
         # File
         topmenu = Gtk.MenuItem(label="File")
@@ -636,6 +643,32 @@ class Main(object):
                               Gtk.AccelFlags.VISIBLE)
         menui.connect("activate", Gtk.main_quit)
         submenu.append(menui)
+
+        # View
+        topmenu = Gtk.MenuItem(label="View")
+        menubar.append(topmenu)
+        submenu = Gtk.Menu()
+        topmenu.set_submenu(submenu)
+
+        views = [["Nautical", False, "0", "Nautical"],
+                 ["Land", False, "1", "Land"],
+                 ]
+
+        if self.nautical:
+            views[0][1] = True
+        else:
+            views[1][1] = True
+
+        menui = None
+        for name, active, acc, handle in views:
+            menui = Gtk.RadioMenuItem(group=menui, label=name)
+            menui.set_active(active)
+            menui.connect("activate", self.view_toggle, handle)
+            if acc:
+                key, mod = Gtk.accelerator_parse(acc)
+                menui.add_accelerator("activate", agr, key, mod,
+                                      Gtk.AccelFlags.VISIBLE)
+            submenu.append(menui)
 
         # Units
         topmenu = Gtk.MenuItem(label="Units")
@@ -669,8 +702,8 @@ class Main(object):
         menui.connect("activate", self.about)
         submenu.append(menui)
 
-        vbox.pack_start(menubar, False, False, 0)
-        vbox.add(self.widget)
+        # vbox.pack_start(menubar, False, False, 0)
+        # vbox.add(self.speedframe)
         self.window.show_all()
 
     def about(self, _unused):
@@ -713,6 +746,30 @@ class Main(object):
         GLib.io_add_watch(daemon.sock, GLib.PRIORITY_DEFAULT,
                           GLib.IO_HUP, self.handle_hangup)
         return True
+
+    def view_toggle(self, action, name):
+        "Toggle widget view"
+
+        if not action.get_active() or not name:
+            # nothing to do
+            return
+
+        parent = self.widget.get_parent()
+
+        if 'Nautical' == name:
+            self.nautical = True
+            widget = NauticalSpeedometer(
+                speed_unit=self.speed_unit,
+                maxspeed=self.maxspeed,
+                rotate=self.rotate)
+        else:
+            self.nautical = False
+            widget = LandSpeedometer(speed_unit=self.speed_unit)
+
+        parent.remove(self.widget)
+        parent.add(widget)
+        self.widget = widget
+        self.widget.show()
 
     def handle_response(self, source, condition):
         if self.daemon.read() == -1:
