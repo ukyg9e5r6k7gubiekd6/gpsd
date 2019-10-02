@@ -512,8 +512,7 @@ class NauticalSpeedometer(Speedometer):
 
         color = Gdk.RGBA()
         color.parse(spec)
-        self.cr.set_source_rgba(color.red, color.green,
-                                color.blue, color.alpha)
+        Gdk.cairo_set_source_rgba(self.cr, color)
 
     def draw_sat(self, satsoup, radius, x, y):
         """Given a sat's elevation, azimuth, SNR, draw it on the skyview
