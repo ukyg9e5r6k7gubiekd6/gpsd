@@ -509,11 +509,11 @@ class NauticalSpeedometer(Speedometer):
 
     def set_color(self, spec):
         '''Set foreground color for drawing.'''
-        gdkcolor = Gdk.color_parse(spec)
-        r = gdkcolor.red / 65535.0
-        g = gdkcolor.green / 65535.0
-        b = gdkcolor.blue / 65535.0
-        self.cr.set_source_rgb(r, g, b)
+
+        color = Gdk.RGBA()
+        color.parse(spec)
+        self.cr.set_source_rgba(color.red, color.green,
+                                color.blue, color.alpha)
 
     def draw_sat(self, satsoup, radius, x, y):
         """Given a sat's elevation, azimuth, SNR, draw it on the skyview
