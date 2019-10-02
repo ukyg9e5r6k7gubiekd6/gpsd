@@ -602,6 +602,8 @@ class Main(object):
         if len(target):
             target = " " + target
         self.window.set_title('xgpsspeed' + target)
+        self.window.connect("delete-event", self.delete_event)
+
         if self.nautical:
             self.window.set_size_request(400, 450)
             self.widget = NauticalSpeedometer(
@@ -690,6 +692,11 @@ class Main(object):
 
         about.run()
         about.destroy()
+
+    def delete_event(self, _widget, _event, _data=None):
+        "Say goodbye nicely"
+        Gtk.main_quit()
+        return False
 
     def set_units(self, _unused, handle):
         "Change the display units."
@@ -795,7 +802,7 @@ class Main(object):
             w.run()
             w.destroy()
         except KeyboardInterrupt:
-            self.window.emit('delete_event', Gdk.Event(Gdk.NOTHING))
+            pass
 
 
 if __name__ == '__main__':
