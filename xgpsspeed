@@ -631,7 +631,6 @@ class Main(object):
         self.window.connect('destroy', self.destroy)
         self.window.present()
 
-
         # File
         topmenu = Gtk.MenuItem(label="File")
         menubar.append(topmenu)
