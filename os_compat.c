@@ -9,7 +9,7 @@
  * History of this code prior to the creation of this file can be found
  * in the histories of those files.
  *
- * This file is Copyright (c)2017-2018 by the GPSD project
+ * This file is Copyright (c)2017-2019 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 

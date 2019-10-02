@@ -12,7 +12,7 @@ now live in a different module.
 '''
 
 #
-# This file is Copyright (c) 2010 by the GPSD project
+# This file is Copyright (c) 2010-2019 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
 
@@ -159,10 +159,10 @@ class gpsdata(object):
     def __repr__(self):
         st = "Time:     %s (%s)\n" % (self.utc, self.fix.time)
         st += "Lat/Lon:  %f %f\n" % (self.fix.latitude, self.fix.longitude)
-        if not isfinite(self.fix.altitude):
-            st += "Altitude: ?\n"
+        if not isfinite(self.fix.altHAE):
+            st += "Altitude HAE: ?\n"
         else:
-            st += "Altitude: %f\n" % (self.fix.altitude)
+            st += "Altitude HAE: %f\n" % (self.fix.altHAAE)
         if not isfinite(self.fix.speed):
             st += "Speed:    ?\n"
         else:
