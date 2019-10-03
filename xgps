@@ -910,8 +910,8 @@ frame * {
         submenu = Gtk.Menu()
         topmenu.set_submenu(submenu)
 
-        grid = [["30\xb0", True, "3", 30],
-                ["45\xb0", False, "4", 45],
+        grid = [["30 deg", True, "3", 30],
+                ["45 deg", False, "4", 45],
                 ["Off", False, "5", 0],
                 ]
 
