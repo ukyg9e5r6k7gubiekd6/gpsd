@@ -303,6 +303,9 @@ static int json_internal_read_object(const char *cp,
 				      cursor->attribute));
 		    if (strcmp(cursor->attribute, attrbuf) == 0)
 			break;
+		    if (cursor->type == t_ignore && strncmp(cursor->attribute, "", 1) == 0) {
+			break;
+		    }
 		}
 		if (cursor->attribute == NULL) {
 		    json_debug_trace((1,
