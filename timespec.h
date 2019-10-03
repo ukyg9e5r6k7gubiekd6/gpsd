@@ -140,7 +140,7 @@ static inline void TS_NORM( struct timespec *ts)
 	(ts)->tv_sec = (time_t)int_part; \
     } while (0)
 
-/* convert integer (long) ms to a timespec_t */
+/* convert integer (64 bit for full range) ms to a timespec_t */
 #define MSTOTS(ts, ms) \
     do { \
 	(ts)->tv_sec = (time_t)(ms / 1000); \

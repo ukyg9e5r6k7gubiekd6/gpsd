@@ -170,7 +170,7 @@ static gps_mask_t greis_msg_GT(struct gps_device_t *session,
 			       unsigned char *buf, size_t len)
 {
     timespec_t ts_tow;
-    long tow;	             /* Time of week [ms] */
+    uint32_t tow;	     /* Time of week [ms] */
     uint16_t wn;	     /* GPS week number (modulo 1024) [dimensionless] */
     char ts_buf[TIMESPEC_LEN];
 
@@ -186,14 +186,15 @@ static gps_mask_t greis_msg_GT(struct gps_device_t *session,
 	return 0;
     }
 
-    tow = (long)getleu32(buf, 0);
+    tow = getleu32(buf, 0);
     wn = getleu16(buf, 4);
 
     MSTOTS(&ts_tow, tow);
     session->newdata.time = gpsd_gpstime_resolv(session, wn, ts_tow);
 
     GPSD_LOG(LOG_DATA, &session->context->errout,
-	     "GREIS: GT, tow: %lu, wn: %u, time: %s Leap:%u\n", tow, wn,
+	     "GREIS: GT, tow: %" PRIu32 ", wn: %" PRIu16 ", time: %s Leap:%u\n",
+             tow, wn,
              timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
              session->context->leap_seconds);
 
