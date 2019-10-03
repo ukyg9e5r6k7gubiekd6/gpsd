@@ -93,6 +93,16 @@ static void dbl_to_str(const char *fmt, double val, char *bufp, size_t len,
     }
 }
 
+#define FIX_QUALITY_INVALID 0
+#define FIX_QUALITY_GPS 1
+#define FIX_QUALITY_DGPS 2
+#define FIX_QUALITY_PPS 3
+#define FIX_QUALITY_RTK 4
+#define FIX_QUALITY_RTK_FLT 5
+#define FIX_QUALITY_DR 6
+#define FIX_QUALITY_MANUAL 7
+#define FIX_QUALITY_SIMULATED 8
+
 /* Dump a $GPGGA.
  * looks like this is only called from net_ntrip.c and nmea_tpv_dump()
  */
@@ -103,10 +113,43 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
     char time_str[TIMESTR_SZ];
     char lat_str[BUF_SZ];
     char lon_str[BUF_SZ];
+    unsigned char fixquality;
 
     utc_to_hhmmss(session->gpsdata.fix.time, time_str, sizeof(time_str), &tm);
 
     if (session->gpsdata.fix.mode > MODE_NO_FIX) {
+        switch(session->gpsdata.status) {
+        case STATUS_NO_FIX:
+            fixquality = FIX_QUALITY_INVALID;
+            break;
+        case STATUS_FIX:
+            fixquality = FIX_QUALITY_GPS;
+            break;
+        case STATUS_DGPS_FIX:
+            fixquality = FIX_QUALITY_DGPS;
+            break;
+        case STATUS_RTK_FIX:
+            fixquality = FIX_QUALITY_RTK;
+            break;
+       case STATUS_RTK_FLT:
+            fixquality = FIX_QUALITY_RTK_FLT;
+            break;
+       case STATUS_DR:
+            // FALLTHROUGH
+       case STATUS_GNSSDR:
+            fixquality = FIX_QUALITY_DR;
+            break;
+       case STATUS_TIME:
+            fixquality = FIX_QUALITY_MANUAL;
+            break;
+       case STATUS_SIM:
+            fixquality = FIX_QUALITY_SIMULATED;
+            break;
+       default:
+            fixquality = FIX_QUALITY_INVALID;
+            break;
+       }
+
         (void)snprintf(bufp, len,
                        "$GPGGA,%s,%s,%c,%s,%c,%d,%02d,",
                        time_str,
@@ -116,7 +159,7 @@ void gpsd_position_fix_dump(struct gps_device_t *session,
                        degtodm_str(session->gpsdata.fix.longitude, "%010.4f",
                                    lon_str),
                        ((session->gpsdata.fix.longitude > 0) ? 'E' : 'W'),
-                       session->gpsdata.status,
+                       fixquality,
                        session->gpsdata.satellites_used);
         dbl_to_str("%.2f,", session->gpsdata.dop.hdop, bufp, len, NULL);
         dbl_to_str("%.2f,", session->gpsdata.fix.altMSL, bufp, len, "M,");
