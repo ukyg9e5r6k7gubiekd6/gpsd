@@ -1159,6 +1159,8 @@ static void *gpsd_ppsmonitor(void *arg)
 	ppstimes.real.tv_nsec = 0;  /* need to be fixed for 5Hz */
 	ppstimes.clock = clock_ts;
 
+        // Here would be a good place to apply qErr
+
 	TS_SUB( &offset, &ppstimes.real, &ppstimes.clock);
 	TS_SUB( &delay, &ppstimes.clock, &last_fixtime.clock);
 	timespec_str(&delay, delay_str, sizeof(delay_str));
@@ -1288,12 +1290,22 @@ void pps_thread_deactivate(volatile struct pps_thread_t *pps_thread)
     pps_thread->report_hook = NULL;
 }
 
-void pps_thread_fixin(volatile struct pps_thread_t *pps_thread,
-			      volatile struct timedelta_t *fix_in)
 /* thread-safe update of last fix time - only way we pass data in */
+void pps_thread_fixin(volatile struct pps_thread_t *pps_thread,
+                      volatile struct timedelta_t *fix_in)
 {
     thread_lock(pps_thread);
     pps_thread->fix_in = *fix_in;
+    thread_unlock(pps_thread);
+}
+
+/* thread-safe update of qErr and qErr_time - only way we pass data in */
+void pps_thread_qErrin(volatile struct pps_thread_t *pps_thread,
+		       long qErr, struct timespec qErr_time)
+{
+    thread_lock(pps_thread);
+    pps_thread->qErr = qErr;
+    pps_thread->qErr_time = qErr_time;
     thread_unlock(pps_thread);
 }
 
