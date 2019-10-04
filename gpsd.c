@@ -1727,13 +1727,11 @@ static void ship_pps_message(struct gps_device_t *session,
 	precision = -10;
     }
 
-    // SNARD
-    GPSD_LOG(LOG_SHOUT, &session->context->errout,
-             "TIM-TP qErr_time %s qErr %ld, pps.tv_sec %lld\n",
-	     timespec_str(&session->gpsdata.qErr_time,  ts_str, sizeof(ts_str)),
+    GPSD_LOG(LOG_DATA, &session->context->errout,
+             "ship_pps: qErr_time %s qErr %ld, pps.tv_sec %lld\n",
+	     timespec_str(&session->gpsdata.qErr_time, ts_str, sizeof(ts_str)),
 	     session->gpsdata.qErr,
 	     (long long)td->real.tv_sec);
-    // SNARD
 
     /* real_XXX - the time the GPS thinks it is at the PPS edge */
     /* clock_XXX - the time the system clock thinks it is at the PPS edge */
