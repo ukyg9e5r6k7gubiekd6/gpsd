@@ -361,19 +361,36 @@ timespec_t gpsd_gpstime_resolv(struct gps_device_t *session,
     if (week < 1024)
 	week += session->context->rollovers * 1024;
 
+#ifdef __UNUSED__
+    // this can not work because leap_seconds is set at build time
+    // need a way to know if leap seconds is default, or from GNSS receiver
+    // sanity check against leap seconds
+    if (0 < session->context->leap_seconds &&
+        19 > session->context->leap_seconds &&
+        2180 < week) {
+        // assume leap second = 19 by 31 Dec 2022
+        week -= 1024;
+	GPSD_LOG(LOG_WARN, &session->context->errout,
+		 "GPS week confusion. Adjusting to %lld. week %u leap %d\n",
+                 (long long)t.tv_sec, week,
+	         session->context->leap_seconds);
+    }
+#endif  // __UNUSED__
+
     t.tv_sec = GPS_EPOCH + (week * SECS_PER_WEEK) + tow.tv_sec;
     t.tv_sec -= session->context->leap_seconds;
     t.tv_nsec = tow.tv_nsec;
 
-    // FIXME! 2038 rollover hack.
+    // 2038 rollover hack for unsigned 32-bit time
     if (0 > t.tv_sec) {
         // recompute for previous EPOCH
         week -= 1024;
 	t.tv_sec = GPS_EPOCH + (week * SECS_PER_WEEK) + tow.tv_sec;
 	t.tv_sec -= session->context->leap_seconds;
 	GPSD_LOG(LOG_WARN, &session->context->errout,
-		 "2038 rollover. Adjusting to %lld\n",
-                 (long long)t.tv_sec);
+		 "2038 rollover. Adjusting to %lld. week %u leap %d\n",
+                 (long long)t.tv_sec, week,
+	         session->context->leap_seconds);
     }
 
     session->context->gps_week = week;
