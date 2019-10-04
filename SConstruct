@@ -1613,6 +1613,10 @@ else:
         "man/ubxtool.1": "man/ubxtool.xml",
         "man/zerk.1": "man/zerk.xml",
     }
+    
+    # aiogps example only available on Python >= 3.6
+    if sys.version_info[0] >= 3 and sys.version_info[1] >= 6:
+        python_misc.extend(["example_aiogps.py", "example_aiogps_run"])
 
     if env['xgps']:
         # check for pycairo
@@ -1641,6 +1645,10 @@ else:
         })
 
     python_modules = Glob('gps/*.py')
+    
+    # aiogps module only available on Python >= 3.6
+    if sys.version_info[0] >= 3 and sys.version_info[1] >= 6:
+        python_modules = [x for x in python_modules if 'aiogps' not in x]
 
     # Build Python binding
     #
@@ -2064,6 +2072,7 @@ if env['python']:
     if env['xgps']:
         checkable.remove("xgps")
         checkable.remove("xgpsspeed")
+    python_lint = python_misc + python_modules + checkable
     pylint = Utility(
         "pylint", ["jsongen.py", "maskaudit.py", python_built_extensions],
         ['''pylint --rcfile=/dev/null --dummy-variables-rgx='^_' '''
@@ -2075,19 +2084,26 @@ if env['python']:
          '''R0902,R0903,R0904,R0911,R0912,R0913,R0914,R0915,W0110,W0201,'''
          '''W0121,W0123,W0231,W0232,W0234,W0401,W0403,W0141,W0142,W0603,'''
          '''W0614,W0640,W0621,W1504,E0602,E0611,E1101,E1102,E1103,E1123,'''
-         '''F0401,I0011 '''
-         '''gps/*.py *.py ''' + " ".join(checkable)])
+         '''F0401,I0011 ''' + " ".join(python_lint)])
 
     # Additional Python readability style checks
+    python_modules_style = glob.glob('gps/[a-zA-Z]*.py')
+    
+    # aiogps module only available on Python >= 3.6
+    if sys.version_info[0] >= 3 and sys.version_info[1] >= 6:
+        python_modules_style = [x for x in python_modules_style \
+                                if 'aiogps' not in x]
+        
+    python_style = python_progs + python_modules_style + python_misc
     pep8 = Utility("pep8",
                    ["jsongen.py", "maskaudit.py", python_built_extensions],
-                   ['pycodestyle --ignore=W602,E122,E241 {0} SConstruct '
-                    'gps/[a-zA-Z]*.py *.py'''.format(" ".join(python_progs))])
+                   ['pycodestyle --ignore=W602,E122,E241 SConstruct ' +
+                    " ".join(python_style)])
 
     flake8 = Utility("flake8",
                      ["jsongen.py", "maskaudit.py", python_built_extensions],
-                     ['flake8 --ignore=E501,W602,E122,E241,E401 {0} '
-                      'gps/[a-zA-Z]*.py *.py'.format(" ".join(python_progs))])
+                     ['flake8 --ignore=E501,W602,E122,E241,E401 ' +
+                      " ".join(python_style)])
 
     # get version from each python prog
     # this ensures they can run and gps_versions match
