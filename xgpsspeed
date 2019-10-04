@@ -708,7 +708,6 @@ class Main(object):
     def about(self, _unused):
         "Show about dialog"
 
-        print("SNARD")
         about = Gtk.AboutDialog()
         about.set_program_name("xgpsspeed")
         about.set_version("Versions:\n"
