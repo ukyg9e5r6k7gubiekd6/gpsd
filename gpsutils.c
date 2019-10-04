@@ -408,9 +408,6 @@ void gps_merge_fix(struct gps_fix_t *to,
     if ('\0' != from->datum[0]) {
         strlcpy(to->datum, from->datum, sizeof(to->datum));
     }
-    if (0 != from->qErr) {
-	to->qErr = from->qErr;
-    }
     if (0 != isfinite(from->dgps_age) &&
         0 <= from->dgps_station) {
         /* both, or neither */

@@ -1532,6 +1532,13 @@ time derived from the start of the GPS cycle can have offsets of
 	<entry>numeric</entry>
         <entry>NTP style estimate of PPS precision</entry>
 </row>
+<row>
+	<entry>qErr</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Quantization error of the PPS, in pico seconds.  Sometimes
+called the "sawtooth" error.</entry>
+</row>
 </tbody>
 </tgroup>
 </table>

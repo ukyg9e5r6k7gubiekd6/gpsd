@@ -1719,22 +1719,40 @@ static void ship_pps_message(struct gps_device_t *session,
 /* on PPS interrupt, ship a message to all clients */
 {
     int precision = -20;
+    char buf[GPS_JSON_RESPONSE_MAX];
+    char ts_str[TIMESPEC_LEN];
 
     if ( source_usb == session->sourcetype) {
         /* PPS over USB not so good */
 	precision = -10;
     }
 
+    // SNARD
+    GPSD_LOG(LOG_SHOUT, &session->context->errout,
+             "TIM-TP qErr_time %s qErr %ld, pps.tv_sec %lld\n",
+	     timespec_str(&session->gpsdata.qErr_time,  ts_str, sizeof(ts_str)),
+	     session->gpsdata.qErr,
+	     (long long)td->real.tv_sec);
+    // SNARD
+
     /* real_XXX - the time the GPS thinks it is at the PPS edge */
     /* clock_XXX - the time the system clock thinks it is at the PPS edge */
-    notify_watchers(session, true, true,
+    (void)snprintf(buf, sizeof(buf),
 		    "{\"class\":\"PPS\",\"device\":\"%s\",\"real_sec\":%lld,"
                     "\"real_nsec\":%ld,\"clock_sec\":%lld,\"clock_nsec\":%ld,"
-                    "\"precision\":%d}\r\n",
+                    "\"precision\":%d",
 		    session->gpsdata.dev.path,
 		    (long long)td->real.tv_sec, td->real.tv_nsec,
 		    (long long)td->clock.tv_sec, td->clock.tv_nsec,
                     precision);
+
+    // output qErr if timestamps line up
+    if (td->real.tv_sec == session->gpsdata.qErr_time.tv_sec) {
+	str_appendf(buf, sizeof(buf), ",\"qErr\":%ld",
+                    session->gpsdata.qErr);
+    }
+    (void)strlcat(buf, "}\r\n", sizeof(buf));
+    notify_watchers(session, true, true, buf);
 
     /*
      * PPS receipt resets the device's timeout.  This keeps PPS-only

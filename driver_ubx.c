@@ -1638,6 +1638,7 @@ ubx_msg_tim_tp(struct gps_device_t *session, unsigned char *buf,
     uint16_t week;
     uint8_t flags;
     uint8_t refInfo;
+    timespec_t ts_tow;
 
     if (16 > data_len) {
         GPSD_LOG(LOG_WARN, &session->context->errout,
@@ -1646,22 +1647,35 @@ ubx_msg_tim_tp(struct gps_device_t *session, unsigned char *buf,
     }
 
     towMS = getleu32(buf, 0);
+    // towSubMS always seems zero, which will match the PPS
     towSubMS = getleu32(buf, 4);
     qErr = getles32(buf, 8);
     week = getleu16(buf, 12);
     flags = buf[14];
     refInfo = buf[15];
 
-    /* are we UTC, and no RAIM? */
-    if ((3 == (flags & 0x03)) &&
-        (8 != (flags & 0x0c))) {
-        /* good, get qErr */
-        session->newdata.qErr = qErr;
+    /* are we UTC, and towSubMs is zero? */
+    if (3 == (flags & 0x03) &&
+        0 == towSubMS) {
+
+        // leap already added!?!?
+        int saved_leap = session->context->leap_seconds;
+        // remove it!
+        session->context->leap_seconds = 0;
+
+        /* good, save qErr and qErr_time */
+        session->gpsdata.qErr = qErr;
+	MSTOTS(&ts_tow, towMS);
+	session->gpsdata.qErr_time = gpsd_gpstime_resolv(session, week, ts_tow);
+
+        // restore leap
+        session->context->leap_seconds = saved_leap;
     }
+
     /* cast for 32 bit compatibility */
     GPSD_LOG(LOG_DATA, &session->context->errout,
-             "TIM_TP: towMS %lu, towSubMS %lu, qErr %ld week %u\n"
-             "        flags %#x, refInfo %#x\n",
+             "TIM-TP: towMS %lu, towSubMS %lu, qErr %ld week %u "
+             "flags %#x, refInfo %#x\n",
              (unsigned long)towMS, (unsigned long)towSubMS, (long)qErr,
               week, flags, refInfo);
     return mask;

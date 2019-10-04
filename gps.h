@@ -70,6 +70,8 @@ extern "C" {
  *       Remove unused iso8601_to_unix().
  *       Remove unused struct timestamp_t entirely
  *       Add DEG_NORM()
+ *       Move toff and pps out of gps_data_t.union.
+ *       Move gps_fix_t.qErr to gps_data_t.
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -169,8 +171,6 @@ struct gps_fix_t {
         double velN, velE, velD;            /* NED velocities */
     } NED;
     char datum[40];             /* map datum */
-    /* quantization error adjustment to PPS. aka "sawtooth" correction */
-    long qErr;                  /* offset in picoseconds (ps) */
     /* DGPS stuff, often from xxGGA, or xxGNS */
     double dgps_age;            /* age of DGPS data in tenths of seconds,
                                  * -1 invalid */
@@ -2275,10 +2275,16 @@ struct gps_data_t {
 	/* "artificial" structures for various protocol responses */
 	struct version_t version;
 	char error[256];
-	struct timedelta_t toff;
-	struct timedelta_t pps;
     };
+
+    /* time stuff */
     /* FIXME! next lib rev need to add a place to put PPS precision */
+    struct timedelta_t toff;
+    struct timedelta_t pps;
+    /* quantization error adjustment to PPS. aka "sawtooth" correction */
+    long qErr;                  /* offset in picoseconds (ps) */
+    /* time of PPS pulse that qErr applies to */
+    timespec_t qErr_time;
 
     /* Private data - client code must not set this */
     void *privdata;

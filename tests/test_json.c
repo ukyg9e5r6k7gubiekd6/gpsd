@@ -238,7 +238,7 @@ static const char *json_str9 = "{\"parts\":[]}";
 static const char *json_strPPS = "{\"class\":\"PPS\",\"device\":\"GPS#1\"," \
     "\"real_sec\":1428001514, \"real_nsec\":1000000," \
     "\"clock_sec\":1428001513,\"clock_nsec\":999999999," \
-    "\"precision\":-20}";
+    "\"precision\":-20,\"qErr\":-123456}";
 
 /* Case 11: test parsing of TOFF message  */
 
@@ -442,16 +442,17 @@ static void jsontest(int i)
 	assert_integer("real_nsec", gpsdata.pps.real.tv_nsec, 1000000);
 	assert_integer("clock_sec", gpsdata.pps.clock.tv_sec, 1428001513);
 	assert_integer("clock_nsec", gpsdata.pps.clock.tv_nsec, 999999999);
+	assert_integer("qErr", gpsdata.qErr, -123456);
 	break;
 
     case 11:
 	status = json_toff_read(json_strTOFF, &gpsdata, NULL);
 	assert_case(status);
 	assert_string("device", gpsdata.dev.path, "GPS#1");
-	assert_integer("real_sec", gpsdata.pps.real.tv_sec, 1428001514);
-	assert_integer("real_nsec", gpsdata.pps.real.tv_nsec, 1000000);
-	assert_integer("clock_sec", gpsdata.pps.clock.tv_sec, 1428001513);
-	assert_integer("clock_nsec", gpsdata.pps.clock.tv_nsec, 999999999);
+	assert_integer("real_sec", gpsdata.toff.real.tv_sec, 1428001514);
+	assert_integer("real_nsec", gpsdata.toff.real.tv_nsec, 1000000);
+	assert_integer("clock_sec", gpsdata.toff.clock.tv_sec, 1428001513);
+	assert_integer("clock_nsec", gpsdata.toff.clock.tv_nsec, 999999999);
 	break;
 
     case 12:
