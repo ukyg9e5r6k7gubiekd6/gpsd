@@ -2,9 +2,20 @@
 # -*- coding: utf-8 -*-
 """aiogps.py -- Asyncio Python interface to GPSD.
 
-This module adds asyncio functionality to the Python gps interface. It can also
-manage connections over unreliable networks through timeouts, keepalive and
-automatic reconnection.
+This module adds asyncio support to the Python gps interface. It runs on
+Python versions >= 3.6 and provides the following benefits:
+    - easy integration in asyncio applications (all I/O operations done through
+        non-blocking coroutines, async context manager, async iterator);
+    - support for cancellation (all operations are cancellable);
+    - support for timeouts (on both read and connect);
+    - support for connection keep-alive (using the TCP keep alive mechanism)
+    - support for automatic re-connection;
+    - configurable connection parameters;
+    - configurable exeption handling (internally or by application);
+    - logging support (logger name: 'gps.aiogps').
+
+The use of timeouts, keepalive and automatic reconnection make possible easy
+handling of GPSD connections over unreliable networks.
 
 Examples:
     import logging
@@ -56,7 +67,7 @@ Examples:
 #
 # SPDX-License-Identifier: BSD-2-clause
 
-# This code run compatibly under  Python 3.x for x >= 6.
+# This code run compatibly under Python 3.x for x >= 6.
 
 __all__ = ['aiogps', ]
 
