@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Example of using the asyncio Python interface to GPSD.
+Example of using the asyncio Python interface to GPSD. This example
+demonstrates error handling by the application code when aiogps is not
+configured to handle automatic re-connection.
 """
 
 # Copyright (c) 2019 Grand Joldes (grandwork2@yahoo.com). All rights reserved.
@@ -81,6 +83,13 @@ async def main():
         logging.error(f'Error: {exc}')
 
 def run():
+    """
+    Main function.
+
+    Because this code only compiles on Python versions >= 3.6,
+    it is not run directly, but through the example_aiogps_run.py wrapper,
+    which fails gracefully on unsupported Python versions.
+    """
     # Set up logging program logging
     logging.basicConfig()
     logging.root.setLevel(logging.INFO)

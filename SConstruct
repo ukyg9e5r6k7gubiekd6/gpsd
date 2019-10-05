@@ -1613,7 +1613,7 @@ else:
         "man/ubxtool.1": "man/ubxtool.xml",
         "man/zerk.1": "man/zerk.xml",
     }
-    
+
     # aiogps example only available on Python >= 3.6
     if sys.version_info[0] >= 3 and sys.version_info[1] >= 6:
         python_misc.extend(["example_aiogps.py", "example_aiogps_run"])
@@ -1645,10 +1645,6 @@ else:
         })
 
     python_modules = Glob('gps/*.py')
-    
-    # aiogps module only available on Python >= 3.6
-    if sys.version_info[0] >= 3 and sys.version_info[1] >= 6:
-        python_modules = [x for x in python_modules if 'aiogps' not in x]
 
     # Build Python binding
     #
@@ -2051,6 +2047,15 @@ if env['python']:
                       Dir(DESTDIR + python_module_dir)]
 
     # Check that Python modules compile properly
+
+    # The aiogps module only available on Python >= 3.6.
+    # It gets installed (above) for completeness of the code, but is not used
+    # on Python versions < 3.6 due to a version based guard in the gps package.
+    # The same guard is used here to make sure the aiogps code is not checked
+    # on Python versions that are not supported.
+    if sys.version_info[0] >= 3 and sys.version_info[1] >= 6:
+        python_modules = [x for x in python_modules if 'aiogps' not in x]
+
     python_all = python_misc + python_modules + python_progs + ['SConstruct']
     check_compile = []
     for p in python_all:
@@ -2088,12 +2093,12 @@ if env['python']:
 
     # Additional Python readability style checks
     python_modules_style = glob.glob('gps/[a-zA-Z]*.py')
-    
+
     # aiogps module only available on Python >= 3.6
     if sys.version_info[0] >= 3 and sys.version_info[1] >= 6:
-        python_modules_style = [x for x in python_modules_style \
+        python_modules_style = [x for x in python_modules_style
                                 if 'aiogps' not in x]
-        
+
     python_style = python_progs + python_modules_style + python_misc
     pep8 = Utility("pep8",
                    ["jsongen.py", "maskaudit.py", python_built_extensions],
