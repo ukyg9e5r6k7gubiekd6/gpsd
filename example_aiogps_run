@@ -18,7 +18,7 @@ import sys
 
 if __name__ == "__main__":
     # aiogps only available on Python >= 3.6
-    if sys.version_info[0] >= 3 and sys.version_info[1] >= 6:
+    if sys.version_info >= (3, 6):
         import example_aiogps
         example_aiogps.run()
     else:

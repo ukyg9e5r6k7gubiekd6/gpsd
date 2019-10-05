@@ -16,10 +16,10 @@ configured to handle automatic re-connection.
 
 import asyncio
 import logging
-import gps
+import gps.aiogps
 
 
-async def get_gps_updates(gpsd: gps.aiogps) -> None:
+async def get_gps_updates(gpsd: gps.aiogps.aiogps) -> None:
     """ Receives and prints messages from GPSD.
 
     The GPS status information is updated within aiogps every time a new
@@ -44,7 +44,7 @@ async def get_gps_updates(gpsd: gps.aiogps) -> None:
         await asyncio.sleep(1)
 
 
-async def print_gps_info(gpsd: gps.aiogps) -> None:
+async def print_gps_info(gpsd: gps.aiogps.aiogps) -> None:
     """ Prints GPS status every 5s """
     while True:
         try:
@@ -60,7 +60,7 @@ async def main():
     """ Main coroutine - executes 2 asyncio tasks in parralel """
     try:
         # Example of using custom connection configuration
-        async with gps.aiogps(
+        async with gps.aiogps.aiogps(
             connection_args={
                 'host': '127.0.0.1',
                 'port': 2947

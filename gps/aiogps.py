@@ -19,7 +19,7 @@ handling of GPSD connections over unreliable networks.
 
 Examples:
     import logging
-    import gps
+    import gps.aiogps
 
     # configuring logging
     logging.basicConfig()
@@ -28,7 +28,7 @@ Examples:
     logging.getLogger('gps.aiogps').setLevel(logging.ERROR)
 
     # using default parameters
-    async with gps.aiogps() as gpsd:
+    async with gps.aiogps.aiogps() as gpsd:
         async for msg in gpsd:
             # Log last message
             logging.info(f'Received: {msg}')
@@ -37,7 +37,7 @@ Examples:
 
     # using custom parameters
     try:
-        async with gps.aiogps(
+        async with gps.aiogps.aiogps(
                 connection_args = {
                     'host': '192.168.10.116',
                     'port': 2947
