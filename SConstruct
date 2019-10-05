@@ -241,6 +241,7 @@ boolopts = (
     ("shared",        True,  "build shared libraries, not static"),
     ("timeservice",   False, "time-service configuration"),
     ("xgps",          True,  "include xgps and xgpsspeed."),
+    ("aiogps",        True,  "include aiogps and the associated example files."),
     # Test control
     ("slow",          False, "run tests with realistic (slow) delays"),
 )
@@ -1614,8 +1615,11 @@ else:
         "man/zerk.1": "man/zerk.xml",
     }
 
-    # aiogps example only available on Python >= 3.6
-    if sys.version_info >= (3, 6):
+    # aiogps is only available on Python >= 3.6
+    if sys.version_info < (3, 6):
+        env['aiogps'] = False
+
+    if env['aiogps']:
         python_misc.extend(["example_aiogps.py", "example_aiogps_run"])
 
     if env['xgps']:
@@ -1645,8 +1649,8 @@ else:
         })
 
     python_modules = Glob('gps/*.py')
-    # Remove the aiogps module for Python versions < 3.6.
-    if sys.version_info < (3, 6):
+    # Remove the aiogps module if not configured
+    if not env['aiogps']:
         python_modules = [x for x in python_modules if 'aiogps' not in x]
 
     # Build Python binding
@@ -2089,7 +2093,7 @@ if env['python']:
     python_modules_style = glob.glob('gps/[a-zA-Z]*.py')
 
     # Remove the aiogps module on Python versions < 3.6
-    if sys.version_info < (3, 6):
+    if not env['aiogps']:
         python_modules_style = [x for x in python_modules_style
                                 if 'aiogps' not in x]
 
