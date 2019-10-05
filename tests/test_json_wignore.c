@@ -1,10 +1,9 @@
-//#include <ctype.h>
 #include <errno.h>
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-//#include <sys/types.h>
 #include "../json.h"
 
 static int test_ver(void);
@@ -50,7 +49,7 @@ static char *TPV =
 static int test_ver() {
   int tally = 0;
   char revision[50];
-  __uint16_t pvhi, pvlo;
+  uint16_t pvhi, pvlo;
   const struct json_attr_t json_attrs_version[] = {
       {"class", t_check, .dflt.check = "VERSION"},
       {"rev", t_string, .addr.string = (char *)&revision, .len = 50},
