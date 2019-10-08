@@ -377,9 +377,9 @@ timespec_t gpsd_gpstime_resolv(struct gps_device_t *session,
     }
 #endif  // __UNUSED__
 
-    // gcc needs the (long)week to not overflow. clang got it right.
-    // if long (time_t) is 32-bits, then still 2038 issues
-    t.tv_sec = GPS_EPOCH + ((long)week * SECS_PER_WEEK) + tow.tv_sec;
+    // gcc needs the (time_t)week to not overflow. clang got it right.
+    // if time_t is 32-bits, then still 2038 issues
+    t.tv_sec = GPS_EPOCH + ((time_t)week * SECS_PER_WEEK) + tow.tv_sec;
     t.tv_sec -= session->context->leap_seconds;
     t.tv_nsec = tow.tv_nsec;
 
