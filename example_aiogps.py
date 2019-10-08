@@ -1,18 +1,19 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Example of using the asyncio Python interface to GPSD. This example
-demonstrates error handling by the application code when aiogps is not
-configured to handle automatic re-connection.
-"""
 
-# Copyright (c) 2019 Grand Joldes (grandwork2@yahoo.com). All rights reserved.
+# Copyright (c) 2019 Grand Joldes (grandwork2@yahoo.com).
 #
 # This file is Copyright (c) 2019 by the GPSD project
 #
 # SPDX-License-Identifier: BSD-2-clause
 
 # This code run compatibly under Python 3.x for x >= 6.
+
+"""
+Example of using the asyncio Python interface to GPSD. This example
+demonstrates error handling by the application code when aiogps is not
+configured to handle automatic re-connection.
+"""
 
 import asyncio
 import logging

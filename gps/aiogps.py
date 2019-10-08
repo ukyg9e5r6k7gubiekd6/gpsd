@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
+# Copyright (c) 2019 Grand Joldes (grandwork2@yahoo.com).
+#
+# This file is Copyright (c) 2019 by the GPSD project
+#
+# SPDX-License-Identifier: BSD-2-clause
+
+# This code run compatibly under Python 3.x for x >= 6.
+
 """aiogps.py -- Asyncio Python interface to GPSD.
 
 This module adds asyncio support to the Python gps interface. It runs on
@@ -60,14 +69,6 @@ Examples:
         logging.error(f'Error: {exc}')
 
 """
-
-# Copyright (c) 2019 Grand Joldes (grandwork2@yahoo.com). All rights reserved.
-#
-# This file is Copyright (c) 2019 by the GPSD project
-#
-# SPDX-License-Identifier: BSD-2-clause
-
-# This code run compatibly under Python 3.x for x >= 6.
 
 __all__ = ['aiogps', ]
 

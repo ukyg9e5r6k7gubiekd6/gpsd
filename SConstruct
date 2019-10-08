@@ -241,7 +241,6 @@ boolopts = (
     ("shared",        True,  "build shared libraries, not static"),
     ("timeservice",   False, "time-service configuration"),
     ("xgps",          True,  "include xgps and xgpsspeed."),
-    ("aiogps",        True,  "include aiogps and the associated example files."),
     # Test control
     ("slow",          False, "run tests with realistic (slow) delays"),
 )
@@ -1618,6 +1617,8 @@ else:
     # aiogps is only available on Python >= 3.6
     if sys.version_info < (3, 6):
         env['aiogps'] = False
+    else:
+        env['aiogps'] = True
 
     if env['aiogps']:
         python_misc.extend(["example_aiogps.py", "example_aiogps_run"])
