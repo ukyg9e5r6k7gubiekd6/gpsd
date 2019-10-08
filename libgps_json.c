@@ -36,7 +36,6 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
                          const char **endptr)
 {
     int leapseconds; /* FIXME, unused... */
-    double epe;      /* obsolete, for back compatibility */
     int ret;
 
     const struct json_attr_t json_attrs_1[] = {
@@ -64,7 +63,6 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
                                  .dflt.real = NAN},
         {"epd",    t_real,    .addr.real = &gpsdata->fix.epd,
                                  .dflt.real = NAN},
-        {"epe",    t_real,    .addr.real = &epe, .dflt.real = NAN},
         {"eph",    t_real,    .addr.real = &gpsdata->fix.eph,
                                  .dflt.real = NAN},
         {"eps",    t_real,    .addr.real = &gpsdata->fix.eps,
@@ -127,6 +125,9 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
                                  .dflt.real = NAN},
         {"dgpsSta", t_integer, .addr.integer = &gpsdata->fix.dgps_station,
                                  .dflt.integer = -1},
+        // ignore unkown keys, for cross-version compatibility
+        {"", t_ignore},
+
         {NULL},
         /* *INDENT-ON* */
     };
