@@ -377,11 +377,13 @@ timespec_t gpsd_gpstime_resolv(struct gps_device_t *session,
     }
 #endif  // __UNUSED__
 
-    t.tv_sec = GPS_EPOCH + (week * SECS_PER_WEEK) + tow.tv_sec;
+    // gcc needs the (long)week to not overflow. clang got it right.
+    // if long (time_t) is 32-bits, then still 2038 issues
+    t.tv_sec = GPS_EPOCH + ((long)week * SECS_PER_WEEK) + tow.tv_sec;
     t.tv_sec -= session->context->leap_seconds;
     t.tv_nsec = tow.tv_nsec;
 
-    // 2038 rollover hack for unsigned 32-bit time
+    // 2038 rollover hack for unsigned 32-bit time, assuming today is < 2038
     if (0 > t.tv_sec) {
         // recompute for previous EPOCH
         week -= 1024;
