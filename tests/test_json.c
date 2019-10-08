@@ -107,7 +107,7 @@ static struct gps_data_t gpsdata;
 /* Case 1: TPV report */
 
 /* *INDENT-OFF* */
-static const char json_str1[] = 
+static const char json_str1[] =
     "{\"class\":\"TPV\","
     "\"device\":\"GPS#1\",\"time\":\"2005-06-19T08:12:41.89Z\","
     "\"lon\":46.498203637,\"lat\":7.568074350,\"altHAE\":1327.780,"
@@ -280,9 +280,68 @@ static const struct json_attr_t json_short_string[] = {
 
 static char json_strOver2[7 * JSON_VAL_MAX];  /* dynamically built */
 
+/* Case 18: Ignore part of VERSION sentence */
+
+static char *json_str18 =
+    "{\"class\":\"VERSION\",\"release\":\"3.19.1~dev\",\"rev\":\"release-3.19-"
+    "655-gb4aded4c1\",\"proto_major\":3,\"proto_minor\":14}";
+
+char revision[50];
+int pvhi, pvlo;
+static const struct json_attr_t json_attrs_18[] = {
+    {"class", t_check, .dflt.check = "VERSION"},
+    {"rev", t_string, .addr.string = (char *)&revision, .len = 50},
+    {"proto_major", t_integer, .addr.integer = &pvhi},
+    {"proto_minor", t_integer, .addr.integer = &pvlo},
+    {"", t_ignore},
+    {NULL},
+};
+
+/* Case 19: Ignore part of WATCH sentence */
+
+static char *json_str19 =
+    "{\"class\":\"WATCH\",\"enable\":true,\"json\":true,\"nmea\":false,\"raw\":"
+    "0,\"scaled\":false,\"timing\":false,\"split24\":false,\"pps\":false,"
+    "\"device\":\"/dev/ttyUSB0\"}";
+
+bool enable, json;
+static const struct json_attr_t json_attrs_19[] = {
+    {"class", t_check, .dflt.check = "WATCH"},
+    {"device", t_check, .dflt.check = "/dev/ttyUSB0"},
+    {"enable", t_boolean, .addr.boolean = &enable},
+    {"json", t_boolean, .addr.boolean = &json},
+    {"", t_ignore},
+    {NULL},
+};
+
+/* Case 20: Ignore part of TPV sentence */
+
+static char *json_str20 =
+    "{\"class\":\"TPV\",\"device\":\"/dev/"
+    "ttyUSB0\",\"mode\":3,\"time\":\"2019-10-04T08:51:34.000Z\",\"ept\":0.005,"
+    "\"lat\":46.367303831,\"lon\":-116.963791235,\"altHAE\":460.834,\"altMSL\":"
+    "476.140,\"epx\":7.842,\"epy\":12.231,\"epv\":30.607,\"track\":57.1020,"
+    "\"magtrack\":70.9299,\"magvar\":13.8,\"speed\":0.065,\"climb\":-0.206,"
+    "\"eps\":24.46,\"epc\":61.21,\"ecefx\":-1999242.00,\"ecefy\":-3929871.00,"
+    "\"ecefz\":4593848.00,\"ecefvx\":0.12,\"ecefvy\":0.12,\"ecefvz\":-0.12,"
+    "\"velN\":0.035,\"velE\":0.055,\"velD\":0.206,\"geoidSep\":-15.307,\"eph\":"
+    "15.200,\"sep\":31.273}";
+
+int gps_mode;
+double ept;
+char gps_time[50];
+static const struct json_attr_t json_attrs_20[] = {
+    {"class", t_check, .dflt.check = "TPV"},
+    {"device", t_check, .dflt.check = "/dev/ttyUSB0"},
+    {"mode", t_integer, .addr.integer = &gps_mode, .dflt.integer = -1},
+    {"time", t_string, .addr.string = (char *)&gps_time, .len = 50},
+    {"ept", t_real, .addr.real = &ept, .dflt.real = NAN},
+    {"", t_ignore},
+    {NULL},
+};
 
 #ifndef JSON_MINIMAL
-/* Case 17: Read array of integers */
+/* Case 21: Read array of integers */
 
 static const char *json_strInt = "[23,-17,5]";
 static int intstore[4], intcount;
@@ -294,7 +353,7 @@ static const struct json_array_t json_array_Int = {
     .maxlen = sizeof(intstore)/sizeof(intstore[0]),
 };
 
-/* Case 18: Read array of booleans */
+/* Case 22: Read array of booleans */
 
 static const char *json_strBool = "[true,false,true]";
 static bool boolstore[4];
@@ -307,7 +366,7 @@ static const struct json_array_t json_array_Bool = {
     .maxlen = sizeof(boolstore)/sizeof(boolstore[0]),
 };
 
-/* Case 19: Read array of reals */
+/* Case 23: Read array of reals */
 
 static const char *json_strReal = "[23.1,-17.2,5.3]";
 static double realstore[4];
@@ -535,10 +594,33 @@ static void jsontest(int i)
 	assert_integer("count", json_short_string_cnt, 0);
 	break;
 
-#ifdef JSON_MINIMAL
-#define MAXTEST 17
-#else
     case 18:
+	status = json_read_object(json_str18, json_attrs_18, NULL);
+	assert_integer("proto_major", pvhi, 3);
+	assert_integer("proto_minor", pvlo, 14);
+	assert_string("rev", revision, "release-3.19-655-gb4aded4c1");
+	assert_integer("return", status, 0);
+	break;
+
+    case 19:
+	status = json_read_object(json_str19, json_attrs_19, NULL);
+	assert_boolean("enable", enable, true);
+	assert_boolean("json", json, true);
+	assert_integer("return", status, 0);
+	break;
+
+    case 20:
+	status = json_read_object(json_str20, json_attrs_20, NULL);
+	assert_integer("mode", gps_mode, 3);
+	assert_string("time", gps_time, "2019-10-04T08:51:34.000Z");
+	assert_real("ept", ept, 0.005);
+	assert_integer("return", status, 0);
+	break;
+
+#ifdef JSON_MINIMAL
+#define MAXTEST 20
+#else
+    case 21:
 	status = json_read_array(json_strInt, &json_array_Int, NULL);
 	assert_integer("count", intcount, 3);
 	assert_integer("intstore[0]", intstore[0], 23);
@@ -547,7 +629,7 @@ static void jsontest(int i)
 	assert_integer("intstore[3]", intstore[3], 0);
 	break;
 
-    case 19:
+    case 22:
 	status = json_read_array(json_strBool, &json_array_Bool, NULL);
 	assert_integer("count", boolcount, 3);
 	assert_boolean("boolstore[0]", boolstore[0], true);
@@ -556,7 +638,7 @@ static void jsontest(int i)
 	assert_boolean("boolstore[3]", boolstore[3], false);
 	break;
 
-    case 20:
+    case 23:
 	status = json_read_array(json_strReal, &json_array_Real, NULL);
 	assert_integer("count", realcount, 3);
 	assert_real("realstore[0]", realstore[0], 23.1);
@@ -565,7 +647,7 @@ static void jsontest(int i)
 	assert_real("realstore[3]", realstore[3], 0);
 	break;
 
-#define MAXTEST 20
+#define MAXTEST 23
 #endif /* JSON_MINIMAL */
 
     default:

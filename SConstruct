@@ -1561,11 +1561,6 @@ else:
         LIBS=['gps_static'],
         parse_flags=mathlibs + rtlibs + usbflags + dbusflags)
 
-    test_json_wignore = env.Program(
-        'tests/test_json_wignore', ['tests/test_json_wignore.c'],
-        LIBS=['gps_static'],
-        parse_flags=mathlibs + rtlibs + usbflags + dbusflags)
-
 # duplicate below?
 test_gpsmm = env.Program('tests/test_gpsmm', ['tests/test_gpsmm.cpp'],
                          LIBS=['gps_static', 'gps'],
@@ -1582,7 +1577,6 @@ testprogs = [test_bits,
              test_trig]
 if env['socket_export']:
     testprogs.append(test_json)
-    testprogs.append(test_json_wignore)
 if env["libgpsmm"]:
     testprogs.append(test_gpsmm)
 
