@@ -752,7 +752,7 @@ static gps_mask_t processGNS(int count UNUSED, char *field[],
     if ('\0' != field[11][0] &&
         '\0' != field[12][0]) {
         /* both, or neither */
-        session->newdata.dgps_age = atoi(field[11]);
+        session->newdata.dgps_age = safe_atof(field[11]);
         session->newdata.dgps_station = atoi(field[12]);
     }
 
