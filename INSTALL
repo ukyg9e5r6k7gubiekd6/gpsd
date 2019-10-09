@@ -440,10 +440,11 @@ install the required tools.
 # echo http://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/amd64/8.1/All > \
    /usr/pkg/etc/pkgin/repositories.conf
 # pkgin update
-# pkgin install python37 py37-curses-3.7
+# pkgin install python37 py37-curses
 # ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python
 # ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python3
-# pkgin install py37-scons-3.0.5
+# pkgin install py37-scons
+# pkgin install ncurses
 # pkgin install openssl mozilla-rootcerts
 # mozilla-rootcerts install
 # pkgin install git
