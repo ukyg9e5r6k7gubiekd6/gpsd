@@ -361,21 +361,18 @@ timespec_t gpsd_gpstime_resolv(struct gps_device_t *session,
     if (week < 1024)
 	week += session->context->rollovers * 1024;
 
-#ifdef __UNUSED__
-    // this can not work because leap_seconds is set at build time
-    // need a way to know if leap seconds is default, or from GNSS receiver
-    // sanity check against leap seconds
+    // sanity check week number, GPS epoch, against leap seconds
     if (0 < session->context->leap_seconds &&
         19 > session->context->leap_seconds &&
         2180 < week) {
-        // assume leap second = 19 by 31 Dec 2022
+        /* assume leap second = 19 by 31 Dec 2022
+         * so week > 2180 is way in the future, do not allow it */
         week -= 1024;
 	GPSD_LOG(LOG_WARN, &session->context->errout,
 		 "GPS week confusion. Adjusting to %lld. week %u leap %d\n",
                  (long long)t.tv_sec, week,
 	         session->context->leap_seconds);
     }
-#endif  // __UNUSED__
 
     // gcc needs the (time_t)week to not overflow. clang got it right.
     // if time_t is 32-bits, then still 2038 issues
