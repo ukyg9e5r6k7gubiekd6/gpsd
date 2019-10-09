@@ -369,9 +369,8 @@ timespec_t gpsd_gpstime_resolv(struct gps_device_t *session,
          * so week > 2180 is way in the future, do not allow it */
         week -= 1024;
 	GPSD_LOG(LOG_WARN, &session->context->errout,
-		 "GPS week confusion. Adjusting to %lld. week %u leap %d\n",
-                 (long long)t.tv_sec, week,
-	         session->context->leap_seconds);
+		 "GPS week confusion. Adjusted week %u for leap %d\n",
+                 week, session->context->leap_seconds);
     }
 
     // gcc needs the (time_t)week to not overflow. clang got it right.
