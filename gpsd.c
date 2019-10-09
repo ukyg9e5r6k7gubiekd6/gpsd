@@ -259,7 +259,7 @@ static socket_t filesock(char *filename)
     }
     (void)strlcpy(addr.sun_path, filename, sizeof(addr.sun_path));
     addr.sun_family = (sa_family_t)AF_UNIX;
-    if (bind(sock, (struct sockaddr *)&addr, (int)sizeof(addr)) < 0) {
+    if (bind(sock, (struct sockaddr *)&addr, (socklen_t)sizeof(addr)) < 0) {
 	GPSD_LOG(LOG_ERROR, &context.errout,
 		 "can't bind to local socket %s\n", filename);
 	(void)close(sock);
@@ -294,15 +294,12 @@ static void adjust_max_fd(int fd, bool on)
     if (on) {
 	if (fd > maxfd)
 	    maxfd = fd;
-    }
-    else {
-	if (fd == maxfd) {
-	    int tfd;
+    } else if (fd == maxfd) {
+        int tfd;
 
-	    for (maxfd = tfd = 0; tfd < (int)FD_SETSIZE; tfd++)
-		if (FD_ISSET(tfd, &all_fds))
-		    maxfd = tfd;
-	}
+        for (maxfd = tfd = 0; tfd < (int)FD_SETSIZE; tfd++)
+            if (FD_ISSET(tfd, &all_fds))
+                maxfd = tfd;
     }
 }
 
@@ -324,7 +321,7 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
     struct servent *pse;
     struct protoent *ppe;
     sockaddr_t sat;
-    int sin_len = 0;
+    size_t sin_len = 0;
     int type, proto, one = 1;
     in_port_t port;
     char *af_str = "";
@@ -366,7 +363,8 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 	s = socket(PF_INET, type, proto);
 	if (s > -1 ) {
 	/* Set packet priority */
-	if (setsockopt(s, IPPROTO_IP, IP_TOS, &dscp, sizeof(dscp)) == -1)
+	if (setsockopt(s, IPPROTO_IP, IP_TOS, &dscp,
+                       (socklen_t)sizeof(dscp)) == -1)
 	    GPSD_LOG(LOG_WARN, &context.errout,
 		     "Warning: SETSOCKOPT TOS failed\n");
 	}
@@ -404,7 +402,8 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 	 */
 	if (s > -1) {
 	    int on = 1;
-	    if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on, sizeof(on)) == -1) {
+	    if (setsockopt(s, IPPROTO_IPV6, IPV6_V6ONLY, &on,
+                           (socklen_t)sizeof(on)) == -1) {
 		GPSD_LOG(LOG_ERROR, &context.errout,
 			 "Error: SETSOCKOPT IPV6_V6ONLY\n");
 		(void)close(s);
@@ -412,7 +411,8 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 	    }
 #ifdef IPV6_TCLASS
 	    /* Set packet priority */
-	    if (setsockopt(s, IPPROTO_IPV6, IPV6_TCLASS, &dscp, sizeof(dscp)) == -1)
+	    if (setsockopt(s, IPPROTO_IPV6, IPV6_TCLASS, &dscp,
+                           (socklen_t)sizeof(dscp)) == -1)
 		GPSD_LOG(LOG_WARN, &context.errout,
 			 "Warning: SETSOCKOPT TOS failed\n");
 #endif /* IPV6_TCLASS */
@@ -432,13 +432,13 @@ static socket_t passivesock_af(int af, char *service, char *tcp_or_udp, int qlen
 	return -1;
     }
     if (setsockopt(s, SOL_SOCKET, SO_REUSEADDR, (char *)&one,
-		   (int)sizeof(one)) == -1) {
+		   (socklen_t)sizeof(one)) == -1) {
 	GPSD_LOG(LOG_ERROR, &context.errout,
 		 "Error: SETSOCKOPT SO_REUSEADDR\n");
 	(void)close(s);
 	return -1;
     }
-    if (bind(s, &sat.sa, sin_len) < 0) {
+    if (bind(s, &sat.sa, (socklen_t)sin_len) < 0) {
 	GPSD_LOG(LOG_ERROR, &context.errout,
 		 "can't bind to %s port %s, %s\n", af_str,
 		 service, strerror(errno));
@@ -802,7 +802,10 @@ static char *snarfline(char *p, char **out)
     char *q;
     static char stash[BUFSIZ];
 
-    for (q = p; isprint((unsigned char) *p) && !isspace((unsigned char) *p) && (p - q < (ssize_t) sizeof(stash) - 1);
+    for (q = p;
+         isprint((unsigned char) *p) &&
+         !isspace((unsigned char) *p) &&
+         (p - q < (ssize_t)(sizeof(stash) - 1));
 	 p++)
 	continue;
     (void)memcpy(stash, q, (size_t) (p - q));
@@ -1006,14 +1009,15 @@ static void set_serial(struct gps_device_t *device,
 #ifndef __clang_analyzer__
     while (isspace((unsigned char) *modestring))
 	modestring++;
-    if (*modestring && strchr("78", *modestring) != NULL) {
+    if (*modestring && (NULL != strchr("78", *modestring))) {
 	wordsize = (int)(*modestring++ - '0');
-	if (*modestring && strchr("NOE", *modestring) != NULL) {
+	if (*modestring && (NULL != strchr("NOE", *modestring))) {
 	    parity = *modestring++;
 	    while (isspace((unsigned char) *modestring))
 		modestring++;
-	    if (*modestring && strchr("12", *modestring) != NULL)
+	    if (*modestring && (NULL != strchr("12", *modestring))) {
 		stopbits = (unsigned int)(*modestring - '0');
+            }
 	}
     }
 #endif /* __clang_analyzer__ */
