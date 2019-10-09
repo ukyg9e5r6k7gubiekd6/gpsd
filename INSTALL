@@ -426,6 +426,32 @@ want to access the development source.
 # scons --config=force && scons install
 --------------------------------------------------------------
 
+== Special Notes for NetBSD 8.1 Installation ==
+
+gpsd will build, install and run on NetBSD.
+
+Use their pkg_add command to install pkgin.  Then use pkgin to
+install the required tools.
+
+--------------------------------------------------------------
+# export PKG_PATH=\
+"http://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/amd64/8.1/All"
+# pkg_add -v pkgin
+# echo http://ftp.netbsd.org/pub/pkgsrc/packages/NetBSD/amd64/8.1/All > \
+   /usr/pkg/etc/pkgin/repositories.conf
+# pkgin update
+# pkgin install python37 py37-curses-3.7
+# ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python
+# ln -s /usr/pkg/bin/python3.7 /usr/pkg/bin/python3
+# pkgin install py37-scons-3.0.5
+# pkgin install openssl mozilla-rootcerts
+# mozilla-rootcerts install
+# pkgin install git
+# git clone https://gitlab.com/gpsd/gpsd.git
+# cd gpsd
+# scons --config=force && scons install
+--------------------------------------------------------------
+
 == Special Notes for CentOS 7 Installation ==
 
 gpsd currently will build, install and run on CentOS 7.
