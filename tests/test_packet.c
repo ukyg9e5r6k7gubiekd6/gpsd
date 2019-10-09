@@ -2,13 +2,13 @@
  * This file is Copyright (c) 2010 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
+#include <ctype.h>
+#include <fcntl.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
-#include <ctype.h>
 #include <sys/types.h>
-#include <fcntl.h>
 #include <unistd.h>
 
 #include "../gpsd.h"
@@ -18,7 +18,7 @@ static int verbose = 0;
 struct map
 {
     char *legend;
-    char test[MAX_PACKET_LENGTH + 1];
+    unsigned char test[MAX_PACKET_LENGTH + 1];
     size_t testlen;
     int garbage_offset;
     int type;
@@ -297,7 +297,7 @@ static void runon_test(struct map *mp)
     lexer.errout.debug = verbose;
     memcpy(lexer.inbufptr = lexer.inbuffer, mp->test, mp->testlen);
     lexer.inbuflen = mp->testlen;
-     (void)fputs(mp->test, stdout);
+    (void)fputs((char *)mp->test, stdout);
     do {
 	st = packet_get(nullfd, &lexer);
 	//printf("packet_parse() returned %zd\n", st);
