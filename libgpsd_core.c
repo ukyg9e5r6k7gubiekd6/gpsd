@@ -121,62 +121,66 @@ static void gpsd_vlog(const int errlevel,
     (void)errlevel;
     (void)fmt;
 #else
-    if (errout->debug >= errlevel) {
-	char buf[BUFSIZ];
-	char *err_str;
+    char buf[BUFSIZ];
+    char *err_str;
 
-	gpsd_acquire_reporting_lock();
-	switch ( errlevel ) {
-	case LOG_ERROR:
-		err_str = "ERROR: ";
-		break;
-	case LOG_SHOUT:
-		err_str = "SHOUT: ";
-		break;
-	case LOG_WARN:
-		err_str = "WARN: ";
-		break;
-	case LOG_CLIENT:
-		err_str = "CLIENT: ";
-		break;
-	case LOG_INF:
-		err_str = "INFO: ";
-		break;
-	case LOG_DATA:
-		err_str = "DATA: ";
-		break;
-	case LOG_PROG:
-		err_str = "PROG: ";
-		break;
-	case LOG_IO:
-		err_str = "IO: ";
-		break;
-	case LOG_SPIN:
-		err_str = "SPIN: ";
-		break;
-	case LOG_RAW:
-		err_str = "RAW: ";
-		break;
-	default:
-		err_str = "UNK: ";
-	}
-
-	assert(errout->label != NULL);
-	(void)strlcpy(buf, errout->label, sizeof(buf));
-	(void)strlcat(buf, ":", sizeof(buf));
-	(void)strlcat(buf, err_str, sizeof(buf));
-	str_vappendf(buf, sizeof(buf), fmt, ap);
-
-	visibilize(outbuf, outlen, buf, strlen(buf));
-
-	if (getpid() == getsid(getpid()))
-	    syslog((errlevel <= LOG_SHOUT) ? LOG_ERR : LOG_NOTICE, "%s", outbuf);
-	else if (errout->report != NULL)
-	    errout->report(outbuf);
-	else
-	    (void)fputs(outbuf, stderr);
-	gpsd_release_reporting_lock();
+    // errout should never be NULL, but some code analyzers complain anyway
+    if (NULL == errout ||
+        errout->debug < errlevel) {
+        return;
     }
+
+    gpsd_acquire_reporting_lock();
+    switch ( errlevel ) {
+    case LOG_ERROR:
+            err_str = "ERROR: ";
+            break;
+    case LOG_SHOUT:
+            err_str = "SHOUT: ";
+            break;
+    case LOG_WARN:
+            err_str = "WARN: ";
+            break;
+    case LOG_CLIENT:
+            err_str = "CLIENT: ";
+            break;
+    case LOG_INF:
+            err_str = "INFO: ";
+            break;
+    case LOG_DATA:
+            err_str = "DATA: ";
+            break;
+    case LOG_PROG:
+            err_str = "PROG: ";
+            break;
+    case LOG_IO:
+            err_str = "IO: ";
+            break;
+    case LOG_SPIN:
+            err_str = "SPIN: ";
+            break;
+    case LOG_RAW:
+            err_str = "RAW: ";
+            break;
+    default:
+            err_str = "UNK: ";
+    }
+
+    assert(errout->label != NULL);
+    (void)strlcpy(buf, errout->label, sizeof(buf));
+    (void)strlcat(buf, ":", sizeof(buf));
+    (void)strlcat(buf, err_str, sizeof(buf));
+    str_vappendf(buf, sizeof(buf), fmt, ap);
+
+    visibilize(outbuf, outlen, buf, strlen(buf));
+
+    if (getpid() == getsid(getpid()))
+        syslog((errlevel <= LOG_SHOUT) ? LOG_ERR : LOG_NOTICE, "%s", outbuf);
+    else if (errout->report != NULL)
+        errout->report(outbuf);
+    else
+        (void)fputs(outbuf, stderr);
+    gpsd_release_reporting_lock();
 #endif /* !SQUELCH_ENABLE */
 }
 
