@@ -160,11 +160,11 @@ static void display_itk_navfix(unsigned char *buf, size_t len)
     (void)wmove(navfixwin, 11, 6);
     {
 	char prn[4], satlist[38];
-	unsigned int i;
+	unsigned long i;         // unsigned long just in case ints are 32-bit
 	satlist[0] = '\0';
 	for (i = 0; i < 32; i++) {
 	    if (svlist & (1 << i)) {
-		(void)snprintf(prn, 4, "%u ", i + 1);
+		(void)snprintf(prn, 4, "%lu ", i + 1);
 		(void)strlcat(satlist, prn, sizeof(satlist));
 	    }
 	}
