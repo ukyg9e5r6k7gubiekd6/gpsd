@@ -628,6 +628,8 @@ class TestSession(object):
         else:
             self.port = freeport()
         self.progress = lambda x: None
+        # for debugging
+        # self.progress = lambda x: sys.stderr.write("# Hi " + x)
         self.reporter = lambda x: None
         self.default_predicate = None
         self.fd_set = []
