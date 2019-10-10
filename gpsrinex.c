@@ -377,7 +377,7 @@ static void print_rinex_header(void)
                   "", "# OF SATELLITES");
 
     /* get all the PRN / # OF OBS */
-    for (i = 0; i <= MAXCNT; i++) {
+    for (i = 0; i < MAXCNT; i++) {
         cnt = 0;
 
         if (0 == obs_cnt[i].svid) {
