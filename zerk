@@ -177,10 +177,10 @@ class greis(object):
 
     def isuchex(self, c):
         "Is byte an upper case hex char?"
-        if 48 <= c and 57 >= c:
+        if 48 <= c <= 57:
             # 0 to 9
             return int(c) - 48
-        if 65 <= c and 70 >= c:
+        if 65 <= c <= 70:
             # A to F
             return int(c) - 55
         return -1
@@ -828,7 +828,7 @@ class greis(object):
                 c = int(this_byte)
 
             if VERB_RAW <= opts['verbosity']:
-                if (ord(' ') <= c) and (ord('~') >= c):
+                if ord(' ') <= c <= ord('~'):
                     # c is printable
                     print("state: %s char %c (%#x)" % (state, chr(c), c))
                 else:
@@ -853,7 +853,7 @@ class greis(object):
                 m_raw = bytearray(0)
                 m_raw.extend([c])
 
-                if (ord('0') <= c) and (ord('~') >= c):
+                if ord('0') <= c <= ord('~'):
                     # maybe id 1, '0' to '~'
                     state = 'ID1'
 
@@ -895,7 +895,7 @@ class greis(object):
 
             if state in ('COMMENT', 'JSON', 'RIL'):
                 # inside comment
-                if ord('\n') == c or ord('\r') == c:
+                if c in (ord('\n'), ord('\r')):
                     # Got newline or linefeed
                     # GREIS terminates messages on <CR> or <LF>
                     # Done, got a full message
@@ -905,8 +905,9 @@ class greis(object):
                     elif VERB_DECODE <= opts['verbosity']:
                         print(comment)
                     return consumed
-                else:
-                    comment += chr(c)
+
+                # else:
+                comment += chr(c)
                 continue
 
             if 'ID1' == state:
@@ -915,7 +916,7 @@ class greis(object):
                     # technically could be GREIS, but likely JSON
                     state = 'JSON'
                     comment += chr(m_id1) + chr(c)
-                elif (ord('0') <= c) and (ord('~') >= c):
+                elif ord('0') <= c <= ord('~'):
                     state = 'ID2'
                     m_id2 = c
                 else:
