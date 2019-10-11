@@ -27,7 +27,7 @@ usage: ubxtool [OPTIONS] [server[:port[:device]]]
 #       ubxtool -v 2 -f test/daemon/ublox-neo-m8n.log
 #
 # References:
-#   [1] IS-GPS-200J
+#   [1] IS-GPS-200K
 
 from __future__ import absolute_import, print_function, division
 
@@ -133,13 +133,13 @@ opts = {
 def unpack_s11(word, pos):
     """Grab a signed 11 bits from offset pos of word"""
 
-    bytes = bytearray(2)
-    bytes[0] = (word >> pos) & 0xff
-    bytes[1] = (word >> (pos + 8)) & 0x07
-    if 0x04 & bytes[1]:
+    ubytes = bytearray(2)
+    ubytes[0] = (word >> pos) & 0xff
+    ubytes[1] = (word >> (pos + 8)) & 0x07
+    if 0x04 & ubytes[1]:
         # extend the sign
-        bytes[1] |= 0xf8
-    u = struct.unpack_from('<h', bytes, 0)
+        ubytes[1] |= 0xf8
+    u = struct.unpack_from('<h', ubytes, 0)
     return u[0]
 
 
@@ -155,123 +155,123 @@ def unpack_s11s(word):
 def unpack_s14(word, pos):
     """Grab a signed 14 bits from offset pos of word"""
 
-    bytes = bytearray(2)
-    bytes[0] = (word >> pos) & 0xff
-    bytes[1] = (word >> (pos + 8)) & 0x3f
-    if 0x20 & bytes[1]:
+    ubytes = bytearray(2)
+    ubytes[0] = (word >> pos) & 0xff
+    ubytes[1] = (word >> (pos + 8)) & 0x3f
+    if 0x20 & ubytes[1]:
         # extend the sign
-        bytes[1] |= 0xc0
-    u = struct.unpack_from('<h', bytes, 0)
+        ubytes[1] |= 0xc0
+    u = struct.unpack_from('<h', ubytes, 0)
     return u[0]
 
 
 def unpack_s16(word, pos):
     """Grab a signed two bytes from offset pos of word"""
 
-    bytes = bytearray(2)
-    bytes[0] = (word >> pos) & 0xff
-    bytes[1] = (word >> (pos + 8)) & 0xff
-    u = struct.unpack_from('<h', bytes, 0)
+    ubytes = bytearray(2)
+    ubytes[0] = (word >> pos) & 0xff
+    ubytes[1] = (word >> (pos + 8)) & 0xff
+    u = struct.unpack_from('<h', ubytes, 0)
     return u[0]
 
 
 def unpack_u16(word, pos):
     """Grab a unsigned two bytes from offset pos of word"""
 
-    bytes = bytearray(2)
-    bytes[0] = (word >> pos) & 0xff
-    bytes[1] = (word >> (pos + 8)) & 0xff
-    u = struct.unpack_from('<H', bytes, 0)
+    ubytes = bytearray(2)
+    ubytes[0] = (word >> pos) & 0xff
+    ubytes[1] = (word >> (pos + 8)) & 0xff
+    u = struct.unpack_from('<H', ubytes, 0)
     return u[0]
 
 
 def unpack_s22(word, pos):
     """Grab a signed 22 bits from offset pos of word"""
 
-    bytes = bytearray(4)
-    bytes[0] = (word >> pos) & 0xff
-    bytes[1] = (word >> (pos + 8)) & 0xff
-    bytes[2] = (word >> (pos + 16)) & 0x3f
-    bytes[3] = 0
-    if 0x20 & bytes[2]:
+    ubytes = bytearray(4)
+    ubytes[0] = (word >> pos) & 0xff
+    ubytes[1] = (word >> (pos + 8)) & 0xff
+    ubytes[2] = (word >> (pos + 16)) & 0x3f
+    ubytes[3] = 0
+    if 0x20 & ubytes[2]:
         # extend the sign
-        bytes[2] |= 0xc0
-        bytes[3] = 0xff
+        ubytes[2] |= 0xc0
+        ubytes[3] = 0xff
 
-    u = struct.unpack_from('<l', bytes, 0)
+    u = struct.unpack_from('<l', ubytes, 0)
     return u[0]
 
 
 def unpack_s24(word, pos):
     """Grab a signed 24 bits from offset pos of word"""
 
-    bytes = bytearray(4)
-    bytes[0] = (word >> pos) & 0xff
-    bytes[1] = (word >> (pos + 8)) & 0xff
-    bytes[2] = (word >> (pos + 16)) & 0xff
-    bytes[3] = 0
-    if 0x80 & bytes[2]:
+    ubytes = bytearray(4)
+    ubytes[0] = (word >> pos) & 0xff
+    ubytes[1] = (word >> (pos + 8)) & 0xff
+    ubytes[2] = (word >> (pos + 16)) & 0xff
+    ubytes[3] = 0
+    if 0x80 & ubytes[2]:
         # extend the sign
-        bytes[3] = 0xff
+        ubytes[3] = 0xff
 
-    u = struct.unpack_from('<l', bytes, 0)
+    u = struct.unpack_from('<l', ubytes, 0)
     return u[0]
 
 
 def unpack_u24(word, pos):
     """Grab an unsigned 24 bits from offset pos of word"""
 
-    bytes = bytearray(4)
-    bytes[0] = (word >> pos) & 0xff
-    bytes[1] = (word >> (pos + 8)) & 0xff
-    bytes[2] = (word >> (pos + 16)) & 0xff
-    bytes[3] = 0
+    ubytes = bytearray(4)
+    ubytes[0] = (word >> pos) & 0xff
+    ubytes[1] = (word >> (pos + 8)) & 0xff
+    ubytes[2] = (word >> (pos + 16)) & 0xff
+    ubytes[3] = 0
 
-    u = struct.unpack_from('<L', bytes, 0)
+    u = struct.unpack_from('<L', ubytes, 0)
     return u[0]
 
 
 def unpack_s32s(word, word1):
     """Grab an signed 32 bits from weird split word, word1"""
 
-    bytes = bytearray(4)
-    bytes[0] = (word >> 6) & 0xff
-    bytes[1] = (word >> 14) & 0xff
-    bytes[2] = (word >> 22) & 0xff
-    bytes[3] = (word1 >> 6) & 0xff
+    ubytes = bytearray(4)
+    ubytes[0] = (word >> 6) & 0xff
+    ubytes[1] = (word >> 14) & 0xff
+    ubytes[2] = (word >> 22) & 0xff
+    ubytes[3] = (word1 >> 6) & 0xff
 
-    u = struct.unpack_from('<l', bytes, 0)
+    u = struct.unpack_from('<l', ubytes, 0)
     return u[0]
 
 
 def unpack_u32s(word, word1):
     """Grab an unsigned 32 bits from weird split word, word1"""
 
-    bytes = bytearray(4)
-    bytes[0] = (word >> 6) & 0xff
-    bytes[1] = (word >> 14) & 0xff
-    bytes[2] = (word >> 22) & 0xff
-    bytes[3] = (word1 >> 6) & 0xff
+    ubytes = bytearray(4)
+    ubytes[0] = (word >> 6) & 0xff
+    ubytes[1] = (word >> 14) & 0xff
+    ubytes[2] = (word >> 22) & 0xff
+    ubytes[3] = (word1 >> 6) & 0xff
 
-    u = struct.unpack_from('<L', bytes, 0)
+    u = struct.unpack_from('<L', ubytes, 0)
     return u[0]
 
 
 def unpack_s8(word, pos):
     """Grab a signed byte from offset pos of word"""
 
-    bytes = bytearray(1)
-    bytes[0] = (word >> pos) & 0xff
-    u = struct.unpack_from('<b', bytes, 0)
+    ubytes = bytearray(1)
+    ubytes[0] = (word >> pos) & 0xff
+    u = struct.unpack_from('<b', ubytes, 0)
     return u[0]
 
 
 def unpack_u8(word, pos):
     """Grab an unsigned byte from offset pos of word"""
 
-    bytes = bytearray(1)
-    bytes[0] = (word >> pos) & 0xff
-    u = struct.unpack_from('<B', bytes, 0)
+    ubytes = bytearray(1)
+    ubytes[0] = (word >> pos) & 0xff
+    u = struct.unpack_from('<B', ubytes, 0)
     return u[0]
 
 
@@ -1748,17 +1748,17 @@ class ubx(object):
 
         # not found, build a fake item, guess on decode
         name = "CFG-%u-%u" % ((key >> 16) & 0xff, ket & 0xff)
-        map = {0: "Z0",
-               1: "L",
-               2: "U1",
-               3: "U2",
-               4: "U4",
-               5: "U8",
-               6: "Z6",
-               7: "Z7",
-               }
+        kmap = {0: "Z0",
+                1: "L",
+                2: "U1",
+                3: "U2",
+                4: "U4",
+                5: "U8",
+                6: "Z6",
+                7: "Z7",
+                }
         size = (key >> 28) & 0x07
-        item = (name, key, map[size], 1, "Unk", "Unknown")
+        item = (name, key, kmap[size], 1, "Unk", "Unknown")
 
         return item
 
@@ -1844,7 +1844,7 @@ class ubx(object):
         u = struct.unpack_from('<LL', buf, 0)
         s = ' svid %u week %u ' % u
 
-        if 0 != u[1] and 8 < m_len and 40 >= m_len:
+        if 0 != u[1] and 8 < m_len <= 40:
             u = struct.unpack_from('<LLLLLLLL', buf, 8)
             s += ('\n dwrd %08x %08x %08x %08x'
                   '\n      %08x %08x %08x %08x' % u)
@@ -1925,7 +1925,7 @@ class ubx(object):
         u = struct.unpack_from('<LL', buf, 0)
         s = ' svid %u how x%x ' % u
 
-        if 0 != u[1] and 8 < m_len and 104 >= m_len:
+        if 0 != u[1] and 8 < m_len <= 104:
             u = struct.unpack_from('<LLLLLLLLLLLLLLLLLLLLLLLL', buf, 8)
             s += ('\n sf1d %08x %08x %08x %08x'
                   '\n      %08x %08x %08x %08x'
@@ -3038,7 +3038,7 @@ Save and Load non-volatile storage data"""
              '  antennaCableDelay %u rfGroupDelay %d userDelay %d' % u)
 
         if VERB_DECODE <= opts['verbosity']:
-            s += ("\n   flags (%s)" %
+            s += ("\n   flags (%s, %s, %s)" %
                   (index_s(u[2], self.cfg_tp_status),
                    index_s(u[3], self.cfg_tp_timeRef),
                    flag_s(u[4], self.cfg_tp_flags)))
@@ -3609,7 +3609,7 @@ Oddly this is the poll for UBX-LOG-BATCH
 
         return s
 
-    def log_retrieveposextra(eself, buf):
+    def log_retrieveposextra(self, buf):
         """UBX-LOG-RETRIEVEPOSEXTRA decode"""
 
         # u-blox 8+, protVer 15+
@@ -5120,7 +5120,7 @@ High Precision GNSS products only."""
         }
 
     # map subframe 4 SV ID to Page number
-    # IS-GPS-200J Table 20-V
+    # IS-GPS-200K Table 20-V
     sbfr4_svid_page = {
         57: 1,
         25: 2,
@@ -5150,7 +5150,8 @@ High Precision GNSS products only."""
         }
 
     # map subframe 5 SV ID to Page number
-    # IS-GPS-200J Table 20-V
+    # FIXME: duplicate keys!
+    # IS-GPS-200K Table 20-V
     sbfr5_svid_page = {
         1: 1,
         2: 2,
@@ -5351,7 +5352,7 @@ High Precision GNSS products only."""
                         s += ("\n   dataid %u svid %u (page %s)\n" %
                               (words[2] >> 28, svid, page))
 
-                        if (((2 <= page <= 10)):
+                        if 2 <= page <= 10:
                             s += self.almanac(words)
                         elif 13 == page:
                             s += "    NWCT"
@@ -7335,7 +7336,7 @@ for (opt, val) in options:
         opts['set_item'].append(val)
 
 if opts['help']:
-        usage()
+    usage()
 
 if opts['input_file_name'] is None:
     # no input file given
