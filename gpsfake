@@ -65,7 +65,6 @@ class Baton(object):
         self.count = 0
         self.endmsg = endmsg
         self.time = time.time()
-        return
 
     def twirl(self, ch=None):
         "Twirl the baton"
