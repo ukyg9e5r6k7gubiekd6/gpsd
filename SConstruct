@@ -1615,12 +1615,11 @@ else:
     }
 
     # aiogps is only available on Python >= 3.6
+    # FIXME check target_python, not current python
     if sys.version_info < (3, 6):
         env['aiogps'] = False
     else:
         env['aiogps'] = True
-
-    if env['aiogps']:
         python_misc.extend(["example_aiogps.py", "example_aiogps_run"])
 
     if env['xgps']:
@@ -1649,10 +1648,11 @@ else:
             "man/xgpsspeed.1": "man/gps.xml",
         })
 
-    python_modules = Glob('gps/*.py')
-    # Remove the aiogps module if not configured
-    if not env['aiogps']:
-        python_modules = [x for x in python_modules if 'aiogps' not in x]
+    # Glob() has to be run after all buildable objects defined
+    if env['aiogps']:
+        python_modules = Glob('gps/*.py')
+    else:
+        python_modules = Glob('gps/*.py', exclude="gps/aiogps.py")
 
     # Build Python binding
     #
@@ -2076,7 +2076,11 @@ if env['python']:
     if env['xgps']:
         checkable.remove("xgps")
         checkable.remove("xgpsspeed")
-    python_lint = python_misc + python_modules + checkable
+
+    python_lint = python_misc + checkable
+    for mod in python_modules:
+        python_lint += [mod.name]
+
     pylint = Utility(
         "pylint", ["jsongen.py", "maskaudit.py", python_built_extensions],
         ['''pylint --rcfile=/dev/null --dummy-variables-rgx='^_' '''
