@@ -129,16 +129,16 @@ def UtilityWithHerald(herald, target, source, action, **kwargs):
     return Utility(target=target, source=source, action=action, **kwargs)
 
 
-def _getstatusoutput(cmd, input=None, shell=True, cwd=None, env=None):
+def _getstatusoutput(cmd, nput=None, shell=True, cwd=None, env=None):
     pipe = subprocess.Popen(cmd, shell=shell, cwd=cwd, env=env,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    (output, errout) = pipe.communicate(input=input)
+    (output, errout) = pipe.communicate(input=nput)
     status = pipe.returncode
     return (status, output)
 
 
-def _getoutput(cmd, input=None, shell=True, cwd=None, env=None):
-    return _getstatusoutput(cmd, input, shell, cwd, env)[1]
+def _getoutput(cmd, nput=None, shell=True, cwd=None, env=None):
+    return _getstatusoutput(cmd, nput, shell, cwd, env)[1]
 
 
 # Spawn replacement that suppresses non-error stderr
@@ -246,8 +246,8 @@ boolopts = (
 )
 
 # now step on the boolopts just read from '.scons-option-cache'
-for (name, default, help) in boolopts:
-    opts.Add(BoolVariable(name, help, default))
+for (name, default, helpd) in boolopts:
+    opts.Add(BoolVariable(name, helpd, default))
 
 # Gentoo, Fedora, opensuse systems use uucp for ttyS* and ttyUSB*
 if os.path.exists("/etc/gentoo-release"):
@@ -272,8 +272,8 @@ nonboolopts = (
 )
 
 # now step on the non boolopts just read from '.scons-option-cache'
-for (name, default, help) in nonboolopts:
-    opts.Add(name, help, default)
+for (name, default, helpd) in nonboolopts:
+    opts.Add(name, helpd, default)
 
 pathopts = (
     ("bindir",              "bin",           "application binaries directory"),
@@ -288,8 +288,8 @@ pathopts = (
 )
 
 # now step on the path options just read from '.scons-option-cache'
-for (name, default, help) in pathopts:
-    opts.Add(PathVariable(name, help, default, PathVariable.PathAccept))
+for (name, default, helpd) in pathopts:
+    opts.Add(PathVariable(name, helpd, default, PathVariable.PathAccept))
 
 #
 # Environment creation
@@ -326,12 +326,12 @@ env = Environment(tools=["default", "tar", "textfile"], options=opts, ENV=envs)
 
 #  Minimal build turns off every option not set on the command line,
 if ARGUMENTS.get('minimal'):
-    for (name, default, help) in boolopts:
+    for (name, default, helpd) in boolopts:
         # Ensure gpsd and gpsdclients are always enabled unless explicitly
         # turned off.
         if ((default is True and
              not ARGUMENTS.get(name) and
-             not (name is "gpsd" or name is "gpsdclients"))):
+             name not in ("gpsd", "gpsdclients"))):
             env[name] = False
 
 # Time-service build = stripped-down with some diagnostic tools
@@ -346,7 +346,7 @@ if ARGUMENTS.get('timeservice'):
                    "socket_export",
                    "ublox",      # For the Uputronics board
                    )
-    for (name, default, help) in boolopts:
+    for (name, default, helpd) in boolopts:
         if ((default is True and
              not ARGUMENTS.get(name) and
              name not in timerelated)):
@@ -376,7 +376,7 @@ if env['isync']:
 opts.Save('.scons-option-cache', env)
 env.SConsignFile(".sconsign.dblite")
 
-for (name, default, help) in pathopts:
+for (name, default, helpd) in pathopts:
     env[name] = env.subst(env[name])
 
 env['VERSION'] = gpsd_version
@@ -433,9 +433,9 @@ def announce(msg):
 DESTDIR = os.environ.get('DESTDIR', '')
 
 
-def installdir(dir, add_destdir=True):
+def installdir(idir, add_destdir=True):
     # use os.path.join to handle absolute paths properly.
-    wrapped = os.path.join(env['prefix'], env[dir])
+    wrapped = os.path.join(env['prefix'], env[idir])
     if add_destdir:
         wrapped = os.path.normpath(DESTDIR + os.path.sep + wrapped)
     wrapped.replace("/usr/etc", "/etc")
@@ -698,7 +698,7 @@ else:
 
     # OS X aliases gcc to clang
     # clang accepts -pthread, then warns it is unused.
-    if (not config.CheckCC()):
+    if not config.CheckCC():
         announce("ERROR: CC doesn't work")
 
     if ((config.CheckCompilerOption("-pthread") and
@@ -1048,7 +1048,7 @@ else:
         + list(map(lambda x: (x[0], x[2]), nonboolopts)) \
         + list(map(lambda x: (x[0], x[2]), pathopts))
     keys.sort()
-    for (key, help) in keys:
+    for (key, helpd) in keys:
         value = config.env[key]
         if value and key in optionrequires:
             for required in optionrequires[key]:
@@ -1058,7 +1058,7 @@ else:
                     value = False
                     break
 
-        confdefs.append("/* %s */" % help)
+        confdefs.append("/* %s */" % helpd)
         if isinstance(value, bool):
             if value:
                 confdefs.append("#define %s_ENABLE 1\n" % key.upper())
@@ -1231,13 +1231,13 @@ if not (cleaning or helping):
 
     # Be explicit about what we're doing.
     changelatch = False
-    for (name, default, help) in boolopts + nonboolopts + pathopts:
+    for (name, default, helpd) in boolopts + nonboolopts + pathopts:
         if env[name] != env.subst(default):
             if not changelatch:
                 announce("Altered configuration variables:")
                 changelatch = True
             announce("%s = %s (default %s): %s"
-                     % (name, env[name], env.subst(default), help))
+                     % (name, env[name], env.subst(default), helpd))
     if not changelatch:
         announce("All configuration flags are defaulted.")
 
@@ -1351,7 +1351,7 @@ libgpsd_sources = [
 ]
 
 if not env["shared"]:
-    def Library(env, target, sources, version, parse_flags=[]):
+    def Library(env, target, sources, version, parse_flags=None):
         return env.StaticLibrary(target,
                                  [env.StaticObject(s) for s in sources],
                                  parse_flags=parse_flags)
@@ -1359,13 +1359,13 @@ if not env["shared"]:
     def LibraryInstall(env, libdir, sources, version):
         return env.Install(libdir, sources)
 else:
-    def Library(env, target, sources, version, parse_flags=[]):
+    def Library(env, target, sources, version, parse_flags=None):
         # Note: We have a possibility of getting either Object or file
         # list for sources, so we run through the sources and try to make
         # them into SharedObject instances.
         obj_list = []
         for s in Flatten(sources):
-            if type(s) is str:
+            if isinstance(s, str):
                 obj_list.append(env.SharedObject(s))
             else:
                 obj_list.append(s)
@@ -1808,7 +1808,7 @@ def GetMtime(file):
         return 0
 
 
-def FileList(patterns, exclusions=[]):
+def FileList(patterns, exclusions=None):
     """Get list of files based on patterns, minus excluded files."""
     files = reduce(operator.add, map(glob.glob, patterns), [])
     for file in exclusions:
@@ -2077,7 +2077,7 @@ if env['python']:
         checkable.remove("xgps")
         checkable.remove("xgpsspeed")
 
-    python_lint = python_misc + checkable
+    python_lint = python_misc + checkable + ['SConstruct']
     for mod in python_modules:
         python_lint += [mod.name]
 
@@ -2789,12 +2789,12 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # How to build a zip file.
     # Perversely, if the zip exists, it is modified, not replaced.
     # So delete it first.
-    zip = env.Command('zip', distfiles, [
+    dozip = env.Command('zip', distfiles, [
         'rm -f gpsd-${VERSION}.zip',
         '@zip -ry gpsd-${VERSION}.zip $SOURCES -x contrib/ais-samples/\\*',
         '@ls -l gpsd-${VERSION}.zip',
     ])
-    env.Clean(zip, ["gpsd-${VERSION}.zip", "packaging/rpm/gpsd.spec"])
+    env.Clean(dozip, ["gpsd-${VERSION}.zip", "packaging/rpm/gpsd.spec"])
 
     # How to build a tarball.
     # The command assume the non-portable GNU tar extension
