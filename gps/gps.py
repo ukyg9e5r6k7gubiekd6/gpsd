@@ -320,7 +320,7 @@ class gps(gpscommon, gpsdata, gpsjson):
 
 def is_sbas(prn):
     "Is this the NMEA ID of an SBAS satellite?"
-    return prn >= 120 and prn <= 158
+    return 120 <= prn <= 158
 
 
 if __name__ == '__main__':
