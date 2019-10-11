@@ -206,7 +206,7 @@ class gps(gpscommon, gpsdata, gpsjson):
         if mode:
             self.stream(mode)
 
-    def __oldstyle_shim(self):
+    def _oldstyle_shim(self):
         # The rest is backwards compatibility for the old interface
         def default(k, dflt, vbit=0):
             "Return default for key"
@@ -295,7 +295,7 @@ class gps(gpscommon, gpsdata, gpsjson):
             return status
         if self.response.startswith("{") and self.response.endswith("}\r\n"):
             self.unpack(self.response)
-            self.__oldstyle_shim()
+            self._oldstyle_shim()
             self.valid |= PACKET_SET
         return 0
 
