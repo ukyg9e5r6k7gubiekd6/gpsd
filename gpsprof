@@ -101,7 +101,6 @@ class Baton(object):
         self.count = 0
         self.endmsg = endmsg
         self.time = time.time()
-        return
 
     def twirl(self, ch=None):
         "Twirl the baton"
@@ -788,7 +787,7 @@ class polarplot(plotter):
 
     def postprocess(self):
         "Postprocess the sample data"
-        pass
+        return
 
     def data(self):
         "Format data for dump"
@@ -943,7 +942,7 @@ class timeplot(plotter):
 
     def postprocess(self):
         "Postprocess the sample data"
-        pass
+        return
 
     def data(self):
         "Format data for dump"
@@ -988,7 +987,7 @@ class uninstrumented(plotter):
 
     def postprocess(self):
         "Postprocess the sample data"
-        pass
+        return
 
     def data(self):
         "Format data for dump"
@@ -1042,7 +1041,7 @@ class instrumented(plotter):
 
     def postprocess(self):
         "Postprocess the sample data"
-        pass
+        return
 
     def data(self):
         "Format data for dump"
