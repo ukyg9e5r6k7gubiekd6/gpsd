@@ -1650,9 +1650,9 @@ else:
 
     # Glob() has to be run after all buildable objects defined
     if env['aiogps']:
-        python_modules = Glob('gps/*.py')
+        python_modules = Glob('gps/*.py', strings=True)
     else:
-        python_modules = Glob('gps/*.py', exclude="gps/aiogps.py")
+        python_modules = Glob('gps/*.py',strings=True, exclude="gps/aiogps.py")
 
     # Build Python binding
     #
@@ -2077,9 +2077,7 @@ if env['python']:
         checkable.remove("xgps")
         checkable.remove("xgpsspeed")
 
-    python_lint = python_misc + checkable + ['SConstruct']
-    for mod in python_modules:
-        python_lint += [mod.name]
+    python_lint = python_misc + python_modules + checkable + ['SConstruct']
 
     pylint = Utility(
         "pylint", ["jsongen.py", "maskaudit.py", python_built_extensions],
