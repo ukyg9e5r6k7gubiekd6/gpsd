@@ -451,7 +451,7 @@ class FakeUDP(FakeGPS):
     def drain(self):
         "Wait for the associated device to drain (e.g. before closing)."
         # shutdown() fails on UDP
-        retur  # shutdown() fails on UDP
+        return  # shutdown() fails on UDP
 
 
 class SubprogramError(TestError):
