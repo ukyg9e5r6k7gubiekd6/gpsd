@@ -79,7 +79,6 @@ class Baton(object):
                 self.stream.write("\b")
                 self.stream.flush()
         self.count = self.count + 1
-        return
 
     def end(self, mesg=None):
         "Write end message"
