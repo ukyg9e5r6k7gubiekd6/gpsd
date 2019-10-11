@@ -103,12 +103,14 @@ def isotime(s):
 
     if isinstance(s, int):
         return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
-    elif isinstance(s, float):
+
+    if isinstance(s, float):
         date = int(s)
         msec = s - date
         date = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
         return date + "." + repr(msec)[3:]
-    elif isinstance(s, STR_CLASS):
+
+    if isinstance(s, STR_CLASS):
         if s[-1] == "Z":
             s = s[:-1]
         if "." in s:
@@ -119,8 +121,9 @@ def isotime(s):
         # Note: no leap-second correction!
         return calendar.timegm(time.strptime(date, "%Y-%m-%dT%H:%M:%S")) \
             + float("0." + msec)
-    else:
-        raise TypeError
+
+    # else:
+    raise TypeError
 
 # *** End of duplicated code ***
 
@@ -395,21 +398,24 @@ def printnext(val):
         sys.stderr.write("leapsecond.py: -n argument must begin with "
                          "'Jun' or 'Dec'\n")
         raise SystemExit(1)
-    else:
-        month = val[:3].lower()
-        if len(val) != 7:
-            sys.stderr.wrrite("leapsecond.py: -n argument must be of "
-                              "the form {jun|dec}nnnn.\n")
-            raise SystemExit(1)
-        try:
-            year = int(val[3:])
-        except ValueError:
-            sys.stderr.write("leapsecond.py: -n argument must end "
-                             "with a 4-digit year.\n")
-            raise SystemExit(1)
-        # Date looks valid
-        tv = leapbound(year, month)
-        print("%d       /* %s */" % (iso_to_unix(tv), tv))
+
+    # else:
+    month = val[:3].lower()
+    if len(val) != 7:
+        sys.stderr.wrrite("leapsecond.py: -n argument must be of "
+                          "the form {jun|dec}nnnn.\n")
+        raise SystemExit(1)
+
+    try:
+        year = int(val[3:])
+    except ValueError:
+        sys.stderr.write("leapsecond.py: -n argument must end "
+                         "with a 4-digit year.\n")
+        raise SystemExit(1)
+
+    # Date looks valid
+    tv = leapbound(year, month)
+    print("%d       /* %s */" % (iso_to_unix(tv), tv))
 
 
 def leapbound(year, month):
