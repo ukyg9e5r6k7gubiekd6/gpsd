@@ -948,7 +948,8 @@ def generate(spec):
             sys.stderr.write("buffered %s is not in base attributes of %s\n"
                              % (attr, initname))
             raise SystemExit(1)
-        elif attr not in outboard:
+
+        if attr not in outboard:
             report += "    char %s[JSON_VAL_MAX+1];\n" % attr
             outboard.append(attr)
 
