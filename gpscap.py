@@ -46,7 +46,8 @@ class GPSDictionary(configparser.RawConfigParser):
         for section in self.sections():
             if not self.has_option(section, "type"):
                 raise configparser.Error("%s has no type" % section)
-            elif (self.get(section, "type")
+
+            if (self.get(section, "type")
                   not in ("engine", "vendor", "device")):
                 raise configparser.Error("%s has invalid type" % section)
         # Sanity check: All devices must point at a vendor object.
