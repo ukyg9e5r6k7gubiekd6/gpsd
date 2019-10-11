@@ -961,8 +961,9 @@ class greis(object):
                     if VERB_DECODE <= opts['verbosity']:
                         print(comment)
                     return consumed
-                else:
-                    comment += chr(c)
+
+                # else:
+                comment += chr(c)
                 continue
 
             if 'PAYLOAD' == state:
@@ -1771,7 +1772,7 @@ for (opt, val) in options:
     elif opt == '-f':
         # file input
         opts['input_file_name'] = val
-    elif opt == '-h' or opt == '-?':
+    elif opt in ('-h', '-?'):
         # help
         usage()
     elif opt == '-p':
