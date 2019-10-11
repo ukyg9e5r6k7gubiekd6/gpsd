@@ -251,12 +251,14 @@ def isotime(s):
     "Convert timestamps in ISO8661 format to and from Unix time."
     if isinstance(s, int):
         return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
-    elif isinstance(s, float):
+
+    if isinstance(s, float):
         date = int(s)
         msec = s - date
         date = time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(s))
         return date + "." + repr(msec)[3:]
-    elif isinstance(s, STR_CLASS):
+
+    if isinstance(s, STR_CLASS):
         if s[-1] == "Z":
             s = s[:-1]
         if "." in s:
@@ -267,7 +269,8 @@ def isotime(s):
         # Note: no leap-second correction!
         return calendar.timegm(
             time.strptime(date, "%Y-%m-%dT%H:%M:%S")) + float("0." + msec)
-    else:
-        raise TypeError
+
+    # else:
+    raise TypeError
 
 # End
