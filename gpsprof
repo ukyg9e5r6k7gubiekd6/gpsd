@@ -122,7 +122,6 @@ class Baton(object):
         if self.stream:
             self.stream.write("...(%2.2f sec) %s.\n"
                               % (time.time() - self.time, msg))
-        return
 
 
 class stats(object):
