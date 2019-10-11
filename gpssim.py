@@ -83,7 +83,7 @@ class satellite(object):
 
     def position(self, time):
         "Return right ascension and declination of satellite,"
-        pass
+        return
 
 # Next, the command interpreter.  This is an object that takes an
 # input source in the track description language, interprets it into
