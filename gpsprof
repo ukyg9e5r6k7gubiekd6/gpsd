@@ -373,7 +373,7 @@ class spaceplot(plotter):
 
     def postprocess(self):
         "Postprocess the sample data"
-        pass
+        return
 
     def data(self):
         "Format data for dump"
