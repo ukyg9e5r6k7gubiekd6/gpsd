@@ -5351,8 +5351,7 @@ High Precision GNSS products only."""
                         s += ("\n   dataid %u svid %u (page %s)\n" %
                               (words[2] >> 28, svid, page))
 
-                        if (((2 <= page and 5 >= page) or
-                             (5 <= page and 10 >= page))):
+                        if (((2 <= page <= 10)):
                             s += self.almanac(words)
                         elif 13 == page:
                             s += "    NWCT"
@@ -5395,7 +5394,7 @@ High Precision GNSS products only."""
                         s += ("\n   dataid %u svid %u (page %s)\n" %
                               (words[2] >> 28, svid, page))
 
-                        if 1 <= page and 24 >= page:
+                        if 1 <= page <= 24:
                             s += self.almanac(words)
                         elif 25 == page:
                             s += "    A/S flags"
@@ -5661,7 +5660,7 @@ High Precision GNSS products only."""
                 c = int(this_byte)
 
             if VERB_RAW <= opts['verbosity']:
-                if (ord(' ') <= c) and (ord('~') >= c):
+                if ord(' ') <= c <= ord('~'):
                     # c is printable
                     print("state: %s char %c (%#x)" % (state, chr(c), c))
                 else:
@@ -5730,8 +5729,9 @@ High Precision GNSS products only."""
                     elif VERB_DECODE <= opts['verbosity']:
                         print(comment)
                     return consumed
-                else:
-                    comment += chr(c)
+
+                # else:
+                comment += chr(c)
                 continue
 
             if 'NMEA' == state:
@@ -5742,8 +5742,9 @@ High Precision GNSS products only."""
                     if VERB_DECODE <= opts['verbosity']:
                         print(comment + '\n')
                     return consumed
-                else:
-                    comment += chr(c)
+
+                # else:
+                comment += chr(c)
                 continue
 
             if 'RTCM3_1' == state:
@@ -5772,10 +5773,10 @@ High Precision GNSS products only."""
                 m_payload.extend([c])
                 if 0 == m_len:
                     state = 'BASE'
-                    type = m_payload[0] << 4
-                    type |= 0x0f & (m_payload[1] >> 4)
+                    ptype = m_payload[0] << 4
+                    ptype |= 0x0f & (m_payload[1] >> 4)
                     if VERB_DECODE <= opts['verbosity']:
-                        print("RTCM3 packet: type %d\n" % type)
+                        print("RTCM3 packet: type %d\n" % ptype)
                 continue
 
             if ord('b') == c and 'HEADER1' == state:
@@ -6443,7 +6444,7 @@ protver 20+, and HP GNSS, required for RELPOSNED"""
         m_data[0] = 1
         gps_model.gps_send(6, 0x31, m_data)
 
-    def send_cfg_valdel(self, key):
+    def send_cfg_valdel(self, keys):
         """UBX-CFG-VALDEL, delete config items by key"""
         m_data = bytearray(4)
         m_data[0] = 0       # version, 0 = transactionless, 1 = transaction
@@ -7274,7 +7275,7 @@ for (opt, val) in options:
         opts['input_file_name'] = val
     elif opt == '-g':
         opts['get_item'].append(val)
-    elif opt == '-h' or opt == '-?':
+    elif opt in ('-h', '-?'):
         opts['help'] = True
     elif opt == '-i':
         valnum = gps_model.port_id_map.get(val.upper())
