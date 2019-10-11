@@ -83,6 +83,7 @@ async def main():
     except Exception as exc:    # pylint: disable=W0703
         logging.error(f'Error: {exc}')
 
+
 def run():
     """
     Main function.
