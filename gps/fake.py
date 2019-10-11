@@ -137,8 +137,7 @@ class TestError(BaseException):
 
 
 class TestLoadError(TestError):
-    "Class TestLoadError"
-    pass
+    "Class TestLoadError, empty"
 
 
 class TestLoad(object):
@@ -233,8 +232,7 @@ class TestLoad(object):
 
 
 class PacketError(TestError):
-    "Class PacketError"
-    pass
+    "Class PacketError, empty"
 
 
 class FakeGPS(object):
@@ -443,7 +441,7 @@ class FakeUDP(FakeGPS):
 
     def read(self):
         "Discard control strings written by gpsd."
-        pass
+        return
 
     def write(self, line):
         self.progress("gpsfake: %s writes %d=%s\n"
@@ -452,7 +450,8 @@ class FakeUDP(FakeGPS):
 
     def drain(self):
         "Wait for the associated device to drain (e.g. before closing)."
-        pass  # shutdown() fails on UDP
+        # shutdown() fails on UDP
+        retur  # shutdown() fails on UDP
 
 
 class SubprogramError(TestError):
@@ -532,7 +531,6 @@ class SubprogramInstance(object):
 
 class DaemonError(SubprogramError):
     "Class DaemonError"
-    pass
 
 
 class DaemonInstance(SubprogramInstance):
@@ -598,8 +596,7 @@ class DaemonInstance(SubprogramInstance):
 
 class TestSessionError(TestError):
     "class TestSessionError"
-    # why does testSessionError() return pass? "
-    pass
+    # why does testSessionError() do nothing? "
 
 
 class TestSession(object):
@@ -750,7 +747,8 @@ class TestSession(object):
                             "Test timed out: maybe increase WRITE_PAD (= %s)\n"
                             % GetDelay(self.slow))
                         raise SystemExit(1)
-                    elif not chosen.go_predicate(chosen.index, chosen):
+
+                    if not chosen.go_predicate(chosen.index, chosen):
                         if chosen.exhausted == 0:
                             chosen.exhausted = time.time()
                             self.progress("gpsfake: GPS %s ran out of input\n"
