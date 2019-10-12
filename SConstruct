@@ -2075,10 +2075,6 @@ if env['python']:
     # There's an internal error in astroid that requires we disable some
     # auditing. This is irritating as hell but there's no help for it short
     # of an upstream fix.
-    if not env['xgps']:
-        checkable.remove("xgps")
-        checkable.remove("xgpsspeed")
-
     python_lint = python_misc + python_modules + checkable + ['SConstruct']
 
     pylint = Utility(
