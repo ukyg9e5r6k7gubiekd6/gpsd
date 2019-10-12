@@ -17,6 +17,7 @@ from math import cos
 from math import sin
 from math import sqrt
 from math import radians
+import os
 from socket import error as SocketError
 import sys
 
@@ -959,6 +960,11 @@ if __name__ == '__main__':
         target = ':'.join(ltarget)
     else:
         target = ""
+
+    if 'DISPLAY' not in os.environ:
+        sys.stderr.write("xgps: ERROR: DISPLAY not set\n")
+        exit(1)
+
     Main(
         host=options.host or 'localhost',
         port=options.port or gps.GPSD_PORT,
