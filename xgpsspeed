@@ -11,14 +11,15 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
+import cairo
 from math import pi
 from math import cos
 from math import sin
 from math import sqrt
 from math import radians
 from socket import error as SocketError
+import sys
 
-import cairo
 
 # Gtk3 imports.  Gtk3 requires the require_version(), which then causes
 # pylint to complain about the subsequent "non-top" imports.
@@ -32,7 +33,6 @@ except ValueError:
 
 from gi.repository import Gtk      # pylint: disable=wrong-import-position
 from gi.repository import Gdk      # pylint: disable=wrong-import-position
-from gi.repository import GObject  # pylint: disable=wrong-import-position
 from gi.repository import GLib  # pylint: disable=wrong-import-position
 
 
@@ -598,7 +598,7 @@ class Main(object):
         self.window = Gtk.Window(type=Gtk.WindowType.TOPLEVEL)
         if not self.window.get_display():
             raise Exception("Can't open display")
-        if len(target):
+        if target:
             target = " " + target
         self.window.set_title('xgpsspeed' + target)
         self.window.connect("delete-event", self.delete_event)
@@ -824,10 +824,6 @@ class Main(object):
                              "expected %s.%s\n" %
                              (sys.argv[0], ver.proto_major, ver.proto_minor,
                               gps.api_major_version, gps.api_minor_version))
-
-    def delete_event(self, _widget, _event, _data=None):
-        # Someday, handle all cleanup operations here
-        return False
 
     def destroy(self, _unused, _empty=None):
         Gtk.main_quit()
