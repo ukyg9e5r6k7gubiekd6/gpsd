@@ -1618,6 +1618,8 @@ else:
     # FIXME check target_python, not current python
     if sys.version_info < (3, 6):
         env['aiogps'] = False
+        announce("WARNING: Python too old: "
+                 "gps/aiogps.py will not be installed\n")
     else:
         env['aiogps'] = True
         python_misc.extend(["example_aiogps.py", "example_aiogps_run"])
@@ -1628,17 +1630,15 @@ else:
             imp.find_module('cairo')
         except ImportError:
             # no pycairo, don't build xgps, xgpsspeed
-            announce("WARNING: Python module pycairo not found.\n"
-                     "    xgps and xgpsspeed will not be installed")
+            announce("WARNING: Python module pycairo not found.")
             env['xgps'] = False
 
         # check for pygobject
         try:
             imp.find_module('gi')
         except ImportError:
-            # no pycairo, don't build xgps, xgpsspeed
-            announce("WARNING: Python module pygobject not found.\n"
-                     "    xgps and xgpsspeed will not be installed")
+            # no pygobject, don't build xgps, xgpsspeed
+            announce("WARNING: Python module pygobject not found.")
             env['xgps'] = False
 
     if env['xgps']:
@@ -1647,6 +1647,8 @@ else:
             "man/xgps.1": "man/gps.xml",
             "man/xgpsspeed.1": "man/gps.xml",
         })
+    else:
+        announce("WARNING: xgps and xgpsspeed will not be installed")
 
     # Glob() has to be run after all buildable objects defined
     if env['aiogps']:
@@ -2073,7 +2075,7 @@ if env['python']:
     # There's an internal error in astroid that requires we disable some
     # auditing. This is irritating as hell but there's no help for it short
     # of an upstream fix.
-    if env['xgps']:
+    if not env['xgps']:
         checkable.remove("xgps")
         checkable.remove("xgpsspeed")
 
