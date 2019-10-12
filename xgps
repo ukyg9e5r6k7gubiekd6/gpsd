@@ -55,10 +55,8 @@ except ValueError:
     sys.stderr.write("xgps: ERROR Unsupported Gtk version\n")
     exit(1)
 
-from gi.repository import GObject  # pylint: disable=wrong-import-position
 from gi.repository import Gtk  # pylint: disable=wrong-import-position
 from gi.repository import Gdk  # pylint: disable=wrong-import-position
-from gi.repository import Pango  # pylint: disable=wrong-import-position
 from gi.repository import GLib  # pylint: disable=wrong-import-position
 
 # pylint wants local modules last
@@ -365,7 +363,7 @@ class SkyView(Gtk.DrawingArea):
     def draw_triangle(self, x, y, radius, filled, flip):
         "Draw a triangle centered on the specified midpoint."
         lw = self.cr.get_line_width()
-        if 0 == flip or 1 == flip:
+        if flip in (0, 1):
             if 0 == flip:
                 # down
                 ytop = y + radius
@@ -996,7 +994,6 @@ frame * {
             # keep going anyway, w/o popups
             sys.stderr.write("xgps: WARNING: failed to grab mouse events, "
                              "popups disabled\n")
-            pass
 
         viewframe.add(self.skyview)
 
