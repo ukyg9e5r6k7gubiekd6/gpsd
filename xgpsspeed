@@ -11,6 +11,7 @@
 # Preserve this property!
 from __future__ import absolute_import, print_function, division
 
+import argparse
 import cairo
 from math import pi
 from math import cos
@@ -857,89 +858,91 @@ class Main(object):
 
 
 if __name__ == '__main__':
-    import sys
-    from os.path import basename
-    from optparse import OptionParser
-    prog = basename(sys.argv[0])
-    usage = ('%s [OPTIONS] [host [:port [:device]]]') % (prog)
-    epilog = 'BSD terms apply: see the file COPYING in the distribution root' \
-             ' for details.'
 
-    parser = OptionParser(usage=usage, epilog=epilog)
-    parser.add_option(
+    usage = '%(prog)s [OPTIONS] [host[:port[:device]]]'
+    epilog = ('BSD terms apply: see the file COPYING in the distribution root'
+              ' for details.')
+
+    parser = argparse.ArgumentParser(usage=usage, epilog=epilog)
+    parser.add_argument(
+        '-D',
         '--debug',
         dest='debug',
         default=0,
-        action='store',
-        type='int',
-        help='Set level of debug. Must be integer. [Default 0]'
+        type=int,
+        help='Set level of debug. Must be integer. [Default %(default)s)]'
     )
-    parser.add_option(
+    parser.add_argument(
         '--device',
         dest='device',
-        default=None,
-        help='The device to connect. [Default None]'
+        default='',
+        help='The device to connect. [Default %(default)s)]'
     )
-    parser.add_option(
+    parser.add_argument(
         '--host',
         dest='host',
-        default=None,
-        help='The host to connect. [Default localhost]'
+        default='localhost',
+        help='The host to connect. [Default %(default)s)]'
     )
-    parser.add_option(
+    parser.add_argument(
         '--landspeed',
         dest='nautical',
         default=True,
         action='store_false',
         help='Enable dashboard-style speedometer.'
     )
-    parser.add_option(
+    parser.add_argument(
         '--maxspeed',
         dest='maxspeed',
         default='50',
-        help='Max speed of the speedmeter [Default 50]'
+        help='Max speed of the speedmeter [Default %(default)s]'
     )
-    parser.add_option(
+    parser.add_argument(
         '--nautical',
         dest='nautical',
         default=True,
         action='store_true',
         help='Enable nautical-style speed and track display.'
     )
-    parser.add_option(
+    parser.add_argument(
         '--port',
         dest='port',
-        default=None,
-        help='The port to connect. [Default %s]' % gps.GPSD_PORT
+        default=gps.GPSD_PORT,
+        help='The port to connect. [Default %(default)s)]'
     )
-    parser.add_option(
+    parser.add_argument(
+        '-r',
         '--rotate',
         dest='rotate',
         default=0,
-        action='store',
-        type='float',
-        help='Rotation of skyview ("up" direction) in degrees. [Default 0]'
+        type=float,
+        help='Rotation of skyview ("up" direction) in degrees. '
+             ' [Default %(default)s)]'
     )
-    parser.add_option(
+    parser.add_argument(
         '--speedunits',
         dest='speedunits',
         default='mph',
-        help='The unit of speed. Possible units are: mph, kmh, knots. '
-             '[Default mph]'
+        choices=['mph', 'kmh', 'knots'],
+        help='The unit of speed. [Default %(default)s)]'
     )
-    parser.add_option(
+    parser.add_argument(
         '-V', '--version',
-        action='store_true',
-        default=False,
+        action='version',
+        version="%(prog)s: Version " + gps_version + "\n",
         help='Output version to stderr, then exit'
     )
-    (options, args) = parser.parse_args()
-    if options.version:
-        sys.stderr.write("xgpsspeed: Version %s\n" % gps_version)
-        sys.exit(0)
+    parser.add_argument(
+        'target',
+        nargs='?',
+        help='[host[:port[:device]]]'
+    )
+    options = parser.parse_args()
 
-    if args:
-        arg = args[0].split(':')
+    # the options host, port, device are set by the defaults
+    if options.target:
+        # override with target
+        arg = options.target.split(':')
         len_arg = len(arg)
         if len_arg == 1:
             (options.host,) = arg
@@ -950,24 +953,18 @@ if __name__ == '__main__':
         else:
             parser.print_help()
             sys.exit(0)
-        target = ':'.join(args[0:])
-    elif options.host or options.port or options.device:
-        ltarget = [options.host or 'localhost']
-        if options.port or options.device:
-            ltarget += [options.port or '']
-        if options.device:
-            ltarget += [options.device]
-        target = ':'.join(ltarget)
-    else:
-        target = ""
+        target = ':'.join(options.target[0:])
+
+    ltarget = [options.host, options.port, options.device]
+    target = ':'.join(ltarget)
 
     if 'DISPLAY' not in os.environ:
         sys.stderr.write("xgps: ERROR: DISPLAY not set\n")
         exit(1)
 
     Main(
-        host=options.host or 'localhost',
-        port=options.port or gps.GPSD_PORT,
+        host=options.host,
+        port=options.port,
         device=options.device,
         speed_unit=options.speedunits,
         maxspeed=options.maxspeed,
