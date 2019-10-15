@@ -35,6 +35,8 @@ import ast
 import functools
 import glob
 import imp         # for imp.find_module('gps'), imp deprecated in 3.4
+# for conditional_leapsecond_fetch(), make_leapsecond_include()
+import leapsecond
 import operator
 import os
 import re
@@ -45,7 +47,6 @@ import time
 from distutils import sysconfig
 import SCons
 
-from leapsecond import conditional_leapsecond_fetch
 
 # Release identification begins here.
 #
@@ -1768,9 +1769,8 @@ env.Command(target="packet_names.h", source="packet_states.h",
 
 
 def timebase_h(target, source, env):
-    from leapsecond import make_leapsecond_include
     f = open(target[0].abspath, 'w')
-    f.write(make_leapsecond_include(source[0].abspath))
+    f.write(leapsecond.make_leapsecond_include(source[0].abspath))
     f.close()
 
 
@@ -1847,7 +1847,8 @@ env.Textfile(target="revision.h", source=[revision])
 def leapseconds_cache_rebuild(target, source, env):
     if not env["leapfetch"]:
         sys.stdout.write("Leapsecond fetch suppressed by leapfetch=no.\n")
-    elif not conditional_leapsecond_fetch(target[0].abspath, timeout=15):
+    elif not leapsecond.conditional_leapsecond_fetch(target[0].abspath,
+                                                     timeout=15):
         sys.stdout.write("try building with leapfetch=no.\n")
 
 
