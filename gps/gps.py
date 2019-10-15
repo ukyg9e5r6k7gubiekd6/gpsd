@@ -93,21 +93,46 @@ class gpsfix(object):
     def __init__(self):
         "Init class gpsfix"
 
-        self.altitude = NaN         # Meters
+        self.altHAE = NaN           # Meters
+        self.altMSL = NaN           # Meters
         self.climb = NaN            # Meters per second
+        self.datum = ""
+        self.dgpsAge = -1
+        self.dgpsSta = ""
+        self.depth = NaN
+        self.device = ""
+        self.ecefx = NaN
+        self.ecefy = NaN
+        self.ecefz = NaN
+        self.ecefvx = NaN
+        self.ecefvy = NaN
+        self.ecefvz = NaN
+        self.ecefpAcc = NaN
+        self.ecefvAcc = NaN
         self.epc = NaN
         self.epd = NaN
+        self.eph = NaN
         self.eps = NaN
         self.ept = NaN
         self.epv = NaN
         self.epx = NaN
         self.epy = NaN
+        self.geoid_sep = NaN        # Meters
         self.latitude = self.longitude = 0.0
+        self.magtrack = NaN
+        self.magvar = NaN
         self.mode = MODE_NO_FIX
+        self.relN = NaN
+        self.relE = NaN
+        self.relD = NaN
+        self.sep = NaN              # a.k.a. epe
         self.speed = NaN            # Knots
         self.status = STATUS_NO_FIX
         self.time = NaN
         self.track = NaN            # Degrees from true north
+        self.velN = NaN
+        self.velE = NaN
+        self.velD = NaN
 
 
 class gpsdata(object):
@@ -162,7 +187,7 @@ class gpsdata(object):
         if not isfinite(self.fix.altHAE):
             st += "Altitude HAE: ?\n"
         else:
-            st += "Altitude HAE: %f\n" % (self.fix.altHAAE)
+            st += "Altitude HAE: %f\n" % (self.fix.altHAE)
         if not isfinite(self.fix.speed):
             st += "Speed:    ?\n"
         else:
