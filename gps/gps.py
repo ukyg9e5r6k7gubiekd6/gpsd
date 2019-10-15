@@ -265,7 +265,8 @@ class gps(gpscommon, gpsdata, gpsjson):
                 # self.utc is always iso 8601 string
                 # just copy to fix.time
                 self.fix.time = self.utc
-            self.fix.altitude = default("alt", NaN, ALTITUDE_SET)
+            self.fix.altHAE = default("altHAE", NaN, ALTITUDE_SET)
+            self.fix.altMSL = default("altMSL", NaN, ALTITUDE_SET)
             self.fix.climb = default("climb", NaN, CLIMB_SET)
             self.fix.epc = default("epc", NaN, CLIMBERR_SET)
             self.fix.epd = default("epd", NaN)
