@@ -162,7 +162,7 @@ The procedure is simple:
 . Verify your GPS is communicating with _gpsd_ by running _cgps_ and
 confirming that you have a stable 3D fix.
 
-. Collect 24 hours of data in a plot file: `gpsprof -n 86400 -T pngcairo > scatter.plot`
+. Collect 24 hours of data in a plot file: `gpsprof -n 2880 -T pngcairo > scatter.plot`
 
 . Convert the plot to a png: `gnuplot < scatter.plot > scatter.png`
 
@@ -171,15 +171,16 @@ from _Imagemagick_: `display scatter.png`
 
 There are many possible adjustments to the above procedure.
 
-Maybe you want to collect just 10 minutes of data to verify that your
+Maybe you want to collect just 10 minutes of data (20 epochs at 30 second
+interval) to verify that your
 tool-chain is working before doing a 24 hour run. Simple, just change
-`gpsprof -n 86400` to `gpsprof -n 600` and then proceed as above.
+`gpsprof -n 2880` to `gpsprof -n 20` and then proceed as above.
 
 Maybe your _gpsd_ host does not have Python installed.  Just run _gpsprof_
 remotely.  On the host you will need to run _gpsd_ with the `-g` parameter so
 that it can be accessed over the network.  Then run _gpsprof_ on a
 remote host that supports Python this way:
-`gpsprof -n 86400 -T pngcairo [hostname] > scatter.plot`
+`gpsprof -n 2880 -T pngcairo [hostname] > scatter.plot`
 
 Depending on your GPS, your GPS antenna, and your sky view, you may get
 a CEP(95) of around 1.5 m.
@@ -369,7 +370,7 @@ your results.  Trimble will average data to 10 second intervals if
 the data rate is faster than 10 seconds. Start the long process:
 
 ...................................
-$ gpsrinex -i 30 -n 86400 -f today.obs
+$ gpsrinex -i 30 -n 2880 -f today.obs
 ...................................
 
 Now is a good time to go the NRCAN's CSRS-PPP page and sign up
