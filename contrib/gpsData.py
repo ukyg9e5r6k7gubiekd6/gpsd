@@ -50,7 +50,7 @@ if __name__ == '__main__':
             print('latitude    ', gpsd.fix.latitude)
             print('longitude   ', gpsd.fix.longitude)
             print('time utc    ', gpsd.utc, ' + ', gpsd.fix.time)
-            print('altitude (m)', gpsd.fix.altitude)
+            print('altHAE (m)  ', gpsd.fix.altHAE)
             print('eps         ', gpsd.fix.eps)
             print('epx         ', gpsd.fix.epx)
             print('epv         ', gpsd.fix.epv)
