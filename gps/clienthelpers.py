@@ -835,7 +835,7 @@ def maidenhead(dec_lat, dec_lon):
     grid_lon_field = str(int((adj_lon / 2) % 10))
 
     adj_lat_remainder = (adj_lat - int(adj_lat)) * 60
-    adj_lon_remainder = ((adj_lon) - int(adj_lon / 2)*2) * 60
+    adj_lon_remainder = ((adj_lon) - int(adj_lon / 2) * 2) * 60
 
     grid_lat_subsq = chr(97 + int(adj_lat_remainder / 2.5))
     grid_lon_subsq = chr(97 + int(adj_lon_remainder / 5))
