@@ -117,7 +117,7 @@ class gpsfix(object):
         self.epv = NaN
         self.epx = NaN
         self.epy = NaN
-        self.geoid_sep = NaN        # Meters
+        self.geoidSep = NaN        # Meters
         self.latitude = self.longitude = 0.0
         self.magtrack = NaN
         self.magvar = NaN
