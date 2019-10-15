@@ -32,20 +32,17 @@
 from __future__ import print_function
 
 import ast
-import copy
+import functools
 import glob
 import imp         # for imp.find_module('gps'), imp deprecated in 3.4
 import operator
 import os
-import platform
 import re
 # replacement for functions from the commands module, which is deprecated.
 import subprocess
 import sys
 import time
 from distutils import sysconfig
-from distutils.util import get_platform
-from functools import reduce
 import SCons
 
 from leapsecond import conditional_leapsecond_fetch
@@ -1812,7 +1809,7 @@ def GetMtime(file):
 
 def FileList(patterns, exclusions=None):
     """Get list of files based on patterns, minus excluded files."""
-    files = reduce(operator.add, map(glob.glob, patterns), [])
+    files = functools.reduce(operator.add, map(glob.glob, patterns), [])
     for file in exclusions:
         try:
             files.remove(file)
@@ -2151,8 +2148,7 @@ env.Precious(uninstall)
 
 
 def error_action(target, source, env):
-    from SCons.Errors import UserError
-    raise UserError("Target selection for '.' is broken.")
+    raise SCons.Error.UserError("Target selection for '.' is broken.")
 
 
 AlwaysBuild(Alias(".", [], error_action))
