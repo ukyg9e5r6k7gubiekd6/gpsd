@@ -2071,14 +2071,13 @@ if env['python']:
     # Sanity-check Python code.
     # Bletch.  We don't really want to suppress W0231 E0602 E0611 E1123,
     # but Python 3 syntax confuses a pylint running under Python 2.
-    checkable = python_progs[:]
     # There's an internal error in astroid that requires we disable some
     # auditing. This is irritating as hell but there's no help for it short
     # of an upstream fix.
-    python_lint = python_misc + python_modules + checkable + ['SConstruct']
+    python_lint = python_misc + python_modules + python_progs + ['SConstruct']
 
     pylint = Utility(
-        "pylint", ["jsongen.py", "maskaudit.py", python_built_extensions],
+        "pylint", python_lint,
         ['''pylint --rcfile=/dev/null --dummy-variables-rgx='^_' '''
          '''--msg-template='''
          '''"{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" '''
@@ -2091,18 +2090,13 @@ if env['python']:
          '''F0401,I0011 ''' + " ".join(python_lint)])
 
     # Additional Python readability style checks
-    python_modules_style = glob.glob('gps/[a-zA-Z]*.py')
+    pep8 = Utility("pep8", python_lint,
+                   ['pycodestyle --ignore=W602,E122,E241 ' +
+                    " ".join(python_lint)])
 
-    python_style = python_progs + python_modules_style + python_misc
-    pep8 = Utility("pep8",
-                   ["jsongen.py", "maskaudit.py", python_built_extensions],
-                   ['pycodestyle --ignore=W602,E122,E241 SConstruct ' +
-                    " ".join(python_style)])
-
-    flake8 = Utility("flake8",
-                     ["jsongen.py", "maskaudit.py", python_built_extensions],
+    flake8 = Utility("flake8", python_lint,
                      ['flake8 --ignore=E501,W602,E122,E241,E401 ' +
-                      " ".join(python_style)])
+                      " ".join(python_lint)])
 
     # get version from each python prog
     # this ensures they can run and gps_versions match
