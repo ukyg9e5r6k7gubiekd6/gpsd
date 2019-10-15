@@ -2093,11 +2093,6 @@ if env['python']:
     # Additional Python readability style checks
     python_modules_style = glob.glob('gps/[a-zA-Z]*.py')
 
-    # Remove the aiogps module on Python versions < 3.6
-    if not env['aiogps']:
-        python_modules_style = [x for x in python_modules_style
-                                if 'aiogps' not in x]
-
     python_style = python_progs + python_modules_style + python_misc
     pep8 = Utility("pep8",
                    ["jsongen.py", "maskaudit.py", python_built_extensions],
