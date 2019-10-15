@@ -17,40 +17,35 @@ import gps.misc
 
 debug = 0
 
-test1 = [
-    # deg_dd
-    (0, 0, "  0.00000000"),
-    (0, 89.999, " 89.99900000"),
-    (0, 90.1, " 90.10000000"),
-    (0, 180.21, "180.21000000"),
-    (0, 359.321, "359.32100000"),
-    (0, 360.0, "  0.00000000"),
-    # deg_ddmm
-    (1, 0, "  0 00.000000'"),
-    (1, 89.999, " 89 59.940000'"),
-    (1, 90.1, " 90 06.000000'"),
-    (1, 180.21, "180 12.600000'"),
-    (1, 359.321, "359 19.260000'"),
-    (1, 360.0, "  0 00.000000'"),
-    # deg_ddmmss
-    (2, 0, "  0 00' 00.00000\""),
-    (2, 89.999, " 89 59' 56.40000\""),
-    (2, 90.1, " 90 06' 00.00000\""),
-    (2, 180.21, "180 12' 36.00000\""),
-    (2, 359.321, "359 19' 15.60000\""),
-    (2, 360.0, "  0 00' 00.00000\""),
-    ]
+test1 = [(0, 0, "  0.00000000"),          # deg_dd
+         (0, 89.999, " 89.99900000"),
+         (0, 90.1, " 90.10000000"),
+         (0, 180.21, "180.21000000"),
+         (0, 359.321, "359.32100000"),
+         (0, 360.0, "  0.00000000"),
+         (1, 0, "  0 00.000000'"),        # deg_ddmm
+         (1, 89.999, " 89 59.940000'"),
+         (1, 90.1, " 90 06.000000'"),
+         (1, 180.21, "180 12.600000'"),
+         (1, 359.321, "359 19.260000'"),
+         (1, 360.0, "  0 00.000000'"),
+         (2, 0, "  0 00' 00.00000\""),    # deg_ddmmss
+         (2, 89.999, " 89 59' 56.40000\""),
+         (2, 90.1, " 90 06' 00.00000\""),
+         (2, 180.21, "180 12' 36.00000\""),
+         (2, 359.321, "359 19' 15.60000\""),
+         (2, 360.0, "  0 00' 00.00000\""),
+         ]
 
-test2 = [
-    # maidenhead
-    # keep in sync with tests/test_gpsdclient.c
-    (48.86471, 2.37305, "JN18eu", "Paris"),
-    (41.93498, 12.43652, "JN61fw", "Rome"),
-    (39.9771, -75.1685, "FM29jx", "Philadelphia"),
-    (-23.4028, -50.9766, "GG46mo", "Sao Paulo"),
-    (90, 180, "RR99xx", "North Pole"),
-    (-90, -180, "AA00aa", "South Pole"),
-    ]
+# maidenhead
+# keep in sync with tests/test_gpsdclient.c
+test2 = [(48.86471, 2.37305, "JN18eu", "Paris"),
+         (41.93498, 12.43652, "JN61fw", "Rome"),
+         (39.9771, -75.1685, "FM29jx", "Philadelphia"),
+         (-23.4028, -50.9766, "GG46mo", "Sao Paulo"),
+         (90, 180, "RR99xx", "North Pole"),
+         (-90, -180, "AA00aa", "South Pole"),
+         ]
 
 test3 = [
     #  wgs84 separation, cm precision
@@ -187,20 +182,19 @@ test3 = [
     (0, -180, 21.28, 9.75, "Away far from Google default"),
 ]
 
-test4 = [
-    # gpsd gpsd_units
-    ('GPSD_UNITS', 'imperial', gps.clienthelpers.imperial),
-    ('GPSD_UNITS', 'nautical', gps.clienthelpers.nautical),
-    ('GPSD_UNITS', 'metric', gps.clienthelpers.metric),
-    ('LC_MEASUREMENT', 'en_US', gps.clienthelpers.imperial),
-    ('LC_MEASUREMENT', 'C', gps.clienthelpers.imperial),
-    ('LC_MEASUREMENT', 'POSIX', gps.clienthelpers.imperial),
-    ('LC_MEASUREMENT', 'ru_RU', gps.clienthelpers.metric),
-    ('LANG', 'en_US', gps.clienthelpers.imperial),
-    ('LANG', 'C', gps.clienthelpers.imperial),
-    ('LANG', 'POSIX', gps.clienthelpers.imperial),
-    ('LANG', 'ru_RU', gps.clienthelpers.metric),
-    ]
+# gpsd gpsd_units
+test4 = [('GPSD_UNITS', 'imperial', gps.clienthelpers.imperial),
+         ('GPSD_UNITS', 'nautical', gps.clienthelpers.nautical),
+         ('GPSD_UNITS', 'metric', gps.clienthelpers.metric),
+         ('LC_MEASUREMENT', 'en_US', gps.clienthelpers.imperial),
+         ('LC_MEASUREMENT', 'C', gps.clienthelpers.imperial),
+         ('LC_MEASUREMENT', 'POSIX', gps.clienthelpers.imperial),
+         ('LC_MEASUREMENT', 'ru_RU', gps.clienthelpers.metric),
+         ('LANG', 'en_US', gps.clienthelpers.imperial),
+         ('LANG', 'C', gps.clienthelpers.imperial),
+         ('LANG', 'POSIX', gps.clienthelpers.imperial),
+         ('LANG', 'ru_RU', gps.clienthelpers.metric),
+         ]
 
 errors = 0
 
