@@ -237,7 +237,7 @@ class PacketError(TestError):
 
 class FakeGPS(object):
     "Class FakeGPS"
-    def __init__(self, testload, progress=None):
+    def __init__(self, testload, progress=lambda x: None):
         self.exhausted = 0
         self.go_predicate = lambda: True
         self.index = 0
@@ -270,7 +270,7 @@ class FakePTY(FakeGPS):
 
     def __init__(self, testload,
                  speed=4800, databits=8, parity='N', stopbits=1,
-                 progress=None):
+                 progress=lambda x: None):
         super(FakePTY, self).__init__(testload, progress)
         # Allow Serial: header to be overridden by explicit speed.
         if self.testload.serial:
@@ -383,7 +383,7 @@ class FakeTCP(FakeGPS):
 
     def __init__(self, testload,
                  host, port,
-                 progress=None):
+                 progress=lambda x: None):
         super(FakeTCP, self).__init__(testload, progress)
         self.host = host
         self.dispatcher = cleansocket(self.host, int(port))
@@ -432,7 +432,7 @@ class FakeUDP(FakeGPS):
 
     def __init__(self, testload,
                  ipaddr, port,
-                 progress=None):
+                 progress=lambda x: None):
         super(FakeUDP, self).__init__(testload, progress)
         self.byname = "udp://" + ipaddr + ":" + str(port)
         self.ipaddr = ipaddr
