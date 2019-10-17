@@ -1256,7 +1256,10 @@ frame * {
         if data.mode == gps.MODE_2D:
             status = "2D FIX"
         elif data.mode == gps.MODE_3D:
-            status = "3D FIX"
+            if hasattr(data, 'status') and gps.STATUS_TIME == data.status:
+                status = "FIXED SURVEYED"
+            else:
+                status = "3D FIX"
         else:
             status = "NO FIX"
 
