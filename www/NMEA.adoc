@@ -171,8 +171,8 @@ In NMEA 3.01 (and possibly some earlier versions), the character "^"
 (HEX 5E) is reserved as an introducer for two-character hex escapes
 using 0-9 and A-F, expressing an ISO 8859-1 (Latin-1) character <<ANON>>.
 
-The Checksum is mandatory, and the last field in a sentance.  It is
-the 8-bit XOR of all characters in the sentance, excluding the "$", "I",
+The Checksum is mandatory, and the last field in a sentence.  It is
+the 8-bit XOR of all characters in the sentence, excluding the "$", "I",
 or "*" characters; but including all "," and "^".  It is encoded as
 two hexadecimal characters (0-9, A-F), the most-significant-nibble
 being sent first.
@@ -257,7 +257,7 @@ Mode is associated with the GSA sentence associated with the last fix.
 It reports whether the fix was no good, sufficient for 2D, or
 sufficient for 3D (values 1, 2, and 3).
 
-Status will be 0 when the sample from from which the reporting
+Status will be 0 when the sample from which the reporting
 sentence was generated does not have a valid fix, 1 when it has
 a valid (normal-precision) fix, and 2 when the fig is DGPS corrected
 (reducing the base error).
@@ -308,7 +308,7 @@ EC -- ECDIS is a specialized geographical information system intended
 to support professional maritime navigation.  NMEA talker units
 meeting the ECDIS standard use this prefix.  Some of these emit GLL.
 
-II - II is emitted by the NMEA interfaces of several widely-used lines
+II -- II is emitted by the NMEA interfaces of several widely-used lines
 of marine-navigation electronics. One is the AutoHelm system by
 Raymarine; see also <<SEATALK>> for the native protocol of these
 devices.
@@ -328,7 +328,7 @@ LC talker prefix for this purpose.  Otherwise they use the CD prefix.
 A vessel's nav system is likely to have both CD and some other
 position indicating talker on its bus(es).
 
-LC - Loran-C is a marine navigation system run by the U.S. government,
+LC -- Loran-C is a marine navigation system formerly run by the U.S. government,
 which is planning to shut it down in favor of GPS.  Some non-Loran
 devices emit GLL but use this talker ID for backward-compatibility
 reasons, so it may outlast the actual Loran system.
@@ -478,11 +478,11 @@ GLONASS satellite numbers come in two flavors.  If a sentence
 has a GL talker ID, expect the skyviews to be GLONASS-only and
 in the range 1-32; you must add 64 to get a globally-unique
 NMEA ID.  If the sentence has a GN talker ID, the device emits
-a multi-constellation skyview with GLONASS IDs aleady in
+a multi-constellation skyview with GLONASS IDs already in
 the 65-96 range.
 
 QZSS is a  geosynchronous (*not geostationary*) system of three
-(possibly four) satellites in highly eliptical, inclined,
+(possibly four) satellites in highly elliptical, inclined,
 orbits.  It is designed to provide coverage in Japan's
 urban canyons.
 
@@ -493,7 +493,7 @@ and prior arrangements with the operator, who calculates and
 returns the position fix.
 
 BeiDou-2 (earlier known as COMPASS) is a system of 35 satellites,
-including 5 geostationary for compatability with BeiDou-1.
+including 5 geostationary for compatibility with BeiDou-1.
 As of late 2015, coverage is complete over most of Asia and the
 West Pacific.  It is expected to be fully operational by 2020, by
 when coverage area is expected to be worldwide.
@@ -505,7 +505,7 @@ signal type (sigId).  NMEA, as of version 4, has not adapted.
 
 == Obsolete sentences ==
 
-Note that sentances made obsolete by newer revisions of the
+Note that sentences made obsolete by newer revisions of the
 standards may still be emitted by devices.
 Support for them may be present in the GPSD project.
 
@@ -1128,7 +1128,7 @@ Field Number:
 8. Horizontal Dilution of Precision, HDOP
 9. Antenna altitude, meters, re:mean-sea-level(geoid).
 10. Goeidal separation meters
-11. Age of diferential data
+11. Age of differential data
 12. Differential reference station ID
 13. Navigational status (optional)
     S = Safe
@@ -1887,6 +1887,45 @@ Field number:
 
 From <<GLOBALSAT>>.  Shown with a "@II" leader rather than "$GP".
 
+=== TLB - Target Label ===
+
+------------------------------------------------------------------------------
+        1   2   (3) (4)               5
+        |   |    |   |                |
+ $--TLB,x.x,c--c,x.x,c--c,...,x.x,c--c*hh<CR><LF>
+------------------------------------------------------------------------------
+
+Field Number:
+
+1. Target Number (0-99)
+2. Label assigned to target
+(3. Target number 2)
+(4. Label assigned to target number 2)
+5. Checksum
+
+Message can contain target number + label pairs up to maximum NMEA message length.
+Target number references to target number in TTM (and/or TLL) messages.
+
+=== TLL - Target Latitude and Longitude ===
+
+------------------------------------------------------------------------------
+        1  2       3 4        5 6    7         8 9 10
+        |  |       | |        | |    |         | | |
+ $--TLL,xx,llll.ll,a,yyyyy.yy,a,c--c,hhmmss.ss,a,a*hh<CR><LF>
+------------------------------------------------------------------------------
+
+Field Number:
+
+1. Target Number (0-99)
+2. Target Latitude
+3. N=north, S=south
+4. Target Longitude
+5. E=east, W=west
+6. Target name
+7. UTC of data
+8. Status (L=lost, Q=acquisition, T=tracking)
+9. R= reference target; null (,,)= otherwise
+
 === TPC - Trawl Position Cartesian Coordinates ===
 
 ------------------------------------------------------------------------------
@@ -2371,7 +2410,6 @@ on the Web:
 |EVE - General Event Message
 |FIR - Fire Detection
 |MWD - Wind Direction & Speed
-|TLL - Target Latitude and Longitude
 |WDR - Distance to Waypoint - Rhumb Line
 |WDC - Distance to Waypoint - Great Circle
 |ZDL - Time and Distance to Variable Point
