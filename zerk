@@ -1582,8 +1582,8 @@ class gps_io(object):
         try:
             if read_opts['target']['server'] is not None:
                 # gpsd input
-                start = time.clock()
-                while read_opts['input_wait'] > (time.clock() - start):
+                start = gps.monotonic()
+                while read_opts['input_wait'] > (gps.monotonic() - start):
                     # First priority is to be sure the input buffer is read.
                     # This is to prevent input buffer overuns
                     if 0 < self.ser.waiting():
@@ -1609,8 +1609,8 @@ class gps_io(object):
 
             elif self.input_is_device:
                 # input is a serial device
-                start = time.clock()
-                while read_opts['input_wait'] > (time.clock() - start):
+                start = gps.monotonic()
+                while read_opts['input_wait'] > (gps.monotonic() - start):
                     # First priority is to be sure the input buffer is read.
                     # This is to prevent input buffer overuns
                     # pyserial 3.0+ deprecates inWaiting() in favor of
