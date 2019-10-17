@@ -1270,10 +1270,10 @@ frame * {
     def update_gpsdata(self, tpv):
         "Update the GPS data fields."
         # the first 28 fields are updated using TPV data
-        # the next 8 fields are updated using SKY data
+        # the next 9 fields are updated using SKY data
 
         markup = "<span font_desc='monospace 10'>%s </span>"
-        for (hook, widget) in Base.gpsfields[:28]:
+        for (hook, widget) in Base.gpsfields[:27]:
             if hook:  # Remove this guard when we have all hooks
                 widget.set_markup(markup % hook(self, tpv))
         if self.rotate is None and self.skyview:
@@ -1375,9 +1375,9 @@ frame * {
         self.skyview.redraw(satellites)
 
         markup = "<span font_desc='monospace 10'>%s </span>"
-        # the first 28 fields are updated using TPV data
-        # the next 8 fields are updated using SKY data
-        for (hook, widget) in Base.gpsfields[28:36]:
+        # the first 27 fields are updated using TPV data
+        # the next 9 fields are updated using SKY data
+        for (hook, widget) in Base.gpsfields[27:36]:
             if hook:  # Remove this guard when we have all hooks
                 widget.set_markup(markup % hook(self, data))
 
