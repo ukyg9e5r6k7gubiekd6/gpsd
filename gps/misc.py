@@ -13,6 +13,19 @@ import io
 import math
 import time
 
+def monotonic():
+    """return monotonic seconds, of unknown epoch.
+    Python 2 to 3.7 has time.clock(), deprecates in 3.3+, removed in 3.8
+    Python 3.5+ has time.monotonic()
+    This always works
+    """
+
+    if hasattr(time, 'monotonic'):
+        return time.monotonic()
+    # else
+    return time.clock()
+
+
 # Determine a single class for testing "stringness"
 try:
     STR_CLASS = basestring  # Base class for 'str' and 'unicode' in Python 2
