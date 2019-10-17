@@ -1526,15 +1526,19 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 /* *INDENT-OFF* */
 		    if (NULL != dp->device_type &&
 		        NULL != dp->device_type->rtcm_writer) {
-			if (dp->device_type->rtcm_writer(dp,
-			        (const char *)device->lexer.outbuffer,
-			        device->lexer.outbuflen) == 0) {
-			    GPSD_LOG(LOG_ERROR, &context.errout,
-				     "Write to RTCM sink failed\n");
+                        ssize_t ret = dp->device_type->rtcm_writer(dp,
+			                 (const char *)device->lexer.outbuffer,
+			                 device->lexer.outbuflen);
+                        if (0 < ret) {
+                            GPSD_LOG(LOG_IO, &context.errout,
+                                     "<= DGPS: %zd bytes of RTCM relayed.\n",
+                                     device->lexer.outbuflen);
+                        } else if (0 == ret) {
+                            // nothing written, probably read_only
 			} else {
-			    GPSD_LOG(LOG_IO, &context.errout,
-				     "<= DGPS: %zd bytes of RTCM relayed.\n",
-				     device->lexer.outbuflen);
+			    GPSD_LOG(LOG_ERROR, &context.errout,
+				     "Write to RTCM sink failed, type %s\n",
+                                     dp->device_type->type_name);
 			}
 		    }
 /* *INDENT-ON* */
