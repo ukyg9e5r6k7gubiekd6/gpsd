@@ -786,8 +786,8 @@ class Main(object):
     def handle_hangup(self, _dummy, _unused):
         w = Gtk.MessageDialog(
             parent=self.window,
-            type=Gtk.MessageType.ERROR,
-            flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+            message_type=Gtk.MessageType.ERROR,
+            destroy_with_parent=True,
             buttons=Gtk.ButtonsType.OK
         )
         w.connect("destroy", lambda unused: Gtk.main_quit())
@@ -843,8 +843,8 @@ class Main(object):
         except SocketError:
             w = Gtk.MessageDialog(
                 parent=self.window,
-                type=Gtk.MessageType.ERROR,
-                flags=Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                message_type=Gtk.MessageType.ERROR,
+                destroy_with_parent=True,
                 buttons=Gtk.ButtonsType.OK
             )
             w.set_title('socket error')
