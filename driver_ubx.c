@@ -448,7 +448,7 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
 {
     uint8_t valid;
     uint8_t flags;
-    uint8_t navmode;
+    uint8_t fixType;
     struct tm unpacked_date;
     int *status = &session->gpsdata.status;
     int *mode = &session->newdata.mode;
@@ -464,26 +464,22 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
 
     session->driver.ubx.iTOW = getleu32(buf, 0);
     valid = (unsigned int)getub(buf, 11);
-    navmode = (unsigned char)getub(buf, 20);
+    fixType = (unsigned char)getub(buf, 20);
     flags = (unsigned int)getub(buf, 21);
 
-    switch (navmode)
-    {
+    switch (fixType) {
     case UBX_MODE_TMONLY:
-    {
-        if (*mode != MODE_NO_FIX) {
-            *mode = MODE_NO_FIX;
-            mask |= MODE_SET;
-        }
-        if (*status != STATUS_NO_FIX) {
-            *status = STATUS_NO_FIX;
-            mask |= STATUS_SET;
-        }
+        // 5 - Surveyed-in, so a precise 3D.
+        *mode = MODE_3D;
+        *status = STATUS_TIME;
+        mask |= STATUS_SET | MODE_SET;
         break;
-    }
+
     case UBX_MODE_3D:
+        // 3
+        // FALLTHROUGH
     case UBX_MODE_GPSDR:
-    {
+        // 4
         if (*mode != MODE_3D) {
             *mode = MODE_3D;
             mask |= MODE_SET;
@@ -501,10 +497,12 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
         }
         mask |=   LATLON_SET;
         break;
-    }
+
     case UBX_MODE_2D:
+        // 2
+        // FALLTHROUGH
     case UBX_MODE_DR:           /* consider this too as 2D */
-    {
+        // 1
         if (*mode != MODE_2D) {
             *mode = MODE_2D;
             mask |= MODE_SET;
@@ -515,9 +513,12 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
         }
         mask |= LATLON_SET | SPEED_SET;
         break;
-    }
+
+    case UBX_MODE_NOFIX:
+        // 0
+        // FALLTHROUGH
     default:
-    {
+        // huh?
         if (*mode != MODE_NO_FIX) {
             *mode = MODE_NO_FIX;
             mask |= MODE_SET;
@@ -527,7 +528,6 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
             mask |= STATUS_SET;
         }
         break;
-    }
     }
 
     if ((valid & UBX_NAV_PVT_VALID_DATE_TIME) == UBX_NAV_PVT_VALID_DATE_TIME) {
