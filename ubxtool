@@ -54,7 +54,7 @@ try:
     import gps
 except ImportError:
     # PEP8 says local imports last
-    sys.stderr.write("%s: failed to import gps, check PYTHON_PATH\n" %
+    sys.stderr.write("%s: failed to import gps, check PYTHONPATH\n" %
                      PROG_NAME)
     sys.exit(2)
 
