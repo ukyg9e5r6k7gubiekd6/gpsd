@@ -1276,10 +1276,13 @@ frame * {
         for (hook, widget) in Base.gpsfields[:27]:
             if hook:  # Remove this guard when we have all hooks
                 widget.set_markup(markup % hook(self, tpv))
-        if self.rotate is None and self.skyview:
-            self.skyview.rotate = gps.clienthelpers.mag_var(tpv.lat, tpv.lon)
-        elif self.rotate is True and 'track' in tpv:
-            self.skyview.rotate = tpv.track
+        if self.skyview:
+            if ((self.rotate is None
+                 and hasattr(tpv, 'lat') and hasattr(tpv, 'lon'))):
+                self.skyview.rotate = gps.clienthelpers.mag_var(tpv.lat,
+                                                                tpv.lon)
+            elif self.rotate is True and 'track' in tpv:
+                self.skyview.rotate = tpv.track
 
     def update_version(self, ver):
         "Update the Version"
