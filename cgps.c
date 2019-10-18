@@ -797,7 +797,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
         newstate = gpsdata->fix.mode;
         switch (gpsdata->status) {
         case STATUS_DGPS_FIX:
-            mod = "DIFF ";
+            mod = "DGPS ";
             break;
         case STATUS_RTK_FIX:
             mod = "RTK ";
@@ -809,10 +809,13 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
             mod = "DR ";
             break;
         case STATUS_GNSSDR:
-            mod = "+DR ";
+            mod = "GNSSDR ";
             break;
         case STATUS_TIME:
             mod = "FIXED ";
+            break;
+        case STATUS_PPS_FIX:
+            mod = "PPS ";
             break;
         default:
             /* ignore: */
