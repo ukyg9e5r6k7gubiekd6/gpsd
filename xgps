@@ -1253,18 +1253,35 @@ frame * {
         if 1 == item:
             return "%d secs" % (time.time() - self.last_transition)
 
+        sub_status = ''
+        if hasattr(data, 'status'):
+            if gps.STATUS_DGPS_FIX == data.status:
+                sub_status = " DGPS"
+            elif gps.STATUS_RTK_FIX == data.status:
+                sub_status = " RTKfix"
+            elif gps.STATUS_RTK_FLT == data.status:
+                sub_status = " RTKflt"
+            elif gps.STATUS_DR == data.status:
+                sub_status = " DR"
+            elif gps.STATUS_GNSSDR == data.status:
+                sub_status = " GNSSDR"
+            elif gps.STATUS_TIME == data.status:
+                sub_status = " FIXED"
+            elif gps.STATUS_SIM == data.status:
+                sub_status = " SIM"
+            elif gps.STATUS_PPS_FIX == data.status:
+                sub_status = " PPS"
+
         if data.mode == gps.MODE_2D:
-            status = "2D FIX"
+            status = "2D%s FIX" % sub_status
         elif data.mode == gps.MODE_3D:
             if hasattr(data, 'status') and gps.STATUS_TIME == data.status:
                 status = "FIXED SURVEYED"
             else:
-                status = "3D FIX"
+                status = "3D%s FIX" % sub_status
         else:
             status = "NO FIX"
 
-        if hasattr(data, 'status') and data.status == gps.STATUS_DGPS_FIX:
-            status += " DIFF"
         if data.mode != self.saved_mode:
             self.last_transition = time.time()
             self.saved_mode = data.mode
