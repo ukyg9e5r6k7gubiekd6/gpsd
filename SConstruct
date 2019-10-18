@@ -2527,8 +2527,8 @@ if env.WhereIs('asciidoc'):
                     ['asciidoc -b html5 -a toc -o www/%s.html www/%s.adoc'
                      % (stem, stem)])
     env.Command("www/installation.html",
-                "INSTALL",
-                ["asciidoc -o www/installation.html INSTALL"])
+                "INSTALL.adoc",
+                ["asciidoc -o www/installation.html INSTALL.adoc"])
     env.Command("www/README.html",
                 "README.adoc",
                 ["asciidoc -o www/README.html README.adoc"])

@@ -141,7 +141,7 @@ because of a missing Python.h.
 The xgps and xgpsspeed clients will only be installed if these Python
 extensions are installed:
 
-|============================================================================
+|===========================================================================
 |python-gi          | Python bindings for gobject-introspection libraries
 |python-gi-cairo    | Python bindings for Cairo toolkit under GI
 |===========================================================================
@@ -155,7 +155,7 @@ On Gentoo systems those packages are named:
 The ubxtool and zerk clients will only be usable in direct-serial mode
 if this Python extension is installed:
 
-|============================================================================
+|===========================================================================
 |pyserial           | Python Serial Port extension
 |===========================================================================
 
@@ -338,7 +338,7 @@ place.
 You will need php and php-gd installed to support the PHP web page
 generator included with the distribution. To install it, copy the file
 'gpsd.php' to your HTML document directory. Then see the
-post-installation instructions in INSTALL for how to configure it.
+post-installation instructions in INSTALL.adoc for how to configure it.
 
 == The leapseconds cache ==
 
@@ -480,7 +480,7 @@ message) if the tool cannot be found.  When running multiple jobs with
 appended to the command.  With a non-default setting, accommodating
 parallelism is the user's responsibility.
 
-For instructions on how to live-test the software, see the file INSTALL.
+For instructions on how to live-test the software, see the file INSTALL.adoc.
 
 == Reverting to a clean state ==
 

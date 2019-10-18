@@ -26,7 +26,7 @@ project mailing lists is: https://gpsd.io/
 
 See that website for a list of GPS units known to be compatible.
 
-See the file INSTALL for installation instructions and some tips on
+See the file INSTALL.adoc for installation instructions and some tips on
 how to troubleshoot your installation.  The file build.adoc has
 instructions for building from source.  The packaging/ directory
 contains resources and suggestions for packagers and distribution

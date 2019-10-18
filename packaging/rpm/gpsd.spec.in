@@ -200,7 +200,7 @@ fi
 
 %files
 %defattr(-,root,root,-)
-%doc README INSTALL COPYING
+%doc README.adoc INSTALL.adoc COPYING
 %config(noreplace) %{_sysconfdir}/init.d/%{name}
 %config(noreplace) %{_sysconfdir}/sysconfig/%{name}
 %config(noreplace) %{_sysconfdir}/udev/rules.d/*
