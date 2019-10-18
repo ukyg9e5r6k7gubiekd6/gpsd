@@ -1526,6 +1526,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 /* *INDENT-OFF* */
 		    if (NULL != dp->device_type &&
 		        NULL != dp->device_type->rtcm_writer) {
+                        // FIXME: don't write back to source
                         ssize_t ret = dp->device_type->rtcm_writer(dp,
 			                 (const char *)device->lexer.outbuffer,
 			                 device->lexer.outbuflen);
