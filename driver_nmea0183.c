@@ -827,7 +827,7 @@ static gps_mask_t processGGA(int c UNUSED, char *field[],
         break;
     case 3:
         /* GPS PPS, fix valid, could be 2D, 3D, GNSSDR */
-        newstatus = STATUS_FIX;
+        newstatus = STATUS_PPS_FIX;
         break;
     case 4:     /* RTK integer */
         newstatus = STATUS_RTK_FIX;
