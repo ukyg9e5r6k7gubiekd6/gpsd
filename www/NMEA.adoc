@@ -528,7 +528,7 @@ publicly available NMEA document dated 2009.
 |BPI | Bearing & Distance to Point of Interest
 |DBK | Depth Below Keel
 |DBS | Depth Below Surface
-|
+
 |DRU | Dual Doppler Auxiliary Data
 |GDA | Dead Reckoning Positions
 |GLA | Loran-C Positions
@@ -549,10 +549,10 @@ publicly available NMEA document dated 2009.
 |MTA | Air Temperature
 |MWH | Wave Height
 |MWS | Wind & Sea State
-|
+
 |Rnn | Routes
 |SBK | Loran-C Blink Status
-|SCY | oran-C Cycle Lock Status
+|SCY | Loran-C Cycle Lock Status
 |SCD | Loran-C ECDs
 |SDB | Loran-C Signal Strength
 |SGD | Position Accuracy Estimate
@@ -2127,7 +2127,7 @@ is correct.
 === VLW - Distance Traveled through Water ===
 
 ------------------------------------------------------------------------------
-        1   2 3   4 5   6  7  9  9
+        1   2 3   4 5   6  7  8  9
         |   | |   | |   |  |  |  |
  $--VLW,x.x,N,x.x,N,x.x,N,x.x,N*hh<CR><LF>
 ------------------------------------------------------------------------------
@@ -2142,7 +2142,7 @@ Field Number:
 6. N = Nautical Miles (NMEA 3 and above)
 7. Ground distance since reset, nm (NMEA 3 and above)
 8. N = Nautical Miles (NMEA 3 and above)
-5. Checksum
+9. Checksum
 
 === VPW - Speed - Measured Parallel to Wind ===
 
