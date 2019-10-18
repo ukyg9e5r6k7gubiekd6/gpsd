@@ -1900,8 +1900,8 @@ From <<GLOBALSAT>>.  Shown with a "@II" leader rather than "$GP".
 === TLB - Target Label ===
 
 ------------------------------------------------------------------------------
-        1   2   (3) (4)               5
-        |   |    |   |                |
+        1   2   (3) (4)                5
+        |   |    |   |                 |
  $--TLB,x.x,c--c,x.x,c--c,...,x.x,c--c*hh<CR><LF>
 ------------------------------------------------------------------------------
 
@@ -1909,8 +1909,8 @@ Field Number:
 
 1. Target Number (0-99)
 2. Label assigned to target
-(3. Target number 2)
-(4. Label assigned to target number 2)
+3. (Target number 2)
+4. (Label assigned to target number 2)
 5. Checksum
 
 Message can contain target number + label pairs up to maximum NMEA message length.
