@@ -551,12 +551,13 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    session->gpsdata.skyview[j].azimuth =
                 (short)GPSD_LE16TOH(sats->azmth);
 	    session->gpsdata.skyview[j].elevation = (short)sats->elev;
-	    // Garmin does not document this.  snr is in dB*100
-	    // Known, but not seen satellites have a dB value of -1*100
-	    session->gpsdata.skyview[j].ss =
-                (float)(GPSD_LE16TOH(sats->snr) / 100.0);
-	    if (session->gpsdata.skyview[j].ss == -1) {
-		continue;
+            if (0xffffffff == sats->snr) {
+                session->gpsdata.skyview[j].ss = NAN;
+            } else {
+                // Garmin does not document this.  snr is in dB*100
+                // Known, but not seen satellites have a dB value of -1*100
+                session->gpsdata.skyview[j].ss =
+                    (float)(GPSD_LE16TOH(sats->snr) / 100.0);
 	    }
 	    // FIX-ME: Garmin documents this, but Daniel Dorau
 	    // <daniel.dorau@gmx.de> says the behavior on his GPSMap60CSX
@@ -572,10 +573,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	}
 	session->gpsdata.skyview_time.tv_sec = 0;
 	session->gpsdata.skyview_time.tv_nsec = 0;
-	if (session->gpsdata.satellites_visible > 0)
-	    mask |= SATELLITE_SET;
-	if (session->gpsdata.satellites_used > 0)
-	    mask |= USED_IS;
+        mask |= USED_IS | SATELLITE_SET;
 	GPSD_LOG(LOG_DATA, &session->context->errout,
 		 "Garmin: SAT_DATA: visible=%d used=%d\n",
 		 session->gpsdata.satellites_visible,
