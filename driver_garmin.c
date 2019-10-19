@@ -520,6 +520,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	break;
 
     case GARMIN_PKTID_SAT_DATA:
+        // record ID 0x72 (114)
 	GPSD_LOG(LOG_PROG, &session->context->errout,
 		 "Garmin: SAT Data Sz: %d\n", pkt_len);
 	sats = (cpo_sat_data *) buf;
@@ -528,7 +529,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	gpsd_zero_satellites(&session->gpsdata);
 	for (i = 0, j = 0; i < GARMIN_CHANNELS; i++, sats++) {
 	    GPSD_LOG(LOG_INF, &session->context->errout,
-		     "Garmin:   Sat %3d, snr: %5u, elev: %2d, Azmth: %3d, Stat: %x\n",
+		     "Garmin: Sat %2d, snr: %5u, elev: %2d, Azmth: %3d, "
+                     "Stat: x%x\n",
 		     sats->svid, GPSD_LE16TOH(sats->snr), sats->elev,
 		     GPSD_LE16TOH(sats->azmth),
 		     sats->status);
@@ -539,15 +541,20 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		continue;
 	    }
 
-	    if ((int)sats->svid <= 32)
-		session->gpsdata.skyview[j].PRN = (short)sats->svid;	/* GPS */
-	    else
-		session->gpsdata.skyview[j].PRN = (short)sats->svid + 87;	/* SBAS */
-	    session->gpsdata.skyview[j].azimuth = (short)GPSD_LE16TOH(sats->azmth);
+	    if ((int)sats->svid <= 32) {
+                /* GPS 1-32 */
+		session->gpsdata.skyview[j].PRN = (short)sats->svid;
+	    } else {
+                /* SBAS 33-64 */
+		session->gpsdata.skyview[j].PRN = (short)sats->svid + 87;
+            }
+	    session->gpsdata.skyview[j].azimuth =
+                (short)GPSD_LE16TOH(sats->azmth);
 	    session->gpsdata.skyview[j].elevation = (short)sats->elev;
 	    // Garmin does not document this.  snr is in dB*100
 	    // Known, but not seen satellites have a dB value of -1*100
-	    session->gpsdata.skyview[j].ss = (float)(GPSD_LE16TOH(sats->snr) / 100.0);
+	    session->gpsdata.skyview[j].ss =
+                (float)(GPSD_LE16TOH(sats->snr) / 100.0);
 	    if (session->gpsdata.skyview[j].ss == -1) {
 		continue;
 	    }
