@@ -292,7 +292,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 			  int pkt_len, unsigned char *buf)
 {
 
-    gps_mask_t mask = 0;
+    gps_mask_t mask = ONLINE_SET;
     int i = 0, j = 0;
     uint16_t prod_id = 0;
     uint16_t ver = 0;
@@ -551,7 +551,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    session->gpsdata.skyview[j].azimuth =
                 (short)GPSD_LE16TOH(sats->azmth);
 	    session->gpsdata.skyview[j].elevation = (short)sats->elev;
-            if (0xffffffff == sats->snr) {
+            if (0xffff == sats->snr) {
                 session->gpsdata.skyview[j].ss = NAN;
             } else {
                 // Garmin does not document this.  snr is in dB*100
@@ -580,6 +580,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		 session->gpsdata.satellites_used);
 	break;
     case GARMIN_PKTID_PROTOCOL_ARRAY:
+        // Pid_Protocol_Array, ID 253
 	// this packet is never requested, it just comes, in some case
 	// after a GARMIN_PKTID_PRODUCT_RQST
 	GPSD_LOG(LOG_INF, &session->context->errout,
@@ -598,8 +599,8 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	break;
     }
     GPSD_LOG(LOG_DATA, &session->context->errout,
-	     "Garmin: PrintSERPacket(, %#02x, %#02x, )\n",
-	     pkt_id, pkt_len);
+	     "Garmin: PrintSERPacket(, %#02x, %#02x, ) mask=(%s)\n",
+	     pkt_id, pkt_len, gps_maskdump(mask));
     return mask;
 }
 
@@ -641,10 +642,12 @@ static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
 	/* Garmin USB layer specific */
 	switch (pkt->mPacketId) {
 	case GARMIN_PKTID_TRANSPORT_START_SESSION_REQ:
+            // Pid_Start_Session, ID 5
 	    GPSD_LOG(LOG_PROG, &session->context->errout,
 		     "Garmin: Transport, Start Session req\n");
 	    break;
 	case GARMIN_PKTID_TRANSPORT_START_SESSION_RESP:
+            // Pid_Session_Started, ID 6
 	    mode = get_int32(&pkt->mData.uchars[0]);
 	    GPSD_LOG(LOG_PROG, &session->context->errout,
 		     "Garmin: Transport, Start Session resp, unit: 0x%x\n",
@@ -652,7 +655,8 @@ static gps_mask_t PrintUSBPacket(struct gps_device_t *session, Packet_t * pkt)
 	    break;
 	default:
 	    GPSD_LOG(LOG_PROG, &session->context->errout,
-		     "Garmin: Transport, Packet: Type %d %d %d, ID: %d, Sz: %d\n",
+		     "Garmin: Transport, Packet: Type %d %d %d, ID: %d,"
+                     "Sz: %d\n",
 		     pkt->mPacketType, pkt->mReserved1, pkt->mReserved2,
 		     pkt->mPacketId, mDataSize);
 	    break;
