@@ -502,18 +502,21 @@ int gpsd_serial_open(struct gps_device_t *session)
     {
 	/*
 	 * We open with O_NONBLOCK because we want to not get hung if
-	 * the clocal flag is off, but we don't want to stay in that mode.
+	 * the CLOCAL flag is off.  Need to keep O_NONBLOCK so the main
+         * loop does not clock on an unresponsive read() from a receiver.
 	 */
 	errno = 0;
         if ((session->gpsdata.gps_fd =
-	     open(session->gpsdata.dev.path, (int)(mode | O_NONBLOCK | O_NOCTTY))) == -1) {
+	     open(session->gpsdata.dev.path,
+                  (int)(mode | O_NONBLOCK | O_NOCTTY))) == -1) {
             GPSD_LOG(LOG_ERROR, &session->context->errout,
 		     "SER: device open of %s failed: %s - "
                      "retrying read-only\n",
 		     session->gpsdata.dev.path,
 		     strerror(errno));
 	    if ((session->gpsdata.gps_fd =
-		 open(session->gpsdata.dev.path, O_RDONLY | O_NONBLOCK | O_NOCTTY)) == -1) {
+		 open(session->gpsdata.dev.path,
+                      O_RDONLY | O_NONBLOCK | O_NOCTTY)) == -1) {
 		GPSD_LOG(LOG_ERROR, &session->context->errout,
 			 "SER: read-only device open of %s failed: %s\n",
 			 session->gpsdata.dev.path,
@@ -538,7 +541,8 @@ int gpsd_serial_open(struct gps_device_t *session)
      *
      * We also exclude bluetooth device because the bluetooth daemon opens them.
      */
-    if (!(session->sourcetype == source_pty || session->sourcetype == source_bluetooth)) {
+    if (!(session->sourcetype == source_pty ||
+          session->sourcetype == source_bluetooth)) {
 #ifdef TIOCEXCL
 	/*
 	 * Try to block other processes from using this device while we
@@ -570,7 +574,8 @@ int gpsd_serial_open(struct gps_device_t *session)
     if (session->saved_baud != -1) {
 	(void)cfsetispeed(&session->ttyset, (speed_t)session->saved_baud);
 	(void)cfsetospeed(&session->ttyset, (speed_t)session->saved_baud);
-	if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) != 0) {
+	if (tcsetattr(session->gpsdata.gps_fd,
+                      TCSANOW, &session->ttyset) != 0) {
 	    GPSD_LOG(LOG_ERROR, &session->context->errout,
 		     "SER: Error setting port attributes: %s\n",
 		     strerror(errno));
@@ -622,14 +627,8 @@ int gpsd_serial_open(struct gps_device_t *session)
 	    );
     }
 
-    /* Probably want to switch back to blocking I/O now that CLOCAL is set. */
-    if (session->sourcetype != source_pipe)
-    {
-	int oldfl = fcntl(session->gpsdata.gps_fd, F_GETFL);
-	if (oldfl != -1)
-	    (void)fcntl(session->gpsdata.gps_fd, F_SETFL, oldfl & ~O_NONBLOCK);
-    }
-
+    /* Used to turn off O_NONBLOCK here, but best not to block trying
+     * to read from an unresponsive receiver. */
 
     /* required so parity field won't be '\0' if saved speed matches */
     if (session->sourcetype <= source_blockdev) {
