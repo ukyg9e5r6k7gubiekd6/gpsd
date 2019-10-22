@@ -2487,6 +2487,8 @@ ssize_t packet_get(int fd, struct gps_lexer_t *lexer)
     ssize_t recvd;
 
     errno = 0;
+    /* O_NONBLOCK set, so this should not block.
+     * Best not to block on an unresponsive GNSS receiver */
     recvd = read(fd, lexer->inbuffer + lexer->inbuflen,
 		 sizeof(lexer->inbuffer) - (lexer->inbuflen));
     if (recvd == -1) {
