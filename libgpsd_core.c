@@ -1509,7 +1509,7 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 	}
     }
 
-    if (session->lexer.outbuflen == 0) {	/* got new data, but no packet */
+    if (session->lexer.outbuflen == 0) {      /* got new data, but no packet */
 	GPSD_LOG(LOG_RAW + 1, &session->context->errout,
 		 "New data on %s, not yet a packet\n",
 		 session->gpsdata.dev.path);
@@ -1523,8 +1523,8 @@ gps_mask_t gpsd_poll(struct gps_device_t *session)
 		 session->gpsdata.dev.path);
 
 	/* track the packet count since achieving sync on the device */
-	if (driver_change
-		&& (session->drivers_identified & (1 << session->driver_index)) == 0) {
+	if (driver_change &&
+            (session->drivers_identified & (1 << session->driver_index)) == 0) {
 	    speed_t speed = gpsd_get_speed(session);
 
 	    /* coverity[var_deref_op] */
@@ -1729,7 +1729,8 @@ int gpsd_multipoll(const bool data_ready,
 		return DEVICE_EOF;
 	    } else if (changed == ERROR_SET) {
 		GPSD_LOG(LOG_WARN, &device->context->errout,
-			 "device read of %s returned error or packet sniffer failed sync (flags %s)\n",
+			 "device read of %s returned error or "
+                         "packet sniffer failed sync (flags %s)\n",
 			 device->gpsdata.dev.path,
 			 gps_maskdump(changed));
 		return DEVICE_ERROR;
