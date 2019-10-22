@@ -1809,6 +1809,7 @@ int gpsd_multipoll(const bool data_ready,
 		handler(device, changed);
 
 #ifdef __future__
+            // this breaks: test/daemon/passthrough.log ??
 	    /*
 	     * Bernd Ocklin suggests:
 	     * Exit when a full packet was received and parsed.
@@ -1817,6 +1818,8 @@ int gpsd_multipoll(const bool data_ready,
 	     * read.
 	     * Otherwise we can sit here for a long time without
 	     * any for-loop exit condition being met.
+             * It might also reduce the latency from a received packet to
+             * it being output by gpsd.
 	     */
 	    if ((changed & PACKET_SET) != 0)
                break;
