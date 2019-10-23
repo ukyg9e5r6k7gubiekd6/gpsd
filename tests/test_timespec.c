@@ -5,19 +5,20 @@
  * SPDX-License-Identifier: BSD-2-clause
  *
  */
-#include <stdlib.h>
-#include <stdbool.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <stdint.h>   /* required by C99, for int32_t */
-#include <string.h>
+/* first so the #defs work */
+#include "../gpsd_config.h"
+
 #include <math.h>
+#include <stdbool.h>
+#include <stdint.h>   /* required by C99, for int32_t */
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
-#include "../compiler.h"
+#include "../gpsd.h"
 #include "../revision.h"
-#include "../ppsthread.h"
-#include "../timespec.h"
 
 #define TS_ZERO         {0,0}
 #define TS_ZERO_ONE     {0,1}
@@ -297,6 +298,77 @@ static int test_format(int verbose )
     return fail_count;
 }
 
+typedef struct {
+    unsigned short week;
+    int leap_seconds;
+    timespec_t ts_tow;
+    timespec_t ts_exp;  // expected result
+    char *exp_s;        // expected string
+    bool last;
+} gpstime_test_t;
+
+gpstime_test_t gpstime_tests[] = {
+    // GPS time zero
+    {0, 0, TS_ZERO, {315964800, 000000000}, "1980-01-06T00:00:00.000Z", 0},
+    // GPS first roll over
+    {1024, 7, TS_ZERO, {935279993, 000000000}, "1999-08-21T23:59:53.000Z", 0},
+    // GPS first roll over
+    {2048, 18, TS_ZERO, {1554595182, 000000000}, "2019-04-06T23:59:42.000Z", 0},
+    {2076, 18, {239910, 100000000}, {1571769492, 100000000},
+     "2019-10-22T18:38:12.100Z", 1},
+};
+
+static int test_gpsd_gpstime_resolv(int verbose )
+{
+
+    char res_s[128];
+    int fail_count = 0;
+    struct gps_device_t session;
+    struct gps_context_t context;
+    timespec_t ts_res;
+    gpstime_test_t *p = gpstime_tests;
+
+    memset(&session, 0, sizeof(session));
+    memset(&context, 0, sizeof(context));
+    session.context = &context;
+
+    while ( 1 ) {
+
+        /* setup preconditions */
+        context.gps_week = p->week;
+        context.leap_seconds = p->leap_seconds;
+        ts_res = gpsd_gpstime_resolv(&session, p->week, p->ts_tow);
+        (void)timespec_to_iso8601(ts_res, res_s, sizeof(res_s));
+
+        if (p->ts_exp.tv_sec != ts_res.tv_sec ||
+            p->ts_exp.tv_nsec != ts_res.tv_nsec ||
+	    strcmp(res_s, p->exp_s) ) {
+                // long long for 32-bit OS
+                printf("FAIL %lld.%09ld s/b: %lld.%09ld\n"
+                       "     %s s/b %s\n",
+                       (long long)ts_res.tv_sec, ts_res.tv_nsec,
+                       (long long)p->ts_exp.tv_sec, p->ts_exp.tv_nsec,
+                       res_s, p->exp_s);
+                fail_count++;
+        } else if ( verbose )  {
+                printf("%lld.%09ld (%s)\n",
+                       (long long)p->ts_exp.tv_sec, p->ts_exp.tv_nsec,
+                       p->exp_s);
+        }
+	if ( p->last ) {
+		break;
+	}
+	p++;
+    }
+
+    if ( fail_count ) {
+	printf("test_gpsd_gpstime_resolv test failed %d tests\n", fail_count );
+    } else {
+	puts("test_gpsd_gpstime_resolv test succeeded\n");
+    }
+    return fail_count;
+}
+
 static int ex_subtract_float( void )
 {
     struct subtract_test *p = subtract_tests;
@@ -540,9 +612,10 @@ int main(int argc, char *argv[])
     }
 
 
-    fail_count = test_format( verbose );
-    fail_count += test_ts_subtract( verbose );
-    fail_count += test_ns_subtract( verbose );
+    fail_count = test_format(verbose );
+    fail_count += test_ts_subtract(verbose );
+    fail_count += test_ns_subtract(verbose );
+    fail_count += test_gpsd_gpstime_resolv(verbose );
 
     if ( fail_count ) {
 	printf("timespec tests failed %d tests\n", fail_count );
