@@ -9,16 +9,16 @@
  * be adding a fixed offset based on a hidden epoch value, in which case
  * unhappy things will occur on the next rollover.
  *
- * This file is Copyright (c) 2010-2018 by the GPSD project
+ * This file is Copyright (c) 2010-2019 by the GPSD project
  * SPDX-License-Identifier: BSD-2-clause
  */
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <string.h>
-#include <stdio.h>
-#include <stdbool.h>
 #include <math.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 #include <time.h>
 #include <unistd.h>
 
@@ -164,7 +164,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	u2 = getub(buf, 1);
 	GPSD_LOG(LOG_WARN, &session->context->errout,
 		 "Received packet of type %02x cannot be parsed\n", u1);
-	if ((int)u1 == 0x8e && (int)u2 == 0x23) {	/* no Compact Super Packet */
+	if ((int)u1 == 0x8e && (int)u2 == 0x23) {
+            /* no Compact Super Packet */
 	    GPSD_LOG(LOG_WARN, &session->context->errout,
 		     "No Compact Super Packet, use LFwEI\n");
 
@@ -190,7 +191,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		ul1 = getbeu16(buf, 7); /* Year */
 		u7 = getub(buf, 9); /* Length of first module name */
 		for (i=0; i < (int)u7; i++) {
-		    buf2[i] = (char)getub(buf, 10+i); /* Product name in ASCII */
+                    /* Product name in ASCII */
+		    buf2[i] = (char)getub(buf, 10+i);
 		}
 		buf2[i] = '\0';
 
@@ -449,9 +451,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Fix info %02x %02x %u %f\n", u1, u2, week, f1);
 	break;
-    case 0x58:			/* Satellite System Data/Acknowledge from Receiver */
+    case 0x58:		/* Satellite System Data/Acknowledge from Receiver */
 	break;
-    case 0x59:			/* Status of Satellite Disable or Ignore Health */
+    case 0x59:		/* Status of Satellite Disable or Ignore Health */
 	break;
     case 0x5a:			/* Raw Measurement Data */
 	if (len != 29)
@@ -490,7 +492,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		session->gpsdata.skyview[i].azimuth = (double)d2;
 		session->gpsdata.skyview[i].used = false;
 		for (j = 0; j < session->gpsdata.satellites_used; j++)
-		    if (session->gpsdata.skyview[i].PRN != 0 && session->driver.tsip.sats_used[j] != 0)
+		    if (session->gpsdata.skyview[i].PRN != 0 &&
+                        session->driver.tsip.sats_used[j] != 0)
 			session->gpsdata.skyview[i].used = true;
 	    } else {
 		session->gpsdata.skyview[i].PRN = 0;
@@ -657,7 +660,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    sqrt(pow(session->gpsdata.dop.pdop, 2) +
 		 pow(session->gpsdata.dop.tdop, 2));
 
-	memset(session->driver.tsip.sats_used, 0, sizeof(session->driver.tsip.sats_used));
+	memset(session->driver.tsip.sats_used, 0,
+               sizeof(session->driver.tsip.sats_used));
 	buf2[0] = '\0';
 	for (i = 0; i < count; i++)
 	    str_appendf(buf2, sizeof(buf2),
@@ -700,7 +704,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	GPSD_LOG(LOG_DATA, &session->context->errout,
 		 "DPFM 0x82 status=%d\n", session->gpsdata.status);
 	break;
-    case 0x83:			/* Double-Precision XYZ Position Fix and Bias Information */
+    case 0x83:     /* Double-Precision XYZ Position Fix and Bias Information */
 	if (len != 36)
 	    break;
 	d1 = getbed64((char *)buf, 0);	/* X */
@@ -711,7 +715,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "GPS Position XYZ %f %f %f %f %f\n", d1, d2, d3, d4, f1);
 	break;
-    case 0x84:			/* Double-Precision LLA Position Fix and Bias Information */
+    case 0x84:     /* Double-Precision LLA Position Fix and Bias Information */
 	if (len != 36)
 	    break;
 	session->newdata.latitude = getbed64((char *)buf, 0) * RAD_2_DEG;
@@ -759,7 +763,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		     d2, d3, d4, d5);
 	    break;
 
-	case 0x20:		/* Last Fix with Extra Information (binary fixed point) */
+	case 0x20:   /* Last Fix with Extra Information (binary fixed point) */
 	    /* CSK sez "why does my Lassen iQ output oversize packets?" */
 	    if ((len != 56) && (len != 64))
 		break;
@@ -1116,7 +1120,7 @@ static void tsip_init_query(struct gps_device_t *session)
 {
     unsigned char buf[100];
 
-    /* Request Hardware Version Information */
+    /* Use 0x1C-03 to Request Hardware Version Information (0x1C-83) */
     putbyte(buf, 0, 0x03); /* Subcode */
     (void)tsip_write(session, 0x1c, buf, 1);
     /*
@@ -1133,13 +1137,19 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	unsigned char buf[100];
 
 	/*
-	 * Set basic configuration, in case no hardware config response
-	 * comes back.
+	 * Set basic configuration, using Set or Request I/O Options (0x35).
+         * in case no hardware config response comes back.
 	 */
-	putbyte(buf, 0, 0x1e);	/* Position: DP, MSL, LLA */
-	putbyte(buf, 1, 0x02);	/* Velocity: ENU */
-	putbyte(buf, 2, 0x00);	/* Time: GPS */
-	putbyte(buf, 3, 0x08);	/* Aux: dBHz */
+        /* Position: enable: Double Precision, MSL, LLA
+         *           disable: ECEF */
+	putbyte(buf, 0, 0x1e);
+        /* Velocity: enable: ENU, disable ECEF */
+	putbyte(buf, 1, 0x02);
+        /* Time: enable: 0x42, 0x43, 0x4a
+         *       disable: 0x83, 0x84, 0x56 */
+	putbyte(buf, 2, 0x00);
+        /* Aux: enable: 0x5A, dBHz */
+	putbyte(buf, 3, 0x08);
 	(void)tsip_write(session, 0x35, buf, 4);
     }
     if (event == event_configure && session->lexer.counter == 0) {
@@ -1186,6 +1196,7 @@ static bool tsip_speed_switch(struct gps_device_t *session,
 	break;
     }
 
+    /* Set Port Configuration (0xbc) */
     putbyte(buf, 0, 0xff);	/* current port */
     /* input dev.baudrate */
     putbyte(buf, 1, (round(log((double)speed / 300) / GPS_LN2)) + 2);
@@ -1207,14 +1218,16 @@ static void tsip_mode(struct gps_device_t *session, int mode)
     if (mode == MODE_NMEA) {
 	unsigned char buf[16];
 
-	/* First turn on the NMEA messages we want */
+        /* send NMEA Interval and Message Mask Command (0x7a)
+	* First turn on the NMEA messages we want */
 	putbyte(buf, 0, 0x00);	/* subcode 0 */
 	putbyte(buf, 1, 0x01);	/* 1-second fix interval */
 	putbyte(buf, 2, 0x00);	/* Reserved */
 	putbyte(buf, 3, 0x00);	/* Reserved */
-	putbyte(buf, 4, 0x01);	/* 0=RMC, 1-7=Reserved */
-	putbyte(buf, 5, 0x19);	/* 0=GGA, 1=GGL, 2=VTG, 3=GSV, */
-	/* 4=GSA, 5=ZDA, 6-7=Reserved  */
+	putbyte(buf, 4, 0x01);	/* 1=GST, Reserved */
+	/* 1=GGA, 2=GGL, 4=VTG, 8=GSV, */
+	/* 0x10=GSA, 0x20=ZDA, 0x40=Reserved, 0x80=RMC  */
+	putbyte(buf, 5, 0x19);
 
 	(void)tsip_write(session, 0x7A, buf, 6);
 
@@ -1222,6 +1235,8 @@ static void tsip_mode(struct gps_device_t *session, int mode)
 
 	memset(buf, 0, sizeof(buf));
 
+        /* Set Port Configuration (0xbc) */
+        // 4800, really?
 	putbyte(buf, 0, 0xff);	/* current port */
 	putbyte(buf, 1, 0x06);	/* 4800 bps input */
 	putbyte(buf, 2, 0x06);	/* 4800 bps output */
@@ -1238,8 +1253,9 @@ static void tsip_mode(struct gps_device_t *session, int mode)
     } else if (mode == MODE_BINARY) {
 	/* The speed switcher also puts us back in TSIP, so call it */
 	/* with the default 9600 8O1. */
-	// FIX-ME: Should preserve the current speed.
+	// FIXME: Should preserve the current speed.
 	// (void)tsip_speed_switch(session, 9600, 'O', 1);
+        // FIXME: should config TSIP binary!
 	;
 
     } else {
@@ -1265,88 +1281,144 @@ static double tsip_time_offset(struct gps_device_t *session UNUSED)
     return 0.0;
 }
 
-void configuration_packets_generic(struct gps_device_t *session)
 /* configure generic Trimble TSIP device to a known state */
+void configuration_packets_generic(struct gps_device_t *session)
 {
 	unsigned char buf[100];
 
-	/* I/O Options */
-	putbyte(buf, 0, 0x1e);	/* Position: DP, MSL, LLA */
-	putbyte(buf, 1, 0x02);	/* Velocity: ENU */
-	putbyte(buf, 2, 0x00);	/* Time: GPS */
-	putbyte(buf, 3, 0x08);	/* Aux: dBHz */
+	// Set basic configuration, using Set or Request I/O Options (0x35).
+        /* Position: enable: Double Precision, MSL, LLA
+         *           disable: ECEF */
+	putbyte(buf, 0, 0x1e);
+        /* Velocity: enable: ENU, disable ECEF */
+	putbyte(buf, 1, 0x02);
+        /* Time: enable: 0x42, 0x43, 0x4a
+         *       disable: 0x83, 0x84, 0x56 */
+	putbyte(buf, 2, 0x00);
+        /* Aux: enable: 0x5A, dBHz */
+	putbyte(buf, 3, 0x08);
 	(void)tsip_write(session, 0x35, buf, 4);
 
-	/* Request Software Versions */
+	/* Request Software Version (0x1f), returns 0x45 */
 	(void)tsip_write(session, 0x1f, NULL, 0);
-	/* Request Current Time */
+
+	/* Current Time Request (0x21), returns 0x41 */
 	(void)tsip_write(session, 0x21, NULL, 0);
-	/* Set Operating Parameters */
-	/* - dynamic code: land */
+
+	/* Set Operating Parameters (0x2c)
+         * not present in RES SMT 360 */
+	/* dynamics code: enabled: 1=land
+         *   disabled: 2=sea, 3=air, 4=static
+         *   default is land */
 	putbyte(buf, 0, 0x01);
-	/* - elevation mask */
-	putbef32((char *)buf, 1, (float)5.0 * DEG_2_RAD);
-	/* - signal level mask */
+	/* elevation mask, 10 degrees is a common default,
+         * TSIP default is 15 */
+	putbef32((char *)buf, 1, (float)10.0 * DEG_2_RAD);
+	/* signal level mask
+         * default is 2.0 AMU. 5.0 to 6.0 for high accuracy */
 	putbef32((char *)buf, 5, (float)06.0);
-	/* - PDOP mask */
+	/* PDOP mask
+         * default is 12. 5.0 to 6.0 for high accuracy */
 	putbef32((char *)buf, 9, (float)8.0);
-	/* - PDOP switch */
+	/* PDOP switch
+         * default is 8.0 */
 	putbef32((char *)buf, 13, (float)6.0);
 	(void)tsip_write(session, 0x2c, buf, 17);
-	/* Set Position Fix Mode (auto 2D/3D) */
+
+	/* Set Position Fix Mode (0x22)
+         * 0=auto 2D/3D, 1=time only, 3=2D, 4=3D, 10=Overdetermined clock */
 	putbyte(buf, 0, 0x00);
 	(void)tsip_write(session, 0x22, buf, 1);
-	/* Request GPS Systems Message */
+
+	/* Request GPS System Message (0x48)
+         * not supported on model RES SMT 360 */
 	(void)tsip_write(session, 0x28, NULL, 0);
-	/* Request Current Datum Values */
+
+	/* Last Position and Velocity Request (0x37)
+         * returns 0x57 and (0x42, 0x4a, 0x83, or 0x84) and (0x43 or 0x56)  */
 	(void)tsip_write(session, 0x37, NULL, 0);
 	putbyte(buf, 0, 0x15);
 	(void)tsip_write(session, 0x8e, buf, 1);
-	/* Request Navigation Configuration */
+
+	/* Primary Receiver Configuration Parameters Request (0xbb-00)
+         * returns  Primary Receiver Configuration Block (0xbb-00) */
 	putbyte(buf, 0, 0x03);
 	(void)tsip_write(session, 0xbb, buf, 1);
 }
 
-void configuration_packets_accutime_gold(struct gps_device_t *session)
 /* configure Accutime Gold to a known state */
+void configuration_packets_accutime_gold(struct gps_device_t *session)
 {
 	unsigned char buf[100];
-	/* Request Software Version Information */
+
+	/* Request Firmware Version (0x1c-01)
+         * returns Firmware component version information (0x1x-81) */
 	putbyte(buf, 0, 0x01);
 	(void)tsip_write(session, 0x1c, buf, 1);
-	/* Set Self-Survey Parameters */
+
+	/* Set Self-Survey Parameters (0x8e-a9) */
 	putbyte(buf, 0, 0xa9); /* Subcode */
 	putbyte(buf, 1, 0x01); /* Self-Survey Enable = enable */
 	putbyte(buf, 2, 0x01); /* Position Save Flag = save position */
-	putbe32(buf, 3, 2000); /* Self-Survey Length = 2000 */
-	putbe32(buf, 7, 0); /* Reserved */
+	putbe32(buf, 3, 2000); /* Self-Survey Length = 2000 fixes */
+        /* Horizontal Uncertainty, 1-100, 1=best, 100=worst,
+         *    default 100 */
+	putbe32(buf, 7, 0);
+        /* Verical Uncertainty, 1-100, 1=best, 100=worst,
+         *    default 100
+         * not present in RES SMT 360 */
 	(void)tsip_write(session, 0x8e, buf, 11);
-	/* Set PPS Output Option */
+
+	/* Set PPS Output Option (0x8e-4e) */
 	putbyte(buf, 0, 0x4e); /* Subcode */
-	putbyte(buf, 1, 2); /* PPS driver switch = 2 (PPS is always output) */
+        /* PPS driver switch = 2 (PPS is always output) */
+	putbyte(buf, 1, 2);
 	(void)tsip_write(session, 0x8e, buf, 2);
-	/* Set Primary Receiver Configuration */
-	putbyte(buf, 0, 0x00); /* Subcode */
-	putbyte(buf, 1, 0x07); /* Operating Dimension = default full position 4, ODCM 7 */
-	putbyte(buf, 2, 0xff); /* Not enabled = unchanged */
-	putbyte(buf, 3, 0x01); /* Dynamics code = default */
-	putbyte(buf, 4, 0x01); /* Solution Mode = default */
-	putbef32((char *)buf, 5, (float)0.1745); /* Elevation Mask = 0.1745 */
-	putbef32((char *)buf, 9, (float)4.0); /* AMU Mask = default is 4.0 */
-	putbef32((char *)buf, 13, (float)8.0); /* PDOP Mask = 8.0 */
-	putbef32((char *)buf, 17, (float)6.0); /* PDOP Switch = 6.0 */
-	putbyte(buf, 21, 0xff); /* N/A */
-	putbyte(buf, 22, 0x0); /* Foliage Mode = default */
-	putbe16(buf, 23, 0xffff); /* Reserved */
-	putbe16(buf, 25, 0x0000); /* Measurement Rate and Position Fix Rate = default */
+
+	/* Set Primary Receiver Configuration (0xbb-00) */
+	putbyte(buf, 0, 0x00);   /* Subcode */
+        /* Receiver mode, 7 = Force Overdetermined clock */
+	putbyte(buf, 1, 0x07);
+        /* Not enabled = unchanged
+         * must be 0xff on RES SMT 360 */
+	putbyte(buf, 2, 0xff);
+        /* Dynamics code = default
+         * must be 0xff on RES SMT 360 */
+	putbyte(buf, 3, 0x01);
+        /* Solution Mode = default
+         * must be 0xff on RES SMT 360 */
+	putbyte(buf, 4, 0x01);
+        /* Elevation Mask = 10 deg */
+	putbef32((char *)buf, 5, (float)10.0 * DEG_2_RAD);
+        /* AMU Mask. 0 to 55. default is 4.0 */
+	putbef32((char *)buf, 9, (float)4.0);
+        /* PDOP Mask = 8.0, default = 6 */
+	putbef32((char *)buf, 13, (float)8.0);
+        /* PDOP Switch = 6.0, ignored in RES SMT 360 */
+	putbef32((char *)buf, 17, (float)6.0);
+        /* must be 0xff */
+	putbyte(buf, 21, 0xff);
+        /* Anti-Jam Mode, 0=Off, 1=On */
+	putbyte(buf, 22, 0x0);
+        /* Reserved.  Must be 0xffff */
+	putbe16(buf, 23, 0xffff);
+        /* Measurement Rate and Position Fix Rate = default
+         * must be 0xffff on res smt 360 */
+	putbe16(buf, 25, 0x0000);
+        /* 27 is Constellation on RES SMT 360.
+         * 1 = GPS, 2=GLONASS, 8=BeiDou, 0x10=Galileo, 5=QZSS */
 	putbe32(buf, 27, 0xffffffff); /* Reserved */
 	putbe32(buf, 31, 0xffffffff); /* Reserved */
 	putbe32(buf, 35, 0xffffffff); /* Reserved */
 	putbe32(buf, 39, 0xffffffff); /* Reserved */
 	(void)tsip_write(session, 0xbb, buf, 43);
-	/* Set Packet Broadcast Mask */
+
+	/* Set Packet Broadcast Mask (0x8e-a5) */
 	putbyte(buf, 0, 0xa5); /* Subcode */
-	putbe16(buf, 1, 0x32e1); /* Packets bit field = default + Primary timing, Supplemental timing 32e1 */
+        /* Packets bit field = default + Primary timing,
+         *  Supplemental timing 32e1
+         *  1=0x8f-ab, 4=0x8f-ac, 0x40=Automatic Output Packets */
+	putbe16(buf, 1, 0x32e1);
 	putbyte(buf, 3, 0x00); /* not used */
 	putbyte(buf, 4, 0x00); /* not used */
 	(void)tsip_write(session, 0x8e, buf, 5);
