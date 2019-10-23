@@ -323,7 +323,6 @@ static int test_gpsd_gpstime_resolv(int verbose )
 
     char res_s[128];
     char buf[20];
-    char buf1[20];
     int fail_count = 0;
     struct gps_device_t session;
     struct gps_context_t context;
