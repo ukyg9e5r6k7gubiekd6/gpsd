@@ -168,12 +168,12 @@ enum isgpsstat_t {
  * choosing this as the cutoff, we'll never reject historical GPS logs
  * that are actually valid.
  */
-#define GPS_EPOCH	315964800	/* 6 Jan 1980 00:00:00 UTC */
+#define GPS_EPOCH	((uint32_t)315964800)   /* 6 Jan 1980 00:00:00 UTC */
 
 /* time constant */
-#define SECS_PER_DAY	(60*60*24)		/* seconds per day */
-#define SECS_PER_WEEK	(7*SECS_PER_DAY)	/* seconds per week */
-#define GPS_ROLLOVER	(1024*SECS_PER_WEEK)	/* rollover period */
+#define SECS_PER_DAY	((uint32_t)(60*60*24))  /* seconds per day */
+#define SECS_PER_WEEK	(7*SECS_PER_DAY)        /* seconds per week */
+#define GPS_ROLLOVER	(1024*SECS_PER_WEEK)    /* rollover period */
 
 struct gpsd_errout_t {
     int debug;				/* lexer debug level */
