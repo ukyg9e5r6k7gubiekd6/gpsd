@@ -257,7 +257,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    mask |= TIME_SET | NTPTIME_IS;
 	}
 	GPSD_LOG(LOG_INF, &session->context->errout,
-		 "GPS Time %f %u %f\n", f1, week, f2);
+		 "GPS Time tow %.2f week %u ls %.1f %s\n",
+                 f1, week, f2,
+                 timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)));
 	break;
     case 0x42:			/* Single-Precision Position Fix, XYZ ECEF */
 	if (len != 16)
@@ -926,23 +928,23 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->driver.tsip.last_41 = now;	/* keep timestamp for request */
 	    ul1 = getbeu32(buf, 1);	/* gpstime */
 	    week = getbeu16(buf, 5);	/* week */
-	    s2 = getbes16(buf, 7);	/* leap seconds */
+            /* leap seconds */
+            session->context->leap_seconds = (int)getbes16(buf, 7);
+	    u1 = buf[9];                // Time Flag
 
-	    if ((int)ul1 > 10) {
-		session->context->leap_seconds = (int)s2;
-		session->context->valid |= LEAP_SECOND_VALID;
-		MSTOTS(&ts_tow, ul1);
-		session->newdata.time =
-		    gpsd_gpstime_resolv(session, week, ts_tow);
-		mask |= TIME_SET | NTPTIME_IS | CLEAR_IS;
-		GPSD_LOG(LOG_DATA, &session->context->errout,
-			 "SP-TTS 0xab time=%s mask={TIME}\n",
-                         timespec_str(&session->newdata.time, ts_buf,
-                                      sizeof(ts_buf)));
-	    }
+            // how do we know leap valid?
+            session->context->valid |= LEAP_SECOND_VALID;
+            MSTOTS(&ts_tow, ul1);
+            session->newdata.time = gpsd_gpstime_resolv(session, week, ts_tow);
+            mask |= TIME_SET | NTPTIME_IS | CLEAR_IS;
+            GPSD_LOG(LOG_DATA, &session->context->errout,
+                     "SP-TTS 0xab time=%s mask={TIME}\n",
+                     timespec_str(&session->newdata.time, ts_buf,
+                                  sizeof(ts_buf)));
 
 	    GPSD_LOG(LOG_PROG, &session->context->errout,
-		     "SP-TTS 0xab GPS Time %u %d %d\n", ul1, s1, s2);
+		     "SP-TTS 0xab GPS Time %u %u %d flag x%x\n",
+                     ul1, week, session->context->leap_seconds, u1);
 	    break;
 
 
