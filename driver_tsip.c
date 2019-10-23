@@ -1265,22 +1265,6 @@ static void tsip_mode(struct gps_device_t *session, int mode)
 }
 #endif /* RECONFIGURE_ENABLE */
 
-static double tsip_time_offset(struct gps_device_t *session UNUSED)
-{
-    /*
-     * the offset depends on the generation and is not reliable, it often
-     * depends on the number of SV being tracked
-     * some example measurements:
-     * Trimble Resolution T   : 0.03s to 0.200s
-     * Trimble Resolution SMTx: 0.300 to 0.500s (unpredictable)
-     * Trimble RES SMT 360    : 0.028s (this appears very stable)
-     *
-     * Trimble users tend to be very picky, so we leave the offset to them.
-     * If we could detect the Trimble model maybe we could pick an offset.
-     */
-    return 0.0;
-}
-
 /* configure generic Trimble TSIP device to a known state */
 void configuration_packets_generic(struct gps_device_t *session)
 {
@@ -1449,7 +1433,7 @@ const struct gps_type_t driver_tsip =
 #ifdef CONTROLSEND_ENABLE
     .control_send   = tsip_control_send,/* how to send commands */
 #endif /* CONTROLSEND_ENABLE */
-    .time_offset     = tsip_time_offset,
+    .time_offset     = NULL,
 };
 /* *INDENT-ON* */
 
