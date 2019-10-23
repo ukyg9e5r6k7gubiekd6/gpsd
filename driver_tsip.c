@@ -27,8 +27,6 @@
 #include "strfuncs.h"
 #include "timespec.h"
 
-#define USE_SUPERPACKET	1	/* use Super Packet mode? */
-
 #define SEMI_2_DEG	(180.0 / 2147483647)	/* 2^-31 semicircle to deg */
 
 void configuration_packets_accutime_gold(struct gps_device_t *session);
@@ -166,7 +164,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	u2 = getub(buf, 1);
 	GPSD_LOG(LOG_WARN, &session->context->errout,
 		 "Received packet of type %02x cannot be parsed\n", u1);
-#if USE_SUPERPACKET
 	if ((int)u1 == 0x8e && (int)u2 == 0x23) {	/* no Compact Super Packet */
 	    GPSD_LOG(LOG_WARN, &session->context->errout,
 		     "No Compact Super Packet, use LFwEI\n");
@@ -176,7 +173,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    putbyte(buf, 1, 0x01);	/* enabled */
 	    (void)tsip_write(session, 0x8e, buf, 2);
 	}
-#endif /* USE_SUPERPACKET */
 
 	break;
     case 0x1c: /* Hardware/Software Version Information (Accutime Gold) */
@@ -383,7 +379,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	u3 = getub(buf, 2);	/* Status 2 */
 	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "Machine ID %02x %02x %02x\n", u1, u2, u3);
-#if USE_SUPERPACKET
 	if ((u3 & 0x01) != (uint8_t) 0 && !session->driver.tsip.superpkt) {
 	    GPSD_LOG(LOG_PROG, &session->context->errout,
 		     "Switching to Super Packet mode\n");
@@ -396,7 +391,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    (void)tsip_write(session, 0x35, buf, 4);
 	    session->driver.tsip.superpkt = true;
 	}
-#endif /* USE_SUPERPACKET */
 	break;
     case 0x4c:			/* Operating Parameters Report */
 	break;
@@ -411,7 +405,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	u4 = getub(buf, 3);	/* Aux */
 	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "IO Options %02x %02x %02x %02x\n", u1, u2, u3, u4);
-#if USE_SUPERPACKET
 	if ((u1 & 0x20) != (uint8_t) 0) {	/* Output Super Packets? */
 	    /* No LFwEI Super Packet */
 	    putbyte(buf, 0, 0x20);
@@ -424,7 +417,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    (void)tsip_write(session, 0x8e, buf, 2);
 	    session->driver.tsip.req_compact = now;
 	}
-#endif /* USE_SUPERPACKET */
 	break;
     case 0x56:			/* Velocity Fix, East-North-Up (ENU) */
 	if (len != 20)
@@ -1093,7 +1085,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	(void)tsip_write(session, 0x26, buf, 0);
 	session->driver.tsip.last_46 = now;
     }
-#if USE_SUPERPACKET
     if ((session->driver.tsip.req_compact > 0) &&
 	((now - session->driver.tsip.req_compact) > 5)) {
 	/* Compact Superpacket requested but no response */
@@ -1106,7 +1097,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	putbyte(buf, 1, 0x01);	/* enabled */
 	(void)tsip_write(session, 0x8e, buf, 2);
     }
-#endif /* USE_SUPERPACKET */
 
     return mask;
 }
