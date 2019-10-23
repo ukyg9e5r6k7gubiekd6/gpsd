@@ -30,6 +30,7 @@ extern "C" {
 
 #include "gps.h"
 #include "os_compat.h"
+#include "ppsthread.h"
 #include "timespec.h"
 
 /*
@@ -492,8 +493,6 @@ struct ntrip_stream_t
     int fee;
     int bitrate;
 };
-
-#include "ppsthread.h"
 
 struct gps_device_t {
 /* session object, encapsulates all global state */
