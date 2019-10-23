@@ -322,6 +322,8 @@ static int test_gpsd_gpstime_resolv(int verbose )
 {
 
     char res_s[128];
+    char buf[20];
+    char buf1[20];
     int fail_count = 0;
     struct gps_device_t session;
     struct gps_context_t context;
@@ -344,15 +346,15 @@ static int test_gpsd_gpstime_resolv(int verbose )
             p->ts_exp.tv_nsec != ts_res.tv_nsec ||
 	    strcmp(res_s, p->exp_s) ) {
                 // long long for 32-bit OS
-                printf("FAIL %lld.%09ld s/b: %lld.%09ld\n"
+                printf("FAIL %s s/b: %s\n"
                        "     %s s/b %s\n",
-                       (long long)ts_res.tv_sec, ts_res.tv_nsec,
-                       (long long)p->ts_exp.tv_sec, p->ts_exp.tv_nsec,
+                       timespec_str(&ts_res, buf, sizeof(buf)),
+                       timespec_str(&p->ts_exp, buf, sizeof(buf)),
                        res_s, p->exp_s);
                 fail_count++;
         } else if ( verbose )  {
-                printf("%lld.%09ld (%s)\n",
-                       (long long)p->ts_exp.tv_sec, p->ts_exp.tv_nsec,
+                printf("%s (%s)\n",
+                       timespec_str(&p->ts_exp, buf, sizeof(buf)),
                        p->exp_s);
         }
 	if ( p->last ) {
