@@ -318,7 +318,7 @@ gpstime_test_t gpstime_tests[] = {
      "2019-10-22T18:38:12.100Z", 1},
 };
 
-static int test_gpsd_gpstime_resolv(int verbose )
+static int test_gpsd_gpstime_resolv(int verbose)
 {
 
     char res_s[128];
@@ -332,6 +332,7 @@ static int test_gpsd_gpstime_resolv(int verbose )
     memset(&session, 0, sizeof(session));
     memset(&context, 0, sizeof(context));
     session.context = &context;
+    context.errout.debug = 0;          // a handle to change debug level
 
     while ( 1 ) {
 
@@ -370,7 +371,7 @@ static int test_gpsd_gpstime_resolv(int verbose )
     return fail_count;
 }
 
-static int ex_subtract_float( void )
+static int ex_subtract_float(void)
 {
     struct subtract_test *p = subtract_tests;
     int fail_count = 0;
