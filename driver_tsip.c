@@ -108,6 +108,7 @@ static bool tsip_detect(struct gps_device_t *session)
     return ret;
 }
 
+/* This is the meat of parsing all the TSIP packets */
 static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 {
     int i, j, len, count;
@@ -135,8 +136,15 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	return 0;
     }
 
-    if (session->lexer.outbuflen < 4 || session->lexer.outbuffer[0] != 0x10)
+    if (session->lexer.outbuflen < 4 || session->lexer.outbuffer[0] != 0x10) {
+        /* packet too short, or does not start with DLE */
+	GPSD_LOG(LOG_INF, &session->context->errout,
+		 "tsip_analyze packet bad packet\n");
 	return 0;
+    }
+
+    // get receive time, first
+    (void)time(&now);
 
     /* remove DLE stuffing and put data part of message in buf */
 
@@ -147,6 +155,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    if (session->lexer.outbuffer[++i] == 0x03)
 		break;
 
+        // FIXME  expensive way to do hex
 	str_appendf(buf2, sizeof(buf2),
 		       "%02x", buf[len++] = session->lexer.outbuffer[i]);
     }
@@ -155,7 +164,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     GPSD_LOG(LOG_DATA, &session->context->errout,
 	     "TSIP packet id 0x%02x length %d: %s\n",
 	     id, len, buf2);
-    (void)time(&now);
 
     session->cycle_end_reliable = true;
     switch (id) {
