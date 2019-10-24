@@ -189,8 +189,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	 * FIXME: We could get both kinds of version info.
 	 */
 	u1 = (uint8_t) getub(buf, 0);
-	if (u1 == 0x81) { /* Software Version Information */
-		uint8_t u6, u7;
+	switch (u1) {
+        case 0x81:       /* Software Version Information */
 		u2 = getub(buf, 2); /* Major version */
 		u3 = getub(buf, 3); /* Minor version */
 		u4 = getub(buf, 4); /* Build number */
@@ -212,8 +212,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 			 session->subtype);
 
 		mask |= DEVICEID_SET;
-	}
-	if (u1 == 0x83) { /* Hardware Version Information */
+                break;
+	case 0x83:    /* Hardware Version Information */
 		ul1 = getbeu32(buf, 1); /* Serial number */
 		u2 = getub(buf, 5); /* Build day */
 		u3 = getub(buf, 6); /* Build month */
@@ -247,6 +247,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 			configuration_packets_generic(session);
 		}
 		break;
+            default:
+                GPSD_LOG(LOG_ERROR, &session->context->errout,
+                         "TSIP: 0x1c Unhandled subpacket ID %u\n", u1);
+                break;
 	}
 	break;
     case 0x41:			/* GPS Time */
