@@ -928,7 +928,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	case 0xab:		/* Thunderbolt Timing Superpacket */
 	    if (len != 17) {
 		GPSD_LOG(LOG_WARNING, &session->context->errout,
-                         "TSIP: pkt 0xab len=%d\n", len);
+                         "TSIP: pkt 0xab wrong len=%d\n", len);
 		break;
 	    }
 	    session->driver.tsip.last_41 = now;	/* keep timestamp for request */
@@ -937,6 +937,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             /* leap seconds */
             session->context->leap_seconds = (int)getbes16(buf, 7);
 	    u1 = buf[9];                // Time Flag
+            // should check time valid?
+            /* ignore the broken down time, use the GNSS time.
+             * Hope it is not BeiDou time */
 
             // how do we know leap valid?
             session->context->valid |= LEAP_SECOND_VALID;
@@ -958,19 +961,35 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	case 0xac:		/* Thunderbolt Position Superpacket */
 	    if (len != 68) {
 		GPSD_LOG(LOG_WARNING, &session->context->errout,
-                         "TSIP: pkt 0xac len=%d\n", len);
+                         "TSIP: pkt 0xac wrong len=%d\n", len);
 
 		break;
 	    }
+
+	    u2 = getub(buf, 1);	        /* Receiver Mode */
+	    u1 = getub(buf, 12);	/* GPS Decoding Status */
+            // ignore 2, Disciplining Mode
+            // ignore 3, Self-Survey Progress
+            // ignore 4-7, Holdover Duration
+            // ignore 8-9, Critical Alarms
+            // ignore 10-11, Minor Alarms
+            // ignore 12, GNSS Decoding Status
+            // ignore 13, Disciplining Activity
+            // ignore 14, PPS indication
+            // ignore 15, PPS reference
+	    // f1 = getbef32((char *)buf, 16);  // PPS Offset
+            // ignore 20-23, Clock Offset
+            // ignore 24-27, DAC Value
+            // ignore 28-31, DAC Voltage
+            // ignore 32-35, Temperature
 	    session->newdata.latitude = getbed64((char *)buf, 36) * RAD_2_DEG;
 	    session->newdata.longitude = getbed64((char *)buf, 44) * RAD_2_DEG;
 	    /* depending on GPS config, could be either WGS84 or MSL
 	     * default differs by model, usually WGS84 */
 	    session->newdata.altHAE = getbed64((char *)buf, 52);
-	    //f1 = getbef32((char *)buf, 16);    clock bias */
+            // ignore 60-63, always zero
+            // ignore 64-67, reserved
 
-	    u1 = getub(buf, 12);	/* GPS Decoding Status */
-	    u2 = getub(buf, 1);	/* Receiver Mode */
 	    if (u1 != (uint8_t) 0) {
 		session->gpsdata.status = STATUS_NO_FIX;
 		mask |= STATUS_SET;
@@ -984,37 +1003,47 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    /* Decode Fix modes */
 	    switch (u2 & 7) {
             case 0:     /* Auto */
+                /*
+                * According to the Thunderbolt Manual, the
+                * first byte of the supplemental timing packet
+                * simply indicates the configuration of the
+                * device, not the actual lock, so we need to
+                * look at the decode status.
+                */
                 switch (u1) {
-                       /*
-			* According to the Thunderbolt Manual, the
-                        * first byte of the supplemental timing packet
-                        * simply indicates the configuration of the
-                        * device, not the actual lock, so we need to
-                        * look at the decode status.
-			*/
-                       case 0:   /* "Doing Fixes" */
-                         session->newdata.mode = MODE_3D;
-                         break;
-                       case 0x0B: /* "Only 3 usable sats" */
-                         session->newdata.mode = MODE_2D;
-                         break;
-                       case 0x1:   /* "Don't have GPS time" */
-                       case 0x3:   /* "PDOP is too high" */
-                       case 0x8:   /* "No usable sats" */
-                       case 0x9:   /* "Only 1 usable sat" */
-                       case 0x0A:  /* "Only 2 usable sats */
-                       case 0x0C:  /* "The chosen sat is unusable" */
-                       case 0x10:  /* TRAIM rejected the fix */
-                       default:
-                          session->newdata.mode = MODE_NO_FIX;
+                case 0:   /* "Doing Fixes" */
+                    session->newdata.mode = MODE_3D;
+                    break;
+                case 0x0B: /* "Only 3 usable sats" */
+                    session->newdata.mode = MODE_2D;
+                    break;
+                case 0x1:   /* "Don't have GPS time" */
+                    // FALLTHROUGH
+                case 0x3:   /* "PDOP is too high" */
+                    // FALLTHROUGH
+                case 0x8:   /* "No usable sats" */
+                    // FALLTHROUGH
+                case 0x9:   /* "Only 1 usable sat" */
+                    // FALLTHROUGH
+                case 0x0A:  /* "Only 2 usable sats */
+                    // FALLTHROUGH
+                case 0x0C:  /* "The chosen sat is unusable" */
+                    // FALLTHROUGH
+                case 0x10:  /* TRAIM rejected the fix */
+                    // FALLTHROUGH
+                default:
+                    session->newdata.mode = MODE_NO_FIX;
+                    break;
                 }
 		break;
 	    case 6:		/* Clock Hold 2D */
+                // FALLTHROUGH
 	    case 3:		/* 2D Position Fix */
 		//session->gpsdata.status = STATUS_FIX;
 		session->newdata.mode = MODE_2D;
 		break;
 	    case 7:		/* Thunderbolt overdetermined clock */
+                // FALLTHROUGH
 	    case 4:		/* 3D position Fix */
 		//session->gpsdata.status = STATUS_FIX;
 		session->newdata.mode = MODE_3D;
@@ -1027,10 +1056,12 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
 	    mask |= LATLON_SET | ALTITUDE_SET | MODE_SET | REPORT_IS;
 	    GPSD_LOG(LOG_DATA, &session->context->errout,
-		     "TSIP: SP-TPS 0xac lat=%.2f lon=%.2f altHAE=%.2f\n",
+		     "TSIP: SP-TPS 0xac lat=%.2f lon=%.2f altHAE=%.2f "
+                     "mask %s\n",
 		     session->newdata.latitude,
 		     session->newdata.longitude,
-		     session->newdata.altHAE);
+		     session->newdata.altHAE,
+                     gps_maskdump(mask));
 	    break;
 
 	default:
