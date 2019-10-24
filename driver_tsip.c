@@ -259,7 +259,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	ftow = getbef32((char *)buf, 0);	/* gpstime */
 	week = getbeu16(buf, 4);	/* week */
 	f2 = getbef32((char *)buf, 6);	/* leap seconds */
-	if (f1 >= 0.0 && f2 > 10.0) {
+	if (ftow >= 0.0 && f2 > 10.0) {
 	    session->context->leap_seconds = (int)round(f2);
 	    session->context->valid |= LEAP_SECOND_VALID;
 	    DTOTS(&ts_tow, ftow);
@@ -357,8 +357,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	GPSD_LOG(LOG_PROG, &session->context->errout,
 		 "TSIP: GPS System Message: %s\n", buf);
 	break;
-    case 0x49:			/* Almanac Health Page */
-	break;
     case 0x4a:			/* Single-Precision Position LLA */
 	if (len != 20)
 	    break;
@@ -404,10 +402,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    (void)tsip_write(session, 0x35, buf, 4);
 	    session->driver.tsip.superpkt = true;
 	}
-	break;
-    case 0x4c:			/* Operating Parameters Report */
-	break;
-    case 0x54:			/* One Satellite Bias */
 	break;
     case 0x55:			/* IO Options */
 	if (len != 4)
@@ -462,10 +456,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "TSIP: Fix info %02x %02x %u %f\n", u1, u2, week, f1);
 	break;
-    case 0x58:		/* Satellite System Data/Acknowledge from Receiver */
-	break;
-    case 0x59:		/* Status of Satellite Disable or Ignore Health */
-	break;
     case 0x5a:			/* Raw Measurement Data */
 	if (len != 29)
 	    break;
@@ -476,8 +466,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	GPSD_LOG(LOG_PROG, &session->context->errout,
 		 "TSIP: Raw Measurement Data %d %f %f %f %f\n",
 		 getub(buf, 0), f1, f2, f3, d1);
-	break;
-    case 0x5b:			/* Satellite Ephemeris Status */
 	break;
     case 0x5c:			/* Satellite Tracking Status */
 	if (len != 24)
@@ -569,8 +557,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    if (i > session->gpsdata.satellites_visible)
 		session->gpsdata.satellites_visible = i;
 	}
-	break;
-    case 0x5e:			/* Additional Fix Status Report */
 	break;
     case 0x6c:			/* Satellite Selection List */
 	//u1 = getub(buf, 0);	/* nsvs/dimension UNUSED */
@@ -689,20 +675,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 session->gpsdata.dop.tdop,
 		 session->gpsdata.dop.gdop);
 	mask |= DOP_SET | STATUS_SET | USED_IS;
-	break;
-    case 0x6e:			/* Synchronized Measurements */
-	break;
-#ifdef __UNUSED__
-    case 0x6f:			/* Synchronized Measurements Report */
-	if (len < 20 || getub(buf, 0) != 1 || getub(buf, 1) != 2)
-	    break;
-	s1 = getbes16(buf, 2);	/* number of bytes */
-	u1 = getub(buf, 20);	/* number of SVs */
-	break;
-#endif /* __UNUSED__ */
-    case 0x70:			/* Filter Report */
-	break;
-    case 0x7a:			/* NMEA settings */
 	break;
     case 0x82:			/* Differential Position Fix Mode */
 	if (len != 1)
@@ -919,15 +891,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		     session->newdata.mode, session->gpsdata.status);
 	    break;
 
-	case 0x4a:		/* Set PPS Characteristics */
-	    break;
-
-	case 0x4e:		/* PPS Output */
-	    break;
-
-	case 0xa2:		/* UTC/GPS Timing */
-	    break;
-
 	case 0xab:		/* Thunderbolt Timing Superpacket */
 	    if (len != 17) {
 		GPSD_LOG(LOG_WARNING, &session->context->errout,
@@ -1089,6 +1052,29 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 "TSIP: Navigation Configuration %u %u %u %u %f %f %f %f %u\n",
 		 u1, u2, u3, u4, f1, f2, f3, f4, u5);
 	break;
+
+    case 0x49:			/* Almanac Health Page */
+	// FALLTHROUGH
+    case 0x4c:			/* Operating Parameters Report */
+	// FALLTHROUGH
+    case 0x54:			/* One Satellite Bias */
+	// FALLTHROUGH
+    case 0x58:		/* Satellite System Data/Acknowledge from Receiver */
+	// FALLTHROUGH
+    case 0x59:		/* Status of Satellite Disable or Ignore Health */
+	// FALLTHROUGH
+    case 0x5b:			/* Satellite Ephemeris Status */
+	// FALLTHROUGH
+    case 0x5e:			/* Additional Fix Status Report */
+	// FALLTHROUGH
+    case 0x6e:			/* Synchronized Measurements */
+	// FALLTHROUGH
+    case 0x6f:			/* Synchronized Measurements Report */
+	// FALLTHROUGH
+    case 0x70:			/* Filter Report */
+	// FALLTHROUGH
+    case 0x7a:			/* NMEA settings */
+	// FALLTHROUGH
     default:
 	GPSD_LOG(LOG_WARN, &session->context->errout,
 		 "TSIP: Unhandled packet type 0x%02x\n", id);
