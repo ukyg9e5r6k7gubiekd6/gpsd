@@ -185,12 +185,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
 	break;
     case 0x1c: /* Hardware/Software Version Information (Accutime Gold) */
-	/*
-	 * FIXME: We could get both kinds of version info.
-	 */
 	u1 = (uint8_t) getub(buf, 0);
+        // decode by subtype
 	switch (u1) {
-        case 0x81:       /* Software Version Information */
+        case 0x81:       // Firmware component version information (0x1c-81)
+                // 1, reserved
 		u2 = getub(buf, 2); /* Major version */
 		u3 = getub(buf, 3); /* Minor version */
 		u4 = getub(buf, 4); /* Build number */
@@ -213,14 +212,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
 		mask |= DEVICEID_SET;
                 break;
-	case 0x83:    /* Hardware Version Information */
-		ul1 = getbeu32(buf, 1); /* Serial number */
-		u2 = getub(buf, 5); /* Build day */
-		u3 = getub(buf, 6); /* Build month */
-		ul2 = getbeu16(buf, 7); /* Build year */
-		u4 = getub(buf, 6); /* Build hour */
+	case 0x83:    //  Hardware component version information (0x1c-83)
+		ul1 = getbeu32(buf, 1);  /* Serial number */
+		u2 = getub(buf, 5);      /* Build day */
+		u3 = getub(buf, 6);      /* Build month */
+		ul2 = getbeu16(buf, 7);  /* Build year */
+		u4 = getub(buf, 6);      /* Build hour */
 		ul3 = getbeu16(buf, 10); /* Hardware Code */
-		u5 = getub(buf, 12); /* Length of Hardware ID */
+		u5 = getub(buf, 12);     /* Length of Hardware ID */
 		/* coverity_submit[tainted_data] */
 		for (i=0; i < (int)u5; i++) {
 		    buf2[i] = (char)getub(buf, 13+i); /* Hardware ID in ASCII */
