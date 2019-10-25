@@ -323,7 +323,7 @@ void gpsd_set_speed(struct gps_device_t *session,
 	 * Don't mess with this conditional! Speed zero is supposed to mean
 	 * to leave the port speed at whatever it currently is. This leads
 	 * to excellent behavior on Linux, which preserves baudrate across
-	 * serial device closes - it means that if you've opended this
+	 * serial device closes - it means that if you've opened this
 	 * device before you typically don't have to hunt at all because
 	 * it's still at the same speed you left it - you'll typically
 	 * get packet lock within 1.5 seconds.  Alas, the BSDs and OS X
@@ -732,7 +732,8 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
             new_stop = '0' - session->context->fixed_port_framing[2];
         }
 
-        gpsd_set_speed(session, rates[session->baudindex], new_parity, new_stop);
+        gpsd_set_speed(session, rates[session->baudindex], new_parity,
+                       new_stop);
         session->lexer.retry_counter = 0;
     }
     return true;		/* keep hunting */
