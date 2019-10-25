@@ -76,6 +76,7 @@ extern "C" {
  *      Remove gpsd_gpstime_resolve()
  *      Changed order of gpsd_log() arguments.  Add GPSD_LOG().
  *      Remove gps_device_t.back_to_nmea.
+ *      Add fixed_port_speed, fixed_port_framing to gps_context_t.
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -290,6 +291,8 @@ struct gps_context_t {
 #define CENTURY_VALID		0x04	/* have received ZDA or 4-digit year */
     struct gpsd_errout_t errout;		/* debug verbosity level and hook */
     bool readonly;			/* if true, never write to device */
+    speed_t fixed_port_speed;           // Fixed port speed, if non-zero
+    char fixed_port_framing[4];         // Fixed port framing, if non-blank
     /* DGPS status */
     int fixcnt;				/* count of good fixes seen */
     /* timekeeping */
@@ -512,9 +515,7 @@ struct gps_device_t {
 #ifdef HAVE_TERMIOS_H
     struct termios ttyset, ttyset_old;
 #endif
-#ifndef FIXED_PORT_SPEED
     unsigned int baudindex;
-#endif /* FIXED_PORT_SPEED */
     int saved_baud;
     struct gps_lexer_t lexer;
     int badcount;

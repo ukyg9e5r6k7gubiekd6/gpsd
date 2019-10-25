@@ -103,23 +103,19 @@
  */
 #define NICEVAL	-10
 
-#if (defined(FIXED_PORT_SPEED) || \
-     defined(TIMESERVICE_ENABLE) || \
+#if (defined(TIMESERVICE_ENABLE) || \
      !defined(SOCKET_EXPORT_ENABLE))
     /*
-     * Force nowait in three circumstances:
+     * Force nowait in two circumstances:
      *
-     * (1) If we're running with FIXED_PORT_SPEED we're some sort
-     * of embedded configuration where we don't want to wait for connect
-     *
-     * (2) Socket export has been disabled.  In this case we have no
+     * (1) Socket export has been disabled.  In this case we have no
      * way to know when client apps are watching the export channels,
      * so we need to be running all the time.
      *
-     * (3) timeservice mode where we want the GPS always on for timing.
+     * (2) timeservice mode where we want the GPS always on for timing.
      */
 #define FORCE_NOWAIT
-#endif /* defined(FIXED_PORT_SPEED) || !defined(SOCKET_EXPORT_ENABLE) */
+#endif /* defined(TIMESERVICE_ENABLE) || !defined(SOCKET_EXPORT_ENABLE) */
 
 #ifdef SOCKET_EXPORT_ENABLE
 /* IP version used by the program */
@@ -211,29 +207,30 @@ static void typelist(void)
 
 static void usage(void)
 {
-    (void)printf("usage: gpsd [-b] [-D n] [-F sockfile] [-G] [-h] [-n] [-N] [-P pidfile] [-S port] device...\n\
+    (void)printf("usage: gpsd [OPTIONS] device...\n\n\
   Options include: \n\
   -b		     	    = bluetooth-safe: open data sources read-only\n\
   -D integer (default 0)    = set debug level \n\
-  -F sockfile		    = specify control socket location\n"
+  -F sockfile		    = specify control socket location\n\
+  -f FRAMING		    = fix device framing to FRAMING (8N1, 8O1, etc.)\n\
+  -G         		    = make gpsd listen on INADDR_ANY\n"
 #ifndef FORCE_GLOBAL_ENABLE
-"  -G         		    = make gpsd listen on INADDR_ANY\n"
-#endif /* FORCE_GLOBAL_ENABLE */
-"  -h		     	    = help message \n"
-#ifdef FORCE_NOWAIT
-"  -n			    = don't wait for client connects to poll GPS\n"
 "                             forced on in this binary\n"
-#else
-"  -n			    = don't wait for client connects to poll GPS\n"
+#endif /* FORCE_GLOBAL_ENABLE */
+"  -h		     	    = help message \n\
+  -n			    = don't wait for client connects to poll GPS\n"
+#ifdef FORCE_NOWAIT
+"                             forced on in this binary\n"
 #endif /* FORCE_NOWAIT */
 "  -N			    = don't go into background\n\
   -P pidfile	      	    = set file to record process ID\n\
   -r               	    = use GPS time even if no fix\n\
-  -S integer (default %s) = set port for daemon \n\
+  -S PORT (default %s) = set port for daemon \n\
+  -s SPEED                  = fix device speed to SPEED\n\
   -V			    = emit version and exit.\n"
 #ifdef NETFEED_ENABLE
-"A device may be a local serial device for GPS input, or a URL in one \n\
-of the following forms:\n\
+"\nA device may be a local serial device for GNSS input, plus an optional\n\
+PPS device, or a URL in one of the following forms:\n\
      tcp://host[:port]\n\
      udp://host[:port]\n\
      {dgpsip|ntrip}://[user:passwd@]host[:port][/stream]\n\
@@ -1898,9 +1895,13 @@ int main(int argc, char *argv[])
 #endif /* SOCKET_EXPORT_ENABLE */
 #endif /* CONTROL_SOCKET_ENABLE */
 
-    while ((option = getopt(argc, argv, "F:D:S:bGhlNnrP:V")) != -1) {
+    while ((option = getopt(argc, argv, "bD:F:f:GhlNnP:rS:s:V")) != -1) {
 	switch (option) {
+	case 'b':
+	    context.readonly = true;
+	    break;
 	case 'D':
+            // accept decimal, octal and hex
 	    context.errout.debug = (int)strtol(optarg, 0, 0);
 #ifdef CLIENTDEBUG_ENABLE
 	    gps_enable_debug(context.errout.debug, stderr);
@@ -1911,11 +1912,22 @@ int main(int argc, char *argv[])
 	    control_socket = optarg;
 	    break;
 #endif /* CONTROL_SOCKET_ENABLE */
-	case 'N':
-	    go_background = false;
-	    break;
-	case 'b':
-	    context.readonly = true;
+	case 'f':
+            // framing
+            if (3 == strlen(optarg) &&
+                ('7' == optarg[0] || '8' == optarg[0]) &&
+                ('E' == optarg[1] || 'N' == optarg[1] ||
+                 'O' == optarg[1]) &&
+                ('0' <= optarg[2] && '2' >= optarg[2])) {
+                // [78][ENO][012]
+                (void)strlcpy(context.fixed_port_framing, optarg,
+                              sizeof(context.fixed_port_framing));
+            } else {
+                // invalid framing
+                GPSD_LOG(LOG_ERROR, &context.errout,
+                         "-f has invalid framing %s\n", optarg);
+                exit(1);
+            }
 	    break;
 #ifndef FORCE_GLOBAL_ENABLE
 	case 'G':
@@ -1925,25 +1937,45 @@ int main(int argc, char *argv[])
 	case 'l':		/* list known device types and exit */
 	    typelist();
 	    break;
+	case 'N':
+	    go_background = false;
+	    break;
+	case 'n':
+	    nowait = true;
+	    break;
+	case 'P':
+	    pid_file = optarg;
+	    break;
+	case 'r':
+	    batteryRTC = true;
+	    break;
 	case 'S':
 #ifdef SOCKET_EXPORT_ENABLE
 	    gpsd_service = optarg;
 #endif /* SOCKET_EXPORT_ENABLE */
 	    break;
-	case 'n':
-	    nowait = true;
-	    break;
-	case 'r':
-	    batteryRTC = true;
-	    break;
-	case 'P':
-	    pid_file = optarg;
+	case 's':
+            {
+                // accept decimal, octal and hex
+                long speed = strtol(optarg, 0, 0);
+                if (0 < speed) {
+                    // allow weird speeds
+                    context.fixed_port_speed = (speed_t)speed;
+                } else {
+                    // invalid speed
+                    GPSD_LOG(LOG_ERROR, &context.errout,
+                             "-s has invalid speed %ld\n", speed);
+                    exit(1);
+                }
+            }
 	    break;
 	case 'V':
 	    (void)printf("%s: %s (revision %s)\n", argv[0], VERSION, REVISION);
 	    exit(EXIT_SUCCESS);
 	case 'h':
+            // FALLTHROUGH
 	case '?':
+            // FALLTHROUGH
 	default:
 	    usage();
 	    exit(EXIT_SUCCESS);
@@ -2029,6 +2061,7 @@ int main(int argc, char *argv[])
     }
 #endif /* defined(CONTROL_SOCKET_ENABLE) || defined(SYSTEMD_ENABLE) */
 
+    // TODO, a dump of all options here at LOG_xx would be nice.
 
     /* might be time to daemonize */
     if (go_background) {

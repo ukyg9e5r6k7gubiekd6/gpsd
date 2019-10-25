@@ -28,6 +28,7 @@ SPDX-License-Identifier: BSD-2-clause
       <arg choice='opt'>-b </arg>
       <arg choice='opt'>-D <replaceable>debuglevel</replaceable></arg>
       <arg choice='opt'>-F <replaceable>control-socket</replaceable></arg>
+      <arg choice='opt'>-f <replaceable>framing</replaceable></arg>
       <arg choice='opt'>-G </arg>
       <arg choice='opt'>-h </arg>
       <arg choice='opt'>-l </arg>
@@ -36,6 +37,7 @@ SPDX-License-Identifier: BSD-2-clause
       <arg choice='opt'>-P <replaceable>pidfile</replaceable></arg>
       <arg choice='opt'>-r </arg>
       <arg choice='opt'>-S <replaceable>listener-port</replaceable></arg>
+      <arg choice='opt'>-s <replaceable>speed</replaceable></arg>
       <arg choice='opt'>-V </arg>
       <arg rep='repeat'>
 	   <group><replaceable>source-name</replaceable></group>
@@ -170,6 +172,13 @@ commands that edit the daemon's internal device list.</para>
 </listitem>
 </varlistentry>
 <varlistentry>
+<term>-f</term>
+<listitem><para>Fix the framing to the GNSS device.
+The framing parameter is of the form: [78][ENO][012].
+Most GNSS are 8N1.  Some Trimble default to 8O1.
+The default is to search for the correct framing.</para></listitem>
+</varlistentry>
+<varlistentry>
 <term>-G</term>
 <listitem><para>This flag causes <application>gpsd</application> to
 listen on all addresses (INADDR_ANY) rather than just the loop back
@@ -227,6 +236,11 @@ time at startup.</para></listitem>
 <term>-S</term>
 <listitem><para>Set TCP/IP port on which to listen for GPSD clients
 (default is 2947).</para></listitem>
+</varlistentry>
+<varlistentry>
+<term>-s</term>
+<listitem><para>Fix the speed to the GNSS device.
+The default is to autobaud.</para></listitem>
 </varlistentry>
 <varlistentry>
 <term>-V</term>

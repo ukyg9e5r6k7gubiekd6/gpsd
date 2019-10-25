@@ -21,8 +21,10 @@
   Remove TIMEHINT_ENABLE.  It only worked when enabled.
   Remove NTP_ENABLE and NTPSHM_ENABLE.  It only worked when enabled.
   Remove PPS_ENABLE and TIMING_ENABLE.
-  add dgps_age and dgps_station to gps_fix_t
+  Add dgps_age and dgps_station to gps_fix_t
   Convert all timestamp_t to timespec_t.
+  Remove FIXED_PORT_SPEED and FIXED_STOP_BITS build options.
+  Add -s [speed] and -f [framing] runtime options to gpsd.
 
 3.19: 2019-07-01
   Rearrange rawdata_t.  Bump the API because gps_data_t changed.

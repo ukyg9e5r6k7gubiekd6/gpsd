@@ -254,8 +254,6 @@ else:
     def_group = "dialout"
 
 nonboolopts = (
-    ("fixed_port_speed", 0,             "fixed serial port speed"),
-    ("fixed_stop_bits",  0,             "fixed serial port stop bits"),
     ("gpsd_group",       def_group,     "privilege revocation group"),
     ("gpsd_user",        "nobody",      "privilege revocation user",),
     ("max_clients",      '64',          "maximum allowed clients"),
@@ -2160,7 +2158,7 @@ AlwaysBuild(Alias(".", [], error_action))
 Utility("cppcheck", ["gpsd.h", "packet_names.h"],
         "cppcheck -U__UNUSED__ -UUSE_QT -U__COVERITY__ -U__future__ "
         "-ULIMITED_MAX_CLIENTS -ULIMITED_MAX_DEVICES -UAF_UNSPEC -UINADDR_ANY "
-        "-UFIXED_PORT_SPEED -UFIXED_STOP_BITS -U_WIN32 -U__CYGWIN__ "
+        "-U_WIN32 -U__CYGWIN__ "
         "-UPATH_MAX -UHAVE_STRLCAT -UHAVE_STRLCPY -UIPTOS_LOWDELAY "
         "-UIPV6_TCLASS -UTCP_NODELAY -UTIOCMIWAIT --template gcc "
         "--enable=all --inline-suppr --suppress='*:driver_proto.c' "

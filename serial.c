@@ -251,7 +251,7 @@ int gpsd_get_stopbits(const struct gps_device_t *dev)
 bool gpsd_set_raw(struct gps_device_t * session)
 {
     (void)cfmakeraw(&session->ttyset);
-    if (tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset) == -1) {
+    if (-1 == tcsetattr(session->gpsdata.gps_fd, TCIOFLUSH, &session->ttyset)) {
 	GPSD_LOG(LOG_ERROR, &session->context->errout,
 		 "SER: error changing port attributes: %s\n", strerror(errno));
 	return false;
@@ -296,13 +296,21 @@ void gpsd_set_speed(struct gps_device_t *session,
 
     /* backward-compatibility hack */
     switch (parity) {
+    case 'E':
+        // FALLTHROUGH
     case (char)2:
 	parity = 'E';
 	break;
+    case 'O':
+        // FALLTHROUGH
     case (char)1:
 	parity = 'O';
 	break;
+    case 'N':
+        // FALLTHROUGH
     case (char)0:
+        // FALLTHROUGH
+    default:
 	parity = 'N';	/* without this we might emit malformed JSON */
 	break;
     }
@@ -338,7 +346,8 @@ void gpsd_set_speed(struct gps_device_t *session,
 	    session->ttyset.c_cflag |= PARENB | PARODD;
 	    break;
 	}
-	if (tcsetattr(session->gpsdata.gps_fd, TCSANOW, &session->ttyset) != 0) {
+        if (0 != tcsetattr(session->gpsdata.gps_fd, TCSANOW,
+                           &session->ttyset)) {
 	    /* strangely this fails on non-serial ports, but if
              * we do not try, we get other failures.
              * so ignore for now, as we always have, until it can
@@ -567,15 +576,15 @@ int gpsd_serial_open(struct gps_device_t *session)
 #endif /* __linux__ */
     }
 
-#ifdef FIXED_PORT_SPEED
-    session->saved_baud = FIXED_PORT_SPEED;
-#endif
+    if (0 < session->context->fixed_port_speed) {
+        session->saved_baud = session->context->fixed_port_speed;
+    }
 
     if (session->saved_baud != -1) {
 	(void)cfsetispeed(&session->ttyset, (speed_t)session->saved_baud);
 	(void)cfsetospeed(&session->ttyset, (speed_t)session->saved_baud);
-	if (tcsetattr(session->gpsdata.gps_fd,
-                      TCSANOW, &session->ttyset) != 0) {
+        if (0 != tcsetattr(session->gpsdata.gps_fd, TCSANOW,
+                           &session->ttyset)) {
 	    GPSD_LOG(LOG_ERROR, &session->context->errout,
 		     "SER: Error setting port attributes: %s\n",
 		     strerror(errno));
@@ -585,6 +594,9 @@ int gpsd_serial_open(struct gps_device_t *session)
 
     session->lexer.type = BAD_PACKET;
     if ( 0 != isatty(session->gpsdata.gps_fd) ) {
+        speed_t new_speed;
+        char new_parity;   // E, N, O
+        unsigned int new_stop;
 
 	/* Save original terminal parameters */
 	if (tcgetattr(session->gpsdata.gps_fd, &session->ttyset_old) != 0)
@@ -609,22 +621,21 @@ int gpsd_serial_open(struct gps_device_t *session)
 	session->ttyset.c_iflag = session->ttyset.c_oflag =
 	    session->ttyset.c_lflag = (tcflag_t) 0;
 
-#ifndef FIXED_PORT_SPEED
 	session->baudindex = 0;
-#endif /* FIXED_PORT_SPEED */
-	gpsd_set_speed(session,
-#ifdef FIXED_PORT_SPEED
-		       FIXED_PORT_SPEED,
-#else
-		       gpsd_get_speed_old(session),
-#endif /* FIXED_PORT_SPEED */
-		       'N',
-#ifdef FIXED_STOP_BITS
-		       FIXED_STOP_BITS
-#else
-		       1
-#endif /* FIXED_STOP_BITS */
-	    );
+        if (0 < session->context->fixed_port_speed) {
+            new_speed = session->context->fixed_port_speed;
+        } else {
+            new_speed = gpsd_get_speed_old(session);
+        }
+        if ('\0' == session->context->fixed_port_framing[0]) {
+            new_parity = 'N';
+            new_stop = 1;
+        } else {
+            // ignore length, stopbits=2 forces length 7.
+            new_parity = session->context->fixed_port_framing[1];
+            new_stop = '0' - session->context->fixed_port_framing[2];
+        }
+        gpsd_set_speed(session, new_speed, new_parity, new_stop);
     }
 
     /* Used to turn off O_NONBLOCK here, but best not to block trying
@@ -672,11 +683,19 @@ ssize_t gpsd_serial_write(struct gps_device_t * session,
  */
 #define SNIFF_RETRIES	(MAX_PACKET_LENGTH + 128)
 
-bool gpsd_next_hunt_setting(struct gps_device_t * session)
 /* advance to the next hunt setting  */
+bool gpsd_next_hunt_setting(struct gps_device_t * session)
 {
+    /* every rate we're likely to see on an old GPS */
+    // FIXME add new rates
+    static unsigned int rates[] =
+        {0, 4800, 9600, 19200, 38400, 57600, 115200, 230400};
+
+    char new_parity;   // E, N, O
+    unsigned int new_stop;
+
     /* don't waste time in the hunt loop if this is not actually a tty */
-    if (isatty(session->gpsdata.gps_fd) == 0)
+    if (0 == isatty(session->gpsdata.gps_fd))
 	return false;
 
     /* ...or if it's nominally a tty but delivers only PPS and no data */
@@ -684,43 +703,39 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
 	return false;
 
     if (session->lexer.retry_counter++ >= SNIFF_RETRIES) {
-#ifdef FIXED_PORT_SPEED
-	return false;
-#else
-	/* every rate we're likely to see on a GPS */
-	static unsigned int rates[] =
-	    { 0, 4800, 9600, 19200, 38400, 57600, 115200, 230400};
+        if (0 < session->context->fixed_port_speed) {
+            //  fixed speed, don't hunt
+            //  this prevents framing hunt?
+            return false;
+        }
 
-	if (session->baudindex++ >=
-	    (unsigned int)(sizeof(rates) / sizeof(rates[0])) - 1) {
-	    session->baudindex = 0;
-#ifdef FIXED_STOP_BITS
-	    return false;	/* hunt is over, no sync */
-#else
-	    if (session->gpsdata.dev.stopbits++ >= 2)
-		return false;	/* hunt is over, no sync */
-#endif /* FIXED_STOP_BITS */
-	}
-#endif /* FIXED_PORT_SPEED */
-	// cppcheck-suppress unreachableCode
-	gpsd_set_speed(session,
-#ifdef FIXED_PORT_SPEED
-		       FIXED_PORT_SPEED,
-#else
-		       rates[session->baudindex],
-#endif /* FIXED_PORT_SPEED */
-		       session->gpsdata.dev.parity,
-#ifdef FIXED_STOP_BITS
-		       FIXED_STOP_BITS
-#else
-		       session->gpsdata.dev.stopbits
-#endif /* FIXED_STOP_BITS */
-	    );
-	session->lexer.retry_counter = 0;
+        if (session->baudindex++ >=
+            (unsigned int)(sizeof(rates) / sizeof(rates[0])) - 1) {
+
+            session->baudindex = 0;
+            if ('\0' != session->context->fixed_port_framing[0]) {
+                return false;	/* hunt is over, no sync */
+            }
+
+            // More stop bits to try?
+            if (session->gpsdata.dev.stopbits++ >= 2) {
+                return false;	/* hunt is over, no sync */
+            }
+        }
+
+        if ('\0' == session->context->fixed_port_framing[0]) {
+            new_parity = session->gpsdata.dev.parity;
+            new_stop = session->gpsdata.dev.stopbits;
+        } else {
+            // ignore length, stopbits=2 forces length 7.
+            new_parity = session->context->fixed_port_framing[1];
+            new_stop = '0' - session->context->fixed_port_framing[2];
+        }
+
+        gpsd_set_speed(session, rates[session->baudindex], new_parity, new_stop);
+        session->lexer.retry_counter = 0;
     }
-
     return true;		/* keep hunting */
-
 }
 
 void gpsd_assert_sync(struct gps_device_t *session)
@@ -758,7 +773,10 @@ void gpsd_close(struct gps_device_t *session)
 	 * obscure Linux 2.6 kernel bug that disables threaded
 	 * ioctl(TIOCMWAIT) on a device after tcsetattr() is called.
 	 */
-	if (cfgetispeed(&session->ttyset_old) != cfgetispeed(&session->ttyset) || (session->ttyset_old.c_cflag & CSTOPB) != (session->ttyset.c_cflag & CSTOPB)) {
+	if ((cfgetispeed(&session->ttyset_old) !=
+             cfgetispeed(&session->ttyset)) ||
+            ((session->ttyset_old.c_cflag & CSTOPB) !=
+             (session->ttyset.c_cflag & CSTOPB))) {
 	    /*
 	     * If we revert, keep the most recent baud rate.
 	     * Cuts down on autobaud overhead the next time.
