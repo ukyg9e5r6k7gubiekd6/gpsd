@@ -426,6 +426,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	u3 = getub(buf, 2);	/* Status 2/Superpacket Support */
 	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "TSIP: Machine ID (0x4b): %02x %02x %02x\n", u1, u2, u3);
+        /* Machine ID:
+         *   1 = RES SMT 360
+         *  32 = Acutime 360
+         *  5a - Lassen IQ
+         *  61 = Acutime 2000
+         *  62 = ACE UTC
+         *  96 = Copernicus II, Thunderbolt E
+         */
 	if (u3 != session->driver.tsip.superpkt) {
 	    session->driver.tsip.superpkt = u3;
             GPSD_LOG(LOG_PROG, &session->context->errout,
