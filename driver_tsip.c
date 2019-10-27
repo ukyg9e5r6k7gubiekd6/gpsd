@@ -247,6 +247,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		}
 		buf2[i] = '\0';
 
+                // FIXME! This over writes date from 0x1c-83
 		(void)snprintf(session->subtype, sizeof(session->subtype),
 			       "hw %u %02u.%02u.%04u %02u %u %.48s",
 			       ul1, u2, u3, ul2, u4, ul3, buf2);
@@ -257,14 +258,28 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		mask |= DEVICEID_SET;
 
 		/* Detecting device by Hardware Code */
-		if (3001 == ul3) {
-			GPSD_LOG(LOG_INF, &session->context->errout,
-				 "TSIP: This device is Accutime Gold\n");
-			session->driver.tsip.subtype = TSIP_ACCUTIME_GOLD;
-			configuration_packets_accutime_gold(session);
-		}
-		else {
+		switch (ul3) {
+		case 3001:            // Acutime Gold
+                    GPSD_LOG(LOG_INF, &session->context->errout,
+                             "TSIP: This device is Accutime Gold\n");
+                    session->driver.tsip.subtype = TSIP_ACCUTIME_GOLD;
+                    configuration_packets_accutime_gold(session);
+                    break;
+                case 1002:            // Copernicus II
+                    // FALLTHROUGH
+                case 3007:            // Thunderbolt E
+                    // FALLTHROUGH
+                case 3023:            // RES SMT 360
+                    // FALLTHROUGH
+                case 3026:            // ICM SMT 360
+                    // FALLTHROUGH
+                case 3031:            // RES360 17x22
+                    // FALLTHROUGH
+                case 3032:            // Acutime 360
+                    // FALLTHROUGH
+                default:
 			configuration_packets_generic(session);
+                        break;
 		}
 		break;
         default:
