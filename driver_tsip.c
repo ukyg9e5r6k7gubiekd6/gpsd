@@ -363,8 +363,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	session->newdata.latitude = getbef32((char *)buf, 0) * RAD_2_DEG;
 	session->newdata.longitude = getbef32((char *)buf, 4) * RAD_2_DEG;
 	/* depending on GPS config, could be either WGS84 or MSL
-	 * default differs by model, usually WGS84 */
-	session->newdata.altHAE = getbef32((char *)buf, 8);
+	 * default differs by model, usually WGS84, we try to force MSL */
+	session->newdata.altMSL = getbef32((char *)buf, 8);
 	//f1 = getbef32((char *)buf, 12);	clock bias */
 	ftow = getbef32((char *)buf, 16);	/* time-of-fix */
 	if ((session->context->valid & GPS_TIME_VALID)!=0) {
@@ -380,7 +380,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
 		 session->newdata.latitude,
 		 session->newdata.longitude,
-		 session->newdata.altHAE);
+		 session->newdata.altMSL);
 	break;
     case 0x4b:			/* Machine/Code ID and Additional Status */
 	if (len != 3)
@@ -785,8 +785,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    if (session->newdata.longitude > 180.0)
 		session->newdata.longitude -= 360.0;
 	    /* depending on GPS config, could be either WGS84 or MSL
-	     * default differs by model, usually WGS84 */
-	    session->newdata.altHAE = (double)sl2 * 1e-3;
+	     * default differs by model, usually WGS84, we try to force MSL */
+	    session->newdata.altMSL = (double)sl2 * 1e-3;
 	    mask |= ALTITUDE_SET;
 
 	    session->gpsdata.status = STATUS_NO_FIX;
@@ -817,7 +817,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                      timespec_str(&session->newdata.time, ts_buf,
                                   sizeof(ts_buf)),
 		     session->newdata.latitude, session->newdata.longitude,
-		     session->newdata.altHAE,
+		     session->newdata.altMSL,
 		     session->newdata.mode, session->gpsdata.status);
 	    break;
 	case 0x23:		/* Compact Super Packet */
@@ -864,8 +864,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    if (session->newdata.longitude > 180.0)
 		session->newdata.longitude -= 360.0;
 	    /* depending on GPS config, could be either WGS84 or MSL
-	     * default differs by model, usually WGS84 */
-	    session->newdata.altHAE = (double)sl3 * 1e-3;
+	     * default differs by model, usually WGS84, we try to force MSL */
+	    session->newdata.altMSL = (double)sl3 * 1e-3;
 	    mask |= ALTITUDE_SET;
 	    if ((u2 & 0x20) != (uint8_t) 0)	/* check velocity scaling */
 		d5 = 0.02;
@@ -883,11 +883,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		    REPORT_IS | VNED_SET;
 	    GPSD_LOG(LOG_DATA, &session->context->errout,
 		     "TSIP: SP-CSP 0x23: time %s lat %.2f lon %.2f "
-                     "altHAE %.2f mode %d status %d\n",
+                     "altMSL %.2f mode %d status %d\n",
                      timespec_str(&session->newdata.time, ts_buf,
                                   sizeof(ts_buf)),
 		     session->newdata.latitude, session->newdata.longitude,
-		     session->newdata.altHAE,
+		     session->newdata.altMSL,
 		     session->newdata.mode, session->gpsdata.status);
 	    break;
 
@@ -951,8 +951,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->newdata.latitude = getbed64((char *)buf, 36) * RAD_2_DEG;
 	    session->newdata.longitude = getbed64((char *)buf, 44) * RAD_2_DEG;
 	    /* depending on GPS config, could be either WGS84 or MSL
-	     * default differs by model, usually WGS84 */
-	    session->newdata.altHAE = getbed64((char *)buf, 52);
+	     * default differs by model, usually WGS84, we try to force MSL */
+	    session->newdata.altMSL = getbed64((char *)buf, 52);
             // ignore 60-63, always zero
             // ignore 64-67, reserved
 
@@ -1022,11 +1022,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
 	    mask |= LATLON_SET | ALTITUDE_SET | MODE_SET | REPORT_IS;
 	    GPSD_LOG(LOG_DATA, &session->context->errout,
-		     "TSIP: SP-TPS 0xac lat=%.2f lon=%.2f altHAE=%.2f "
+		     "TSIP: SP-TPS 0xac lat=%.2f lon=%.2f altMSL=%.2f "
                      "mask %s\n",
 		     session->newdata.latitude,
 		     session->newdata.longitude,
-		     session->newdata.altHAE,
+		     session->newdata.altMSL,
                      gps_maskdump(mask));
 	    break;
 
