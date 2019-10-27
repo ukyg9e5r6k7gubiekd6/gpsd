@@ -77,6 +77,7 @@ extern "C" {
  *      Changed order of gpsd_log() arguments.  Add GPSD_LOG().
  *      Remove gps_device_t.back_to_nmea.
  *      Add fixed_port_speed, fixed_port_framing to gps_context_t.
+ *      change tsip.superpkt from bool to int.
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -652,7 +653,9 @@ struct gps_device_t {
 #ifdef TSIP_ENABLE
 	struct {
 	    unsigned short sats_used[MAXCHANNELS];
-	    bool superpkt;		/* Super Packet mode requested */
+            /* Super Packet mode requested.
+             * 0 = None, 1 = old superpacket, 2 = new superpacket (SMT 360) */
+	    uint8_t superpkt;
 	    time_t last_41;		/* Timestamps for packet requests */
 	    time_t last_48;
 	    time_t last_5c;

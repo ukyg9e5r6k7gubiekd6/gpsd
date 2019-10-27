@@ -387,20 +387,20 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    break;
 	u1 = getub(buf, 0);	/* Machine ID */
 	u2 = getub(buf, 1);	/* Status 1 */
-	u3 = getub(buf, 2);	/* Status 2 */
+	u3 = getub(buf, 2);	/* Status 2/Superpacket Support */
 	GPSD_LOG(LOG_INF, &session->context->errout,
-		 "TSIP: Machine ID %02x %02x %02x\n", u1, u2, u3);
-	if ((u3 & 0x01) != (uint8_t) 0 && !session->driver.tsip.superpkt) {
+		 "TSIP: Machine ID (0x4b) %02x %02x %02x\n", u1, u2, u3);
+	if (u3 != session->driver.tsip.superpkt) {
 	    GPSD_LOG(LOG_PROG, &session->context->errout,
-		     "TSIP: Switching to Super Packet mode\n");
+		     "TSIP: Switching to Super Packet mode %d\n", u3);
 
-	    /* set new I/O Options for Super Packet output */
+	    /* set I/O Options for Super Packet output */
 	    putbyte(buf, 0, 0x2c);	/* Position: SP, MSL */
 	    putbyte(buf, 1, 0x00);	/* Velocity: none (via SP) */
 	    putbyte(buf, 2, 0x00);	/* Time: GPS */
 	    putbyte(buf, 3, 0x08);	/* Aux: dBHz */
 	    (void)tsip_write(session, 0x35, buf, 4);
-	    session->driver.tsip.superpkt = true;
+	    session->driver.tsip.superpkt = u3;
 	}
 	break;
     case 0x55:			/* IO Options */
