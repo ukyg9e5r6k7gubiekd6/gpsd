@@ -43,9 +43,9 @@
 #define IO2_VECEF 1
 #define IO2_ENU 2
 // byte 3
-#define IO3_8EA2 1
+#define IO3_UTC 1
 // byte 4
-#define IO4_5A 1
+#define IO4_RAW 1
 #define IO4_DBHZ 8
 
 #define SEMI_2_DEG	(180.0 / 2147483647)	/* 2^-31 semicircle to deg */
@@ -425,10 +425,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 // 1 == superpacket is acutime 360, support 0x8f-20
 
                 /* set I/O Options for Super Packet output */
-                putbyte(buf, 0, 0x2c);	/* Position: SP, MSL */
-                putbyte(buf, 1, 0x00);	/* Velocity: none (via SP) */
-                putbyte(buf, 2, 0x00);	/* Time: GPS */
-                putbyte(buf, 3, 0x08);	/* Aux: dBHz */
+                /* Position: 8F20, ECEF, DP, MSL, */
+                putbyte(buf, 0, IO1_8F20|IO1_MSL|IO1_DP|IO1_ECEF);
+                putbyte(buf, 1, 0x00);	        /* Velocity: none (via SP) */
+                putbyte(buf, 2, 0x00);	        /* Time: GPS */
+                putbyte(buf, 3, IO4_DBHZ);	/* Aux: dBHz */
                 (void)tsip_write(session, 0x35, buf, 4);
                 break;
             case 2:
@@ -1213,14 +1214,14 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	 */
         /* Position: enable: Double Precision, MSL, LLA
          *           disable: ECEF */
-	putbyte(buf, 0, 0x1e);
-        /* Velocity: enable: ENU, disable ECEF */
-	putbyte(buf, 1, 0x02);
+	putbyte(buf, 0, IO1_DP|IO1_MSL|IO1_LLA);
+        /* Velocity: enable: ENU, disable vECEF */
+	putbyte(buf, 1, IO2_ENU);
         /* Time: enable: 0x42, 0x43, 0x4a
          *       disable: 0x83, 0x84, 0x56 */
 	putbyte(buf, 2, 0x00);
         /* Aux: enable: 0x5A, dBHz */
-	putbyte(buf, 3, 0x08);
+	putbyte(buf, 3, IO4_DBHZ);
 	(void)tsip_write(session, 0x35, buf, 4);
     }
     if (event == event_configure && session->lexer.counter == 0) {
@@ -1344,14 +1345,14 @@ void configuration_packets_generic(struct gps_device_t *session)
 	// Set basic configuration, using Set or Request I/O Options (0x35).
         /* Position: enable: Double Precision, MSL, LLA
          *           disable: ECEF */
-	putbyte(buf, 0, 0x1e);
+	putbyte(buf, 0, IO1_DP|IO1_MSL|IO1_LLA);
         /* Velocity: enable: ENU, disable ECEF */
-	putbyte(buf, 1, 0x02);
+	putbyte(buf, 1, IO2_ENU);
         /* Time: enable: 0x42, 0x43, 0x4a
          *       disable: 0x83, 0x84, 0x56 */
 	putbyte(buf, 2, 0x00);
         /* Aux: enable: 0x5A, dBHz */
-	putbyte(buf, 3, 0x08);
+	putbyte(buf, 3, IO4_DBHZ);
 	(void)tsip_write(session, 0x35, buf, 4);
 
 	/* Request Software Version (0x1f), returns 0x45 */
