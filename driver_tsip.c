@@ -1212,6 +1212,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     }
 
 #ifdef __UNUSED__
+// #if 1
         // full reset
 	putbyte(buf, 0, 0x46);
 	(void)tsip_write(session, 0x1e, buf, 1);
@@ -1498,7 +1499,7 @@ void configuration_packets_generic(struct gps_device_t *session)
 
 	/* Primary Receiver Configuration Parameters Request (0xbb-00)
          * returns  Primary Receiver Configuration Block (0xbb-00) */
-	putbyte(buf, 0, 0x03);
+	putbyte(buf, 0, 0x00);
 	(void)tsip_write(session, 0xbb, buf, 1);
 }
 
