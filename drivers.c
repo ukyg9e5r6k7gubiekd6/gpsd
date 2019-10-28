@@ -1064,7 +1064,7 @@ static const struct gps_type_t driver_garmintxt = {
 #ifdef MTK3301_ENABLE
 /**************************************************************************
  *
- * MediaTek MTK-3301, 3329, 3339
+ * MediaTek MTK-3301, 3329, 3333, 3339
  *
  * OEMs for several GPS vendors, notably including Garmin, FasTrax, Trimble,
  * and AdaFruit. Website at <http://www.mediatek.com/>.
@@ -1080,6 +1080,8 @@ static const struct gps_type_t driver_garmintxt = {
  * sense given the multi-constellation capability. The channel count
  * in the driver is never used by the NMEA driver so leaving the lower MTK3301
  * value in there is OK.
+ *
+ * MTK3333 support 10Hz.
  *
  * The Adafruit GPS HAT for the Raspberry Pi is an MTK3339. It works with this
  * driver; in fact AdaFruit's overview page for the product features GPSD.
@@ -1130,10 +1132,13 @@ static bool mtk3301_rate_switcher(struct gps_device_t *session, double rate)
     char buf[78];
 
     unsigned int milliseconds = (unsigned int)(1000 * rate);
-    if (rate > 1)
-	milliseconds = 1000;
-    else if (rate < 0.2)
-	milliseconds = 200;
+    if (rate > 1) {
+        // force no slower than 1Hz
+        milliseconds = 1000;
+    } else if (rate < 0.1) {
+        // force no faster than 10Hz, MTK3333 can do 10Hz
+        milliseconds = 100;
+    }
 
     (void)snprintf(buf, sizeof(buf), "$PMTK300,%u,0,0,0,0", milliseconds);
     (void)nmea_send(session, buf);	/* Fix interval */
@@ -1159,7 +1164,7 @@ const struct gps_type_t driver_mtk3301 = {
     .mode_switcher  = NULL,		/* no mode switcher */
     .rate_switcher  = mtk3301_rate_switcher,	/* sample rate switcher */
     .min_cycle.tv_sec  = 0,
-    .min_cycle.tv_nsec = 200000000,     /* max 5Hz */
+    .min_cycle.tv_nsec = 100000000,     /* max 10Hz */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     .control_send   = nmea_write,	/* how to send control strings */
