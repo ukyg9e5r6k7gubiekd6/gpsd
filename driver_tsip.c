@@ -149,6 +149,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     double ftow;              // time of week in seconds
     timespec_t ts_tow;
     char ts_buf[TIMESPEC_LEN];
+    int bad_len = 0;
 
     if (session->lexer.type != TSIP_PACKET) {
 	GPSD_LOG(LOG_INF, &session->context->errout,
@@ -292,8 +293,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	}
 	break;
     case 0x41:			/* GPS Time */
-	if (len != 10)
+	if (len != 10) {
+            bad_len = 10;
 	    break;
+        }
 	session->driver.tsip.last_41 = now;	/* keep timestamp for request */
 	ftow = getbef32((char *)buf, 0);	/* gpstime */
 	week = getbeu16(buf, 4);	/* week */
@@ -312,8 +315,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)));
 	break;
     case 0x42:			/* Single-Precision Position Fix, XYZ ECEF */
-	if (len != 16)
+	if (len != 16) {
+            bad_len = 16;
 	    break;
+        }
 	f1 = getbef32((char *)buf, 0);	/* X */
 	f2 = getbef32((char *)buf, 4);	/* Y */
 	f3 = getbef32((char *)buf, 8);	/* Z */
@@ -322,8 +327,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 "TSIP: GPS Position (0x42): XYZ %f %f %f %f\n", f1, f2, f3, f4);
 	break;
     case 0x43:			/* Velocity Fix, XYZ ECEF */
-	if (len != 20)
+	if (len != 20) {
+            bad_len = 20;
 	    break;
+        }
 	f1 = getbef32((char *)buf, 0);	/* X velocity */
 	f2 = getbef32((char *)buf, 4);	/* Y velocity */
 	f3 = getbef32((char *)buf, 8);	/* Z velocity */
@@ -334,8 +341,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 f4, f5);
 	break;
     case 0x45:			/* Software Version Information */
-	if (len != 10)
+	if (len != 10) {
+            bad_len = 10;
 	    break;
+        }
 	(void)snprintf(session->subtype, sizeof(session->subtype),
 		       "%d.%d %02d%02d%02d %d.%d %02d%02d%02d",
 		       getub(buf, 0),
@@ -355,6 +364,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     case 0x46:			/* Health of Receiver */
 	if ( 2 > len) {
             // 0x46 can be 2 or 3 bytes, model dependent
+            bad_len = 2;
 	    break;
         }
 	session->driver.tsip.last_46 = now;
@@ -376,10 +386,16 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 "TSIP: Receiver Health (0x46): %x %x %x\n", u1, u2, u3);
 	break;
     case 0x47:			/* Signal Levels for all Satellites */
+	if (1 > len) {
+            bad_len = 1;
+	    break;
+        }
 	gpsd_zero_satellites(&session->gpsdata);
 	count = (int)getub(buf, 0);	/* satellite count */
-	if (len != (5 * count + 1))
+	if (len != (5 * count + 1)) {
+            bad_len = 5 * count + 1;
 	    break;
+        }
 	buf2[0] = '\0';
 	for (i = 0; i < count; i++) {
 	    u1 = getub(buf, 5 * i + 1);
@@ -402,8 +418,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 "TSIP: GPS System Message (0x48): %s\n", buf);
 	break;
     case 0x4a:			/* Single-Precision Position LLA */
-	if (len != 20)
+	if (len != 20) {
+            bad_len = 20;
 	    break;
+        }
 	session->newdata.latitude = getbef32((char *)buf, 0) * RAD_2_DEG;
 	session->newdata.longitude = getbef32((char *)buf, 4) * RAD_2_DEG;
 	/* depending on GPS config, could be either WGS84 or MSL
@@ -427,8 +445,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 session->newdata.altMSL);
 	break;
     case 0x4b:			/* Machine/Code ID and Additional Status */
-	if (len != 3)
+	if (len != 3) {
+            bad_len = 3;
 	    break;
+        }
 	u1 = getub(buf, 0);	/* Machine ID */
 	u2 = getub(buf, 1);	/* Status 1 */
 	u3 = getub(buf, 2);	/* Status 2/Superpacket Support */
@@ -470,8 +490,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	}
 	break;
     case 0x55:			/* IO Options */
-	if (len != 4)
+	if (len != 4) {
+            bad_len = 4;
 	    break;
+        }
 	u1 = getub(buf, 0);	/* Position */
         // FIXME: decode HAE/MSL from position
 	u2 = getub(buf, 1);	/* Velocity */
@@ -495,8 +517,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	}
 	break;
     case 0x56:			/* Velocity Fix, East-North-Up (ENU) */
-	if (len != 20)
+	if (len != 20) {
+            bad_len = 20;
 	    break;
+        }
 	f1 = getbef32((char *)buf, 0);	/* East velocity */
 	f2 = getbef32((char *)buf, 4);	/* North velocity */
 	f3 = getbef32((char *)buf, 8);	/* Up velocity */
@@ -512,8 +536,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	GPSD_LOG(LOG_DATA, &session->context->errout, "TSIP: VFENU 0x56\n");
 	break;
     case 0x57:			/* Information About Last Computed Fix */
-	if (len != 8)
+	if (len != 8) {
+            bad_len = 8;
 	    break;
+        }
 	u1 = getub(buf, 0);	                /* Source of information */
 	u2 = getub(buf, 1);	                /* Mfg. diagnostic */
 	ftow = getbef32((char *)buf, 2);	/* gps_time */
@@ -527,8 +553,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 "TSIP: Fix info (0x57): %02x %02x %u %f\n", u1, u2, week, f1);
 	break;
     case 0x5a:			/* Raw Measurement Data */
-	if (len != 29)
+	if (len != 29) {
+            bad_len = 29;
 	    break;
+        }
 	f1 = getbef32((char *)buf, 5);	/* Signal Level */
 	f2 = getbef32((char *)buf, 9);	/* Code phase */
 	f3 = getbef32((char *)buf, 13);	/* Doppler */
@@ -538,8 +566,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 getub(buf, 0), f1, f2, f3, d1);
 	break;
     case 0x5c:			/* Satellite Tracking Status */
-	if (len != 24)
+	if (len != 24) {
+            bad_len = 24;
 	    break;
+        }
 	u1 = getub(buf, 0);	/* PRN */
 	u2 = getub(buf, 1);	/* chan */
 	u3 = getub(buf, 2);	/* Acquisition flag */
@@ -582,8 +612,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	break;
      case 0x5d:
         /* GNSS Satellite Tracking Status (multi-GNSS operation) */
-	if (len != 26)
+	if (len != 26) {
+            bad_len = 26;
 	    break;
+        }
 	u1 = getub(buf, 0);	/* PRN */
 	u2 = getub(buf, 1);	/* chan */
 	u3 = getub(buf, 2);	/* Acquisition flag */
@@ -629,10 +661,16 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	}
 	break;
     case 0x6c:			/* Satellite Selection List */
+	if (18 > len) {
+            bad_len = 18;
+	    break;
+        }
 	//u1 = getub(buf, 0);	/* nsvs/dimension UNUSED */
 	count = (int)getub(buf, 17);
-	if (len != (18 + count))
+	if (len != (18 + count)) {
+            bad_len = 18 + count;
 	    break;
+        }
 
         // why same as 6d?
 	session->driver.tsip.last_6d = now;	/* keep timestamp for request */
@@ -690,10 +728,16 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	mask |= DOP_SET | STATUS_SET | USED_IS;
 	break;
     case 0x6d:			/* All-In-View Satellite Selection */
+	if (1 > len) {
+            bad_len = 1;
+	    break;
+        }
 	u1 = getub(buf, 0);	/* nsvs/dimension */
 	count = (int)((u1 >> 4) & 0x0f);
-	if (len != (17 + count))
+	if (len != (17 + count)) {
+            bad_len = 17 + count;
 	    break;
+        }
 	session->driver.tsip.last_6d = now;	/* keep timestamp for request */
 #ifdef __UNUSED__
 	/*
@@ -749,8 +793,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	mask |= DOP_SET | STATUS_SET | USED_IS;
 	break;
     case 0x82:			/* Differential Position Fix Mode */
-	if (len != 1)
+	if (len != 1) {
+            bad_len = 1;
 	    break;
+        }
 	u1 = getub(buf, 0);	/* fix mode */
 	if (session->gpsdata.status == STATUS_FIX && (u1 & 0x01) != 0) {
 	    session->gpsdata.status = STATUS_DGPS_FIX;
@@ -760,8 +806,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 "TSIP: DPFM (0x82) status=%d\n", session->gpsdata.status);
 	break;
     case 0x83:     /* Double-Precision XYZ Position Fix and Bias Information */
-	if (len != 36)
+	if (len != 36) {
+            bad_len = 36;
 	    break;
+        }
 	d1 = getbed64((char *)buf, 0);	/* X */
 	d2 = getbed64((char *)buf, 8);	/* Y */
 	d3 = getbed64((char *)buf, 16);	/* Z */
@@ -772,8 +820,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  d1, d2, d3, d4, f1);
 	break;
     case 0x84:     /* Double-Precision LLA Position Fix and Bias Information */
-	if (len != 36)
+	if (len != 36) {
+            bad_len = 36;
 	    break;
+        }
 	session->newdata.latitude = getbed64((char *)buf, 0) * RAD_2_DEG;
 	session->newdata.longitude = getbed64((char *)buf, 8) * RAD_2_DEG;
 	/* depending on GPS config, could be either WGS84 or MSL
@@ -806,8 +856,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	u1 = (uint8_t) getub(buf, 0);
 	switch (u1) {		/* sub-packet ID */
 	case 0x15:		/* Current Datum Values */
-	    if (len != 43)
-		break;
+	    if (len != 43) {
+                bad_len = 43;
+                break;
+            }
 	    s1 = getbes16(buf, 1);	/* Datum Index */
 	    d1 = getbed64((char *)buf, 3);	/* DX */
 	    d2 = getbed64((char *)buf, 11);	/* DY */
@@ -821,8 +873,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
 	case 0x20:   /* Last Fix with Extra Information (binary fixed point) */
 	    /* CSK sez "why does my Lassen iQ output oversize packets?" */
-	    if ((len != 56) && (len != 64))
-		break;
+	    if ((len != 56) && (len != 64)) {
+                bad_len = 56;
+                break;
+            }
 	    s1 = getbes16(buf, 2);	/* east velocity */
 	    s2 = getbes16(buf, 4);	/* north velocity */
 	    s3 = getbes16(buf, 6);	/* up velocity */
@@ -896,8 +950,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	case 0x23:		/* Compact Super Packet */
 	    session->driver.tsip.req_compact = 0;
 	    /* CSK sez "i don't trust this to not be oversized either." */
-	    if (len < 29)
-		break;
+	    if (len < 29) {
+                bad_len = 29;
+                break;
+            }
 	    tow = getbeu32(buf, 1) * 1000;	/* time */
 	    week = getbeu16(buf, 5);	        /* tsip.gps_week */
 	    u1 = getub(buf, 7);	                /* utc offset */
@@ -966,9 +1022,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
 	case 0xab:		/* Thunderbolt Timing Superpacket */
 	    if (len != 17) {
-		GPSD_LOG(LOG_WARNING, &session->context->errout,
-                         "TSIP: SP-TTS (0xab) wrong len=%d\n", len);
-		break;
+                bad_len = 17;
+                break;
 	    }
 	    session->driver.tsip.last_41 = now;	/* keep timestamp for request */
 	    tow = getbeu32(buf, 1) * 1000;	/* gpstime */
@@ -999,10 +1054,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
 	case 0xac:		/* Thunderbolt Position Superpacket */
 	    if (len != 68) {
-		GPSD_LOG(LOG_WARNING, &session->context->errout,
-                         "TSIP: SP-TTS (0xac) wrong len=%d\n", len);
-
-		break;
+                bad_len = 68;
+                break;
 	    }
 
 	    u2 = getub(buf, 1);	        /* Receiver Mode */
@@ -1110,8 +1163,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	}
 	break;
     case 0xbb:			/* Navigation Configuration */
-	if (len != 40 && len != 43)	/* see packet.c for explamation */
+	if (len != 40 && len != 43) {
+            /* see packet.c for explamation */
+            bad_len = 40;
 	    break;
+        }
 	u1 = getub(buf, 0);	/* Subcode */
 	u2 = getub(buf, 1);	/* Operating Dimension */
 	u3 = getub(buf, 2);	/* DGPS Mode (not enabled in Accutime Gold) */
@@ -1161,7 +1217,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	(void)tsip_write(session, 0x1e, buf, 1);
 #endif
 
-    /* see if it is time to send some request packets for reports that */
+    if (bad_len) {
+        GPSD_LOG(LOG_WARNING, &session->context->errout,
+                 "TSIP: ID x%02x wrong len %d s/b >= %d \n", id, len, bad_len);
+    }
+/* see if it is time to send some request packets for reports that */
     /* the receiver won't send at fixed intervals */
 
     if ((now - session->driver.tsip.last_41) > 5) {
