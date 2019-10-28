@@ -78,6 +78,7 @@ extern "C" {
  *      Remove gps_device_t.back_to_nmea.
  *      Add fixed_port_speed, fixed_port_framing to gps_context_t.
  *      change tsip.superpkt from bool to int.
+ *      Add tsip.machine_id and tsip.hardware_code
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -656,6 +657,8 @@ struct gps_device_t {
             /* Super Packet mode requested.
              * 0 = None, 1 = old superpacket, 2 = new superpacket (SMT 360) */
 	    uint8_t superpkt;
+	    uint8_t machine_id;         // from 0x4b
+	    uint16_t hardware_code;     // from 0x1c-83
 	    time_t last_41;		/* Timestamps for packet requests */
 	    time_t last_48;
 	    time_t last_5c;

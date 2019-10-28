@@ -139,7 +139,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     uint8_t u1, u2, u3, u4, u5, u6, u7, u8, u9, u10;
     int16_t s1, s2, s3, s4;
     int32_t sl1, sl2, sl3;
-    uint32_t ul1, ul2, ul3;
+    uint32_t ul1, ul2;
     float f1, f2, f3, f4, f5;
     double d1, d2, d3, d4, d5;
     time_t now;
@@ -209,7 +209,16 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	}
 
 	break;
-    case 0x1c: /* Hardware/Software Version Information (Accutime Gold) */
+    case 0x1c:        // Hardware/Software Version Information
+        /* Present in:
+         *  Accutime Gold
+         *  Copernicus II
+         *  Thunderbolt E (2012)
+         *  RES SMT 360
+         *  ICM SMT 360
+         *  RES360 17x22
+         *  Acutime 360
+         * Not in Lassen SQ (2002) */
 	u1 = (uint8_t) getub(buf, 0);
         // decode by subtype
 	switch (u1) {
@@ -243,7 +252,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		u3 = getub(buf, 6);      /* Build month */
 		ul2 = getbeu16(buf, 7);  /* Build year */
 		u4 = getub(buf, 6);      /* Build hour */
-		ul3 = getbeu16(buf, 10); /* Hardware Code */
+                /* Hardware Code */
+                session->driver.tsip.hardware_code = getbeu16(buf, 10);
 		u5 = getub(buf, 12);     /* Length of Hardware ID */
 		/* coverity_submit[tainted_data] */
 		for (i=0; i < (int)u5; i++) {
@@ -254,7 +264,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 // FIXME! This over writes date from 0x1c-83
 		(void)snprintf(session->subtype, sizeof(session->subtype),
 			       "hw %u %02u.%02u.%04u %02u %u %.48s",
-			       ul1, u2, u3, ul2, u4, ul3, buf2);
+			       ul1, u2, u3, ul2, u4,
+                               session->driver.tsip.hardware_code,
+                               buf2);
 		GPSD_LOG(LOG_INF, &session->context->errout,
 			 "TSIP: Hardware version (0x83): %s\n",
 			 session->subtype);
@@ -262,7 +274,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		mask |= DEVICEID_SET;
 
 		/* Detecting device by Hardware Code */
-		switch (ul3) {
+		switch (session->driver.tsip.hardware_code) {
 		case 3001:            // Acutime Gold
                     GPSD_LOG(LOG_INF, &session->context->errout,
                              "TSIP: This device is Accutime Gold\n");
@@ -449,15 +461,17 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             bad_len = 3;
 	    break;
         }
-	u1 = getub(buf, 0);	/* Machine ID */
+	session->driver.tsip.machine_id = getub(buf, 0);  /* Machine ID */
 	u2 = getub(buf, 1);	/* Status 1 */
 	u3 = getub(buf, 2);	/* Status 2/Superpacket Support */
 	GPSD_LOG(LOG_INF, &session->context->errout,
-		 "TSIP: Machine ID (0x4b): %02x %02x %02x\n", u1, u2, u3);
+		 "TSIP: Machine ID (0x4b): %02x %02x %02x\n",
+                 session->driver.tsip.machine_id,
+                 u2, u3);
         /* Machine ID:
          *   1 = RES SMT 360
          *  32 = Acutime 360
-         *  5a - Lassen IQ
+         *  5a - Lassen IQ (2002)
          *  61 = Acutime 2000
          *  62 = ACE UTC
          *  96 = Copernicus II, Thunderbolt E
@@ -1250,7 +1264,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         (now - session->driver.tsip.last_48) > 60) {
 	/* Request GPS System Message
          * Returns 0x48.
-         * not supported on models Lassen SQ or SMT 360 */
+         * not supported on models Lassen SQ (2002) or SMT 360 */
 	(void)tsip_write(session, 0x28, buf, 0);
 	session->driver.tsip.last_48 = now;
     }
@@ -1475,7 +1489,7 @@ void configuration_packets_generic(struct gps_device_t *session)
 	(void)tsip_write(session, 0x21, NULL, 0);
 
 	/* Set Operating Parameters (0x2c)
-         * not present in RES SMT 360 */
+         * not present in Lassen SQ (2002) or RES SMT 360 */
 	/* dynamics code: enabled: 1=land
          *   disabled: 2=sea, 3=air, 4=static
          *   default is land */
