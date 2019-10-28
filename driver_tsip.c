@@ -711,20 +711,24 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	memset(session->driver.tsip.sats_used, 0,
 		sizeof(session->driver.tsip.sats_used));
 	buf2[0] = '\0';
-	for (i = 0; i < count; i++)
-	    str_appendf(buf2, sizeof(buf2),
-			   " %d", session->driver.tsip.sats_used[i] =
-			   (short)getub(buf, 18 + i));
+	for (i = 0; i < count; i++) {
+            session->driver.tsip.sats_used[i] = (short)getub(buf, 18 + i);
+            if (session->context->errout.debug >= LOG_DATA) {
+                str_appendf(buf2, sizeof(buf2),
+                               " %d", session->driver.tsip.sats_used[i]);
+            }
+        }
 	GPSD_LOG(LOG_DATA, &session->context->errout,
 		 "TSIP: AIVSS (0x6c): status=%d used=%d "
-		 "pdop=%.1f hdop=%.1f vdop=%.1f tdop=%.1f gdup=%.1f\n",
+		 "pdop=%.1f hdop=%.1f vdop=%.1f tdop=%.1f gdop=%.1f Used:%s\n",
 		 session->gpsdata.status,
 		 session->gpsdata.satellites_used,
 		 session->gpsdata.dop.pdop,
 		 session->gpsdata.dop.hdop,
 		 session->gpsdata.dop.vdop,
 		 session->gpsdata.dop.tdop,
-		 session->gpsdata.dop.gdop);
+		 session->gpsdata.dop.gdop,
+                 buf2);
 	mask |= DOP_SET | STATUS_SET | USED_IS;
 	break;
     case 0x6d:			/* All-In-View Satellite Selection */
@@ -776,20 +780,23 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	memset(session->driver.tsip.sats_used, 0,
                sizeof(session->driver.tsip.sats_used));
 	buf2[0] = '\0';
-	for (i = 0; i < count; i++)
-	    str_appendf(buf2, sizeof(buf2),
-			   " %d", session->driver.tsip.sats_used[i] =
-			   (short)getub(buf, 17 + i));
+	for (i = 0; i < count; i++) {
+            session->driver.tsip.sats_used[i] = (short)getub(buf, 17 + i);
+            if (session->context->errout.debug >= LOG_DATA) {
+                str_appendf(buf2, sizeof(buf2),
+                               " %d", session->driver.tsip.sats_used[i]);
+            }
+        }
 	GPSD_LOG(LOG_DATA, &session->context->errout,
 		 "TSIP: AIVSS (0x6d) status=%d used=%d "
-		 "pdop=%.1f hdop=%.1f vdop=%.1f tdop=%.1f gdup=%.1f\n",
+		 "pdop=%.1f hdop=%.1f vdop=%.1f tdop=%.1f gdop=%.1f used:%s\n",
 		 session->gpsdata.status,
 		 session->gpsdata.satellites_used,
 		 session->gpsdata.dop.pdop,
 		 session->gpsdata.dop.hdop,
 		 session->gpsdata.dop.vdop,
 		 session->gpsdata.dop.tdop,
-		 session->gpsdata.dop.gdop);
+		 session->gpsdata.dop.gdop, buf2);
 	mask |= DOP_SET | STATUS_SET | USED_IS;
 	break;
     case 0x82:			/* Differential Position Fix Mode */
@@ -1507,6 +1514,9 @@ void configuration_packets_generic(struct gps_device_t *session)
 void configuration_packets_accutime_gold(struct gps_device_t *session)
 {
 	unsigned char buf[100];
+
+	GPSD_LOG(LOG_PROG, &session->context->errout,
+		 "TSIP: configuration_packets_accutime_gold()\n");
 
 	/* Request Firmware Version (0x1c-01)
          * returns Firmware component version information (0x1x-81) */
