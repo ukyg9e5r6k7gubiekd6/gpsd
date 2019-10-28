@@ -57,11 +57,13 @@ static int tsip_write(struct gps_device_t *session,
 		      unsigned int id, unsigned char *buf, size_t len)
 {
     char *ep, *cp;
+    char obuf[100];
+    size_t olen = len;
 
     session->msgbuf[0] = '\x10';
     session->msgbuf[1] = (char)id;
     ep = session->msgbuf + 2;
-    for (cp = (char *)buf; len-- > 0; cp++) {
+    for (cp = (char *)buf; olen-- > 0; cp++) {
 	if (*cp == '\x10')
 	    *ep++ = '\x10';
 	*ep++ = *cp;
@@ -70,7 +72,8 @@ static int tsip_write(struct gps_device_t *session,
     *ep++ = '\x03';
     session->msgbuflen = (size_t) (ep - session->msgbuf);
     GPSD_LOG(LOG_PROG, &session->context->errout,
-	     "TSIP: Sent packet id 0x%02x\n", id);
+	     "TSIP: Sent packet id 0x %s\n",
+             gpsd_hexdump(obuf, sizeof(obuf), &session->msgbuf[1], len + 1));
     if (gpsd_write(session, session->msgbuf, session->msgbuflen) !=
 	(ssize_t) session->msgbuflen)
 	return -1;
@@ -350,22 +353,27 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	mask |= DEVICEID_SET;
 	break;
     case 0x46:			/* Health of Receiver */
-	if (len != 2)
+	if ( 2 > len) {
+            // 0x46 can be 2 or 3 bytes, model dependent
 	    break;
+        }
 	session->driver.tsip.last_46 = now;
 	u1 = getub(buf, 0);	/* Status code */
-	u2 = getub(buf, 1);	/* Antenna/Battery */
-	if (u1 != (uint8_t) 0) {
+	u2 = getub(buf, 1);	/* Battery Backup */
+	if ( 2 < len) {
+            u3 = getub(buf, 2);	/* Antenna */
+        } else {
+            u3 = 0;             // assume good antenna
+        }
+	if ((uint8_t)0 != u1) {
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    mask |= STATUS_SET;
-	} else {
-	    if (session->gpsdata.status < STATUS_FIX) {
-		session->gpsdata.status = STATUS_FIX;
-		mask |= STATUS_SET;
-	    }
+	} else if (session->gpsdata.status < STATUS_FIX) {
+            session->gpsdata.status = STATUS_FIX;
+            mask |= STATUS_SET;
 	}
 	GPSD_LOG(LOG_PROG, &session->context->errout,
-		 "TSIP: Receiver Health (0x46): %02x %02x\n", u1, u2);
+		 "TSIP: Receiver Health (0x46): %x %x %x\n", u1, u2, u3);
 	break;
     case 0x47:			/* Signal Levels for all Satellites */
 	gpsd_zero_satellites(&session->gpsdata);
@@ -1147,6 +1155,12 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	break;
     }
 
+#ifdef __UNUSED__
+        // full reset
+	putbyte(buf, 0, 0x46);
+	(void)tsip_write(session, 0x1e, buf, 1);
+#endif
+
     /* see if it is time to send some request packets for reports that */
     /* the receiver won't send at fixed intervals */
 
@@ -1364,6 +1378,9 @@ static void tsip_mode(struct gps_device_t *session, int mode)
 void configuration_packets_generic(struct gps_device_t *session)
 {
 	unsigned char buf[100];
+
+	GPSD_LOG(LOG_PROG, &session->context->errout,
+		 "TSIP: configuration_packets_generic()\n");
 
 	// Set basic configuration, using Set or Request I/O Options (0x35).
         /* Position: enable: Double Precision, MSL, LLA
