@@ -150,6 +150,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     timespec_t ts_tow;
     char ts_buf[TIMESPEC_LEN];
     int bad_len = 0;
+    const char *name;
 
     if (session->lexer.type != TSIP_PACKET) {
 	GPSD_LOG(LOG_INF, &session->context->errout,
@@ -450,7 +451,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	}
 	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_IS | REPORT_IS;
 	GPSD_LOG(LOG_DATA, &session->context->errout,
-		 "TSIP: SPPLLA (0x4a): time=%s lat=%.2f lon=%.2f altMSL=%.2f\n",
+		 "TSIP: SP-PLLA (0x4a): time=%s lat=%.2f lon=%.2f "
+                 "altMSL=%.2f\n",
                  timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
 		 session->newdata.latitude,
 		 session->newdata.longitude,
@@ -468,14 +470,36 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 "TSIP: Machine ID (0x4b): %02x %02x %02x\n",
                  session->driver.tsip.machine_id,
                  u2, u3);
-        /* Machine ID:
-         *   1 = RES SMT 360
-         *  32 = Acutime 360
-         *  5a - Lassen IQ (2002)
-         *  61 = Acutime 2000
-         *  62 = ACE UTC
-         *  96 = Copernicus II, Thunderbolt E
-         */
+
+        if ('\0' == session->subtype[0]) {
+            // better than nothing
+            switch (session->driver.tsip.machine_id) {
+            case 1:
+                // should use better name from superpacket
+                name = " SMT 360";
+                break;
+            case 0x32:
+                name = " Acutime 360";
+                break;
+            case 0x5a:
+                name = " Lassen SQ";
+                break;
+            case 0x61:
+                name = " Acutime 2000";
+                break;
+            case 0x62:
+                name = " ACE UTC";
+                break;
+            case 0x96:
+                name = " Copernicus II, Thunderbolt E";
+                break;
+            default:
+                 name = "";
+            }
+            (void)snprintf(session->subtype, sizeof(session->subtype),
+                           "Machine ID x%x%s",
+                           session->driver.tsip.machine_id, name);
+        }
 	if (u3 != session->driver.tsip.superpkt) {
 	    session->driver.tsip.superpkt = u3;
             GPSD_LOG(LOG_PROG, &session->context->errout,
@@ -674,6 +698,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	}
 	break;
     case 0x6c:			/* Satellite Selection List */
+        /* Present in:
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
+         * Not present in Lassen SQ (2002) */
 	if (18 > len) {
             bad_len = 18;
 	    break;
@@ -687,31 +715,42 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
         // why same as 6d?
 	session->driver.tsip.last_6d = now;	/* keep timestamp for request */
-#ifdef __UNUSED__
 	/*
 	 * This looks right, but it sets a spurious mode value when
 	 * the satellite constellation looks good to the chip but no
 	 * actual fix has yet been acquired.  We should set the mode
 	 * field (which controls gpsd's fix reporting) only from sentences
-	 * that convey actual fix information, like 0x20, otherwise we
-	 * get results like triggering their error modeler spuriously.
+	 * that convey actual fix information, like 0x8f-20, but some
+         * TSIP do not support 0x8f-20, and 0x6c may be all we got.
 	 */
 	switch (u1 & 7) {	/* dimension */
+	case 1:       // clock fix (surveyed in)
+            // FALLTHROUGH
+        case 5:       // Overdetermined clock fix
+	    session->gpsdata.status = STATUS_TIME;
+	    session->newdata.mode = MODE_3D;
+	    break;
 	case 3:
-	    // session->gpsdata.status = STATUS_FIX;
+	    session->gpsdata.status = STATUS_FIX;
 	    session->newdata.mode = MODE_2D;
 	    break;
 	case 4:
-	    // session->gpsdata.status = STATUS_FIX;
+	    session->gpsdata.status = STATUS_FIX;
 	    session->newdata.mode = MODE_3D;
 	    break;
+        case 2:
+            // FALLTHROUGH
+        case 6:
+            // FALLTHROUGH
+        case 7:
+            // FALLTHROUGH
 	default:
-	    // session->gpsdata.status = STATUS_NO_FIX;
+	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->newdata.mode = MODE_NO_FIX;
 	    break;
 	}
 	mask |= MODE_SET;
-#endif /* __UNUSED__ */
+
 	session->gpsdata.satellites_used = count;
 	session->gpsdata.dop.pdop = getbef32((char *)buf, 1);
 	session->gpsdata.dop.hdop = getbef32((char *)buf, 5);
@@ -745,6 +784,12 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	mask |= DOP_SET | STATUS_SET | USED_IS;
 	break;
     case 0x6d:			/* All-In-View Satellite Selection */
+        /* Present in:
+         *   Lassen SQ
+         * Not present in:
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
+         */
 	if (1 > len) {
             bad_len = 1;
 	    break;
@@ -756,31 +801,42 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    break;
         }
 	session->driver.tsip.last_6d = now;	/* keep timestamp for request */
-#ifdef __UNUSED__
 	/*
 	 * This looks right, but it sets a spurious mode value when
 	 * the satellite constellation looks good to the chip but no
 	 * actual fix has yet been acquired.  We should set the mode
 	 * field (which controls gpsd's fix reporting) only from sentences
-	 * that convey actual fix information, like 0x20, otherwise we
-	 * get results like triggering their error modeler spuriously.
+	 * that convey actual fix information, like 0x8f-20, but some
+         * TSIP do not support 0x8f-20, and 0x6c may be all we got.
 	 */
 	switch (u1 & 7) {	/* dimension */
+	case 1:       // clock fix (surveyed in)
+            // FALLTHROUGH
+        case 5:       // Overdetermined clock fix
+	    session->gpsdata.status = STATUS_TIME;
+	    session->newdata.mode = MODE_3D;
+	    break;
 	case 3:
-	    //session->gpsdata.status = STATUS_FIX;
+	    session->gpsdata.status = STATUS_FIX;
 	    session->newdata.mode = MODE_2D;
 	    break;
 	case 4:
-	    //session->gpsdata.status = STATUS_FIX;
+	    session->gpsdata.status = STATUS_FIX;
 	    session->newdata.mode = MODE_3D;
 	    break;
+        case 2:
+            // FALLTHROUGH
+        case 6:
+            // FALLTHROUGH
+        case 7:
+            // FALLTHROUGH
 	default:
-	    //session->gpsdata.status = STATUS_NO_FIX;
+	    session->gpsdata.status = STATUS_NO_FIX;
 	    session->newdata.mode = MODE_NO_FIX;
 	    break;
 	}
 	mask |= MODE_SET;
-#endif /* __UNUSED__ */
+
 	session->gpsdata.satellites_used = count;
 	session->gpsdata.dop.pdop = getbef32((char *)buf, 1);
 	session->gpsdata.dop.hdop = getbef32((char *)buf, 5);
@@ -1243,8 +1299,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         GPSD_LOG(LOG_WARNING, &session->context->errout,
                  "TSIP: ID x%02x wrong len %d s/b >= %d \n", id, len, bad_len);
     }
-/* see if it is time to send some request packets for reports that */
-    /* the receiver won't send at fixed intervals */
+    /* See if it is time to send some request packets for reports that.
+     * The receiver won't send at fixed intervals */
 
     if ((now - session->driver.tsip.last_41) > 5) {
 	/* Request Current Time
@@ -1260,11 +1316,12 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	session->driver.tsip.last_6d = now;
     }
 
-    if (2 > session->driver.tsip.superpkt &&
+    if (1 > session->driver.tsip.superpkt &&
         (now - session->driver.tsip.last_48) > 60) {
 	/* Request GPS System Message
          * Returns 0x48.
-         * not supported on models Lassen SQ (2002) or SMT 360 */
+         * not supported on models Lassen SQ (2002) or newer.
+         * We assume SuperPackets replaced 0x28 */
 	(void)tsip_write(session, 0x28, buf, 0);
 	session->driver.tsip.last_48 = now;
     }
