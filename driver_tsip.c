@@ -529,11 +529,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	session->newdata.NED.velN = f2;
 	session->newdata.NED.velE = f1;
 	session->newdata.NED.velD = -f3;
-	GPSD_LOG(LOG_INF, &session->context->errout,
-		 "TSIP: GPS Velocity ENU (0x56): %f %f %f %f %f\n",
-                 f1, f2, f3, f4, f5);
 	mask |= VNED_SET;
-	GPSD_LOG(LOG_DATA, &session->context->errout, "TSIP: VFENU 0x56\n");
+	GPSD_LOG(LOG_INF, &session->context->errout,
+		 "TSIP: Vel ENU (0x56): %f %f %f %f %f\n",
+                 f1, f2, f3, f4, f5);
 	break;
     case 0x57:			/* Information About Last Computed Fix */
 	if (len != 8) {
@@ -810,7 +809,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    mask |= STATUS_SET;
 	}
 	GPSD_LOG(LOG_DATA, &session->context->errout,
-		 "TSIP: DPFM (0x82) status=%d\n", session->gpsdata.status);
+		 "TSIP: DPFM (0x82) mode %d status=%d\n",
+                 u1, session->gpsdata.status);
 	break;
     case 0x83:     /* Double-Precision XYZ Position Fix and Bias Information */
 	if (len != 36) {
@@ -823,7 +823,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	d4 = getbed64((char *)buf, 24);	/* clock bias */
 	f1 = getbef32((char *)buf, 32);	/* time-of-fix */
 	GPSD_LOG(LOG_INF, &session->context->errout,
-		 "TSIP: GPS Position (0x83) XYZ %f %f %f %f %f\n",
+		 "TSIP: Position (0x83) XYZ %f %f %f %f %f\n",
                  d1, d2, d3, d4, f1);
 	break;
     case 0x84:     /* Double-Precision LLA Position Fix and Bias Information */
@@ -1233,36 +1233,41 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     /* the receiver won't send at fixed intervals */
 
     if ((now - session->driver.tsip.last_41) > 5) {
-	/* Request Current Time (0x41) */
+	/* Request Current Time
+         * Returns 0x41. */
 	(void)tsip_write(session, 0x21, buf, 0);
 	session->driver.tsip.last_41 = now;
     }
 
     if ((now - session->driver.tsip.last_6d) > 5) {
-	/* Request GPS Receiver Position Fix Mode (0x44 or 0x6d) */
+	/* Request GPS Receiver Position Fix Mode
+         * Returns 0x44 or 0x6d. */
 	(void)tsip_write(session, 0x24, buf, 0);
 	session->driver.tsip.last_6d = now;
     }
 
     if (2 > session->driver.tsip.superpkt &&
         (now - session->driver.tsip.last_48) > 60) {
-	/* Request GPS System Message (0x48)
-         * not supported on model SMT 360 */
+	/* Request GPS System Message
+         * Returns 0x48.
+         * not supported on models Lassen SQ or SMT 360 */
 	(void)tsip_write(session, 0x28, buf, 0);
 	session->driver.tsip.last_48 = now;
     }
 
     if ((now - session->driver.tsip.last_5c) >= 5) {
-	/* Request Current Satellite Tracking Status (0x5c or 0x5d)
-	 * 5c in PS only devices
-	 * 5d in multi-gnss devices */
+	/* Request Current Satellite Tracking Status
+         * Returns: 0x5c or 0x5d
+	 *  5c in PS only devices
+	 *  5d in multi-gnss devices */
 	putbyte(buf, 0, 0x00);	/* All satellites */
 	(void)tsip_write(session, 0x3c, buf, 1);
 	session->driver.tsip.last_5c = now;
     }
 
     if ((now - session->driver.tsip.last_46) > 5) {
-	/* Request Health of Receiver (0x46 and 0x4b) */
+	/* Request Health of Receiver
+         * Returns 0x46 and 0x4b. */
 	(void)tsip_write(session, 0x26, buf, 0);
 	session->driver.tsip.last_46 = now;
     }
