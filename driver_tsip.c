@@ -188,7 +188,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	     "TSIP: got packet id 0x%02x length %d: %s\n",
 	     id, len, buf2);
 
-    session->cycle_end_reliable = true;
+    // session->cycle_end_reliable = true;
     switch (id) {
     case 0x13:			/* Packet Received */
 	u1 = getub(buf, 0);     // Packet ID of non-parsable packet
@@ -917,13 +917,13 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    mask |= TIME_SET | NTPTIME_IS;
 	}
 	GPSD_LOG(LOG_INF, &session->context->errout,
-		 "TSIP: GPS DP LLA (0x84) %s %f %f %f\n",
+		 "TSIP: DP-PLLA (0x84) %s %f %f %f\n",
                  timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
 		 session->newdata.latitude,
 		 session->newdata.longitude, session->newdata.altMSL);
 	mask |= LATLON_SET | CLEAR_IS | REPORT_IS;
 	GPSD_LOG(LOG_DATA, &session->context->errout,
-		 "TSIP: DPPLLA (0x84) time=%s lat=%.2f lon=%.2f altMSL=%.2f\n",
+		 "TSIP: DP-PLLA (0x84) time=%s lat=%.2f lon=%.2f altMSL=%.2f\n",
                  timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
 		 session->newdata.latitude,
 		 session->newdata.longitude,
