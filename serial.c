@@ -266,6 +266,12 @@ void gpsd_set_speed(struct gps_device_t *session,
     speed_t rate;
     struct timespec delay;
 
+    if ('\0' != session->context->fixed_port_framing[0]) {
+        // ignore length, stopbits=2 forces length 7.
+        parity = session->context->fixed_port_framing[1];
+        stopbits = session->context->fixed_port_framing[2] - '0';
+    }
+
     /*
      * Yes, you can set speeds that aren't in the hunt loop.  If you
      * do this, and you aren't on Linux where baud rate is preserved
@@ -633,7 +639,7 @@ int gpsd_serial_open(struct gps_device_t *session)
         } else {
             // ignore length, stopbits=2 forces length 7.
             new_parity = session->context->fixed_port_framing[1];
-            new_stop = '0' - session->context->fixed_port_framing[2];
+            new_stop = session->context->fixed_port_framing[2] - '0';
         }
         gpsd_set_speed(session, new_speed, new_parity, new_stop);
     }
@@ -729,7 +735,7 @@ bool gpsd_next_hunt_setting(struct gps_device_t * session)
         } else {
             // ignore length, stopbits=2 forces length 7.
             new_parity = session->context->fixed_port_framing[1];
-            new_stop = '0' - session->context->fixed_port_framing[2];
+            new_stop = session->context->fixed_port_framing[2] - '0';
         }
 
         gpsd_set_speed(session, rates[session->baudindex], new_parity,
