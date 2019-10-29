@@ -1659,13 +1659,11 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 	/* some listeners may be in watcher mode */
 	if (sub->policy.watcher) {
 	    if (changed & DATA_IS) {
-		/* guard keeps mask dumper from eating CPU */
-		if (context.errout.debug >= LOG_PROG)
-		    GPSD_LOG(LOG_PROG, &context.errout,
-			     "Changed mask: %s with %sreliable "
-                             "cycle detection\n",
-			     gps_maskdump(changed),
-			     device->cycle_end_reliable ? "" : "un");
+                GPSD_LOG(LOG_PROG, &context.errout,
+                         "Changed mask: %s with %sreliable "
+                         "cycle detection\n",
+                         gps_maskdump(changed),
+                         device->cycle_end_reliable ? "" : "un");
 		if ((changed & REPORT_IS) != 0)
 		    GPSD_LOG(LOG_PROG, &context.errout,
 			     "time to report a fix\n");
@@ -1673,8 +1671,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 		if (sub->policy.nmea)
 		    pseudonmea_report(sub, changed, device);
 
-		if (sub->policy.json)
-		{
+		if (sub->policy.json) {
 		    char buf[GPS_JSON_RESPONSE_MAX * 4];
 
 		    if ((changed & AIS_SET) != 0)
@@ -1683,8 +1680,7 @@ static void all_reports(struct gps_device_t *device, gps_mask_t changed)
 			    && !sub->policy.split24)
 			    continue;
 
-		    json_data_report(changed,
-				     device, &sub->policy,
+		    json_data_report(changed, device, &sub->policy,
 				     buf, sizeof(buf));
 		    if (buf[0] != '\0')
 			(void)throttled_write(sub, buf, strlen(buf));
