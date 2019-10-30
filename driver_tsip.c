@@ -207,7 +207,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    /* Request LFwEI Super Packet
              * SMT 360 does not support 0x8e-20 either */
 	    putbyte(buf, 0, 0x20);
-	    putbyte(buf, 1, 0x01);	/* enabled */
+	    putbyte(buf, 1, 0x01);	/* auto-report */
 	    (void)tsip_write(session, 0x8e, buf, 2);
 	}
 	break;
@@ -384,20 +384,23 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 "TSIP: Software version (0x45): %s\n", session->subtype);
 	mask |= DEVICEID_SET;
 	break;
-    case 0x46:			/* Health of Receiver */
+    case 0x46:
+        /* Health of Receiver (0x46).  Poll with 0x26
+         * Present on all models
+         * RES SMT 360 says use 0x8f-ab or 0x8f-ac instead
+         */
 	if ( 2 > len) {
-            // 0x46 can be 2 or 3 bytes, model dependent
             bad_len = 2;
 	    break;
         }
 	session->driver.tsip.last_46 = now;
 	u1 = getub(buf, 0);	/* Status code */
-	u2 = getub(buf, 1);	/* Battery Backup */
-	if ( 2 < len) {
-            u3 = getub(buf, 2);	/* Antenna */
-        } else {
-            u3 = 0;             // assume good antenna
-        }
+	/* Error codes, model dependent
+         * 0x01 -- no battery, always set on RES SMT 360
+         * 0x10 -- antenna fault
+         * 0x20 -- antenna is shorted
+         */
+	u2 = getub(buf, 1);
 	if ((uint8_t)0 != u1) {
 	    session->gpsdata.status = STATUS_NO_FIX;
 	    mask |= STATUS_SET;
@@ -406,7 +409,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             mask |= STATUS_SET;
 	}
 	GPSD_LOG(LOG_PROG, &session->context->errout,
-		 "TSIP: Receiver Health (0x46): %x %x %x\n", u1, u2, u3);
+		 "TSIP: Receiver Health (0x46): %x %x\n", u1, u2);
 	break;
     case 0x47:			/* Signal Levels for all Satellites */
 	if (1 > len) {
