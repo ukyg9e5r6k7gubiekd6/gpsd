@@ -153,6 +153,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     const char *name;
 
     if (session->lexer.type != TSIP_PACKET) {
+        // this should not happen
 	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "TSIP: tsip_analyze packet type %d\n",
 		 session->lexer.type);
@@ -208,18 +209,23 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    putbyte(buf, 1, 0x01);	/* enabled */
 	    (void)tsip_write(session, 0x8e, buf, 2);
 	}
-
 	break;
+
     case 0x1c:        // Hardware/Software Version Information
         /* Present in:
          *  Accutime Gold
-         *  Copernicus II
+         *  Copernicus (2006)
+         *  Copernicus II (2009)
          *  Thunderbolt E (2012)
-         *  RES SMT 360
-         *  ICM SMT 360
-         *  RES360 17x22
+         *  RES SMT 360 (2018)
+         *  ICM SMT 360 (2018)
+         *  RES360 17x22 (2018)
          *  Acutime 360
-         * Not in Lassen SQ (2002) */
+         * Not in:
+         *  ACE II (1999)
+         *  ACE III (2000)
+         *  Lassen SQ (2002)
+         *  Lassen iQ (2005) */
 	u1 = (uint8_t) getub(buf, 0);
         // decode by subtype
 	switch (u1) {
@@ -282,7 +288,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                     session->driver.tsip.subtype = TSIP_ACCUTIME_GOLD;
                     configuration_packets_accutime_gold(session);
                     break;
-                case 1002:            // Copernicus II
+                case 1001:            // Lassen iQ
+                    // FALLTHROUGH
+                case 1002:            // Copernicus, Copernicus II
                     // FALLTHROUGH
                 case 3007:            // Thunderbolt E
                     // FALLTHROUGH
@@ -295,13 +303,13 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 case 3032:            // Acutime 360
                     // FALLTHROUGH
                 default:
-			configuration_packets_generic(session);
-                        break;
+                    configuration_packets_generic(session);
+                    break;
 		}
 		break;
         default:
                 GPSD_LOG(LOG_ERROR, &session->context->errout,
-                         "TSIP: 0x83 Unhandled subpacket ID x%x\n", u1);
+                         "TSIP: Unhandled subpacket ID 0x1c-%x\n", u1);
                 break;
 	}
 	break;
@@ -337,7 +345,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	f3 = getbef32((char *)buf, 8);	/* Z */
 	f4 = getbef32((char *)buf, 12);	/* time-of-fix */
 	GPSD_LOG(LOG_INF, &session->context->errout,
-		 "TSIP: GPS Position (0x42): XYZ %f %f %f %f\n", f1, f2, f3, f4);
+		 "TSIP: GPS Position (0x42): XYZ %f %f %f %f\n",
+                 f1, f2, f3, f4);
 	break;
     case 0x43:			/* Velocity Fix, XYZ ECEF */
 	if (len != 20) {
@@ -449,7 +458,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 				    ts_tow);
 	    mask |= TIME_SET | NTPTIME_IS;
 	}
-	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_IS | REPORT_IS;
+        // this seems to be first in cycle
+        // REPORT_IS here breaks reports in read-only mode
+	mask |= LATLON_SET | ALTITUDE_SET | CLEAR_IS;
 	GPSD_LOG(LOG_DATA, &session->context->errout,
 		 "TSIP: SP-PLLA (0x4a): time=%s lat=%.2f lon=%.2f "
                  "altMSL=%.2f\n",
@@ -458,7 +469,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 session->newdata.longitude,
 		 session->newdata.altMSL);
 	break;
-    case 0x4b:			/* Machine/Code ID and Additional Status */
+    case 0x4b:
+        /* Machine/Code ID and Additional Status */
+        /* Present in all receivers? */
 	if (len != 3) {
             bad_len = 3;
 	    break;
@@ -482,7 +495,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 name = " Acutime 360";
                 break;
             case 0x5a:
-                name = " Lassen SQ";
+                name = " Lassen iQ";
                 break;
             case 0x61:
                 name = " Acutime 2000";
@@ -491,7 +504,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 name = " ACE UTC";
                 break;
             case 0x96:
-                name = " Copernicus II, Thunderbolt E";
+                // Also Copernicus II
+                name = " Copernicus, Thunderbolt E";
                 break;
             default:
                  name = "";
@@ -603,12 +617,19 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 getub(buf, 0), f1, f2, f3, d1);
 	break;
     case 0x5c:			/* Satellite Tracking Status */
+        /* GPS only, no WAAS reported here or used in fix
+         * Present in:
+         *  Copernicus, Copernicus II
+         *  Thunderbold E
+         * Note Present in:
+         *  ICM SMT 360, RES SMT 360
+         */
 	if (len != 24) {
             bad_len = 24;
 	    break;
         }
-	u1 = getub(buf, 0);	/* PRN */
-	u2 = getub(buf, 1);	/* chan */
+	u1 = getub(buf, 0);	/* PRN 1-32 */
+	u2 = getub(buf, 1);	/* slot:chan */
 	u3 = getub(buf, 2);	/* Acquisition flag */
 	u4 = getub(buf, 3);	/* Ephemeris flag */
 	f1 = getbef32((char *)buf, 4);	/* Signal level */
@@ -701,7 +722,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* Present in:
          *   ICM SMT 360 (2018)
          *   RES SMT 360 (2018)
-         * Not present in Lassen SQ (2002) */
+         * Not present in:
+         *   Lassen SQ (2002)
+         *   Lassen iQ (2005) */
 	if (18 > len) {
             bad_len = 18;
 	    break;
@@ -786,6 +809,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     case 0x6d:			/* All-In-View Satellite Selection */
         /* Present in:
          *   Lassen SQ
+         *   Lassen iQ
          * Not present in:
          *   ICM SMT 360 (2018)
          *   RES SMT 360 (2018)
@@ -921,7 +945,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
 		 session->newdata.latitude,
 		 session->newdata.longitude, session->newdata.altMSL);
-	mask |= LATLON_SET | CLEAR_IS | REPORT_IS;
+        // this seems to be first in cycle
+	mask |= LATLON_SET | CLEAR_IS;
 	GPSD_LOG(LOG_DATA, &session->context->errout,
 		 "TSIP: DP-PLLA (0x84) time=%s lat=%.2f lon=%.2f altMSL=%.2f\n",
                  timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
@@ -944,12 +969,19 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    d4 = getbed64((char *)buf, 27);	/* A-axis */
 	    d5 = getbed64((char *)buf, 35);	/* Eccentricity Squared */
 	    GPSD_LOG(LOG_INF, &session->context->errout,
-		     "TSIP: Current Datum (0x8f) %d %f %f %f %f %f\n", s1, d1,
-		     d2, d3, d4, d5);
+		     "TSIP: Current Datum (0x8f-15) %d %f %f %f %f %f\n",
+                     s1, d1, d2, d3, d4, d5);
 	    break;
 
-	case 0x20:   /* Last Fix with Extra Information (binary fixed point) */
-	    /* CSK sez "why does my Lassen iQ output oversize packets?" */
+	case 0x20:
+            /* Last Fix with Extra Information (binary fixed point) 0x8f-20 */
+	    /* CSK sez "why does my Lassen SQ output oversize packets?" */
+            /* Present in:
+             *  ACE II
+             * Not present in:
+             *  ICM SMT 360
+             *  RES SMT 360
+             */
 	    if ((len != 56) && (len != 64)) {
                 bad_len = 56;
                 break;
@@ -970,7 +1002,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    week = getbeu16(buf, 30);	/* tsip.gps_week */
 	    /* PRN/IODE data follows */
 	    GPSD_LOG(LOG_DATA, &session->context->errout,
-		     "TSIP: LFwEI (0x20) %d %d %d %u %d %u %u %x %x %u %u %d\n",
+		     "TSIP: LFwEI (0x8f-20) %d %d %d %u %d %u %u "
+                     "%x %x %u %u %d\n",
                      s1, s2, s3, ul1, sl1, ul2, sl2, u1, u2, u3, u4, week);
 
 	    if ((u1 & 0x01) != (uint8_t) 0)	/* check velocity scaling */
@@ -1016,7 +1049,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		    STATUS_SET | MODE_SET | CLEAR_IS |
 		    REPORT_IS | VNED_SET;
 	    GPSD_LOG(LOG_DATA, &session->context->errout,
-		     "TSIP: SP-LFEI (0x20): time=%s lat=%.2f lon=%.2f "
+		     "TSIP: SP-LFEI (0x8f-20): time=%s lat=%.2f lon=%.2f "
                      "altMSL=%.2f mode=%d status=%d\n",
                      timespec_str(&session->newdata.time, ts_buf,
                                   sizeof(ts_buf)),
@@ -1045,8 +1078,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    s3 = getbes16(buf, 23);	/* north velocity */
 	    s4 = getbes16(buf, 25);	/* up velocity */
 	    GPSD_LOG(LOG_INF, &session->context->errout,
-		     "TSIP: CSP (0x23): %u %d %u %u %d %u %d %d %d %d\n", ul1,
-		     week, u1, u2, sl1, ul2, sl3, s2, s3, s4);
+		     "TSIP: CSP (0x8f-23): %u %d %u %u %d %u %d %d %d %d\n",
+                     ul1, week, u1, u2, sl1, ul2, sl3, s2, s3, s4);
 	    if ((int)u1 > 10) {
 		session->context->leap_seconds = (int)u1;
 		session->context->valid |= LEAP_SECOND_VALID;
@@ -1124,7 +1157,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                      gps_maskdump(mask));
 
 	    GPSD_LOG(LOG_PROG, &session->context->errout,
-		     "TSIP: SP-TTS (0xab) GPS Time %u %u %d flag x%x\n",
+		     "TSIP: SP-TTS (0x8f-ab) GPS Time %u %u %d flag x%x\n",
                      ul1, week, session->context->leap_seconds, u1);
 	    break;
 
@@ -1225,7 +1258,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
 	    mask |= LATLON_SET | ALTITUDE_SET | MODE_SET | REPORT_IS;
 	    GPSD_LOG(LOG_DATA, &session->context->errout,
-		     "TSIP: SP-TPS (0xac) lat=%.2f lon=%.2f altMSL=%.2f "
+		     "TSIP: SP-TPS (0x8f-ac) lat=%.2f lon=%.2f altMSL=%.2f "
                      "mask %s\n",
 		     session->newdata.latitude,
 		     session->newdata.longitude,
@@ -1235,7 +1268,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
 	default:
 	    GPSD_LOG(LOG_WARN, &session->context->errout,
-		     "TSIP: Unhandled TSIP superpacket type 0x%02x\n",
+		     "TSIP: Unhandled TSIP superpacket type 0x8f-%02x\n",
 		     u1);
 	}
 	break;
@@ -1298,6 +1331,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     if (bad_len) {
         GPSD_LOG(LOG_WARNING, &session->context->errout,
                  "TSIP: ID x%02x wrong len %d s/b >= %d \n", id, len, bad_len);
+    } else {
+        GPSD_LOG(LOG_PROG, &session->context->errout,
+                 "TSIP: ID x%02x mask %s\n", id, gps_maskdump(mask));
     }
     /* See if it is time to send some request packets for reports that.
      * The receiver won't send at fixed intervals */
@@ -1320,7 +1356,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         (now - session->driver.tsip.last_48) > 60) {
 	/* Request GPS System Message
          * Returns 0x48.
-         * not supported on models Lassen SQ (2002) or newer.
+         * not supported on:
+         *  Lassen SQ (2002)
+         *  Lassen iQ (2005)
+         *  and post 2005
          * We assume SuperPackets replaced 0x28 */
 	(void)tsip_write(session, 0x28, buf, 0);
 	session->driver.tsip.last_48 = now;
@@ -1407,7 +1446,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
     }
     if (event == event_configure && session->lexer.counter == 0) {
 	/*
-	 * TSIP is ODD parity 1 stopbit, save original values and
+	 * TSIP is often ODD parity 1 stopbit, save original values and
 	 * change it Thunderbolts and Copernicus use
 	 * 8N1... which isn't exactly a good idea due to the
 	 * fragile wire format.  We must divine a clever
@@ -1416,7 +1455,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	session->driver.tsip.parity = session->gpsdata.dev.parity;
 	session->driver.tsip.stopbits =
 	    (unsigned int) session->gpsdata.dev.stopbits;
-	// gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
+	gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
     }
     if (event == event_deactivate) {
 	/* restore saved parity and stopbits when leaving TSIP mode */
@@ -1546,7 +1585,10 @@ void configuration_packets_generic(struct gps_device_t *session)
 	(void)tsip_write(session, 0x21, NULL, 0);
 
 	/* Set Operating Parameters (0x2c)
-         * not present in Lassen SQ (2002) or RES SMT 360 */
+         * not present in:
+         *   Lassen SQ (2002)
+         *   Lassen iQ (2005)
+         *   RES SMT 360 */
 	/* dynamics code: enabled: 1=land
          *   disabled: 2=sea, 3=air, 4=static
          *   default is land */
