@@ -193,18 +193,27 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     // session->cycle_end_reliable = true;
     switch (id) {
     case 0x13:			/* Packet Received */
-	u1 = getub(buf, 0);     // Packet ID of non-parsable packet
-	u2 = getub(buf, 1);     // Data byte 0 of non-parsable packet
+        if (1 > len) {
+            bad_len = 1;
+            break;
+        }
+        u1 = getub(buf, 0);     // Packet ID of non-parsable packet
+        if (2 <= len) {
+            u2 = getub(buf, 1);     // Data byte 0 of non-parsable packet
+        } else {
+            u2 = 0;
+        }
+        GPSD_LOG(LOG_WARN, &session->context->errout,
+                 "TSIP: Report Packet (0x13): type x%02x %02x "
+                 "cannot be parsed\n",
+                 u1, u2);
         // ignore the rest of the bad data
-	GPSD_LOG(LOG_WARN, &session->context->errout,
-		 "TSIP: Report Packet (0x13): type x%02x cannot be parsed\n",
-                 u1);
 	if ((int)u1 == 0x8e && (int)u2 == 0x23) {
             /* no Compact Super Packet 0x8e-23 */
 	    GPSD_LOG(LOG_WARN, &session->context->errout,
 		     "TSIP: No 0x8e-23, use LFwEI (0x8f-20)\n");
 
-	    /* Request LFwEI Super Packet
+	    /* Request LFwEI Super Packet instead
              * SMT 360 does not support 0x8e-20 either */
 	    putbyte(buf, 0, 0x20);
 	    putbyte(buf, 1, 0x01);	/* auto-report */
@@ -314,7 +323,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 break;
 	}
 	break;
-    case 0x41:			/* GPS Time */
+    case 0x41:
+        /* GPS Time (0x41).  polled by 0x21 */
 	if (len != 10) {
             bad_len = 10;
 	    break;
@@ -521,7 +531,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	if (u3 != session->driver.tsip.superpkt) {
 	    session->driver.tsip.superpkt = u3;
             GPSD_LOG(LOG_PROG, &session->context->errout,
-                     "TSIP: Switching to Super Packet mode %d\n", u3);
+                     "TSIP: witching to Super Packet mode %d\n", u3);
             switch (u3){
             default:
                 // FALLTHROUGH
@@ -545,6 +555,25 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             }
 	}
 	break;
+    case 0x4c:
+        /* Operating Parameters Report (0x4c).  Polled by 0x2c
+         * Present in:
+         *   Vintage 1999 devices
+         *   Lassen iQ, but not documented
+         */
+	if (len != 17) {
+            bad_len = 17;
+	    break;
+        }
+	u1 = getub(buf, 0);               // Dynamics Code
+	f1 = getbef32((char *)buf, 1);    // Elevation Mask
+	f2 = getbef32((char *)buf, 5);    // Signal Level Mask
+	f3 = getbef32((char *)buf, 9);    // PDOP Mask
+	f4 = getbef32((char *)buf, 13);   // PDOP Switch
+	GPSD_LOG(LOG_INF, &session->context->errout,
+		 "TSIP: Operating Params (0x4c): x%02x %f %f %f %f\n",
+                 u1, f1, f2, f3, f4);
+        break;
     case 0x55:			/* IO Options */
 	if (len != 4) {
             bad_len = 4;
@@ -558,14 +587,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "TSIP: IO Options (0x55): %02x %02x %02x %02x\n",
                  u1, u2, u3, u4);
-	if ((u1 & 0x20) != (uint8_t) 0) {	/* Output Super Packets? */
-            // Huh???
-	    /* No LFwEI Super Packet */
+	if ((u1 & 0x20) != (uint8_t) 0) {
+            /* Try to get Super Packets */
+	    /* Turn off 0x8f-20 LFwEI Super Packet */
 	    putbyte(buf, 0, 0x20);
 	    putbyte(buf, 1, 0x00);	/* disabled */
 	    (void)tsip_write(session, 0x8e, buf, 2);
 
-	    /* Request Compact Super Packet */
+	    /* Turn on Compact Super Packet 0x8f-23 */
 	    putbyte(buf, 0, 0x23);
 	    putbyte(buf, 1, 0x01);	/* enabled */
 	    (void)tsip_write(session, 0x8e, buf, 2);
@@ -627,7 +656,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          * Present in:
          *  Copernicus, Copernicus II
          *  Thunderbold E
-         * Note Present in:
+         * Not Present in:
          *  ICM SMT 360, RES SMT 360
          */
 	if (len != 24) {
@@ -674,6 +703,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		session->gpsdata.satellites_visible = i;
 	}
 	break;
+
      case 0x5d:
         /* GNSS Satellite Tracking Status (multi-GNSS operation) */
 	if (len != 26) {
@@ -843,32 +873,38 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	 * that convey actual fix information, like 0x8f-20, but some
          * TSIP do not support 0x8f-20, and 0x6c may be all we got.
 	 */
-	switch (u1 & 7) {	/* dimension */
-	case 1:       // clock fix (surveyed in)
-            // FALLTHROUGH
-        case 5:       // Overdetermined clock fix
-	    session->gpsdata.status = STATUS_TIME;
-	    session->newdata.mode = MODE_3D;
-	    break;
-	case 3:
-	    session->gpsdata.status = STATUS_FIX;
-	    session->newdata.mode = MODE_2D;
-	    break;
-	case 4:
-	    session->gpsdata.status = STATUS_FIX;
-	    session->newdata.mode = MODE_3D;
-	    break;
-        case 2:
-            // FALLTHROUGH
-        case 6:
-            // FALLTHROUGH
-        case 7:
-            // FALLTHROUGH
-	default:
-	    session->gpsdata.status = STATUS_NO_FIX;
-	    session->newdata.mode = MODE_NO_FIX;
-	    break;
-	}
+        if (0 != isfinite(session->gpsdata.fix.longitude)) {
+            // have a fix
+            switch (u1 & 7) {	/* dimension */
+            case 1:       // clock fix (surveyed in)
+                // FALLTHROUGH
+            case 5:       // Overdetermined clock fix
+                session->gpsdata.status = STATUS_TIME;
+                session->newdata.mode = MODE_3D;
+                break;
+            case 3:
+                session->gpsdata.status = STATUS_FIX;
+                session->newdata.mode = MODE_2D;
+                break;
+            case 4:
+                session->gpsdata.status = STATUS_FIX;
+                session->newdata.mode = MODE_3D;
+                break;
+            case 2:
+                // FALLTHROUGH
+            case 6:
+                // FALLTHROUGH
+            case 7:
+                // FALLTHROUGH
+            default:
+                session->gpsdata.status = STATUS_NO_FIX;
+                session->newdata.mode = MODE_NO_FIX;
+                break;
+            }
+        } else {
+            session->gpsdata.status = STATUS_NO_FIX;
+            session->newdata.mode = MODE_NO_FIX;
+        }
 	mask |= MODE_SET;
 
 	session->gpsdata.satellites_used = count;
@@ -903,7 +939,13 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 session->gpsdata.dop.gdop, buf2);
 	mask |= DOP_SET | STATUS_SET | USED_IS;
 	break;
-    case 0x82:			/* Differential Position Fix Mode */
+    case 0x82:
+        /* Differential Position Fix Mode (0x82) poll with 0x62-ff
+         * Sent after every position fix in Auto GPS/DGPS,
+         * so potential cycle ender
+         *
+         * Lassen iQ, deprecated use 0xbb instead
+         */
 	if (len != 1) {
             bad_len = 1;
 	    break;
@@ -1306,8 +1348,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
     case 0x49:			/* Almanac Health Page */
 	// FALLTHROUGH
-    case 0x4c:			/* Operating Parameters Report */
-	// FALLTHROUGH
     case 0x54:			/* One Satellite Bias */
 	// FALLTHROUGH
     case 0x58:		/* Satellite System Data/Acknowledge from Receiver */
@@ -1397,9 +1437,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	/* Compact Superpacket requested but no response */
 	session->driver.tsip.req_compact = 0;
 	GPSD_LOG(LOG_WARN, &session->context->errout,
-		 "TSIP: No Compact Super Packet, use LFwEI\n");
+		 "TSIP: No Compact Super Packet (0x8f-23), "
+                 "try LFwEI (0x8f-20)\n");
 
-	/* Request LFwEI Super Packet */
+	/* Request LFwEI Super Packet 0x8f-20 */
 	putbyte(buf, 0, 0x20);
 	putbyte(buf, 1, 0x01);	/* enabled */
 	(void)tsip_write(session, 0x8e, buf, 2);
@@ -1445,7 +1486,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	 */
         /* Position: enable: Double Precision, MSL, LLA
          *           disable: ECEF */
-	putbyte(buf, 0, IO1_DP|IO1_MSL|IO1_LLA);
+	putbyte(buf, 0, IO1_8F20|IO1_DP|IO1_MSL|IO1_LLA);
         /* Velocity: enable: ENU, disable vECEF */
 	putbyte(buf, 1, IO2_ENU);
         /* Time: enable: 0x42, 0x43, 0x4a
@@ -1580,7 +1621,7 @@ void configuration_packets_generic(struct gps_device_t *session)
 	// Set basic configuration, using Set or Request I/O Options (0x35).
         /* Position: enable: Double Precision, MSL, LLA
          *           disable: ECEF */
-	putbyte(buf, 0, IO1_DP|IO1_MSL|IO1_LLA);
+	putbyte(buf, 0, IO1_8F20|IO1_DP|IO1_MSL|IO1_LLA);
         /* Velocity: enable: ENU, disable ECEF */
 	putbyte(buf, 1, IO2_ENU);
         /* Time: enable: 0x42, 0x43, 0x4a
