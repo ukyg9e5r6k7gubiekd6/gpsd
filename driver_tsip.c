@@ -98,6 +98,7 @@ static bool tsip_detect(struct gps_device_t *session)
     old_baudrate = session->gpsdata.dev.baudrate;
     old_parity = session->gpsdata.dev.parity;
     old_stopbits = session->gpsdata.dev.stopbits;
+    // FIXME.  Should respect fixed speed/framing
     gpsd_set_speed(session, 9600, 'O', 1);
 
     /* request firmware revision and look for a valid response */
@@ -616,8 +617,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		 "TSIP: Raw Measurement Data (0x5a): %d %f %f %f %f\n",
 		 getub(buf, 0), f1, f2, f3, d1);
 	break;
-    case 0x5c:			/* Satellite Tracking Status */
-        /* GPS only, no WAAS reported here or used in fix
+    case 0x5c:
+	/* Satellite Tracking Status (0x5c) polled by 0x3c
+         *
+         * GPS only, no WAAS reported here or used in fix
          * Present in:
          *  Copernicus, Copernicus II
          *  Thunderbold E
@@ -642,24 +645,24 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  "es %d Acq %d Eph %2d SNR %4.1f LMT %.04f El %4.1f Az %5.1f\n",
 		 i, u1, u2 & 7, u3, u4, f1, f2, d1, d2);
 	if (i < TSIP_CHANNELS) {
-	    if (d1 >= 0.0) {
-		session->gpsdata.skyview[i].PRN = (short)u1;
-		session->gpsdata.skyview[i].ss = (double)f1;
-		session->gpsdata.skyview[i].elevation = (double)d1;
-		session->gpsdata.skyview[i].azimuth = (double)d2;
-		session->gpsdata.skyview[i].used = false;
-		for (j = 0; j < session->gpsdata.satellites_used; j++)
-		    if (session->gpsdata.skyview[i].PRN != 0 &&
-                        session->driver.tsip.sats_used[j] != 0)
-			session->gpsdata.skyview[i].used = true;
-	    } else {
-		session->gpsdata.skyview[i].PRN = 0;
-		session->gpsdata.skyview[i].elevation = NAN;
-		session->gpsdata.skyview[i].azimuth = NAN;
-		session->gpsdata.skyview[i].ss = NAN;
-		session->gpsdata.skyview[i].used = false;
-	    }
+            session->gpsdata.skyview[i].PRN = (short)u1;
+            session->gpsdata.skyview[i].svid = (unsigned char)u1;
+            session->gpsdata.skyview[i].gnssid = GNSSID_GPS;
+            session->gpsdata.skyview[i].ss = (double)f1;
+            session->gpsdata.skyview[i].elevation = (double)d1;
+            session->gpsdata.skyview[i].azimuth = (double)d2;
+            session->gpsdata.skyview[i].used = false;
+            if (0.1 < f1) {
+                // check used list, if ss is non-zero
+                for (j = 0; j < session->gpsdata.satellites_used; j++) {
+                    if (session->gpsdata.skyview[i].PRN != 0 &&
+                        session->driver.tsip.sats_used[j] != 0) {
+                        session->gpsdata.skyview[i].used = true;
+                    }
+                }
+            }
 	    if (++i == session->gpsdata.satellites_visible) {
+                // why not use GPS tow from bytes 8-11?
 		session->gpsdata.skyview_time.tv_sec = 0;
 		session->gpsdata.skyview_time.tv_nsec = 0;
 		mask |= SATELLITE_SET;	/* last of the series */
@@ -718,8 +721,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		session->gpsdata.satellites_visible = i;
 	}
 	break;
-    case 0x6c:			/* Satellite Selection List */
-        /* Present in:
+    case 0x6c:
+	/* Satellite Selection List (0x6c) polled by 0x24
+         *
+         * Present in:
          *   ICM SMT 360 (2018)
          *   RES SMT 360 (2018)
          * Not present in:
@@ -806,8 +811,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  buf2);
 	mask |= DOP_SET | STATUS_SET | USED_IS;
 	break;
-    case 0x6d:			/* All-In-View Satellite Selection */
-        /* Present in:
+    case 0x6d:
+        /* All-In-View Satellite Selection (0x6d) polled by 0x24
+         *
+         * Present in:
          *   Lassen SQ
          *   Lassen iQ
          * Not present in:
@@ -874,6 +881,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                sizeof(session->driver.tsip.sats_used));
 	buf2[0] = '\0';
 	for (i = 0; i < count; i++) {
+            // negative PRN means sat unhealthy
             session->driver.tsip.sats_used[i] = (short)getub(buf, 17 + i);
             if (session->context->errout.debug >= LOG_DATA) {
                 str_appendf(buf2, sizeof(buf2),
@@ -1455,6 +1463,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
 	session->driver.tsip.parity = session->gpsdata.dev.parity;
 	session->driver.tsip.stopbits =
 	    (unsigned int) session->gpsdata.dev.stopbits;
+        // FIXME.  Should respect fixed speed/framing
 	gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
     }
     if (event == event_deactivate) {
