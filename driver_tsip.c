@@ -1046,8 +1046,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    tow = getbeu32(buf, 8);	/* time in ms */
 	    sl1 = getbes32(buf, 12);	/* latitude */
 	    ul2 = getbeu32(buf, 16);	/* longitude */
-	    /* depending on GPS config, could be either WGS84 or MSL
-	     * default differs by model, usually WGS84 */
+            // Lassen iQ doc says this is always altHAE
 	    sl2 = getbes32(buf, 20);	/* altitude */
 	    u1 = getub(buf, 24);	/* velocity scaling */
 	    u2 = getub(buf, 27);	/* fix flags */
@@ -1102,6 +1101,20 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    if ((int)u4 > 10) {
 		session->context->leap_seconds = (int)u4;
 		session->context->valid |= LEAP_SECOND_VALID;
+                /* check for week rollover
+                 * Trimble uses 15 bit weeks, but can guess the epoch wrong
+                 * Can not be in gpsd_gpstime_resolv() because that
+                 * may see BUILD_LEAPSECONDS instead of leap_seconds
+                 * from receiver.
+                 */
+                if (17 < u4 && 1930 > week) {
+                    // leap second 18 added in gps week 1930
+                    week += 1024;
+                    if (1930 > week) {
+                        // and again?
+                        week += 1024;
+                    }
+                }
 	    }
 	    MSTOTS(&ts_tow, tow);
 	    session->newdata.time = gpsd_gpstime_resolv(session, week,
@@ -1111,11 +1124,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		    REPORT_IS | VNED_SET;
 	    GPSD_LOG(LOG_DATA, &session->context->errout,
 		     "TSIP: LFwEI (0x8f-20): time=%s lat=%.2f lon=%.2f "
-                     "altMSL=%.2f mode=%d status=%d\n",
+                     "altHAE=%.2f mode=%d status=%d\n",
                      timespec_str(&session->newdata.time, ts_buf,
                                   sizeof(ts_buf)),
 		     session->newdata.latitude, session->newdata.longitude,
-		     session->newdata.altMSL,
+		     session->newdata.altHAE,
 		     session->newdata.mode, session->gpsdata.status);
 	    break;
 	case 0x23:		/* Compact Super Packet */
