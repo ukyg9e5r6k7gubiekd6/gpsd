@@ -361,7 +361,9 @@ timespec_t gpsd_gpstime_resolv(struct gps_device_t *session,
     if (week < 1024)
 	week += session->context->rollovers * 1024;
 
-    // sanity check week number, GPS epoch, against leap seconds
+    /* sanity check week number, GPS epoch, against leap seconds
+     * Does not work well because the leap_sconds could be from the
+     * receiver, or from BUILD_LEAPSECONDS. */
     if (0 < session->context->leap_seconds &&
         19 > session->context->leap_seconds &&
         2180 < week) {
