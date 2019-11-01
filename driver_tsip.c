@@ -1027,9 +1027,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    break;
 
 	case 0x20:
-            /* Last Fix with Extra Information (binary fixed point) 0x8f-20 */
-	    /* CSK sez "why does my Lassen SQ output oversize packets?" */
-            /* Present in:
+            /* Last Fix with Extra Information (binary fixed point) 0x8f-20
+             * Only ouput when fix is available.
+	     * CSK sez "why does my Lassen SQ output oversize packets?"
+             * Present in:
              *  ACE II
              * Not present in:
              *  ICM SMT 360
@@ -1042,7 +1043,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    s1 = getbes16(buf, 2);	/* east velocity */
 	    s2 = getbes16(buf, 4);	/* north velocity */
 	    s3 = getbes16(buf, 6);	/* up velocity */
-	    tow = getbeu32(buf, 8) * 1000;	/* time */
+	    tow = getbeu32(buf, 8);	/* time in ms */
 	    sl1 = getbes32(buf, 12);	/* latitude */
 	    ul2 = getbeu32(buf, 16);	/* longitude */
 	    /* depending on GPS config, could be either WGS84 or MSL
@@ -1055,28 +1056,35 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    week = getbeu16(buf, 30);	/* tsip.gps_week */
 	    /* PRN/IODE data follows */
 	    GPSD_LOG(LOG_DATA, &session->context->errout,
-		     "TSIP: LFwEI (0x8f-20) %d %d %d %u %d %u %u "
-                     "%x %x %u %u %d\n",
-                     s1, s2, s3, ul1, sl1, ul2, sl2, u1, u2, u3, u4, week);
+		     "TSIP: LFwEI (0x8f-20) %d %d %d tow %u %d "
+                     " %u %u %x %x %u leap %u week %d\n",
+                     s1, s2, s3, tow, sl1, ul2, sl2, u1, u2, u3, u4, week);
 
 	    if ((u1 & 0x01) != (uint8_t) 0)	/* check velocity scaling */
 		d5 = 0.02;
 	    else
 		d5 = 0.005;
-	    d1 = (double)s1 * d5;	/* east velocity m/s */
-	    d2 = (double)s2 * d5;	/* north velocity m/s */
-	    d3 = (double)s3 * d5;       /* up velocity m/s */
-	    session->newdata.NED.velN = d2;
-	    session->newdata.NED.velE = d1;
-	    session->newdata.NED.velD = -d3;
+
+            // 0x8000 is over-range
+            if ((int16_t)0x8000 != s2) {
+                d2 = (double)s2 * d5;	/* north velocity m/s */
+                session->newdata.NED.velN = d2;
+            }
+            if ((int16_t)0x8000 != s1) {
+                d1 = (double)s1 * d5;	/* east velocity m/s */
+                session->newdata.NED.velE = d1;
+            }
+            if ((int16_t)0x8000 != s3) {
+                d3 = (double)s3 * d5;       /* up velocity m/s */
+                session->newdata.NED.velD = -d3;
+            }
 
 	    session->newdata.latitude = (double)sl1 * SEMI_2_DEG;
 	    session->newdata.longitude = (double)ul2 * SEMI_2_DEG;
 	    if (session->newdata.longitude > 180.0)
 		session->newdata.longitude -= 360.0;
-	    /* depending on GPS config, could be either WGS84 or MSL
-	     * default differs by model, usually WGS84, we try to force MSL */
-	    session->newdata.altMSL = (double)sl2 * 1e-3;
+            // Lassen iQ doc says this is always altHAE
+	    session->newdata.altHAE = (double)sl2 * 1e-3;
 	    mask |= ALTITUDE_SET;
 
 	    session->gpsdata.status = STATUS_NO_FIX;
@@ -1102,7 +1110,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		    STATUS_SET | MODE_SET | CLEAR_IS |
 		    REPORT_IS | VNED_SET;
 	    GPSD_LOG(LOG_DATA, &session->context->errout,
-		     "TSIP: SP-LFEI (0x8f-20): time=%s lat=%.2f lon=%.2f "
+		     "TSIP: LFwEI (0x8f-20): time=%s lat=%.2f lon=%.2f "
                      "altMSL=%.2f mode=%d status=%d\n",
                      timespec_str(&session->newdata.time, ts_buf,
                                   sizeof(ts_buf)),
@@ -1117,7 +1125,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 bad_len = 29;
                 break;
             }
-	    tow = getbeu32(buf, 1) * 1000;	/* time */
+	    tow = getbeu32(buf, 1);	        /* time in ms */
 	    week = getbeu16(buf, 5);	        /* tsip.gps_week */
 	    u1 = getub(buf, 7);	                /* utc offset */
 	    u2 = getub(buf, 8);	                /* fix flags */
@@ -1132,7 +1140,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    s4 = getbes16(buf, 25);	/* up velocity */
 	    GPSD_LOG(LOG_INF, &session->context->errout,
 		     "TSIP: CSP (0x8f-23): %u %d %u %u %d %u %d %d %d %d\n",
-                     ul1, week, u1, u2, sl1, ul2, sl3, s2, s3, s4);
+                     tow, week, u1, u2, sl1, ul2, sl3, s2, s3, s4);
 	    if ((int)u1 > 10) {
 		session->context->leap_seconds = (int)u1;
 		session->context->valid |= LEAP_SECOND_VALID;
@@ -1189,7 +1197,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 break;
 	    }
 	    session->driver.tsip.last_41 = now;	/* keep timestamp for request */
-	    tow = getbeu32(buf, 1) * 1000;	/* gpstime */
+	    tow = getbeu32(buf, 1);	        /* gpstime in ms */
 	    week = getbeu16(buf, 5);	        /* week */
             /* leap seconds */
             session->context->leap_seconds = (int)getbes16(buf, 7);
@@ -1204,7 +1212,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             session->newdata.time = gpsd_gpstime_resolv(session, week, ts_tow);
             mask |= TIME_SET | NTPTIME_IS | CLEAR_IS;
             GPSD_LOG(LOG_DATA, &session->context->errout,
-                     "TSIP: SP-TTS 0xab time=%s mask=%s\n",
+                     "TSIP: SP-TTS (0xab) time=%s mask=%s\n",
                      timespec_str(&session->newdata.time, ts_buf,
                                   sizeof(ts_buf)),
                      gps_maskdump(mask));
