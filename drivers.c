@@ -5,13 +5,13 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <stdarg.h>
 #include <assert.h>
 #include <ctype.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "gpsd.h"
