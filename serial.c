@@ -266,6 +266,9 @@ void gpsd_set_speed(struct gps_device_t *session,
     speed_t rate;
     struct timespec delay;
 
+    if (0 < session->context->fixed_port_speed) {
+        speed = session->context->fixed_port_speed;
+    }
     if ('\0' != session->context->fixed_port_framing[0]) {
         // ignore length, stopbits=2 forces length 7.
         parity = session->context->fixed_port_framing[1];
