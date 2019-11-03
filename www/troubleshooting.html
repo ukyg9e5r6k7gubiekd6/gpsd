@@ -5,7 +5,7 @@
    <meta name="Author" content="Eric S. Raymond">
    <meta name="Description" content="How to bring up a GPS under GPSD">
    <meta name="Keywords" content="GPS, gpsd, troubleshooting">
-   <meta name="Revised" content="9 April 2015">
+   <meta name="Revised" content="3 November 2019">
    <meta name="robots" content="index,follow">
    <title>Troubleshooting GPSD</title>
    <link rel="stylesheet" href="main.css" type="text/css">
@@ -78,6 +78,7 @@ commands and section 8 to administrative commands.</p>
   <li><a href="#startuptroubleshooting">Start at Boot Troubleshooting</a></li>
   <li><a href="#telnet" >Telnet</a></li>
   <li><a href="#hotplugtroubleshooting">Udev Hotplug Troubleshooting</a></li>
+  <li><a href="#systemdtroubleshooting" >Systemd Troubleshooting</a></li>
 </ol>
 
 <h1 id='firsttry'>First Try</h1>
@@ -471,6 +472,115 @@ matching expectations about the location of the control socket.</p>
 
 <p>If you do see these device file opens and closes logged, the
 udev end of the configuration is working.</p>
+
+<h1 id="systemdtroubleshooting">Systemd Troubleshooting</h1>
+
+<h2>Systemd Interaction</h2>
+
+<p>gpsd must be installed. We want gpsd itself and, for testing, the gpsd clients, at least cgps and possibly xgps.</p>
+
+<p>gpsd must running and reading from the GPS receiver. For general gpsd debugging, it is helpful to know that gpsd is running, and that the GPS receiver device file is present. For a u-blox receiver:</p>
+
+<pre>root@orca:~# ps aux | grep -i gpsd | grep -v grep ; ls /dev/ttyA*
+gpsd     14547  0.5  0.0  18092  3504 ?        S&lt;sl 15:44   0:00 /usr/sbin/gpsd
+/dev/ttyACM0
+root@orca:~#</pre>
+
+<p>(Devices file names vary. <code>/dev/ttyU*</code> is typical.)</p>
+
+<p>If gpsd isn't running, check other parts of this document, and <a href="https://gitlab.com/gpsd/gpsd/blob/master/INSTALL" >INSTALL</a> in the root of the <a href="https://gitlab.com/gpsd/gpsd" >git repo</a>.</p>
+
+<p>The next question is, is gpsd controlled by systemd?</p>
+
+<h3>Systemd isn't installed</h3>
+<p>Your problem lies elsewhere.</p>
+
+<h3>Systemd is present but but does not manage gpsd.</h3>
+<p>You can use systemd's tools to check. <code><a href="https://www.freedesktop.org/software/systemd/man/systemctl.html#status%20PATTERN%E2%80%A6%7CPID%E2%80%A6%5D" >systemctl status</a> gpsd</code> should tell you what systemd thinks gpsd's status is.</p>
+
+<pre>
+root@orca:~# <a href="https://www.freedesktop.org/software/systemd/man/systemctl.html#status%20PATTERN%E2%80%A6%7CPID%E2%80%A6%5D" >systemctl status</a> gpsd
+● gpsd.service - GPS (Global Positioning System) Daemon
+   Loaded: loaded (/lib/systemd/system/gpsd.service; enabled; vendor preset: enabled)
+   Active: active (running) since Thu 2019-10-03 15:07:01 MDT; 1 weeks 2 days ago
+ Main PID: 32454 (gpsd)
+    Tasks: 1 (limit: 4915)
+   Memory: 924.0K
+   CGroup: /system.slice/gpsd.service
+           └─32454 /usr/sbin/gpsd
+
+Oct 03 15:07:01 orca systemd[1]: Starting GPS (Global Positioning System) Daemon...
+Oct 03 15:07:01 orca systemd[1]: Started GPS (Global Positioning System) Daemon.
+root@orca:~# 
+</pre>
+
+<p>This example shows that systemd clearly does control gpsd. If systemd replies something like <code>Unit gpsd.service could not be found.</code>, systemd is present but does not control gpsd.</p>
+
+<p>Alternatively, see if any of the files <code>gpsd.*</code> are present under systemd's directories. That location is system dependent, but <code>/lib/systemd/system/</code> is typical. Or use <code>locate</code> or your package manager to check.</p>
+
+<p>If systemd is present but does not control gpsd, your problem lies elsewhere.</p>
+
+<h3>Systemd is present and controls gpsd</h3>
+
+<p>Your tool for interacting with systemd is <a href="https://www.freedesktop.org/software/systemd/man/systemctl.html" >systemctl</a>. The typical syntax is</p>
+
+<pre>systemctl [OPTIONS...] COMMAND [UNIT...]</pre>
+
+<p>For the gory details, see the <a href="https://www.freedesktop.org/software/systemd/man/systemctl.html" >systemctl man page</a>. Generally useful commands include: <a href="https://www.freedesktop.org/software/systemd/man/systemctl.html#daemon-reload" >daemon-reload</a>, <a href="https://www.freedesktop.org/software/systemd/man/systemctl.html#disable%20UNIT%E2%80%A6" >disable</a>, <a href="https://www.freedesktop.org/software/systemd/man/systemctl.html#enable%20UNIT%E2%80%A6" >enable</a>, <a href="https://www.freedesktop.org/software/systemd/man/systemctl.html#reload%20PATTERN%E2%80%A6" >reload</a>, <a href="https://www.freedesktop.org/software/systemd/man/systemctl.html#restart%20PATTERN%E2%80%A6" >restart</a>, <a href="https://www.freedesktop.org/software/systemd/man/systemctl.html#show%20PATTERN%E2%80%A6%7CJOB%E2%80%A6" >show</a>, <a href="https://www.freedesktop.org/software/systemd/man/systemctl.html#start%20PATTERN%E2%80%A6" >start</a>, <a href="https://www.freedesktop.org/software/systemd/man/systemctl.html#status%20PATTERN%E2%80%A6%7CPID%E2%80%A6%5D" >status</a>, and <a href="https://www.freedesktop.org/software/systemd/man/systemctl.html#stop%20PATTERN%E2%80%A6" >stop</a>. Note that daemon-reload and reload are not the same command. reload tells a unit to reload its configuration file (if it can do so). daemon-reload has systemd reload all unit files and its own configuration file.</p>
+
+<p>If you want to shut gpsd down, you have to shut down both units. Shutting down gpsd.service alone is not sufficient because gpsd.socket could fire it up again.</p>
+
+<pre><a href="https://www.freedesktop.org/software/systemd/man/systemctl.html#stop%20PATTERN%E2%80%A6" >systemctl stop</a> gpsd.socket gpsd.service</pre>
+
+<p>Note: issuing the stop command may not actually stop the service. On a Debian system out of the box, systemd starts gpsd up again.</p>
+
+<h2>Real World Example</h2>
+
+<p>For security, gpsd by default is shipped set up to listen only on the loopback interface, thereby restricting its audience to clients on the same computer. We'd like to allow other computers to listen in as well. This means:</p>
+
+<ul>
+  <li>Opening the firewall at the gpsd assigned port, 2947. That is beyond the scope of this document.</li>
+  <li>Adding the appropriate switch to the command line for gpsd. While we're at it, we'll also add the -n switch.</li>
+  <li>Changing the gpsd.socket unit so that other clients can connect to the daemon.</li>
+</ul>
+
+<p>Once we know gpsd is running, we modify <code>/etc/default/gpsd</code> to provide the options we want. One to listen on all the interfaces (-G), and one to tell gpsd not to wait for a client to connect before polling (-n). The GPSD_OPTIONS stanza now looks like:</p>
+
+<pre>
+# Other options you want to pass to gpsd
+# GPSD_OPTIONS=""
+GPSD_OPTIONS="-Gn"
+</pre>
+
+<p>We can stop gpsd. Systemd will restart it for us, this time with the options in place. We then verify that the options are there:</p>
+
+<pre>root@orca:~# <a href="https://www.freedesktop.org/software/systemd/man/systemctl.html#stop%20PATTERN%E2%80%A6" >systemctl stop</a> gpsd.socket gpsd.service
+root@orca:~# ps aux | grep -i gpsd | grep -v grep
+gpsd     14547  0.5  0.0  18092  3504 ?        S&lt;sl 15:44   0:00 /usr/sbin/gpsd -Gn
+root@orca:~#</pre>
+
+<p>But we aren't there yet. gpsd may be listening on all interfaces, but systemd's hold on the socket means gpsd can't hear anything on interfaces other than the loopback. We have to tell systemd to allow gpsd to hear other interfaces. We run <code><a href="https://www.freedesktop.org/software/systemd/man/systemctl.html#edit%20UNIT%E2%80%A6" >systemctl edit --full gpsd.socket</a></code>. Then we can edit it. After editing, the [Socket] stanza looks like so:</p>
+
+<pre>
+[Socket]
+ListenStream=/var/run/gpsd.sock
+ListenStream=[::1]:2947
+# ListenStream=127.0.0.1:2947
+ListenStream=0.0.0.0:2947
+SocketMode=0600
+</pre>
+
+<p>When you are done editing, systemctl does what it needs to do internally to preserve your changes from being over-written during upgrades. It also does the equivalent of a <code>systemctl daemon-reload</code> for you.</p>
+
+<p>We now restart both gpsd units like so:</p>
+
+<pre><a href="https://www.freedesktop.org/software/systemd/man/systemctl.html#restart%20PATTERN%E2%80%A6" >systemctl restart</a> gpsd.socket gpsd.service</pre>
+
+<p>Now check with a local client, and a client on the remote computer:</p>
+
+<pre>xgps &lt;host&gt;</pre>
+
+<p>Where &lt;host&gt; in our example is orca. As usual, if you see data in the client, you're done.</p>
 
 <hr>
 <script src="datestamp.js"></script>
