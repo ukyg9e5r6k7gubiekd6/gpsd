@@ -52,16 +52,17 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <string.h>
-#include <stdio.h>
-#include <stdbool.h>
-#include <limits.h>
 #include <errno.h>
+#include <inttypes.h>
+#include <limits.h>
 #include <math.h>
+#include <pthread.h>		/* pacifies OpenBSD's compiler */
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <unistd.h>
-#include <pthread.h>		/* pacifies OpenBSD's compiler */
 
 /* use RFC 2783 PPS API */
 /* this needs linux >= 2.6.34 and
@@ -679,7 +680,7 @@ static void *gpsd_ppsmonitor(void *arg)
     volatile struct timedelta_t last_fixtime = {{0, 0}, {0, 0}};
     struct timespec clock_ts = {0, 0};
     time_t last_second_used = 0;
-    long long cycle = 0, duration = 0;
+    int64_t cycle = 0, duration = 0;
     /* state is the last state of the tty control signals */
     int state = 0;
     /* count of how many cycles unchanged data */
@@ -692,7 +693,7 @@ static void *gpsd_ppsmonitor(void *arg)
 #if defined(TIOCMIWAIT)
     int edge_tio = 0;
     long long cycle_tio = 0;
-    long long duration_tio = 0;
+    int64_t duration_tio = 0;
     int state_tio = 0;
     int state_last_tio = 0;
     struct timespec clock_ts_tio = {0, 0};
@@ -701,7 +702,7 @@ static void *gpsd_ppsmonitor(void *arg)
 #endif /* TIOCMIWAIT */
 
 #if defined(HAVE_SYS_TIMEPPS_H)
-    long long cycle_kpps = 0, duration_kpps = 0;
+    int64_t cycle_kpps = 0, duration_kpps = 0;
     /* kpps_pulse stores the time of the last two edges */
     struct timespec pulse_kpps[2] = { {0, 0}, {0, 0} };
 #endif /* defined(HAVE_SYS_TIMEPPS_H) */
@@ -836,7 +837,8 @@ static void *gpsd_ppsmonitor(void *arg)
 	    duration = duration_tio;
 
 	    thread_context->log_hook(thread_context, THREAD_PROG,
-		    "TPPS:%s %.10s, cycle: %lld, duration: %lld @ %s\n",
+		    "TPPS:%s %.10s, cycle: " PRId64 ", duration: " PRId64
+                    " @ %s\n",
 		    thread_context->devicename, edge_str, cycle, duration,
                     timespec_str(&clock_ts, ts_str1, sizeof(ts_str1)));
 
@@ -886,7 +888,8 @@ static void *gpsd_ppsmonitor(void *arg)
 	    cycle_kpps = timespec_diff_ns(clock_ts_kpps, pulse_kpps[edge_kpps]);
 	    cycle_kpps /= 1000;
             /* compute time from previous saved dis-similar edge */
-	    duration_kpps = timespec_diff_ns(clock_ts_kpps, prev_clock_ts)/1000;
+	    duration_kpps = timespec_diff_ns(clock_ts_kpps, prev_clock_ts) /
+                            1000;
 
 	    /* save for later */
 	    pulse_kpps[edge_kpps] = clock_ts_kpps;
@@ -902,7 +905,7 @@ static void *gpsd_ppsmonitor(void *arg)
 	    duration = duration_kpps;
 
 	    thread_context->log_hook(thread_context, THREAD_PROG,
-		"KPPS:%s %.10s cycle: %7lld, duration: %7lld @ %s\n",
+		"KPPS:%s %.10s cycle: " PRId64 ", duration: " PRId64 " @ %s\n",
 		thread_context->devicename,
 		edge_str,
 		cycle_kpps, duration_kpps,
@@ -960,7 +963,7 @@ static void *gpsd_ppsmonitor(void *arg)
 
 	state_last = state;
 	thread_context->log_hook(thread_context, THREAD_PROG,
-	    "PPS:%s %.10s cycle: %7lld, duration: %7lld @ %s\n",
+	    "PPS:%s %.10s cycle: " PRId64 ", duration: " PRId64 " @ %s\n",
 	    thread_context->devicename,
 	    edge_str,
 	    cycle, duration,
