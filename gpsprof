@@ -1196,6 +1196,11 @@ if __name__ == '__main__':
         # double quotes on title so \n is parsed by gnuplot
         sys.stdout.write('set title noenhanced "%s"\n' % title)
         sys.stdout.write(plot.plot())
+    except getopt.GetoptError as error:
+        print(error)
+        print("")
+        usage()
+        exit(1)
     except KeyboardInterrupt:
         pass
 
