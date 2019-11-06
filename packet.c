@@ -1806,27 +1806,49 @@ void packet_parse(struct gps_lexer_t *lexer)
 	    }
 	    /* checksum passed or not present */
 #ifdef AIVDM_ENABLE
-	    if (str_starts_with((char *)lexer->inbuffer, "!AIVDM"))
+            /* !ABVDx  - NMEA 4.0 Base AIS station
+             * !ADVDx  - MMEA 4.0 Dependent AIS Base Station
+             * !AIVDx  - Mobile AIS station
+             * !ANVDx  - NMEA 4.0 Aid to Navigation AIS station
+             * !ARVDx  - NMEA 4.0 AIS Receiving Station
+             * !ASVDx  - NMEA 4.0 Limited Base Station
+             * !ATVDx  - NMEA 4.0 AIS Transmitting Station
+             * !AXVDx  - NMEA 4.0 Repeater AIS station
+             * !BSVDx  - Base AIS station (deprecated in NMEA 4.0)
+             * !SAVDx  - NMEA 4.0 Physical Shore AIS Station
+             *
+             * where x is:
+             *   M -- from other ships
+             *   O -- from your own ship
+             */
+            /* make some simple char tests first to stop wasting cycles
+             * on a lot of strncmp()s */
+	    if ('!' == lexer->inbuffer[0] &&
+	        'V' == lexer->inbuffer[3] &&
+	        'D' == lexer->inbuffer[4] &&
+	        ',' == lexer->inbuffer[6] &&
+	        (str_starts_with((char *)lexer->inbuffer, "!ABVDM,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!ABVDO,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!ADVDM,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!ADVDO,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!AIVDM,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!AIVDO,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!ANVDM,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!ANVDO,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!ARVDM,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!ARVDO,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!ASVDM,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!ASVDO,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!ATVDM,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!ATVDO,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!AXVDM,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!AXVDO,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!BSVDM,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!BSVDO,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!SAVDM,") ||
+	         str_starts_with((char *)lexer->inbuffer, "!SAVDO,"))) {
 		packet_accept(lexer, AIVDM_PACKET);
-	    else if (str_starts_with((char *)lexer->inbuffer, "!AIVDO"))
-		packet_accept(lexer, AIVDM_PACKET);
-	    else if (str_starts_with((char *)lexer->inbuffer, "!BSVDM"))
-		packet_accept(lexer, AIVDM_PACKET);
-	    else if (str_starts_with((char *)lexer->inbuffer, "!BSVDO"))
-		packet_accept(lexer, AIVDM_PACKET);
-	    else if (str_starts_with((char *)lexer->inbuffer, "!ABVDM"))
-		packet_accept(lexer, AIVDM_PACKET);
-	    else if (str_starts_with((char *)lexer->inbuffer, "!ABVDO"))
-		packet_accept(lexer, AIVDM_PACKET);
-	    else if (str_starts_with((char *)lexer->inbuffer, "!ANVDM"))
-		packet_accept(lexer, AIVDM_PACKET);
-	    else if (str_starts_with((char *)lexer->inbuffer, "!ANVDO"))
-		packet_accept(lexer, AIVDM_PACKET);
-	    else if (str_starts_with((char *)lexer->inbuffer, "!SAVDM"))
-		packet_accept(lexer, AIVDM_PACKET);
-	    else if (str_starts_with((char *)lexer->inbuffer, "!SAVDO"))
-		packet_accept(lexer, AIVDM_PACKET);
-	    else
+	    } else
 #endif /* AIVDM_ENABLE */
 		packet_accept(lexer, NMEA_PACKET);
 	    packet_discard(lexer);
