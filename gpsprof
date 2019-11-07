@@ -868,33 +868,35 @@ set style line 11 pt 2 ps 2 #set the line style for the plot
 
 set style fill transparent solid 0.8 noborder
 
+# set rmargin then put colorbox in the margin.
+set lmargin at screen .08
+set rmargin at screen .85
 set cbrange [10:60]
 set palette defined (100 "blue", 200 "green", 300 "red")
+set colorbox user origin .92, .15 size .03, .6
+set label 10 at screen 0.89, screen 0.13 "SNR dBHz"
 '''
 
         count = len(self.fixes)
         fmt += '''\
-set label 10 at screen 0.01, screen 0.15 "%s plot, samples %d"
+set label 11 at screen 0.01, screen 0.15 "%s plot, samples %d"
+set label 12 at screen 0.01, screen 0.10 "\\nSS\\nSeen\\nUsed"
 ''' % (self.name, count)
 
         fmt += '''\
-set label 11 at screen 0.01, screen 0.10 "\\nSS\\nSeen\\nUsed"
-'''
-
-        fmt += '''\
-set label 12 at screen 0.11, screen 0.10 "min\\n%d\\n%d\\n%d" right
+set label 13 at screen 0.11, screen 0.10 "min\\n%d\\n%d\\n%d" right
 ''' % (stat_ss.min, stat_seen.min, stat_used.min)
 
         fmt += '''\
-set label 13 at screen 0.21, screen 0.10 "max\\n%d\\n%d\\n%d" right
+set label 14 at screen 0.21, screen 0.10 "max\\n%d\\n%d\\n%d" right
 ''' % (stat_ss.max, stat_seen.max, stat_used.max)
 
         fmt += '''\
-set label 14 at screen 0.31, screen 0.10 "mean\\n%.1f\\n%.1f\\n%.1f" right
+set label 15 at screen 0.31, screen 0.10 "mean\\n%.1f\\n%.1f\\n%.1f" right
 ''' % (stat_ss.mean, stat_seen.mean, stat_used.mean)
 
         fmt += '''\
-set label 15 at screen 0.41, screen 0.10 "sigma\\n%.1f\\n%.1f\\n%.1f" right
+set label 16 at screen 0.41, screen 0.10 "sigma\\n%.1f\\n%.1f\\n%.1f" right
 ''' % (stat_ss.sigma, stat_seen.sigma, stat_used.sigma)
 
         fmt += '''\
@@ -1194,7 +1196,7 @@ if __name__ == '__main__':
                              " 800,950\n"
                              % terminal)
         # double quotes on title so \n is parsed by gnuplot
-        sys.stdout.write('set title noenhanced "%s"\n' % title)
+        sys.stdout.write('set title noenhanced "%s\\n\\n"\n' % title)
         sys.stdout.write(plot.plot())
     except getopt.GetoptError as error:
         print(error)
