@@ -28,7 +28,7 @@
 #include "timespec.h"
 
 #ifdef TSIP_ENABLE
-/ RES SMT 360 has 32 max channels, use 64 for next gen
+// RES SMT 360 has 32 max channels, use 64 for next gen
 #define TSIP_CHANNELS  64
 
 /* defines for Set or Request I/O Options (0x35)
