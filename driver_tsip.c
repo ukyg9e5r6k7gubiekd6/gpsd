@@ -811,6 +811,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		mask |= SATELLITE_SET;	/* last of the series */
 	    }
 	    if (i > session->gpsdata.satellites_visible)
+	        // FIXME! how does this ever decrease??
 		session->gpsdata.satellites_visible = i;
 	}
 	break;
