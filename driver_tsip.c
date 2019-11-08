@@ -28,7 +28,9 @@
 #include "timespec.h"
 
 #ifdef TSIP_ENABLE
-#define TSIP_CHANNELS	15
+// Unclear what max channels is.  Guess 70
+// 18 seen on RES SMT 360
+#define TSIP_CHANNELS	70
 
 /* defines for Set or Request I/O Options (0x35)
  * SMT 360 default: IO1_DP|IO1_LLA, IO2_ENU, 0, IO4_DBHZ */
@@ -52,6 +54,70 @@
 
 void configuration_packets_accutime_gold(struct gps_device_t *session);
 void configuration_packets_generic(struct gps_device_t *session);
+
+/* convert TSIP SV Type to satellite_t.gnssid */
+static unsigned char tsip_gnssid(unsigned svtype, short prn,
+                                 unsigned char *svid)
+{
+    unsigned char gnssid;
+
+    *svid = 0;
+
+    switch (svtype) {
+    case 0:
+        gnssid = 0;  // GPS
+	if (0 < prn && 33 > prn) {
+	    *svid = prn;
+	} else if (32 < prn && 55 > prn) {
+	    *svid = prn + 87;
+	}
+	// else: huh?
+	break;
+    case 1:
+        gnssid = 6;  // GLONASS
+	*svid = prn - 64;
+	break;
+    case 2:
+        gnssid = 3;  // BeiDou
+	*svid = prn - 200;
+	break;
+    case 3:
+        gnssid = 2;  // Galileo
+	*svid = prn - 96;
+	break;
+    case 5:
+        gnssid = 5;  // QZSS
+	switch (prn) {
+	case 183:
+	    *svid = 1;
+	    break;
+	case 192:
+	    *svid = 2;
+	    break;
+	case 193:
+	    *svid = 3;
+	    break;
+	case 200:
+	    *svid = 4;
+	    break;
+	default:
+	    *svid = prn;
+	    break;
+	}
+	break;
+    case 4:
+        // FALLTHROUGH
+    case 6:
+        // FALLTHROUGH
+    case 7:
+        // FALLTHROUGH
+    default:
+        svid = 0;
+	gnssid = 0;
+	break;
+    }
+    return gnssid;
+}
 
 static int tsip_write(struct gps_device_t *session,
 		      unsigned int id, unsigned char *buf, size_t len)
@@ -732,19 +798,13 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 "Int %d Bad %d Col %d TPF %d SVT %d\n",
 		i, u10, u1, u3, u4, f1, f2, d1, d2, u5, u6, u7, u8, u9, u10);
 	if (i < TSIP_CHANNELS) {
-	    if (d1 >= 0.0) {
-		session->gpsdata.skyview[i].PRN = (short)u1;
-		session->gpsdata.skyview[i].ss = (double)f1;
-		session->gpsdata.skyview[i].elevation = (double)d1;
-		session->gpsdata.skyview[i].azimuth = (double)d2;
-		session->gpsdata.skyview[i].used = (bool)u4;
-	    } else {
-		session->gpsdata.skyview[i].PRN = (short)u1;
-		session->gpsdata.skyview[i].elevation = NAN;
-		session->gpsdata.skyview[i].azimuth = NAN;
-		session->gpsdata.skyview[i].ss = NAN;
-		session->gpsdata.skyview[i].used = false;
-	    }
+	    session->gpsdata.skyview[i].PRN = (short)u1;
+	    session->gpsdata.skyview[i].ss = (double)f1;
+	    session->gpsdata.skyview[i].elevation = (double)d1;
+	    session->gpsdata.skyview[i].azimuth = (double)d2;
+	    session->gpsdata.skyview[i].used = (bool)u4;
+	    session->gpsdata.skyview[i].gnssid = tsip_gnssid(u10, u1,
+	        &session->gpsdata.skyview[i].svid);
 	    if (++i == session->gpsdata.satellites_visible) {
 		session->gpsdata.skyview_time.tv_sec = 0;
 		session->gpsdata.skyview_time.tv_nsec = 0;
