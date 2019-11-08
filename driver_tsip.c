@@ -213,6 +213,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     char buf2[BUFSIZ];
     uint32_t tow;             // time of week in milli seconds
     double ftow;              // time of week in seconds
+    double temp;              // tempurature in degrees C
+    double fqErr;             // PPS Offset. positive is slow.
     timespec_t ts_tow;
     char ts_buf[TIMESPEC_LEN];
     int bad_len = 0;
@@ -596,7 +598,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         if (u3 != session->driver.tsip.superpkt) {
             session->driver.tsip.superpkt = u3;
             GPSD_LOG(LOG_PROG, &session->context->errout,
-                     "TSIP: witching to Super Packet mode %d\n", u3);
+                     "TSIP: Switching to Super Packet mode %d\n", u3);
             switch (u3){
             default:
                 // FALLTHROUGH
@@ -1274,7 +1276,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 break;
             }
             session->driver.tsip.last_41 = now; /* keep timestamp for request */
-            tow = getbeu32(buf, 1);             /* gpstime in ms */
+            tow = getbeu32(buf, 1);             /* gpstime in seconds */
+            ts_tow.tv_sec = tow;
+            ts_tow.tv_nsec = 0;
             week = getbeu16(buf, 5);            /* week */
             /* leap seconds */
             session->context->leap_seconds = (int)getbes16(buf, 7);
@@ -1285,11 +1289,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
             // how do we know leap valid?
             session->context->valid |= LEAP_SECOND_VALID;
-            MSTOTS(&ts_tow, tow);
             session->newdata.time = gpsd_gpstime_resolv(session, week, ts_tow);
             mask |= TIME_SET | NTPTIME_IS | CLEAR_IS;
             GPSD_LOG(LOG_DATA, &session->context->errout,
-                     "TSIP: SP-TTS (0xab) time=%s mask=%s\n",
+                     "TSIP: SP-TTS (0x8f-ab) time=%s mask=%s\n",
                      timespec_str(&session->newdata.time, ts_buf,
                                   sizeof(ts_buf)),
                      gps_maskdump(mask));
@@ -1300,14 +1303,21 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             break;
 
 
-        case 0xac:              /* Thunderbolt Position Superpacket */
+        case 0xac:
+            /* Supplemental Timing Packet (0x8f-ac)
+             * present in:
+             *   ThunderboltE
+             *   ICM SMT 360
+             *   RES SMT 360
+             */
             if (len != 68) {
                 bad_len = 68;
                 break;
             }
 
+            // byte 0 is Subpacket ID
             u2 = getub(buf, 1);         /* Receiver Mode */
-            u1 = getub(buf, 12);        /* GPS Decoding Status */
+            u1 = getub(buf, 12);        /* GNSS Decoding Status */
             // ignore 2, Disciplining Mode
             // ignore 3, Self-Survey Progress
             // ignore 4-7, Holdover Duration
@@ -1317,16 +1327,20 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             // ignore 13, Disciplining Activity
             // ignore 14, PPS indication
             // ignore 15, PPS reference
-            // f1 = getbef32((char *)buf, 16);  // PPS Offset
+            // PPS Offset
+            fqErr = getbef32((char *)buf, 16);
+            session->gpsdata.qErr = (long)(fqErr * 1000);
             // ignore 20-23, Clock Offset
             // ignore 24-27, DAC Value
             // ignore 28-31, DAC Voltage
-            // ignore 32-35, Temperature
+            // 32-35, Temperature degrees C
+            temp = getbef32((char *)buf, 32);
             session->newdata.latitude = getbed64((char *)buf, 36) * RAD_2_DEG;
             session->newdata.longitude = getbed64((char *)buf, 44) * RAD_2_DEG;
             /* depending on GPS config, could be either WGS84 or MSL
-             * default differs by model, usually WGS84, we try to force MSL */
-            session->newdata.altMSL = getbed64((char *)buf, 52);
+             * default differs by model, usually WGS84.
+             * ICM SMT 360 and RES SMT 360 are HAE, so we use altHAE */
+            session->newdata.altHAE = getbed64((char *)buf, 52);
             // ignore 60-63, always zero
             // ignore 64-67, reserved
 
@@ -1396,11 +1410,12 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
             mask |= LATLON_SET | ALTITUDE_SET | MODE_SET | REPORT_IS;
             GPSD_LOG(LOG_DATA, &session->context->errout,
-                     "TSIP: SP-TPS (0x8f-ac) lat=%.2f lon=%.2f altMSL=%.2f "
-                     "mask %s\n",
+                     "TSIP: SP-TPS (0x8f-ac) lat=%.2f lon=%.2f altHAE=%.2f "
+                     "temp %.1f fqErr %.4f mask %s\n",
                      session->newdata.latitude,
                      session->newdata.longitude,
-                     session->newdata.altMSL,
+                     session->newdata.altHAE,
+                     temp, fqErr,
                      gps_maskdump(mask));
             break;
 
