@@ -1296,7 +1296,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
             GPSD_LOG(LOG_PROG, &session->context->errout,
                      "TSIP: SP-TTS (0x8f-ab) GPS Time %u %u %d flag x%x\n",
-                     ul1, week, session->context->leap_seconds, u1);
+                     tow, week, session->context->leap_seconds, u1);
             break;
 
 
