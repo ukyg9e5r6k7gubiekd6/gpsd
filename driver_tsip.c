@@ -28,9 +28,8 @@
 #include "timespec.h"
 
 #ifdef TSIP_ENABLE
-// Unclear what max channels is.  Guess 70
-// 18 seen on RES SMT 360
-#define TSIP_CHANNELS	70
+/ RES SMT 360 has 32 max channels, use 64 for next gen
+#define TSIP_CHANNELS  64
 
 /* defines for Set or Request I/O Options (0x35)
  * SMT 360 default: IO1_DP|IO1_LLA, IO2_ENU, 0, IO4_DBHZ */
@@ -765,8 +764,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 		session->gpsdata.skyview_time.tv_nsec = 0;
 		mask |= SATELLITE_SET;	/* last of the series */
 	    }
-	    if (i > session->gpsdata.satellites_visible)
+	    if (i > session->gpsdata.satellites_visible) {
+	        // FIXME! how does this ever decrease??
 		session->gpsdata.satellites_visible = i;
+            }
 	}
 	break;
 
@@ -806,13 +807,15 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 	    session->gpsdata.skyview[i].gnssid = tsip_gnssid(u10, u1,
 	        &session->gpsdata.skyview[i].svid);
 	    if (++i == session->gpsdata.satellites_visible) {
+                // why not use GPS tow from bytes 8-11?
 		session->gpsdata.skyview_time.tv_sec = 0;
 		session->gpsdata.skyview_time.tv_nsec = 0;
 		mask |= SATELLITE_SET;	/* last of the series */
 	    }
-	    if (i > session->gpsdata.satellites_visible)
+	    if (i > session->gpsdata.satellites_visible) {
 	        // FIXME! how does this ever decrease??
 		session->gpsdata.satellites_visible = i;
+	    }
 	}
 	break;
     case 0x6c:
