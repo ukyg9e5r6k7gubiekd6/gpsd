@@ -648,7 +648,12 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  "TSIP: Operating Params (0x4c): x%02x %f %f %f %f\n",
                  u1, f1, f2, f3, f4);
         break;
-    case 0x55:                  /* IO Options */
+    case 0x55:
+        /* IO Options (0x55), polled by 0x35
+         * Seems to be present in all TSIP
+         * Present, bit 5 (0x20) is set if superpackets allowed.
+         * seems to be set in RES SMT 360 and RES SMT 360, but undocumented.
+         */
         if (len != 4) {
             bad_len = 4;
             break;
