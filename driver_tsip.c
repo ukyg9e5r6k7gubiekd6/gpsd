@@ -807,7 +807,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         u3 = getub(buf, 2);     /* Acquisition flag */
         u4 = getub(buf, 3);     /* SV used in Position or Time calculation*/
         f1 = getbef32((char *)buf, 4);  /* Signal level */
-        f2 = getbef32((char *)buf, 8);  /* time of Last measurement */
+        // This can be one second behind the TPV on RES SMT 360
+        ftow = getbef32((char *)buf, 8);  /* time of Last measurement */
         d1 = getbef32((char *)buf, 12) * RAD_2_DEG;     /* Elevation */
         d2 = getbef32((char *)buf, 16) * RAD_2_DEG;     /* Azimuth */
         u5 = getub(buf, 20);    /* old measurement flag */
@@ -822,7 +823,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 "TSIP: Satellite Tracking Status (0x5d): Ch %2d Con %d PRN %3d "
                 "Acq %d Use %d SNR %4.1f LMT %.04f El %4.1f Az %5.1f Old %d "
                 "Int %d Bad %d Col %d TPF %d SVT %d\n",
-                i, u10, u1, u3, u4, f1, f2, d1, d2, u5, u6, u7, u8, u9, u10);
+                i, u10, u1, u3, u4, f1, ftow, d1, d2, u5, u6, u7, u8, u9, u10);
         if (i < TSIP_CHANNELS) {
             session->gpsdata.skyview[i].PRN = (short)u1;
             session->gpsdata.skyview[i].ss = (double)f1;
@@ -831,10 +832,16 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             session->gpsdata.skyview[i].used = (bool)u4;
             session->gpsdata.skyview[i].gnssid = tsip_gnssid(u10, u1,
                 &session->gpsdata.skyview[i].svid);
+
+            /* when polled by 0x3c, all the skyview times will be the same
+             * in one cluster */
+            if (0.0 < ftow) {
+                DTOTS(&ts_tow, ftow);
+                session->gpsdata.skyview_time =
+                    gpsd_gpstime_resolv(session, session->context->gps_week,
+                                        ts_tow);
+            }
             if (++i == session->gpsdata.satellites_visible) {
-                // why not use GPS tow from bytes 8-11?
-                session->gpsdata.skyview_time.tv_sec = 0;
-                session->gpsdata.skyview_time.tv_nsec = 0;
                 mask |= SATELLITE_SET;  /* last of the series */
             }
             if (i > session->gpsdata.satellites_visible) {
