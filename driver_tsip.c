@@ -1363,7 +1363,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             // ignore 13, Disciplining Activity
             // ignore 14, PPS indication
             // ignore 15, PPS reference
-            // PPS Offset
+            /* PPS Offset in ns
+             * save as (long)pico seconds
+             * can't really use it as it is not referenced to any PPS */
             fqErr = getbef32((char *)buf, 16);
             session->gpsdata.qErr = (long)(fqErr * 1000);
             // ignore 20-23, Clock Offset
