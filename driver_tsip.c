@@ -54,7 +54,8 @@
 void configuration_packets_accutime_gold(struct gps_device_t *session);
 void configuration_packets_generic(struct gps_device_t *session);
 
-/* convert TSIP SV Type to satellite_t.gnssid */
+/* convert TSIP SV Type to satellite_t.gnssid and satellite_t.svid
+ * return gnssid directly, svid indirectly through pointer */
 static unsigned char tsip_gnssid(unsigned svtype, short prn,
                                  unsigned char *svid)
 {
@@ -64,28 +65,34 @@ static unsigned char tsip_gnssid(unsigned svtype, short prn,
 
     switch (svtype) {
     case 0:
-        gnssid = 0;  // GPS
         if (0 < prn && 33 > prn) {
+            gnssid = GNSSID_GPS;
             *svid = prn;
         } else if (32 < prn && 55 > prn) {
+            // RES SMT 360 and ICT SMT 360 put SBAS in 33-54
+            gnssid = GNSSID_SBAS;
+            *svid = prn + 87;
+        } else if (119 < prn && 139 > prn) {
+            // Copernicus (II) put SBAS in 120-138
+            gnssid = GNSSID_SBAS;
             *svid = prn + 87;
         }
         // else: huh?
         break;
     case 1:
-        gnssid = 6;  // GLONASS
+        gnssid = GNSSID_GLO;  // GLONASS
         *svid = prn - 64;
         break;
     case 2:
-        gnssid = 3;  // BeiDou
+        gnssid = GNSSID_BD;  // BeiDou
         *svid = prn - 200;
         break;
     case 3:
-        gnssid = 2;  // Galileo
+        gnssid = GNSSID_GAL;  // Galileo
         *svid = prn - 96;
         break;
     case 5:
-        gnssid = 5;  // QZSS
+        gnssid = GNSSID_QZSS;  // QZSS
         switch (prn) {
         case 183:
             *svid = 1;
@@ -735,14 +742,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         u3 = getub(buf, 2);     /* Acquisition flag */
         u4 = getub(buf, 3);     /* Ephemeris flag */
         f1 = getbef32((char *)buf, 4);  /* Signal level */
-        f2 = getbef32((char *)buf, 8);  /* time of Last measurement */
+        ftow = getbef32((char *)buf, 8);  /* time of Last measurement */
         d1 = getbef32((char *)buf, 12) * RAD_2_DEG;     /* Elevation */
         d2 = getbef32((char *)buf, 16) * RAD_2_DEG;     /* Azimuth */
         i = (int)(u2 >> 3);     /* channel number */
         GPSD_LOG(LOG_INF, &session->context->errout,
                  "TSIP: Satellite Tracking Status (0x5c): Ch %2d PRN %3d "
                  "es %d Acq %d Eph %2d SNR %4.1f LMT %.04f El %4.1f Az %5.1f\n",
-                 i, u1, u2 & 7, u3, u4, f1, f2, d1, d2);
+                 i, u1, u2 & 7, u3, u4, f1, ftow, d1, d2);
         if (i < TSIP_CHANNELS) {
             session->gpsdata.skyview[i].PRN = (short)u1;
             session->gpsdata.skyview[i].svid = (unsigned char)u1;
@@ -751,6 +758,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             session->gpsdata.skyview[i].elevation = (double)d1;
             session->gpsdata.skyview[i].azimuth = (double)d2;
             session->gpsdata.skyview[i].used = false;
+            session->gpsdata.skyview[i].gnssid = tsip_gnssid(0, u1,
+                &session->gpsdata.skyview[i].svid);
             if (0.1 < f1) {
                 // check used list, if ss is non-zero
                 for (j = 0; j < session->gpsdata.satellites_used; j++) {
@@ -760,10 +769,15 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                     }
                 }
             }
+            /* when polled by 0x3c, all the skyview times will be the same
+             * in one cluster */
+            if (0.0 < ftow) {
+                DTOTS(&ts_tow, ftow);
+                session->gpsdata.skyview_time =
+                    gpsd_gpstime_resolv(session, session->context->gps_week,
+                                        ts_tow);
+            }
             if (++i == session->gpsdata.satellites_visible) {
-                // why not use GPS tow from bytes 8-11?
-                session->gpsdata.skyview_time.tv_sec = 0;
-                session->gpsdata.skyview_time.tv_nsec = 0;
                 mask |= SATELLITE_SET;  /* last of the series */
             }
             if (i > session->gpsdata.satellites_visible) {
@@ -774,7 +788,16 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         break;
 
      case 0x5d:
-        /* GNSS Satellite Tracking Status (multi-GNSS operation) */
+        /* GNSS Satellite Tracking Status (multi-GNSS operation) (0x5d)
+         * polled by 0x3c
+         *
+         * GNSS only, no WAAS reported here or used in fix
+         * Present in:
+         *  ICM SMT 360, RES SMT 360
+         * Not Present in:
+         *  Copernicus, Copernicus II
+         *  Thunderbold E
+         */
         if (len != 26) {
             bad_len = 26;
             break;

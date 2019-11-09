@@ -19,7 +19,7 @@ $GPGSA,A,1,6,29,2,21,30,10,7,,,,,,,,,*0B
 $GPGSV,3,1,09,26,06,138,00,24,14,077,34,06,77,232,26,29,14,126,29*7F
 $GPGSV,3,2,09,02,16,079,38,21,35,257,26,30,22,204,32,10,54,073,41*75
 $GPGSV,3,3,09,07,40,297,29*44
-{"class":"SKY","xdop":0.62,"ydop":0.98,"vdop":2.72,"tdop":2.15,"hdop":2.55,"gdop":4.30,"pdop":3.73,"satellites":[{"PRN":26,"el":5.8,"az":138.0,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.9,"az":76.7,"ss":34.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":232.2,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.4,"az":126.4,"ss":29.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.3,"az":79.4,"ss":38.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":34.8,"az":257.3,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
+{"class":"SKY","time":"2006-11-26T01:24:25.621Z","xdop":0.62,"ydop":0.98,"vdop":2.72,"tdop":2.15,"hdop":2.55,"gdop":4.30,"pdop":3.73,"satellites":[{"PRN":26,"el":5.8,"az":138.0,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.9,"az":76.7,"ss":34.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":232.2,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.4,"az":126.4,"ss":29.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.3,"az":79.4,"ss":38.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":34.8,"az":257.3,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
 $GPRMC,012424.46,V,,S,,W,,,261106,,*1A
 $GPGSA,A,1,24,6,29,2,21,30,10,7,,,,,,,,*0D
 {"class":"TPV","mode":1,"time":"2006-11-26T01:24:24.463Z","leapseconds":14,"ept":0.005}
@@ -32,7 +32,7 @@ $GPGSA,A,1,24,6,29,2,21,30,10,7,,,,,,,,*0D
 $GPGSV,3,1,09,26,06,138,00,24,14,077,32,06,77,232,26,29,14,126,28*78
 $GPGSV,3,2,09,02,16,079,38,21,35,257,26,30,22,204,32,10,54,072,42*77
 $GPGSV,3,3,09,07,40,297,29*44
-{"class":"SKY","xdop":0.62,"ydop":0.98,"vdop":2.72,"tdop":2.14,"hdop":2.55,"gdop":4.30,"pdop":3.73,"satellites":[{"PRN":26,"el":5.8,"az":138.0,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.9,"az":76.7,"ss":32.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":231.9,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.5,"az":126.4,"ss":28.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.2,"az":79.4,"ss":38.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":34.9,"az":257.3,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
+{"class":"SKY","time":"2006-11-26T01:24:33.572Z","xdop":0.62,"ydop":0.98,"vdop":2.72,"tdop":2.14,"hdop":2.55,"gdop":4.30,"pdop":3.73,"satellites":[{"PRN":26,"el":5.8,"az":138.0,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.9,"az":76.7,"ss":32.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":231.9,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.5,"az":126.4,"ss":28.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.2,"az":79.4,"ss":38.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":34.9,"az":257.3,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
 $GPRMC,012434.49,V,,S,,W,,,261106,,*14
 $GPGSA,A,1,24,6,29,2,21,30,10,7,,,,,,,,*0D
 {"class":"TPV","mode":1,"time":"2006-11-26T01:24:34.491Z","leapseconds":14,"ept":0.005}
@@ -45,7 +45,7 @@ $GPGSA,A,1,24,6,29,2,21,30,10,7,,,,,,,,*0D
 $GPGSV,3,1,09,26,06,138,00,24,14,077,33,06,77,232,26,29,15,126,27*77
 $GPGSV,3,2,09,02,16,079,37,21,35,257,26,30,22,204,30,10,54,072,42*7A
 $GPGSV,3,3,09,07,40,297,29*44
-{"class":"SKY","xdop":0.62,"ydop":0.98,"vdop":2.72,"tdop":2.14,"hdop":2.55,"gdop":4.30,"pdop":3.73,"satellites":[{"PRN":26,"el":5.8,"az":138.0,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.8,"az":76.7,"ss":33.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":231.8,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.5,"az":126.4,"ss":27.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.2,"az":79.4,"ss":37.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":34.9,"az":257.3,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
+{"class":"SKY","time":"2006-11-26T01:24:38.589Z","xdop":0.62,"ydop":0.98,"vdop":2.72,"tdop":2.14,"hdop":2.55,"gdop":4.30,"pdop":3.73,"satellites":[{"PRN":26,"el":5.8,"az":138.0,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.8,"az":76.7,"ss":33.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":231.8,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.5,"az":126.4,"ss":27.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.2,"az":79.4,"ss":37.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":34.9,"az":257.3,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
 $GPRMC,012444.46,V,,S,,W,,,261106,,*1C
 $GPGSA,A,1,24,6,29,2,21,30,10,7,,,,,,,,*0D
 {"class":"TPV","mode":1,"time":"2006-11-26T01:24:44.461Z","leapseconds":14,"ept":0.005}
@@ -55,7 +55,7 @@ $GPGSA,A,1,24,6,29,2,21,30,10,7,,,,,,,,*0D
 $GPGSV,3,1,09,26,06,138,00,24,14,077,33,06,77,232,26,29,15,126,28*78
 $GPGSV,3,2,09,02,16,079,37,21,35,257,26,30,22,204,32,10,54,072,42*78
 $GPGSV,3,3,09,07,40,297,29*44
-{"class":"SKY","xdop":0.62,"ydop":0.98,"vdop":2.72,"tdop":2.14,"hdop":2.55,"gdop":4.29,"pdop":3.72,"satellites":[{"PRN":26,"el":5.8,"az":138.0,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.8,"az":76.7,"ss":33.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":231.6,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.6,"az":126.3,"ss":28.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.1,"az":79.4,"ss":37.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":35.0,"az":257.3,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
+{"class":"SKY","time":"2006-11-26T01:24:44.560Z","xdop":0.62,"ydop":0.98,"vdop":2.72,"tdop":2.14,"hdop":2.55,"gdop":4.29,"pdop":3.72,"satellites":[{"PRN":26,"el":5.8,"az":138.0,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.8,"az":76.7,"ss":33.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":231.6,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.6,"az":126.3,"ss":28.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.1,"az":79.4,"ss":37.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":35.0,"az":257.3,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
 $GPZDA,012446.00,26,11,2006,00,00*63
 $GPGGA,012446.00,5332.2649,N,11329.5955,W,1,04,2.55,957.60,M,-18.865,M,,*55
 $GPRMC,012446.00,A,5332.2649,N,11329.5955,W,0.0000,0.000,261106,13.9,E*4C
@@ -98,7 +98,7 @@ $GPGBS,012449.00,9.338,14.739,,,,,*5C
 $GPGSV,3,1,09,26,06,138,00,24,14,077,30,06,77,231,26,29,15,126,27*77
 $GPGSV,3,2,09,02,16,079,37,21,35,257,26,30,22,204,33,10,54,072,42*79
 $GPGSV,3,3,09,07,40,297,29*44
-{"class":"SKY","xdop":0.62,"ydop":0.98,"vdop":0.04,"tdop":2.07,"hdop":5.26,"gdop":5.65,"pdop":5.26,"satellites":[{"PRN":26,"el":5.8,"az":138.0,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.8,"az":76.7,"ss":30.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":231.4,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.6,"az":126.3,"ss":27.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.1,"az":79.5,"ss":37.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":35.0,"az":257.4,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
+{"class":"SKY","time":"2006-11-26T01:24:49.531Z","xdop":0.62,"ydop":0.98,"vdop":0.04,"tdop":2.07,"hdop":5.26,"gdop":5.65,"pdop":5.26,"satellites":[{"PRN":26,"el":5.8,"az":138.0,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.8,"az":76.7,"ss":30.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":231.4,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.6,"az":126.3,"ss":27.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.1,"az":79.5,"ss":37.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":35.0,"az":257.4,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
 $GPZDA,012450.00,26,11,2006,00,00*64
 $GPGGA,012450.00,5332.2659,N,11329.5932,W,1,04,5.26,961.02,M,-18.865,M,,*50
 $GPRMC,012450.00,A,5332.2659,N,11329.5932,W,0.0000,0.000,261106,13.9,E*4B
@@ -147,7 +147,7 @@ $GPGBS,012454.00,9.338,14.739,,,,,*50
 $GPGSV,3,1,09,26,06,138,00,24,14,077,30,06,77,231,26,29,15,126,26*76
 $GPGSV,3,2,09,02,16,079,37,21,35,257,26,30,22,204,33,10,54,072,42*79
 $GPGSV,3,3,09,07,40,297,29*44
-{"class":"SKY","xdop":0.62,"ydop":0.98,"vdop":0.04,"tdop":2.06,"hdop":5.24,"gdop":5.63,"pdop":5.24,"satellites":[{"PRN":26,"el":6.0,"az":137.9,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.7,"az":76.8,"ss":30.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":231.2,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.6,"az":126.3,"ss":26.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.1,"az":79.5,"ss":37.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":35.0,"az":257.4,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
+{"class":"SKY","time":"2006-11-26T01:24:54.585Z","xdop":0.62,"ydop":0.98,"vdop":0.04,"tdop":2.06,"hdop":5.24,"gdop":5.63,"pdop":5.24,"satellites":[{"PRN":26,"el":6.0,"az":137.9,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.7,"az":76.8,"ss":30.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":231.2,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.6,"az":126.3,"ss":26.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.1,"az":79.5,"ss":37.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":35.0,"az":257.4,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
 $GPZDA,012455.00,26,11,2006,00,00*61
 $GPGGA,012455.00,5332.2669,N,11329.5912,W,1,04,5.24,964.16,M,-18.865,M,,*56
 $GPRMC,012455.00,A,5332.2669,N,11329.5912,W,0.0000,0.000,261106,13.9,E*4F
@@ -191,7 +191,7 @@ $GPGBS,012459.00,9.338,14.739,,,,,*5D
 $GPGSV,3,1,09,26,06,138,00,24,14,077,29,06,77,231,26,29,15,126,26*7E
 $GPGSV,3,2,09,02,16,079,35,21,35,257,26,30,22,204,32,10,54,072,43*7B
 $GPGSV,3,3,09,07,40,297,29*44
-{"class":"SKY","xdop":0.62,"ydop":0.98,"vdop":0.04,"tdop":2.06,"hdop":5.23,"gdop":5.62,"pdop":5.23,"satellites":[{"PRN":26,"el":6.0,"az":137.9,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.7,"az":76.8,"ss":29.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":231.0,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.7,"az":126.3,"ss":26.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.0,"az":79.5,"ss":35.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":35.1,"az":257.4,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
+{"class":"SKY","time":"2006-11-26T01:24:59.531Z","xdop":0.62,"ydop":0.98,"vdop":0.04,"tdop":2.06,"hdop":5.23,"gdop":5.62,"pdop":5.23,"satellites":[{"PRN":26,"el":6.0,"az":137.9,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.7,"az":76.8,"ss":29.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":231.0,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.7,"az":126.3,"ss":26.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.0,"az":79.5,"ss":35.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":35.1,"az":257.4,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
 $GPZDA,012500.00,26,11,2006,00,00*60
 $GPGGA,012500.00,5332.2675,N,11329.5900,W,1,04,5.23,966.05,M,-18.865,M,,*5E
 $GPRMC,012500.00,A,5332.2675,N,11329.5900,W,0.0000,0.000,261106,13.9,E*40
@@ -229,7 +229,7 @@ $GPGBS,012504.00,9.338,14.739,,,,,*54
 $GPGSV,3,1,09,26,06,138,00,24,14,077,29,06,77,231,26,29,15,126,26*7E
 $GPGSV,3,2,09,02,16,080,35,21,35,257,26,30,22,204,33,10,54,072,43*7C
 $GPGSV,3,3,09,07,40,297,29*44
-{"class":"SKY","xdop":0.62,"ydop":0.98,"vdop":0.04,"tdop":2.05,"hdop":5.21,"gdop":5.60,"pdop":5.21,"satellites":[{"PRN":26,"el":6.1,"az":137.9,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.7,"az":76.8,"ss":29.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":230.9,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.7,"az":126.2,"ss":26.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.0,"az":79.5,"ss":35.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":35.1,"az":257.4,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
+{"class":"SKY","time":"2006-11-26T01:25:04.527Z","xdop":0.62,"ydop":0.98,"vdop":0.04,"tdop":2.05,"hdop":5.21,"gdop":5.60,"pdop":5.21,"satellites":[{"PRN":26,"el":6.1,"az":137.9,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.7,"az":76.8,"ss":29.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":230.9,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.7,"az":126.2,"ss":26.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.0,"az":79.5,"ss":35.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":35.1,"az":257.4,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
 $GPZDA,012505.00,26,11,2006,00,00*65
 $GPGGA,012505.00,5332.2678,N,11329.5893,W,1,04,5.21,967.26,M,-18.865,M,,*5F
 $GPRMC,012505.00,A,5332.2678,N,11329.5893,W,0.0000,0.000,261106,13.9,E*43
@@ -278,7 +278,7 @@ $GPGBS,012509.00,9.338,14.739,,,,,*59
 $GPGSV,3,1,09,26,06,138,00,24,14,077,28,06,77,231,26,29,15,126,26*7F
 $GPGSV,3,2,09,02,16,080,35,21,35,257,26,30,22,204,30,10,54,072,44*78
 $GPGSV,3,3,09,07,40,297,29*44
-{"class":"SKY","xdop":0.62,"ydop":0.98,"vdop":0.04,"tdop":2.05,"hdop":5.20,"gdop":5.59,"pdop":5.20,"satellites":[{"PRN":26,"el":6.1,"az":137.9,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.6,"az":76.8,"ss":28.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":230.6,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.7,"az":126.2,"ss":26.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.0,"az":79.5,"ss":35.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":35.1,"az":257.4,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
+{"class":"SKY","time":"2006-11-26T01:25:09.579Z","xdop":0.62,"ydop":0.98,"vdop":0.04,"tdop":2.05,"hdop":5.20,"gdop":5.59,"pdop":5.20,"satellites":[{"PRN":26,"el":6.1,"az":137.9,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.6,"az":76.8,"ss":28.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":230.6,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.7,"az":126.2,"ss":26.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":16.0,"az":79.5,"ss":35.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":35.1,"az":257.4,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
 $GPZDA,012510.00,26,11,2006,00,00*61
 $GPGGA,012510.00,5332.2680,N,11329.5887,W,1,04,5.20,968.11,M,-18.865,M,,*53
 $GPRMC,012510.00,A,5332.2680,N,11329.5887,W,0.0000,0.000,261106,13.9,E*45
@@ -327,7 +327,7 @@ $GPGBS,012514.00,9.338,14.739,,,,,*55
 $GPGSV,3,1,09,26,06,138,00,24,14,077,30,06,77,231,26,29,15,126,26*76
 $GPGSV,3,2,09,02,16,080,35,21,35,257,26,30,22,204,30,10,54,072,45*79
 $GPGSV,3,3,09,07,40,297,29*44
-{"class":"SKY","xdop":0.62,"ydop":0.98,"vdop":0.04,"tdop":2.04,"hdop":5.18,"gdop":5.57,"pdop":5.18,"satellites":[{"PRN":26,"el":6.1,"az":137.8,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.6,"az":76.8,"ss":30.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":230.6,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.8,"az":126.2,"ss":26.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":15.9,"az":79.5,"ss":35.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":35.2,"az":257.5,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
+{"class":"SKY","time":"2006-11-26T01:25:14.518Z","xdop":0.62,"ydop":0.98,"vdop":0.04,"tdop":2.04,"hdop":5.18,"gdop":5.57,"pdop":5.18,"satellites":[{"PRN":26,"el":6.1,"az":137.8,"ss":0.0,"used":false,"gnssid":0,"svid":26},{"PRN":24,"el":13.6,"az":76.8,"ss":30.0,"used":true,"gnssid":0,"svid":24},{"PRN":6,"el":77.3,"az":230.6,"ss":26.0,"used":true,"gnssid":0,"svid":6},{"PRN":29,"el":14.8,"az":126.2,"ss":26.0,"used":true,"gnssid":0,"svid":29},{"PRN":2,"el":15.9,"az":79.5,"ss":35.0,"used":true,"gnssid":0,"svid":2},{"PRN":21,"el":35.2,"az":257.5,"ss":26.0,"used":true,"gnssid":0,"svid":21}]}
 $GPZDA,012515.00,26,11,2006,00,00*64
 $GPGGA,012515.00,5332.2681,N,11329.5882,W,1,04,5.18,968.73,M,-18.865,M,,*5D
 $GPRMC,012515.00,A,5332.2681,N,11329.5882,W,0.0000,0.000,261106,13.9,E*44
