@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 '''
 ntpshmviz - graph the drift of NTP servers
 Written by Keane Wolter <daemoneye2@gmail.com>
