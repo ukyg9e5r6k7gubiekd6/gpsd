@@ -833,7 +833,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             bad_len = 18;
             break;
         }
-        //u1 = getub(buf, 0);   /* nsvs/dimension UNUSED */
+        u1 = getub(buf, 0);          // fix dimension, mode
         count = (int)getub(buf, 17);
         if (len != (18 + count)) {
             bad_len = 18 + count;
@@ -876,12 +876,17 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             session->newdata.mode = MODE_NO_FIX;
             break;
         }
+        if (8 == (u1 & 8)) {
+            // Surveyed in
+            session->gpsdata.status = STATUS_TIME;
+        }
         mask |= MODE_SET;
 
         session->gpsdata.satellites_used = count;
         session->gpsdata.dop.pdop = getbef32((char *)buf, 1);
         session->gpsdata.dop.hdop = getbef32((char *)buf, 5);
         session->gpsdata.dop.vdop = getbef32((char *)buf, 9);
+        // RES SMT 360 and ICM SMT 360 always report tdop == 1
         session->gpsdata.dop.tdop = getbef32((char *)buf, 13);
         session->gpsdata.dop.gdop =
             sqrt(pow(session->gpsdata.dop.pdop, 2) +
@@ -898,8 +903,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             }
         }
         GPSD_LOG(LOG_DATA, &session->context->errout,
-                 "TSIP: AIVSS (0x6c): status=%d used=%d "
-                 "pdop=%.1f hdop=%.1f vdop=%.1f tdop=%.1f gdop=%.1f Used:%s\n",
+                 "TSIP: AIVSS (0x6c): mode %dstatus %d used %d "
+                 "pdop %.1f hdop %.1f vdop %.1f tdop %.1f gdop %.1f Used %s\n",
+                 session->newdata.mode,
                  session->gpsdata.status,
                  session->gpsdata.satellites_used,
                  session->gpsdata.dop.pdop,
@@ -908,7 +914,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  session->gpsdata.dop.tdop,
                  session->gpsdata.dop.gdop,
                  buf2);
-        mask |= DOP_SET | STATUS_SET | USED_IS;
+        mask |= DOP_SET | MODE_SET | STATUS_SET | USED_IS;
         break;
     case 0x6d:
         /* All-In-View Satellite Selection (0x6d) polled by 0x24
