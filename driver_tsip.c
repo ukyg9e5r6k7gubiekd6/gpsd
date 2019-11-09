@@ -69,7 +69,7 @@ static unsigned char tsip_gnssid(unsigned svtype, short prn,
             gnssid = GNSSID_GPS;
             *svid = prn;
         } else if (32 < prn && 55 > prn) {
-            // RES SMT 360 and ICT SMT 360 put SBAS in 33-54
+            // RES SMT 360 and ICM SMT 360 put SBAS in 33-54
             gnssid = GNSSID_SBAS;
             *svid = prn + 87;
         } else if (119 < prn && 139 > prn) {
@@ -1536,7 +1536,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
     if ((now - session->driver.tsip.last_6d) > 5) {
         /* Request GPS Receiver Position Fix Mode
-         * Returns 0x44 or 0x6d. */
+         * Returns 0x44, 0x6c, or 0x6d. */
         (void)tsip_write(session, 0x24, buf, 0);
         session->driver.tsip.last_6d = now;
     }
@@ -1548,8 +1548,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          * not supported on:
          *  Lassen SQ (2002)
          *  Lassen iQ (2005)
+         *  ICM SMT 360
+         *  RES SMT 360
          *  and post 2005
-         * We assume SuperPackets replaced 0x28 */
+         * SuperPackets replaced 0x28 */
         (void)tsip_write(session, 0x28, buf, 0);
         session->driver.tsip.last_48 = now;
     }
@@ -1572,7 +1574,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     }
     if ((session->driver.tsip.req_compact > 0) &&
         ((now - session->driver.tsip.req_compact) > 5)) {
-        /* Compact Superpacket requested but no response */
+        /* Compact Superpacket requested but no response
+         * Not in:
+         * ICM SMT 360
+         * RES SMT 360
+          */
         session->driver.tsip.req_compact = 0;
         GPSD_LOG(LOG_WARN, &session->context->errout,
                  "TSIP: No Compact Super Packet (0x8f-23), "
@@ -1613,11 +1619,18 @@ static void tsip_init_query(struct gps_device_t *session)
 
 static void tsip_event_hook(struct gps_device_t *session, event_t event)
 {
+    unsigned char buf[100];
+
+    GPSD_LOG(LOG_SPIN, &session->context->errout,
+             "TSIP: event_hook event %d ro %d\n",
+             event, session->context->readonly);
+
     if (session->context->readonly)
         return;
-    if (event == event_identified) {
-        unsigned char buf[100];
-
+    switch (event) {
+    case event_identified:
+        // FALLTHROUGH
+    case event_reactivate:
         /*
          * Set basic configuration, using Set or Request I/O Options (0x35).
          * in case no hardware config response comes back.
@@ -1633,27 +1646,20 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
         /* Aux: enable: 0x5A, dBHz */
         putbyte(buf, 3, IO4_DBHZ);
         (void)tsip_write(session, 0x35, buf, 4);
-    }
-    if (event == event_configure && session->lexer.counter == 0) {
-        /*
-         * TSIP is often ODD parity 1 stopbit, save original values and
-         * change it Thunderbolts and Copernicus use
-         * 8N1... which isn't exactly a good idea due to the
-         * fragile wire format.  We must divine a clever
-         * heuristic to decide if the parity change is required.
-         */
-        session->driver.tsip.parity = session->gpsdata.dev.parity;
-        session->driver.tsip.stopbits =
-            (unsigned int) session->gpsdata.dev.stopbits;
-        // FIXME.  Should respect fixed speed/framing
-        gpsd_set_speed(session, session->gpsdata.dev.baudrate, 'O', 1);
-    }
-    if (event == event_deactivate) {
-        /* restore saved parity and stopbits when leaving TSIP mode */
-        gpsd_set_speed(session,
-                       session->gpsdata.dev.baudrate,
-                       session->driver.tsip.parity,
-                       session->driver.tsip.stopbits);
+        break;
+    case event_configure:
+        // this seems to get called on every packet...
+        if (session->lexer.counter == 0) {
+            /* but the above if() makes it never execute
+             * formerely tried to force 801 here, but luckily it
+             * never fired as some Trimble are 8N1 */
+        }
+        break;
+    case event_deactivate:
+        // used to revert serial port parms here.  No need   for that.
+        // FALLTHROUGH
+    default:
+        break;
     }
 }
 
