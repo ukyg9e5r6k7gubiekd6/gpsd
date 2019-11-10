@@ -729,7 +729,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
             (void)snprintf(buf2, sizeof(buf2), "%11.3f ",
                            gpsdata->fix.altMSL * altfactor);
         else
-            (void)strlcpy(scr, "       n/a ", sizeof(scr));
+            (void)strlcpy(buf2, "       n/a ", sizeof(buf2));
 
         (void)strlcpy(scr, buf1, sizeof(scr));
         (void)strlcat(scr, buf2, sizeof(scr));
