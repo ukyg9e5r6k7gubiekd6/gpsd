@@ -394,6 +394,8 @@ static int json_devicelist_read(const char *buf, struct gps_data_t *gpsdata,
                                         .dflt.real = NAN},
         {"mincycle",   t_real,       STRUCTOBJECT(struct devconfig_t, mincycle),
                                         .dflt.real = NAN},
+        // ignore unkown keys, for cross-version compatibility
+        {"", t_ignore},
         {NULL},
         /* *INDENT-ON* */
     };
