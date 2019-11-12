@@ -1725,10 +1725,15 @@ backup battery.</para>
 </row>
 <row>
 	<entry>subtype</entry>
-	<entry>When the daemon sees a delayed response to a probe for
-	subtype or firmware-version information.</entry>
+	<entry>No</entry>
 	<entry>string</entry>
-	<entry>Whatever version information the device returned.</entry>
+	<entry>Whatever version information the device driver returned.</entry>
+</row>
+<row>
+	<entry>subtype1</entry>
+	<entry>No</entry>
+	<entry>string</entry>
+	<entry>More version information the device driver returned.</entry>
 </row>
 <row>
 	<entry>bps</entry>
