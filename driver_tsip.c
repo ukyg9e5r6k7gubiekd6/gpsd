@@ -311,7 +311,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          *  Lassen SQ (2002)
          *  Lassen iQ (2005) */
         u1 = (uint8_t) getub(buf, 0);
-        // decode by subtype
+        // decode by sub-code
         switch (u1) {
         case 0x81:       // Firmware component version information (0x1c-81)
                 // 1, reserved
@@ -455,26 +455,53 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         f4 = getbef32((char *)buf, 12); /* bias rate */
         f5 = getbef32((char *)buf, 16); /* time-of-fix */
         GPSD_LOG(LOG_INF, &session->context->errout,
-                 "TSIP: GPS Velocity (0x43): XYZ %f %f %f %f %f\n", f1, f2, f3,
-                 f4, f5);
+                 "TSIP: GPS Velocity (0x43): XYZ %f %f %f %f %f\n",
+                 f1, f2, f3, f4, f5);
         break;
-    case 0x45:                  /* Software Version Information */
-        if (len != 10) {
+    case 0x45:
+        /* Software Version Information (0x45)
+         * Present in:
+         *   ACE II (1999)
+         *   ACE III (2000)
+         *   Lassen SQ (2002)
+         *   Lassen iQ (2005)
+         *   ICM SMT 360
+         *   RES SMT 360
+         *   Probably all TSIP
+         */
+        if (10 > len) {
             bad_len = 10;
             break;
         }
+        // convert 2 digit years to 4 digit years
+        ul1 = getub(buf, 3);
+        if (80 > ul1) {
+            ul1 += 2000;
+        } else {
+            ul1 += 1900;
+        }
+        ul2 = getub(buf, 8);
+        if (80 > ul2) {
+            ul2 += 2000;
+        } else {
+            ul2 += 1900;
+        }
+        /* ACE calls these "NAV processor firmware" and
+         * "SIG processor firmware".
+         * RES SMT 360 calls these "application" and "GPS core".
+         */
         (void)snprintf(session->subtype, sizeof(session->subtype),
-                       "%d.%d %02d%02d%02d %d.%d %02d%02d%02d",
+                       "sw %d.%d %02d/%02d/%04d hw %d.%d %02d/%02d/%04d",
                        getub(buf, 0),
                        getub(buf, 1),
                        getub(buf, 4),
                        getub(buf, 2),
-                       getub(buf, 3),
+                       ul1,
                        getub(buf, 5),
                        getub(buf, 6),
                        getub(buf, 9),
                        getub(buf, 7),
-                       getub(buf, 8));
+                       ul2);
         GPSD_LOG(LOG_INF, &session->context->errout,
                  "TSIP: Software version (0x45): %s\n", session->subtype);
         mask |= DEVICEID_SET;
