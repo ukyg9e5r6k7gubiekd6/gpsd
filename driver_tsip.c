@@ -298,6 +298,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     case 0x1c:        // Hardware/Software Version Information
         /* Present in:
          *  Accutime Gold
+         *  Lassen iQ (2005) fw 1.16+
          *  Copernicus (2006)
          *  Copernicus II (2009)
          *  Thunderbolt E (2012)
@@ -309,12 +310,16 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          *  ACE II (1999)
          *  ACE III (2000)
          *  Lassen SQ (2002)
-         *  Lassen iQ (2005) */
+         *  Lassen iQ (2005) pre fw 1.16
+         */
         u1 = (uint8_t) getub(buf, 0);
         // decode by sub-code
         switch (u1) {
-        case 0x81:       // Firmware component version information (0x1c-81)
-                // 1, reserved
+        case 0x81:
+                /* Firmware component version information (0x1c-81)
+                 * polled by 0x1c-01
+                 */
+                // byte 1, reserved
                 u2 = getub(buf, 2);       // Major version
                 u3 = getub(buf, 3);       // Minor version
                 u4 = getub(buf, 4);       // Build number
@@ -342,8 +347,17 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                          session->subtype);
 
                 mask |= DEVICEID_SET;
+                if ('\0' == session->subtype1[0]) {
+                    // request actual subtype1 from 0x1c-83
+                    putbyte(buf, 0, 0x03);
+                    (void)tsip_write(session, 0x1c, buf, 1);
+                }
                 break;
-        case 0x83:    //  Hardware component version information (0x1c-83)
+
+        case 0x83:
+                /* Hardware component version information (0x1c-83)
+                 * polled by 0x1c-03
+                 */
                 ul1 = getbeu32(buf, 1);  // Serial number
                 u2 = getub(buf, 5);      // Build day
                 u3 = getub(buf, 6);      // Build month
@@ -353,6 +367,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 session->driver.tsip.hardware_code = getbeu16(buf, 10);
                 u5 = getub(buf, 12);     /* Length of Hardware ID */
                 // check for valid module name length
+                // copernicus ii is 27 long
                 if (40 < u5) {
                     u5 = 40;
                 }
@@ -596,7 +611,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  session->newdata.altMSL);
         break;
     case 0x4b:
-        /* Machine/Code ID and Additional Status */
+        /* Machine/Code ID and Additional Status (0x4b)
+         * polled by i0x25 or 0x26.  Sent with 0x46.
         /* Present in all receivers? */
         if (len != 3) {
             bad_len = 3;
@@ -616,12 +632,21 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             case 1:
                 // should use better name from superpacket
                 name = " SMT 360";
+                /* request actual subtype from 0x1c-81
+                 * which in turn requests 0x1c-83 */
+                putbyte(buf, 0, 0x01);
+                (void)tsip_write(session, 0x1c, buf, 1);
                 break;
             case 0x32:
                 name = " Acutime 360";
                 break;
             case 0x5a:
                 name = " Lassen iQ";
+                /* request actual subtype from 0x1c-81
+                 * which in turn requests 0x1c-83.
+                 * Only later firmware Lassen iQ supports this */
+                putbyte(buf, 0, 0x01);
+                (void)tsip_write(session, 0x1c, buf, 1);
                 break;
             case 0x61:
                 name = " Acutime 2000";
@@ -632,6 +657,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             case 0x96:
                 // Also Copernicus II
                 name = " Copernicus, Thunderbolt E";
+                /* so request actual subtype from 0x1c-81
+                 * which in turn requests 0x1c-83 */
+                putbyte(buf, 0, 0x01);
+                (void)tsip_write(session, 0x1c, buf, 1);
                 break;
             default:
                  name = "";
