@@ -315,13 +315,13 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         switch (u1) {
         case 0x81:       // Firmware component version information (0x1c-81)
                 // 1, reserved
-                u2 = getub(buf, 2); /* Major version */
-                u3 = getub(buf, 3); /* Minor version */
-                u4 = getub(buf, 4); /* Build number */
-                u5 = getub(buf, 5); /* Month */
-                u6 = getub(buf, 6); /* Day */
-                ul1 = getbeu16(buf, 7); /* Year */
-                u7 = getub(buf, 9); /* Length of first module name */
+                u2 = getub(buf, 2);       // Major version
+                u3 = getub(buf, 3);       // Minor version
+                u4 = getub(buf, 4);       // Build number
+                u5 = getub(buf, 5);       // Build Month
+                u6 = getub(buf, 6);       // Build Day
+                ul1 = getbeu16(buf, 7);   // Build Year
+                u7 = getub(buf, 9);       // Length of product name
                 // check for valid module name length
                 if (40 < u7) {
                     u7 = 40;
@@ -335,10 +335,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 buf2[u7] = '\0';
 
                 (void)snprintf(session->subtype, sizeof(session->subtype),
-                               "sw %u.%u %u %02u/%02u/%04u %.40s",
+                               "fw %u.%u %u %02u/%02u/%04u %.40s",
                                u2, u3, u4, u6, u5, ul1, buf2);
                 GPSD_LOG(LOG_INF, &session->context->errout,
-                         "TSIP: Software version (0x81): %s\n",
+                         "TSIP: Firmware version (0x1c-81): %s\n",
                          session->subtype);
 
                 mask |= DEVICEID_SET;
@@ -369,7 +369,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                                session->driver.tsip.hardware_code,
                                buf2);
                 GPSD_LOG(LOG_INF, &session->context->errout,
-                         "TSIP: Hardware version (0x83): %s\n",
+                         "TSIP: Hardware version (0x1c-83): %s\n",
                          session->subtype1);
 
                 mask |= DEVICEID_SET;
@@ -377,22 +377,23 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 /* Detecting device by Hardware Code */
                 switch (session->driver.tsip.hardware_code) {
                 case 3001:            // Acutime Gold
-                    GPSD_LOG(LOG_INF, &session->context->errout,
-                             "TSIP: This device is Accutime Gold\n");
                     session->driver.tsip.subtype = TSIP_ACCUTIME_GOLD;
                     configuration_packets_accutime_gold(session);
+                    break;
+                case 3023:            // RES SMT 360
+                    session->driver.tsip.subtype = TSIP_RESSMT360;
+                    break;
+                case 3026:            // ICM SMT 360
+                    session->driver.tsip.subtype = TSIP_ICMSMT360;
+                    break;
+                case 3031:            // RES360 17x22
+                    session->driver.tsip.subtype = TSIP_RES36017x22;
                     break;
                 case 1001:            // Lassen iQ
                     // FALLTHROUGH
                 case 1002:            // Copernicus, Copernicus II
                     // FALLTHROUGH
                 case 3007:            // Thunderbolt E
-                    // FALLTHROUGH
-                case 3023:            // RES SMT 360
-                    // FALLTHROUGH
-                case 3026:            // ICM SMT 360
-                    // FALLTHROUGH
-                case 3031:            // RES360 17x22
                     // FALLTHROUGH
                 case 3032:            // Acutime 360
                     // FALLTHROUGH
