@@ -33,19 +33,19 @@
 
 /* defines for Set or Request I/O Options (0x35)
  * SMT 360 default: IO1_DP|IO1_LLA, IO2_ENU, 0, IO4_DBHZ */
-// byte 1
+// byte 1 Position
 #define IO1_ECEF 1
 #define IO1_LLA 2
 #define IO1_MSL 4
 #define IO1_DP 0x10
 // IO1_8F20 not in SMT 360
 #define IO1_8F20 0x20
-// byte 2
+// byte 2 Velocity
 #define IO2_VECEF 1
 #define IO2_ENU 2
-// byte 3
+// byte 3 Timing
 #define IO3_UTC 1
-// byte 4
+// byte 4 Aux/Reserved
 #define IO4_RAW 1
 #define IO4_DBHZ 8
 
@@ -648,6 +648,22 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  "TSIP: Operating Params (0x4c): x%02x %f %f %f %f\n",
                  u1, f1, f2, f3, f4);
         break;
+    case 0x54:
+        /* Bias and Bias Rate Report (0x54)
+         * Present in:
+         *   Acutime 360
+         *   ICM SMT 360, RES SMT 360.  (undocumented)
+         */
+         {
+            float  bias, bias_rate;
+            bias = getbef32((char *)buf, 0);         // Bias
+            bias_rate = getbef32((char *)buf, 4);    // Bias rate
+            ftow = getbef32((char *)buf, 8);         // tow
+            GPSD_LOG(LOG_INF, &session->context->errout,
+                     "TSIP: Bias and Bias Rate Report (0x54) %f %f %f\n",
+                     bias, bias_rate, ftow);
+         }
+         break;
     case 0x55:
         /* IO Options (0x55), polled by 0x35
          * Seems to be present in all TSIP
@@ -662,7 +678,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         // FIXME: decode HAE/MSL from position
         u2 = getub(buf, 1);     /* Velocity */
         u3 = getub(buf, 2);     /* Timing */
-        u4 = getub(buf, 3);     /* Aux */
+        /* Aux
+         * RES SMT 360 sets bit 3 (0x08), undocumented */
+        u4 = getub(buf, 3);
         GPSD_LOG(LOG_INF, &session->context->errout,
                  "TSIP: IO Options (0x55): %02x %02x %02x %02x\n",
                  u1, u2, u3, u4);
@@ -938,7 +956,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             }
         }
         GPSD_LOG(LOG_DATA, &session->context->errout,
-                 "TSIP: AIVSS (0x6c): mode %dstatus %d used %d "
+                 "TSIP: AIVSS (0x6c): mode %d status %d used %d "
                  "pdop %.1f hdop %.1f vdop %.1f tdop %.1f gdop %.1f Used %s\n",
                  session->newdata.mode,
                  session->gpsdata.status,
@@ -1311,8 +1329,28 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                      session->newdata.mode, session->gpsdata.status);
             break;
 
+        case 0xa5:
+            /* Packet Broadcast Mask (0x8f-a5) polled by 0x8e-a5
+             *
+             * Present in:
+             * ICM SMT 360, RES SMT 360
+             */
+            {
+                uint16_t mask0, mask1;
+                if (5 > len) {
+                    bad_len = 5;
+                    break;
+                }
+                mask0 = getbeu16(buf, 1);    // Mask 0
+                mask1 = getbeu16(buf, 3);    // Mask 1
+                GPSD_LOG(LOG_DATA, &session->context->errout,
+                         "TSIP: PBM (0x8f-a5) mask0 x%04x mask1 x%04x\n",
+                         mask0, mask1);
+            }
+            break;
+
         case 0xab:              /* Thunderbolt Timing Superpacket */
-            if (len != 17) {
+            if (17 > len) {
                 bad_len = 17;
                 break;
             }
@@ -1490,8 +1528,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         break;
 
     case 0x49:                  /* Almanac Health Page */
-        // FALLTHROUGH
-    case 0x54:                  /* One Satellite Bias */
         // FALLTHROUGH
     case 0x58:          /* Satellite System Data/Acknowledge from Receiver */
         // FALLTHROUGH
