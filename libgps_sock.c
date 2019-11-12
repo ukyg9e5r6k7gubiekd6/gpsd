@@ -205,34 +205,78 @@ int gps_sock_read(struct gps_data_t *gpsdata, char *message, int message_len)
 	int wserr = WSAGetLastError();
 #endif /* HAVE_WINSOCK2_H */
 
-	/* if we just received data from the socket, it's in the buffer */
-	if (status > -1)
-	    PRIVATE(gpsdata)->waiting += status;
-
-	if (PRIVATE(gpsdata)->waiting == 0) {
-	    /* buffer is empty - implies no data was read */
-	    /*
-	     * If we received 0 bytes, other side of socket is closing.
-	     * Return -1 as end-of-data indication.
-	     */
-	    // cppcheck-suppress duplicateBranch
-	    if (status == 0)
-		return -1;
-#ifndef USE_QT
-	    /* count transient errors as success, we'll retry later */
-#ifdef HAVE_WINSOCK2_H
-	    else if (wserr == WSAEINTR || wserr == WSAEWOULDBLOCK)
-		return 0;
-#else
-	    else if (errno == EINTR || errno == EAGAIN
-		     || errno == EWOULDBLOCK)
-		return 0;
-#endif /* HAVE_WINSOCK2_H */
-#endif
-	    /* hard error return of -1, pass it along */
-	    else
+#ifdef USE_QT
+	if (status < 0) {
+		/* All negative statuses are error for QT
+		 *
+		 * read: https://doc.qt.io/qt-5/qiodevice.html#read
+		 *
+		 * Reads at most maxSize bytes from the device into data, and returns the number of bytes read.
+		 * If an error occurs, such as when attempting to read from a device opened in WriteOnly mode,
+		 * this function returns -1.
+		 *
+		 * 0 is returned when no more data is available for reading. However, reading past the end
+		 * of the stream is considered an error, so this function returns -1 in those cases
+		 * (that is, reading on a closed socket or after a process has died).
+		 */
 		return -1;
 	}
+
+#else  /* not USE_QT */
+	if (status <= 0) {
+		/* 0 or negative
+		 *
+		 * read: https://pubs.opengroup.org/onlinepubs/007908775/xsh/read.html:
+		 *
+		 * If nbyte is 0, read() will return 0 and have no other results.
+		 * ...
+		 * When attempting to read a file (other than a pipe or FIFO) that supports non-blocking reads and has no data currently available:
+		 *    - If O_NONBLOCK is set, read() will return a -1 and set errno to [EAGAIN].
+		 *    - If O_NONBLOCK is clear, read() will block the calling thread until some data becomes available.
+		 *    - The use of the O_NONBLOCK flag has no effect if there is some data available.
+		 * ...
+		 * If a read() is interrupted by a signal before it reads any data, it will return -1 with errno set to [EINTR].
+		 * If a read() is interrupted by a signal after it has successfully read some data, it will return the number of bytes read.
+		 *
+		 * recv: https://pubs.opengroup.org/onlinepubs/007908775/xns/recv.html
+		 *
+		 * If no messages are available at the socket and O_NONBLOCK is not set on the socket's file descriptor,
+		 * recv() blocks until a message arrives. If no messages are available at the socket and O_NONBLOCK is set
+		 * on the socket's file descriptor, recv() fails and sets errno to [EAGAIN] or [EWOULDBLOCK].
+		 * ...
+		 * Upon successful completion, recv() returns the length of the message in bytes. If no messages are available
+		 * to be received and the peer has performed an orderly shutdown, recv() returns 0. Otherwise, -1 is returned
+		 * and errno is set to indicate the error.
+		 *
+		 * Summary:
+		 * if nbytes 0 and read return 0 -> out of the free buffer space but still didn't get correct json -> report an error -> return -1
+		 * if read return 0 but requested some bytes to read -> other side disconnected -> report an error -> return -1
+		 * if read return -1 and errno is in [EAGAIN, EINTR, EWOULDBLOCK] -> not an error, we'll retry later -> return 0
+		 * if read return -1 and errno is not in [EAGAIN, EINTR, EWOULDBLOCK] -> error -> return -1
+		 *
+		 */
+
+		/*
+		 * check for not error cases first: EAGAIN, EINTR, etc
+		 */
+		 if (status < 0) {
+#ifdef HAVE_WINSOCK2_H
+		   if (wserr == WSAEINTR || wserr == WSAEWOULDBLOCK)
+			return 0;
+#else
+		   if (errno == EINTR || errno == EAGAIN
+			     || errno == EWOULDBLOCK)
+			return 0;
+#endif /* HAVE_WINSOCK2_H */
+		 }
+
+      /* disconnect or error */
+		return -1;
+	}
+#endif /* USE_QT */
+
+	/* if we just received data from the socket, it's in the buffer */
+	PRIVATE(gpsdata)->waiting += status;
 
 	/* there's new buffered data waiting, check for full message */
 	for (eol = PRIVATE(gpsdata)->buffer;
