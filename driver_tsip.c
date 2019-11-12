@@ -352,15 +352,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 }
                 buf2[i] = '\0';
 
-                // FIXME! This over writes date from 0x1c-83
-                (void)snprintf(session->subtype, sizeof(session->subtype),
+                (void)snprintf(session->subtype1, sizeof(session->subtype1),
                                "hw %u %02u.%02u.%04u %02u %u %.48s",
                                ul1, u2, u3, ul2, u4,
                                session->driver.tsip.hardware_code,
                                buf2);
                 GPSD_LOG(LOG_INF, &session->context->errout,
                          "TSIP: Hardware version (0x83): %s\n",
-                         session->subtype);
+                         session->subtype1);
 
                 mask |= DEVICEID_SET;
 
