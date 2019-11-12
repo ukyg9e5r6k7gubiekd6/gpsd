@@ -283,6 +283,19 @@ ubx_msg_mon_ver(struct gps_device_t *session, unsigned char *buf,
                    (char *)&buf[UBX_MESSAGE_DATA_OFFSET + 0],
                    (char *)&buf[UBX_MESSAGE_DATA_OFFSET + 30]);
 
+    /* save what we can */
+    (void)strlcpy(session->subtype, obuf, sizeof(session->subtype));
+    /* find PROTVER= */
+    cptr = strstr(session->subtype, "PROTVER=");
+    if (NULL != cptr) {
+        int protver = atoi(cptr + 8);
+        if (9 < protver) {
+            /* protver 10, u-blox 5, is the oldest we know */
+            session->driver.ubx.protver = protver;
+        }
+    }
+
+    obuf[0] = '\0';
     /* get n number of Extended info strings.  what is max n? */
     for ( n = 0; ; n++ ) {
         size_t start_of_str = UBX_MESSAGE_DATA_OFFSET + 40 + (30 * n);
@@ -296,21 +309,11 @@ ubx_msg_mon_ver(struct gps_device_t *session, unsigned char *buf,
         (void)strlcat(obuf, (char *)&buf[start_of_str], sizeof(obuf));
     }
     /* save what we can */
-    (void)strlcpy(session->subtype, obuf, sizeof(session->subtype));
-    /* find PROTVER= */
-    cptr = strstr(session->subtype, "PROTVER=");
-    if (NULL != cptr) {
-        int protver = atoi(cptr + 8);
-        if (9 < protver) {
-            /* protver 10, u-blox 5, is the oldest we know */
-            session->driver.ubx.protver = protver;
-        }
-    }
-
+    (void)strlcpy(session->subtype1, obuf, sizeof(session->subtype1));
     /* output SW and HW Version at LOG_INFO */
     GPSD_LOG(LOG_INF, &session->context->errout,
-             "UBX-MON-VER: %.*s\n",
-             (int)sizeof(obuf), obuf);
+             "UBX-MON-VER: %s %s\n",
+             session->subtype, session->subtype1);
 }
 
 /*
