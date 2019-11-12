@@ -72,6 +72,7 @@ extern "C" {
  *       Add DEG_NORM()
  *       Move toff and pps out of gps_data_t.union.
  *       Move gps_fix_t.qErr to gps_data_t.
+ *       Split devconfig_t.subtype into subtype and subtype1
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
@@ -2096,7 +2097,9 @@ struct devconfig_t {
 #define SEEN_RTCM3	0x04
 #define SEEN_AIS 	0x08
     char driver[64];
-    char subtype[128];                  /* 96 too small for ZED-F9 */
+    /* 96 too small for ZED-F9 */
+    char subtype[128];           // maybe hardware version
+    char subtype1[128];          // maybe software version
     /* a buffer to hold data to output to GPS */
     char hexdata[HEXDATA_MAX];
     timespec_t activated;

@@ -438,6 +438,13 @@ void json_device_dump(const struct gps_device_t *device,
 		      replylen);
 	(void)strlcat(reply, "\",", replylen);
     }
+    if (device->subtype1[0] != '\0') {
+	(void)strlcat(reply, "\"subtype1\":\"", replylen);
+	(void)strlcat(reply,
+		      json_stringify(buf1, sizeof(buf1), device->subtype1),
+		      replylen);
+	(void)strlcat(reply, "\",", replylen);
+    }
     /*
      * There's an assumption here: Anything that we type service_sensor is
      * a serial device with the usual control parameters.

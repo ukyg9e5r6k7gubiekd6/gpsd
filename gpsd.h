@@ -79,6 +79,7 @@ extern "C" {
  *      Add fixed_port_speed, fixed_port_framing to gps_context_t.
  *      change tsip.superpkt from bool to int.
  *      Add tsip.machine_id and tsip.hardware_code
+ *      Split gps_device_t.subtype into subtype and subtype1
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
 #define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
@@ -524,6 +525,7 @@ struct gps_device_t {
     int subframe_count;
     /* firmware version or subtype ID, 96 too small for ZED-F9 */
     char subtype[128];
+    char subtype1[128];
     time_t opentime;
     time_t releasetime;
     bool zerokill;
