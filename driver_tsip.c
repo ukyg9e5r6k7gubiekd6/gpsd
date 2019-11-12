@@ -322,14 +322,20 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 u6 = getub(buf, 6); /* Day */
                 ul1 = getbeu16(buf, 7); /* Year */
                 u7 = getub(buf, 9); /* Length of first module name */
-                for (i=0; i < (int)u7; i++) {
-                    /* Product name in ASCII */
-                    buf2[i] = (char)getub(buf, 10+i);
+                // check for valid module name length
+                if (40 < u7) {
+                    u7 = 40;
                 }
-                buf2[i] = '\0';
+                // check for valid module name length, again
+                if (u7 > (len - 10)) {
+                    u7 = len - 10;
+                }
+                /* Product name in ASCII */
+                memcpy(buf2, &buf[10], u7);
+                buf2[u7] = '\0';
 
                 (void)snprintf(session->subtype, sizeof(session->subtype),
-                               "sw %u %u %u %02u.%02u.%04u %.62s",
+                               "sw %u.%u %u %02u/%02u/%04u %.40s",
                                u2, u3, u4, u6, u5, ul1, buf2);
                 GPSD_LOG(LOG_INF, &session->context->errout,
                          "TSIP: Software version (0x81): %s\n",
@@ -338,22 +344,27 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 mask |= DEVICEID_SET;
                 break;
         case 0x83:    //  Hardware component version information (0x1c-83)
-                ul1 = getbeu32(buf, 1);  /* Serial number */
-                u2 = getub(buf, 5);      /* Build day */
-                u3 = getub(buf, 6);      /* Build month */
-                ul2 = getbeu16(buf, 7);  /* Build year */
-                u4 = getub(buf, 6);      /* Build hour */
+                ul1 = getbeu32(buf, 1);  // Serial number
+                u2 = getub(buf, 5);      // Build day
+                u3 = getub(buf, 6);      // Build month
+                ul2 = getbeu16(buf, 7);  // Build year
+                u4 = getub(buf, 9);      // Build hour
                 /* Hardware Code */
                 session->driver.tsip.hardware_code = getbeu16(buf, 10);
                 u5 = getub(buf, 12);     /* Length of Hardware ID */
-                /* coverity_submit[tainted_data] */
-                for (i=0; i < (int)u5; i++) {
-                    buf2[i] = (char)getub(buf, 13+i); /* Hardware ID in ASCII */
+                // check for valid module name length
+                if (40 < u5) {
+                    u5 = 40;
                 }
-                buf2[i] = '\0';
+                // check for valid module name length, again
+                if (u5 > (len - 13)) {
+                    u5 = len - 13;
+                }
+                memcpy(buf2, &buf[13], u5);
+                buf2[u5] = '\0';
 
                 (void)snprintf(session->subtype1, sizeof(session->subtype1),
-                               "hw %u %02u.%02u.%04u %02u %u %.48s",
+                               "hw %u %02u/%02u/%04u %02u %04u %.40s",
                                ul1, u2, u3, ul2, u4,
                                session->driver.tsip.hardware_code,
                                buf2);
