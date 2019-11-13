@@ -813,9 +813,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         u1 = getub(buf, 0);     /* Position */
         // FIXME: decode HAE/MSL from position
         u2 = getub(buf, 1);     /* Velocity */
-        u3 = getub(buf, 2);     /* Timing */
+        /* Timing
+         * bit 0 - reserved use 0x8e-a2 ?
+         */
+        u3 = getub(buf, 2);
         /* Aux
-         * RES SMT 360 sets bit 3 (0x08), undocumented */
+         * bit 0 - packet 0x5a (raw data)
+         * bit 3 -- Output dbHz
+         */
         u4 = getub(buf, 3);
         GPSD_LOG(LOG_INF, &session->context->errout,
                  "TSIP: IO Options (0x55): %02x %02x %02x %02x\n",
@@ -833,6 +838,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             (void)tsip_write(session, 0x8e, buf, 2);
             session->driver.tsip.req_compact = now;
         }
+        // RES SMT 360 defaults:  12 02 00 08
         break;
     case 0x56:
         /* Velocity Fix, East-North-Up (ENU)
@@ -1873,6 +1879,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  "TSIP: Navigation Configuration (0xbb) %u %u %u %u %f %f %f "
                  "%f %u x%x\n",
                  u1, u2, u3, u4, f1, f2, f3, f4, u5, u6);
+        // RES SMT 360 defaults to Mode 7, Constellation 3
         break;
 
     case 0x2e:
@@ -2038,9 +2045,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
 #ifdef __UNUSED__
 // #if 1
-        // full reset
-        putbyte(buf, 0, 0x46);
-        (void)tsip_write(session, 0x1e, buf, 1);
+    // full reset
+    putbyte(buf, 0, 0x46);
+    (void)tsip_write(session, 0x1e, buf, 1);
 #endif
 
     if (bad_len) {
@@ -2065,6 +2072,12 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          * Returns 0x44, 0x6c, or 0x6d. */
         (void)tsip_write(session, 0x24, buf, 0);
         session->driver.tsip.last_6d = now;
+#ifdef __UNUSED__
+// #if 1
+        // request Receiver Configuration (0xbb)
+        putbyte(buf, 0, 0x00);
+        (void)tsip_write(session, 0xbb, buf, 1);
+#endif // UNUSED
     }
 
     if (1 > session->driver.tsip.superpkt &&
