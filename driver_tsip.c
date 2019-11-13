@@ -266,7 +266,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
     // session->cycle_end_reliable = true;
     switch (id) {
-    case 0x13:                  /* Packet Received */
+    case 0x13:
+        /* Packet Received
+         * Not present in:
+         *    Copernicus II
+         */
         if (1 > len) {
             bad_len = 1;
             break;
@@ -297,20 +301,20 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
     case 0x1c:        // Hardware/Software Version Information
         /* Present in:
-         *  Accutime Gold
-         *  Lassen iQ (2005) fw 1.16+
-         *  Copernicus (2006)
-         *  Copernicus II (2009)
-         *  Thunderbolt E (2012)
-         *  RES SMT 360 (2018)
-         *  ICM SMT 360 (2018)
-         *  RES360 17x22 (2018)
-         *  Acutime 360
+         *   Accutime Gold
+         *   Lassen iQ (2005) fw 1.16+
+         *   Copernicus (2006)
+         *   Copernicus II (2009)
+         *   Thunderbolt E (2012)
+         *   RES SMT 360 (2018)
+         *   ICM SMT 360 (2018)
+         *   RES360 17x22 (2018)
+         *   Acutime 360
          * Not in:
-         *  ACE II (1999)
-         *  ACE III (2000)
-         *  Lassen SQ (2002)
-         *  Lassen iQ (2005) pre fw 1.16
+         *   ACE II (1999)
+         *   ACE III (2000)
+         *   Lassen SQ (2002)
+         *   Lassen iQ (2005) pre fw 1.16
          */
         u1 = (uint8_t) getub(buf, 0);
         // decode by sub-code
@@ -318,6 +322,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         case 0x81:
                 /* Firmware component version information (0x1c-81)
                  * polled by 0x1c-01
+                 * Present in:
+                 *   Copernicus II (2009)
                  */
                 // byte 1, reserved
                 u2 = getub(buf, 2);       // Major version
@@ -357,6 +363,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         case 0x83:
                 /* Hardware component version information (0x1c-83)
                  * polled by 0x1c-03
+                 * Not Present in:
+                 *   Copernicus II (2009)
                  */
                 ul1 = getbeu32(buf, 1);  // Serial number
                 u2 = getub(buf, 5);      // Build day
@@ -424,7 +432,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         }
         break;
     case 0x41:
-        /* GPS Time (0x41).  polled by 0x21 */
+        /* GPS Time (0x41).  polled by 0x21
+         * Present in:
+         *   Copernicus II (2009)
+         */
         if (len != 10) {
             bad_len = 10;
             break;
@@ -446,7 +457,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  ftow, week, f2,
                  timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)));
         break;
-    case 0x42:                  /* Single-Precision Position Fix, XYZ ECEF */
+    case 0x42:
+        /* Single-Precision Position Fix, XYZ ECEF
+         * Present in:
+         *   Copernicus II (2009)
+         */
         if (len != 16) {
             bad_len = 16;
             break;
@@ -459,7 +474,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  "TSIP: GPS Position (0x42): XYZ %f %f %f %f\n",
                  f1, f2, f3, f4);
         break;
-    case 0x43:                  /* Velocity Fix, XYZ ECEF */
+    case 0x43:
+        /* Velocity Fix, XYZ ECEF
+         * Not Present in:
+         *   Copernicus II (2009)
+         */
         if (len != 20) {
             bad_len = 20;
             break;
@@ -480,6 +499,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          *   ACE III (2000)
          *   Lassen SQ (2002)
          *   Lassen iQ (2005)
+         *   Copernicus II (2009)
          *   ICM SMT 360
          *   RES SMT 360
          *   Probably all TSIP
@@ -523,7 +543,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         break;
     case 0x46:
         /* Health of Receiver (0x46).  Poll with 0x26
-         * Present on all models
+         * Present in:
+         *   Copernicus II (2009)
+         *   all models?
          * RES SMT 360 says use 0x8f-ab or 0x8f-ac instead
          */
         if ( 2 > len) {
@@ -548,7 +570,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         GPSD_LOG(LOG_PROG, &session->context->errout,
                  "TSIP: Receiver Health (0x46): %x %x\n", u1, u2);
         break;
-    case 0x47:                  /* Signal Levels for all Satellites */
+    case 0x47:
+        /* Signal Levels for all Satellites
+         * Present in:
+         *   Copernicus II (2009)
+         */
         if (1 > len) {
             bad_len = 1;
             break;
@@ -575,12 +601,20 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  "TSIP: Signal Levels (0x47): (%d):%s\n", count, buf2);
         mask |= SATELLITE_SET;
         break;
-    case 0x48:                  /* GPS System Message */
+    case 0x48:
+        /* GPS System Message
+         * Not Present in:
+         *   Copernicus II (2009)
+         */
         buf[len] = '\0';
         GPSD_LOG(LOG_PROG, &session->context->errout,
                  "TSIP: GPS System Message (0x48): %s\n", buf);
         break;
-    case 0x4a:                  /* Single-Precision Position LLA */
+    case 0x4a:
+        /* Single-Precision Position LLA
+         * Present in:
+         *   Copernicus II (2009)
+         */
         if (len != 20) {
             bad_len = 20;
             break;
@@ -613,13 +647,19 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     case 0x4b:
         /* Machine/Code ID and Additional Status (0x4b)
          * polled by i0x25 or 0x26.  Sent with 0x46.
-        /* Present in all receivers? */
+         * Present in:
+         *   Copernicus II (2009)
+         *   all receivers?
+         */
         if (len != 3) {
             bad_len = 3;
             break;
         }
         session->driver.tsip.machine_id = getub(buf, 0);  /* Machine ID */
-        u2 = getub(buf, 1);     /* Status 1 */
+        /* Status 1
+         * bit 1 -- No RTC at power up
+         * bit 3 -- almanac not complete and current */
+        u2 = getub(buf, 1);
         u3 = getub(buf, 2);     /* Status 2/Superpacket Support */
         GPSD_LOG(LOG_INF, &session->context->errout,
                  "TSIP: Machine ID (0x4b): %02x %02x %02x\n",
@@ -701,6 +741,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          * Present in:
          *   Vintage 1999 devices
          *   Lassen iQ, but not documented
+         * Not Present in:
+         *   Copernicus II (2009)
          */
         if (len != 17) {
             bad_len = 17;
@@ -720,6 +762,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          * Present in:
          *   Acutime 360
          *   ICM SMT 360, RES SMT 360.  (undocumented)
+         * Not Present in:
+         *   Copernicus II (2009)
          */
          {
             float  bias, bias_rate;
@@ -765,7 +809,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             session->driver.tsip.req_compact = now;
         }
         break;
-    case 0x56:                  /* Velocity Fix, East-North-Up (ENU) */
+    case 0x56:
+        /* Velocity Fix, East-North-Up (ENU)
+         * Present in:
+         *   Copernicus II (2009)
+         */
         if (len != 20) {
             bad_len = 20;
             break;
@@ -783,7 +831,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  "TSIP: Vel ENU (0x56): %f %f %f %f %f\n",
                  f1, f2, f3, f4, f5);
         break;
-    case 0x57:                  /* Information About Last Computed Fix */
+    case 0x57:
+        /* Information About Last Computed Fix
+         * Present in:
+         *   Copernicus II (2009)
+         */
         if (len != 8) {
             bad_len = 8;
             break;
@@ -800,7 +852,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         GPSD_LOG(LOG_INF, &session->context->errout,
                  "TSIP: Fix info (0x57): %02x %02x %u %f\n", u1, u2, week, f1);
         break;
-    case 0x5a:                  /* Raw Measurement Data */
+    case 0x5a:
+        /* Raw Measurement Data
+         * Present in:
+         *   Copernicus II (2009)
+         */
         if (len != 29) {
             bad_len = 29;
             break;
@@ -947,6 +1003,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          *   ICM SMT 360 (2018)
          *   RES SMT 360 (2018)
          * Not present in:
+         *   Copernicus II (2009)
          *   Lassen SQ (2002)
          *   Lassen iQ (2005) */
         if (18 > len) {
@@ -1040,6 +1097,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* All-In-View Satellite Selection (0x6d) polled by 0x24
          *
          * Present in:
+         *   Copernicus II (2009)
          *   Lassen SQ
          *   Lassen iQ
          * Not present in:
@@ -1136,7 +1194,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          * Sent after every position fix in Auto GPS/DGPS,
          * so potential cycle ender
          *
-         * Lassen iQ, deprecated use 0xbb instead
+         * Present in:
+         *   Copernicus II (2009)
+         *   Lassen iQ, deprecated use 0xbb instead
          */
         if (len != 1) {
             bad_len = 1;
@@ -1151,7 +1211,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  "TSIP: DPFM (0x82) mode %d status=%d\n",
                  u1, session->gpsdata.status);
         break;
-    case 0x83:     /* Double-Precision XYZ Position Fix and Bias Information */
+    case 0x83:
+        /* Double-Precision XYZ Position Fix and Bias Information
+         * Present in:
+         *   Copernicus II (2009)
+         */
         if (len != 36) {
             bad_len = 36;
             break;
@@ -1165,7 +1229,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  "TSIP: Position (0x83) XYZ %f %f %f %f %f\n",
                  d1, d2, d3, d4, f1);
         break;
-    case 0x84:     /* Double-Precision LLA Position Fix and Bias Information */
+    case 0x84:
+        /* Double-Precision LLA Position Fix and Bias Information
+         * Present in:
+         *   Copernicus II (2009)
+         */
         if (len != 36) {
             bad_len = 36;
             break;
@@ -1199,10 +1267,22 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  session->newdata.longitude,
                  session->newdata.altMSL);
         break;
-    case 0x8f:                  /* Super Packet.  Well...  */
+    case 0x8f:
+        /* Super Packet.
+         * Present in:
+         *   ACE II
+         *   ACE III
+         *   Copernicus II (2009)
+         *   ICM SMT 360
+         *   RES SMT 360
+         */
         u1 = (uint8_t) getub(buf, 0);
-        switch (u1) {           /* sub-packet ID */
-        case 0x15:              /* Current Datum Values */
+        switch (u1) {           /* sub-code ID */
+        case 0x15:
+            /* Current Datum Values
+             * Not Present in:
+             *   Copernicus II (2009)
+             */
             if (len != 43) {
                 bad_len = 43;
                 break;
@@ -1224,6 +1304,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
              * CSK sez "why does my Lassen SQ output oversize packets?"
              * Present in:
              *  ACE II
+             *  Copernicus, Copernicus II (64-bytes)
              * Not present in:
              *  ICM SMT 360
              *  RES SMT 360
@@ -1323,10 +1404,17 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                      session->newdata.altHAE,
                      session->newdata.mode, session->gpsdata.status);
             break;
-        case 0x23:              /* Compact Super Packet */
+        case 0x23:
+            /* Compact Super Packet (0x8f-23)
+             * Present in:
+             *   Copernicus, Copernicus II
+             * Not present in:
+             *  ICM SMT 360
+             *  RES SMT 360
+             */
             session->driver.tsip.req_compact = 0;
             /* CSK sez "i don't trust this to not be oversized either." */
-            if (len < 29) {
+            if (29 > len) {
                 bad_len = 29;
                 break;
             }
@@ -1387,7 +1475,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                     STATUS_SET | MODE_SET | CLEAR_IS |
                     REPORT_IS | VNED_SET;
             GPSD_LOG(LOG_DATA, &session->context->errout,
-                     "TSIP: SP-CSP 0x23: time %s lat %.2f lon %.2f "
+                     "TSIP: SP-CSP (0x8f-23): time %s lat %.2f lon %.2f "
                      "altMSL %.2f mode %d status %d\n",
                      timespec_str(&session->newdata.time, ts_buf,
                                   sizeof(ts_buf)),
@@ -1400,7 +1488,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             /* Packet Broadcast Mask (0x8f-a5) polled by 0x8e-a5
              *
              * Present in:
-             * ICM SMT 360, RES SMT 360
+             *  ICM SMT 360
+             *  RES SMT 360
+             * Not Present in:
+             *   Copernicus II (2009)
              */
             {
                 uint16_t mask0, mask1;
@@ -1416,7 +1507,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             }
             break;
 
-        case 0xab:              /* Thunderbolt Timing Superpacket */
+        case 0xab:
+            /* Thunderbolt Timing Superpacket
+             * Not Present in:
+             *   Copernicus II (2009)
+             */
             if (17 > len) {
                 bad_len = 17;
                 break;
@@ -1455,6 +1550,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
              *   ThunderboltE
              *   ICM SMT 360
              *   RES SMT 360
+             * Not Present in:
+             *   Copernicus II (2009)
              */
             if (len != 68) {
                 bad_len = 68;
@@ -1567,13 +1664,41 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                      gps_maskdump(mask));
             break;
 
+        case 0x21:
+            /* Request accuracy information
+             * Present in:
+             *   Copernicus II (2009)
+             */
+            // FALLTHROUGH
+        case 0x2a:
+            /* Request Fix and Channel Tracking info, Type 1
+             * Present in:
+             *   Copernicus II (2009)
+             */
+            // FALLTHROUGH
+        case 0x2b:
+            /* Request Fix and Channel Tracking info, Type 2
+             * Present in:
+             *   Copernicus II (2009)
+             */
+            // FALLTHROUGH
+        case 0x4a:
+            /* Set Copernicus II GPS Cable Delay and PPS polarity
+             * Present in:
+             *   Copernicus II (2009)
+             */
+            // FALLTHROUGH
         default:
             GPSD_LOG(LOG_WARN, &session->context->errout,
                      "TSIP: Unhandled TSIP superpacket type 0x8f-%02x\n",
                      u1);
         }
         break;
-    case 0xbb:                  /* Navigation Configuration */
+    case 0xbb:
+        /* Navigation Configuration
+         * Present in:
+         *   Copernicus II (2009)
+         */
         if (len != 40 && len != 43) {
             /* see packet.c for explamation */
             bad_len = 40;
@@ -1594,23 +1719,95 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  u1, u2, u3, u4, f1, f2, f3, f4, u5);
         break;
 
-    case 0x49:                  /* Almanac Health Page */
+    case 0x49:
+        /* Almanac Health Page
+         * Not Present in:
+         *   Copernicus II (2009)
+         */
         // FALLTHROUGH
-    case 0x58:          /* Satellite System Data/Acknowledge from Receiver */
+    case 0x4d:
+        /* Oscillator Offset
+         * Present in:
+         *   Copernicus II (2009)
+         */
         // FALLTHROUGH
-    case 0x59:          /* Status of Satellite Disable or Ignore Health */
+    case 0x4e:
+        /* Response to set GPS time
+         * Present in:
+         *   Copernicus II (2009)
+         */
         // FALLTHROUGH
-    case 0x5b:                  /* Satellite Ephemeris Status */
+    case 0x58:
+        /* Satellite System Data/Acknowledge from Receiver
+         * Present in:
+         *   Copernicus II (2009)
+         */
         // FALLTHROUGH
-    case 0x5e:                  /* Additional Fix Status Report */
+    case 0x59:
+        /* Status of Satellite Disable or Ignore Health
+         * Not Present in:
+         *   Copernicus II (2009)
+         */
         // FALLTHROUGH
-    case 0x6e:                  /* Synchronized Measurements */
+    case 0x5b:
+        /* Satellite Ephemeris Status
+         * Not Present in:
+         *   Copernicus II (2009)
+         */
         // FALLTHROUGH
-    case 0x6f:                  /* Synchronized Measurements Report */
+    case 0x5e:
+        /* Additional Fix Status Report
+         * Not Present in:
+         *   Copernicus II (2009)
+         */
         // FALLTHROUGH
-    case 0x70:                  /* Filter Report */
+    case 0x6e:
+        /* Synchronized Measurements
+         * Not Present in:
+         *   Copernicus II (2009)
+         */
         // FALLTHROUGH
-    case 0x7a:                  /* NMEA settings */
+    case 0x6f:
+        /* Synchronized Measurements Report
+         * Not Present in:
+         *   Copernicus II (2009)
+         */
+        // FALLTHROUGH
+    case 0x70:
+        /* Filter Report
+         * Not Present in:
+         *   Copernicus II (2009)
+         */
+        // FALLTHROUGH
+    case 0x7a:
+        /* NMEA settings
+         * Not Present in:
+         *   Copernicus II (2009)
+         */
+        // FALLTHROUGH
+    case 0x89:
+        /* Receiver acquisition sensitivity mode
+         * Present in:
+         *   Copernicus II (2009)
+         */
+        // FALLTHROUGH
+    case 0xbc:
+        /* Receiver port configuration
+         * Present in:
+         *   Copernicus II (2009)
+         */
+        // FALLTHROUGH
+    case 0xc1:
+        /* Bit Mask for GPIOs in Standby Mode
+         * Present in:
+         *   Copernicus II (2009)
+         */
+        // FALLTHROUGH
+    case 0xc2:
+        /* SBAS SV Mask
+         * Present in:
+         *   Copernicus II (2009)
+         */
         // FALLTHROUGH
     default:
         GPSD_LOG(LOG_WARN, &session->context->errout,
