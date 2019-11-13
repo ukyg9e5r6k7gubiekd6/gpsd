@@ -1553,6 +1553,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                          "TSIP: PBM (0x8f-a5) mask0 x%04x mask1 x%04x\n",
                          mask0, mask1);
             }
+            // RES SMT 360 default 5, 0
             break;
 
         case 0xab:
@@ -2077,6 +2078,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         // request Receiver Configuration (0xbb)
         putbyte(buf, 0, 0x00);
         (void)tsip_write(session, 0xbb, buf, 1);
+        // request Packet Broadcast Mask
+        putbyte(buf, 0, 0xa5);
+        (void)tsip_write(session, 0x8e, buf, 1);
 #endif // UNUSED
     }
 
