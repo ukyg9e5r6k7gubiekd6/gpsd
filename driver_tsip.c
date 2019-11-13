@@ -268,6 +268,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     switch (id) {
     case 0x13:
         /* Packet Received
+         * Present in:
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          * Not present in:
          *    Copernicus II
          */
@@ -435,6 +438,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* GPS Time (0x41).  polled by 0x21
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         if (len != 10) {
             bad_len = 10;
@@ -461,6 +466,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* Single-Precision Position Fix, XYZ ECEF
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         if (len != 16) {
             bad_len = 16;
@@ -476,6 +483,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         break;
     case 0x43:
         /* Velocity Fix, XYZ ECEF
+         * Present in:
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          * Not Present in:
          *   Copernicus II (2009)
          */
@@ -545,6 +555,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* Health of Receiver (0x46).  Poll with 0x26
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          *   all models?
          * RES SMT 360 says use 0x8f-ab or 0x8f-ac instead
          */
@@ -574,6 +586,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* Signal Levels for all Satellites
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         if (1 > len) {
             bad_len = 1;
@@ -605,6 +619,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* GPS System Message
          * Not Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         buf[len] = '\0';
         GPSD_LOG(LOG_PROG, &session->context->errout,
@@ -614,6 +630,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* Single-Precision Position LLA
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         if (len != 20) {
             bad_len = 20;
@@ -649,6 +667,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          * polled by i0x25 or 0x26.  Sent with 0x46.
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          *   all receivers?
          */
         if (len != 3) {
@@ -743,6 +763,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          *   Lassen iQ, but not documented
          * Not Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         if (len != 17) {
             bad_len = 17;
@@ -780,6 +802,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          * Seems to be present in all TSIP
          * Present, bit 5 (0x20) is set if superpackets allowed.
          * seems to be set in RES SMT 360 and RES SMT 360, but undocumented.
+         * Present in:
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         if (len != 4) {
             bad_len = 4;
@@ -813,6 +838,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* Velocity Fix, East-North-Up (ENU)
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         if (len != 20) {
             bad_len = 20;
@@ -835,6 +862,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* Information About Last Computed Fix
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         if (len != 8) {
             bad_len = 8;
@@ -856,6 +885,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* Raw Measurement Data
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         if (len != 29) {
             bad_len = 29;
@@ -877,7 +908,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          *  Copernicus, Copernicus II
          *  Thunderbold E
          * Not Present in:
-         *  ICM SMT 360, RES SMT 360
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         if (len != 24) {
             bad_len = 24;
@@ -939,7 +971,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          *
          * GNSS only, no WAAS reported here or used in fix
          * Present in:
-         *  ICM SMT 360, RES SMT 360
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          * Not Present in:
          *  Copernicus, Copernicus II
          *  Thunderbold E
@@ -1197,6 +1230,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          * Present in:
          *   Copernicus II (2009)
          *   Lassen iQ, deprecated use 0xbb instead
+         * Not Present in:
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         if (len != 1) {
             bad_len = 1;
@@ -1215,6 +1251,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* Double-Precision XYZ Position Fix and Bias Information
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         if (len != 36) {
             bad_len = 36;
@@ -1233,6 +1271,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* Double-Precision LLA Position Fix and Bias Information
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         if (len != 36) {
             bad_len = 36;
@@ -1282,6 +1322,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             /* Current Datum Values
              * Not Present in:
              *   Copernicus II (2009)
+             *   ICM SMT 360 (2018)
+             *   RES SMT 360 (2018)
              */
             if (len != 43) {
                 bad_len = 43;
@@ -1409,8 +1451,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
              * Present in:
              *   Copernicus, Copernicus II
              * Not present in:
-             *  ICM SMT 360
-             *  RES SMT 360
+             *   ICM SMT 360
+             *   RES SMT 360
              */
             session->driver.tsip.req_compact = 0;
             /* CSK sez "i don't trust this to not be oversized either." */
@@ -1664,6 +1706,15 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                      gps_maskdump(mask));
             break;
 
+        case 0x02:
+            /* UTC Information
+             * Present in:
+             *   ICM SMT 360 (2018)
+             *   RES SMT 360 (2018)
+             * Not Present in:
+             *   Copernicus II (2009)
+             */
+            // FALLTHROUGH
         case 0x21:
             /* Request accuracy information
              * Present in:
@@ -1682,9 +1733,101 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
              *   Copernicus II (2009)
              */
             // FALLTHROUGH
-        case 0x4a:
-            /* Set Copernicus II GPS Cable Delay and PPS polarity
+        case 0x41:
+            /* Stored manufacturing operating parameters
              * Present in:
+             *   ICM SMT 360 (2018)
+             *   RES SMT 360 (2018)
+             * Not Present in:
+             *   Copernicus II (2009)
+             */
+            // FALLTHROUGH
+        case 0x42:
+            /* Stored production parameters
+             * Present in:
+             *   ICM SMT 360 (2018)
+             *   RES SMT 360 (2018)
+             * Not Present in:
+             *   Copernicus II (2009)
+             */
+            // FALLTHROUGH
+        case 0x4a:
+            /* PPS characteristics
+             * Present in:
+             *   ICM SMT 360 (2018)
+             *   RES SMT 360 (2018)
+             *   Copernicus II (2009)
+             */
+            // FALLTHROUGH
+        case 0x4e:
+            /* PPS Output options
+             * Present in:
+             *   ICM SMT 360 (2018)
+             *   RES SMT 360 (2018)
+             * Not Present in:
+             *   Copernicus II (2009)
+             */
+            // FALLTHROUGH
+        case 0x4f:
+            /* Set PPS Width
+             * Present in:
+             *   Copernicus II (2009)
+             * Not Present in:
+             *   ICM SMT 360 (2018)
+             *   RES SMT 360 (2018)
+             */
+            // FALLTHROUGH
+        case 0xa0:
+            /* DAC value
+             * Present in:
+             *   ICM SMT 360 (2018)
+             *   RES SMT 360 (2018)
+             * Not Present in:
+             *   Copernicus II (2009)
+             */
+            // FALLTHROUGH
+        case 0xa2:
+            /* UTC/GPS timing
+             * Present in:
+             *   ICM SMT 360 (2018)
+             *   RES SMT 360 (2018)
+             * Not Present in:
+             *   Copernicus II (2009)
+             */
+            // FALLTHROUGH
+        case 0xa3:
+            /* Oscillator disciplining command
+             * Present in:
+             *   ICM SMT 360 (2018)
+             *   RES SMT 360 (2018)
+             * Not Present in:
+             *   Copernicus II (2009)
+             */
+            // FALLTHROUGH
+        case 0xa6:
+            /* self-survey commands
+             * Present in:
+             *   ICM SMT 360 (2018)
+             *   RES SMT 360 (2018)
+             * Not Present in:
+             *   Copernicus II (2009)
+             */
+            // FALLTHROUGH
+        case 0xa8:
+            /* Oscillator disciplining parameters
+             * Present in:
+             *   ICM SMT 360 (2018)
+             *   RES SMT 360 (2018)
+             * Not Present in:
+             *   Copernicus II (2009)
+             */
+            // FALLTHROUGH
+        case 0xa9:
+            /* self-survey parameters
+             * Present in:
+             *   ICM SMT 360 (2018)
+             *   RES SMT 360 (2018)
+             * Not Present in:
              *   Copernicus II (2009)
              */
             // FALLTHROUGH
@@ -1719,6 +1862,33 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  u1, u2, u3, u4, f1, f2, f3, f4, u5);
         break;
 
+    case 0x2e:
+        /* Request GPS Time
+         * Present in:
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
+         * Not Present in:
+         *   Copernicus II (2009)
+         */
+        // FALLTHROUGH
+    case 0x32:
+        /* Request Unit Position
+         * Present in:
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
+         * Not Present in:
+         *   Copernicus II (2009)
+         */
+        // FALLTHROUGH
+    case 0x38:
+        /* Request SV System data
+         * Present in:
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
+         * Not Present in:
+         *   Copernicus II (2009)
+         */
+        // FALLTHROUGH
     case 0x49:
         /* Almanac Health Page
          * Not Present in:
@@ -1735,16 +1905,23 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* Response to set GPS time
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         // FALLTHROUGH
     case 0x58:
         /* Satellite System Data/Acknowledge from Receiver
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         // FALLTHROUGH
     case 0x59:
         /* Status of Satellite Disable or Ignore Health
+         * Present in:
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          * Not Present in:
          *   Copernicus II (2009)
          */
@@ -1753,34 +1930,55 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* Satellite Ephemeris Status
          * Not Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         // FALLTHROUGH
     case 0x5e:
         /* Additional Fix Status Report
          * Not Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         // FALLTHROUGH
     case 0x6e:
         /* Synchronized Measurements
          * Not Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         // FALLTHROUGH
     case 0x6f:
         /* Synchronized Measurements Report
          * Not Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         // FALLTHROUGH
     case 0x70:
         /* Filter Report
          * Not Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         // FALLTHROUGH
     case 0x7a:
         /* NMEA settings
+         * Not Present in:
+         *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
+         */
+        // FALLTHROUGH
+    case 0x7b:
+        /* NMEA interval and message mask response
+         * Present in:
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          * Not Present in:
          *   Copernicus II (2009)
          */
@@ -1789,24 +1987,34 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* Receiver acquisition sensitivity mode
          * Present in:
          *   Copernicus II (2009)
+         * Not Present in:
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         // FALLTHROUGH
     case 0xbc:
         /* Receiver port configuration
          * Present in:
          *   Copernicus II (2009)
+         * Not Present in:
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         // FALLTHROUGH
     case 0xc1:
         /* Bit Mask for GPIOs in Standby Mode
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         // FALLTHROUGH
     case 0xc2:
         /* SBAS SV Mask
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         // FALLTHROUGH
     default:
