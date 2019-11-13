@@ -1,7 +1,7 @@
 /*
  * Handle the Trimble TSIP packet format
  * by Rob Janssen, PE1CHL.
- * Accutime Gold support by Igor Socec <igorsocec@gmail.com>
+ * Acutime Gold support by Igor Socec <igorsocec@gmail.com>
  * Trimble RES multi-constelation support by Nuno Goncalves <nunojpg@gmail.com>
  *
  * Week counters are not limited to 10 bits. It's unknown what
@@ -51,7 +51,7 @@
 
 #define SEMI_2_DEG      (180.0 / 2147483647)    /* 2^-31 semicircle to deg */
 
-void configuration_packets_accutime_gold(struct gps_device_t *session);
+void configuration_packets_acutime_gold(struct gps_device_t *session);
 void configuration_packets_generic(struct gps_device_t *session);
 
 /* convert TSIP SV Type to satellite_t.gnssid and satellite_t.svid
@@ -304,7 +304,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
     case 0x1c:        // Hardware/Software Version Information
         /* Present in:
-         *   Accutime Gold
+         *   Acutime Gold
          *   Lassen iQ (2005) fw 1.16+
          *   Copernicus (2006)
          *   Copernicus II (2009)
@@ -403,8 +403,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 /* Detecting device by Hardware Code */
                 switch (session->driver.tsip.hardware_code) {
                 case 3001:            // Acutime Gold
-                    session->driver.tsip.subtype = TSIP_ACCUTIME_GOLD;
-                    configuration_packets_accutime_gold(session);
+                    session->driver.tsip.subtype = TSIP_ACUTIME_GOLD;
+                    configuration_packets_acutime_gold(session);
                     break;
                 case 3023:            // RES SMT 360
                     session->driver.tsip.subtype = TSIP_RESSMT360;
@@ -1858,13 +1858,13 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         }
         u1 = getub(buf, 0);             // Subcode
         u2 = getub(buf, 1);             // Operating Dimension
-        u3 = getub(buf, 2);             // DGPS Mode (not in Accutime Gold)
+        u3 = getub(buf, 2);             // DGPS Mode (not in Acutime Gold)
         u4 = getub(buf, 3);             // Dynamics Code
         f1 = getbef32((char *)buf, 5);  // Elevation Mask
         f2 = getbef32((char *)buf, 9);  // AMU Mask
         f3 = getbef32((char *)buf, 13); // DOP Mask
         f4 = getbef32((char *)buf, 17); // DOP Switch
-        u5 = getub(buf, 21);            // DGPS Age Limit (not in Accutime Gold)
+        u5 = getub(buf, 21);            // DGPS Age Limit (not in Acutime Gold)
         /* Constellation
          * bit 0 - GPS
          * bit 1 - GLONASS
@@ -2368,13 +2368,13 @@ void configuration_packets_generic(struct gps_device_t *session)
         (void)tsip_write(session, 0xbb, buf, 1);
 }
 
-/* configure Accutime Gold to a known state */
-void configuration_packets_accutime_gold(struct gps_device_t *session)
+/* configure Acutime Gold to a known state */
+void configuration_packets_acutime_gold(struct gps_device_t *session)
 {
         unsigned char buf[100];
 
         GPSD_LOG(LOG_PROG, &session->context->errout,
-                 "TSIP: configuration_packets_accutime_gold()\n");
+                 "TSIP: configuration_packets_acutime_gold()\n");
 
         /* Request Firmware Version (0x1c-01)
          * returns Firmware component version information (0x1x-81) */
