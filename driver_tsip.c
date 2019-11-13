@@ -1841,25 +1841,38 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         /* Navigation Configuration
          * Present in:
          *   Copernicus II (2009)
+         *   ICM SMT 360 (2018)
+         *   RES SMT 360 (2018)
          */
         if (len != 40 && len != 43) {
             /* see packet.c for explamation */
             bad_len = 40;
             break;
         }
-        u1 = getub(buf, 0);     /* Subcode */
-        u2 = getub(buf, 1);     /* Operating Dimension */
-        u3 = getub(buf, 2);     /* DGPS Mode (not enabled in Accutime Gold) */
-        u4 = getub(buf, 3);     /* Dynamics Code */
-        f1 = getbef32((char *)buf, 5);  /* Elevation Mask */
-        f2 = getbef32((char *)buf, 9);  /* AMU Mask */
-        f3 = getbef32((char *)buf, 13); /* DOP Mask */
-        f4 = getbef32((char *)buf, 17); /* DOP Switch */
-        u5 = getub(buf, 21);    /* DGPS Age Limit (not in Accutime Gold) */
+        u1 = getub(buf, 0);             // Subcode
+        u2 = getub(buf, 1);             // Operating Dimension
+        u3 = getub(buf, 2);             // DGPS Mode (not in Accutime Gold)
+        u4 = getub(buf, 3);             // Dynamics Code
+        f1 = getbef32((char *)buf, 5);  // Elevation Mask
+        f2 = getbef32((char *)buf, 9);  // AMU Mask
+        f3 = getbef32((char *)buf, 13); // DOP Mask
+        f4 = getbef32((char *)buf, 17); // DOP Switch
+        u5 = getub(buf, 21);            // DGPS Age Limit (not in Accutime Gold)
+        /* Constellation
+         * bit 0 - GPS
+         * bit 1 - GLONASS
+         * bit 2 - reserved
+         * bit 3 - BeiDou
+         * bit 4 - Galileo
+         * bit 5 - QZSS
+         * bit 6 - reserved
+         * bit 7 - reserved
+         */
+        u6 = getub(buf, 27);
         GPSD_LOG(LOG_INF, &session->context->errout,
                  "TSIP: Navigation Configuration (0xbb) %u %u %u %u %f %f %f "
-                 "%f %u\n",
-                 u1, u2, u3, u4, f1, f2, f3, f4, u5);
+                 "%f %u x%x\n",
+                 u1, u2, u3, u4, f1, f2, f3, f4, u5, u6);
         break;
 
     case 0x2e:
