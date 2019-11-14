@@ -494,17 +494,21 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          *   ICM SMT 360 (2018)
          *   RES SMT 360 (2018)
          */
-        if (len != 16) {
+        if (16 > len) {
             bad_len = 16;
             break;
         }
-        f1 = getbef32((char *)buf, 0);  /* X */
-        f2 = getbef32((char *)buf, 4);  /* Y */
-        f3 = getbef32((char *)buf, 8);  /* Z */
+        session->newdata.ecef.x = getbef32((char *)buf, 0);  /* X */
+        session->newdata.ecef.y = getbef32((char *)buf, 4);  /* Y */
+        session->newdata.ecef.z = getbef32((char *)buf, 8);  /* Z */
         f4 = getbef32((char *)buf, 12); /* time-of-fix */
         GPSD_LOG(LOG_INF, &session->context->errout,
                  "TSIP: GPS Position (0x42): XYZ %f %f %f %f\n",
-                 f1, f2, f3, f4);
+                 session->newdata.ecef.x,
+                 session->newdata.ecef.y,
+                 session->newdata.ecef.z,
+                 f4);
+        mask = ECEF_SET;
         break;
     case 0x43:
         /* Velocity Fix, XYZ ECEF
@@ -1287,18 +1291,22 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          *   ICM SMT 360 (2018)
          *   RES SMT 360 (2018)
          */
-        if (len != 36) {
+        if (36 > len) {
             bad_len = 36;
             break;
         }
-        d1 = getbed64((char *)buf, 0);  /* X */
-        d2 = getbed64((char *)buf, 8);  /* Y */
-        d3 = getbed64((char *)buf, 16); /* Z */
+        session->newdata.ecef.x = getbed64((char *)buf, 0);  /* X */
+        session->newdata.ecef.y = getbed64((char *)buf, 8);  /* Y */
+        session->newdata.ecef.z = getbed64((char *)buf, 16); /* Z */
         d4 = getbed64((char *)buf, 24); /* clock bias */
         f1 = getbef32((char *)buf, 32); /* time-of-fix */
         GPSD_LOG(LOG_INF, &session->context->errout,
                  "TSIP: Position (0x83) XYZ %f %f %f %f %f\n",
-                 d1, d2, d3, d4, f1);
+                 session->newdata.ecef.x,
+                 session->newdata.ecef.y,
+                 session->newdata.ecef.z,
+                 d4, f1);
+        mask = ECEF_SET;
         break;
     case 0x84:
         /* Double-Precision LLA Position Fix and Bias Information
@@ -1563,8 +1571,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             /* Packet Broadcast Mask (0x8f-a5) polled by 0x8e-a5
              *
              * Present in:
-             *  ICM SMT 360
-             *  RES SMT 360
+             *   ICM SMT 360
+             *   RES SMT 360
              * Not Present in:
              *   Copernicus II (2009)
              */
@@ -1581,6 +1589,26 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                          mask0, mask1);
             }
             // RES SMT 360 default 5, 0
+            break;
+
+        case 0xa6:
+            /* Self-Survey Comman (0x8f-a6) polled by 0x8e-a6
+             *
+             * Present in:
+             *   ICM SMT 360
+             *   RES SMT 360
+             * Not Present in:
+             *   Copernicus II (2009)
+             */
+            if (3 > len) {
+                bad_len = 3;
+                break;
+            }
+            u2 = getub(buf, 1);          // Command
+            u3 = getub(buf, 2);          // Status
+            GPSD_LOG(LOG_DATA, &session->context->errout,
+                     "TSIP: SSC (0x8f-a6) command x%x status x%x\n",
+                     u2, u3);
             break;
 
         case 0xab:
@@ -1831,15 +1859,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             // FALLTHROUGH
         case 0xa3:
             /* Oscillator disciplining command
-             * Present in:
-             *   ICM SMT 360 (2018)
-             *   RES SMT 360 (2018)
-             * Not Present in:
-             *   Copernicus II (2009)
-             */
-            // FALLTHROUGH
-        case 0xa6:
-            /* self-survey commands
              * Present in:
              *   ICM SMT 360 (2018)
              *   RES SMT 360 (2018)
@@ -2501,7 +2520,7 @@ void configuration_packets_res360(struct gps_device_t *session)
 
     // set I/O Options
     // RES SMT 360 defaults:  12 02 00 08
-    // position and velocity seem to be ignored...
+    // position and velocity only sent during self-survey.
     // Position
     putbyte(buf, 0, IO1_DP|IO1_LLA|IO1_ECEF);
     // Velocity
@@ -2520,6 +2539,11 @@ void configuration_packets_res360(struct gps_device_t *session)
     putbyte(buf, 0, 0x00);
     (void)tsip_write(session, 0xbb, buf, 1);
 #endif // __UNUSED__
+    // Restart Self-Survey (0x8e-a6)
+    // which gives us 2,000 normal fixes, before going quite again.
+    putbyte(buf, 0, 0xa6);
+    putbyte(buf, 1, 0x00);
+    (void)tsip_write(session, 0x8e, buf, 2);
 }
 
 /* this is everything we export */
