@@ -675,6 +675,7 @@ struct gps_device_t {
 #define TSIP_RESSMT360          3023
 #define TSIP_ICMSMT360          3026
 #define TSIP_RES36017x22        3031
+            uint8_t alt_is_msl;         // 0 if alt is HAE, 1 if MSL
 	} tsip;
 #endif /* TSIP_ENABLE */
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */

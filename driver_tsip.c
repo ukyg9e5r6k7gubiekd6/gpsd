@@ -672,9 +672,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         }
         session->newdata.latitude = getbef32((char *)buf, 0) * RAD_2_DEG;
         session->newdata.longitude = getbef32((char *)buf, 4) * RAD_2_DEG;
-        /* depending on GPS config, could be either WGS84 or MSL
-         * default differs by model, usually WGS84, we try to force MSL */
-        session->newdata.altMSL = getbef32((char *)buf, 8);
+        /* depending on GPS config, could be either WGS84 or MSL */
+        d1 = getbef32((char *)buf, 8);
+        if (0 == session->driver.tsip.alt_is_msl) {
+            session->newdata.altHAE = d1;
+        } else {
+            session->newdata.altMSL = d1;
+        }
+
         //f1 = getbef32((char *)buf, 12);       clock bias */
         ftow = getbef32((char *)buf, 16);       /* time-of-fix */
         if ((session->context->valid & GPS_TIME_VALID)!=0) {
@@ -689,11 +694,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         mask |= LATLON_SET | ALTITUDE_SET | CLEAR_IS;
         GPSD_LOG(LOG_DATA, &session->context->errout,
                  "TSIP: SP-PLLA (0x4a): time=%s lat=%.2f lon=%.2f "
-                 "altMSL=%.2f\n",
+                 "alt=%.2f\n",
                  timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
                  session->newdata.latitude,
-                 session->newdata.longitude,
-                 session->newdata.altMSL);
+                 session->newdata.longitude, d1);
         break;
     case 0x4b:
         /* Machine/Code ID and Additional Status (0x4b)
@@ -844,7 +848,12 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             break;
         }
         u1 = getub(buf, 0);     /* Position */
-        // FIXME: decode HAE/MSL from position
+        // decode HAE/MSL from Position byte
+        if (IO1_MSL == (IO1_MSL & u1)) {
+            session->driver.tsip.alt_is_msl = 1;
+        } else {
+            session->driver.tsip.alt_is_msl = 0;
+        }
         u2 = getub(buf, 1);     /* Velocity */
         /* Timing
          * bit 0 - reserved use 0x8e-a2 ?
@@ -1325,9 +1334,13 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         }
         session->newdata.latitude = getbed64((char *)buf, 0) * RAD_2_DEG;
         session->newdata.longitude = getbed64((char *)buf, 8) * RAD_2_DEG;
-        /* depending on GPS config, could be either WGS84 or MSL
-         * default differs by model, usually WGS84 */
-        session->newdata.altMSL = getbed64((char *)buf, 16);
+        /* depending on GPS config, could be either WGS84 or MSL */
+        d1 = getbed64((char *)buf, 16);
+        if (0 == session->driver.tsip.alt_is_msl) {
+            session->newdata.altHAE = d1;
+        } else {
+            session->newdata.altMSL = d1;
+        }
         mask |= ALTITUDE_SET;
         //d1 = getbed64((char *)buf, 24);       clock bias */
         ftow = getbef32((char *)buf, 32);       /* time-of-fix */
@@ -1342,15 +1355,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  "TSIP: DP-PLLA (0x84) %s %f %f %f\n",
                  timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
                  session->newdata.latitude,
-                 session->newdata.longitude, session->newdata.altMSL);
+                 session->newdata.longitude, d1);
         // this seems to be first in cycle
         mask |= LATLON_SET | CLEAR_IS;
         GPSD_LOG(LOG_DATA, &session->context->errout,
-                 "TSIP: DP-PLLA (0x84) time=%s lat=%.2f lon=%.2f altMSL=%.2f\n",
+                 "TSIP: DP-PLLA (0x84) time=%s lat=%.2f lon=%.2f alt=%.2f\n",
                  timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
                  session->newdata.latitude,
-                 session->newdata.longitude,
-                 session->newdata.altMSL);
+                 session->newdata.longitude, d1);
         break;
     case 0x8f:
         /* Super Packet.
@@ -1406,7 +1418,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             tow = getbeu32(buf, 8);     /* time in ms */
             sl1 = getbes32(buf, 12);    /* latitude */
             ul2 = getbeu32(buf, 16);    /* longitude */
-            // Lassen iQ doc says this is always altHAE
+            // Lassen iQ, and copernicus (ii) doc says this is always altHAE
             sl2 = getbes32(buf, 20);    /* altitude */
             u1 = getub(buf, 24);        /* velocity scaling */
             u2 = getub(buf, 27);        /* fix flags */
@@ -1442,7 +1454,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             session->newdata.longitude = (double)ul2 * SEMI_2_DEG;
             if (session->newdata.longitude > 180.0)
                 session->newdata.longitude -= 360.0;
-            // Lassen iQ doc says this is always altHAE
+            // Lassen iQ doc says this is always altHAE in mm
             session->newdata.altHAE = (double)sl2 * 1e-3;
             mask |= ALTITUDE_SET;
 
@@ -1496,6 +1508,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
              * Present in:
              *   Copernicus, Copernicus II
              * Not present in:
+             *   Lassen iQ
              *   ICM SMT 360
              *   RES SMT 360
              */
@@ -1511,8 +1524,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             u2 = getub(buf, 8);                 /* fix flags */
             sl1 = getbes32(buf, 9);             /* latitude */
             ul2 = getbeu32(buf, 13);            /* longitude */
-            /* depending on GPS config, could be either WGS84 or MSL
-             * default differs by model, usually WGS84 */
+            // Copernicus (ii) doc says this is always altHAE in mm
             sl3 = getbes32(buf, 17);    /* altitude */
             /* set xNED here */
             s2 = getbes16(buf, 21);     /* east velocity */
@@ -1543,9 +1555,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             session->newdata.longitude = (double)ul2 * SEMI_2_DEG;
             if (session->newdata.longitude > 180.0)
                 session->newdata.longitude -= 360.0;
-            /* depending on GPS config, could be either WGS84 or MSL
-             * default differs by model, usually WGS84, we try to force MSL */
-            session->newdata.altMSL = (double)sl3 * 1e-3;
+            // Copernicus (ii) doc says this is always altHAE in mm
+            session->newdata.altHAE = (double)sl3 * 1e-3;
             mask |= ALTITUDE_SET;
             if ((u2 & 0x20) != (uint8_t) 0)     /* check velocity scaling */
                 d5 = 0.02;
@@ -1563,11 +1574,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                     REPORT_IS | VNED_SET;
             GPSD_LOG(LOG_DATA, &session->context->errout,
                      "TSIP: SP-CSP (0x8f-23): time %s lat %.2f lon %.2f "
-                     "altMSL %.2f mode %d status %d\n",
+                     "altHAE %.2f mode %d status %d\n",
                      timespec_str(&session->newdata.time, ts_buf,
                                   sizeof(ts_buf)),
                      session->newdata.latitude, session->newdata.longitude,
-                     session->newdata.altMSL,
+                     session->newdata.altHAE,
                      session->newdata.mode, session->gpsdata.status);
             break;
 
@@ -1659,6 +1670,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
              *   ICM SMT 360
              *   RES SMT 360
              * Not Present in:
+             *   Lassen iQ
              *   Copernicus II (2009)
              */
             if (len != 68) {
@@ -1690,9 +1702,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             temp = getbef32((char *)buf, 32);
             session->newdata.latitude = getbed64((char *)buf, 36) * RAD_2_DEG;
             session->newdata.longitude = getbed64((char *)buf, 44) * RAD_2_DEG;
-            /* depending on GPS config, could be either WGS84 or MSL
-             * default differs by model, usually WGS84.
-             * ICM SMT 360 and RES SMT 360 are HAE, so we use altHAE */
+            // SMT 360 doc says this is always altHAE in meters
             session->newdata.altHAE = getbed64((char *)buf, 52);
             // ignore 60-63, always zero
             // ignore 64-67, reserved
