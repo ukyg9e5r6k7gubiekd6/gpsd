@@ -52,6 +52,7 @@
 #define SEMI_2_DEG      (180.0 / 2147483647)    /* 2^-31 semicircle to deg */
 
 void configuration_packets_acutime_gold(struct gps_device_t *session);
+void configuration_packets_res360(struct gps_device_t *session);
 void configuration_packets_generic(struct gps_device_t *session);
 
 /* convert TSIP SV Type to satellite_t.gnssid and satellite_t.svid
@@ -72,10 +73,31 @@ static unsigned char tsip_gnssid(unsigned svtype, short prn,
             // RES SMT 360 and ICM SMT 360 put SBAS in 33-54
             gnssid = GNSSID_SBAS;
             *svid = prn + 87;
+        } else if (64 < prn && 97 > prn) {
+            // RES SMT 360 and ICM SMT 360 put GLONASS in 65-96
+            gnssid = GNSSID_GLO;
+            *svid = prn - 64;
+        } else if (96 < prn && 134 > prn) {
+            // RES SMT 360 and ICM SMT 360 put Galileo in 97-133
+            gnssid = GNSSID_GAL;
+            *svid = prn - 96;
         } else if (119 < prn && 139 > prn) {
             // Copernicus (II) put SBAS in 120-138
             gnssid = GNSSID_SBAS;
             *svid = prn + 87;
+        } else if (183 == prn) {
+            gnssid = GNSSID_QZSS;
+            *svid = 1;
+        } else if (192 >= prn && 193 >= prn) {
+            gnssid = GNSSID_QZSS;
+            *svid = prn - 190;
+        } else if (200 == prn) {
+            gnssid = GNSSID_QZSS;
+            *svid = 4;
+        } else if (200 < prn && 238 > prn) {
+            // BeidDou in 201-237
+            gnssid = GNSSID_BD;
+            *svid = prn - 200;
         }
         // else: huh?
         break;
@@ -408,12 +430,15 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                     break;
                 case 3023:            // RES SMT 360
                     session->driver.tsip.subtype = TSIP_RESSMT360;
+                    configuration_packets_res360(session);
                     break;
                 case 3026:            // ICM SMT 360
                     session->driver.tsip.subtype = TSIP_ICMSMT360;
+                    configuration_packets_res360(session);
                     break;
                 case 3031:            // RES360 17x22
                     session->driver.tsip.subtype = TSIP_RES36017x22;
+                    configuration_packets_res360(session);
                     break;
                 case 1001:            // Lassen iQ
                     // FALLTHROUGH
@@ -799,12 +824,12 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          break;
     case 0x55:
         /* IO Options (0x55), polled by 0x35
-         * Seems to be present in all TSIP
-         * Present, bit 5 (0x20) is set if superpackets allowed.
-         * seems to be set in RES SMT 360 and RES SMT 360, but undocumented.
          * Present in:
          *   ICM SMT 360 (2018)
          *   RES SMT 360 (2018)
+         *   all TSIP?
+         *
+         * RES SMT 360 defaults:  12 02 00 08
          */
         if (len != 4) {
             bad_len = 4;
@@ -838,7 +863,6 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             (void)tsip_write(session, 0x8e, buf, 2);
             session->driver.tsip.req_compact = now;
         }
-        // RES SMT 360 defaults:  12 02 00 08
         break;
     case 0x56:
         /* Velocity Fix, East-North-Up (ENU)
@@ -894,17 +918,20 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          *   ICM SMT 360 (2018)
          *   RES SMT 360 (2018)
          */
-        if (len != 29) {
-            bad_len = 29;
+        if (25 > len) {
+            bad_len = 25;
             break;
         }
-        f1 = getbef32((char *)buf, 5);  /* Signal Level */
-        f2 = getbef32((char *)buf, 9);  /* Code phase */
-        f3 = getbef32((char *)buf, 13); /* Doppler */
-        d1 = getbed64((char *)buf, 17); /* Time of Measurement */
+        // Useless without the pseudorange...
+        u1 = getub(buf, 0);             // PRN 1-237
+        f1 = getbef32((char *)buf, 1);  // sample length
+        f2 = getbef32((char *)buf, 5);  // Signal Level, dbHz
+        f3 = getbef32((char *)buf, 9);  // Code phase, 1/16th chip
+        f4 = getbef32((char *)buf, 13); // Doppler, Hz @ L1
+        d1 = getbed64((char *)buf, 17); // Time of Measurement
         GPSD_LOG(LOG_PROG, &session->context->errout,
-                 "TSIP: Raw Measurement Data (0x5a): %d %f %f %f %f\n",
-                 getub(buf, 0), f1, f2, f3, d1);
+                 "TSIP: Raw Measurement Data (0x5a): %d %f %f %f %f %f\n",
+                 u1, f1, f2, f3, f4, d1);
         break;
     case 0x5c:
         /* Satellite Tracking Status (0x5c) polled by 0x3c
@@ -2447,6 +2474,52 @@ void configuration_packets_acutime_gold(struct gps_device_t *session)
         putbyte(buf, 3, 0x00); /* not used */
         putbyte(buf, 4, 0x00); /* not used */
         (void)tsip_write(session, 0x8e, buf, 5);
+}
+
+/* configure RES 360 to a known state */
+void configuration_packets_res360(struct gps_device_t *session)
+{
+    unsigned char buf[100];
+
+    GPSD_LOG(LOG_PROG, &session->context->errout,
+             "TSIP: configuration_packets_res360()\n");
+
+    // should already have versions 0x8f-81 and 0x8f-83.
+    /* Self-Survey Parameters (0x8e-a9) is default on
+     * query them? */
+
+    /* PPS Output Option (0x8e-4e) is default on */
+
+    /* Set Packet Broadcast Mask (0x8e-a5)
+     * RES SMT 360 default 5, 0 */
+    putbyte(buf, 0, 0xa5); /* Subcode */
+    /* Packets bit field = default + Auto output packets
+     *  1=0x8f-ab, 4=0x8f-ac, 0x40=Automatic Output Packets */
+    putbe16(buf, 1, 0x0045);
+    putbe16(buf, 3, 0x0000);
+    (void)tsip_write(session, 0x8e, buf, 5);
+
+    // set I/O Options
+    // RES SMT 360 defaults:  12 02 00 08
+    // position and velocity seem to be ignored...
+    // Position
+    putbyte(buf, 0, IO1_DP|IO1_LLA|IO1_ECEF);
+    // Velocity
+    putbyte(buf, 1, IO2_VECEF|IO2_ENU);
+    // Timing
+    putbyte(buf, 2, 0x01);          // Use 0x8e-a2
+    // Auxillary
+    putbyte(buf, 3, 0x08);          // Packet 0x5a off, dBHz
+    (void)tsip_write(session, 0x35, buf, 4);
+
+#ifdef __UNUSED__
+    // request I/O Options (0x55)
+    (void)tsip_write(session, 0x35, buf, 0);
+
+    // request Receiver Configuration (0xbb)
+    putbyte(buf, 0, 0x00);
+    (void)tsip_write(session, 0xbb, buf, 1);
+#endif // __UNUSED__
 }
 
 /* this is everything we export */
