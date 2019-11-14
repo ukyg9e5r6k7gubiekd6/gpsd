@@ -508,7 +508,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  session->newdata.ecef.y,
                  session->newdata.ecef.z,
                  f4);
-        mask = ECEF_SET;
+        mask = ECEF_SET | REPORT_IS;
         break;
     case 0x43:
         /* Velocity Fix, XYZ ECEF
@@ -522,14 +522,18 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             bad_len = 20;
             break;
         }
-        f1 = getbef32((char *)buf, 0);  /* X velocity */
-        f2 = getbef32((char *)buf, 4);  /* Y velocity */
-        f3 = getbef32((char *)buf, 8);  /* Z velocity */
+        session->newdata.ecef.vx = getbef32((char *)buf, 0);  // X velocity
+        session->newdata.ecef.vy = getbef32((char *)buf, 4);  // Y velocity
+        session->newdata.ecef.vz = getbef32((char *)buf, 8);  // Z velocity
         f4 = getbef32((char *)buf, 12); /* bias rate */
         f5 = getbef32((char *)buf, 16); /* time-of-fix */
         GPSD_LOG(LOG_INF, &session->context->errout,
                  "TSIP: GPS Velocity (0x43): XYZ %f %f %f %f %f\n",
-                 f1, f2, f3, f4, f5);
+                 session->newdata.ecef.vx,
+                 session->newdata.ecef.vy,
+                 session->newdata.ecef.vz,
+                 f4, f5);
+        mask = VECEF_SET;
         break;
     case 0x45:
         /* Software Version Information (0x45)
@@ -1306,7 +1310,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  session->newdata.ecef.y,
                  session->newdata.ecef.z,
                  d4, f1);
-        mask = ECEF_SET;
+        mask = ECEF_SET | REPORT_IS;
         break;
     case 0x84:
         /* Double-Precision LLA Position Fix and Bias Information
