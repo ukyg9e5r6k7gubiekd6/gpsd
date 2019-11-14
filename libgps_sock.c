@@ -70,11 +70,11 @@ static bool windows_init(void)
 static bool windows_finish(void)
 /* Shutdown Windows Sockets. */
 {
-  int res = WSACleanup();
-  if (res != 0) {
-    libgps_debug_trace((DEBUG_CALLS, "WSACleanup returns error %d\n", res));
-  }
-  return (res == 0);
+    int res = WSACleanup();
+    if (res != 0) {
+        libgps_debug_trace((DEBUG_CALLS, "WSACleanup returns error %d\n", res));
+    }
+    return (res == 0);
 }
 #endif /* HAVE_WINSOCK2_H */
 
@@ -97,11 +97,14 @@ int gps_sock_open(const char *host, const char *port,
 	if ((gpsdata->gps_fd =
 	    netlib_connectsock(AF_UNSPEC, host, port, "tcp")) < 0) {
 	    errno = gpsdata->gps_fd;
-	    libgps_debug_trace((DEBUG_CALLS, "netlib_connectsock() returns error %d\n", errno));
+	    libgps_debug_trace((DEBUG_CALLS,
+                               "netlib_connectsock() returns error %d\n",
+                               errno));
 	    return -1;
-        }
-	else
-	    libgps_debug_trace((DEBUG_CALLS, "netlib_connectsock() returns socket on fd %d\n", gpsdata->gps_fd));
+        } else
+	    libgps_debug_trace((DEBUG_CALLS,
+                "netlib_connectsock() returns socket on fd %d\n",
+                gpsdata->gps_fd));
 #else /* HAVE_WINSOCK2_H */
 	QTcpSocket *sock = new QTcpSocket();
 	gpsdata->gps_fd = sock;
@@ -131,7 +134,8 @@ bool gps_sock_waiting(const struct gps_data_t *gpsdata, int timeout)
 /* timeout is in uSec */
 {
 #ifndef USE_QT
-    libgps_debug_trace((DEBUG_CALLS, "gps_waiting(%d): %d\n", timeout, PRIVATE(gpsdata)->waitcount++));
+    libgps_debug_trace((DEBUG_CALLS, "gps_waiting(%d): %d\n",
+                       timeout, PRIVATE(gpsdata)->waitcount++));
     if (PRIVATE(gpsdata)->waiting > 0)
 	return true;
 
@@ -192,14 +196,13 @@ int gps_sock_read(struct gps_data_t *gpsdata, char *message, int message_len)
 #ifndef USE_QT
 	/* read data: return -1 if no data waiting or buffered, 0 otherwise */
 	status = (int)recv(gpsdata->gps_fd,
-			   PRIVATE(gpsdata)->buffer + PRIVATE(gpsdata)->waiting,
-			   sizeof(PRIVATE(gpsdata)->buffer) - PRIVATE(gpsdata)->waiting, 0);
+               PRIVATE(gpsdata)->buffer + PRIVATE(gpsdata)->waiting,
+               sizeof(PRIVATE(gpsdata)->buffer) - PRIVATE(gpsdata)->waiting, 0);
 #else
 	status =
 	    ((QTcpSocket *) (gpsdata->gps_fd))->read(PRIVATE(gpsdata)->buffer +
-						     PRIVATE(gpsdata)->waiting,
-						     sizeof(PRIVATE(gpsdata)->buffer) -
-						     PRIVATE(gpsdata)->waiting);
+                 PRIVATE(gpsdata)->waiting,
+                 sizeof(PRIVATE(gpsdata)->buffer) - PRIVATE(gpsdata)->waiting);
 #endif
 #ifdef HAVE_WINSOCK2_H
 	int wserr = WSAGetLastError();
@@ -207,71 +210,94 @@ int gps_sock_read(struct gps_data_t *gpsdata, char *message, int message_len)
 
 #ifdef USE_QT
 	if (status < 0) {
-		/* All negative statuses are error for QT
-		 *
-		 * read: https://doc.qt.io/qt-5/qiodevice.html#read
-		 *
-		 * Reads at most maxSize bytes from the device into data, and returns the number of bytes read.
-		 * If an error occurs, such as when attempting to read from a device opened in WriteOnly mode,
-		 * this function returns -1.
-		 *
-		 * 0 is returned when no more data is available for reading. However, reading past the end
-		 * of the stream is considered an error, so this function returns -1 in those cases
-		 * (that is, reading on a closed socket or after a process has died).
-		 */
-		return -1;
+            /* All negative statuses are error for QT
+             *
+             * read: https://doc.qt.io/qt-5/qiodevice.html#read
+             *
+             * Reads at most maxSize bytes from the device into data,
+             * and returns the number of bytes read.
+             * If an error occurs, such as when attempting to read from
+             * a device opened in WriteOnly mode, this function returns -1.
+             *
+             * 0 is returned when no more data is available for reading.
+             * However, reading past the end of the stream is considered
+             * an error, so this function returns -1 in those cases
+             * (that is, reading on a closed socket or after a process
+             * has died).
+             */
+            return -1;
 	}
 
 #else  /* not USE_QT */
 	if (status <= 0) {
-		/* 0 or negative
-		 *
-		 * read: https://pubs.opengroup.org/onlinepubs/007908775/xsh/read.html:
-		 *
-		 * If nbyte is 0, read() will return 0 and have no other results.
-		 * ...
-		 * When attempting to read a file (other than a pipe or FIFO) that supports non-blocking reads and has no data currently available:
-		 *    - If O_NONBLOCK is set, read() will return a -1 and set errno to [EAGAIN].
-		 *    - If O_NONBLOCK is clear, read() will block the calling thread until some data becomes available.
-		 *    - The use of the O_NONBLOCK flag has no effect if there is some data available.
-		 * ...
-		 * If a read() is interrupted by a signal before it reads any data, it will return -1 with errno set to [EINTR].
-		 * If a read() is interrupted by a signal after it has successfully read some data, it will return the number of bytes read.
-		 *
-		 * recv: https://pubs.opengroup.org/onlinepubs/007908775/xns/recv.html
-		 *
-		 * If no messages are available at the socket and O_NONBLOCK is not set on the socket's file descriptor,
-		 * recv() blocks until a message arrives. If no messages are available at the socket and O_NONBLOCK is set
-		 * on the socket's file descriptor, recv() fails and sets errno to [EAGAIN] or [EWOULDBLOCK].
-		 * ...
-		 * Upon successful completion, recv() returns the length of the message in bytes. If no messages are available
-		 * to be received and the peer has performed an orderly shutdown, recv() returns 0. Otherwise, -1 is returned
-		 * and errno is set to indicate the error.
-		 *
-		 * Summary:
-		 * if nbytes 0 and read return 0 -> out of the free buffer space but still didn't get correct json -> report an error -> return -1
-		 * if read return 0 but requested some bytes to read -> other side disconnected -> report an error -> return -1
-		 * if read return -1 and errno is in [EAGAIN, EINTR, EWOULDBLOCK] -> not an error, we'll retry later -> return 0
-		 * if read return -1 and errno is not in [EAGAIN, EINTR, EWOULDBLOCK] -> error -> return -1
-		 *
-		 */
+            /* 0 or negative
+             *
+             * read:
+             *  https://pubs.opengroup.org/onlinepubs/007908775/xsh/read.html
+             *
+             * If nbyte is 0, read() will return 0 and have no other results.
+             * ...
+             * When attempting to read a file (other than a pipe or FIFO)
+             * that supports non-blocking reads and has no data currently
+             * available:
+             *    - If O_NONBLOCK is set,
+             *            read() will return a -1 and set errno to [EAGAIN].
+             *    - If O_NONBLOCK is clear,
+             *            read() will block the calling thread until some
+             *            data becomes available.
+             *    - The use of the O_NONBLOCK flag has no effect if there
+             *       is some data available.
+             * ...
+             * If a read() is interrupted by a signal before it reads any
+             * data, it will return -1 with errno set to [EINTR].
+             * If a read() is interrupted by a signal after it has
+             * successfully read some data, it will return the number of
+             * bytes read.
+             *
+             * recv:
+             *   https://pubs.opengroup.org/onlinepubs/007908775/xns/recv.html
+             *
+             * If no messages are available at the socket and O_NONBLOCK
+             * is not set on the socket's file descriptor, recv() blocks
+             * until a message arrives.
+             * If no messages are available at the socket and O_NONBLOCK
+             * is set on the socket's file descriptor, recv() fails and
+             * sets errno to [EAGAIN] or [EWOULDBLOCK].
+             * ...
+             * Upon successful completion, recv() returns the length of
+             * the message in bytes. If no messages are available to be
+             * received and the peer has performed an orderly shutdown,
+             * recv() returns 0. Otherwise, -1 is returned and errno is
+             * set to indicate the error.
+             *
+             * Summary:
+             * if nbytes 0 and read return 0 -> out of the free buffer
+             * space but still didn't get correct json -> report an error
+             * -> return -1
+             * if read return 0 but requested some bytes to read -> other
+             *side disconnected -> report an error -> return -1
+             * if read return -1 and errno is in [EAGAIN, EINTR, EWOULDBLOCK]
+             * -> not an error, we'll retry later -> return 0
+             * if read return -1 and errno is not in [EAGAIN, EINTR,
+             * EWOULDBLOCK] -> error -> return -1
+             *
+             */
 
-		/*
-		 * check for not error cases first: EAGAIN, EINTR, etc
-		 */
-		 if (status < 0) {
+            /*
+             * check for not error cases first: EAGAIN, EINTR, etc
+             */
+             if (status < 0) {
 #ifdef HAVE_WINSOCK2_H
-		   if (wserr == WSAEINTR || wserr == WSAEWOULDBLOCK)
-			return 0;
+                if (wserr == WSAEINTR || wserr == WSAEWOULDBLOCK)
+                    return 0;
 #else
-		   if (errno == EINTR || errno == EAGAIN
-			     || errno == EWOULDBLOCK)
-			return 0;
+                if (errno == EINTR || errno == EAGAIN || errno == EWOULDBLOCK)
+                    return 0;
 #endif /* HAVE_WINSOCK2_H */
-		 }
+             }
 
-      /* disconnect or error */
-		return -1;
+             /* disconnect or error */
+             return -1;
 	}
 #endif /* USE_QT */
 
@@ -331,7 +357,9 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
     if (buf[0] == '{') {
 	const char *jp = buf, **next = &jp;
 	while (next != NULL && *next != NULL && next[0][0] != '\0') {
-	    libgps_debug_trace((DEBUG_CALLS,"gps_unpack() segment parse '%s'\n", *next));
+	    libgps_debug_trace((DEBUG_CALLS,
+                               "gps_unpack() segment parse '%s'\n",
+                               *next));
 	    if (libgps_json_unpack(*next, gpsdata, next) == -1)
 		break;
 #ifdef LIBGPS_DEBUG
@@ -343,7 +371,9 @@ int gps_unpack(char *buf, struct gps_data_t *gpsdata)
     }
 
 #ifndef USE_QT
-    libgps_debug_trace((DEBUG_CALLS, "final flags: (0x%04x) %s\n", gpsdata->set,gps_maskdump(gpsdata->set)));
+    libgps_debug_trace((DEBUG_CALLS,
+                        "final flags: (0x%04x) %s\n",
+                        gpsdata->set,gps_maskdump(gpsdata->set)));
 #endif
     return 0;
 }
@@ -407,7 +437,8 @@ int gps_sock_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d)
 	    (void)strlcat(buf, "\"pps\":false,", sizeof(buf));
 	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "};", sizeof(buf));
-	libgps_debug_trace((DEBUG_CALLS, "gps_stream() disable command: %s\n", buf));
+	libgps_debug_trace((DEBUG_CALLS,
+                           "gps_stream() disable command: %s\n", buf));
 	return gps_send(gpsdata, buf);
     } else {			/* if ((flags & WATCH_ENABLE) != 0) */
 	(void)strlcpy(buf, "?WATCH={\"enable\":true,", sizeof(buf));
@@ -431,7 +462,8 @@ int gps_sock_stream(struct gps_data_t *gpsdata, unsigned int flags, void *d)
 	    str_appendf(buf, sizeof(buf), "\"device\":\"%s\",", (char *)d);
 	str_rstrip_char(buf, ',');
 	(void)strlcat(buf, "};", sizeof(buf));
-	libgps_debug_trace((DEBUG_CALLS, "gps_stream() enable command: %s\n", buf));
+	libgps_debug_trace((DEBUG_CALLS,
+                           "gps_stream() enable command: %s\n", buf));
 	return gps_send(gpsdata, buf);
     }
 }
