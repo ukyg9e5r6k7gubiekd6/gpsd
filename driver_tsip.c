@@ -235,7 +235,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     int16_t s1, s2, s3, s4;
     int32_t sl1, sl2, sl3;
     uint32_t ul1, ul2;
-    float f1, f2, f3, f4, f5;
+    float f1, f2, f3, f4;
     double d1, d2, d3, d4, d5;
     time_t now;
     unsigned char buf[BUFSIZ];
@@ -505,14 +505,18 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         session->newdata.ecef.x = getbef32((char *)buf, 0);  /* X */
         session->newdata.ecef.y = getbef32((char *)buf, 4);  /* Y */
         session->newdata.ecef.z = getbef32((char *)buf, 8);  /* Z */
-        f4 = getbef32((char *)buf, 12); /* time-of-fix */
+        ftow = getbef32((char *)buf, 12); /* time-of-fix */
+        DTOTS(&ts_tow, ftow);
+        session->newdata.time = gpsd_gpstime_resolv(session,
+                                                    session->context->gps_week,
+                                                    ts_tow);
         GPSD_LOG(LOG_INF, &session->context->errout,
                  "TSIP: GPS Position (0x42): XYZ %f %f %f %f\n",
                  session->newdata.ecef.x,
                  session->newdata.ecef.y,
                  session->newdata.ecef.z,
-                 f4);
-        mask = ECEF_SET | REPORT_IS;
+                 ftow);
+        mask = ECEF_SET | REPORT_IS | TIME_SET | NTPTIME_IS;
         break;
     case 0x43:
         /* Velocity Fix, XYZ ECEF
@@ -531,14 +535,18 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         session->newdata.ecef.vy = getbef32((char *)buf, 4);  // Y velocity
         session->newdata.ecef.vz = getbef32((char *)buf, 8);  // Z velocity
         f4 = getbef32((char *)buf, 12); /* bias rate */
-        f5 = getbef32((char *)buf, 16); /* time-of-fix */
+        ftow = getbef32((char *)buf, 16); /* time-of-fix */
+        DTOTS(&ts_tow, ftow);
+        session->newdata.time = gpsd_gpstime_resolv(session,
+                                                    session->context->gps_week,
+                                                    ts_tow);
         GPSD_LOG(LOG_INF, &session->context->errout,
                  "TSIP: GPS Velocity (0x43): XYZ %f %f %f %f %f\n",
                  session->newdata.ecef.vx,
                  session->newdata.ecef.vy,
                  session->newdata.ecef.vz,
-                 f4, f5);
-        mask = VECEF_SET;
+                 f4, ftow);
+        mask = VECEF_SET | TIME_SET | NTPTIME_IS;
         break;
     case 0x45:
         /* Software Version Information (0x45)
@@ -843,9 +851,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             bias = getbef32((char *)buf, 0);         // Bias
             bias_rate = getbef32((char *)buf, 4);    // Bias rate
             ftow = getbef32((char *)buf, 8);         // tow
+            DTOTS(&ts_tow, ftow);
+            session->newdata.time =
+                gpsd_gpstime_resolv(session, session->context->gps_week,
+                                    ts_tow);
             GPSD_LOG(LOG_INF, &session->context->errout,
                      "TSIP: Bias and Bias Rate Report (0x54) %f %f %f\n",
                      bias, bias_rate, ftow);
+            mask |= TIME_SET | NTPTIME_IS;
          }
          break;
     case 0x55:
@@ -913,14 +926,18 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         f2 = getbef32((char *)buf, 4);  /* North velocity */
         f3 = getbef32((char *)buf, 8);  /* Up velocity */
         f4 = getbef32((char *)buf, 12); /* clock bias rate */
-        f5 = getbef32((char *)buf, 16); /* time-of-fix */
+        ftow = getbef32((char *)buf, 16); /* time-of-fix */
+        DTOTS(&ts_tow, ftow);
+        session->newdata.time = gpsd_gpstime_resolv(session,
+                                                    session->context->gps_week,
+                                                    ts_tow);
         session->newdata.NED.velN = f2;
         session->newdata.NED.velE = f1;
         session->newdata.NED.velD = -f3;
-        mask |= VNED_SET;
+        mask |= VNED_SET | TIME_SET | NTPTIME_IS;
         GPSD_LOG(LOG_INF, &session->context->errout,
                  "TSIP: Vel ENU (0x56): %f %f %f %f %f\n",
-                 f1, f2, f3, f4, f5);
+                 f1, f2, f3, f4, ftow);
         break;
     case 0x57:
         /* Information About Last Computed Fix
@@ -942,6 +959,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             /* good current fix */
             DTOTS(&ts_tow, ftow);
             (void)gpsd_gpstime_resolv(session, week, ts_tow);
+            mask |= TIME_SET | NTPTIME_IS;
         }
         GPSD_LOG(LOG_INF, &session->context->errout,
                  "TSIP: Fix info (0x57): %02x %02x %u %f\n", u1, u2, week, f1);
@@ -1337,14 +1355,18 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         session->newdata.ecef.y = getbed64((char *)buf, 8);  /* Y */
         session->newdata.ecef.z = getbed64((char *)buf, 16); /* Z */
         d4 = getbed64((char *)buf, 24); /* clock bias */
-        f1 = getbef32((char *)buf, 32); /* time-of-fix */
+        ftow = getbef32((char *)buf, 32); /* time-of-fix */
+        DTOTS(&ts_tow, ftow);
+        session->newdata.time = gpsd_gpstime_resolv(session,
+                                                    session->context->gps_week,
+                                                    ts_tow);
         GPSD_LOG(LOG_INF, &session->context->errout,
                  "TSIP: Position (0x83) XYZ %f %f %f %f %f\n",
                  session->newdata.ecef.x,
                  session->newdata.ecef.y,
                  session->newdata.ecef.z,
-                 d4, f1);
-        mask = ECEF_SET | REPORT_IS;
+                 d4, ftow);
+        mask = ECEF_SET | REPORT_IS | TIME_SET | NTPTIME_IS;
         break;
     case 0x84:
         /* Double-Precision LLA Position Fix and Bias Information
