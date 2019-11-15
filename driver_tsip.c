@@ -780,8 +780,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 // 1 == superpacket is acutime 360, support 0x8f-20
 
                 /* set I/O Options for Super Packet output */
-                /* Position: 8F20, ECEF, DP, MSL, */
-                putbyte(buf, 0, IO1_8F20|IO1_MSL|IO1_DP|IO1_ECEF);
+                /* Position: 8F20, ECEF, DP */
+                putbyte(buf, 0, IO1_8F20|IO1_DP|IO1_ECEF);
                 putbyte(buf, 1, 0x00);          /* Velocity: none (via SP) */
                 putbyte(buf, 2, 0x00);          /* Time: GPS */
                 putbyte(buf, 3, IO4_DBHZ);      /* Aux: dBHz */
@@ -841,6 +841,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          *   RES SMT 360 (2018)
          *   all TSIP?
          *
+         * Lassen iQ defaults: 02 02 00 00
          * RES SMT 360 defaults:  12 02 00 08
          */
         if (len != 4) {
@@ -2234,13 +2235,14 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
     case event_identified:
         // FALLTHROUGH
     case event_reactivate:
+        // FIXME: reactivate style should depend on model
         /*
          * Set basic configuration, using Set or Request I/O Options (0x35).
          * in case no hardware config response comes back.
          */
-        /* Position: enable: Double Precision, MSL, LLA
+        /* Position: enable: Double Precision, LLA
          *           disable: ECEF */
-        putbyte(buf, 0, IO1_8F20|IO1_DP|IO1_MSL|IO1_LLA);
+        putbyte(buf, 0, IO1_8F20|IO1_DP|IO1_LLA);
         /* Velocity: enable: ENU, disable vECEF */
         putbyte(buf, 1, IO2_ENU);
         /* Time: enable: 0x42, 0x43, 0x4a
@@ -2366,9 +2368,9 @@ void configuration_packets_generic(struct gps_device_t *session)
                  "TSIP: configuration_packets_generic()\n");
 
         // Set basic configuration, using Set or Request I/O Options (0x35).
-        /* Position: enable: Double Precision, MSL, LLA
+        /* Position: enable: Double Precision, LLA
          *           disable: ECEF */
-        putbyte(buf, 0, IO1_8F20|IO1_DP|IO1_MSL|IO1_LLA);
+        putbyte(buf, 0, IO1_8F20|IO1_DP|IO1_LLA);
         /* Velocity: enable: ENU, disable ECEF */
         putbyte(buf, 1, IO2_ENU);
         /* Time: enable: 0x42, 0x43, 0x4a
