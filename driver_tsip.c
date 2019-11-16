@@ -375,7 +375,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 (void)snprintf(session->subtype, sizeof(session->subtype),
                                "fw %u.%u %u %02u/%02u/%04u %.40s",
                                u2, u3, u4, u6, u5, ul1, buf2);
-                GPSD_LOG(LOG_INF, &session->context->errout,
+                GPSD_LOG(LOG_PROG, &session->context->errout,
                          "TSIP: Firmware version (0x1c-81): %s\n",
                          session->subtype);
 
@@ -418,7 +418,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                                ul1, u2, u3, ul2, u4,
                                session->driver.tsip.hardware_code,
                                buf2);
-                GPSD_LOG(LOG_INF, &session->context->errout,
+                GPSD_LOG(LOG_PROG, &session->context->errout,
                          "TSIP: Hardware version (0x1c-83): %s\n",
                          session->subtype1);
 
@@ -463,6 +463,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         break;
     case 0x41:
         /* GPS Time (0x41).  polled by 0x21
+         * Note: this is not the time of current fix
          * Present in:
          *   pre-2000 models
          *   Copernicus II (2009)
@@ -484,12 +485,10 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             session->newdata.time =
                 gpsd_gpstime_resolv(session, week, ts_tow);
             mask |= TIME_SET | NTPTIME_IS;
-            if (!TS_EQ(&ts_tow, &session->driver.tsip.last_tow)) {
-                mask |= CLEAR_IS;
-                session->driver.tsip.last_tow = ts_tow;
-            }
+            /* Note: this is not the time of current fix
+             * Do not use in tsip.last_tow */
         }
-        GPSD_LOG(LOG_INF, &session->context->errout,
+        GPSD_LOG(LOG_PROG, &session->context->errout,
                  "TSIP: GPS Time (0x41): tow %.2f week %u ls %.1f %s\n",
                  ftow, week, f2,
                  timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)));
@@ -514,13 +513,13 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         session->newdata.time = gpsd_gpstime_resolv(session,
                                                     session->context->gps_week,
                                                     ts_tow);
-        GPSD_LOG(LOG_INF, &session->context->errout,
-                 "TSIP: GPS Position (0x42): XYZ %f %f %f %f\n",
+        GPSD_LOG(LOG_PROG, &session->context->errout,
+                 "TSIP: SP-XYZ (0x42): %f %f %f ftow %f\n",
                  session->newdata.ecef.x,
                  session->newdata.ecef.y,
                  session->newdata.ecef.z,
                  ftow);
-        mask = ECEF_SET | REPORT_IS | TIME_SET | NTPTIME_IS;
+        mask = ECEF_SET | TIME_SET | NTPTIME_IS;
         if (!TS_EQ(&ts_tow, &session->driver.tsip.last_tow)) {
             mask |= CLEAR_IS;
             session->driver.tsip.last_tow = ts_tow;
@@ -548,8 +547,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         session->newdata.time = gpsd_gpstime_resolv(session,
                                                     session->context->gps_week,
                                                     ts_tow);
-        GPSD_LOG(LOG_INF, &session->context->errout,
-                 "TSIP: GPS Velocity (0x43): XYZ %f %f %f %f %f\n",
+        GPSD_LOG(LOG_PROG, &session->context->errout,
+                 "TSIP: Vel XYZ (0x43): %f %f %f %f ftow %f\n",
                  session->newdata.ecef.vx,
                  session->newdata.ecef.vy,
                  session->newdata.ecef.vz,
@@ -606,7 +605,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                        getub(buf, 9),
                        getub(buf, 7),
                        ul2);
-        GPSD_LOG(LOG_INF, &session->context->errout,
+        GPSD_LOG(LOG_PROG, &session->context->errout,
                  "TSIP: Software version (0x45): %s\n", session->subtype);
         mask |= DEVICEID_SET;
         break;
@@ -724,11 +723,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 session->driver.tsip.last_tow = ts_tow;
             }
         }
-        // this seems to be first in cycle
+        // this seems to be often first in cycle
         // REPORT_IS here breaks reports in read-only mode
-        mask |= LATLON_SET | ALTITUDE_SET | CLEAR_IS;
+        mask |= LATLON_SET | ALTITUDE_SET;
         GPSD_LOG(LOG_DATA, &session->context->errout,
-                 "TSIP: SP-PLLA (0x4a): time=%s lat=%.2f lon=%.2f "
+                 "TSIP: SP-LLA (0x4a): time=%s lat=%.2f lon=%.2f "
                  "alt=%.2f\n",
                  timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
                  session->newdata.latitude,
@@ -754,7 +753,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          * bit 3 -- almanac not complete and current */
         u2 = getub(buf, 1);
         u3 = getub(buf, 2);     /* Status 2/Superpacket Support */
-        GPSD_LOG(LOG_INF, &session->context->errout,
+        GPSD_LOG(LOG_PROG, &session->context->errout,
                  "TSIP: Machine ID (0x4b): %02x %02x %02x\n",
                  session->driver.tsip.machine_id,
                  u2, u3);
@@ -848,7 +847,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         f2 = getbef32((char *)buf, 5);    // Signal Level Mask
         f3 = getbef32((char *)buf, 9);    // PDOP Mask
         f4 = getbef32((char *)buf, 13);   // PDOP Switch
-        GPSD_LOG(LOG_INF, &session->context->errout,
+        GPSD_LOG(LOG_PROG, &session->context->errout,
                  "TSIP: Operating Params (0x4c): x%02x %f %f %f %f\n",
                  u1, f1, f2, f3, f4);
         break;
@@ -871,7 +870,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             session->newdata.time =
                 gpsd_gpstime_resolv(session, session->context->gps_week,
                                     ts_tow);
-            GPSD_LOG(LOG_INF, &session->context->errout,
+            GPSD_LOG(LOG_PROG, &session->context->errout,
                      "TSIP: Bias and Bias Rate Report (0x54) %f %f %f\n",
                      bias, bias_rate, ftow);
             mask |= TIME_SET | NTPTIME_IS;
@@ -913,7 +912,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          * bit 3 -- Output dbHz
          */
         u4 = getub(buf, 3);
-        GPSD_LOG(LOG_INF, &session->context->errout,
+        GPSD_LOG(LOG_PROG, &session->context->errout,
                  "TSIP: IO Options (0x55): %02x %02x %02x %02x\n",
                  u1, u2, u3, u4);
         if ((u1 & 0x20) != (uint8_t) 0) {
@@ -959,8 +958,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             mask |= CLEAR_IS;
             session->driver.tsip.last_tow = ts_tow;
         }
-        GPSD_LOG(LOG_INF, &session->context->errout,
-                 "TSIP: Vel ENU (0x56): %f %f %f %f %f\n",
+        GPSD_LOG(LOG_PROG, &session->context->errout,
+                 "TSIP: Vel ENU (0x56): %f %f %f %f ftow %f\n",
                  f1, f2, f3, f4, ftow);
         break;
     case 0x57:
@@ -989,7 +988,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 session->driver.tsip.last_tow = ts_tow;
             }
         }
-        GPSD_LOG(LOG_INF, &session->context->errout,
+        GPSD_LOG(LOG_PROG, &session->context->errout,
                  "TSIP: Fix info (0x57): %02x %02x %u %f\n", u1, u2, week, f1);
         break;
     case 0x5a:
@@ -1040,7 +1039,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         d1 = getbef32((char *)buf, 12) * RAD_2_DEG;     /* Elevation */
         d2 = getbef32((char *)buf, 16) * RAD_2_DEG;     /* Azimuth */
         i = (int)(u2 >> 3);     /* channel number */
-        GPSD_LOG(LOG_INF, &session->context->errout,
+        GPSD_LOG(LOG_PROG, &session->context->errout,
                  "TSIP: Satellite Tracking Status (0x5c): Ch %2d PRN %3d "
                  "es %d Acq %d Eph %2d SNR %4.1f LMT %.04f El %4.1f Az %5.1f\n",
                  i, u1, u2 & 7, u3, u4, f1, ftow, d1, d2);
@@ -1117,7 +1116,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         u10 = getub(buf, 25);   /* SV Type */
 
         i = u2;                 /* channel number */
-        GPSD_LOG(LOG_INF, &session->context->errout,
+        GPSD_LOG(LOG_PROG, &session->context->errout,
                 "TSIP: Satellite Tracking Status (0x5d): Ch %2d Con %d PRN %3d "
                 "Acq %d Use %d SNR %4.1f LMT %.04f El %4.1f Az %5.1f Old %d "
                 "Int %d Bad %d Col %d TPF %d SVT %d\n",
@@ -1234,7 +1233,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                                " %d", session->driver.tsip.sats_used[i]);
             }
         }
-        GPSD_LOG(LOG_DATA, &session->context->errout,
+        GPSD_LOG(LOG_PROG, &session->context->errout,
                  "TSIP: AIVSS (0x6c): mode %d status %d used %d "
                  "pdop %.1f hdop %.1f vdop %.1f tdop %.1f gdop %.1f Used %s\n",
                  session->newdata.mode,
@@ -1333,7 +1332,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                                " %d", session->driver.tsip.sats_used[i]);
             }
         }
-        GPSD_LOG(LOG_DATA, &session->context->errout,
+        GPSD_LOG(LOG_PROG, &session->context->errout,
                  "TSIP: AIVSS (0x6d) status=%d used=%d "
                  "pdop=%.1f hdop=%.1f vdop=%.1f tdop=%.1f gdop=%.1f used:%s\n",
                  session->gpsdata.status,
@@ -1367,7 +1366,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             session->gpsdata.status = STATUS_DGPS_FIX;
             mask |= STATUS_SET;
         }
-        GPSD_LOG(LOG_DATA, &session->context->errout,
+        GPSD_LOG(LOG_PROG, &session->context->errout,
                  "TSIP: DPFM (0x82) mode %d status=%d\n",
                  u1, session->gpsdata.status);
         break;
@@ -1392,13 +1391,13 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         session->newdata.time = gpsd_gpstime_resolv(session,
                                                     session->context->gps_week,
                                                     ts_tow);
-        GPSD_LOG(LOG_INF, &session->context->errout,
-                 "TSIP: Position (0x83) XYZ %f %f %f %f %f\n",
+        GPSD_LOG(LOG_PROG, &session->context->errout,
+                 "TSIP: DP-XYZ (0x83) %f %f %f %f tow %f\n",
                  session->newdata.ecef.x,
                  session->newdata.ecef.y,
                  session->newdata.ecef.z,
                  d4, ftow);
-        mask = ECEF_SET | REPORT_IS | TIME_SET | NTPTIME_IS;
+        mask = ECEF_SET | TIME_SET | NTPTIME_IS;
         if (!TS_EQ(&ts_tow, &session->driver.tsip.last_tow)) {
             mask |= CLEAR_IS;
             session->driver.tsip.last_tow = ts_tow;
@@ -1439,15 +1438,9 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 session->driver.tsip.last_tow = ts_tow;
             }
         }
-        GPSD_LOG(LOG_INF, &session->context->errout,
-                 "TSIP: DP-PLLA (0x84) %s %f %f %f\n",
-                 timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
-                 session->newdata.latitude,
-                 session->newdata.longitude, d1);
-        // this seems to be first in cycle
-        mask |= LATLON_SET | CLEAR_IS;
-        GPSD_LOG(LOG_DATA, &session->context->errout,
-                 "TSIP: DP-PLLA (0x84) time=%s lat=%.2f lon=%.2f alt=%.2f\n",
+        mask |= LATLON_SET;
+        GPSD_LOG(LOG_PROG, &session->context->errout,
+                 "TSIP: DP-LLA (0x84) time=%s lat=%.2f lon=%.2f alt=%.2f\n",
                  timespec_str(&session->newdata.time, ts_buf, sizeof(ts_buf)),
                  session->newdata.latitude,
                  session->newdata.longitude, d1);
@@ -1482,7 +1475,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             d3 = getbed64((char *)buf, 19);     /* DZ */
             d4 = getbed64((char *)buf, 27);     /* A-axis */
             d5 = getbed64((char *)buf, 35);     /* Eccentricity Squared */
-            GPSD_LOG(LOG_INF, &session->context->errout,
+            GPSD_LOG(LOG_PROG, &session->context->errout,
                      "TSIP: Current Datum (0x8f-15) %d %f %f %f %f %f\n",
                      s1, d1, d2, d3, d4, d5);
             break;
@@ -1517,7 +1510,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             u4 = getub(buf, 29);        /* utc offset */
             week = getbeu16(buf, 30);   /* tsip.gps_week */
             /* PRN/IODE data follows */
-            GPSD_LOG(LOG_DATA, &session->context->errout,
+            GPSD_LOG(LOG_PROG, &session->context->errout,
                      "TSIP: LFwEI (0x8f-20) %d %d %d tow %u %d "
                      " %u %u %x %x %u leap %u week %d\n",
                      s1, s2, s3, tow, sl1, ul2, sl2, u1, u2, u3, u4, week);
@@ -1583,8 +1576,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             session->newdata.time = gpsd_gpstime_resolv(session, week,
                                                         ts_tow);
             mask |= TIME_SET | NTPTIME_IS | LATLON_SET |
-                    STATUS_SET | MODE_SET |
-                    REPORT_IS | VNED_SET;
+                    STATUS_SET | MODE_SET | VNED_SET;
             if (!TS_EQ(&ts_tow, &session->driver.tsip.last_tow)) {
                 mask |= CLEAR_IS;
                 session->driver.tsip.last_tow = ts_tow;
@@ -1626,7 +1618,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             s2 = getbes16(buf, 21);     /* east velocity */
             s3 = getbes16(buf, 23);     /* north velocity */
             s4 = getbes16(buf, 25);     /* up velocity */
-            GPSD_LOG(LOG_INF, &session->context->errout,
+            GPSD_LOG(LOG_PROG, &session->context->errout,
                      "TSIP: CSP (0x8f-23): %u %d %u %u %d %u %d %d %d %d\n",
                      tow, week, u1, u2, sl1, ul2, sl3, s2, s3, s4);
             if ((int)u1 > 10) {
@@ -1666,13 +1658,12 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             session->newdata.NED.velD = -d3;
 
             mask |= TIME_SET | NTPTIME_IS | LATLON_SET |
-                    STATUS_SET | MODE_SET |
-                    REPORT_IS | VNED_SET;
+                    STATUS_SET | MODE_SET | VNED_SET;
             if (!TS_EQ(&ts_tow, &session->driver.tsip.last_tow)) {
                 mask |= CLEAR_IS;
                 session->driver.tsip.last_tow = ts_tow;
             }
-            GPSD_LOG(LOG_DATA, &session->context->errout,
+            GPSD_LOG(LOG_PROG, &session->context->errout,
                      "TSIP: SP-CSP (0x8f-23): time %s lat %.2f lon %.2f "
                      "altHAE %.2f mode %d status %d\n",
                      timespec_str(&session->newdata.time, ts_buf,
@@ -1738,14 +1729,15 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 bad_len = 17;
                 break;
             }
-            session->driver.tsip.last_41 = now; /* keep timestamp for request */
-            tow = getbeu32(buf, 1);             /* gpstime in seconds */
+            session->driver.tsip.last_41 = now; // keep timestamp for request
+            // we assume the receiver not in some crazy mode, and is GPS time
+            tow = getbeu32(buf, 1);             // gpstime in seconds
             ts_tow.tv_sec = tow;
             ts_tow.tv_nsec = 0;
-            week = getbeu16(buf, 5);            /* week */
+            week = getbeu16(buf, 5);            // week
             /* leap seconds */
             session->context->leap_seconds = (int)getbes16(buf, 7);
-            u1 = buf[9];                // Time Flag
+            u2 = buf[9];                // Time Flag
             // should check time valid?
             /* ignore the broken down time, use the GNSS time.
              * Hope it is not BeiDou time */
@@ -1758,15 +1750,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 mask |= CLEAR_IS;
                 session->driver.tsip.last_tow = ts_tow;
             }
-            GPSD_LOG(LOG_DATA, &session->context->errout,
-                     "TSIP: SP-TTS (0x8f-ab) time=%s mask=%s\n",
+
+            GPSD_LOG(LOG_PROG, &session->context->errout,
+                     "TSIP: SP-TTS (0x8f-ab) tow %u wk %u ls %d flag x%x "
+                     "time %s mask %s\n",
+                     tow, week, session->context->leap_seconds, u2,
                      timespec_str(&session->newdata.time, ts_buf,
                                   sizeof(ts_buf)),
                      gps_maskdump(mask));
-
-            GPSD_LOG(LOG_PROG, &session->context->errout,
-                     "TSIP: SP-TTS (0x8f-ab) GPS Time %u %u %d flag x%x\n",
-                     tow, week, session->context->leap_seconds, u1);
             break;
 
 
@@ -1788,7 +1779,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
 
             // byte 0 is Subpacket ID
             u2 = getub(buf, 1);         /* Receiver Mode */
-            u1 = getub(buf, 12);        /* GNSS Decoding Status */
+            u3 = getub(buf, 12);        /* GNSS Decoding Status */
             // ignore 2, Disciplining Mode
             // ignore 3, Self-Survey Progress
             // ignore 4-7, Holdover Duration
@@ -1815,7 +1806,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             // ignore 60-63, always zero
             // ignore 64-67, reserved
 
-            if (u1 != (uint8_t) 0) {
+            if (u3 != (uint8_t)0) {
+                // not exactly true, could be sort of Dead Reckoning
                 session->gpsdata.status = STATUS_NO_FIX;
                 mask |= STATUS_SET;
             } else {
@@ -1835,7 +1827,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 * device, not the actual lock, so we need to
                 * look at the decode status.
                 */
-                switch (u1) {
+                switch (u3) {
                 case 0:   /* "Doing Fixes" */
                     session->newdata.mode = MODE_3D;
                     break;
@@ -1879,15 +1871,15 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 break;
             }
 
-            mask |= LATLON_SET | ALTITUDE_SET | MODE_SET | REPORT_IS;
-            GPSD_LOG(LOG_DATA, &session->context->errout,
+            mask |= LATLON_SET | ALTITUDE_SET | MODE_SET;
+            GPSD_LOG(LOG_PROG, &session->context->errout,
                      "TSIP: SP-TPS (0x8f-ac) lat=%.2f lon=%.2f altHAE=%.2f "
-                     "temp %.1f fqErr %.4f mask %s\n",
+                     "mode %d temp %.1f fqErr %.4f\n",
                      session->newdata.latitude,
                      session->newdata.longitude,
                      session->newdata.altHAE,
-                     temp, fqErr,
-                     gps_maskdump(mask));
+                     session->newdata.mode,
+                     temp, fqErr);
             break;
 
         case 0x02:
@@ -2483,7 +2475,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
          * bit 7 - reserved
          */
         u6 = getub(buf, 27);
-        GPSD_LOG(LOG_INF, &session->context->errout,
+        GPSD_LOG(LOG_PROG, &session->context->errout,
                  "TSIP: Navigation Configuration (0xbb) %u %u %u %u %f %f %f "
                  "%f %u x%x\n",
                  u1, u2, u3, u4, f1, f2, f3, f4, u5, u6);
@@ -2877,8 +2869,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
      * The receiver won't send at fixed intervals */
 
     if ((now - session->driver.tsip.last_41) > 5) {
-        /* Request Current Time
-         * Returns 0x41. */
+        /* Request Current Time returns 0x41.
+         * Easiest way to get GPS weeks and current leap seconds */
         (void)tsip_write(session, 0x21, buf, 0);
         session->driver.tsip.last_41 = now;
     }
@@ -3308,12 +3300,12 @@ void configuration_packets_res360(struct gps_device_t *session)
     // request Receiver Configuration (0xbb)
     putbyte(buf, 0, 0x00);
     (void)tsip_write(session, 0xbb, buf, 1);
-#endif // __UNUSED__
     // Restart Self-Survey (0x8e-a6)
-    // which gives us 2,000 normal fixes, before going quite again.
+    // which gives us 2,000 normal fixes, before going quiet again.
     putbyte(buf, 0, 0xa6);
     putbyte(buf, 1, 0x00);
     (void)tsip_write(session, 0x8e, buf, 2);
+#endif // __UNUSED__
 }
 
 /* this is everything we export */
