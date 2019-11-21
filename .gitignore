@@ -107,6 +107,7 @@ CHECK.*
 # SCons cruft
 config.log
 .sconsign.dblite
+.sconsign.*.dblite
 .sconf_temp
 .scons-option-cache
 stamp-python

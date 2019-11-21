@@ -14,7 +14,7 @@
 # release    - ship a release
 #
 # --clean    - clean all normal build targets
-# sconsclean - clean up scons dotfiles (but not the database: .sconsign.dblite)
+# sconsclean - clean up scons dotfiles (but not the database: .sconsign.*.dblite)
 #
 # Setting the DESTDIR environment variable will prefix the install destinations
 # without changing the --prefix prefix.
@@ -39,6 +39,7 @@ import imp         # for imp.find_module('gps'), imp deprecated in 3.4
 import leapsecond
 import operator
 import os
+import pickle
 import re
 # replacement for functions from the commands module, which is deprecated.
 import subprocess
@@ -156,6 +157,10 @@ def filtered_spawn(sh, escape, cmd, args, env):
 # without this, scons will not rebuild an existing target when the
 # source changes.
 Decider('timestamp-match')
+
+# support building with various Python versions.
+sconsign_file = '.sconsign.{}.dblite'.format(pickle.HIGHEST_PROTOCOL)
+SConsignFile(sconsign_file)
 
 # Start by reading configuration variables from the cache
 opts = Variables('.scons-option-cache')
@@ -370,7 +375,6 @@ if env['isync']:
     env['ublox'] = True
 
 opts.Save('.scons-option-cache', env)
-env.SConsignFile(".sconsign.dblite")
 
 for (name, default, helpd) in pathopts:
     env[name] = env.subst(env[name])
@@ -2730,7 +2734,7 @@ sconsclean = Utility("sconsclean", '',
 
 if cleaning:
     env.Default(build_all, audit, clean_misc)
-    announce("You must manually remove .sconsign.dblite")
+    announce("You must manually remove {}".format(sconsign_file))
 else:
     env.Default(build)
 
