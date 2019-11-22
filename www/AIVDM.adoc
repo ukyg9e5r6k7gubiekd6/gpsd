@@ -2761,7 +2761,7 @@ is the message header format:
 |77-81   |  5 |Day (UTC)            |day        |u|1-31; 0 = N/A (default)
 |82-86   |  5 |Hour (UTC)           |hour       |u|0-23; 24 = N/A (default)
 |87-92   |  6 |Minute (UTC)         |minute     |u|0-59; 60 = N/A (default)
-|93-110  | 18 |Duration             |duration   |In minutes,
+|93-110  | 18 |Duration             |duration   |u|In minutes,
                                                  262143 = N/A (default),
                                                  0 = cancel this notice.
 |111-113 |  3 |Subarea shape #1     |subarea type |u|0-5 (see "Subarea Types")
