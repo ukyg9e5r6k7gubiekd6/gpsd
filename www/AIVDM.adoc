@@ -2,7 +2,7 @@
 :description: The AIVDM Marine AIS protocol demystified, for programmers.
 :keywords: AIS, AIVDM, AIVDO, standard, protocol, Automatic Identification System
 Eric S. Raymond <esr@thyrsus.com>
-v1.52, Aug 2016
+v1.53, Nov 2019
 
 This document is mastered in asciidoc format.  If you are reading it in HTML,
 you can find the original at the GPSD project website
@@ -251,10 +251,10 @@ The AI prefix commonly found on these sentences is an NMEA talker ID
 for a mobile AIS station.  Other possible values are as listed:
 
 .AIS talker IDs
-[width="25%",frame="topbot",options="header"]
+[width="25%",frame="topbot"]
 |================================================
 | !AB | NMEA 4.0 Base AIS station
-| !AD | MMEA 4.0 Dependent AIS Base Station
+| !AD | NMEA 4.0 Dependent AIS Base Station
 | !AI | Mobile AIS station
 | !AN | NMEA 4.0 Aid to Navigation AIS station
 | !AR | NMEA 4.0 AIS Receiving Station
@@ -514,7 +514,7 @@ identifies a country or other maritime jurisdiction.  See <<ITU-MID>>
 for a list of MIDs.
 
 .MID formats
-[frame="topbot",options="header"]
+[frame="topbot"]
 |==============================================================================
 |8MIDXXXXX  | Diver's radio (not used in the U.S. in 2013)
 |MIDXXXXXX  | Ship
@@ -548,7 +548,7 @@ any of the values in the following table.  It is intended to be used
 for generating bitfield-extraction code directly from the message
 type descriptions.
 
-[frame="topbot",options="header"]
+[frame="topbot"]
 |==============================================================================
 |u|   Unsigned integer
 |U|   Unsigned integer with scale - renders as float, suffix is decimal places
@@ -691,7 +691,7 @@ authorities.  It is not known to be in any actual use up to 2009.
 The Maneuver Indicator (143-144) may have these values:
 
 .Maneuver Indicator
-[width="50%",frame="topbot",options="header"]
+[width="50%",frame="topbot"]
 |===========================================================
 |0 | Not available (default)
 |1 | No special maneuver
@@ -703,7 +703,7 @@ designate this field "Blue Sign" with the following enumerated
 values:
 
 .Blue Sign
-[width="50%",frame="topbot",options="header"]
+[width="50%",frame="topbot"]
 |===========================================================
 |0 | Not available (default)
 |1 | No
@@ -969,7 +969,8 @@ Interpretation of the binary payload is controlled by:
   sources this is abbreviated FI.
 
 The following is a non-exhaustive list of standardized DAC-FID pairs
-in use for type 6.
+in use for type 6. For an up-to-date list of registered application-specific messages,
+see <<IALA-ASM>>.
 
 |==============================================================================
 | DAC |FID | Source        | Status           | Description
@@ -1326,12 +1327,29 @@ is the message header format:
 |109-113 |  5 |Day (UTC)            |day        |u|1-31; 0 = N/A (default)
 |114-118 |  5 |Hour (UTC)           |hour       |u|0-23; 24 = N/A (default)
 |119-124 |  6 |Minute (UTC)         |minute     |u|0-59; 60 = N/A (default)
-|125-142 | 18 |Duration             |duration   |In minutes,
+|125-142 | 18 |Duration             |duration   |u|In minutes,
                                                  262143 = N/A (default),
                                                  0 = cancel this notice.
-|143     |    |                     |subarea    |a10|Subarea array
-|0-2     |  2 |                     |shape      |u|Subarea shape
-|3-86    | 85 |Subarea Payload      |payload    |d|Subarea payload
+|143-145 |  3 |Subarea shape #1     |subarea type |u|0-5 (see "Subarea Types")
+|146-229 | 84 |Subarea payload #1   |shape data |array|See "Subarea Payloads"
+|230-232 |  3 |Subarea shape #2     |subarea type |u|0-5 (see "Subarea Types")
+|233-316 | 84 |Subarea payload #2   |shape data |array|See "Subarea Payloads"
+|317-319 |  3 |Subarea shape #3     |subarea type |u|0-5 (see "Subarea Types")
+|320-403 | 84 |Subarea payload #3   |shape data |array|See "Subarea Payloads"
+|404-406 |  3 |Subarea shape #4     |subarea type |u|0-5 (see "Subarea Types")
+|407-490 | 84 |Subarea payload #4   |shape data |array|See "Subarea Payloads"
+|491-493 |  3 |Subarea shape #5     |subarea type |u|0-5 (see "Subarea Types")
+|494-577 | 84 |Subarea payload #5   |shape data |array|See "Subarea Payloads"
+|578-580 |  3 |Subarea shape #6     |subarea type |u|0-5 (see "Subarea Types")
+|581-664 | 84 |Subarea payload #6   |shape data |array|See "Subarea Payloads"
+|665-667 |  3 |Subarea shape #7     |subarea type |u|0-5 (see "Subarea Types")
+|668-751 | 84 |Subarea payload #7   |shape data |array|See "Subarea Payloads"
+|752-754 |  3 |Subarea shape #8     |subarea type |u|0-5 (see "Subarea Types")
+|755-838 | 84 |Subarea payload #8   |shape data |array|See "Subarea Payloads"
+|839-841 |  3 |Subarea shape #9     |subarea type |u|0-5 (see "Subarea Types")
+|842-925 | 84 |Subarea payload #9   |shape data |array|See "Subarea Payloads"
+|926-928 |  3 |Subarea shape #10    |subarea type |u|0-5 (see "Subarea Types")
+|929-1012| 84 |Subarea payload #10  |shape data |array|See "Subarea Payloads"
 |==============================================================================
 
 The Message Linkage field is, as usual, for linking to a textual explanatory
@@ -1341,7 +1359,7 @@ it has the semantics of being an identifier of or reference to an area.
 Notice description types are as follows:
 
 .Area Notice Description
-[frame="topbot",options="header"]
+[frame="topbot"]
 |==============================================================================
 |  0| Caution Area: Marine mammals habitat
 |  1| Caution Area: Marine mammals in area - reduce speed
@@ -1475,7 +1493,7 @@ Notice description types are as follows:
 
 Subarea types are as follows:
 
-[frame="topbot",options="header"]
+[frame="topbot"]
 |==============================================================================
 |  0  | Circle or point
 |  1  | Rectangle
@@ -1493,8 +1511,8 @@ Subarea payload layouts are as follows:
 |==============================================================================
 |Field   |Len |Description        |Member/Type |T|Units
 |0-2     | 3  |Shape of area      |shape       |e|Constant: 0
-|3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
-                                                  1 = meters (default)
+|3-4     | 2  |Scale factor       |scale       |u|Power of 10 for area dimensions;
+                                                  10^0 = scale factor 1 (default)
 |5-29    | 25 |Longitude          |lon         |I3|Longitude of center point,
                                                    Unit = minutes * 0.001,
                                                    181000 = N/A (default).
@@ -1514,8 +1532,8 @@ Subarea payload layouts are as follows:
 |==============================================================================
 |Field   |Len |Description        |Member/Type |T|Units
 |0-2     | 3  |Shape of area      |shape       |e|Constant: 1
-|3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
-                                                  1 = meters (default)
+|3-4     | 2  |Scale factor       |scale       |u|Power of 10 for area dimensions;
+                                                  10^0 = scale factor 1 (default)
 |5-29    | 25 |Longitude          |lon         |I3|Longitude of SW corner
                                                    Unit = minutes * 0.001,
                                                    181000 = N/A (default).
@@ -1542,8 +1560,8 @@ Subarea payload layouts are as follows:
 |==============================================================================
 |Field   |Len |Description        |Member/Type |T|Units
 |0-2     | 3  |Shape of area      |shape       |e|Constant: 2
-|3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
-                                                  1 = meters (default)
+|3-4     | 2  |Scale factor       |scale       |u|Power of 10 for area dimensions;
+                                                  10^0 = scale factor 1 (default)
 |5-29    | 25 |Longitude          |lon         |I3|Longitude of center point,
                                                    Unit = minutes * 0.001,
                                                    181000 = N/A (default).
@@ -1570,8 +1588,8 @@ Subarea payload layouts are as follows:
 |==============================================================================
 |Field   |Len |Description        |Member/Type |T|Units
 |0-2     | 3  |Shape of area      |shape       |e|Constant: 3
-|3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
-                                                  1 = meters (default)
+|3-4     | 2  |Scale factor       |scale       |u|Power of 10 for area dimensions;
+                                                  10^0 = scale factor 1 (default)
 |5       |    |                   |waypoints   |a4|Waypoints array
 |0-9     |10  |Bearing            |bearing     |u|True bearing in half-degree
                                                   steps from previous waypoint;
@@ -1591,8 +1609,8 @@ case the first bearing is from the implied last point.
 |==============================================================================
 |Field   |Len |Description        |Member/Type |T|Units
 |0-2     | 3  |Shape of area      |shape       |e|Constant: 4
-|3-4     | 2  |Scale factor       |scale       |u|Exponent for area dimensions
-                                                  1 = meters (default)
+|3-4     | 2  |Scale factor       |scale       |u|Power of 10 for area dimensions;
+                                                  10^0 = scale factor 1 (default)
 |5       |    |                   |vertices    |a4|Vertices array
 |0-9     |10  |Bearing            |bearing     |u|True bearing in half-degree
                                                   steps from previous vertex;
@@ -1673,7 +1691,7 @@ the cargotype is 4 = MARPOL Annex I) or as a MARPOL Annex II code (if
 the cargotype is 5 = MARPOL Annex II).
 
 .Dangerous Cargo Indication: MARPOL Annex I list of oils
-[width="50%",frame="topbot",options="header"]
+[width="50%",frame="topbot"]
 |===================================
 |0    | N/A (default)
 |1    | asphalt solutions
@@ -1688,7 +1706,7 @@ the cargotype is 5 = MARPOL Annex II).
 |===================================
 
 .Dangerous Cargo Indication: MARPOL Annex II list of oils
-[width="50%",frame="topbot",options="header"]
+[width="50%",frame="topbot"]
 |===================================
 |0    | N/A (default)
 |1    | Category X
@@ -1746,7 +1764,7 @@ The final pair of fields in the table above is a waypoint.  The message may
 end with 1 to 16 waypoints.
 
 .Route Type Codes
-[width="50%",frame="topbot",options="header"]
+[width="50%",frame="topbot"]
 |===================================
 |0    |Undefined (default)
 |1    |Mandatory
@@ -1923,7 +1941,7 @@ or local.
 OPEN-QUESTION: No default is specified for the Status field.
 
 .Lock/Bridge/Terminal status codes
-[frame="topbot",options="header"]
+[frame="topbot"]
 |==============================================================================
 | 0 | Operational
 | 1 | Limited operation
@@ -2080,7 +2098,8 @@ to a maximum of 1008 bits (up to 5 AIVDM sentence payloads).
 
 Interpretation of the binary payload is controlled by DAC/FID as in
 message type 6. The following is a non-exhaustive list of standardized
-DAC-FID pairs in use for type 8:
+DAC-FID pairs in use for type 8; for an up-to-date list of registered application-specific
+messages, see <<IALA-ASM>>:
 
 [frame="topbot",options="header"]
 |==============================================================================
@@ -2144,7 +2163,7 @@ broadcast of this message of 12 minutes.
 //: Type 8(1/11)
 [frame="topbot",options="header"]
 |==============================================================================
-|Field   |Len |Description        |Member      |u|Units
+|Field   |Len |Description        |Member      |T|Units
 |0-5     |  6 |Message Type       |type        |u|Constant: 8
 |6-7     |  2 |Repeat Indicator   |repeat      |u|As in Common Navigation Block
 |8-37    | 30 |Source MMSI        |mmsi        |u|9 decimal digits
@@ -2272,23 +2291,23 @@ WMO 306 Code table 4.201 specifies the following precipitation type values:
 |0    |Calm           |Flat.
 |1    |Light air      |Ripples without crests.
 |2    |Light breeze   |Small wavelets.
-|                      Crests of glassy appearance, not breaking.
+                       Crests of glassy appearance, not breaking.
 |3    |Gentle breeze  |Large wavelets.
-|                      Crests begin to break; scattered whitecaps.
+                       Crests begin to break; scattered whitecaps.
 |4    |Moderate breeze|Small waves.
 |5    |Fresh breeze   |Moderate (1.2 m) longer waves. Some foam and spray.
 |6    |Strong breeze  |Large waves with foam crests and some spray.
 |7    |High wind      |Sea heaps up and foam begins to streak.
 |8    |Gale           |Moderately high waves with breaking crests
-|                      forming spindrift. Streaks of foam.
+                       forming spindrift. Streaks of foam.
 |9    |Strong gale    |High waves (6-7 m) with dense foam.
-|                      Wave crests start to roll over. Considerable spray.
+                       Wave crests start to roll over. Considerable spray.
 |10   |Storm          |Very high waves. The sea surface is white and there
-|                      is considerable tumbling. Visibility is reduced.
+                       is considerable tumbling. Visibility is reduced.
 |11   |Violent storm  |Exceptionally high waves.
 |12   |Hurricane force|Huge waves. Air filled with foam and spray. Sea
-|                      completely white with driving spray. Visibility
-|                      greatly reduced.
+                       completely white with driving spray. Visibility
+                       greatly reduced.
 |13   |               |N/A (default)
 |14-15|               |Reserved
 |===========================================================================
@@ -2415,7 +2434,7 @@ length: 360 bits.
 //: Type 8(1/19)
 [frame="topbot",options="header"]
 |==============================================================================
-|Field   |Len  |Description           |Member  |u|Units
+|Field   |Len  |Description           |Member  |T|Units
 |0-5     |   6 |Message Type          |type    |u|Constant: 8
 |6-7     |   2 |Repeat Indicator      |repeat  |u|As in Common Navigation Block
 |8-37    |  30 |Source MMSI           |mmsi    |u|9 decimal digits
@@ -2447,25 +2466,25 @@ length: 360 bits.
 |Code |Position Fix Type
 |  0  |N/A (default)
 |  1  |IALA port traffic signal 1: Serious emergency – all vessels to stop
-|      or divert according to instructions.
+       or divert according to instructions.
 |  2  |IALA port traffic signal 2: Vessels shall not proceed.
 |  3  |IALA port traffic signal 3: Vessels may proceed. One way traffic.
 |  4  |IALA port traffic signal 4: Vessels may proceed. Two way traffic.
 |  5  |IALA port traffic signal 5: A vessel may proceed only when it has
-|      received specific orders to do so.
+       received specific orders to do so.
 |  6  |IALA port traffic signal 2a: Vessels shall not proceed, except that
-|      vessels which navigate outside the main channel need not comply with
-|      the main message.
+       vessels which navigate outside the main channel need not comply with
+       the main message.
 |  7  |IALA port traffic signal 5a: A vessel may proceed only when it has
-|      received specific orders to do so; except that vessels which navigate
-|      outside the main channel need not comply with the main message.
+       received specific orders to do so; except that vessels which navigate
+       outside the main channel need not comply with the main message.
 |  8  |Japan Traffic Signal - I = "in-bound" only acceptable.
 |  9  |Japan Traffic Signal - O = "out-bound" only acceptable.
 | 10  |Japan Traffic Signal - F = both "in- and out-bound" acceptable.
 | 11  |Japan Traffic Signal - XI = Code will shift to "I" in due time.
 | 12  |Japan Traffic Signal - XO = Code will shift to "O" in due time.
 | 13  |Japan Traffic Signal - X = Vessels shall not proceed, except a vessel
-|      which receives the direction from the competent authority.
+       which receives the direction from the competent authority.
 |14-31|Reserved
 |===========================================================================
 
@@ -2561,6 +2580,7 @@ The following table applies:
 .Weather observation report from ship: WMO variant
 [frame="topbot",options="header"]
 |==============================================================================
+|Field   |Len  |Description            |Member  |T|Units
 |0-5     |   6 |Message Type           |type    |u|Constant: 8
 |6-7     |   2 |Repeat Indicator       |repeat  |u|As in Common Navigation Block
 |8-37    |  30 |Source MMSI            |mmsi    |u|9 decimal digits
@@ -2744,9 +2764,26 @@ is the message header format:
 |93-110  | 18 |Duration             |duration   |In minutes,
                                                  262143 = N/A (default),
                                                  0 = cancel this notice.
-|143     |    |                     |subarea    |a10|Subarea array
-|0-2     |  2 |                     |shape      |u|Subarea shape
-|3-86    | 85 |Subarea Payload      |payload    |d|Subarea payload
+|111-113 |  3 |Subarea shape #1     |subarea type |u|0-5 (see "Subarea Types")
+|114-197 | 84 |Subarea payload #1   |shape data |array|See "Subarea Payloads"
+|198-200 |  3 |Subarea shape #2     |subarea type |u|0-5 (see "Subarea Types")
+|201-284 | 84 |Subarea payload #2   |shape data |array|See "Subarea Payloads"
+|285-287 |  3 |Subarea shape #3     |subarea type |u|0-5 (see "Subarea Types")
+|288-371 | 84 |Subarea payload #3   |shape data |array|See "Subarea Payloads"
+|372-374 |  3 |Subarea shape #4     |subarea type |u|0-5 (see "Subarea Types")
+|375-458 | 84 |Subarea payload #4   |shape data |array|See "Subarea Payloads"
+|459-461 |  3 |Subarea shape #5     |subarea type |u|0-5 (see "Subarea Types")
+|462-545 | 84 |Subarea payload #5   |shape data |array|See "Subarea Payloads"
+|546-548 |  3 |Subarea shape #6     |subarea type |u|0-5 (see "Subarea Types")
+|549-632 | 84 |Subarea payload #6   |shape data |array|See "Subarea Payloads"
+|633-635 |  3 |Subarea shape #7     |subarea type |u|0-5 (see "Subarea Types")
+|636-719 | 84 |Subarea payload #7   |shape data |array|See "Subarea Payloads"
+|720-722 |  3 |Subarea shape #8     |subarea type |u|0-5 (see "Subarea Types")
+|723-806 | 84 |Subarea payload #8   |shape data |array|See "Subarea Payloads"
+|807-809 |  3 |Subarea shape #9     |subarea type |u|0-5 (see "Subarea Types")
+|810-893 | 84 |Subarea payload #9   |shape data |array|See "Subarea Payloads"
+|894-896 |  3 |Subarea shape #10    |subarea type |u|0-5 (see "Subarea Types")
+|897-980 | 84 |Subarea payload #10  |shape data |array|See "Subarea Payloads"
 |==============================================================================
 
 The sub-area indications are as described under the addressed form,
@@ -2928,7 +2965,7 @@ long.  The Sensor Report Type is interpreted as follows, and controls
 the interpretation of the sensor payload data.
 
 .Sensor report types
-[frame="topbot",options="header"]
+[frame="topbot"]
 |==============================================================================
 | 0 | Site location
 | 1 | Station ID
@@ -2963,7 +3000,7 @@ Here are the payload types for each variant:
 |==============================================================================
 
 .Sensor Owner Codes
-[frame="topbot",options="header"]
+[frame="topbot"]
 |==============================================================================
 |   0  | Unknown (default)
 |   1  | Hydrographic office
@@ -2977,7 +3014,7 @@ Here are the payload types for each variant:
 |==============================================================================
 
 .Data Timeout Codes
-[frame="topbot",options="header"]
+[frame="topbot"]
 |==============================================================================
 |   0  | No time period (default)
 |   1  | 10 minutes
@@ -3039,7 +3076,7 @@ Here are the payload types for each variant:
 The timestamp group is intended as a valid time of forecast.
 
 .Sensor Types
-[frame="topbot",options="header"]
+[frame="topbot"]
 |==============================================================================
 |   0  | No data (default)
 |   1  | Raw real time
@@ -3054,6 +3091,7 @@ The timestamp group is intended as a valid time of forecast.
 .Water level report payload
 [frame="topbot",options="header"]
 |==============================================================================
+|Field   |Len |Description              |Member     |T|Units
 |0-0     | 1  |Water Level Type         |absolute   |b|False if relative to
                                                        reference datum.
 |1-16    | 16 |Water Level              |level      |i|In 0.001 meter steps,
@@ -3089,7 +3127,7 @@ two digits of precision in the range.
 The timestamp group is intended as a valid time of forecast.
 
 .Vertical Reference Datum
-[frame="topbot",options="header"]
+[frame="topbot"]
 |==============================================================================
 |   0  | Mean Lower Low Water (MLLW)
 |   1  | International Great Lakes Datum (IGLD-85)
@@ -3678,7 +3716,7 @@ expand both.  Full ERI codes have been observed in the wild.
 |=============================================================================
 
 .SOLAS ship type, first digit
-[frame="topbot",options="header"]
+[frame="topbot"]
 |=============================================================================
 | 3 | Vessel
 | 7 | Cargo ship
@@ -3687,7 +3725,7 @@ expand both.  Full ERI codes have been observed in the wild.
 |=============================================================================
 
 .SOLAS ship type, second digit
-[frame="topbot",options="header"]
+[frame="topbot"]
 |=============================================================================
 | 0 | All ships of this type
 | 1 | Towing
@@ -3696,7 +3734,7 @@ expand both.  Full ERI codes have been observed in the wild.
 |=============================================================================
 
 .Hazard code
-[frame="topbot",options="header"]
+[frame="topbot"]
 |==============================================================================
 | 0 | 0 blue cones/lights
 | 1 | 1 blue cone/light
@@ -3707,7 +3745,7 @@ expand both.  Full ERI codes have been observed in the wild.
 |==============================================================================
 
 .Load status
-[frame="topbot",options="header"]
+[frame="topbot"]
 |==============================================================================
 | 0 | N/A (default)
 | 1 | Unloaded
@@ -3776,7 +3814,7 @@ OPEN-QUESTION: <<INLAND>> does not specify whether start and end times
 are UTC or local.
 
 .EMMA Type Codes
-[frame="topbot",options="header"]
+[frame="topbot"]
 |==============================
 |  0 | NA | Not Available
 |  1 | WI | Wind
@@ -3791,7 +3829,7 @@ are UTC or local.
 |==============================
 
 .EMMA Winds
-[frame="topbot",options="header"]
+[frame="topbot"]
 |==============================
 |  1 | N  | North
 |  2 | NE | North East
@@ -3871,7 +3909,7 @@ unspecified.
 
 //: direction vocabulary
 .Direction of Signal Impact
-[frame="topbot",options="header"]
+[frame="topbot"]
 |===============================================================================
 | 0 | Unknown (default)
 | 1 | Upstream
@@ -3887,7 +3925,7 @@ following way:
 
 //: status vocabulary
 .Signal Status
-[frame="topbot",options="header"]
+[frame="topbot"]
 |===============================================================================
 | 0 | Unknown (default)
 | 1 | No light
@@ -4325,8 +4363,8 @@ and 16-31 for floating aids to navigation.  The detailed list is as follows:
 |1    |Reference point
 |2    |RACON (radar transponder marking a navigation hazard)
 |3    |Fixed structure off shore, such as oil platforms, wind farms,
-|      rigs. (Note: This code should identify an obstruction that is
-|      fitted with an Aid-to-Navigation AIS station.)
+       rigs. (Note: This code should identify an obstruction that is
+       fitted with an Aid-to-Navigation AIS station.)
 |4    |Spare, Reserved for future use.
 |5    |Light, without sectors
 |6    |Light, with sectors
@@ -4494,10 +4532,10 @@ VHF channels as in Message Type 22. The field is interpreted as follows:
 .Transmit Modes
 [width="25%",frame="topbot"]
 |===================================
-|0 = |TxA/TxB, RxA/RxB (default)
-|1 = |TxA, RxA/RxB
-|2 = |TxB, RxA/RxB
-|3 = |Reserved for Future Use
+|0 |TxA/TxB, RxA/RxB (default)
+|1 |TxA, RxA/RxB
+|2 |TxB, RxA/RxB
+|3 |Reserved for Future Use
 |===================================
 
 .Station Types
@@ -4701,7 +4739,7 @@ should warn when this occurs but decode the first 96 bits.
 //: Type 27
 [frame="topbot",options="header"]
 |==============================================================================
-|Field   |Len   |Description         |Member   |u|Units
+|Field   |Len   |Description         |Member   |T|Units
 |0-5     |  6   |Message Type        |type     |u|Constant: 27
 |6-7     |  2   |Repeat Indicator    |repeat   |u|As in CNB
 |8-37    | 30   |MMSI                |mmsi     |u|9 decimal digits
@@ -4755,7 +4793,7 @@ in some cases identically named subtypes are assigned different FIDs.
 === U.S. Coast Guard Extended AIVDM ===
 
 You may occasionally see AIVDM packets with additional comma-separated
-fields following the CRC-32 checksum.  This is a semi-obsolescent
+fields following the checksum.  This is a semi-obsolescent
 logging format used by the USCG, which has never documented it well
 and plans to replace it with a new one based on NMEA 4.0.
 
@@ -5202,6 +5240,8 @@ Identification System]
 - [[[IALA]]]  http://www.ialathree.org/iala/pages/AIS/IALATech1.5.pdf[IALA
   Technical Clarifications on Recommendation ITU-R M.1371-1]
 
+- [[[IALA-ASM]]] https://www.iala-aism.org/asm/[Collection of regional applications for AIS Application Specific Messages of regional applications for AIS Binary Messages]
+
 - [[[NAVCEN]]] http://www.navcen.uscg.gov/enav/ais/[NAVCEN AIS pages]
 
 - [[[NMEA]]] "NMEA Revealed" This document collects information from
@@ -5434,5 +5474,9 @@ Version 1.51 fixes an incorrect bit length in the IMO289 Hydrological
 Data message.
 
 Version 1.52 fixes many small typos. Change Gratipay to Patreon.
+
+Version 1.53 fixes several small typos and formatting errors, adds detail
+to the Types 6 and 8 Area Notice message, and adds reference to the IALA
+Application-Specific Message (ASM) registry.
 
 // end
