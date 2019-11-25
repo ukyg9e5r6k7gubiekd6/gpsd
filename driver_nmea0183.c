@@ -3243,6 +3243,8 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
         {"PSTI", 2, false, processPSTI},        /* $PSTI Skytraq */
         {"STI", 2, false, processSTI},          /* $STI  Skytraq */
 #endif /* SKYTRAQ_ENABLE */
+        // $PSTM ST Micro STA8088xx/STA8089xx/STA8090xx
+        {"PSTM", 0, false, NULL},
         /* ignore Recommended Minimum Navigation Info, waypoint */
         {"RMB", 0,  false, NULL},
         {"RMC", 8,  false, processRMC},
