@@ -1,6 +1,8 @@
-image: alpine:latest
+stages:
+  - deploy
 
 pages:
+  image: alpine:latest
   stage: deploy
   script:
   - apk update && apk add python xmlto asciidoc scons rsync
