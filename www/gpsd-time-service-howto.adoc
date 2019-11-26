@@ -1444,9 +1444,9 @@ ntpd seems to better use a PPS refclock when the polling interval is
 as small as possible.  The ntpd default minpoll is 6, and can be set to
 as low as 4.  NTPsec versions 0.9.5 and above of ntpd allow you to
 set minpoll and maxpoll as low as 0.  Changing minpoll from 4 to 3, 2, 1
-or maybe even a,0 may reduce your PPS jitter by over a factor of 4.
+or maybe even a, 0 may reduce your PPS jitter by over a factor of 4.
 
-It change may require several hours for ntpd to converge with the new
+Any change will require several hours for ntpd to converge with the new
 settings.  Use ntpviz to find the best poll interval for your system.
 
 The value that yields the lowest jitter may not be the one that yields
