@@ -1,5 +1,13 @@
 stages:
+  - build
   - deploy
+
+build:
+  image: debian:latest
+  stage: build
+  script:
+  - apt update && apt install build-essential debhelper po-debconf python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
+  - .ci-build/build.sh
 
 pages:
   image: alpine:latest
