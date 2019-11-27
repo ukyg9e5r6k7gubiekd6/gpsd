@@ -24,16 +24,21 @@ fi
 
 export SCONSOPTS
 
+
 export PYTHONS="$(pyversions -v -r '>= 2.3'; py3versions -v -r '>= 3.4')"
 
 if [ -z "$PYTHONS" ]; then
     export PYTHONS="2 3"
 fi
 
+if [ -n "${SCAN_BUILD}" ]; then
+    export PYTHONS="3"
+fi
+
 for py in $PYTHONS; do
     python${py}     /usr/bin/scons ${SCONSOPTS} --clean
     rm -f .sconsign.*.dblite
-    python${py}     /usr/bin/scons ${SCONSOPTS} build-all
+    ${SCAN_BUILD} python${py}     /usr/bin/scons ${SCONSOPTS} build-all
     python${py}     /usr/bin/scons ${SCONSOPTS} check
 done
 
