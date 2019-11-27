@@ -13,6 +13,7 @@
 
 #include "../libgpsmm.h"
 #include "../timespec.h"
+#include "../timespec_str.c"
 #include "../gpsdclient.c"
 /*     YES   --->  ^^^^
  Using .c rather than the .h to embed gpsd_source_spec() source here
