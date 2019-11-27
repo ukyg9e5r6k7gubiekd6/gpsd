@@ -1,5 +1,6 @@
 stages:
   - build
+  - advanced_build
 
 build:
   image: debian:latest
@@ -8,6 +9,26 @@ build:
     SCONSOPTS: 'qt=yes xgps=yes'
   script:
   - apt update && apt -y install build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
+  - .ci-build/build.sh
+
+debian-unstable:
+  image: debian:unstable
+  stage: advanced_build 
+  variables:
+    SCONSOPTS: 'qt=yes xgps=yes'
+  script:
+  - apt update && apt -y install build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
+  - .ci-build/build.sh
+
+debian-unstable-clang:
+  image: debian:unstable
+  stage: advanced_build
+  variables:
+    SCONSOPTS: 'qt=yes xgps=yes'
+    CC: 'clang'
+    CXX: 'clang++'
+  script:
+  - apt update && apt -y clang install build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
   - .ci-build/build.sh
 
 pages:
