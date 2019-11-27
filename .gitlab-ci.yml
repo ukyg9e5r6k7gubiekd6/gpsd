@@ -32,6 +32,16 @@ debian-unstable.clang:
   - apt update && apt -y install clang build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
   - .ci-build/build.sh
 
+ubuntu-devel.gcc:
+image: ubuntu:devel
+  stage: advanced_build
+  variables:
+    SCONSOPTS: 'qt=yes xgps=yes'
+  script:
+  - apt update && apt -y install build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
+  - .ci-build/build.sh
+
+
 scan-build:
   allow_failure: true
   image: debian:unstable
