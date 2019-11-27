@@ -48,7 +48,7 @@ scan-build:
     expire_in: 1 week
 
 
-  pages:
+pages:
   image: alpine:latest
   stage: build
   script:
