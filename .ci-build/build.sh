@@ -8,7 +8,7 @@ eval "$(dpkg-buildflags --export=sh)"
 
 export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 
-SCONSOPTS="$@ prefix=/usr"
+SCONSOPTS="${SCONSOPTS} $@ prefix=/usr"
 SCONSOPTS="${SCONSOPTS} systemd=yes"
 SCONSOPTS="${SCONSOPTS} nostrip=yes"
 SCONSOPTS="${SCONSOPTS} dbus_export=yes"
@@ -17,8 +17,6 @@ SCONSOPTS="${SCONSOPTS} libdir=/usr/lib/${DEB_HOST_MULTIARCH}"
 SCONSOPTS="${SCONSOPTS} gpsd_user=gpsd"
 SCONSOPTS="${SCONSOPTS} gpsd_group=dialout"
 SCONSOPTS="${SCONSOPTS} debug=yes"
-### SCONSOPTS="${SCONSOPTS} qt=yes"  # The default qt=yes must be overridable
-SCONSOPTS="${SCONSOPTS} xgps=no"  # Until we figure out the right Gtk3 packages
 
 if dpkg -s qtbase5-dev 1>/dev/null 2>&1; then
     SCONSOPTS="${SCONSOPTS} qt_versioned=5"
