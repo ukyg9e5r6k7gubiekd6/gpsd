@@ -13,7 +13,7 @@ build:
 
 debian-unstable:
   image: debian:unstable
-  stage: advanced_build 
+  stage: advanced_build
   variables:
     SCONSOPTS: 'qt=yes xgps=yes'
   script:
