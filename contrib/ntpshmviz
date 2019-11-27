@@ -49,8 +49,8 @@ class ntpOffset(object):
         "display the graphs"
 
         # Alert the user that closing the graphs can be done with "Ctrl-w"
-        print ("Please note that the graph can be closed with the "
-               "key combination of <Ctrl-w>")
+        print("Please note that the graph can be closed with the "
+              "key combination of <Ctrl-w>")
 
         PLT.figure()
         subplot_value = 211
@@ -100,9 +100,9 @@ class ntpOffset(object):
                     try:
                         offset = (numpy.longdouble(record[3]) -
                                   numpy.longdouble(record[4]))
-                    except:
-                        print ("Invalid data: ", sys.exc_info()[0],
-                               ". Data was: ", line)
+                    except Exception:
+                        print("Invalid data: ", sys.exc_info()[0],
+                              ". Data was: ", line)
                         continue
 
                     # If the NTP unit is in the dictionary
@@ -117,13 +117,15 @@ class ntpOffset(object):
                     self.line_counts[record[1]] += 1
         stream.close()
 
+
 def args():
     parser = argparse.ArgumentParser(description='NTP drift visualizer')
     parser.add_argument('-V', '--version',
                         action='version',
                         help='Get version of GPS project',
-                        version = "ntpshmviz: version" + str(gps_version))
+                        version="ntpshmviz: version"+str(gps_version))
     return parser.parse_args()
+
 
 if __name__ == "__main__":
     if len(sys.argv) >= 2:
