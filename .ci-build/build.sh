@@ -32,7 +32,6 @@ fi
 
 for py in $PYTHONS; do
     python${py}     /usr/bin/scons ${SCONSOPTS} --clean
-    python${py}     /usr/bin/scons ${SCONSOPTS} sconsclean
     rm -f .sconsign.*.dblite
     python${py}     /usr/bin/scons ${SCONSOPTS} build-all
     python${py}     /usr/bin/scons ${SCONSOPTS} check
