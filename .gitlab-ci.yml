@@ -33,7 +33,7 @@ debian-unstable.clang:
   - .ci-build/build.sh
 
 ubuntu-devel.gcc:
-image: ubuntu:devel
+  image: ubuntu:devel
   stage: advanced_build
   variables:
     SCONSOPTS: 'qt=yes xgps=yes'
