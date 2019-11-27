@@ -1564,7 +1564,7 @@ else:
 # duplicate below?
 test_gpsmm = env.Program('tests/test_gpsmm', ['tests/test_gpsmm.cpp'],
                          LIBS=['gps_static', 'gps'],
-                         parse_flags=gpsdflags + mathlibs + rtlibs + dbusflags)
+                         parse_flags=mathlibs + rtlibs + dbusflags)
 testprogs = [test_bits,
              test_float,
              test_geoid,
