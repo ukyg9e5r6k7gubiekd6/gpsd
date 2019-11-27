@@ -108,7 +108,7 @@ GPSD Frequently Asked Questions
 
   <li>Troubleshooting GPSD: advanced topics
   <ul>
-    <li><a href='#baud'>Why is there no option to fix baud rate?</a></li>
+    <li><a href='#baud'>What about serial port speed (baud rate)?</a></li>
     <li><a href='#conflict'>Why does GPSD open non-GPS USB devices?</a></li>
     <li><a href='#efficiency'>What is gpsd's CPU and power overhead?</a></li>
     <li><a href='#usblockup'>My USB port becomes unavailable after gpsd uses it.</a><li><a href='#lockup'>My <code>gpsd</code> sometimes stops responding overnight</a></li>
@@ -539,12 +539,13 @@ sustainability; @TIPLINK@.</p>
 <h1 id="startup">Why does getting a fix take so long after powerup?</h1>
 
 <p>On a Linux machine, the <code>gpsd</code> daemon normally takes
-between 0.1 and 0.6 seconds to handshake with your hardware.  After
+between 0.1 and 0.6 seconds to handshake with your hardware, but this can
+vary widely.  After
 that you will receive GPS reports within a second of when the sensor
 issues them.  GPSD itself adds <a href="/performance/performance.html"
 >almost nomeasurable latency</a>, but RS-232 transmission time to
 <code>gpsd</code> can be more significant; you can cut this time by
-increasing the baud rate.</p>
+increasing the serial port speed (baud rate).</p>
 
 <p>Longer handshake delays have been reported from other platforms.
 Under OpenBSD, time to handshake with some binary GPSes (including
@@ -748,24 +749,24 @@ do with them.</p>
 <p>Your Kismet configuration has to include the setting
 "gps=true"  This is a surprisingly easy detail to forget.</p>
 
-<h1 id='baud'>Why is there no option to fix baud rate?</h1>
+<h1 id='baud'>What about serial port speed (baud rate)?</h1>
 
-<p>There is no option to fix baud rate because <code>gpsd</code> is
-designed to (a) be autoconfiguring, and (b) handle multiple devices.
-There are some more philosophical reasons as well; read the
-<a href="hacking.html">Hacker's Guide</a> for discussion.</p>
+<p>The <code>gpsd</code> code is designed to be autoconfiguring for both
+static and hot-plugged devices.  The <code>gpsd</code> command line
+options are only for problem solving or odd configurations.</p>
 
-<p>Unfortunately, this causes problems with some devices (notably
-Bluetooth GPSes) that are designed to operate at fixed baud rates.
-Some of these go catatonic if you try to set the baud rate, which is
+<p>One common problem is GNSS receivers that operate over Bluetooth.
+Changing the speed of these is difficult to impossible.  Some go
+catatonic if you try to change the serial port speed rate, which is
 why we have a -b option that prevents <code>gpsd</code> from trying to
 configure the GPSes it talks to.</p>
 
-<p>On Linux systems, there's a trick you can play to simulate fixing the
-baud rate.  It utilizes the fact that under Linux, setting baud rate 0
-is interpreted as "use the hardware port's existing baud rate without
-change".  The autoconfiguring hunt loop in <code>gpsd</code> always starts
-with this behavior.</p>
+<p>Another problem is that some systems may have long autobaud detection
+times, or be set to impossible to detect framing, like 8O1.
+On most systems, simply set the speed and framing before calling
+<code>gpsd</code> and <code>gpsd</code> will try those settings first.
+This works for both devices specified on the <code>gpsd</code> command
+line and those hot-plugged with <code>gpsdctl</code>.</p>
 
 <p>Accordingly, you can short-circuit the autobaud if you use stty(1) to set
 the bit rate just before starting gpsd.  For example, suppose you know that
@@ -773,17 +774,24 @@ your GPS is on serial port 0 and operates at a fixed bps of 54600.  You
 can set that up like this:</p>
 
 <pre><code>
-        stty speed 54600 &lt;/dev/ttyS0
-        gpsd -nN /dev/ttyS0
+        stty -F /dev/ttyS0 speed 54600
+        gpsd -n /dev/ttyS0
 </code></pre>
 
-<p>On *BSD systems, baud rate 0 doesn't have this special meaning -
-the ports open at a fixed speed, usually 9600.  So to suppress the
-hunt loop you may have to actually compile at a fixed baud rate and
-then use the stty trick - unless your BSD has an "init" device paired
-with each real one in which case <a
-href="https://www.clearchain.com/blog/posts/using-serial-devices-in-freebsd-how-to-set-a-terminal-baud-rate"
->this note on how to set a baud rate</a> may be relevant.</p>
+<p>If you have a Trimble that needs 115200 and 8O1, do this:</p>
+
+<pre><code>
+        stty -F /dev/ttyS0 speed 115200 parodd
+        gpsd -n /dev/ttyS0
+</code></pre>
+
+<p>If you only have one device connected to <code>gpsd</code> and
+that device is specified on the command line, then you can instead
+specify the speed with the -s [SPEED] option and/or the framing
+with the -f [FRAMING] option.</p>
+
+<p>For more details and discussion about autobaud refer to the
+<a href="hacking.html">Hacker's Guide</a>.</p>
 
 <h1 id='conflict'>Why does GPSD open non-GPS USB devices?</h1>
 
