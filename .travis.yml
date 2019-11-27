@@ -1,6 +1,9 @@
 sudo: required
 language: generic
 
+## The used .ci-build/build.sh is maintained for the gitlab CI.
+## Please upadte the travis yaml file if necessary
+
 # Some versions of clang++ don't work with some C++ headers, due to an
 # issue with __float128.  Until this is reproducible in a more debuggable
 # context, we disable the C++ builds in the clang case.
