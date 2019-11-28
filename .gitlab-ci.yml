@@ -54,7 +54,7 @@ fedora-latest:
     SCONSOPTS: 'qt=yes xgps=yes'
     DEBIAN_FRONTEND: 'noninteractive'
   script:
-  - dnf install -y bluez-libs-devel chrpath dbus-devel desktop-file-utils gcc-c++ libXaw-devel ncurses-devel python-devel qt-devel scons xmlto pps-tools-devel
+  - dnf install -y diffutils bluez-libs-devel chrpath dbus-devel desktop-file-utils gcc-c++ libXaw-devel ncurses-devel python-devel qt-devel scons xmlto pps-tools-devel
   - .ci-build/build.sh
 
 
@@ -66,7 +66,7 @@ fedora-rawhide:
     SCONSOPTS: 'qt=yes xgps=yes'
     DEBIAN_FRONTEND: 'noninteractive'
   script:
-  - dnf install -y bluez-libs-devel chrpath dbus-devel desktop-file-utils gcc-c++ libXaw-devel ncurses-devel python-devel qt-devel scons xmlto pps-tools-devel
+  - dnf install -y diffutils bluez-libs-devel chrpath dbus-devel desktop-file-utils gcc-c++ libXaw-devel ncurses-devel python-devel qt-devel scons xmlto pps-tools-devel
   - .ci-build/build.sh
 
 
