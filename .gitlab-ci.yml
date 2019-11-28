@@ -46,6 +46,30 @@ ubuntu-devel.gcc:
   - .ci-build/build.sh
 
 
+fedora-latest:
+  allow_failure: true
+  image: fedora:latest
+  stage: advanced_build
+  variables:
+    SCONSOPTS: 'qt=yes xgps=yes'
+    DEBIAN_FRONTEND: 'noninteractive'
+  script:
+  - dnf install -y bluez-libs-devel chrpath dbus-devel desktop-file-utils gcc-c++ libXaw-devel ncurses-devel python-devel qt-devel scons xmlto pps-tools-devel
+  - .ci-build/build.sh
+
+
+fedora-rawhide:
+  allow_failure: true
+  image: fedora:rawhide
+  stage: advanced_build
+  variables:
+    SCONSOPTS: 'qt=yes xgps=yes'
+    DEBIAN_FRONTEND: 'noninteractive'
+  script:
+  - dnf install -y bluez-libs-devel chrpath dbus-devel desktop-file-utils gcc-c++ libXaw-devel ncurses-devel python-devel qt-devel scons xmlto pps-tools-devel
+  - .ci-build/build.sh
+
+
 scan-build:
   allow_failure: true
   image: debian:unstable
