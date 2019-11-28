@@ -47,7 +47,6 @@ ubuntu-devel.gcc:
 
 
 fedora-latest:
-  allow_failure: true
   image: fedora:latest
   stage: advanced_build
   variables:
