@@ -312,7 +312,7 @@ have a real <code>gpsd</code> bug.</p>
 
 <p>If you are using an old version of <code>gpsd</code>, it is
 possible your bug has already been fixed.  Download the latest public
-version from the <a href='@DOWNLOADPAGE@'>download page</a> and test it.
+version from the <a href='@DOWNLOAD@'>download page</a> and test it.
 To be really helpful, check out git head
 and test that.  We don't mind getting reports that say "I saw
 version foo had the following bug, but you've fixed it."</p>
