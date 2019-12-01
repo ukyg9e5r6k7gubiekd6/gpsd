@@ -36,6 +36,7 @@ debian-unstable.clang:
   - .ci-build/build.sh
 
 debian-unstable.minimal:
+  allow_failure: true
   image: debian:unstable
   stage: advanced_build
   variables:
