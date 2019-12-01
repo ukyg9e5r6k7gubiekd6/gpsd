@@ -653,24 +653,19 @@ static void deactivate_device(struct gps_device_t *device)
     }
 }
 
-#if defined(SOCKET_EXPORT_ENABLE) || defined(CONTROL_SOCKET_ENABLE)
-/* *INDENT-OFF* */
-static struct gps_device_t *find_device(const char
-								 *device_name)
 /* find the device block for an existing device name */
+static struct gps_device_t *find_device(const char *device_name)
 {
     struct gps_device_t *devp;
 
-    for (devp = devices; devp < devices + MAX_DEVICES; devp++)
-    {
+    for (devp = devices; devp < devices + MAX_DEVICES; devp++) {
         if (allocated_device(devp) && NULL != device_name &&
-            strcmp(devp->gpsdata.dev.path, device_name) == 0)
+            strcmp(devp->gpsdata.dev.path, device_name) == 0) {
             return devp;
+        }
     }
     return NULL;
 }
-/* *INDENT-ON* */
-#endif /* defined(SOCKET_EXPORT_ENABLE) || defined(CONTROL_SOCKET_ENABLE) */
 
 static bool open_device( struct gps_device_t *device)
 /* open the input device
