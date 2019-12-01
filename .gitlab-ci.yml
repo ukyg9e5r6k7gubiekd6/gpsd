@@ -40,7 +40,7 @@ debian-unstable.minimal:
   image: debian:unstable
   stage: advanced_build
   variables:
-    SCONSOPTS: 'aivdm=no ashtech=no bluez=no control_socket=no controlsend=no coveraging=no dbus_export=no debug=no earthmate=no evermore=no force_global=no fury=no fv18=no garmin=no garmintxt=no geostar=no gpsclock=no gpsdclients=no greis=no implicit_link=no isync=no itrax=no leapfetch=no libgpsmm=no magic_hat=no manbuild=no minimal=no mtk3301=no navcom=no ncurses=no netfeed=no nmea0183=no nmea2000=no nostrip=no ntrip=no oceanserver=no oncore=no oscillator=no passthrough=no profiling=no python=no qt=no reconfigure=no rtcm104v2=no rtcm104v3=no shared=no shm_export=no sirf=no skytraq=no slow=no socket_export=no squelch=no superstar2=no systemd=no timeservice=no tnt=no tripmate=no tsip=no ublox=no usb=no xgps=no'
+    SCONSOPTS: 'aivdm=no ashtech=no bluez=no control_socket=no controlsend=no coveraging=no dbus_export=no debug=no earthmate=no evermore=no force_global=no fury=no fv18=no garmin=no garmintxt=no geostar=no gpsclock=no gpsdclients=no greis=no implicit_link=no isync=no itrax=no leapfetch=no libgpsmm=no magic_hat=no manbuild=no minimal=no mtk3301=no navcom=no ncurses=no netfeed=no nmea0183=no nmea2000=no nostrip=no ntrip=no oceanserver=no oncore=no oscillator=no passthrough=no profiling=no python=no qt=no reconfigure=no rtcm104v2=no rtcm104v3=no shared=no shm_export=no sirf=no skytraq=no slow=no socket_export=yes squelch=no superstar2=no systemd=no timeservice=no tnt=no tripmate=no tsip=no ublox=no usb=no xgps=no'
     DEBIAN_FRONTEND: 'noninteractive'
   script:
   - apt update && apt -y install build-essential scons chrpath lsb-release python2-minimal python3-minimal
