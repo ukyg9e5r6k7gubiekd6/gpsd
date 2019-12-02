@@ -43,6 +43,8 @@ for py in $PYTHONS; do
     python${py}     /usr/bin/scons ${SCONSOPTS} --clean
     rm -f .sconsign.*.dblite
     ${SCAN_BUILD} python${py}     /usr/bin/scons ${SCONS_PARALLEL}${SCONSOPTS} build-all
-    if [ -n "${NOCHECK}" ]; then python${py}     /usr/bin/scons ${SCONSOPTS} check; fi
+    if [ -z "${NOCHECK}" ]; then
+	    python${py}     /usr/bin/scons ${SCONSOPTS} check
+    fi
 done
 
