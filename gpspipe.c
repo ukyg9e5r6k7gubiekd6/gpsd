@@ -42,9 +42,7 @@
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif /* HAVE_SYS_SOCKET_H */
-#ifdef HAVE_TERMIOS_H
-#include <termios.h>            /* for cfmakeraw() on some OS */
-#endif /* HAVE_TERMIOS_H */
+#include <termios.h>            /* for speed_t, and cfmakeraw() on some OS */
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif /* HAVE_WINSOCK2_H */
@@ -61,9 +59,7 @@ static void spinner(unsigned int, unsigned int);
 #define BAUDRATE B4800
 
 /* Serial port variables */
-#ifdef HAVE_TERMIOS_H
 static struct termios oldtio, newtio;
-#endif /* HAVE_TERMIOS_H */
 static int fd_out = 1;		/* output initially goes to standard output */
 static char serbuf[255];
 static int debug;
@@ -80,7 +76,6 @@ static void open_serial(char *device)
 	exit(EXIT_FAILURE);
     }
 
-#ifdef HAVE_TERMIOS_H
     /* Save current serial port settings for later */
     if (tcgetattr(fd_out, &oldtio) != 0) {
 	(void)fprintf(stderr, "gpspipe: error reading serial port settings\n");
@@ -101,7 +96,6 @@ static void open_serial(char *device)
 	(void)fprintf(stderr, "gpspipe: error configuring serial port\n");
 	exit(EXIT_FAILURE);
     }
-#endif /* HAVE_TERMIOS_H */
 }
 
 static void usage(void)

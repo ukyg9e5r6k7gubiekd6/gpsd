@@ -18,9 +18,7 @@ extern "C" {
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
-#ifdef HAVE_TERMIOS_H
 #include <termios.h>
-#endif
 #ifdef HAVE_WINSOCK2_H
 #include <winsock2.h>      /* for fd_set */
 #else /* !HAVE_WINSOCK2_H */
@@ -405,13 +403,11 @@ struct gps_type_t {
     void (*init_query)(struct gps_device_t *session);
     void (*event_hook)(struct gps_device_t *session, event_t event);
 #ifdef RECONFIGURE_ENABLE
-#ifdef HAVE_TERMIOS_H
     bool (*speed_switcher)(struct gps_device_t *session,
 				     speed_t speed, char parity, int stopbits);
     void (*mode_switcher)(struct gps_device_t *session, int mode);
     bool (*rate_switcher)(struct gps_device_t *session, double rate);
     timespec_t min_cycle;
-#endif /* HAVE_TERMIOS_H */
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
     ssize_t (*control_send)(struct gps_device_t *session, char *buf, size_t buflen);
@@ -515,9 +511,7 @@ struct gps_device_t {
     sourcetype_t sourcetype;
     servicetype_t servicetype;
     int mode;
-#ifdef HAVE_TERMIOS_H
     struct termios ttyset, ttyset_old;
-#endif
     unsigned int baudindex;
     int saved_baud;
     struct gps_lexer_t lexer;
@@ -878,11 +872,9 @@ extern ssize_t gpsd_serial_write(struct gps_device_t *,
 				 const char *, const size_t);
 extern bool gpsd_next_hunt_setting(struct gps_device_t *);
 extern int gpsd_switch_driver(struct gps_device_t *, char *);
-#ifdef HAVE_TERMIOS_H
 extern void gpsd_set_speed(struct gps_device_t *, speed_t, char, unsigned int);
 extern speed_t gpsd_get_speed(const struct gps_device_t *);
 extern speed_t gpsd_get_speed_old(const struct gps_device_t *);
-#endif /* HAVE_TERMIOS_H */
 extern int gpsd_get_stopbits(const struct gps_device_t *);
 extern char gpsd_get_parity(const struct gps_device_t *);
 extern void gpsd_assert_sync(struct gps_device_t *);
