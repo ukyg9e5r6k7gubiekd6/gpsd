@@ -700,7 +700,6 @@ else:
     # clang accepts -pthread, then warns it is unused.
     if not config.CheckCC():
         announce("ERROR: CC doesn't work")
-        Exit(1)
 
     if ((config.CheckCompilerOption("-pthread") and
          not sys.platform.startswith('darwin'))):
@@ -1005,7 +1004,6 @@ else:
                             % hdr.replace("/", "_").upper())
         elif "termios" == hdr:
             announce("ERROR: %s.h not found" % hdr)
-            Exit(1)
         else:
             confdefs.append("/* #undef HAVE_%s_H */\n"
                             % hdr.replace("/", "_").upper())
