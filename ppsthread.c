@@ -692,7 +692,7 @@ static void *gpsd_ppsmonitor(void *arg)
 
 #if defined(TIOCMIWAIT)
     int edge_tio = 0;
-    long long cycle_tio = 0;
+    int64_t cycle_tio = 0;
     int64_t duration_tio = 0;
     int state_tio = 0;
     int state_last_tio = 0;
@@ -822,7 +822,7 @@ static void *gpsd_ppsmonitor(void *arg)
             cycle_tio = timespec_diff_ns(clock_ts_tio, pulse_tio[edge_tio]);
             cycle_tio /= 1000;  /* nsec to usec */
             duration_tio = timespec_diff_ns(clock_ts_tio,
-                        pulse_tio[edge_tio ? 0 : 1])/1000;
+                                            pulse_tio[edge_tio ? 0 : 1]) / 1000;
 
             /* save this edge so we know next cycle time */
             pulse_tio[edge_tio] = clock_ts_tio;
@@ -836,10 +836,11 @@ static void *gpsd_ppsmonitor(void *arg)
             cycle = cycle_tio;
             duration = duration_tio;
 
+            // (long long) for 32-bit compat.  PRId64 segfaults
             thread_context->log_hook(thread_context, THREAD_PROG,
-                    "TPPS:%s %.10s, cycle: " PRId64 ", duration: " PRId64
-                    " @ %s\n",
-                    thread_context->devicename, edge_str, cycle, duration,
+                    "TPPS:%s %.10s, cycle: %lld, duration: %lld @ %s\n",
+                    thread_context->devicename, edge_str,
+                    (long long)cycle, (long long)duration,
                     timespec_str(&clock_ts, ts_str1, sizeof(ts_str1)));
 
         }
@@ -904,11 +905,12 @@ static void *gpsd_ppsmonitor(void *arg)
             cycle = cycle_kpps;
             duration = duration_kpps;
 
+            // (long long) for 32-bit compat.  PRId64 segfaults
             thread_context->log_hook(thread_context, THREAD_PROG,
-                "KPPS:%s %.10s cycle: " PRId64 ", duration: " PRId64 " @ %s\n",
+                "KPPS:%s %.10s cycle: %lld, duration: %lld @ %s\n",
                 thread_context->devicename,
                 edge_str,
-                cycle_kpps, duration_kpps,
+                (long long)cycle_kpps, (long long)duration_kpps,
                 timespec_str(&clock_ts_kpps, ts_str1, sizeof(ts_str1)));
 
         }
@@ -962,11 +964,12 @@ static void *gpsd_ppsmonitor(void *arg)
         /* else, unchannged state, and weird cycle time */
 
         state_last = state;
+        // (long long) for 32-bit compat.  PRId64 segfaults
         thread_context->log_hook(thread_context, THREAD_PROG,
-            "PPS:%s %.10s cycle: " PRId64 ", duration: " PRId64 " @ %s\n",
+            "PPS:%s %.10s cycle: %lld, duration: %lld @ %s\n",
             thread_context->devicename,
             edge_str,
-            cycle, duration,
+            (long long)cycle, (long long)duration,
             timespec_str(&clock_ts, ts_str1, sizeof(ts_str1)));
         if (unchanged) {
             // strange, try again
