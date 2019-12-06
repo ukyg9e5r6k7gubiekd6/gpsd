@@ -267,8 +267,8 @@ void gpsd_set_century(struct gps_device_t *session)
 }
 
 #ifdef NMEA0183_ENABLE
-timespec_t gpsd_utc_resolve(struct gps_device_t *session)
 /* resolve a UTC date, checking for rollovers */
+timespec_t gpsd_utc_resolve(struct gps_device_t *session)
 {
     /*
      * We'd like to *correct* for rollover the way we do for GPS week.
@@ -277,6 +277,7 @@ timespec_t gpsd_utc_resolve(struct gps_device_t *session)
      * this will be hairy and risky.
      */
     timespec_t t;
+    char scr[128];
 
     t.tv_sec = (time_t)mkgmtime(&session->nmea.date);
     t.tv_nsec = session->nmea.subseconds.tv_nsec;
@@ -289,17 +290,35 @@ timespec_t gpsd_utc_resolve(struct gps_device_t *session)
     if (session->context->start_time < GPS_EPOCH)
 	return t;
 
+    /* sanity check unix time against leap second.
+     * Does not work well with regressions because the leap_sconds
+     * could be from the receiver, or from BUILD_LEAPSECONDS.
+     * Leap second 18 at 1 Jan 2017: 1483228800 */
+    if (17 < session->context->leap_seconds &&
+        1483228800L > t.tv_sec) {
+        t.tv_sec += 619315200;                       // fast forward 1024 weeks
+        (void)gmtime_r(&t.tv_sec, &session->nmea.date);   // fix NMEA date
+	(void)timespec_to_iso8601(t, scr, sizeof(scr));
+	GPSD_LOG(LOG_WARN, &session->context->errout,
+		 "Warning leap second %d inconsistent with %s(%lld)\n",
+                 session->context->leap_seconds,
+		 scr, (long long)t.tv_sec);
+    }
+
     /*
      * If the GPS is reporting a time from before the daemon started, we've
      * had a rollover event while the daemon was running.
      */
-    if (session->newdata.time.tv_sec < (time_t)session->context->start_time) {
-	char scr[128];
-	(void)timespec_to_iso8601(session->newdata.time, scr, sizeof(scr));
+#ifdef __UNUSED__
+    // 5 Dec 2019
+    // This fails ALL regression tests as start time after regression added
+    if (t.tv_sec < (time_t)session->context->start_time) {
+	(void)timespec_to_iso8601(t, scr, sizeof(scr));
 	GPSD_LOG(LOG_WARN, &session->context->errout,
 		 "GPS week rollover makes time %s (%lld) invalid\n",
-		 scr, (long long)session->newdata.time.tv_sec);
+		 scr, (long long)t.tv_sec);
     }
+#endif  // __UNUSED__
 
     return t;
 }
@@ -362,8 +381,8 @@ timespec_t gpsd_gpstime_resolv(struct gps_device_t *session,
 	week += session->context->rollovers * 1024;
 
     /* sanity check week number, GPS epoch, against leap seconds
-     * Does not work well because the leap_sconds could be from the
-     * receiver, or from BUILD_LEAPSECONDS. */
+     * Does not work well with regressions because the leap_sconds
+     * could be from the receiver, or from BUILD_LEAPSECONDS. */
     if (0 < session->context->leap_seconds &&
         19 > session->context->leap_seconds &&
         2180 < week) {

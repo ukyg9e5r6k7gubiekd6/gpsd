@@ -199,6 +199,12 @@ static int merge_ddmmyy(char *ddmmyy, struct gps_device_t *session)
         session->nmea.date.tm_mon = mon - 1;
         session->nmea.date.tm_mday = mday;
     }
+    GPSD_LOG(LOG_RAW, &session->context->errout,
+             "merge_ddmmyy(%s) %d %d %d\n",
+             ddmmyy,
+             session->nmea.date.tm_mon,
+             session->nmea.date.tm_mday,
+             session->nmea.date.tm_year);
     return 0;
 }
 
@@ -399,7 +405,7 @@ static gps_mask_t processRMC(int count, char *field[],
      * 5,6   12311.12,W   Longitude 123 deg. 11.12 min West
      * 7     000.5        Speed over ground, Knots
      * 8     054.7        Course Made Good, True north
-     * 9     181194       Date of fix  18 November 1994
+     * 9     181194       Date of fix ddmmyy.  18 November 1994
      * 10,11 020.3,E      Magnetic variation 20.3 deg East
      * 12    A            FAA mode indicator (NMEA 2.3 and later)
      *                     see faa_mode() for possible mode values
@@ -1929,19 +1935,40 @@ static gps_mask_t processPGRMF(int c UNUSED, char *field[],
   * 15 = dop, 0 to 9
   */
     gps_mask_t mask = ONLINE_SET;
+    unsigned short week = 0;
+    time_t tow = 0;
+    timespec_t ts_tow = {0, 0};
 
-    if (0 == merge_hhmmss(field[4], session) &&
-        0 == merge_ddmmyy(field[3], session)) {
-        /* got a good data/time */
+    /* Some garmin fail due to GPS Week Roll Over
+     * Ignore their UTC date/time, use their GPS week, GPS tow and
+     * leap seconds to decide the correct time */
+    if (isdigit(field[5][0])) {
+        session->context->leap_seconds = atoi(field[5]);
+        session->context->valid = LEAP_SECOND_VALID;
+    }
+    if (isdigit(field[1][0]) &&
+        isdigit(field[2][0]) &&
+        0 < session->context->leap_seconds) {
+        // have GPS week, tow and leap second
+        week = atol(field[1]);
+        ts_tow.tv_sec = tow = atol(field[2]);
+        ts_tow.tv_nsec = 0;
+        session->newdata.time = gpsd_gpstime_resolv(session, week, ts_tow);
+        mask |= TIME_SET;
+        GPSD_LOG(LOG_SPIN, &session->context->errout,
+                 "PGRMF gps time %ld\n",
+                 session->newdata.time.tv_sec);
+    } else if (0 == merge_hhmmss(field[4], session) &&
+               0 == merge_ddmmyy(field[3], session)) {
+        // fall back to UTC if we need and can
+        GPSD_LOG(LOG_SPIN, &session->context->errout,
+                 "PGRMF gps time %ld\n",
+                 session->newdata.time.tv_sec);
         mask |= TIME_SET;
     }
     if ('A' != field[10][0]) {
         /* Huh? */
         return mask;
-    }
-    if ('\0' != field[5][0]) {
-        session->context->leap_seconds = atoi(field[5]);
-        session->context->valid = LEAP_SECOND_VALID;
     }
     if (0 == do_lat_lon(&field[6], &session->newdata)) {
         mask |= LATLON_SET;
