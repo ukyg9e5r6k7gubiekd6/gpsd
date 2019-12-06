@@ -420,6 +420,8 @@ void gps_merge_fix(struct gps_fix_t *to,
  * convert struct tm, as UTC, to seconds since Unix epoch
  * This differs from mktime() from libc.
  * mktime() takes struct tm as localtime.
+ *
+ * The inverse of gmtime(time_t)
  */
 time_t mkgmtime(struct tm * t)
 {
