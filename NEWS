@@ -26,6 +26,7 @@
   Remove FIXED_PORT_SPEED and FIXED_STOP_BITS build options.
   Add -s [speed] and -f [framing] runtime options to gpsd.
   A working CC and termios.h are mandatory.
+  use the current leap second to determine the current GPS epoch.
 
 3.19: 2019-07-01
   Rearrange rawdata_t.  Bump the API because gps_data_t changed.
