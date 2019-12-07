@@ -45,11 +45,12 @@ if [ -n "${SCAN_BUILD}" ]; then
 fi
 
 for py in $PYTHONS; do
-    python${py}     ${SCONS} ${SCONSOPTS} --clean
+    _SCONS="${SCONS} target_python=python${py}"
+    python${py}     ${_SCONS} ${SCONSOPTS} --clean
     rm -f .sconsign.*.dblite
-    ${SCAN_BUILD} python${py}     ${SCONS} ${SCONS_PARALLEL}${SCONSOPTS} build-all
+    ${SCAN_BUILD} python${py}     ${_SCONS} ${SCONS_PARALLEL}${SCONSOPTS} build-all
     if [ -z "${NOCHECK}" ]; then
-	    python${py}     ${SCONS} ${SCONSOPTS} check
+	    python${py}     ${_SCONS} ${SCONSOPTS} check
     fi
 done
 
