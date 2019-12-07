@@ -1,10 +1,10 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 set -x
 
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 
-if lsb_release -d | grep -qi -e debian -e ubuntu; then
+if which lsb_release >/dev/null && lsb_release -d | grep -qi -e debian -e ubuntu; then
 	eval "$(dpkg-buildflags --export=sh)"
 	export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 	export PYTHONS="$(pyversions -v -r '>= 2.3'; py3versions -v -r '>= 3.4')"
