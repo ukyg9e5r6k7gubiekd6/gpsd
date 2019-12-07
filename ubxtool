@@ -17,7 +17,7 @@ usage: ubxtool [OPTIONS] [server[:port[:device]]]
 #    the CLI options.  A handy place to put your '-f /dev/ttyXX -s SPEED'
 #
 # To see what constellations are enabled:
-#       ubxtool -p GNSS -f /dev/ttyXX
+#       ubxtool -p CFG-GNSS -f /dev/ttyXX
 #
 # To disable GALILEO and enable GALILEO:
 #       ubxtool -d GLONASS -f /dev/ttyXX
