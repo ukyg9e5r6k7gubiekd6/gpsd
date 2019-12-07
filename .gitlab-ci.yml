@@ -70,6 +70,15 @@ fedora-latest:
   - .ci-build/build.sh
 
 
+freebsd:
+  image: fedora:latest
+  stage: advanced_build
+  tags:
+  - freebsd
+  script:
+  - .ci-build/build.sh
+
+
 scan-build:
   allow_failure: true
   image: debian:unstable
