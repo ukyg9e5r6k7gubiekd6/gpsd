@@ -126,7 +126,7 @@ ubxtool -e GPS
 </programlisting></para>
     <para>Verify the constellations enabled:
 <programlisting>
-ubxtool -p GNSS
+ubxtool -p CFG-GNSS
 </programlisting></para>
     <para>Enable the good stuff, the raw measurement messages:
 <programlisting>
