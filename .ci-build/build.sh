@@ -3,6 +3,9 @@ set -e
 set -x
 
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+if uname -a | grep -qi freebsd; then
+	export PATH="${PATH}:/usr/local/bin:/usr/local/sbin"
+fi
 
 if which lsb_release >/dev/null && lsb_release -d | grep -qi -e debian -e ubuntu; then
 	eval "$(dpkg-buildflags --export=sh)"
