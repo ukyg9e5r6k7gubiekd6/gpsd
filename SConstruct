@@ -2395,8 +2395,8 @@ else:
             ' $SRCDIR/test/clientlib/*.log', ])
     # Unit-test the bitfield extractor
     misc_regress = Utility('misc-regress', [], [
-        '$SRCDIR/test_clienthelpers.py',
-        '$SRCDIR/test_misc.py'
+        '{} $SRCDIR/test_clienthelpers.py'.format(target_python_path.decode()),
+        '{} $SRCDIR/test_misc.py'.format(target_python_path.decode())
     ])
 
 
