@@ -26,6 +26,8 @@ SCONSOPTS="${SCONSOPTS} gpsd_group=dialout"
 SCONSOPTS="${SCONSOPTS} debug=yes"
 SCONSOPTS="${SCONSOPTS} qt_versioned=5"
 
+export SCONS=$(which scons)
+
 if which nproc >/dev/null; then
 	SCONS_PARALLEL="-j $(nproc) "
 else
@@ -43,11 +45,11 @@ if [ -n "${SCAN_BUILD}" ]; then
 fi
 
 for py in $PYTHONS; do
-    python${py}     /usr/bin/scons ${SCONSOPTS} --clean
+    python${py}     ${SCONS} ${SCONSOPTS} --clean
     rm -f .sconsign.*.dblite
-    ${SCAN_BUILD} python${py}     /usr/bin/scons ${SCONS_PARALLEL}${SCONSOPTS} build-all
+    ${SCAN_BUILD} python${py}     ${SCONS} ${SCONS_PARALLEL}${SCONSOPTS} build-all
     if [ -z "${NOCHECK}" ]; then
-	    python${py}     /usr/bin/scons ${SCONSOPTS} check
+	    python${py}     ${SCONS} ${SCONSOPTS} check
     fi
 done
 
