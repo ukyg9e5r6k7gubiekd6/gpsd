@@ -85,6 +85,10 @@ extern "C" {
 
 #define JSON_DATE_MAX	24	/* ISO8601 timestamp with 2 decimal places */
 
+// be sure to change BUILD_LEAPSECONDS as needed.
+#define BUILD_CENTURY 2000
+#define BUILD_LEAPSECONDS 18
+
 #ifndef DEFAULT_GPSD_SOCKET
 #define DEFAULT_GPSD_SOCKET	"/var/run/gpsd.sock"
 #endif
