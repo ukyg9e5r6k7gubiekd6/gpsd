@@ -35,8 +35,6 @@ import ast
 import functools
 import glob
 import imp         # for imp.find_module('gps'), imp deprecated in 3.4
-# for conditional_leapsecond_fetch(), make_leapsecond_include()
-import leapsecond
 import operator
 import os
 import pickle
@@ -233,7 +231,6 @@ boolopts = (
     ("gpsdclients",   True,  "gspd client programs"),
     ("gpsd",          True,  "gpsd itself"),
     ("implicit_link", imloads, "implicit linkage is supported in shared libs"),
-    ("leapfetch",     True,  "fetch up-to-date data on leap seconds."),
     ("magic_hat", sys.platform.startswith('linux'),
      "special Linux PPS hack for Raspberry Pi et al"),
     ("manbuild",      True,  "build help in man and HTML formats"),
@@ -1599,7 +1596,6 @@ else:
         "gpscap.py",
         "gpssim.py",
         "jsongen.py",
-        "leapsecond.py",
         "maskaudit.py",
         "test_clienthelpers.py",
         "test_misc.py",
@@ -1769,19 +1765,6 @@ env.Command(target="packet_names.h", source="packet_states.h",
     sed -e '/^ *\\([A-Z][A-Z0-9_]*\\),/s//   \"\\1\",/' <$SOURCE >$TARGET &&\
     chmod a-w $TARGET""")
 
-# timebase.h - always built in order to include current GPS week
-
-
-def timebase_h(target, source, env):
-    f = open(target[0].abspath, 'w')
-    f.write(leapsecond.make_leapsecond_include(source[0].abspath))
-    f.close()
-
-
-timebase = env.Command(target="timebase.h",
-                       source=["leapseconds.cache"], action=timebase_h)
-env.AlwaysBuild(timebase)
-
 env.Textfile(target="gpsd_config.h", source=confdefs)
 
 env.Command(target="gps_maskdump.c",
@@ -1842,28 +1825,6 @@ revision = '''/* Automatically generated file, do not edit */
 #define REVISION "%s"
 ''' % (polystr(rev.strip()),)
 env.Textfile(target="revision.h", source=[revision])
-
-# leapseconds.cache is a local cache for information on leapseconds issued
-# by the U.S. Naval observatory. It gets kept in the repository so we can
-# build without Internet access.
-
-
-def leapseconds_cache_rebuild(target, source, env):
-    if not env["leapfetch"]:
-        sys.stdout.write("Leapsecond fetch suppressed by leapfetch=no.\n")
-    elif not leapsecond.conditional_leapsecond_fetch(target[0].abspath,
-                                                     timeout=15):
-        sys.stdout.write("try building with leapfetch=no.\n")
-
-
-if 'dev' in gpsd_version or not os.path.exists('leapseconds.cache'):
-    leapseconds_cache = env.Command(target="leapseconds.cache",
-                                    source="leapsecond.py",
-                                    action=leapseconds_cache_rebuild)
-    env.Clean(leapseconds_cache, "leapsecond.pyc")
-    env.NoClean(leapseconds_cache)
-    env.Precious(leapseconds_cache)
-    env.AlwaysBuild(leapseconds_cache)
 
 if env['systemd']:
     udevcommand = 'TAG+="systemd", ENV{SYSTEMD_WANTS}="gpsdctl@%k.service"'
@@ -2258,9 +2219,8 @@ else:
 
     # Build the regression tests for the daemon.
     # Note: You'll have to do this whenever the default leap second
-    # changes in timebase.h.  The problem is in the SiRF tests;
-    # that driver relies on the default until it gets the current
-    # offset from subframe data.
+    # changes in gpsd.h.  Many drivers rely on the default until they
+    # get the current leap second.
     gps_rebuilds = []
     for gps_name, gps_log in zip(gps_names, gps_logs):
         gps_rebuilds.append(Utility('gps-makeregress-' + gps_name, gps_herald,
