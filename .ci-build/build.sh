@@ -7,7 +7,7 @@ if uname -a | grep -qi freebsd; then
 	export PATH="${PATH}:/usr/local/bin:/usr/local/sbin"
 fi
 
-if which lsb_release >/dev/null && lsb_release -d | grep -qi -e debian -e ubuntu; then
+if command -v lsb_release >/dev/null && lsb_release -d | grep -qi -e debian -e ubuntu; then
 	eval "$(dpkg-buildflags --export=sh)"
 	export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 	export PYTHONS="$(pyversions -v -r '>= 2.3'; py3versions -v -r '>= 3.4')"
@@ -26,9 +26,9 @@ SCONSOPTS="${SCONSOPTS} gpsd_group=dialout"
 SCONSOPTS="${SCONSOPTS} debug=yes"
 SCONSOPTS="${SCONSOPTS} qt_versioned=5"
 
-export SCONS=$(which scons)
+export SCONS=$(command -v scons)
 
-if which nproc >/dev/null; then
+if command -v nproc >/dev/null; then
 	SCONS_PARALLEL="-j $(nproc) "
 else
 	SCONS_PARALLEL=""
