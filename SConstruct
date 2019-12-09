@@ -1779,7 +1779,7 @@ env.Command(target="ais_json.i", source="jsongen.py", action='''\
     $SC_PYTHON $SOURCE --ais --target=parser >$TARGET &&\
     chmod a-w $TARGET''')
 
-generated_sources = ['packet_names.h', 'timebase.h', "ais_json.i",
+generated_sources = ['packet_names.h', "ais_json.i",
                      'gps_maskdump.c', 'revision.h', 'gpsd.php',
                      'gpsd_config.h']
 

@@ -31,7 +31,6 @@
 <!ENTITY pseudonmea.c             SYSTEM "explan_pseudonmea.c.xml">
 <!ENTITY serial.c                 SYSTEM "explan_serial.c.xml">
 <!ENTITY subframe.c               SYSTEM "explan_subframe.c.xml">
-<!ENTITY timebase.h               SYSTEM "explan_timebase.h.xml">
 
 <!ENTITY wrapup                   SYSTEM "explan_wrapup.xml">
 ]>
@@ -112,7 +111,6 @@ is not yet documented here.</para>
 &pseudonmea.c;
 &serial.c;
 &subframe.c;
-&timebase.h;
 
 &wrapup;
 </article>

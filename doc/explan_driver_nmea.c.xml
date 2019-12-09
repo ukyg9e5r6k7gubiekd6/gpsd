@@ -33,7 +33,7 @@
   <entry><para>If the century has not yet been stored in the nmea
   driver private data, take the supplied ddmmyy date and generate and
   store a ddmmyyyy date, using the century value compiled in from
-  <function>timebase.h</function>.</para></entry>
+  <function>gpsd.h</function>.</para></entry>
 </row>
 <row>
   <entry><function>static void merge_hhmmss(char *hhmmss, struct gps_device_t *session)</function></entry>

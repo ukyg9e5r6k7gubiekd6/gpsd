@@ -340,58 +340,33 @@ generator included with the distribution. To install it, copy the file
 'gpsd.php' to your HTML document directory. Then see the
 post-installation instructions in INSTALL.adoc for how to configure it.
 
-== The leapseconds cache ==
+== Leap Seconds ==
 
-Early in your build, the recipe will try to go over the Internet to
-one of several sources of current data on the leap-second offset in
-order to ensure that the file leapseconds.cache is up to date.  This,
-in turn, is used to build a timebase.h include file.
+The header gpsd.h contains the value BUILD_LEAPSECONDS.  This is set,
+at release time, to the leap second value current at that time.
 
-This procedure may fail if you are building in a network that
-requires an authenticating web proxy.  If that occurs, the build will
-time out with a warning and a suggestion to use the leapfetch=no build
-option.
+Ideally gpsd would be reading the standard leapseconds.cache file
+provided by most distributions for the current leap second.
 
-Building with leapfetch=no may, in unusual circumstances, result in
-reported GPS time being off by a second or more.  The circumstances
-are:
+Most of the drivers supply the current leap second, after the GNSS
+receiver sends it in a message to gpsd.  But none of the standard NMEA
+0183 messages supply the current leap second.  Thus the need for a fall
+back leap second value.
 
-1. It has been less than 20 minutes since power-up; the GPS has
-   not yet received the current leapsecond offset as part of the
-   periodic ephemeris download.
+The leap second value is mainly used to check for invalid UTC time from
+the GNSS receiver.  If the receiver is affected by the GPS Week Number
+Roll Over (WKNO) bug, then the UTC time it reports will be off by 1024
+weeks.
 
-2. One or more leap-second offset increments have been issued between
-   when your GPSD source tree was cloned from the repository (or
-   leapsecond.cache was later updated) and now.  Leap-second
-   increments, compensating for minute and unpredictable changes in
-   the Earth's rotation, are occasionally issued by international time
-   authorities.
+All GNSS receivers may be using the wrong leap second internally on
+startup. This may happen if it has been less than about 12 minutes since
+power-up; the receiver has not yet received the current leapsecond
+offset as part of the periodic almanac download.  Page 18, subframe 4,
+of the almanac contains the leap second data.
 
-Note that the same failure can occur with any GPSD installation.  But
-by refreshing leapseconds.cache you reduce the error window for
-leap-second offset bumps to affect your installation so that it begins
-as late as possible, at your build time rather than from when the
-source tree was copied.
-
-If you have had a leap-second transition, the following regression tests
-will break:
-
-	  bu303-climbing.log
-	  bu303-moving.log
-	  bu303-nofix.log
-	  bu303-stillfix.log
-	  bu303b-nofix.log
-	  italk-binary.log
-	  navcom.log
-	  ublox-aek-4t.log
-	  ublox-lea-4t.log
-	  ublox-sirf1.log
-
-There is no help for this other than a test rebuild.  The problem is
-that these devices rely on the build-time leap-second offset; you'll
-see times one second off.  Other GPSes either return
-leap-second-corrected time or the test loads include a
-leapsecond-offset report before any time is reported.
+The gpsd daemon may be using the wrong leap second internally if
+the compiled in leap second is no longer valid, and the GNSS receiver
+has not reported the current leap second to gpsd.
 
 == Optional features ==
 

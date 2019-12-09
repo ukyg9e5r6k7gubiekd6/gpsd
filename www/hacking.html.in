@@ -1710,11 +1710,9 @@ and Coverity warnings and fix them.</p></dd>
 representative selection of <a
 href="https://db.debian.org/machines.cgi">porterboxes</a>.</p>
 
-<p>Warning! Whenever the default leap second changes in timebase.h the
-GPS tests will break (times one second off) and the testloads will
-have to be rebuilt.  The problem is in the SiRF tests; that driver
-relies on the default until it gets the current offset from subframe
-data.</p></dd>
+<p>Warning! Whenever the default leap second changes in gpsd.h some
+gpsd regression tests will break (times one second off) and the testloads
+will have to be rebuilt.</p></dd>
 
 <dt>9. Live-test PPS</dt>
 <dd><p>Point gpsmon at a GR601-W or other PPS-capable GPS and verify
