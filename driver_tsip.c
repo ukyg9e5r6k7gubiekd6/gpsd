@@ -2872,16 +2872,17 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                  "TSIP: ID x%02x mask %s\n", id, gps_maskdump(mask));
     }
     /* See if it is time to send some request packets for reports that.
-     * The receiver won't send at fixed intervals */
+     * The receiver won't send at fixed intervals.
+     * Use llabs() as time sometimes goes backwards. */
 
-    if ((now - session->driver.tsip.last_41) > 5) {
+    if (5 < llabs(now - session->driver.tsip.last_41)) {
         /* Request Current Time returns 0x41.
          * Easiest way to get GPS weeks and current leap seconds */
         (void)tsip_write(session, 0x21, buf, 0);
         session->driver.tsip.last_41 = now;
     }
 
-    if ((now - session->driver.tsip.last_6d) > 5) {
+    if (5 < llabs(now - session->driver.tsip.last_6d)) {
         /* Request GPS Receiver Position Fix Mode
          * Returns 0x44, 0x6c, or 0x6d. */
         (void)tsip_write(session, 0x24, buf, 0);
@@ -2898,7 +2899,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
     }
 
     if (1 > session->driver.tsip.superpkt &&
-        (now - session->driver.tsip.last_48) > 60) {
+        60 < llabs(now - session->driver.tsip.last_48)) {
         /* Request GPS System Message
          * Returns 0x48.
          * not supported on:
@@ -2912,24 +2913,24 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         session->driver.tsip.last_48 = now;
     }
 
-    if ((now - session->driver.tsip.last_5c) >= 5) {
+    if (5 < llabs(now - session->driver.tsip.last_5c)) {
         /* Request Current Satellite Tracking Status
          * Returns: 0x5c or 0x5d
-         *  5c in PS only devices
-         *  5d in multi-gnss devices */
+         *  5c from GPS only devices
+         *  5d from multi-gnss devices */
         putbyte(buf, 0, 0x00);  /* All satellites */
         (void)tsip_write(session, 0x3c, buf, 1);
         session->driver.tsip.last_5c = now;
     }
 
-    if ((now - session->driver.tsip.last_46) > 5) {
+    if (5 < llabs(now - session->driver.tsip.last_46)) {
         /* Request Health of Receiver
          * Returns 0x46 and 0x4b. */
         (void)tsip_write(session, 0x26, buf, 0);
         session->driver.tsip.last_46 = now;
     }
     if ((session->driver.tsip.req_compact > 0) &&
-        ((now - session->driver.tsip.req_compact) > 5)) {
+        (5 < llabs(now - session->driver.tsip.req_compact))) {
         /* Compact Superpacket requested but no response
          * Not in:
          * ICM SMT 360
@@ -3013,7 +3014,7 @@ static void tsip_event_hook(struct gps_device_t *session, event_t event)
         }
         break;
     case event_deactivate:
-        // used to revert serial port parms here.  No need   for that.
+        // used to revert serial port parms here.  No need for that.
         // FALLTHROUGH
     default:
         break;
