@@ -76,7 +76,7 @@ extern "C" {
  *      Remove gps_device_t.back_to_nmea.
  *      Add fixed_port_speed, fixed_port_framing to gps_context_t.
  *      change tsip.superpkt from bool to int.
- *      Add tsip.machine_id, tsip.hardware_code and tsip.last_tow
+ *      Add tsip  .machine_id, .hardware_code, .last_tow, last_chan_seen
  *      Split gps_device_t.subtype into subtype and subtype1
  */
 /* Keep in sync with api_major_version and api_minor gps/__init__.py */
@@ -675,6 +675,7 @@ struct gps_device_t {
 #define TSIP_RES36017x22        3031
             uint8_t alt_is_msl;         // 0 if alt is HAE, 1 if MSL
             timespec_t last_tow;        // used to find cycle start
+            int last_chan_seen;         // from 0x5c or 0x5d
 	} tsip;
 #endif /* TSIP_ENABLE */
 #ifdef GARMIN_ENABLE	/* private housekeeping stuff for the Garmin driver */

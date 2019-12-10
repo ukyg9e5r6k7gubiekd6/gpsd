@@ -1040,7 +1040,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         ftow = getbef32((char *)buf, 8);  /* time of Last measurement */
         d1 = getbef32((char *)buf, 12) * RAD_2_DEG;     /* Elevation */
         d2 = getbef32((char *)buf, 16) * RAD_2_DEG;     /* Azimuth */
+
+        /* channel number, bits 0-2 reserved/unused as of 1999
+         * seems to always start series at zero and increment to last one
+         * save it to check for last 0x5d message
+         */
         i = (int)(u2 >> 3);     /* channel number */
+        session->driver.tsip.last_chan_seen = i;
+
         GPSD_LOG(LOG_PROG, &session->context->errout,
                  "TSIP: Satellite Tracking Status (0x5c): Ch %2d PRN %3d "
                  "es %d Acq %d Eph %2d SNR %4.1f LMT %.04f El %4.1f Az %5.1f\n",
@@ -1102,7 +1109,14 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             break;
         }
         u1 = getub(buf, 0);     /* PRN */
-        u2 = getub(buf, 1);     /* chan */
+
+        /* channel number
+         * seems to always start series at zero and increment to last one
+         * save it to check for last 0x5d message
+         */
+        i = getub(buf, 1);     /* chan */
+        session->driver.tsip.last_chan_seen = i;
+
         u3 = getub(buf, 2);     /* Acquisition flag */
         u4 = getub(buf, 3);     /* SV used in Position or Time calculation*/
         f1 = getbef32((char *)buf, 4);  /* Signal level */
@@ -1117,7 +1131,7 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         u9 = getub(buf, 24);    /* Used flags */
         u10 = getub(buf, 25);   /* SV Type */
 
-        i = u2;                 /* channel number */
+
         GPSD_LOG(LOG_PROG, &session->context->errout,
                 "TSIP: Satellite Tracking Status (0x5d): Ch %2d Con %d PRN %3d "
                 "Acq %d Use %d SNR %4.1f LMT %.04f El %4.1f Az %5.1f Old %d "
