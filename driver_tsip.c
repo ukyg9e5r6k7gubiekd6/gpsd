@@ -2,7 +2,7 @@
  * Handle the Trimble TSIP packet format
  * by Rob Janssen, PE1CHL.
  * Acutime Gold support by Igor Socec <igorsocec@gmail.com>
- * Trimble RES multi-constelation support by Nuno Goncalves <nunojpg@gmail.com>
+ * Trimble RES multi-constellation support by Nuno Goncalves <nunojpg@gmail.com>
  *
  * Week counters are not limited to 10 bits. It's unknown what
  * the firmware is doing to disambiguate them, if anything; it might just
@@ -654,7 +654,8 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             break;
         }
         gpsd_zero_satellites(&session->gpsdata);
-        count = (int)getub(buf, 0);     /* satellite count */
+        /* satellite count, RES SMT 360 doc says 12 max */
+        count = (int)getub(buf, 0);
         if (len != (5 * count + 1)) {
             bad_len = 5 * count + 1;
             break;
@@ -1129,6 +1130,11 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
             session->gpsdata.skyview[i].used = (bool)u4;
             session->gpsdata.skyview[i].gnssid = tsip_gnssid(u10, u1,
                 &session->gpsdata.skyview[i].svid);
+            if (0 == u7) {
+		session->gpsdata.skyview[i].health = SAT_HEALTH_OK;
+            } else {
+		session->gpsdata.skyview[i].health = SAT_HEALTH_BAD;
+            }
 
             /* when polled by 0x3c, all the skyview times will be the same
              * in one cluster */
