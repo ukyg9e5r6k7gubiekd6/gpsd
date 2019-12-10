@@ -423,7 +423,7 @@ struct gps_type_t {
  * Each input source has an associated type.  This is currently used in two
  * ways:
  *
- * (1) To determince if we require that gpsd be the only process opening a
+ * (1) To determine if we require that gpsd be the only process opening a
  * device.  We make an exception for PTYs because the master side has to be
  * opened by test code.
  *
@@ -545,7 +545,7 @@ struct gps_device_t {
     bool cycle_end_reliable;		/* does driver signal REPORT_MASK */
     int fixcnt;				/* count of fixes from this device */
     struct gps_fix_t newdata;		/* where drivers put their data */
-    struct gps_fix_t lastfix;		/* not qute yet ready for oldfix */
+    struct gps_fix_t lastfix;		/* not quite yet ready for oldfix */
     struct gps_fix_t oldfix;		/* previous fix for error modeling */
 #ifdef NMEA0183_ENABLE
     struct {
@@ -792,7 +792,7 @@ struct gps_device_t {
 };
 
 /*
- * These are used where a file descriptor of 0 or greater indicaes open device.
+ * These are used where a file descriptor of 0 or greater indicates open device.
  */
 #define UNALLOCATED_FD	-1	/* this slot is available for reallocation */
 #define PLACEHOLDING_FD	-2	/* this slot *not* available for reallocation */
