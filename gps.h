@@ -97,7 +97,7 @@ extern "C" {
  *
  * Error estimates are at 95% confidence.
  */
-/* WARNING!  loss of precision telling timme as a double.
+/* WARNING!  loss of precision telling time as a double.
  * A double is 53 significant bits.
  * UNIX time to nanoSec precision is 62 significant bits
  * UNIX time to nanoSec precision after 2038 is 63 bits
@@ -131,7 +131,7 @@ struct gps_fix_t {
     double epy;  	/* Latitude position uncertainty, meters */
     double longitude;	/* Longitude in degrees (valid if mode >= 2) */
     double epx;  	/* Longitude position uncertainty, meters */
-    double altHAE;	/* Altitude, height above allipsoid.
+    double altHAE;	/* Altitude, height above ellipsoid.
                          * in meters and probably WGS84
                          * (valid if mode == 3)
                          * MSL = altHAE - geoid_sep */
@@ -143,10 +143,10 @@ struct gps_fix_t {
     double eps;		/* Speed uncertainty, meters/sec */
     double climb;       /* Vertical speed, meters/sec */
     double epc;		/* Vertical speed uncertainty */
-    /* estimated postion error horizontal (2D) . meters, maybe 50%, maybe 95% */
+    /* estimated position error horizontal (2D). Meters, maybe 50%, maybe 95% */
     /* aka estimated position error (epe) */
-    double eph;		/* estimated postion error horizontal (2D) */
-    /* sperical error probability, 3D. meters, maybe 50%, maybe 95% */
+    double eph;		/* estimated position error horizontal (2D) */
+    /* spherical error probability, 3D. Meters, maybe 50%, maybe 95% */
     /* Garmin, not gpsd, calls this estimated position error (epe) */
     double sep;
     /* Geoid separation (ellipsoid separation)
@@ -231,7 +231,7 @@ struct gst_t {
 typedef uint32_t isgps30bits_t;
 
 /*
- * Values for "system" fields.  Note, the encoding logic is senstive to the
+ * Values for "system" fields.  Note, the encoding logic is sensitive to the
  * actual values of these; it's not sufficient that they're distinct.
  */
 #define NAVSYSTEM_GPS   	0
@@ -254,7 +254,7 @@ struct rtcm2_t {
 	    unsigned int nentries;
 	    struct gps_rangesat_t {	/* data from messages 1 & 9 */
 		unsigned ident;		/* satellite ID */
-		unsigned udre;		/* user diff. range error */
+		unsigned udre;		/* user differential range error */
 		unsigned iod;		/* issue of data */
 		double prc;		/* range error */
 		double rrc;		/* range error rate */
@@ -318,7 +318,7 @@ struct rtcm2_t {
 	    unsigned int nentries;
 	    struct glonass_rangesat_t {		/* data from message type 31 */
 		unsigned ident;		/* satellite ID */
-		unsigned udre;		/* user diff. range error */
+		unsigned udre;		/* user differential range error */
 		unsigned tod;		/* issue of data */
 		bool change;		/* ephemeris change bit */
 		double prc;		/* range error */
@@ -376,7 +376,7 @@ struct rtcm3_network_rtk_header {
     time_t time;		/* GPS Epoch Time (TOW) in ms */
     bool multimesg;		/* GPS Multiple Message Indicator */
     unsigned master_id;		/* Master Reference Station ID */
-    unsigned aux_id;		/* Auxilary Reference Station ID */
+    unsigned aux_id;		/* Auxiliary Reference Station ID */
     unsigned char satcount;	/* count of GPS satellites */
 };
 
@@ -502,7 +502,7 @@ struct rtcm3_t {
 	    unsigned int subnetwork_id;	/* Subnetwork ID */
 	    unsigned int stationcount;	/* # auxiliary stations transmitted */
 	    unsigned int master_id;	/* Master Reference Station ID */
-	    unsigned int aux_id;	/* Auxilary Reference Station ID */
+	    unsigned int aux_id;	/* Auxiliary Reference Station ID */
 	    double d_lat, d_lon, d_alt;	/* Aux-master location delta */
 	} rtcm3_1014;
 	struct rtcm3_1015_t {
@@ -963,7 +963,7 @@ struct ais_t
 #define AIS_TURN_HARD_LEFT	-127
 #define AIS_TURN_HARD_RIGHT	127
 #define AIS_TURN_NOT_AVAILABLE	128
-	    unsigned int speed;			/* speed over ground in deciknots */
+	    unsigned int speed;		/* speed over ground in deciknots */
 #define AIS_SPEED_NOT_AVAILABLE	1023
 #define AIS_SPEED_FAST_MOVER	1022		/* >= 102.2 knots */
 	    bool accuracy;			/* position accuracy */
@@ -1025,7 +1025,7 @@ struct ais_t
 	    unsigned int to_stern;	/* dimension to stern */
 	    unsigned int to_port;	/* dimension to port */
 	    unsigned int to_starboard;	/* dimension to starboard */
-	    unsigned int epfd;		/* type of position fix deviuce */
+	    unsigned int epfd;		/* type of position fix device */
 	    unsigned int month;		/* UTC month */
 	    unsigned int day;		/* UTC day */
 	    unsigned int hour;		/* UTC hour */
@@ -1166,7 +1166,7 @@ struct ais_t
 		    unsigned int tugs;	/* Tugs */
 		    unsigned int solidwaste;	/* Waste disposal (solid) */
 		    unsigned int liquidwaste;	/* Waste disposal (liquid) */
-		    unsigned int hazardouswaste;	/* Waste disposal (hazardous) */
+		    unsigned int hazardouswaste;  // Waste disposal (hazardous)
 		    unsigned int ballast;	/* Reserved ballast exchange */
 		    unsigned int additional;	/* Additional services */
 		    unsigned int regional1;	/* Regional reserved 1 */
@@ -1430,10 +1430,10 @@ struct ais_t
 #define DAC1FID11_WATERLEVEL_DIV		10.0
 		    unsigned int leveltrend;	/* water level trend code */
 #define DAC1FID11_WATERLEVELTREND_NOT_AVAILABLE	3
-		    unsigned int cspeed;	/* surface current speed in deciknots */
+		    unsigned int cspeed;  // surface current speed in deciknots
 #define DAC1FID11_CSPEED_NOT_AVAILABLE		255
 #define DAC1FID11_CSPEED_DIV			10.0
-		    unsigned int cdir;		/* surface current dir., degrees */
+		    unsigned int cdir;	/* surface current dir., degrees */
 #define DAC1FID11_CDIR_NOT_AVAILABLE		511
 		    unsigned int cspeed2;	/* current speed in deciknots */
 		    unsigned int cdir2;		/* current dir., degrees */
@@ -1608,7 +1608,7 @@ struct ais_t
 #define DAC1FID31_WATERTEMP_DIV		10.0
 		    unsigned int preciptype;	/* 0-7, enumerated */
 #define DAC1FID31_PRECIPTYPE_NOT_AVAILABLE	7
-		    unsigned int salinity;	/* units of 0.1 permil (ca. PSU) */
+		    unsigned int salinity;   // units of 0.1 permil (ca. PSU)
 #define DAC1FID31_SALINITY_NOT_AVAILABLE	510
 #define DAC1FID31_SALINITY_DIV		10.0
 		    unsigned int ice;		/* is there sea ice? */
@@ -1742,7 +1742,7 @@ struct ais_t
 	    unsigned int to_stern;	/* dimension to stern */
 	    unsigned int to_port;	/* dimension to port */
 	    unsigned int to_starboard;	/* dimension to starboard */
-	    unsigned int epfd;		/* type of position fix deviuce */
+	    unsigned int epfd;		/* type of position fix device */
 	    bool raim;			/* RAIM flag */
 	    unsigned int dte;    	/* date terminal enable */
 	    bool assigned;		/* assigned-mode flag */
@@ -1811,7 +1811,7 @@ struct ais_t
 		    unsigned int dest2;	/* addressed station MMSI 2 */
 		} mmsi;
 	    };
-	    bool addressed;		/* addressed vs. broadast flag */
+	    bool addressed;		/* addressed vs. broadcast flag */
 	    bool band_a;		/* fix 1.5kHz band for channel A */
 	    bool band_b;		/* fix 1.5kHz band for channel B */
 	    unsigned int zonesize;	/* size of transitional zone */
@@ -1962,7 +1962,7 @@ struct satellite_t {
      */
     unsigned char sigid;
     signed char freqid;         /* The GLONASS (Only) frequency, 0 - 13 */
-    unsigned char health;       /* 0 = unknown, 1 = helthy, 2 = unhealthy */
+    unsigned char health;       /* 0 = unknown, 1 = healthy, 2 = unhealthy */
 #define SAT_HEALTH_UNK 0
 #define SAT_HEALTH_OK 1
 #define SAT_HEALTH_BAD 2
