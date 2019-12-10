@@ -18,6 +18,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>           // For llabs()
 #include <string.h>
 #include <time.h>
 #include <unistd.h>
@@ -166,7 +167,7 @@ static int tsip_write(struct gps_device_t *session,
     *ep++ = '\x03';
     session->msgbuflen = (size_t) (ep - session->msgbuf);
     GPSD_LOG(LOG_PROG, &session->context->errout,
-             "TSIP: Sent packet id 0x %s\n",
+             "TSIP: Sent packet id 0x%s\n",
              gpsd_hexdump(obuf, sizeof(obuf), &session->msgbuf[1], len + 1));
     if (gpsd_write(session, session->msgbuf, session->msgbuflen) !=
         (ssize_t) session->msgbuflen)
