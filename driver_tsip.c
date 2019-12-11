@@ -1041,11 +1041,17 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         d1 = getbef32((char *)buf, 12) * RAD_2_DEG;     /* Elevation */
         d2 = getbef32((char *)buf, 16) * RAD_2_DEG;     /* Azimuth */
 
-        /* channel number, bits 0-2 reserved/unused as of 1999
-         * seems to always start series at zero and increment to last one
-         * save it to check for last 0x5d message
+        /* Channel number, bits 0-2 reserved/unused as of 1999.
+         * Seems to always start series at zero and increment to last one.
+         * No way to know how many there will be.
+         * Save current channel to check for last 0x5c message
          */
         i = (int)(u2 >> 3);     /* channel number */
+        if (0 == i) {
+            // start of new cycle, save last count
+            session->gpsdata.satellites_visible =
+                session->driver.tsip.last_chan_seen;
+        }
         session->driver.tsip.last_chan_seen = i;
 
         GPSD_LOG(LOG_PROG, &session->context->errout,
@@ -1081,13 +1087,15 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 /* do not save in session->driver.tsip.last_tow
                  * as this is skyview time, not fix time */
             }
-            if (++i == session->gpsdata.satellites_visible) {
-                mask |= SATELLITE_SET;  /* last of the series */
-            }
-            if (i > session->gpsdata.satellites_visible) {
-                // FIXME! how does this ever decrease??
+            if (++i >= session->gpsdata.satellites_visible) {
+                /* Last of the series?
+                 * This will cause extra SKY if this set has more
+                 * sats than the last set */
+                mask |= SATELLITE_SET;
                 session->gpsdata.satellites_visible = i;
             }
+            /* If this series has fewer than last series there will
+             * be no SKY, unless the cycle ender pushes the SKY */
         }
         break;
 
@@ -1110,11 +1118,17 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
         }
         u1 = getub(buf, 0);     /* PRN */
 
-        /* channel number
-         * seems to always start series at zero and increment to last one
-         * save it to check for last 0x5d message
+        /* Channel number, bits 0-2 reserved/unused as of 1999.
+         * Seems to always start series at zero and increment to last one.
+         * No way to know how many there will be.
+         * Save current channel to check for last 0x5d message
          */
         i = getub(buf, 1);     /* chan */
+        if (0 == i) {
+            // start of new cycle, save last count
+            session->gpsdata.satellites_visible =
+                session->driver.tsip.last_chan_seen;
+        }
         session->driver.tsip.last_chan_seen = i;
 
         u3 = getub(buf, 2);     /* Acquisition flag */
@@ -1161,13 +1175,15 @@ static gps_mask_t tsip_parse_input(struct gps_device_t *session)
                 /* do not save in session->driver.tsip.last_tow
                  * as this is skyview time, not fix time */
             }
-            if (++i == session->gpsdata.satellites_visible) {
-                mask |= SATELLITE_SET;  /* last of the series */
-            }
-            if (i > session->gpsdata.satellites_visible) {
-                // FIXME! how does this ever decrease??
+            if (++i >= session->gpsdata.satellites_visible) {
+                /* Last of the series?
+                 * This will cause extra SKY if this set has more
+                 * sats than the last set */
+                mask |= SATELLITE_SET;
                 session->gpsdata.satellites_visible = i;
             }
+            /* If this series has fewer than last series there will
+             * be no SKY, unless the cycle ender pushes the SKY */
         }
         break;
     case 0x6c:
