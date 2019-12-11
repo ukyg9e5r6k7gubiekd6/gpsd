@@ -56,7 +56,8 @@ extern "C" {
  *       change satellite_t elevation and azimuth to double
  *       satellite_t elevation, azimuth, and ss use NAN for unknown value.
  *       add altMSL, and depth, to gps_fix_t
- *       change altitude to altHAE to gps_fix_t
+ *       add altHAE to gps_fix_t
+ *       mark altitude in gps_fix_t as deprecated and undefined
  *       Move mag_var from gps_device_t to magnetic_var gps_data_t.
  *       add dgps_age and dgps_station, to gps_fix_t
  *       Change gps_fix_t.time from timestamp_t to timespec_t
@@ -131,6 +132,7 @@ struct gps_fix_t {
     double epy;  	/* Latitude position uncertainty, meters */
     double longitude;	/* Longitude in degrees (valid if mode >= 2) */
     double epx;  	/* Longitude position uncertainty, meters */
+    double altitude;    // DEPRECATED, undefined.
     double altHAE;	/* Altitude, height above ellipsoid.
                          * in meters and probably WGS84
                          * (valid if mode == 3)

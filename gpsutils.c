@@ -246,6 +246,7 @@ void gps_clear_fix(struct gps_fix_t *fixp)
 /* stuff a fix structure with recognizable out-of-band values */
 {
     memset(fixp, 0, sizeof(struct gps_fix_t));
+    fixp->altitude = NAN;        // DEPRECATED, undefined
     fixp->altHAE = NAN;
     fixp->altMSL = NAN;
     fixp->climb = NAN;

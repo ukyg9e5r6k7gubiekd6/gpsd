@@ -157,18 +157,30 @@ void json_tpv_dump(const struct gps_device_t *session,
      * chips, which are quite common.
      */
     if (gpsdata->fix.mode >= MODE_2D) {
+        double altitude = NAN;
+
 	if (isfinite(gpsdata->fix.latitude) != 0)
 	    str_appendf(reply, replylen,
 			   "\"lat\":%.9f,", gpsdata->fix.latitude);
 	if (isfinite(gpsdata->fix.longitude) != 0)
 	    str_appendf(reply, replylen,
 			   "\"lon\":%.9f,", gpsdata->fix.longitude);
-	if (0 != isfinite(gpsdata->fix.altHAE))
+	if (0 != isfinite(gpsdata->fix.altHAE)) {
+	    altitude = gpsdata->fix.altHAE;
 	    str_appendf(reply, replylen,
 			   "\"altHAE\":%.3f,", gpsdata->fix.altHAE);
-	if (0 != isfinite(gpsdata->fix.altMSL))
+        }
+	if (0 != isfinite(gpsdata->fix.altMSL)) {
+	    altitude = gpsdata->fix.altMSL;
 	    str_appendf(reply, replylen,
 			   "\"altMSL\":%.3f,", gpsdata->fix.altMSL);
+        }
+	if (0 != isfinite(altitude)) {
+            // DEPRECATED, undefined
+	    str_appendf(reply, replylen,
+			   "\"alt\":%.3f,", altitude);
+        }
+
 	if (isfinite(gpsdata->fix.epx) != 0)
 	    str_appendf(reply, replylen, "\"epx\":%.3f,", gpsdata->fix.epx);
 	if (isfinite(gpsdata->fix.epy) != 0)

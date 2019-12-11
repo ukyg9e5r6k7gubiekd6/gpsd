@@ -159,6 +159,12 @@ and is often inacurate.  See the comments below on geoidSep.  Present if
  mode is 3.  altMSL is altHAE - geoidSep.</entry>
 </row>
 <row>
+	<entry>alt</entry>
+	<entry>No</entry>
+	<entry>numeric</entry>
+        <entry>Deprecated.  Undefined.  Use altHAE or altMSL.</entry>
+</row>
+<row>
 	<entry>climb</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>

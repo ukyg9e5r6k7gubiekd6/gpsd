@@ -53,6 +53,8 @@ static int json_tpv_read(const char *buf, struct gps_data_t *gpsdata,
                                  .dflt.real = NAN},
         {"lat",    t_real,    .addr.real = &gpsdata->fix.latitude,
                                  .dflt.real = NAN},
+        {"alt",    t_real,    .addr.real = &gpsdata->fix.altitude,
+                                 .dflt.real = NAN}, // DEPRECATED, undefined
         {"altHAE",    t_real,  .addr.real = &gpsdata->fix.altHAE,
                                  .dflt.real = NAN},
         {"altMSL", t_real,    .addr.real = &gpsdata->fix.altMSL,
@@ -600,10 +602,12 @@ int libgps_json_unpack(const char *buf,
             gpsdata->set |= TIMERR_SET;
         if (isfinite(gpsdata->fix.longitude) != 0)
             gpsdata->set |= LATLON_SET;
-        if (0 != isfinite(gpsdata->fix.altHAE) ||
+        if (0 != isfinite(gpsdata->fix.altitude) ||
+            0 != isfinite(gpsdata->fix.altHAE) ||
             0 != isfinite(gpsdata->fix.depth) ||
-            0 != isfinite(gpsdata->fix.altMSL))
+            0 != isfinite(gpsdata->fix.altMSL)) {
             gpsdata->set |= ALTITUDE_SET;
+        }
         if (isfinite(gpsdata->fix.epx) != 0 && isfinite(gpsdata->fix.epy) != 0)
             gpsdata->set |= HERR_SET;
         if (isfinite(gpsdata->fix.epv) != 0)
