@@ -5,15 +5,15 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <math.h>
-#include <time.h>
 #include <errno.h>
 #include <libgen.h>
+#include <math.h>
 #include <signal.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "gps.h"
@@ -53,7 +53,7 @@ static DBusHandlerResult handle_gps_fix(DBusMessage * message)
 			  DBUS_TYPE_DOUBLE, &share_gpsdata->fix.latitude,
 			  DBUS_TYPE_DOUBLE, &share_gpsdata->fix.longitude,
 			  DBUS_TYPE_DOUBLE, &share_gpsdata->fix.eph,
-                          /* The debus doc does not seem to specify
+                          /* The dbus doc does not seem to specify
                            * altHAE or altMSL */
 			  DBUS_TYPE_DOUBLE, &share_gpsdata->fix.altHAE,
 			  DBUS_TYPE_DOUBLE, &share_gpsdata->fix.epv,
