@@ -20,9 +20,6 @@ from __future__ import absolute_import, print_function, division
 
 import argparse
 import sys
-# need numpy for float128, normal python floats are too small to
-# hold a timespec
-import numpy
 try:
     import matplotlib.pyplot as PLT
 except ImportError:
@@ -31,6 +28,7 @@ except ImportError:
     sys.exit(1)
 
 gps_version = '3.19.1~dev'
+ns_per_s = 1e9
 
 
 class ntpOffset(object):
@@ -58,7 +56,7 @@ class ntpOffset(object):
             # create the subplot for the data
             PLT.subplot(subplot_value)
             # setup and create the vlines graph
-            t = numpy.arange(0, self.line_counts[ntp_item], 1)
+            t = range(0, self.line_counts[ntp_item], 1)
             PLT.vlines(t, 0, self.ntp_data[ntp_item], color='r')
             # add labels
             PLT.title("NTP drift for " + ntp_item)
@@ -93,28 +91,30 @@ class ntpOffset(object):
         self.lines = 0          # width of graph
 
         for line in stream:
-            if len(line.split(' ')) > 6:
-                if line[:1] != '#':
-                    line = line.lstrip()
-                    record = line.split(' ')
-                    try:
-                        offset = (numpy.longdouble(record[3]) -
-                                  numpy.longdouble(record[4]))
-                    except Exception:
-                        print("Invalid data: ", sys.exc_info()[0],
-                              ". Data was: ", line)
-                        continue
+            line = line.lstrip()
+            record = line.split()
+            if len(record) > 6 and line[0] != '#':
+                try:
+                    then = record[3].split('.')
+                    nows = record[4].split('.')
+                    offset = (int(then[0]) - int(nows[0])) * ns_per_s
+                    offset += (int(then[1]) - int(nows[1]))
+                    offset /= float(ns_per_s)
+                except Exception:
+                    print("Invalid data: ", sys.exc_info()[0],
+                          ". Data was: ", line)
+                    continue
 
-                    # If the NTP unit is in the dictionary
-                    # append the offset to the list
-                    # Otherwise, create a new list in the dictionary
-                    # and add the offset.
-                    if record[1] not in self.ntp_data:
-                        self.ntp_data[record[1]] = []
-                        self.line_counts[record[1]] = 0
+                # If the NTP unit is in the dictionary
+                # append the offset to the list
+                # Otherwise, create a new list in the dictionary
+                # and add the offset.
+                if record[1] not in self.ntp_data:
+                    self.ntp_data[record[1]] = []
+                    self.line_counts[record[1]] = 0
 
-                    self.ntp_data[record[1]].append(offset)
-                    self.line_counts[record[1]] += 1
+                self.ntp_data[record[1]].append(offset)
+                self.line_counts[record[1]] += 1
         stream.close()
 
 
