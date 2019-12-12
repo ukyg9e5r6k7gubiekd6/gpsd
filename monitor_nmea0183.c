@@ -25,7 +25,8 @@
 #ifdef NMEA0183_ENABLE
 extern const struct gps_type_t driver_nmea0183;
 
-static WINDOW *cookedwin, *nmeawin, *satwin, *gprmcwin, *gpggawin, *gpgsawin, *gpgstwin;
+static WINDOW *cookedwin, *nmeawin, *satwin, *gprmcwin;
+static WINDOW *gpggawin, *gpgsawin, *gpgstwin;
 static timespec_t last_tick, tick_interval;
 static char sentences[NMEA_MAX * 2];
 
@@ -40,7 +41,6 @@ static char sentences[NMEA_MAX * 2];
 
 static bool nmea_initialize(void)
 {
-    int i;
 
     cookedwin = derwin(devicewin, 3, 80, 0, 0);
     assert(cookedwin !=NULL);
@@ -65,9 +65,7 @@ static bool nmea_initialize(void)
     assert(satwin !=NULL);
     (void)wborder(satwin, 0, 0, 0, 0, 0, 0, 0, 0), (void)syncok(satwin, true);
     (void)wattrset(satwin, A_BOLD);
-    (void)mvwprintw(satwin, 1, 1, "Ch PRN  Az El S/N");
-    for (i = 0; i < MAXSATS; i++)
-        (void)mvwprintw(satwin, (int)(i + 2), 1, "%2d", i);
+    (void)mvwprintw(satwin, 1, 1, "PRN  Az El S/N");
     (void)mvwprintw(satwin, 14, 7, " GSV ");
     (void)wattrset(satwin, A_NORMAL);
 
@@ -264,11 +262,11 @@ static void nmea_update(void)
                  MAXSATS) ? session.gpsdata.satellites_visible : MAXSATS;
 
             for (i = 0; i < nsats; i++) {
-                (void)wmove(satwin, i + 2, 3);
-                (void)wprintw(satwin, " %3d %3d%3d %3.0f",
+                (void)wmove(satwin, i + 2, 1);
+                (void)wprintw(satwin, "%3d %3d%3d %3.0f",
                               session.gpsdata.skyview[i].PRN,
-                              session.gpsdata.skyview[i].azimuth,
-                              session.gpsdata.skyview[i].elevation,
+                              (int)session.gpsdata.skyview[i].azimuth,
+                              (int)session.gpsdata.skyview[i].elevation,
                               session.gpsdata.skyview[i].ss);
             }
             /* add overflow mark to the display */
@@ -519,4 +517,4 @@ const struct monitor_object_t aivdm_mmt = {
 #endif /* AIVDM_ENABLE */
 #endif /* NMEA0183_ENABLE */
 
-// vim: set expandtab shiftwidth=4
+/* vim: set expandtab shiftwidth=4: */
