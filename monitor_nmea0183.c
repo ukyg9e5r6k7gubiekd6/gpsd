@@ -9,12 +9,12 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
-#include <stdlib.h> /* for labs() */
 #include <assert.h>
+#include <math.h>
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h> /* for labs() */
+#include <string.h>
 #include <unistd.h>
 
 #include "gpsd.h"
@@ -35,8 +35,8 @@ static char sentences[NMEA_MAX * 2];
  *
  *****************************************************************************/
 
-#define SENTENCELINE	1	/* index of sentences line in the NMEA window */
-#define MAXSATS 	12	/* max satellites we can display */
+#define SENTENCELINE    1       /* index of sentences line in the NMEA window */
+#define MAXSATS         12      /* max satellites we can display */
 
 static bool nmea_initialize(void)
 {
@@ -67,14 +67,14 @@ static bool nmea_initialize(void)
     (void)wattrset(satwin, A_BOLD);
     (void)mvwprintw(satwin, 1, 1, "Ch PRN  Az El S/N");
     for (i = 0; i < MAXSATS; i++)
-	(void)mvwprintw(satwin, (int)(i + 2), 1, "%2d", i);
+        (void)mvwprintw(satwin, (int)(i + 2), 1, "%2d", i);
     (void)mvwprintw(satwin, 14, 7, " GSV ");
     (void)wattrset(satwin, A_NORMAL);
 
     gprmcwin = derwin(devicewin, 9, 30, 6, 20);
     assert(gprmcwin !=NULL);
     (void)wborder(gprmcwin, 0, 0, 0, 0, 0, 0, 0, 0),
-	(void)syncok(gprmcwin, true);
+        (void)syncok(gprmcwin, true);
     (void)wattrset(gprmcwin, A_BOLD);
     (void)mvwprintw(gprmcwin, 1, 1, "Time: ");
     (void)mvwprintw(gprmcwin, 2, 1, "Latitude: ");
@@ -91,17 +91,17 @@ static bool nmea_initialize(void)
     (void)wborder(gpgsawin, 0, 0, 0, 0, 0, 0, 0, 0);
     (void)syncok(gpgsawin, true);
     (void)wattrset(gpgsawin, A_BOLD);
-#define MODE_LINE	1
+#define MODE_LINE       1
     (void)mvwprintw(gpgsawin, MODE_LINE, 1, "Mode: ");
-#define SATS_LINE	1
-#define SATS_COL	10
+#define SATS_LINE       1
+#define SATS_COL        10
     (void)mvwprintw(gpgsawin, SATS_LINE, SATS_COL, "Sats: ");
-#define DOP_LINE	2
+#define DOP_LINE        2
     (void)mvwprintw(gpgsawin, DOP_LINE, 1, "DOP: H=      V=      P=");
-#define TOFF_LINE	3
+#define TOFF_LINE       3
     (void)mvwprintw(gpgsawin, TOFF_LINE, 1, "TOFF: ");
     (void)mvwaddstr(gpgsawin, TOFF_LINE, 7, "N/A");
-#define PPS_LINE	4
+#define PPS_LINE        4
     (void)mvwprintw(gpgsawin, PPS_LINE, 1, "PPS: ");
     (void)mvwaddstr(gpgsawin, PPS_LINE, 6, "N/A");
     (void)mvwprintw(gpgsawin, 5, 9, " GSA + PPS ");
@@ -152,22 +152,22 @@ static void cooked_pvt(void)
     char scr[128];
 
     if (0 < session.gpsdata.fix.time.tv_sec) {
-	(void)timespec_to_iso8601(session.gpsdata.fix.time, scr, sizeof(scr));
+        (void)timespec_to_iso8601(session.gpsdata.fix.time, scr, sizeof(scr));
     } else
-	(void)snprintf(scr, sizeof(scr), "n/a");
+        (void)snprintf(scr, sizeof(scr), "n/a");
     (void)mvwprintw(cookedwin, 1, 7, "%-24s", scr);
 
 
     if (session.gpsdata.fix.mode >= MODE_2D) {
-	deg_to_str2(deg_ddmm, session.gpsdata.fix.latitude,
-		    scr, sizeof(scr), " N", " S");
+        deg_to_str2(deg_ddmm, session.gpsdata.fix.latitude,
+                    scr, sizeof(scr), " N", " S");
     } else
         (void)strncpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(cookedwin, 1, 37, "%-17s", scr);
 
     if (session.gpsdata.fix.mode >= MODE_2D) {
-	deg_to_str2(deg_ddmm, session.gpsdata.fix.longitude,
-		    scr, sizeof(scr), " E", " W");
+        deg_to_str2(deg_ddmm, session.gpsdata.fix.longitude,
+                    scr, sizeof(scr), " E", " W");
     } else
         (void)strncpy(scr, "n/a", sizeof(scr));
     (void)mvwprintw(cookedwin, 1, 60, "%-17s", scr);
@@ -185,17 +185,17 @@ static void monitor_satlist(WINDOW *win, int y, int x)
     (void)wclrtoeol(win);
     scr[0] = '\0';
     for (i = 0; i < MAXCHANNELS; i++) {
-	if (session.gpsdata.skyview[i].used)
-	    str_appendf(scr, sizeof(scr),
-			"%d ", session.gpsdata.skyview[i].PRN);
+        if (session.gpsdata.skyview[i].used)
+            str_appendf(scr, sizeof(scr),
+                        "%d ", session.gpsdata.skyview[i].PRN);
     }
     getmaxyx(win, ymax, xmax);
-    assert(ymax != 0);	/* suppress compiler warning */
+    assert(ymax != 0);  /* suppress compiler warning */
     (void)mvwaddnstr(win, y, x, scr, xmax - 2 - x);
     if (strlen(scr) >= (size_t) (xmax - 2)) {
-	(void)mvwaddch(win, y, xmax - 2 - x, (chtype) '.');
-	(void)mvwaddch(win, y, xmax - 3 - x, (chtype) '.');
-	(void)mvwaddch(win, y, xmax - 4 - x, (chtype) '.');
+        (void)mvwaddch(win, y, xmax - 2 - x, (chtype) '.');
+        (void)mvwaddch(win, y, xmax - 3 - x, (chtype) '.');
+        (void)mvwaddch(win, y, xmax - 4 - x, (chtype) '.');
     }
     monitor_fixframe(win);
 }
@@ -215,122 +215,122 @@ static void nmea_update(void)
     fields = session.nmea.field;
 
     if (session.lexer.outbuffer[0] == (unsigned char)'$'
-		&& fields != NULL && fields[0] != NULL) {
-	int ymax, xmax;
-	timespec_t now;
-	timespec_t ts_diff;
+                && fields != NULL && fields[0] != NULL) {
+        int ymax, xmax;
+        timespec_t now;
+        timespec_t ts_diff;
 
-	getmaxyx(nmeawin, ymax, xmax);
-	assert(ymax > 0);
-	if (strstr(sentences, fields[0]) == NULL) {
-	    char *s_end = sentences + strlen(sentences);
-	    if ((int)(strlen(sentences) + strlen(fields[0])) < xmax - 2) {
-		*s_end++ = ' ';
-		(void)strlcpy(s_end, fields[0], NMEA_MAX);
-	    } else {
-		*--s_end = '.';
-		*--s_end = '.';
-		*--s_end = '.';
-	    }
-	    (void)mvwaddstr(nmeawin, SENTENCELINE, 1, sentences);
-	}
+        getmaxyx(nmeawin, ymax, xmax);
+        assert(ymax > 0);
+        if (strstr(sentences, fields[0]) == NULL) {
+            char *s_end = sentences + strlen(sentences);
+            if ((int)(strlen(sentences) + strlen(fields[0])) < xmax - 2) {
+                *s_end++ = ' ';
+                (void)strlcpy(s_end, fields[0], NMEA_MAX);
+            } else {
+                *--s_end = '.';
+                *--s_end = '.';
+                *--s_end = '.';
+            }
+            (void)mvwaddstr(nmeawin, SENTENCELINE, 1, sentences);
+        }
 
-	/*
-	 * If the interval between this and last update is
-	 * the longest we've seen yet, boldify the corresponding
-	 * tag.
-	 */
-	(void)clock_gettime(CLOCK_REALTIME, &now);
+        /*
+         * If the interval between this and last update is
+         * the longest we've seen yet, boldify the corresponding
+         * tag.
+         */
+        (void)clock_gettime(CLOCK_REALTIME, &now);
         TS_SUB(&ts_diff, &now, &last_tick);
-	if (TS_GZ(&ts_diff) && TS_GT(&ts_diff, &tick_interval)) {
-	    char *findme = strstr(sentences, fields[0]);
+        if (TS_GZ(&ts_diff) && TS_GT(&ts_diff, &tick_interval)) {
+            char *findme = strstr(sentences, fields[0]);
 
-	    tick_interval = ts_diff;
-	    if (findme != NULL) {
-		(void)mvwchgat(nmeawin, SENTENCELINE, 1, xmax - 13, A_NORMAL, 0,
-			       NULL);
-		(void)mvwchgat(nmeawin, SENTENCELINE, 1 + (findme - sentences),
-			       (int)strlen(fields[0]), A_BOLD, 0, NULL);
-	    }
-	}
-	last_tick = now;
+            tick_interval = ts_diff;
+            if (findme != NULL) {
+                (void)mvwchgat(nmeawin, SENTENCELINE, 1, xmax - 13, A_NORMAL, 0,
+                               NULL);
+                (void)mvwchgat(nmeawin, SENTENCELINE, 1 + (findme - sentences),
+                               (int)strlen(fields[0]), A_BOLD, 0, NULL);
+            }
+        }
+        last_tick = now;
 
-	if (strcmp(fields[0], "GPGSV") == 0
-	    || strcmp(fields[0], "GNGSV") == 0
-	    || strcmp(fields[0], "GLGSV") == 0) {
-	    int i;
-	    int nsats =
-		(session.gpsdata.satellites_visible <
-		 MAXSATS) ? session.gpsdata.satellites_visible : MAXSATS;
+        if (strcmp(fields[0], "GPGSV") == 0
+            || strcmp(fields[0], "GNGSV") == 0
+            || strcmp(fields[0], "GLGSV") == 0) {
+            int i;
+            int nsats =
+                (session.gpsdata.satellites_visible <
+                 MAXSATS) ? session.gpsdata.satellites_visible : MAXSATS;
 
-	    for (i = 0; i < nsats; i++) {
-		(void)wmove(satwin, i + 2, 3);
-		(void)wprintw(satwin, " %3d %3d%3d %3.0f",
-			      session.gpsdata.skyview[i].PRN,
-			      session.gpsdata.skyview[i].azimuth,
-			      session.gpsdata.skyview[i].elevation,
-			      session.gpsdata.skyview[i].ss);
-	    }
-	    /* add overflow mark to the display */
-	    if (nsats <= MAXSATS)
-		(void)mvwaddch(satwin, MAXSATS + 2, 18, ACS_HLINE);
-	    else
-		(void)mvwaddch(satwin, MAXSATS + 2, 18, ACS_DARROW);
-	}
+            for (i = 0; i < nsats; i++) {
+                (void)wmove(satwin, i + 2, 3);
+                (void)wprintw(satwin, " %3d %3d%3d %3.0f",
+                              session.gpsdata.skyview[i].PRN,
+                              session.gpsdata.skyview[i].azimuth,
+                              session.gpsdata.skyview[i].elevation,
+                              session.gpsdata.skyview[i].ss);
+            }
+            /* add overflow mark to the display */
+            if (nsats <= MAXSATS)
+                (void)mvwaddch(satwin, MAXSATS + 2, 18, ACS_HLINE);
+            else
+                (void)mvwaddch(satwin, MAXSATS + 2, 18, ACS_DARROW);
+        }
 
-	if (strcmp(fields[0], "GPRMC") == 0
-	    || strcmp(fields[0], "GNRMC") == 0
-	    || strcmp(fields[0], "GLRMC") == 0) {
-	    /* time, lat, lon, course, speed */
-	    (void)mvwaddstr(gprmcwin, 1, 12, fields[1]);
-	    (void)mvwprintw(gprmcwin, 2, 12, "%12s %s", fields[3], fields[4]);
-	    (void)mvwprintw(gprmcwin, 3, 12, "%12s %s", fields[5], fields[6]);
-	    (void)mvwaddstr(gprmcwin, 4, 12, fields[7]);
-	    (void)mvwaddstr(gprmcwin, 5, 12, fields[8]);
-	    /* the status field, FAA code, and magnetic variation */
-	    (void)mvwaddstr(gprmcwin, 6, 12, fields[2]);
-	    (void)mvwaddstr(gprmcwin, 6, 25, fields[12]);
-	    (void)mvwprintw(gprmcwin, 7, 12, "%-5s%s", fields[10],
-			    fields[11]);
+        if (strcmp(fields[0], "GPRMC") == 0
+            || strcmp(fields[0], "GNRMC") == 0
+            || strcmp(fields[0], "GLRMC") == 0) {
+            /* time, lat, lon, course, speed */
+            (void)mvwaddstr(gprmcwin, 1, 12, fields[1]);
+            (void)mvwprintw(gprmcwin, 2, 12, "%12s %s", fields[3], fields[4]);
+            (void)mvwprintw(gprmcwin, 3, 12, "%12s %s", fields[5], fields[6]);
+            (void)mvwaddstr(gprmcwin, 4, 12, fields[7]);
+            (void)mvwaddstr(gprmcwin, 5, 12, fields[8]);
+            /* the status field, FAA code, and magnetic variation */
+            (void)mvwaddstr(gprmcwin, 6, 12, fields[2]);
+            (void)mvwaddstr(gprmcwin, 6, 25, fields[12]);
+            (void)mvwprintw(gprmcwin, 7, 12, "%-5s%s", fields[10],
+                            fields[11]);
 
-	    cooked_pvt();	/* cooked version of TPV */
-	}
+            cooked_pvt();       /* cooked version of TPV */
+        }
 
-	if (strcmp(fields[0], "GPGSA") == 0
-	    || strcmp(fields[0], "GNGSA") == 0
-	    || strcmp(fields[0], "GLGSA") == 0) {
-	    (void)mvwprintw(gpgsawin, MODE_LINE, 7, "%1s%s", fields[1], fields[2]);
-	    monitor_satlist(gpgsawin, SATS_LINE, SATS_COL+6);
-	    (void)mvwprintw(gpgsawin, DOP_LINE, 8, "%-5s", fields[16]);
-	    (void)mvwprintw(gpgsawin, DOP_LINE, 16, "%-5s", fields[17]);
-	    (void)mvwprintw(gpgsawin, DOP_LINE, 24, "%-5s", fields[15]);
-	    monitor_fixframe(gpgsawin);
-	}
+        if (strcmp(fields[0], "GPGSA") == 0
+            || strcmp(fields[0], "GNGSA") == 0
+            || strcmp(fields[0], "GLGSA") == 0) {
+            (void)mvwprintw(gpgsawin, MODE_LINE, 7, "%1s%s", fields[1], fields[2]);
+            monitor_satlist(gpgsawin, SATS_LINE, SATS_COL+6);
+            (void)mvwprintw(gpgsawin, DOP_LINE, 8, "%-5s", fields[16]);
+            (void)mvwprintw(gpgsawin, DOP_LINE, 16, "%-5s", fields[17]);
+            (void)mvwprintw(gpgsawin, DOP_LINE, 24, "%-5s", fields[15]);
+            monitor_fixframe(gpgsawin);
+        }
 
-	toff_update(gpgsawin, TOFF_LINE, 7);
+        toff_update(gpgsawin, TOFF_LINE, 7);
 
-	if (strcmp(fields[0], "GPGGA") == 0
-	    || strcmp(fields[0], "GNGGA") == 0
-	    || strcmp(fields[0], "GLGGA") == 0) {
-	    (void)mvwprintw(gpggawin, 1, 12, "%-17s", fields[1]);
-	    (void)mvwprintw(gpggawin, 2, 12, "%-17s", fields[2]);
-	    (void)mvwprintw(gpggawin, 3, 12, "%-17s", fields[4]);
-	    (void)mvwprintw(gpggawin, 4, 12, "%-17s", fields[9]);
-	    (void)mvwprintw(gpggawin, 5, 12, "%1.1s", fields[6]);
-	    (void)mvwprintw(gpggawin, 5, 22, "%2.2s", fields[7]);
-	    (void)mvwprintw(gpggawin, 6, 12, "%-5.5s", fields[8]);
-	    (void)mvwprintw(gpggawin, 7, 12, "%-5.5s", fields[11]);
-	}
-	if (strcmp(fields[0], "GPGST") == 0) {
-	    (void)mvwprintw(gpgstwin, 1,  6, "%-10s", fields[1]);
-	    (void)mvwprintw(gpgstwin, 1, 21,  "%-8s", fields[2]);
-	    (void)mvwprintw(gpgstwin, 2,  6, "%-10s", fields[3]);
-	    (void)mvwprintw(gpgstwin, 2, 21,  "%-8s", fields[4]);
-	    (void)mvwprintw(gpgstwin, 3,  6, "%-10s", fields[5]);
-	    (void)mvwprintw(gpgstwin, 3, 21,  "%-8s", fields[6]);
-	    (void)mvwprintw(gpgstwin, 4,  6, "%-10s", fields[7]);
-	    (void)mvwprintw(gpgstwin, 4, 21,  "%-8s", fields[8]);
-	}
+        if (strcmp(fields[0], "GPGGA") == 0
+            || strcmp(fields[0], "GNGGA") == 0
+            || strcmp(fields[0], "GLGGA") == 0) {
+            (void)mvwprintw(gpggawin, 1, 12, "%-17s", fields[1]);
+            (void)mvwprintw(gpggawin, 2, 12, "%-17s", fields[2]);
+            (void)mvwprintw(gpggawin, 3, 12, "%-17s", fields[4]);
+            (void)mvwprintw(gpggawin, 4, 12, "%-17s", fields[9]);
+            (void)mvwprintw(gpggawin, 5, 12, "%1.1s", fields[6]);
+            (void)mvwprintw(gpggawin, 5, 22, "%2.2s", fields[7]);
+            (void)mvwprintw(gpggawin, 6, 12, "%-5.5s", fields[8]);
+            (void)mvwprintw(gpggawin, 7, 12, "%-5.5s", fields[11]);
+        }
+        if (strcmp(fields[0], "GPGST") == 0) {
+            (void)mvwprintw(gpgstwin, 1,  6, "%-10s", fields[1]);
+            (void)mvwprintw(gpgstwin, 1, 21,  "%-8s", fields[2]);
+            (void)mvwprintw(gpgstwin, 2,  6, "%-10s", fields[3]);
+            (void)mvwprintw(gpgstwin, 2, 21,  "%-8s", fields[4]);
+            (void)mvwprintw(gpgstwin, 3,  6, "%-10s", fields[5]);
+            (void)mvwprintw(gpgstwin, 3, 21,  "%-8s", fields[6]);
+            (void)mvwprintw(gpgstwin, 4,  6, "%-10s", fields[7]);
+            (void)mvwprintw(gpgstwin, 4, 21,  "%-8s", fields[8]);
+        }
     }
 
     pps_update(gpgsawin, PPS_LINE, 6);
@@ -406,46 +406,46 @@ extern const struct gps_type_t driver_ashtech;
 static int ashtech_command(char line[])
 {
     switch (line[0]) {
-    case 'N':			/* normal = 9600, GGA+GSA+GSV+RMC+ZDA */
-	monitor_nmea_send("$PASHS,NME,ALL,A,OFF");	/* silence outbound chatter */
-	monitor_nmea_send("$PASHS,NME,ALL,B,OFF");
-	monitor_nmea_send("$PASHS,NME,GGA,A,ON");
-	monitor_nmea_send("$PASHS,NME,GSA,A,ON");
-	monitor_nmea_send("$PASHS,NME,GSV,A,ON");
-	monitor_nmea_send("$PASHS,NME,RMC,A,ON");
-	monitor_nmea_send("$PASHS,NME,ZDA,A,ON");
+    case 'N':                   /* normal = 9600, GGA+GSA+GSV+RMC+ZDA */
+        monitor_nmea_send("$PASHS,NME,ALL,A,OFF");      /* silence outbound chatter */
+        monitor_nmea_send("$PASHS,NME,ALL,B,OFF");
+        monitor_nmea_send("$PASHS,NME,GGA,A,ON");
+        monitor_nmea_send("$PASHS,NME,GSA,A,ON");
+        monitor_nmea_send("$PASHS,NME,GSV,A,ON");
+        monitor_nmea_send("$PASHS,NME,RMC,A,ON");
+        monitor_nmea_send("$PASHS,NME,ZDA,A,ON");
 
-	monitor_nmea_send("$PASHS,INI,%d,%d,,,0,",
-			  ASHTECH_SPEED_9600, ASHTECH_SPEED_9600);
-	(void)sleep(6);		/* it takes 4-6 sec for the receiver to reboot */
-	monitor_nmea_send("$PASHS,WAS,ON");	/* enable WAAS */
-	break;
+        monitor_nmea_send("$PASHS,INI,%d,%d,,,0,",
+                          ASHTECH_SPEED_9600, ASHTECH_SPEED_9600);
+        (void)sleep(6);         /* it takes 4-6 sec for the receiver to reboot */
+        monitor_nmea_send("$PASHS,WAS,ON");     /* enable WAAS */
+        break;
 
-    case 'R':			/* raw = 57600, normal+XPG+POS+SAT+MCA+PBN+SNV */
-	monitor_nmea_send("$PASHS,NME,ALL,A,OFF");	/* silence outbound chatter */
-	monitor_nmea_send("$PASHS,NME,ALL,B,OFF");
-	monitor_nmea_send("$PASHS,NME,GGA,A,ON");
-	monitor_nmea_send("$PASHS,NME,GSA,A,ON");
-	monitor_nmea_send("$PASHS,NME,GSV,A,ON");
-	monitor_nmea_send("$PASHS,NME,RMC,A,ON");
-	monitor_nmea_send("$PASHS,NME,ZDA,A,ON");
+    case 'R':                   /* raw = 57600, normal+XPG+POS+SAT+MCA+PBN+SNV */
+        monitor_nmea_send("$PASHS,NME,ALL,A,OFF");      /* silence outbound chatter */
+        monitor_nmea_send("$PASHS,NME,ALL,B,OFF");
+        monitor_nmea_send("$PASHS,NME,GGA,A,ON");
+        monitor_nmea_send("$PASHS,NME,GSA,A,ON");
+        monitor_nmea_send("$PASHS,NME,GSV,A,ON");
+        monitor_nmea_send("$PASHS,NME,RMC,A,ON");
+        monitor_nmea_send("$PASHS,NME,ZDA,A,ON");
 
-	monitor_nmea_send("$PASHS,INI,%d,%d,,,0,",
-			  ASHTECH_SPEED_57600, ASHTECH_SPEED_9600);
-	(void)sleep(6);		/* it takes 4-6 sec for the receiver to reboot */
-	monitor_nmea_send("$PASHS,WAS,ON");	/* enable WAAS */
+        monitor_nmea_send("$PASHS,INI,%d,%d,,,0,",
+                          ASHTECH_SPEED_57600, ASHTECH_SPEED_9600);
+        (void)sleep(6);         /* it takes 4-6 sec for the receiver to reboot */
+        monitor_nmea_send("$PASHS,WAS,ON");     /* enable WAAS */
 
-	monitor_nmea_send("$PASHS,NME,POS,A,ON");	/* Ashtech TPV solution */
-	monitor_nmea_send("$PASHS,NME,SAT,A,ON");	/* Ashtech Satellite status */
-	monitor_nmea_send("$PASHS,NME,MCA,A,ON");	/* MCA measurements */
-	monitor_nmea_send("$PASHS,NME,PBN,A,ON");	/* ECEF TPV solution */
-	monitor_nmea_send("$PASHS,NME,SNV,A,ON,10");	/* Almanac data */
+        monitor_nmea_send("$PASHS,NME,POS,A,ON");       /* Ashtech TPV solution */
+        monitor_nmea_send("$PASHS,NME,SAT,A,ON");       /* Ashtech Satellite status */
+        monitor_nmea_send("$PASHS,NME,MCA,A,ON");       /* MCA measurements */
+        monitor_nmea_send("$PASHS,NME,PBN,A,ON");       /* ECEF TPV solution */
+        monitor_nmea_send("$PASHS,NME,SNV,A,ON,10");    /* Almanac data */
 
-	monitor_nmea_send("$PASHS,NME,XMG,A,ON");	/* exception messages */
-	break;
+        monitor_nmea_send("$PASHS,NME,XMG,A,ON");       /* exception messages */
+        break;
 
     default:
-	return COMMAND_UNKNOWN;
+        return COMMAND_UNKNOWN;
     }
 
     return COMMAND_UNKNOWN;
@@ -518,3 +518,5 @@ const struct monitor_object_t aivdm_mmt = {
 };
 #endif /* AIVDM_ENABLE */
 #endif /* NMEA0183_ENABLE */
+
+// vim: set expandtab shiftwidth=4
