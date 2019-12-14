@@ -249,21 +249,50 @@ is strongly recommended.
 # apt-get install git-core
 --------------------------------------------------------------
 
-Git-core is only required to build from a git repository.  pps-tools is for
-testing PPS inputs.
+Git-core is required to build from a git repository.  pps-tools is for
+PPS timing.
 
 The rest of the installation is just as for any other source based
 install, as noted in the file *build.adoc* .
 
 === Other Debian derivatives (including stock) ===
-==== Jessie ====
+==== Buster (10) with python2 ====
+--------------------------------------------------------------
+# apt-get update
+# apt-get dist-upgrade
+# reboot
+# apt-get install scons libncurses-dev python-dev pps-tools
+# apt-get install git-core
+# apt-get install build-essential manpages-dev pkg-config
+--------------------------------------------------------------
+
+If "apt-get install scons" fails, check the file "/etc/apt/sources.list".
+
+Git-core is required to build from a git repository.
+pps-tools is for PPS timing.
+Build-essential installs the compiler and associated tools.
+Manpages-dev is the associated man pages.
+Pkg-config is a helper for scons.
+
+This distro does not support Gtk3, so xgps and xgpsspeed will not work.
+
+The rest of the installation is just as for any other source based
+install, as noted in the file *build.adoc* .
+
+--------------------------------------------------------------
+# git clone https://gitlab.com/gpsd/gpsd.git
+# cd gpsd
+# scons --config=force && scons install
+--------------------------------------------------------------
+
+==== Jessie (8) ====
 --------------------------------------------------------------
 # apt-get install scons libncurses5-dev python-dev pps-tools
 # apt-get install git-core
 --------------------------------------------------------------
 
-Git-core is only required to build from a git repository.  pps-tools is for
-testing PPS inputs.
+Git-core is required to build from a git repository.  pps-tools is for
+PPS timing.
 
 The rest of the installation is just as for any other source based
 install, as noted in the file *build.adoc* .
@@ -327,8 +356,8 @@ and other tools:
 # apt-get install git-core
 --------------------------------------------------------------
 
-Git-core is only required to build from a git repository.  pps-tools is for
-testing PPS inputs.
+Git-core is required to build from a git repository.  pps-tools is for
+PPS timing.
 
 The rest of the installation is just as for any other source based
 install, as noted in the file *build.adoc* .
