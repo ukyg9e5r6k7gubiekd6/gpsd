@@ -47,7 +47,12 @@ import time
 # "Python bindings for GObject Introspection"
 # It looks like PyGTK, but it is not.  PyGTK is unmaintained.
 
-import gi
+try:
+    import gi
+except ModuleNotFoundError:
+    sys.stderr.write("xgps: ERROR Module gi not found\n")
+    exit(1)
+
 try:
     gi.require_version('Gtk', '3.0')
 except ValueError:
