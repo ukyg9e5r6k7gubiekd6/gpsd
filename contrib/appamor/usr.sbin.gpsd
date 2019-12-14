@@ -1,0 +1,68 @@
+# vim:syntax=apparmor
+# ------------------------------------------------------------------
+#
+# Copyright (C) 2018 Canonical Ltd.
+#
+# This software is distributed under a BSD-style license. See the
+# file "COPYING" in the top-level directory of the distribution for details.
+#
+# ------------------------------------------------------------------
+
+#include <tunables/global>
+
+/usr/sbin/gpsd {
+  #include <abstractions/base>
+  #include <abstractions/nameservice>
+
+  capability ipc_lock,
+  capability net_bind_service,
+  capability sys_nice,
+  capability fsetid,
+  capability setgid,
+  capability setuid,
+  capability sys_resource,
+
+  # for all the remote connection options
+  network dgram,
+  network stream,
+
+  # common serial paths to GPS devices
+  /dev/tty{,S,USB,AMA,ACM}[0-9]*    rw,
+  /sys/dev/char     r,
+  /sys/dev/char/**  r,
+
+  # pps related devices
+  /dev/pps[0-9]*              rw,
+  /sys/devices/virtual/pps    r,
+  /sys/devices/virtual/pps/** r,
+
+  # gpsd device to share
+  /dev/gpsd[0-9] rw,
+
+  # libusb device access to GPS devices
+  /proc/      r,
+  /dev/       r,
+  /sys/class/ r,
+  /sys/bus/   r,
+  /dev/bus/usb/ r,
+  /sys/bus/usb/devices/ r,
+  /sys/devices/pci[0-9]*/**/{uevent,busnum,devnum,speed,descriptors} r,
+  /run/udev/data/+usb* r,
+  /run/udev/data/c189* r,
+
+  # common config path (by default unused)
+  /etc/gpsd/* r,
+
+  # enumerate own FDs
+  @{PROC}/@{pid}/fd/ r,
+
+  # default paths feeding GPS data into chrony
+  /{,var/}run/chrony.tty{,S,USB,AMA}[0-9]*.sock rw,
+  /tmp/chrony.tty{,S,USB,AMA}[0-9]*.sock rw,
+
+  # logging
+  /{,var/}run/systemd/journal/dev-log w,
+
+  # Site-specific additions and overrides. See local/README for details.
+  #include <local/usr.sbin.gpsd>
+}
