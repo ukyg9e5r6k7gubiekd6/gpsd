@@ -49,15 +49,15 @@ import time
 
 try:
     import gi
-except ModuleNotFoundError:
-    sys.stderr.write("xgps: ERROR Module gi not found\n")
+    gi.require_version('Gtk', '3.0')
+
+except ModuleNotFoundError as err:
+    sys.stderr.write("xgps: ERROR %s\n" % err)
     exit(1)
 
-try:
-    gi.require_version('Gtk', '3.0')
-except ValueError:
+except ValueError as err:
     # Gtk2 may be installed, has no require_version()
-    sys.stderr.write("xgps: ERROR Unsupported Gtk version\n")
+    sys.stderr.write("xgps: ERROR %s\n" % err)
     exit(1)
 
 from gi.repository import Gtk  # pylint: disable=wrong-import-position
