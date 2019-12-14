@@ -29,7 +29,8 @@ try:
     import gi
     gi.require_version('Gtk', '3.0')
 
-except ModuleNotFoundError as err:
+except ImportError as err:
+    # ModuleNotFoundError needs Python 3.6
     sys.stderr.write("xgps: ERROR %s\n" % err)
     exit(1)
 
