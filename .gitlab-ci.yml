@@ -1,3 +1,14 @@
+cache:
+  key: "${CI_JOB_NAME}"
+  paths:
+  - .ccache/
+
+variables:
+  USE_CCACHE: "true"
+  CCACHE_BASEDIR: "${CI_BUILDS_DIR}${CI_PROJECT_DIR}"
+  CCACHE_DIR: "${CI_BUILDS_DIR}${CI_PROJECT_DIR}/.ccache"
+
+
 stages:
   - build
   - advanced_build
@@ -10,7 +21,7 @@ build:
     SCONSOPTS: 'qt=yes xgps=yes'
     DEBIAN_FRONTEND: 'noninteractive'
   script:
-  - apt update && apt -y install build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
+  - apt update && apt -y install build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
   - .ci-build/build.sh
 
 debian-unstable:gcc:
@@ -20,7 +31,7 @@ debian-unstable:gcc:
     SCONSOPTS: 'qt=yes xgps=yes'
     DEBIAN_FRONTEND: 'noninteractive'
   script:
-  - apt update && apt -y install build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
+  - apt update && apt -y install build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
   - .ci-build/build.sh
 
 debian-unstable:clang:
@@ -32,7 +43,7 @@ debian-unstable:clang:
     CC: 'clang'
     CXX: 'clang++'
   script:
-  - apt update && apt -y install clang build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
+  - apt update && apt -y install clang build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
   - .ci-build/build.sh
 
 debian-unstable:minimal:
@@ -44,7 +55,7 @@ debian-unstable:minimal:
     DEBIAN_FRONTEND: 'noninteractive'
     NOCHECK: 'true'
   script:
-  - apt update && apt -y install build-essential scons chrpath lsb-release python3-all-dev
+  - apt update && apt -y install build-essential ccache scons chrpath lsb-release python3-all-dev
   - .ci-build/build.sh
 
 
@@ -57,7 +68,7 @@ ubuntu-latest:gcc:
     SCONSOPTS: 'qt=yes xgps=yes'
     DEBIAN_FRONTEND: 'noninteractive'
   script:
-  - apt update && apt -y install build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
+  - apt update && apt -y install build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
   - .ci-build/build.sh
 
 
@@ -70,7 +81,7 @@ ubuntu-rolling:gcc:
     SCONSOPTS: 'qt=yes xgps=yes'
     DEBIAN_FRONTEND: 'noninteractive'
   script:
-  - apt update && apt -y install build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
+  - apt update && apt -y install build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
   - .ci-build/build.sh
 
 
@@ -82,7 +93,7 @@ ubuntu-devel:gcc:
     SCONSOPTS: 'qt=yes xgps=yes'
     DEBIAN_FRONTEND: 'noninteractive'
   script:
-  - apt update && apt -y install build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
+  - apt update && apt -y install build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
   - .ci-build/build.sh
 
 
@@ -93,7 +104,7 @@ fedora-latest:
     SCONSOPTS: 'qt=yes xgps=yes'
     DEBIAN_FRONTEND: 'noninteractive'
   script:
-  - dnf install -y diffutils bluez-libs-devel chrpath dbus-devel desktop-file-utils gcc-c++ libXaw-devel ncurses-devel python-devel qt-devel scons xmlto pps-tools-devel
+  - dnf install -y ccache diffutils bluez-libs-devel chrpath dbus-devel desktop-file-utils gcc-c++ libXaw-devel ncurses-devel python-devel qt-devel scons xmlto pps-tools-devel
   - .ci-build/build.sh
 
 

@@ -2,9 +2,18 @@
 set -e
 set -x
 
+
+
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 if uname -a | grep -qi freebsd; then
 	export PATH="${PATH}:/usr/local/bin:/usr/local/sbin"
+fi
+
+if [ "${USE_CCACHE}" = "true" ] && [ -n "${CCACHE_DIR}" ] && command -v ccache >/dev/null; then
+	export PATH="/usr/lib/ccache:${PATH}"
+	mkdir -p "${CCACHE_DIR}"
+else
+	export USE_CCACHE="false"
 fi
 
 if command -v lsb_release >/dev/null && lsb_release -d | grep -qi -e debian -e ubuntu; then
@@ -53,4 +62,10 @@ for py in $PYTHONS; do
 	    python${py}     ${_SCONS} ${SCONSOPTS} check
     fi
 done
+
+
+
+if [ "${USE_CCACHE}" = "true" ]; then
+	ccache -s
+fi
 
