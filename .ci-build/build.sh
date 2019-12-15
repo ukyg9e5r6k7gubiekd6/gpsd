@@ -12,6 +12,7 @@ fi
 if [ "${USE_CCACHE}" = "true" ] && [ -n "${CCACHE_DIR}" ] && command -v ccache >/dev/null; then
 	export PATH="/usr/lib/ccache:${PATH}"
 	mkdir -p "${CCACHE_DIR}"
+	echo 'max_size = 100M' > "${CCACHE_DIR}/ccache.conf"
 else
 	export USE_CCACHE="false"
 fi

@@ -5,8 +5,8 @@ cache:
 
 variables:
   USE_CCACHE: "true"
-  CCACHE_BASEDIR: "${CI_BUILDS_DIR}${CI_PROJECT_DIR}"
-  CCACHE_DIR: "${CI_BUILDS_DIR}${CI_PROJECT_DIR}/.ccache"
+  CCACHE_BASEDIR: "${CI_PROJECT_DIR}"
+  CCACHE_DIR: "${CI_PROJECT_DIR}/.ccache"
   CCACHE_COMPILERCHECK: "content"
 
 stages:
