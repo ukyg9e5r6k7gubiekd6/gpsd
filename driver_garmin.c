@@ -79,6 +79,8 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
+#ifdef GARMIN_ENABLE
+
 #include <errno.h>
 #include <math.h>
 #include <stdbool.h>
@@ -97,8 +99,6 @@
 
 #define GPSD_LE16TOH(x) getles16((char *)(&(x)), 0)
 #define GPSD_LE32TOH(x) getles32((char *)(&(x)), 0)
-
-#ifdef GARMIN_ENABLE
 
 #define USE_RMD 0
 
@@ -367,7 +367,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	break;
     case GARMIN_PKTID_PVT_DATA:
 	GPSD_LOG(LOG_PROG, &session->context->errout,
-		 "Garmin: Appl, PVT Data Sz: %d\n", pkt_len);
+		 "Garmin: PVT Data (51) Sz: %d\n", pkt_len);
 
 	pvt = (cpo_pvt_data *) buf;
 
@@ -377,14 +377,24 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	time_l -= GPSD_LE16TOH(pvt->leap_sec);
 	session->context->leap_seconds = (int)GPSD_LE16TOH(pvt->leap_sec);
 	session->context->valid = LEAP_SECOND_VALID;
+
 	// gps_tow is always like x.999 or x.998 just round it to nearest sec
         // FIXME! this will break 5Hz garmins...
 	time_l += (time_t) round(pvt->gps_tow);
+
+	/* sanity check unix time against leap second.
+	 * Leap second 18 at 1 Jan 2017: 1483228800 */
+	if (17 < session->context->leap_seconds &&
+	    1483228800L > time_l) {
+	    time_l += 619315200;               // fast forward 1024 weeks
+        }
+
 	DTOTS(&session->context->gps_tow, pvt->gps_tow);
 	session->newdata.time.tv_sec = time_l;
 	session->newdata.time.tv_nsec = 0;
+        // (long long) for 32-bit systems
 	GPSD_LOG(LOG_PROG, &session->context->errout,
-		 "Garmin: time_l: %ld\n", (long int)time_l);
+		 "Garmin: time_l: %lld\n", (long long)time_l);
 
 	session->newdata.latitude = radtodeg(pvt->lat);
 	session->newdata.longitude = radtodeg(pvt->lon);
