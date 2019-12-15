@@ -380,6 +380,25 @@ PPS timing.
 The rest of the installation is just as for any other source based
 install, as noted in the file *build.adoc* .
 
+==== Ubuntu 18.04 LTS ====
+
+Preliminary install notes.
+
+--------------------------------------------------------------
+apt install gcc scons python-gi python-gi-cairo g++
+apt install libncurses5-dev pps-tools
+apt install apt install gir1.2-gtk-3.0
+--------------------------------------------------------------
+
+If you wish to build the coumentation, then install:
+
+--------------------------------------------------------------
+apt install xsltproc docbook-xsl xmlto asciidoc
+--------------------------------------------------------------
+
+The rest of the installation is just as for any other source based
+install, as noted in the file *build.adoc* .
+
 === Other Raspberry Pi tips ===
 
 Any USB connected GPS that is known to work with gpsd will work fine on
