@@ -132,18 +132,20 @@ scan-build:
     - scan_build
     expire_in: 1 week
 
-
-test-options:
-  image: debian:unstable
-  stage: test
-  needs: ["debian-unstable:gcc"]
-  variables:
-    DEBIAN_FRONTEND: 'noninteractive'
-  when: manual
-  script:
-  - apt update && apt -y install build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
-  - .ci-build/test_options.sh
-
+# as long as sconstruct has so many options, this does not make sense
+# needs a better / faster way to test
+#
+#test-options:
+#  image: debian:unstable
+#  stage: test
+#  needs: ["debian-unstable:gcc"]
+#  variables:
+#    DEBIAN_FRONTEND: 'noninteractive'
+#  when: manual
+#  script:
+#  - apt update && apt -y install build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
+#  - .ci-build/test_options.sh
+#
 
 pages:
   image: alpine:latest
