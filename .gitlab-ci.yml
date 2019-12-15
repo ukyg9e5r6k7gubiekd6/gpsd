@@ -154,6 +154,7 @@ scan-build:
   changes:
     - www/*
     - www/*/*
+    - *.adoc
 
 .should_build_pages: &should_build_pages
   only:
