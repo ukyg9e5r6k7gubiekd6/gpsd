@@ -1213,6 +1213,47 @@ else:
                                                PYTHON_CONFIG_CALL,
                                                brief=True)
 
+        # aiogps is only available on Python >= 3.6
+        # FIXME check target_python, not current python
+        if sys.version_info < (3, 6):
+            config.env['aiogps'] = False
+            announce("WARNING: Python too old: "
+                     "gps/aiogps.py will not be installed\n")
+        else:
+            config.env['aiogps'] = True
+
+        # check for pyserial
+        try:
+            imp.find_module('serial')
+            announce("Python module serial (pyserial) found.")
+        except ImportError:
+            # no pycairo, don't build xgps, xgpsspeed
+            announce("WARNING: Python module serial (pyserial) not found.")
+            config.env['xgps'] = False
+
+        if config.env['xgps']:
+            # check for pycairo
+            try:
+                imp.find_module('cairo')
+                announce("Python module cairo (pycairo) found.")
+            except ImportError:
+                # no pycairo, don't build xgps, xgpsspeed
+                announce("WARNING: Python module cairo (pycairo) not found.")
+                config.env['xgps'] = False
+
+            # check for pygobject
+            try:
+                imp.find_module('gi')
+                announce("Python module gi (pygobject) found.")
+            except ImportError:
+                # no pygobject, don't build xgps, xgpsspeed
+                announce("WARNING: Python module gi (pygobject) not found.")
+                config.env['xgps'] = False
+
+            if not config.CheckPKG('gtk+-3.0'):
+                config.env['xgps'] = False
+
+
 if config.env['python']:  # May have been turned off by error
     config.env['PYTHON'] = polystr(target_python_path)
     # For regress-driver
@@ -1225,6 +1266,7 @@ if config.env['python']:  # May have been turned off by error
 
 env = config.Finish()
 # All configuration should be finished.  env can now be modified.
+# NO CONFIG TESTS AFTER THIS POINT!
 
 if not (cleaning or helping):
 
@@ -1603,6 +1645,9 @@ else:
         "valgrind-audit.py"
     ]
 
+    if env['aiogps']:
+        python_misc.extend(["example_aiogps.py", "example_aiogps_run"])
+
     python_manpages = {
         "man/gegps.1": "man/gps.xml",
         "man/gpscat.1": "man/gpscat.xml",
@@ -1611,44 +1656,6 @@ else:
         "man/ubxtool.1": "man/ubxtool.xml",
         "man/zerk.1": "man/zerk.xml",
     }
-
-    # aiogps is only available on Python >= 3.6
-    # FIXME check target_python, not current python
-    if sys.version_info < (3, 6):
-        env['aiogps'] = False
-        announce("WARNING: Python too old: "
-                 "gps/aiogps.py will not be installed\n")
-    else:
-        env['aiogps'] = True
-        python_misc.extend(["example_aiogps.py", "example_aiogps_run"])
-
-    # check for pyserial
-    try:
-        imp.find_module('serial')
-        announce("Python module serial (pyserial) found.")
-    except ImportError:
-        # no pycairo, don't build xgps, xgpsspeed
-        announce("WARNING: Python module serial (pyserial) not found.")
-        env['xgps'] = False
-
-    if env['xgps']:
-        # check for pycairo
-        try:
-            imp.find_module('cairo')
-            announce("Python module cairo (pycairo) found.")
-        except ImportError:
-            # no pycairo, don't build xgps, xgpsspeed
-            announce("WARNING: Python module cairo (pycairo) not found.")
-            env['xgps'] = False
-
-        # check for pygobject
-        try:
-            imp.find_module('gi')
-            announce("Python module gi (pygobject) found.")
-        except ImportError:
-            # no pygobject, don't build xgps, xgpsspeed
-            announce("WARNING: Python module gi (pygobject) not found.")
-            env['xgps'] = False
 
     if env['xgps']:
         python_progs.extend(["xgps", "xgpsspeed"])
