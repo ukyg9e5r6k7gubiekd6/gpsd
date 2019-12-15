@@ -282,7 +282,8 @@ X11 server installed, but it still pulls in a lot of packages.
 # apt-get install python-gobject-dev libgtk-3-dev
 --------------------------------------------------------------
 
-Ubxtool and zerk may optionally use the pyserial module:
+Ubxtool and zerk may optionally use the pyserial module for
+direct connection to the GNSS receiver:
 
 --------------------------------------------------------------
 # apt-get install python-serial
@@ -292,6 +293,11 @@ gpsd may optional connect to dbus with the libdbus package:
 
 --------------------------------------------------------------
 # apt-get install libdbus-1-dev
+--------------------------------------------------------------
+
+Some very old Garmin USB devices need libusb:
+--------------------------------------------------------------
+# apt-get install libusb-1.0-0-dev
 --------------------------------------------------------------
 
 The rest of the installation is just as for any other source based
