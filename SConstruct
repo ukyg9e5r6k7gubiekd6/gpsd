@@ -1622,21 +1622,32 @@ else:
         env['aiogps'] = True
         python_misc.extend(["example_aiogps.py", "example_aiogps_run"])
 
+    # check for pyserial
+    try:
+        imp.find_module('serial')
+        announce("Python module serial (pyserial) found.")
+    except ImportError:
+        # no pycairo, don't build xgps, xgpsspeed
+        announce("WARNING: Python module serial (pyserial) not found.")
+        env['xgps'] = False
+
     if env['xgps']:
         # check for pycairo
         try:
             imp.find_module('cairo')
+            announce("Python module cairo (pycairo) found.")
         except ImportError:
             # no pycairo, don't build xgps, xgpsspeed
-            announce("WARNING: Python module pycairo not found.")
+            announce("WARNING: Python module cairo (pycairo) not found.")
             env['xgps'] = False
 
         # check for pygobject
         try:
             imp.find_module('gi')
+            announce("Python module gi (pygobject) found.")
         except ImportError:
             # no pygobject, don't build xgps, xgpsspeed
-            announce("WARNING: Python module pygobject not found.")
+            announce("WARNING: Python module gi (pygobject) not found.")
             env['xgps'] = False
 
     if env['xgps']:
