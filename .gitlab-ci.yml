@@ -47,7 +47,6 @@ debian-unstable:clang:
   - .ci-build/build.sh
 
 debian-unstable:minimal:
-  allow_failure: true
   image: debian:unstable
   stage: advanced_build
   variables:
@@ -61,7 +60,6 @@ debian-unstable:minimal:
 
 # the latest tag should match the last Ubuntu LTS release.
 ubuntu-latest:gcc:
-  allow_failure: true
   image: ubuntu:latest
   stage: advanced_build
   variables:
@@ -75,7 +73,6 @@ ubuntu-latest:gcc:
 
 # the "rolling" release
 ubuntu-rolling:gcc:
-  allow_failure: true
   image: ubuntu:rolling
   stage: advanced_build
   variables:
