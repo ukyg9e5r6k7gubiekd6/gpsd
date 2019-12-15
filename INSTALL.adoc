@@ -274,7 +274,20 @@ Build-essential installs the compiler and associated tools.
 Manpages-dev is the associated man pages.
 Pkg-config is a helper for scons.
 
-This distro does not support Gtk3, so xgps and xgpsspeed will not work.
+This distro does not support Gtk3 on python2, so xgps and xgpsspeed will
+not work.
+
+Ubxtool and zerk may optionally use the pyserial module:
+
+--------------------------------------------------------------
+# apt-get install python-serial
+--------------------------------------------------------------
+
+gpsd may optional connect to dbus with the libdbus package:
+
+--------------------------------------------------------------
+# apt-get install libdbus-1-dev
+--------------------------------------------------------------
 
 The rest of the installation is just as for any other source based
 install, as noted in the file *build.adoc* .
