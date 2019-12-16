@@ -103,7 +103,7 @@ freebsd:
   image: fedora:latest
   stage: advanced_build
   variables:
-    WRITE_PAD: '0.10000'
+    WRITE_PAD: '0.01250'
   tags:
   - freebsd
   script:
