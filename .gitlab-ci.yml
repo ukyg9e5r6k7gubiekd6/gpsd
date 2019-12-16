@@ -152,9 +152,9 @@ scan-build:
 
 .changes_pages: &changes_pages
   changes:
-    - www/*
-    - www/*/*
-    - *.adoc
+    - 'www/*'
+    - 'www/*/*'
+    - '*.adoc'
 
 .should_build_pages: &should_build_pages
   only:
