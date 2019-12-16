@@ -241,7 +241,8 @@ struct rtcm2_msg_t {
 		    unsigned int    parity:6;
 		    unsigned int    iod3:8;
 		    int             rrc3:8;
-		    unsigned int    prc3_l:8;		/* NOTE: unsigned int for low byte */
+                    /* NOTE: unsigned int for low byte */
+		    unsigned int    prc3_l:8;
 		    unsigned int    _pad:2;
 		} w7;
 	    } corrections[(RTCM2_WORDS_MAX - 2) / 5];
@@ -458,7 +459,8 @@ struct rtcm2_msg_t {
 		    unsigned int    tod3:7;
 		    unsigned int    change3:1;
 		    int             rrc3:8;
-		    unsigned int    prc3_l:8;	/* NOTE: unsigned int for low byte */
+                    /* NOTE: unsigned int for low byte */
+		    unsigned int    prc3_l:8;
 		    unsigned int    _pad:2;
 		} w7;
 	    } corrections[(RTCM2_WORDS_MAX - 2) / 5];
@@ -536,7 +538,7 @@ struct rtcm2_msg_t {
 
 		struct {			/* msg 1 word 7 */
 		    unsigned int    _pad:2;
-		    unsigned int    prc3_l:8;   /* NOTE: unsigned for low byte */
+		    unsigned int    prc3_l:8;   // NOTE: unsigned for low byte
 		    int             rrc3:8;
 		    unsigned int    iod3:8;
 		    unsigned int    parity:6;
@@ -744,7 +746,7 @@ struct rtcm2_msg_t {
 
 		struct {			/* msg 1 word 7 */
 		    unsigned int    _pad:2;
-		    unsigned int    prc3_l:8;	/* NOTE: unsigned for low byte */
+		    unsigned int    prc3_l:8;	// NOTE: unsigned for low byte
 		    int             rrc3:8;
 		    unsigned int    change3:1;
 		    unsigned int    tod3:7;
@@ -1015,3 +1017,5 @@ enum isgpsstat_t rtcm2_decode(struct gps_lexer_t *lexer, unsigned int c)
 }
 
 #endif /* RTCM104V2_ENABLE */
+
+// vim: set expandtab shiftwidth=4
