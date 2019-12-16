@@ -422,11 +422,31 @@ void rtcm3_unpack(const struct gps_context_t *context,
         unknown = false;
         break;
 
+    case 1015:
+        /* RTCM 3.1
+         * GPS Ionospheric Correction Differences for all satellites
+         * between the master station and one auxiliary station
+         */
+        break;
+
+    case 1016:
+        /* RTCM 3.1
+         * GPS Geometric Correction Differences for all satellites between
+         * the master station and one auxiliary station.
+         */
+        break;
+
     case 1017:
-        /* RTCM 3.1 - 1017
+        /* RTCM 3.1
          * GPS Combined Geometric and Ionospheric Correction Differences
          * for all satellites between one Aux station and the master station
          * (same content as both types 1015 and 1016 together, but less size)
+         */
+        break;
+
+    case 1018:
+        /* RTCM 3.1
+         * Reserved for alternative Ionospheric Correction Difference Message
          */
         break;
 
@@ -446,6 +466,54 @@ void rtcm3_unpack(const struct gps_context_t *context,
         /* TODO: rtklib has C code for this one.  */
         break;
 
+    case 1021:
+        /* RTCM 3.1
+         * Helmert / Abridged Molodenski transformation parameters
+         */
+        break;
+
+    case 1022:
+        /* RTCM 3.1
+         * Molodenski-Badekas transformation parameters
+         */
+        break;
+
+    case 1023:
+        /* RTCM 3.1
+         * Transformation residual message, ellipsoidal grid representation
+         */
+        break;
+
+    case 1024:
+        /* RTCM 3.1
+         * Transformation residual message, plane grid representation
+         */
+        break;
+
+    case 1025:
+        /* RTCM 3.1
+         * Projection parameters, types other than LCC2SP, OM
+         */
+        break;
+
+    case 1026:
+        /* RTCM 3.1
+         * Projection parameters, type LCC2SP (Lambert Conic Conformal)
+         */
+        break;
+
+    case 1027:
+        /* RTCM 3.1
+         * Projection parameters, type OM (Oblique Mercator)
+         */
+        break;
+
+    case 1028:
+        /* RTCM 3.1
+         * Reserved for global to plate fixed transformation
+         */
+        break;
+
     case 1029:
         /* Text in UTF8 format
          *(max. 127 multibyte characters and max. 255 bytes)
@@ -458,6 +526,24 @@ void rtcm3_unpack(const struct gps_context_t *context,
         (void)memcpy(rtcm->rtcmtypes.rtcm3_1029.text,
                      buf + 12, rtcm->rtcmtypes.rtcm3_1029.unicode_units);
         unknown = false;
+        break;
+
+    case 1030:
+        /* RTCM 3.1
+         * GPS network-RTK residuals message
+         */
+        break;
+
+    case 1031:
+        /* RTCM 3.1
+         * GLONASS network-RTK residuals message
+         */
+        break;
+
+    case 1032:
+        /* RTCM 3.1
+         * Physical reference station position message
+         */
         break;
 
     case 1033:                  /* see note in header */
