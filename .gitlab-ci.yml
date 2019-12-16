@@ -14,16 +14,20 @@ stages:
   - advanced_build
   - test
 
+.debian_build: &debian_build
+  script:
+  - apt update && apt -y install --no-install-recommends eatmydata
+  - eatmydata -- apt -y install --no-install-recommends ${PACKAGES}
+  - eatmydata -- .ci-build/build.sh
+
 debian-stable:
   image: debian:latest
   stage: build
   variables:
     SCONSOPTS: 'qt=yes xgps=yes'
     DEBIAN_FRONTEND: 'noninteractive'
-  script:
-  - apt update && apt -y install --no-install-recommends eatmydata
-  - eatmydata -- apt -y install --no-install-recommends build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
-  - eatmydata -- .ci-build/build.sh
+    PACKAGES: 'build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial'
+  <<: *debian_build
 
 debian-unstable:gcc:
   image: debian:unstable
