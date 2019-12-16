@@ -616,3 +616,5 @@ void ntrip_report(struct gps_context_t *context,
         }
     }
 }
+
+// vim: set expandtab shiftwidth=4

@@ -1298,3 +1298,5 @@ const struct gps_type_t driver_garmin_ser_binary =
 /* *INDENT-ON* */
 
 #endif /* GARMIN_ENABLE */
+
+// vim: set expandtab shiftwidth=4

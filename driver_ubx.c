@@ -2566,3 +2566,5 @@ const struct gps_type_t driver_ubx = {
 };
 /* *INDENT-ON* */
 #endif /* defined(UBLOX_ENABLE) && defined(BINARY_ENABLE) */
+
+// vim: set expandtab shiftwidth=4
