@@ -247,6 +247,9 @@ struct rtcm2_msg_t {
 	    } corrections[(RTCM2_WORDS_MAX - 2) / 5];
 	} type1;
 
+        /* msg 2 -  Pseudo-range corrections, referring to previous orbit
+         * data records (maximum 12 satellites) */
+
 	/* msg 3 - reference station parameters */
 	struct rtcm2_msg3 {
 	    struct {
@@ -273,6 +276,8 @@ struct rtcm2_msg_t {
 		unsigned int        _pad:2;
 	    } w6;
 	} type3;
+
+        // msg - 6 -  Null message, used as filler record during time-outs
 
 	/* msg 4 - reference station datum */
 	struct rtcm2_msg4 {
@@ -403,6 +408,10 @@ struct rtcm2_msg_t {
 	    } txt[RTCM2_WORDS_MAX-2];
 	} type16;
 
+        // Message Type 18 for carrier phase for L1 or L2.  RTCM 2.3
+
+        // Message Type 19 for pseudo-range for CA or P code.  RTCM 2.3
+
 	/* msg 31 - differential GLONASS corrections */
 	struct rtcm2_msg31 {
 	    struct glonass_correction_t {
@@ -454,6 +463,9 @@ struct rtcm2_msg_t {
 		} w7;
 	    } corrections[(RTCM2_WORDS_MAX - 2) / 5];
 	} type31;
+
+        /* msg 59 -  Proprietary messages, for transmission of any
+         * required data */
 
 	/* unknown message */
 	isgps30bits_t	rtcm2_msgunk[RTCM2_WORDS_MAX-2];
@@ -532,6 +544,9 @@ struct rtcm2_msg_t {
 	    } corrections[(RTCM2_WORDS_MAX - 2) / 5];
 	} type1;
 
+        /* msg 2 -  Pseudo-range corrections, referring to previous orbit
+         * data records (maximum 12 satellites) */
+
 	/* msg 3 - reference station parameters */
 	struct rtcm2_msg3 {
 	    struct {
@@ -609,7 +624,7 @@ struct rtcm2_msg_t {
 	    } health[MAXHEALTH];
 	} type5;
 
-	/* msg 6 - null message */
+        // msg - 6 -  Null message, used as filler record during time-outs
 
 	/* msg 7 - beacon almanac */
 	struct rtcm2_msg7 {
@@ -682,6 +697,10 @@ struct rtcm2_msg_t {
 	    } txt[RTCM2_WORDS_MAX-2];
 	} type16;
 
+        // Message Type 18 for carrier phase for L1 or L2.  RTCM 2.3
+
+        // Message Type 19 for pseudo-range for CA or P code.  RTCM 2.3
+
 	/* msg 31 - differential GLONASS corrections */
 	struct rtcm2_msg31 {
 	    struct glonass_correction_t {
@@ -733,6 +752,9 @@ struct rtcm2_msg_t {
 		} w7;
 	    } corrections[(RTCM2_WORDS_MAX - 2) / 5];
 	} type31;
+
+        /* msg 59 -  Proprietary messages, for transmission of any
+         * required data */
 
 	/* unknown message */
 	isgps30bits_t	rtcm2_msgunk[RTCM2_WORDS_MAX-2];
