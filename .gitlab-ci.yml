@@ -14,7 +14,7 @@ stages:
   - advanced_build
   - test
 
-build:
+debian-stable:
   image: debian:latest
   stage: build
   variables:
