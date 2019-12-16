@@ -274,7 +274,7 @@ Build-essential installs the compiler and associated tools.
 Manpages-dev is the associated man pages.
 Pkg-config is a helper for scons.
 
-Gtk3 is only required to run xgps and xgpsspeed. You do not need a local
+Gtk3 is only required to run xgps and xgpsspeed.  You do not need a local
 X11 server installed, but it still pulls in a lot of packages.
 
 --------------------------------------------------------------
@@ -296,8 +296,16 @@ gpsd may optional connect to dbus with the libdbus package:
 --------------------------------------------------------------
 
 Some very old Garmin USB devices need libusb:
+
 --------------------------------------------------------------
 # apt-get install libusb-1.0-0-dev
+--------------------------------------------------------------
+
+If you wish to build the documentation, be warned it pull in a
+lot of packages.  To build the doc install:
+
+--------------------------------------------------------------
+apt-get install xsltproc docbook-xsl xmlto asciidoc
 --------------------------------------------------------------
 
 The rest of the installation is just as for any other source based
@@ -396,7 +404,8 @@ apt install libncurses5-dev pps-tools
 apt install apt install gir1.2-gtk-3.0
 --------------------------------------------------------------
 
-If you wish to build the coumentation, then install:
+If you wish to build the documentation, be warned it pull in a
+lot of packages.  To build the doc install:
 
 --------------------------------------------------------------
 apt install xsltproc docbook-xsl xmlto asciidoc
