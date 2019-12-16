@@ -81,8 +81,10 @@ void rtcm3_unpack(const struct gps_context_t *context,
     signed long temp;
     bool unknown = true;;
 
-#define ugrab(width)	(bitcount += width, ubits((unsigned char *)buf, bitcount-width, width, false))
-#define sgrab(width)	(bitcount += width, sbits((signed char *)buf, bitcount-width, width, false))
+#define ugrab(width)	(bitcount += width, ubits((unsigned char *)buf, \
+                         bitcount-width, width, false))
+#define sgrab(width)	(bitcount += width, sbits((signed char *)buf,  \
+                         bitcount-width, width, false))
 #define GPS_PSEUDORANGE(fld, len) \
     {temp = (unsigned long)ugrab(len);		\
     if (temp == GPS_INVALID_PSEUDORANGE)	\
@@ -376,7 +378,8 @@ void rtcm3_unpack(const struct gps_context_t *context,
 	    if (rangeincr == GLONASS_INVALID_RANGEINCR)
 		R1012.L2.pseudorange = 0;
 	    else
-		R1012.L2.pseudorange = (rangeincr * GLONASS_PSEUDORANGE_RESOLUTION);
+		R1012.L2.pseudorange = (rangeincr *
+                                        GLONASS_PSEUDORANGE_RESOLUTION);
 	    RANGEDIFF(R1012.L2, 20);
 	    R1012.L2.locktime =	(unsigned char)sgrab(7);
 	    R1012.L2.CNR = (unsigned char)ugrab(8) * CARRIER_NOISE_RATIO_UNITS;
@@ -595,3 +598,5 @@ void rtcm3_unpack(const struct gps_context_t *context,
 /* *INDENT-ON* */
 
 #endif /* RTCM104V3_ENABLE */
+
+// vim: set expandtab shiftwidth=4
