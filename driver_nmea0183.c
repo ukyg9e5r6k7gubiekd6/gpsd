@@ -5,6 +5,8 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
+#ifdef NMEA0183_ENABLE
+
 #include <ctype.h>       /* for isdigit() */
 #include <stdio.h>
 #include <stdlib.h>
@@ -17,7 +19,6 @@
 #include "gpsd.h"
 #include "strfuncs.h"
 
-#ifdef NMEA0183_ENABLE
 #include "timespec.h"
 /**************************************************************************
  *
@@ -1955,15 +1956,17 @@ static gps_mask_t processPGRMF(int c UNUSED, char *field[],
         ts_tow.tv_nsec = 0;
         session->newdata.time = gpsd_gpstime_resolv(session, week, ts_tow);
         mask |= TIME_SET;
+        // (long long) cast for 32/64 bit compat
         GPSD_LOG(LOG_SPIN, &session->context->errout,
-                 "PGRMF gps time %ld\n",
-                 session->newdata.time.tv_sec);
+                 "PGRMF gps time %lld\n",
+                 (long long)session->newdata.time.tv_sec);
     } else if (0 == merge_hhmmss(field[4], session) &&
                0 == merge_ddmmyy(field[3], session)) {
         // fall back to UTC if we need and can
+        // (long long) cast for 32/64 bit compat
         GPSD_LOG(LOG_SPIN, &session->context->errout,
-                 "PGRMF gps time %ld\n",
-                 session->newdata.time.tv_sec);
+                 "PGRMF gps time %lld\n",
+                 (long long)session->newdata.time.tv_sec);
         mask |= TIME_SET;
     }
     if ('A' != field[10][0]) {
@@ -3483,7 +3486,7 @@ gps_mask_t nmea_parse(char *sentence, struct gps_device_t * session)
                 0 == (session->nmea.cycle_enders & lasttag_mask) &&
                 !session->nmea.cycle_continue) {
                 session->nmea.cycle_enders |= lasttag_mask;
-                /* cast for 32/64 bit compat */
+                /* (long long) cast for 32/64 bit compat */
                 GPSD_LOG(LOG_PROG, &session->context->errout,
                          "tagged %s as a cycle ender. %#llx\n",
                          nmea_phrase[lasttag - 1].name,
@@ -3578,3 +3581,5 @@ ssize_t nmea_send(struct gps_device_t * session, const char *fmt, ...)
     va_end(ap);
     return nmea_write(session, buf, strlen(buf));
 }
+
+// vim: set expandtab shiftwidth=4
