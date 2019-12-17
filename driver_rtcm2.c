@@ -278,8 +278,6 @@ struct rtcm2_msg_t {
             } w6;
         } type3;
 
-        // msg - 6 -  Null message, used as filler record during time-outs
-
         /* msg 4 - reference station datum */
         struct rtcm2_msg4 {
             struct {
@@ -369,6 +367,16 @@ struct rtcm2_msg_t {
             } almanac[(RTCM2_WORDS_MAX - 2)/3];
         } type7;
 
+        // msg 8 - Pseudolite almanac
+
+        // msg 9 - GPS Partial correction set
+
+        // msg 10 - P-code differential corrections
+
+        // msg 11 - C/A-code L1, L2 delta corrections
+
+        // msg 12 - Pseudolite station parameters.
+
         /* msg 13 - Ground Transmitter Parameters (RTCM2.3 only) */
         struct rtcm2_msg13 {
             struct {
@@ -398,6 +406,8 @@ struct rtcm2_msg_t {
             } w1;
         } type14;
 
+        // msg 15 - Ionospheric delay message
+
         /* msg 16 - text msg */
         struct rtcm2_msg16 {
             struct {
@@ -409,11 +419,23 @@ struct rtcm2_msg_t {
             } txt[RTCM2_WORDS_MAX-2];
         } type16;
 
-        // Message Type 18 for carrier phase for L1 or L2.  RTCM 2.3
+        // msg 17 - GPS ephmerides.  RTCM 2.1
 
-        // Message Type 19 for pseudo-range for CA or P code.  RTCM 2.3
+        // msg 18 - RTK uncorrected carrier phases.  RTCM 2.1
 
-        // msg 27 Extended radio beacon almanac.
+        // msg 19 - RTK uncorrected psuedoranges.  RTCM 2.1
+
+        // msg 20 - RTK carrier phase corrections.  RTCM 2.1
+
+        // msg 21 - RTK/high accuracy psuedorange corrections.  RTCM 2.1
+
+        // msg 22 - Extended reference station parameters
+
+        // msg 23 - Type of Antenna.  RTCM 2.3
+
+        // msg 24 - Reference station ARP..  RTCM 2.3
+
+        // msg 27 -  Extended almanac of DGPS.
 
         /* msg 31 - differential GLONASS corrections */
         struct rtcm2_msg31 {
@@ -468,8 +490,22 @@ struct rtcm2_msg_t {
             } corrections[(RTCM2_WORDS_MAX - 2) / 5];
         } type31;
 
+        // msg 32 - Differential GLONASS reference station parameters, RTCM 2.3
+
+        // msg 33 - GLONASS constellation health, RTCM 2.3
+
+        // msg 34 - DGLONASS corrections, RTCM 2.3
+
+        // msg 35 - GLONASS radiobeacon almanac, RTCM 2.3
+
+        // msg 36 - GLONASS special message, RTCM 2.3
+
+        // msg 37 - GNSS system time offset, RTCM 2.3
+
         /* msg 59 -  Proprietary messages, for transmission of any
          * required data */
+
+        // msg 60-63 - Multipurpsoe usage
 
         /* unknown message */
         isgps30bits_t   rtcm2_msgunk[RTCM2_WORDS_MAX-2];
@@ -661,6 +697,16 @@ struct rtcm2_msg_t {
             } almanac[(RTCM2_WORDS_MAX - 2)/3];
         } type7;
 
+        // msg 8 - Pseudolite almanac
+
+        // msg 9 - GPS Partial correction set
+
+        // msg 10 - P-code differential corrections
+
+        // msg 11 - C/A-code L1, L2 delta corrections
+
+        // msg 12 - Pseudolite station parameters.
+
         /* msg 13 - Ground Transmitter Parameters (RTCM2.3 only) */
         struct rtcm2_msg13 {
             struct {
@@ -690,6 +736,8 @@ struct rtcm2_msg_t {
             } w1;
         } type14;
 
+        // msg 15 - Ionospheric delay message
+
         /* msg 16 - text msg */
         struct rtcm2_msg16 {
             struct {
@@ -701,11 +749,23 @@ struct rtcm2_msg_t {
             } txt[RTCM2_WORDS_MAX-2];
         } type16;
 
-        // Message Type 18 for carrier phase for L1 or L2.  RTCM 2.3
+        // msg 17 - GPS ephmerides.  RTCM 2.1
 
-        // Message Type 19 for pseudo-range for CA or P code.  RTCM 2.3
+        // msg 18 - RTK uncorrected carrier phases.  RTCM 2.1
 
-        // msg 27 Extended radio beacon almanac.
+        // msg 19 - RTK uncorrected psuedoranges.  RTCM 2.1
+
+        // msg 20 - RTK carrier phase corrections.  RTCM 2.1
+
+        // msg 21 - RTK/high accuracy psuedorange corrections.  RTCM 2.1
+
+        // msg 22 - Extended reference station parameters
+
+        // msg 23 - Type of Antenna.  RTCM 2.3
+
+        // msg 24 - Reference station ARP..  RTCM 2.3
+
+        // msg 27 -  Extended almanac of DGPS.
 
         /* msg 31 - differential GLONASS corrections */
         struct rtcm2_msg31 {
@@ -759,8 +819,22 @@ struct rtcm2_msg_t {
             } corrections[(RTCM2_WORDS_MAX - 2) / 5];
         } type31;
 
+        // msg 32 - Differential GLONASS reference station parameters, RTCM 2.3
+
+        // msg 33 - GLONASS constellation health, RTCM 2.3
+
+        // msg 34 - DGLONASS corrections, RTCM 2.3
+
+        // msg 35 - GLONASS radiobeacon almanac, RTCM 2.3
+
+        // msg 36 - GLONASS special message, RTCM 2.3
+
+        // msg 37 - GNSS system time offset, RTCM 2.3
+
         /* msg 59 -  Proprietary messages, for transmission of any
          * required data */
+
+        // msg 60-63 - Multipurpsoe usage
 
         /* unknown message */
         isgps30bits_t   rtcm2_msgunk[RTCM2_WORDS_MAX-2];
