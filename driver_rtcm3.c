@@ -608,12 +608,19 @@ void rtcm3_unpack(const struct gps_context_t *context,
 
     case 1074:
         /* RTCM 3.x
-         * GPS Multi Signal Message
+         * GPS Multi Signal Message 4
+         */
+        break;
+
+    case 1075:
+        /* RTCM 3.x
+         * GPS Multi Signal Message 5
          */
         break;
 
     case 1077:
         /* RTCM 3.x - 1077
+         * GPS Multi Signal Message 7
          * Full GPS pseudo-ranges, carrier phases, Doppler and
          * signal strength (high resolution)
          * length 438
@@ -621,8 +628,21 @@ void rtcm3_unpack(const struct gps_context_t *context,
         /* TODO: rtklib has C code for this one.  */
         break;
 
+    case 1084:
+        /* RTCM 3.x
+         * GLONASS  Multi Signal Message 4
+         */
+        break;
+
+    case 1085:
+        /* RTCM 3.x
+         * GLONASS Multi Signal Message 5
+         */
+        break;
+
     case 1087:
         /* RTCM 3.x - 1087
+         * GLONASS Multi Signal Message 7
          * Full GLONASS pseudo-ranges, carrier phases, Doppler and
          * signal strength (high resolution)
          * length 417 or 427
@@ -630,8 +650,21 @@ void rtcm3_unpack(const struct gps_context_t *context,
         /* TODO: rtklib has C code for this one.  */
         break;
 
+    case 1094:
+        /* RTCM 3.x
+         * Galileo Multi Signal Message 4
+         */
+        break;
+
+    case 1095:
+        /* RTCM 3.x
+         * Galileo Multi Signal Message 5
+         */
+        break;
+
     case 1097:
         /* RTCM 3.x - 1097
+         * Galileo Multi Signal Message 7
          * Full Galileo pseudo-ranges, carrier phases, Doppler and
          * signal strength (high resolution)
          * length 96
@@ -657,7 +690,32 @@ void rtcm3_unpack(const struct gps_context_t *context,
 
     case 1124:
         /* RTCM 3.x
-         * BeiDou Multi Signal Message
+         * BeiDou Multi Signal Message 4
+         */
+        break;
+
+    case 1125:
+        /* RTCM 3.x
+         * BeiDou Multi Signal Message 5
+         */
+        break;
+
+    case 1127:
+        /* RTCM 3.x
+         * BeiDou Multi Signal Message 7
+         */
+        break;
+
+    case 1230:
+        /* RTCM 3.x
+         * GLONASS L1 and L2 code-phase biases.
+         */
+        break;
+
+    case 4072:
+        /* RTCM 3.x
+         * 4072.0 Reference station PVT (u-blox proprietary)
+         * 4072.1 Additional reference station information (u-blox proprietary)
          */
         break;
 
