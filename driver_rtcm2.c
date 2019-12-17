@@ -413,6 +413,8 @@ struct rtcm2_msg_t {
 
         // Message Type 19 for pseudo-range for CA or P code.  RTCM 2.3
 
+        // msg 27 Extended radio beacon almanac.
+
         /* msg 31 - differential GLONASS corrections */
         struct rtcm2_msg31 {
             struct glonass_correction_t {
@@ -702,6 +704,8 @@ struct rtcm2_msg_t {
         // Message Type 18 for carrier phase for L1 or L2.  RTCM 2.3
 
         // Message Type 19 for pseudo-range for CA or P code.  RTCM 2.3
+
+        // msg 27 Extended radio beacon almanac.
 
         /* msg 31 - differential GLONASS corrections */
         struct rtcm2_msg31 {
