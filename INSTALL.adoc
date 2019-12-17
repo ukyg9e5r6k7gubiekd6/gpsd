@@ -499,6 +499,9 @@ gpsd will build, install and run on FreeBSD.
 Use their pkg command to install scons, and optionally git if you
 want to access the development source.
 
+If you want to build the QT bindings, you'll also need the
+qt5-network and pkgconf packages.
+
 --------------------------------------------------------------
 # pkg install scons
 # pkg install git
