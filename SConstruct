@@ -1445,7 +1445,8 @@ libraries = [libgps_shared]
 if qt_env:
     qtobjects = []
     qt_flags = qt_env['CFLAGS']
-    for c_only in ('-Wmissing-prototypes', '-Wstrict-prototypes'):
+    for c_only in ('-Wmissing-prototypes', '-Wstrict-prototypes',
+                   '-Wmissing-declarations'):
         if c_only in qt_flags:
             qt_flags.remove(c_only)
     # Qt binding object files have to be renamed as they're built to avoid
