@@ -492,7 +492,8 @@ https://learn.adafruit.com/adafruit-ultimate-gps-hat-for-raspberry-pi/
 You will need to dig deeper to make the PPS work, here is a good reference:
 http://www.satsignal.eu/ntp/Raspberry-Pi-NTP.html
 
-== Special Notes for FreeBSD Installation ==
+== BSD derivatives ==
+=== Special Notes for FreeBSD Installation ==+
 
 gpsd will build, install and run on FreeBSD.
 Due to the missing CAN bus support (linux/can.h), NMEA2000/CAN
@@ -512,7 +513,7 @@ qt5-network and pkgconf packages.
 # scons --config=force && scons install
 --------------------------------------------------------------
 
-== Special Notes for NetBSD 8.1 Installation ==
+=== Special Notes for NetBSD 8.1 Installation ===
 
 gpsd will build, install and run on NetBSD.
 
@@ -539,7 +540,29 @@ install the required tools.
 # scons --config=force && scons install
 --------------------------------------------------------------
 
-== Special Notes for CentOS 7 Installation ==
+=== Special Notes for OpenBSD 6.6 Installation ===
+
+gpsd will build, install and run on NetBSD.
+
+All you need for a basic gpsd install is scons and git.  Then
+create the missing python link.
+
+--------------------------------------------------------------
+# pkg_add scons
+# pkg_add git
+# ln -s /usr/local/bin/python2 /usr/local/bin/python
+--------------------------------------------------------------
+
+Then install the normal way.
+
+--------------------------------------------------------------
+# git clone https://gitlab.com/gpsd/gpsd.git
+# cd gpsd
+# scons --config=force && scons install
+--------------------------------------------------------------
+
+== Special Notes for Fedora derivatives ==
+=== Special Notes for CentOS 7 Installation ===
 
 gpsd currently will build, install and run on CentOS 7.
 
