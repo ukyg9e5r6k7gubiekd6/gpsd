@@ -1667,10 +1667,15 @@ else:
         announce("WARNING: xgps and xgpsspeed will not be installed")
 
     # Glob() has to be run after all buildable objects defined
-    if env['aiogps']:
-        python_modules = Glob('gps/*.py', strings=True)
-    else:
-        python_modules = Glob('gps/*.py',strings=True, exclude="gps/aiogps.py")
+    python_modules = Glob('gps/*.py', strings=True)
+
+    # Remove the aiogps module if not configured
+    # Don't use Glob's exclude option, since it may not be available
+    if not env['aiogps']:
+        try:
+            python_modules.remove('gps/aiogps.py')
+        except ValueError:
+            pass
 
     # Build Python binding
     #
