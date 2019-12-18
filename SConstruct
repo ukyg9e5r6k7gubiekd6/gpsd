@@ -1605,7 +1605,7 @@ else:
 
 # duplicate below?
 test_gpsmm = env.Program('tests/test_gpsmm', ['tests/test_gpsmm.cpp'],
-                         LIBS=['gps_static', 'gps'],
+                         LIBS=['gps_static'],
                          parse_flags=mathlibs + rtlibs + dbusflags)
 testprogs = [test_bits,
              test_float,
@@ -1985,7 +1985,7 @@ if qt_env:
     test_qgpsmm = env.Program('tests/test_qgpsmm', ['tests/test_gpsmm.cpp'],
                               LIBPATH=['.'],
                               OBJPREFIX='qt-',
-                              LIBS=['Qgpsmm', 'gps'])
+                              LIBS=['Qgpsmm'])
     build_qt = qt_env.Alias('build', [compiled_qgpsmmlib, test_qgpsmm])
     qt_env.Default(*build_qt)
     testprogs.append(test_qgpsmm)
