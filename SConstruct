@@ -1448,7 +1448,10 @@ if qt_env:
     for c_only in ('-Wmissing-prototypes', '-Wstrict-prototypes',
                    '-Wmissing-declarations'):
         if c_only in qt_flags:
-            qt_flags.remove(c_only)
+            try:
+                qt_flags.remove(c_only)
+            except ValueError:
+                pass
     # Qt binding object files have to be renamed as they're built to avoid
     # name clashes with the plain non-Qt object files. This prevents the
     # infamous "Two environments with different actions were specified
