@@ -5,8 +5,6 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#ifdef NMEA0183_ENABLE
-
 #include <ctype.h>       /* for isdigit() */
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,6 +17,7 @@
 #include "gpsd.h"
 #include "strfuncs.h"
 
+#ifdef NMEA0183_ENABLE
 #include "timespec.h"
 /**************************************************************************
  *
