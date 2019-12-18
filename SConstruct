@@ -2468,6 +2468,12 @@ test_nondaemon = [
     # trig_regress,  # not ready
     unpack_regress,
 ]
+if env['socket_export']:
+    test_nondaemon.append(test_json)
+if env['libgpsmm']:
+    test_nondaemon.append(test_gpsmm)
+if qt_env:
+    test_nondaemon.append(test_qgpsmm)
 
 test_quick = test_nondaemon + [gpsfake_tests]
 test_noclean = test_quick + [gps_regress]
