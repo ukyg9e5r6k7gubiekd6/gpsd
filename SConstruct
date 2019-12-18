@@ -1454,7 +1454,8 @@ if qt_env:
     # for the same target" error.
     for src in libgps_sources:
         if src not in ('ais_json.c', 'json.c', 'libgps_json.c',
-                       'rtcm2_json.c', 'rtcm3_json.c', 'shared_json.c'):
+                       'rtcm2_json.c', 'rtcm3_json.c', 'shared_json.c',
+                       'timespec_str.c'):
             compile_with = qt_env['CXX']
             compile_flags = qt_flags
         else:
