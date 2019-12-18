@@ -1650,7 +1650,7 @@ else:
         "valgrind-audit.py"
     ]
 
-    if env['aiogps']:
+    if not helping and env['aiogps']:
         python_misc.extend(["example_aiogps.py", "example_aiogps_run"])
 
     python_manpages = {
@@ -1676,7 +1676,7 @@ else:
 
     # Remove the aiogps module if not configured
     # Don't use Glob's exclude option, since it may not be available
-    if not env['aiogps']:
+    if helping or not env['aiogps']:
         try:
             python_modules.remove('gps/aiogps.py')
         except ValueError:
