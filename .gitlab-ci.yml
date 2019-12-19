@@ -102,9 +102,8 @@ fedora-latest:
 freebsd:
   image: fedora:latest
   stage: advanced_build
-  timeout: 3 hours
   variables:
-    WRITE_PAD: '0.05'
+    WRITE_PAD: '0.01250'
   tags:
   - freebsd
   script:
