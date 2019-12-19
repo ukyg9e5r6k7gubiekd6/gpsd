@@ -1506,8 +1506,9 @@ static gps_mask_t processGSA(int count, char *field[],
 #ifdef __UNUSED__
             /* debug */
             GPSD_LOG(LOG_ERROR, &session->context->errout,
-                     "%s nmeaid_to_prn: nmea_gnssid %d nmea_satnum %d ubx_gnssid %d "
-                     "ubx_svid %d nmea2_prn %d\n", field[0],
+                     "%s nmeaid_to_prn: nmea_gnssid %d nmea_satnum %d "
+                     "ubx_gnssid %d ubx_svid %d nmea2_prn %d\n",
+                     field[0],
                      nmea_gnssid, nmea_satnum, ubx_gnssid, ubx_svid, prn);
             GPSD_LOG(LOG_ERROR, &session->context->errout,
                      "%s count %d\n", field[0], count);
