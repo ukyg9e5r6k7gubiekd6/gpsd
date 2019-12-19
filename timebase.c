@@ -292,16 +292,19 @@ timespec_t gpsd_utc_resolve(struct gps_device_t *session)
     /* sanity check unix time against leap second.
      * Does not work well with regressions because the leap_sconds
      * could be from the receiver, or from BUILD_LEAPSECONDS.
-     * Leap second 18 at 1 Jan 2017: 1483228800 */
+     * Leap second 18 at 1 Jan 2017: 1483228800
+     * (long long) for 32-bit systems */
     if (17 < session->context->leap_seconds &&
-        1483228800L > t.tv_sec) {
-        t.tv_sec += 619315200;                       // fast forward 1024 weeks
+        1483228800LL > t.tv_sec) {
+        long long old_tv_sec = t.tv_sec;
+        t.tv_sec += 619315200LL;                    // fast forward 1024 weeks
         (void)gmtime_r(&t.tv_sec, &session->nmea.date);   // fix NMEA date
 	(void)timespec_to_iso8601(t, scr, sizeof(scr));
 	GPSD_LOG(LOG_WARN, &session->context->errout,
-		 "Warning leap second %d inconsistent with %s(%lld)\n",
+		 "Warning leap second %d inconsistent with %s(%lld), "
+                 "corrected to %lld\n",
                  session->context->leap_seconds,
-		 scr, (long long)t.tv_sec);
+		 scr, old_tv_sec, (long long)t.tv_sec);
     }
 
     /*
