@@ -221,7 +221,7 @@ This switch is mainly useful for debugging.</para>
 <varlistentry>
 <term>-r</term>
 <listitem><para>Use GPS time even with no current fix.  Some GPS's have
-battery powered Real Time Clocks (RTC's) built in, makeing them a valid time
+battery powered Real Time Clocks (RTC's) built in, making them a valid time
 source even before a fix is acquired.  This can be useful on a Raspberry Pi,
 or other device that has no battery powered RTC, and thus has no valid
 time at startup.</para></listitem>
@@ -325,7 +325,7 @@ to accept them. Example:
 <term>Remote gpsd feed</term>
 <listitem>
 <para>A URI with the prefix "gpsd://", followed by a hostname and
-optionally a colony and a port number (if the port is absent the
+optionally a colon and a port number (if the port is absent the
 default <application>gpsd</application> port will be used). The daemon
 will open a socket to the indicated address and port and emulate a
 <application>gpsd</application> client, collecting JSON reports from
@@ -521,7 +521,7 @@ This control socket will be located wherever the -F option specifies
 it.</para>
 
 <para>A device may will also be dropped from the pool if GPSD gets a zero
-length read from it. This  end-of-file condition indicates that the'
+length read from it. This  end-of-file condition indicates that the
 device has been disconnected.</para>
 
 <para>When <application>gpsd</application> is properly installed along
