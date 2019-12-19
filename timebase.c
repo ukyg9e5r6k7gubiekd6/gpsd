@@ -301,8 +301,8 @@ timespec_t gpsd_utc_resolve(struct gps_device_t *session)
         (void)gmtime_r(&t.tv_sec, &session->nmea.date);   // fix NMEA date
 	(void)timespec_to_iso8601(t, scr, sizeof(scr));
 	GPSD_LOG(LOG_WARN, &session->context->errout,
-		 "Warning leap second %d inconsistent with %s(%lld), "
-                 "corrected to %lld\n",
+		 "WARNING: WKRO bug: leap second %d inconsistent "
+                 "with %s(%lld), corrected to %lld\n",
                  session->context->leap_seconds,
 		 scr, old_tv_sec, (long long)t.tv_sec);
     }
