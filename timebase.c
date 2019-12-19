@@ -302,9 +302,9 @@ timespec_t gpsd_utc_resolve(struct gps_device_t *session)
 	(void)timespec_to_iso8601(t, scr, sizeof(scr));
 	GPSD_LOG(LOG_WARN, &session->context->errout,
 		 "WARNING: WKRO bug: leap second %d inconsistent "
-                 "with %s(%lld), corrected to %lld\n",
+                 "with %lld, corrected to %lld (%s)\n",
                  session->context->leap_seconds,
-		 scr, old_tv_sec, (long long)t.tv_sec);
+		 old_tv_sec, (long long)t.tv_sec, scr);
     }
 
     /*
