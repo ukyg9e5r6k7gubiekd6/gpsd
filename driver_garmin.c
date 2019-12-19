@@ -99,6 +99,8 @@
 
 #define GPSD_LE16TOH(x) getles16((char *)(&(x)), 0)
 #define GPSD_LE32TOH(x) getles32((char *)(&(x)), 0)
+#define GPSD_LEF32(x) getlef32((const char *)(&(x)), 0)
+#define GPSD_LED64(x) getled64((const char *)(&(x)), 0)
 
 #define USE_RMD 0
 
@@ -304,6 +306,7 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
     cpo_sat_data *sats = NULL;
     cpo_pvt_data *pvt = NULL;
     cpo_rcv_data *rmd = NULL;
+    double gps_tow = 0;
 
     GPSD_LOG(LOG_DATA, &session->context->errout,
 	     "Garmin: PrintSERPacket(, %#02x, %#02x, )\n", pkt_id, pkt_len);
@@ -371,16 +374,18 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 
 	pvt = (cpo_pvt_data *) buf;
 
-	// 631065600, unix seconds for 31 Dec 1989 Zulu
-	time_l = (time_t) (631065600 + (GPSD_LE32TOH(pvt->grmn_days) * 86400));
-	// TODO, convert grmn_days to context->gps_week
-	time_l -= GPSD_LE16TOH(pvt->leap_sec);
 	session->context->leap_seconds = (int)GPSD_LE16TOH(pvt->leap_sec);
 	session->context->valid = LEAP_SECOND_VALID;
 
+	// 631065600, unix seconds for 31 Dec 1989 Zulu
+	time_l = (time_t) (631065600 + (GPSD_LE32TOH(pvt->grmn_days) * 86400));
+	// TODO, convert grmn_days to context->gps_week
+	time_l -= session->context->leap_seconds;
+
 	// gps_tow is always like x.999 or x.998 just round it to nearest sec
         // FIXME! this will break 5Hz garmins...
-	time_l += (time_t) round(pvt->gps_tow);
+	gps_tow = GPSD_LED64(pvt->gps_tow);
+	time_l += (time_t)round(gps_tow);
 
 	/* sanity check unix time against leap second.
 	 * Leap second 18 at 1 Jan 2017: 1483228800 */
@@ -389,38 +394,42 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    time_l += 619315200;               // fast forward 1024 weeks
         }
 
-	DTOTS(&session->context->gps_tow, pvt->gps_tow);
+	DTOTS(&session->context->gps_tow, gps_tow);
 	session->newdata.time.tv_sec = time_l;
 	session->newdata.time.tv_nsec = 0;
         // (long long) for 32-bit systems
 	GPSD_LOG(LOG_PROG, &session->context->errout,
 		 "Garmin: time_l: %lld\n", (long long)time_l);
 
-	session->newdata.latitude = radtodeg(pvt->lat);
-	session->newdata.longitude = radtodeg(pvt->lon);
+	session->newdata.latitude = radtodeg(GPSD_LED64(pvt->lat));
+	session->newdata.longitude = radtodeg(GPSD_LED64(pvt->lon));
 	// altitude is WGS84
-	session->newdata.altHAE = pvt->alt;
+	session->newdata.altHAE = GPSD_LEF32(pvt->alt);
 
 	// geoid separation from WGS 84
 	// gpsd sign is opposite of garmin sign
-	session->newdata.geoid_sep = -pvt->msl_hght;
+	session->newdata.geoid_sep = -GPSD_LEF32(pvt->msl_hght);
 
-	/* Estimated position error in meters.  2 sigma
+	/* Estimated position error in meters.  Confidence (sigma) not
+         * specified by Garmin.
 	 * We follow the advice at <http://gpsinformation.net/main/errors.htm>.
          * Since GPS data is not gaussian, this is marginal advice...
 	 * If this assumption changes here, it should also change in
 	 * nmea_parse.c where we analyze PGRME.
          */
-	session->newdata.sep = pvt->epe * (GPSD_CONFIDENCE / CEP50_SIGMA);
+	session->newdata.sep = GPSD_LEF32(pvt->epe) *
+                                   (GPSD_CONFIDENCE / CEP50_SIGMA);
         /* eph, horizaontal error, 2 sigma */
-	session->newdata.eph = pvt->eph * (GPSD_CONFIDENCE / CEP50_SIGMA);
+	session->newdata.eph = GPSD_LEF32(pvt->eph) *
+                                   (GPSD_CONFIDENCE / CEP50_SIGMA);
         /* eph, horizaontal error, 2 sigma */
-	session->newdata.epv = pvt->epv * (GPSD_CONFIDENCE / CEP50_SIGMA);
+	session->newdata.epv = GPSD_LEF32(pvt->epv) *
+                                   (GPSD_CONFIDENCE / CEP50_SIGMA);
 
 	/* meters/sec */
-	session->newdata.NED.velN = pvt->lat_vel;
-	session->newdata.NED.velE = pvt->lon_vel;
-	session->newdata.NED.velD = -pvt->alt_vel;
+	session->newdata.NED.velN = GPSD_LEF32(pvt->lat_vel);
+	session->newdata.NED.velE = GPSD_LEF32(pvt->lon_vel);
+	session->newdata.NED.velD = -GPSD_LEF32(pvt->alt_vel);
 
 	switch (GPSD_LE16TOH(pvt->fix)) {
 	case 0:
@@ -465,20 +474,28 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    GPSD_LOG(LOG_INF, &session->context->errout,
 		     "Garmin: Geoid Separation (MSL-WGS84): from garmin %lf, "
                      "calculated %lf\n",
-		     -pvt->msl_hght,
+                     session->newdata.geoid_sep,
 		     wgs84_separation(session->newdata.latitude,
 					 session->newdata.longitude));
 
 	    GPSD_LOG(LOG_INF, &session->context->errout,
-		     "Garmin: Alt: %.3f, Epe: %.3f, Eph: %.3f, Epv: %.3f, "
+		     "Garmin: Alt: %.3f, sep: %.3f, eph: %.3f, Epv: %.3f, "
                      "Fix: %d, Gps_tow: %f, Lat: %.3f, Lon: %.3f, "
-                     "LonVel: %.3f, LatVel: %.3f, AltVel: %.3f, MslHgt: %.3f, "
+                     "velN: %.3f, velE: %.3f, velD: %.3f, geoidsep: %.3f, "
                      "Leap: %d, GarminDays: %d\n",
-		     pvt->alt, pvt->epe, pvt->eph, pvt->epv,
+                     session->newdata.altHAE,
+                     session->newdata.sep,
+                     session->newdata.eph,
+                     session->newdata.epv,
                      GPSD_LE16TOH(pvt->fix),
-		     pvt->gps_tow, session->newdata.latitude,
-		     session->newdata.longitude, pvt->lon_vel, pvt->lat_vel,
-		     pvt->alt_vel, pvt->msl_hght, GPSD_LE16TOH(pvt->leap_sec),
+		     gps_tow,
+                     session->newdata.latitude,
+		     session->newdata.longitude,
+                     session->newdata.NED.velN,
+                     session->newdata.NED.velE,
+                     session->newdata.NED.velD,
+                     session->newdata.geoid_sep,
+                     session->context->leap_seconds,
 		     GPSD_LE32TOH(pvt->grmn_days));
         }
 
