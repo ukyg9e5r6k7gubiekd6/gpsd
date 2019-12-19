@@ -1942,12 +1942,12 @@ static gps_mask_t processPGRMF(int c UNUSED, char *field[],
     /* Some garmin fail due to GPS Week Roll Over
      * Ignore their UTC date/time, use their GPS week, GPS tow and
      * leap seconds to decide the correct time */
-    if (isdigit(field[5][0])) {
+    if (isdigit((int)field[5][0])) {
         session->context->leap_seconds = atoi(field[5]);
         session->context->valid = LEAP_SECOND_VALID;
     }
-    if (isdigit(field[1][0]) &&
-        isdigit(field[2][0]) &&
+    if (isdigit((int)field[1][0]) &&
+        isdigit((int)field[2][0]) &&
         0 < session->context->leap_seconds) {
         // have GPS week, tow and leap second
         week = atol(field[1]);
