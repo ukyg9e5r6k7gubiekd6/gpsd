@@ -175,6 +175,8 @@ static struct
 
     /* the end of time: 2038 */
     {{2147483647L, 123456000L}, "2038-01-19T03:14:07.123Z"},
+    /* this next line generates warning if 4 < sizeof(time_t)
+     * if so, your system will break in 2038 */
     {{2147483648L, 123456000L}, "2038-01-19T03:14:08.123Z"},
 };
 
