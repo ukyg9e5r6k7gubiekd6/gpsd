@@ -554,9 +554,13 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 	    if ((int)sats->svid <= 32) {
                 /* GPS 1-32 */
 		session->gpsdata.skyview[j].PRN = (short)sats->svid;
+		session->gpsdata.skyview[j].svid = (short)sats->svid;
+		session->gpsdata.skyview[j].gnssid = GNSSID_GPS;
 	    } else {
                 /* SBAS 33-64 */
-		session->gpsdata.skyview[j].PRN = (short)sats->svid + 87;
+		session->gpsdata.skyview[j].PRN = (short)sats->svid;
+		session->gpsdata.skyview[j].svid = (short)sats->svid + 87;
+		session->gpsdata.skyview[j].gnssid = GNSSID_SBAS;
             }
 	    session->gpsdata.skyview[j].azimuth =
                 (short)GPSD_LE16TOH(sats->azmth);
