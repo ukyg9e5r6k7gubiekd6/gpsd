@@ -1370,10 +1370,11 @@ frame * {
                     continue
 
                 self.set_satlist_field(i, 0, gnssid_str(satellite)[0])
-                # SBAS is in the 100's...
-                self.set_satlist_field(i, 1,
-                                       self._int_to_str(satellite.svid,
-                                                        1, 199))
+                if 'svid' in satellite:
+                    # SBAS is in the 100's...
+                    self.set_satlist_field(i, 1,
+                                           self._int_to_str(satellite.svid,
+                                                            1, 199))
                 # NMEA uses PRN up to 437
                 self.set_satlist_field(i, 2,
                                        self._int_to_str(satellite.PRN, 1, 437))
