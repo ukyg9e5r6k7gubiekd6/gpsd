@@ -198,6 +198,21 @@ xmlto to build the documentation.
 # port install xmlto
 --------------------------------------------------------------
 
+Currently the osX port does not work with Qt5.  To see the build
+failure:
+
+--------------------------------------------------------------
+# port install qt5
+# scons --config=force qt_versioned=5
+--------------------------------------------------------------
+
+If you have Qt5 installed, and want to avoid the build failure, bui.d
+this way:
+
+--------------------------------------------------------------
+# scons --config=force qt=no
+--------------------------------------------------------------
+
 While running gpsd, or scons check, you may run out of shared memory
 segments.  If so, you will see this error message:
 
@@ -401,7 +416,7 @@ Preliminary install notes.
 --------------------------------------------------------------
 apt install gcc scons python-gi python-gi-cairo g++
 apt install libncurses5-dev pps-tools
-apt install apt install gir1.2-gtk-3.0
+apt install gir1.2-gtk-3.0
 --------------------------------------------------------------
 
 If you wish to build the documentation, be warned it pull in a
