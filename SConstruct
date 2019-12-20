@@ -612,7 +612,7 @@ def CheckSizeOf(context, type):
  * header required for time_t, which is the sole current use of this
  * function.
  */
-#include <sys/time.h>
+#include <time.h>
 
 int main() {
     printf("%d", (int)sizeof(""" + type + """));
