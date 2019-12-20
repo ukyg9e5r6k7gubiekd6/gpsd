@@ -208,7 +208,7 @@ typedef struct __attribute__((__packed__))
 typedef struct __attribute__((__packed__))
 {
     uint32_t cycles;
-    double pr;
+    double pr;                  // psuedorange in meters
     uint16_t phase;
     int8_t slp_dtct;
     uint8_t snr_dbhz;
@@ -531,14 +531,14 @@ gps_mask_t PrintSERPacket(struct gps_device_t *session, unsigned char pkt_id,
 		 "Garmin: PVT RMD Data Sz: %d\n", pkt_len);
 	GPSD_LOG(LOG_PROG, &session->context->errout,
 		 "Garmin: PVT RMD rcvr_tow: %f, rcvr_wn: %d\n",
-		 rmd->rcvr_tow, rmd->rcvr_wn);
+		 GPSD_LED64(rmd->rcvr_tow), GPSD_LE16TOH(rmd->rcvr_wn));
 	for (i = 0; i < GARMIN_CHANNELS; i++) {
 	    GPSD_LOG(LOG_INF, &session->context->errout,
 		     "Garmin: PVT RMD Sat: %3u, cycles: %9u, pr: %16.6f, "
 		     "phase: %7.3f, slp_dtct: %3s, snr: %3u, Valid: %3s\n",
 		     (int)rmd->sv[i].svid + 1,
 		     GPSD_LE32TOH(rmd->sv[i].cycles),
-		     rmd->sv[i].pr,
+		     GPSD_LED64(rmd->sv[i].pr),
 		     (GPSD_LE16TOH(rmd->sv[i].phase) * 360.0) / 2048.0,
 		     rmd->sv[i].slp_dtct != 0 ? "Yes" : "No",
 		     rmd->sv[i].snr_dbhz,
