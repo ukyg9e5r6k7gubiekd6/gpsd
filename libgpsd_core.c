@@ -422,6 +422,35 @@ void gpsd_clear(struct gps_device_t *session)
     session->opentime = time(NULL);
 }
 
+static int parse_uri_dest(struct gps_device_t *session, char *s,
+	char **host, char **service)
+/* split s into host and service parts
+ * if service is not specified, *service is assigned to NULL
+ * return: -1 on error, 0 otherwise
+ */
+{
+	if (s[0] != '[') {
+		*host = s;
+		s = strchr(s, ':');
+	} else { /* IPv6 literal */
+		char *cb = strchr(s, ']');
+		if (!cb || (cb[1] && cb[1] != ':')) {
+			GPSD_LOG(LOG_ERROR, &session->context->errout,
+				"Malformed URI specified.\n");
+			return -1;
+		}
+		*cb = '\0';
+		*host = s + 1;
+		s = cb + 1;
+	}
+	if (s && s[0] && s[1]) {
+		*s = '\0';
+		*service = s + 1;
+	} else
+		*service = NULL;
+	return 0;
+}
+
 int gpsd_open(struct gps_device_t *session)
 /* open a device for access to its data *
  * return: the opened file descriptor
@@ -442,21 +471,19 @@ int gpsd_open(struct gps_device_t *session)
 	return session->gpsdata.gps_fd;
     /* otherwise, could be an TCP data feed */
     } else if (str_starts_with(session->gpsdata.dev.path, "tcp://")) {
-	char server[GPS_PATH_MAX], *port;
+	char server[GPS_PATH_MAX], *host, *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 6, sizeof(server));
 	INVALIDATE_SOCKET(session->gpsdata.gps_fd);
-	port = strchr(server, ':');
-	if (port == NULL) {
+	if (parse_uri_dest(session, server, &host, &port) == -1 || !port) {
 	    GPSD_LOG(LOG_ERROR, &session->context->errout,
-		     "Missing colon in TCP feed spec.\n");
+		     "Missing service in TCP feed spec.\n");
 	    return -1;
 	}
-	*port++ = '\0';
 	GPSD_LOG(LOG_INF, &session->context->errout,
-		 "opening TCP feed at %s, port %s.\n", server,
+		 "opening TCP feed at %s, port %s.\n", host,
 		 port);
-	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp")) < 0) {
+	if ((dsock = netlib_connectsock(AF_UNSPEC, host, port, "tcp")) < 0) {
 	    GPSD_LOG(LOG_ERROR, &session->context->errout,
 		     "TCP device open error %s.\n",
 		     netlib_errstr(dsock));
@@ -469,21 +496,19 @@ int gpsd_open(struct gps_device_t *session)
 	return session->gpsdata.gps_fd;
     /* or could be UDP */
     } else if (str_starts_with(session->gpsdata.dev.path, "udp://")) {
-	char server[GPS_PATH_MAX], *port;
+	char server[GPS_PATH_MAX], *host, *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 6, sizeof(server));
 	INVALIDATE_SOCKET(session->gpsdata.gps_fd);
-	port = strchr(server, ':');
-	if (port == NULL) {
+	if (parse_uri_dest(session, server, &host, &port) == -1 || !port) {
 	    GPSD_LOG(LOG_ERROR, &session->context->errout,
-		     "Missing colon in UDP feed spec.\n");
+		     "Missing service in UDP feed spec.\n");
 	    return -1;
 	}
-	*port++ = '\0';
 	GPSD_LOG(LOG_INF, &session->context->errout,
-		 "opening UDP feed at %s, port %s.\n", server,
+		 "opening UDP feed at %s, port %s.\n", host,
 		 port);
-	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "udp")) < 0) {
+	if ((dsock = netlib_connectsock(AF_UNSPEC, host, port, "udp")) < 0) {
 	    GPSD_LOG(LOG_ERROR, &session->context->errout,
 		     "UDP device open error %s.\n",
 		     netlib_errstr(dsock));
@@ -498,18 +523,18 @@ int gpsd_open(struct gps_device_t *session)
 #endif /* NETFEED_ENABLE */
 #ifdef PASSTHROUGH_ENABLE
     if (str_starts_with(session->gpsdata.dev.path, "gpsd://")) {
-	char server[GPS_PATH_MAX], *port;
+	char server[GPS_PATH_MAX], *host, *port;
 	socket_t dsock;
 	(void)strlcpy(server, session->gpsdata.dev.path + 7, sizeof(server));
 	INVALIDATE_SOCKET(session->gpsdata.gps_fd);
-	if ((port = strchr(server, ':')) == NULL) {
+	if (parse_uri_dest(session, server, &host, &port) == -1)
+		return -1;
+	if (!port)
 	    port = DEFAULT_GPSD_PORT;
-	} else
-	    *port++ = '\0';
 	GPSD_LOG(LOG_INF, &session->context->errout,
 		 "opening remote gpsd feed at %s, port %s.\n",
-		 server, port);
-	if ((dsock = netlib_connectsock(AF_UNSPEC, server, port, "tcp")) < 0) {
+		 host, port);
+	if ((dsock = netlib_connectsock(AF_UNSPEC, host, port, "tcp")) < 0) {
 	    GPSD_LOG(LOG_ERROR, &session->context->errout,
 		     "remote gpsd device open error %s.\n",
 		     netlib_errstr(dsock));
