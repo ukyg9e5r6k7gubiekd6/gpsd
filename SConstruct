@@ -14,7 +14,6 @@
 # release    - ship a release
 #
 # --clean    - clean all normal build targets
-# sconsclean - clean up scons dotfiles (but not the database: .sconsign.*.dblite)
 #
 # Setting the DESTDIR environment variable will prefix the install destinations
 # without changing the --prefix prefix.
@@ -2751,10 +2750,6 @@ env.Clean(clean_misc, ['config.log', 'contrib/ppscheck', 'contrib/clock_test',
                        'TAGS'])
 # Clean scons state files
 env.Clean(clean_misc, ['.sconf_temp', '.scons-option-cache', 'config.log'])
-
-# Nuke scons state files
-sconsclean = Utility("sconsclean", '',
-                     ["rm -fr .sconf_temp .scons-option-cache config.log"])
 
 # Default targets
 
