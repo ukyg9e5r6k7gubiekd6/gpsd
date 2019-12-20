@@ -604,6 +604,16 @@ def CheckSizeOf(context, type):
     program = """
 #include <stdlib.h>
 #include <stdio.h>
+
+/*
+ * The CheckSizeOf function does not have a way for the caller to
+ * specify header files to be included to provide the type being
+ * checked.  As a workaround until that is remedied, include the
+ * header required for time_t, which is the sole current use of this
+ * function.
+ */
+#include <sys/time.h>
+
 int main() {
     printf("%d", (int)sizeof(""" + type + """));
     return 0;
