@@ -175,9 +175,13 @@ static struct
 
     /* the end of time: 2038 */
     {{2147483647L, 123456000L}, "2038-01-19T03:14:07.123Z"},
-    /* this next line generates warning if 4 < sizeof(time_t)
-     * if so, your system will break in 2038 */
+
+#if 4 < SIZEOF_TIME_T
+    /* this next line generates compiler warning if 4 < sizeof(time_t)
+     * if so, the test will fail, and your system will break in 2038 */
     {{2147483648L, 123456000L}, "2038-01-19T03:14:08.123Z"},
+#endif
+
 };
 
 int main(int argc UNUSED, char *argv[] UNUSED)
@@ -219,21 +223,20 @@ int main(int argc UNUSED, char *argv[] UNUSED)
     }
 
     /* test timespec_to_iso8601() */
+    if ( 4 >= sizeof(time_t)) {
+        (void)printf("WARNING: time_t too small.  This gpsd binary "
+                     "will fail at the 2038 roll over\n");
+    }
+
     for (i = 0; i < (int)(sizeof(tests1) / sizeof(tests1[0])); i++) {
         timespec_to_iso8601(tests1[i].ts_time, tbuf, sizeof(tbuf));
         if (0 != strcmp(tests1[i].iso8601, tbuf)) {
-            if ( 4 >= sizeof(time_t)) {
-                (void)printf("WARNING: time_t too small.  This gpsd binary "
-                             "will fail at the 2038 roll over\n");
-            } else {
-                failed = true;
-                (void)printf("test_mktime: timespec_to_iso8601() "
-                             "test %s failed.\n"
-                             "  Got %s, s/b %s\n",
-                             timespec_str(&tests1[i].ts_time, ts_buf,
-                                          sizeof(ts_buf)),
-                             tbuf, tests1[i].iso8601);
-            }
+            failed = true;
+            (void)printf("test_mktime: timespec_to_iso8601() test %s failed.\n"
+                         "  Got %s, s/b %s\n",
+                         timespec_str(&tests1[i].ts_time, ts_buf,
+                                      sizeof(ts_buf)),
+                         tbuf, tests1[i].iso8601);
         }
     }
 
