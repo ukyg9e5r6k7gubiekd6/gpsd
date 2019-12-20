@@ -241,6 +241,11 @@ in which case it specifies an input source for device, DGPS or ntrip data.\n"
 The following driver types are compiled into this gpsd instance:\n",
 		 DEFAULT_GPSD_PORT);
     typelist();
+    if (8 > sizeof(time_t)) {
+	(void)printf("\nWARNING: This system has a 32-bit time_t.\n"
+		     "WARNING: This gpsd will fail at 2038-01-19T03:14:07Z.\n");
+    }
+
 }
 
 #ifdef CONTROL_SOCKET_ENABLE
@@ -1982,9 +1987,8 @@ int main(int argc, char *argv[])
 
     if (8 > sizeof(time_t)) {
 	GPSD_LOG(LOG_WARN, &context.errout,
-		 "This system has a 32-bit time_t.\n");
-	GPSD_LOG(LOG_WARN, &context.errout,
-		 "This gpsd will fail on 2038-01-19T03:14:07Z.\n");
+		 "This system has a 32-bit time_t.  "
+		 "This gpsd will fail at 2038-01-19T03:14:07Z.\n");
     }
 
 #if defined(SYSTEMD_ENABLE) && defined(CONTROL_SOCKET_ENABLE)
