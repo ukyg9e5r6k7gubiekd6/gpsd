@@ -19,6 +19,7 @@
 #define HAVE_ARPA_INET_H 1
 #define HAVE_SYSLOG_H 1
 #define HAVE_DAEMON 1
+#define SIZEOF_TIME_T 8
 #define HAVE_CLOCK_GETTIME 1
 #define HAVE_STRPTIME 1
 #define HAVE_GMTIME_R 1

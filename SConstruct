@@ -598,6 +598,30 @@ def CheckHeaderDefines(context, file, define):
     return ret
 
 
+def CheckSizeOf(context, type):
+    """Check sizeof 'type'"""
+    context.Message( 'Checking size of ' + type + '... ' )
+
+    program = """
+#include <stdlib.h>
+#include <stdio.h>
+int main() {
+    printf("%d", (int)sizeof(""" + type + """));
+    return 0;
+}
+"""
+
+    # compile it
+    ret = context.TryCompile(program, '.c')
+    if 0 == ret:
+        announce('ERROR: TryCompile failed\n')
+        exit(1)
+
+    # run it
+    ret = context.TryRun(program, '.c')
+    context.Result(ret[0])
+    return ret[1]
+
 def CheckCompilerDefines(context, define):
     context.Message('Checking if compiler supplies %s... ' % (define,))
     ret = context.TryLink("""
@@ -653,6 +677,7 @@ def GetPythonValue(context, name, imp, expr, brief=False):
     return value
 
 
+
 def GetLoadPath(context):
     context.Message("Getting system load path... ")
 
@@ -668,13 +693,15 @@ env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
 
 # CheckXsltproc works, but result is incorrectly saved as "no"
 config = Configure(env, custom_tests={
-    'CheckPKG': CheckPKG,
-    'CheckXsltproc': CheckXsltproc,
-    'CheckCompilerOption': CheckCompilerOption,
-    'CheckCompilerDefines': CheckCompilerDefines,
     'CheckC11': CheckC11,
+    'CheckCompilerDefines': CheckCompilerDefines,
+    'CheckCompilerOption': CheckCompilerOption,
     'CheckHeaderDefines': CheckHeaderDefines,
-    'GetPythonValue': GetPythonValue})
+    'CheckPKG': CheckPKG,
+    'CheckSizeOf': CheckSizeOf,
+    'CheckXsltproc': CheckXsltproc,
+    'GetPythonValue': GetPythonValue,
+    })
 
 # Use print, rather than announce, so we see it in -s mode.
 print("This system is: %s" % sys.platform)
@@ -1004,6 +1031,12 @@ else:
         else:
             confdefs.append("/* #undef HAVE_%s_H */\n"
                             % hdr.replace("/", "_").upper())
+
+    sizeof_time_t = config.CheckSizeOf("time_t")
+    confdefs.append("#define SIZEOF_TIME_T %s\n" % sizeof_time_t)
+    announce("sizeof(time_t) is %s" % sizeof_time_t)
+    if 4 >= int(sizeof_time_t):
+        announce("WARNING: time_t is too small.  It will fail in 2038")
 
     # check function after libraries, because some function require libraries
     # for example clock_gettime() require librt on Linux glibc < 2.17
