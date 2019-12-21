@@ -156,7 +156,7 @@ pages:
   image: alpine:latest
   stage: build
   script:
-  - apk update && apk add python xmlto asciidoc scons rsync
+  - apk update && apk add python xmlto asciidoc scons rsync musl-dev gcc
   - mkdir .pages; WEBSITE=.public scons website=.pages website; mv .public public
   - find public -type f -regex '.*\.\(htm\|html\|txt\|text\|js\|css\)$' -exec gzip -f -k {} \;
   - ls -lR public
