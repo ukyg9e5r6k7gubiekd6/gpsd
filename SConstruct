@@ -624,7 +624,8 @@ int main() {
     ret = context.TryCompile(program, '.c')
     if 0 == ret:
         announce('ERROR: TryCompile failed\n')
-        exit(1)
+        # fall back to sizeof(time_t) is 8
+        return '8'
 
     # run it
     ret = context.TryRun(program, '.c')
