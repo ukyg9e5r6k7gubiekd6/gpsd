@@ -523,10 +523,16 @@ qt5-network and pkgconf packages.
 --------------------------------------------------------------
 # pkg install scons
 # pkg install git
+# ln -s /usr/local/bin/python2.7 /usr/local/bin/python
+# ln -s /usr/local/bin/python2.7 /usr/local/bin/python2
+# ln -s /usr/local/bin/python3.6 /usr/local/bin/python3
 # git clone https://gitlab.com/gpsd/gpsd.git
 # cd gpsd
 # scons --config=force && scons install
 --------------------------------------------------------------
+
+FreeBSD fails to create the python links as required by PEP394.
+So you need to add them yourself, as above.
 
 === Special Notes for NetBSD 8.1 Installation ===
 
