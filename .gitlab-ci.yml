@@ -100,7 +100,6 @@ fedora-latest:
 
 
 freebsd:
-  image: fedora:latest
   stage: advanced_build
   variables:
     WRITE_PAD: '0.01250'
