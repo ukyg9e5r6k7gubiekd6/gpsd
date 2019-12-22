@@ -7,7 +7,7 @@
 #
 # SPDX-License-Identifier: BSD-2-clause
 
-# This code runs compatibly under Python 2 and 3.x for x >= 2.
+# This code runs only under Python 3.x for x >= 6.
 
 """
 Script that runs the aiogps example. On Python versions that can not run the
