@@ -89,7 +89,7 @@ def run():
     Main function.
 
     Because this code only compiles on Python versions >= 3.6,
-    it is not run directly, but through the example_aiogps_run.py wrapper,
+    it is not run directly, but through the example_aiogps_run wrapper,
     which fails gracefully on unsupported Python versions.
     """
     # Set up logging program logging
