@@ -111,7 +111,7 @@ python-gi, python-gobject, python-cairo, etc.  The packages also need
 the underlying system libraries (GTK, GLib, etc.)
 
 The asynchronous python module (gps/aiogps.py) and its example client
-(example_aiogps.py) require Python 3.5+.
+(example_aiogps.py) require Python 3.6+.
 
 See below for more specific module requirements in the individual
 distribution instructions.
