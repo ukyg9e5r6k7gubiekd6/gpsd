@@ -10,7 +10,11 @@ if uname -a | grep -qi freebsd; then
 fi
 
 if [ "${USE_CCACHE}" = "true" ] && [ -n "${CCACHE_DIR}" ] && command -v ccache >/dev/null; then
-	export PATH="/usr/lib/ccache:${PATH}"
+	if [ -d "/usr/lib64/ccache" ]; then
+		export PATH="/usr/lib64/ccache:${PATH}"
+	else
+		export PATH="/usr/lib/ccache:${PATH}"
+	fi
 	mkdir -p "${CCACHE_DIR}"
 	echo 'max_size = 100M' > "${CCACHE_DIR}/ccache.conf"
 else
