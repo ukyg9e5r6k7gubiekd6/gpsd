@@ -39,9 +39,17 @@ SCONSOPTS="${SCONSOPTS} qt_versioned=5"
 export SCONS=$(command -v scons)
 
 if command -v nproc >/dev/null; then
-	SCONS_PARALLEL="-j $(nproc) "
+	NPROC=$(nproc)
+	SCONS_PARALLEL="-j ${NPROC} "
+	if [ "${SLOW_CHECK}" != "yes" ]; then
+		CHECK_NPROC=$(( 4 * ${NPROC} ))
+		SCONS_CHECK_PARALLEL="-j ${CHECK_NPROC} "
+	else
+		SCONS_CHECK_PARALLEL="${SCONS_PARALLEL}"
+	fi
 else
 	SCONS_PARALLEL=""
+	SCONS_CHECK_PARALLEL=""
 fi
 
 export SCONSOPTS
@@ -60,7 +68,7 @@ for py in $PYTHONS; do
     rm -f .sconsign.*.dblite
     ${SCAN_BUILD} python${py}     ${_SCONS} ${SCONS_PARALLEL}${SCONSOPTS} build-all
     if [ -z "${NOCHECK}" ]; then
-	    python${py}     ${_SCONS} ${SCONSOPTS} check
+	    python${py}     ${_SCONS} ${SCONS_CHECK_PARALLEL}${SCONSOPTS} check
     fi
 done
 
