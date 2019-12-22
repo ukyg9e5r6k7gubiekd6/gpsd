@@ -11,8 +11,13 @@ fi
 
 if [ "${USE_CCACHE}" = "true" ] && [ -n "${CCACHE_DIR}" ] && command -v ccache >/dev/null; then
 	if [ -d "/usr/lib64/ccache" ]; then
+		# fedora
 		export PATH="/usr/lib64/ccache:${PATH}"
+	elif [ -d "/usr/local/libexec/ccache/" ]; then
+		# freebsd
+		export PATH="/usr/local/libexec/ccache:${PATH}"
 	else
+		# debian, .....
 		export PATH="/usr/lib/ccache:${PATH}"
 	fi
 	mkdir -p "${CCACHE_DIR}"
