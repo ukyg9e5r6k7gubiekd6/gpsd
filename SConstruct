@@ -599,7 +599,7 @@ def CheckHeaderDefines(context, file, define):
 
 def CheckSizeOf(context, type):
     """Check sizeof 'type'"""
-    context.Message( 'Checking size of ' + type + '... ' )
+    context.Message('Checking size of ' + type + '... ')
 
     program = """
 #include <stdlib.h>
@@ -631,6 +631,7 @@ int main() {
     ret = context.TryRun(program, '.c')
     context.Result(ret[0])
     return ret[1]
+
 
 def CheckCompilerDefines(context, define):
     context.Message('Checking if compiler supplies %s... ' % (define,))
@@ -685,7 +686,6 @@ def GetPythonValue(context, name, imp, expr, brief=False):
             env['python'] = False
     context.Result('failed' if status else 'ok' if brief else value)
     return value
-
 
 
 def GetLoadPath(context):
@@ -843,7 +843,7 @@ else:
     if not cxx:
         announce("C++ doesn't work, suppressing libgpsmm and Qt build.")
         config.env["libgpsmm"] = False
-	config.env["qt"] = False
+        config.env["qt"] = False
 
     # define a helper function for pkg-config - we need to pass
     # --static for static linking, too.
