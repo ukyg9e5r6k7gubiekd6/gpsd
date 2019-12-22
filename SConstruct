@@ -2268,12 +2268,7 @@ else:
         gps_tests.append(Utility(
             'gps-regress-' + gps_name, gps_herald,
             '$SRCDIR/regress-driver -q -o -t $REGRESSOPTS ' + gps_log))
-    if GetOption('num_jobs') <= 1:
-        gps_regress = Utility('gps-regress', gps_herald,
-                              '$SRCDIR/regress-driver $REGRESSOPTS %s'
-                              % gps_log_pattern)
-    else:
-        gps_regress = env.Alias('gps-regress', gps_tests)
+    gps_regress = env.Alias('gps-regress', gps_tests)
 
     # Run the passthrough log in all transport modes for better coverage
     gpsfake_log = os.path.join('test', 'daemon', 'passthrough.log')
