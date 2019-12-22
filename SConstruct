@@ -840,9 +840,10 @@ else:
         confdefs.append('#endif\n')
 
     cxx = config.CheckCXX()
-    if not cxx and config.env["libgpsmm"]:
-        announce("C++ doesn't work, suppressing libgpsmm build.")
+    if not cxx:
+        announce("C++ doesn't work, suppressing libgpsmm and Qt build.")
         config.env["libgpsmm"] = False
+	config.env["qt"] = False
 
     # define a helper function for pkg-config - we need to pass
     # --static for static linking, too.
