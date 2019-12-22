@@ -88,19 +88,33 @@ absolutely needs is the C runtime support. The test clients and
 various additional features have additional prerequisites:
 
 |===============================================================================
-|pthreads library             | support for PPS timekeeping on serial GPSes
-|DBUS                         | gpsd will issue DBUS notifications
-|ncurses                      | a test client and the GPS monitor depend on this
-|libtinfo5                    | shared low-level terminfo library (see below)
-|libusb-1.0.x or later        | better USB device discovery
-|Qt + qmake                   | libQgpsmm depends on this
+|pps-tools                    | for PPS time keeping
+|dbus                         | gpsd will issue DBUS notifications
+|ncurses                      | for cgps and gpsmon clients
+|libtinfo5                    | low-level terminfo library (see below)
+|libusb-1.0.x or later        | for older Garmin USB devices
+|Qt                           | libQgpsmm depends on this
 |python2.x(x>=6) or 3.y(y>=2) | required for various clients and utilities
-|python-GI bindings           | the test clients xgps and xgpsspeed, need this
+|PyGObject                    | for xps and xgpsspeed clients (see below)
+|python-cairo                 | for python-GI
+|GTK                          | for python-GI
 |pyserial                     | for ubxtool and zerk in direct-serial mode
+|gnuplot                      | to plot gpsprof output.
 |===============================================================================
 
 Some ncurses packages contain the terminfo library; some break it out
 separately as libtinfo5 or libtinfo.
+
+The PyGObject package goes by several names, and is split up into sub
+packages different ways, depending on the distribution.  Sometimes
+python-gi, python-gobject, python-cairo, etc.  The packages also need
+the underlying system libraries (GTK, GLib, etc.)
+
+The asynchronous python module (gps/aiogps.py) and its example client
+(example_aiogps.py) require Python 3.5+.
+
+See below for more specific module requirements in the individual
+distribution instructions.
 
 == Installing gpsd ==
 
