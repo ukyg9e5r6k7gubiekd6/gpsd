@@ -120,10 +120,7 @@ TEST_TIMEOUT = 60
 
 def GetDelay(slow=False):
     "Get appropriate per-line delay."
-    delay = WRITE_PAD
-    # Make it easier to test pad values
-    if os.getenv("WRITE_PAD"):
-        delay = eval(os.getenv("WRITE_PAD"))
+    delay = float(os.getenv("WRITE_PAD", WRITE_PAD))
     if slow:
         delay += WRITE_PAD_SLOWDOWN
     return delay
