@@ -104,7 +104,7 @@ elif sys.platform.startswith("freebsd"):
 elif sys.platform.startswith("netbsd5"):
     WRITE_PAD = 0.200
 elif sys.platform.startswith("netbsd"):
-    WRITE_PAD = 0.004
+    WRITE_PAD = 0.01
 elif sys.platform.startswith("darwin"):
     # darwin Darwin-13.4.0-x86_64-i386-64bit
     WRITE_PAD = 0.005
