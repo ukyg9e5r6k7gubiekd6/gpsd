@@ -79,13 +79,15 @@ static void ntrip_str_parse(char *str, size_t len,
     s = ntrip_field_iterate(NULL, s, eol, errout);
     /* <format> */
     if ((s = ntrip_field_iterate(NULL, s, eol, errout))) {
-        if (strcasecmp("RTCM 2", s) == 0)
+	if ((strcasecmp("RTCM 2", s) == 0) ||
+            (strcasecmp("RTCM2", s) == 0))
             hold->format = fmt_rtcm2;
         else if (strcasecmp("RTCM 2.0", s) == 0)
             hold->format = fmt_rtcm2_0;
         else if (strcasecmp("RTCM 2.1", s) == 0)
             hold->format = fmt_rtcm2_1;
-        else if (strcasecmp("RTCM 2.2", s) == 0)
+        else if ((strcasecmp("RTCM 2.2", s) == 0) ||
+                 (strcasecmp("RTCM22", s) == 0))
             hold->format = fmt_rtcm2_2;
         else if ((strcasecmp("RTCM2.3", s) == 0) ||
                  (strcasecmp("RTCM 2.3", s) == 0))
@@ -94,12 +96,15 @@ static void ntrip_str_parse(char *str, size_t len,
         else if (strcasecmp("RTCM1_", s) == 0)
             hold->format = fmt_rtcm2_3;
         else if ((strcasecmp("RTCM 3", s) == 0) ||
-                 (strcasecmp("RTCM 3.0", s) == 0))
+                 (strcasecmp("RTCM 3.0", s) == 0) ||
+                 (strcasecmp("RTCM3.0", s) == 0) ||
+                 (strcasecmp("RTCM3", s) == 0))
             hold->format = fmt_rtcm3_0;
         else if ((strcasecmp("RTCM3.1", s) == 0) ||
                  (strcasecmp("RTCM 3.1", s) == 0))
             hold->format = fmt_rtcm3_1;
-        else if (strcasecmp("RTCM 3.2", s) == 0)
+        else if ((strcasecmp("RTCM 3.2", s) == 0) ||
+                 (strcasecmp("RTCM32", s) == 0))
             hold->format = fmt_rtcm3_2;
         else if (strcasecmp("RTCM 3.3", s) == 0)
             hold->format = fmt_rtcm3_3;
