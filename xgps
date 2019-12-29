@@ -744,11 +744,11 @@ class Base(object):
         ("Sats Used", lambda s, r: s.update_seen(r, 1)),
         ("XDOP", lambda s, r: s.update_dop(r, "xdop")),
         ("YDOP", lambda s, r: s.update_dop(r, "ydop")),
-        ("VDOP", lambda s, r: s.update_dop(r, "vdop")),
         ("HDOP", lambda s, r: s.update_dop(r, "hdop")),
+        ("VDOP", lambda s, r: s.update_dop(r, "vdop")),
+        ("PDOP", lambda s, r: s.update_dop(r, "pdop")),
         ("TDOP", lambda s, r: s.update_dop(r, "tdop")),
         ("GDOP", lambda s, r: s.update_dop(r, "gdop")),
-        ('', ''),
     )
 
     def about(self, _unused):
