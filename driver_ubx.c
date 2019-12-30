@@ -563,12 +563,12 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     session->newdata.track = 1e-5 * (int32_t)getles32(buf, 64);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET;
 
-    /* Height Accuracy estimate, unknown details */
+    /* Horizontal Accuracy estimate, in mm */
     session->newdata.eph = (double)(getles32(buf, 40) / 1000.0);
-    /* Velocity Accuracy estimate, unknown details */
+    /* Vertical Accuracy estimate, in mm */
     session->newdata.epv = (double)(getles32(buf, 44) / 1000.0);
-    /* Speed Accuracy estimate, unknown details */
-    session->newdata.eps = (double)(getles32(buf, 48) / 1000.0);
+    /* Speed Accuracy estimate, in mm/s */
+    session->newdata.eps = (double)(getles32(buf, 68) / 1000.0);
     /* let gpsd_error_model() do the rest */
 
     mask |= HERR_SET | SPEEDERR_SET | VERR_SET;
