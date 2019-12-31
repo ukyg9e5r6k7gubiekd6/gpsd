@@ -563,6 +563,9 @@ ubx_msg_nav_pvt(struct gps_device_t *session, unsigned char *buf,
     session->newdata.track = 1e-5 * (int32_t)getles32(buf, 64);
     mask |= LATLON_SET | ALTITUDE_SET | SPEED_SET | TRACK_SET;
 
+    /* u-blox does not document the basis for the following "accuracy"
+     * estimates.  Maybe CEP(50), one sigma, two sigma, CEP(99), etc. */
+
     /* Horizontal Accuracy estimate, in mm */
     session->newdata.eph = (double)(getles32(buf, 40) / 1000.0);
     /* Vertical Accuracy estimate, in mm */
