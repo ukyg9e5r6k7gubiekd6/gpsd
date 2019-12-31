@@ -297,6 +297,15 @@ after that.</para>
 
 </refsect2>
 </refsect1>
+
+<refsect1 id='environment'><title>ENVIRONMENT</title>
+<para>The <option>XGPSOPTS></option> environment variable may be set to
+pass commonly used command line options to <command>xgps</command>
+and <command>xgpsspeed</command>.  This is often used to set the
+<option>-u</option> option for locale specific units.
+<option>XGPSOPTS</option> is processed before the CLI options.</para>
+</refsect1>
+
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
 <citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
