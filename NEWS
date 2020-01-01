@@ -1,6 +1,6 @@
 			GPSD project news
 
-3.19.1: Dev branch in process
+3.20: 2019-12-31
   Change README into an asciidoc file and publish HTML from it
   Add NED and geoid_sep to gps_fix_t and TPV JSON.
   Add "-e NED" to ubxtool to enable NED messages.
@@ -28,6 +28,7 @@
   A working CC and termios.h are mandatory.
   use the current leap second to determine the current GPS epoch.
   leapfetch.py, leapseconds.cache, timebase.h and leapfetch option gone.
+  See also change histories in gps.h and gpsd.h
 
 3.19: 2019-07-01
   Rearrange rawdata_t.  Bump the API because gps_data_t changed.

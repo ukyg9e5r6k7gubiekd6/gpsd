@@ -51,8 +51,8 @@ import SCons
 # Actual releases follow the normal X.Y or X.Y.Z scheme.  The version
 # number in git between releases has the form X.Y~dev, when it is
 # expected that X.Y will be the next actual release.  As an example,
-# when 3.18.1 is the last release, and 3.19 is the expected next
-# release, the version in git will be 3.19~dev.  Note that ~ is used,
+# when 3.20 is the last release, and 3.20.1 is the expected next
+# release, the version in git will be 3.20.1~dev.  Note that ~ is used,
 # because there is some precedent, ~ is an allowed version number in
 # the Debian version rules, and it does not cause confusion with
 # whether - separates components of the package name, separates the
@@ -63,7 +63,7 @@ import SCons
 # sure to update all of them.
 #
 # package version
-gpsd_version = "3.19.1~dev"
+gpsd_version = "3.20"
 # client library version
 libgps_version_current = 25
 libgps_version_revision = 0
@@ -2841,7 +2841,6 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         flocktest,
     ])
 
-    # This is how to ship a release to the hosting site.
     # The chmod copes with the fact that scp will give a
     # replacement the permissions of the *original*...
     upload_release = Utility('upload-release', [dist], [

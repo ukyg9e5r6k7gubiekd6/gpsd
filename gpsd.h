@@ -61,7 +61,7 @@ extern "C" {
  *      Add ubx.protver, ubx.last_msgid and more to gps_device_t.ubx
  *      MAX_PACKET_LENGTH 516 -> 9216
  *      Add stuff to gps_device_t.nmea for NMEA 4.1
- * 3.19.1
+ * 3.20
  *      Remove TIMEHINT_ENABLE.  It only worked when enabled.
  *      Remove NTP_ENABLE and NTPSHM_ENABLE.  It only worked when enabled.
  *      Change gps_type_t.min_cycle from double to timespec_t

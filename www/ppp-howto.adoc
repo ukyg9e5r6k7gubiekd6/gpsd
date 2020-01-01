@@ -2,7 +2,7 @@
 :description: This document is a guide getting high accuracy from your GPS using Precise Point Positioning (PPP).
 :keywords: Precise Point Positioning, PPP, GPSD, GPS
 Gary E. Miller <gem@rellim.com>
-V1.00, 25 Sep 2019
+V1.01, 31 Dec 2019
 
 == WARNING ==
 
@@ -31,7 +31,7 @@ base using PPP before sending the RTK data from the base to its rovers.
 
 == Requirements ==
 
-This document assumes that you have installed gpsd version 3.19, basic
+This document assumes that you have installed gpsd version 3.19 or 3.20, basic
 knowledge of how to use _gpsd_.  Before continuing you should know how
 to start and stop _gpsd_, and how to use _cgps_ to see you current
 position and fix status.
