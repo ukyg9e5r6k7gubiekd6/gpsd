@@ -1,5 +1,7 @@
 			GPSD project news
 
+3.20.1~dev: In process
+
 3.20: 2019-12-31
   Change README into an asciidoc file and publish HTML from it
   Add NED and geoid_sep to gps_fix_t and TPV JSON.

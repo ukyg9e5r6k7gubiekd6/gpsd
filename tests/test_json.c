@@ -283,8 +283,8 @@ static char json_strOver2[7 * JSON_VAL_MAX];  /* dynamically built */
 /* Case 18: Ignore part of VERSION sentence */
 
 static char *json_str18 =
-    "{\"class\":\"VERSION\",\"release\":\"3.20\",\"rev\":\"release-3.20"
-    "\",\"proto_major\":3,\"proto_minor\":14}";
+    "{\"class\":\"VERSION\",\"release\":\"3.20.1~dev\","
+    "\"rev\":\"release-3.20.1~dev\",\"proto_major\":3,\"proto_minor\":14}";
 
 char revision[50];
 int pvhi, pvlo;
@@ -598,7 +598,7 @@ static void jsontest(int i)
 	status = json_read_object(json_str18, json_attrs_18, NULL);
 	assert_integer("proto_major", pvhi, 3);
 	assert_integer("proto_minor", pvlo, 14);
-	assert_string("rev", revision, "release-3.20");
+	assert_string("rev", revision, "release-3.20.1~dev");
 	assert_integer("return", status, 0);
 	break;
 

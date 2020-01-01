@@ -27,7 +27,7 @@ except ImportError:
           sys.exc_info()[0])
     sys.exit(1)
 
-gps_version = '3.20'
+gps_version = '3.20.1~dev'
 ns_per_s = 1e9
 
 
