@@ -1825,7 +1825,7 @@ Platform: UNKNOWN
                                           % (gpsd_version, ),
                                           source=python_egg_info_source)
     python_built_extensions = list(python_compiled_libs.values())
-    python_targets = python_built_extensions + [python_egg_info]
+    python_targets = python_built_extensions + [python_egg_info] + ['zerk']
 
 
 env.Command(target="packet_names.h", source="packet_states.h",
@@ -1960,7 +1960,7 @@ templated = [x for x in templated if not x.startswith('debian/')]
 for fn in templated:
     builder = env.Command(source=fn, target=fn[:-3], action=substituter)
     env.AddPostAction(builder, 'chmod -w $TARGET')
-    if fn.endswith(".py.in"):
+    if fn.endswith(".py.in") or fn in ['zerk']:
         env.AddPostAction(builder, 'chmod +x $TARGET')
 
 # Documentation

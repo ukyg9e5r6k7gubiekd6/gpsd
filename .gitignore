@@ -23,6 +23,7 @@ control
 upload
 gpsd.php
 valgrind-audit.py
+zerk
 # Unit tests
 test_bits
 test_float
