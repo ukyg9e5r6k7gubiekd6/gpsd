@@ -299,6 +299,19 @@ after that.</para>
 </refsect1>
 
 <refsect1 id='environment'><title>ENVIRONMENT</title>
+
+<para>The environment variable <envar>GPSD_UNITS</envar> is checked
+if no unit system is specified on the command line or in
+<envar>XPGSOPTS</envar> it may be set to 'imperial', 'metric', or
+'nautical'.</para>
+
+<para><envar>LC_MEASUREMENT</envar> and then <envar>LANG</envar> are
+checked if no unit system has been specified on the command line, in
+<envar>XPGSOPTS</envar> or in <envar>GPSD_UNITS</envar>. If the value
+is 'C', 'POSIX', or begins with
+'en_US' the unit system is set to imperial. The default
+if no system has been selected defaults to metric.</para>
+
 <para>The <option>XGPSOPTS></option> environment variable may be set to
 pass commonly used command line options to <command>xgps</command>
 and <command>xgpsspeed</command>.  This is often used to set the
