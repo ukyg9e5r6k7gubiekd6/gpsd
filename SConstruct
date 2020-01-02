@@ -1825,7 +1825,8 @@ Platform: UNKNOWN
                                           % (gpsd_version, ),
                                           source=python_egg_info_source)
     python_built_extensions = list(python_compiled_libs.values())
-    python_targets = python_built_extensions + [python_egg_info] + ['zerk']
+    python_targets = (python_built_extensions + [python_egg_info] +
+                      python_progs)
 
 
 env.Command(target="packet_names.h", source="packet_states.h",
@@ -1960,7 +1961,7 @@ templated = [x for x in templated if not x.startswith('debian/')]
 for fn in templated:
     builder = env.Command(source=fn, target=fn[:-3], action=substituter)
     env.AddPostAction(builder, 'chmod -w $TARGET')
-    if fn.endswith(".py.in") or fn in ['zerk']:
+    if fn.endswith(".py.in") or fn[:-3] in python_progs:
         env.AddPostAction(builder, 'chmod +x $TARGET')
 
 # Documentation
@@ -2736,6 +2737,12 @@ Utility('udev-test', '', ['$SRCDIR/gpsd -N -n -F /var/run/gpsd.sock -D 5', ])
 
 # Dummy target for cleaning misc files
 clean_misc = env.Alias('clean-misc')
+
+# clean generated python, need a new list here because python_progs
+# may be empty because env["python"] is empty
+env.Clean(clean_misc, ["gegps", "gpscat", "gpsfake", "gpsprof", "ubxtool",
+                       "xgps", "xgpsspeed", "zerk"])
+
 # Since manpage targets are disabled in clean mode, we cover them here
 env.Clean(clean_misc, all_manpages + other_manpages)
 # Clean compiled Python

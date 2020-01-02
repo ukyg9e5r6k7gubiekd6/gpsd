@@ -17,13 +17,21 @@ rtcmdecode
 contrib/clock_test
 *.exe
 # These are built from .in files
-jsongen.py
-maskaudit.py
 control
-upload
+gegps
+gpscat
 gpsd.php
+gpsfake
+gpsprof
+jsongen
+maskaudit.py
+ubxtool
+ubxtool
+upload
 valgrind-audit.py
 zerk
+xgps
+xgpsspeed
 # Unit tests
 test_bits
 test_float
