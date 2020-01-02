@@ -2770,6 +2770,8 @@ env.Clean(clean_misc, glob.glob('*.[0-8]'))
 # Other misc items
 env.Clean(clean_misc, ['config.log', 'contrib/ppscheck', 'contrib/clock_test',
                        'TAGS'])
+# old egg files
+env.Clean(clean_misc, glob.glob('gps-*.egg-info'))
 # Clean scons state files
 env.Clean(clean_misc, ['.sconf_temp', '.scons-option-cache', 'config.log'])
 
