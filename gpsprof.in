@@ -352,7 +352,9 @@ class spaceplot(plotter):
 
         # Watch out for the NaN value from gps.py.
         if (((self.in_replot or self.session.valid) and
-             self.session.data["class"] == "TPV")):
+             self.session.data["class"] == "TPV" and
+             # Skip TPV without an actual fix.
+             self.session.data["mode"] >= gps.MODE_2D)):
             # get sat used count
             sats_used = 0
             for sat in self.session.satellites:
@@ -395,6 +397,10 @@ class spaceplot(plotter):
         stat_lat_r = stats()
         stat_lon_r = stats()
         stat_alt_r = stats()
+
+        if len(self.fixes) == 0:
+            print("plot(): fixes array is empty\n")
+            raise Exception('When plotting, there are no fixes.')
 
         sats_used = []
         for x in self.fixes:
