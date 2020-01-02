@@ -19,6 +19,8 @@ contrib/clock_test
 # These are built from .in files
 control
 gegps
+gps/__init__.py
+gps/gps.py
 gpscat
 gpsd.php
 gpsfake

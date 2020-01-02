@@ -114,6 +114,7 @@ PYTHON_SYSCONFIG_IMPORT = 'from distutils import sysconfig'
 
 def Utility(target, source, action, **kwargs):
     target = env.Command(target=target, source=source, action=action, **kwargs)
+    # why always build?  wasteful?
     env.AlwaysBuild(target)
     env.Precious(target)
     return target
@@ -1783,7 +1784,7 @@ else:
                        CFLAGS=[],
                        CXXFLAGS=[])
 
-    for flag in ['CFLAGS','LDFLAGS','OPT']:
+    for flag in ['CFLAGS', 'LDFLAGS', 'OPT']:
         python_env.MergeFlags(Split(python_config[flag]))
 
     python_objects = {}
@@ -1958,11 +1959,15 @@ templated = glob.glob("*.in") + glob.glob("*/*.in") + glob.glob("*/*/*.in")
 
 # ignore files in subfolder called 'debian' - the Debian packaging
 # tools will handle them.
-templated = [x for x in templated if not x.startswith('debian/')]
-
+# ignore files in subfolder called './contrib/gps' - just links
+# ignore files in subfolder called './devtools/gps' - just links
+templated = [x for x in templated if (not x.startswith('debian/') and
+                                      not x.startswith('devtools/gps/') and
+                                      not x.startswith('contrib/gps/'))]
 
 for fn in templated:
     builder = env.Command(source=fn, target=fn[:-3], action=substituter)
+    env.Default(builder)
     env.AddPostAction(builder, 'chmod -w $TARGET')
     if fn.endswith(".py.in") or fn[:-3] in python_progs:
         env.AddPostAction(builder, 'chmod +x $TARGET')
