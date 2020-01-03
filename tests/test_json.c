@@ -211,7 +211,7 @@ static const struct json_attr_t json_attrs_6[] = {
 /* Case 7: test parsing of version response */
 
 static const char *json_str7 = "{\"class\":\"VERSION\",\
-           \"release\":\"2.40dev\",\"rev\":\"dummy-revision\",\
+           \"release\":\"" VERSION "\",\"rev\":\"dummy-revision\",\
            \"proto_major\":3,\"proto_minor\":1}";
 
 /* Case 8: test parsing arrays of enumerated types */
@@ -283,14 +283,14 @@ static char json_strOver2[7 * JSON_VAL_MAX];  /* dynamically built */
 /* Case 18: Ignore part of VERSION sentence */
 
 static char *json_str18 =
-    "{\"class\":\"VERSION\",\"release\":\"3.20.1~dev\","
-    "\"rev\":\"release-3.20.1~dev\",\"proto_major\":3,\"proto_minor\":14}";
+    "{\"class\":\"VERSION\",\"release\":\"" VERSION "\","
+    "\"rev\":\"release-dummy\",\"proto_major\":3,\"proto_minor\":14}";
 
-char revision[50];
+char release[50];
 int pvhi, pvlo;
 static const struct json_attr_t json_attrs_18[] = {
     {"class", t_check, .dflt.check = "VERSION"},
-    {"rev", t_string, .addr.string = (char *)&revision, .len = 50},
+    {"release", t_string, .addr.string = (char *)&release, .len = 50},
     {"proto_major", t_integer, .addr.integer = &pvhi},
     {"proto_minor", t_integer, .addr.integer = &pvlo},
     {"", t_ignore},
@@ -472,7 +472,7 @@ static void jsontest(int i)
     case 7:
 	status = libgps_json_unpack(json_str7, &gpsdata, NULL);
 	assert_case(status);
-	assert_string("release", gpsdata.version.release, "2.40dev");
+	assert_string("release", gpsdata.version.release, VERSION);
 	assert_string("rev", gpsdata.version.rev, "dummy-revision");
 	assert_integer("proto_major", gpsdata.version.proto_major, 3);
 	assert_integer("proto_minor", gpsdata.version.proto_minor, 1);
@@ -598,7 +598,7 @@ static void jsontest(int i)
 	status = json_read_object(json_str18, json_attrs_18, NULL);
 	assert_integer("proto_major", pvhi, 3);
 	assert_integer("proto_minor", pvlo, 14);
-	assert_string("rev", revision, "release-3.20.1~dev");
+	assert_string("release", release, VERSION);
 	assert_integer("return", status, 0);
 	break;
 
