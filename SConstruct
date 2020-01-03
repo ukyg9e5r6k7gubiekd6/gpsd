@@ -1970,7 +1970,9 @@ for fn in templated:
     builder = env.Command(source=fn, target=fn[:-3], action=substituter)
     env.Default(builder)
     env.AddPostAction(builder, 'chmod -w $TARGET')
-    if fn.endswith(".py.in") or fn[:-3] in python_progs:
+    if (fn.endswith(".py.in") or
+        fn[:-3] in python_progs or
+        fn[:-3] in ['contrib/ntpshmviz', 'contrib/webgps']):
         env.AddPostAction(builder, 'chmod +x $TARGET')
 
 # Documentation

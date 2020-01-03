@@ -17,6 +17,10 @@ rtcmdecode
 contrib/clock_test
 *.exe
 # These are built from .in files
+android/gpsd_config
+contrib/ntpshmviz
+contrib/skyview2svg.py
+contrib/webgps
 control
 gegps
 gps/__init__.py
@@ -31,9 +35,9 @@ ubxtool
 ubxtool
 upload
 valgrind-audit.py
-zerk
 xgps
 xgpsspeed
+zerk
 # Unit tests
 test_bits
 test_float
