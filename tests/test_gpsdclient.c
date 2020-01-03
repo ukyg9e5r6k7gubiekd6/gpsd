@@ -15,7 +15,6 @@
 #include <string.h>
 #include <unistd.h>            /* for getopt() */
 #include "../gpsdclient.h"
-#include "../revision.h"
 
 struct test {
     double deg;

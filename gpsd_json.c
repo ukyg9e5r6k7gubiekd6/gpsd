@@ -29,7 +29,6 @@ PERMISSIONS
 #ifdef SOCKET_EXPORT_ENABLE
 #include "gps_json.h"
 #include "timespec.h"
-#include "revision.h"
 
 /* *INDENT-OFF* */
 #define JSON_BOOL(x)	((x)?"true":"false")

@@ -4,15 +4,16 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
+#include "../gpsd_config.h"
+
+#include <getopt.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stddef.h>
-#include <getopt.h>
 
 #include "../gpsd.h"
 #include "../gps_json.h"
-#include "../revision.h"
 
 /* GPSD is built with JSON_MINIMAL.  Any !JSON_MINIMAL tests,
  * like 18, 19 and 20 will thus fail.

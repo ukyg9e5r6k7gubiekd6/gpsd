@@ -107,7 +107,6 @@
 #include "gps_json.h"   /* for GPS_JSON_RESPONSE_MAX */
 #include "compiler.h"   /* for UNUSED */
 #include "gpsdclient.h"
-#include "revision.h"
 #include "os_compat.h"
 #include "timespec.h"
 

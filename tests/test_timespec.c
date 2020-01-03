@@ -18,7 +18,6 @@
 #include <unistd.h>
 
 #include "../gpsd.h"
-#include "../revision.h"
 
 #define TS_ZERO         {0,0}
 #define TS_ZERO_ONE     {0,1}

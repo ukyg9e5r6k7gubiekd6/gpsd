@@ -36,7 +36,6 @@
 
 #include "gpsd.h"
 #include "gpsdclient.h"
-#include "revision.h"
 #include "strfuncs.h"
 #include "timespec.h"
 

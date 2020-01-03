@@ -16,7 +16,6 @@
 
 #include "gps.h"	/* for safe_atof() */
 #include "ntpshm.h"
-#include "revision.h"
 #include "timespec.h"
 #include "os_compat.h"
 

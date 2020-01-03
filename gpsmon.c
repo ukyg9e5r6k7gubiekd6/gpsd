@@ -29,7 +29,6 @@
 #include "gps_json.h"
 #include "gpsmon.h"
 #include "gpsdclient.h"
-#include "revision.h"
 #include "strfuncs.h"
 #include "timespec.h"
 

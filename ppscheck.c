@@ -35,7 +35,6 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "revision.h"
 #include "timespec.h"
 
 struct assoc {

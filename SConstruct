@@ -47,6 +47,32 @@ from distutils import sysconfig
 import SCons
 
 
+# Helper functions for revision hackery
+def GetMtime(file):
+    """Get mtime of given file, or 0."""
+    try:
+        return os.stat(file).st_mtime
+    except OSError:
+        return 0
+
+def FileList(patterns, exclusions=None):
+    """Get list of files based on patterns, minus excluded files."""
+    files = functools.reduce(operator.add, map(glob.glob, patterns), [])
+    for file in exclusions:
+        try:
+            files.remove(file)
+        except ValueError:
+            pass
+    return files
+
+def _getstatusoutput(cmd, nput=None, shell=True, cwd=None, env=None):
+    pipe = subprocess.Popen(cmd, shell=shell, cwd=cwd, env=env,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    (output, errout) = pipe.communicate(input=nput)
+    status = pipe.returncode
+    return (status, output)
+
+
 # Release identification begins here.
 #
 # Actual releases follow the normal X.Y or X.Y.Z scheme.  The version
@@ -65,6 +91,23 @@ import SCons
 #
 # package version
 gpsd_version = "3.20.1~dev"
+if 'dev' in gpsd_version:
+    (st, gpsd_revision) = _getstatusoutput('git describe --tags')
+    if st != 0:
+        # Use timestamp from latest relevant file
+        files = FileList(['*.c', '*.cpp', '*.h', '*.in', 'SConstruct'],
+                         generated_sources)
+        timestamps = map(GetMtime, files)
+        if timestamps:
+            from datetime import datetime
+            latest = datetime.fromtimestamp(sorted(timestamps)[-1])
+            gpsd_revision = '%s-%s' % (gpsd_version, latest.isoformat())
+        else:
+            gpsd_revision = gpsd_version  # Paranoia
+else:
+    gpsd_revision = gpsd_version
+gpsd_revision = gpsd_revision.strip()
+
 # client library version
 libgps_version_current = 25
 libgps_version_revision = 0
@@ -125,14 +168,6 @@ def UtilityWithHerald(herald, target, source, action, **kwargs):
     if not env.GetOption('silent'):
         action = ['@echo "%s"' % herald] + action
     return Utility(target=target, source=source, action=action, **kwargs)
-
-
-def _getstatusoutput(cmd, nput=None, shell=True, cwd=None, env=None):
-    pipe = subprocess.Popen(cmd, shell=shell, cwd=cwd, env=env,
-                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    (output, errout) = pipe.communicate(input=nput)
-    status = pipe.returncode
-    return (status, output)
 
 
 def _getoutput(cmd, nput=None, shell=True, cwd=None, env=None):
@@ -746,6 +781,7 @@ else:
     confdefs.append('#ifndef GPSD_CONFIG_H\n')
 
     confdefs.append('#define VERSION "%s"\n' % gpsd_version)
+    confdefs.append('#define REVISION "%s"\n' % gpsd_revision)
 
     confdefs.append('#define GPSD_URL "%s"\n' % website)
 
@@ -1855,51 +1891,8 @@ env.Command(target="ais_json.i", source="jsongen.py", action='''\
     chmod a-w $TARGET''')
 
 generated_sources = ['packet_names.h', "ais_json.i",
-                     'gps_maskdump.c', 'revision.h', 'gpsd.php',
-                     'gpsd_config.h']
+                     'gps_maskdump.c', 'gpsd.php', 'gpsd_config.h']
 
-# Helper functions for revision hackery
-
-
-def GetMtime(file):
-    """Get mtime of given file, or 0."""
-    try:
-        return os.stat(file).st_mtime
-    except OSError:
-        return 0
-
-
-def FileList(patterns, exclusions=None):
-    """Get list of files based on patterns, minus excluded files."""
-    files = functools.reduce(operator.add, map(glob.glob, patterns), [])
-    for file in exclusions:
-        try:
-            files.remove(file)
-        except ValueError:
-            pass
-    return files
-
-
-# generate revision.h
-if 'dev' in gpsd_version:
-    (st, rev) = _getstatusoutput('git describe --tags')
-    if st != 0:
-        # Use timestamp from latest relevant file
-        files = FileList(['*.c', '*.cpp', '*.h', '*.in', 'SConstruct'],
-                         generated_sources)
-        timestamps = map(GetMtime, files)
-        if timestamps:
-            from datetime import datetime
-            latest = datetime.fromtimestamp(sorted(timestamps)[-1])
-            rev = '%s-%s' % (gpsd_version, latest.isoformat())
-        else:
-            rev = gpsd_version  # Paranoia
-else:
-    rev = gpsd_version
-revision = '''/* Automatically generated file, do not edit */
-#define REVISION "%s"
-''' % (polystr(rev.strip()),)
-env.Textfile(target="revision.h", source=[revision])
 
 if env['systemd']:
     udevcommand = 'TAG+="systemd", ENV{SYSTEMD_WANTS}="gpsdctl@%k.service"'
@@ -2491,7 +2484,7 @@ flocktest = Utility("flocktest", [], "cd devtools; ./flocktest " + gitrepo)
 
 # Run all normal regression tests
 describe = UtilityWithHerald(
-    'Run normal regression tests for %s...' % rev.strip(),
+    'Run normal regression tests for %s...' % gpsd_revision.strip(),
     'describe', [], [])
 
 # Delete all test programs
@@ -2773,8 +2766,8 @@ env.Clean(clean_misc, glob.glob('*.[0-8]'))
 # Other misc items
 env.Clean(clean_misc, ['config.log', 'contrib/ppscheck', 'contrib/clock_test',
                        'TAGS'])
-# old egg files
-env.Clean(clean_misc, glob.glob('gps-*.egg-info'))
+# old egg files, obsolete revision.h
+env.Clean(clean_misc, glob.glob('gps-*.egg-info') + ['revision.h'])
 # Clean scons state files
 env.Clean(clean_misc, ['.sconf_temp', '.scons-option-cache', 'config.log'])
 
@@ -2881,9 +2874,9 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     # but it doesn't do any uploads or public repo mods.
     #
     # Note that tag_release has to fire early, otherwise the value of REVISION
-    # won't be right when revision.h is generated for the tarball.
+    # won't be right when gpsd_config.h is generated for the tarball.
     releaseprep = env.Alias("releaseprep",
-                            [Utility("distclean", [], ["rm -f revision.h"]),
+                            [Utility("distclean", [], ["rm -f gpsd_config.h"]),
                              tag_release,
                              dist])
     # Undo local release preparation

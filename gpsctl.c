@@ -21,7 +21,6 @@
 #include <unistd.h>
 
 #include "gpsd.h"
-#include "revision.h"
 
 #ifdef SHM_EXPORT_ENABLE
 #include <sys/ipc.h>

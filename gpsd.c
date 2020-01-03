@@ -43,7 +43,6 @@
 
 #include "gpsd.h"
 #include "gps_json.h"         /* needs gpsd.h */
-#include "revision.h"
 #include "sockaddr.h"
 #include "strfuncs.h"
 

@@ -50,7 +50,6 @@
 #include "gpsd.h"
 
 #include "gpsdclient.h"
-#include "revision.h"
 
 static struct gps_data_t gpsdata;
 static void spinner(unsigned int, unsigned int);

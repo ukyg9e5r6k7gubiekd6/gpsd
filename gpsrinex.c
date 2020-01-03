@@ -77,7 +77,6 @@
 
 #include "gps.h"
 #include "gpsdclient.h"
-#include "revision.h"
 #include "os_compat.h"
 
 static char *progname;
