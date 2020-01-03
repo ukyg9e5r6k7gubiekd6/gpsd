@@ -73,6 +73,9 @@ def _getstatusoutput(cmd, nput=None, shell=True, cwd=None, env=None):
     return (status, output)
 
 
+generated_sources = ['packet_names.h', "ais_json.i",
+                     'gps_maskdump.c', 'gpsd.php', 'gpsd_config.h']
+
 # Release identification begins here.
 #
 # Actual releases follow the normal X.Y or X.Y.Z scheme.  The version
@@ -1889,9 +1892,6 @@ env.Command(target="ais_json.i", source="jsongen.py", action='''\
     rm -f $TARGET &&\
     $SC_PYTHON $SOURCE --ais --target=parser >$TARGET &&\
     chmod a-w $TARGET''')
-
-generated_sources = ['packet_names.h', "ais_json.i",
-                     'gps_maskdump.c', 'gpsd.php', 'gpsd_config.h']
 
 
 if env['systemd']:
