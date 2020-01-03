@@ -1,6 +1,7 @@
 # Make core client functions available without prefix.
+# @GENERATED@
 #
-# This file is Copyright (c) 2010 by the GPSD project
+# This file is Copyright (c) 2010-2020 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
 # This code runs compatibly under Python 2 and 3.x for x >= 2.

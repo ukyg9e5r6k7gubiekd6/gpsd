@@ -1,10 +1,11 @@
 <?php
 
 # @MASTER@
+# @GENERATED@
 
 # Copyright (c) 2006,2010 Chris Kuethe <chris.kuethe@gmail.com>
 #
-# This file is Copyright (c) 2009-2019 The GPSD project
+# This file is Copyright (c) 2009-2020 The GPSD project
 # SPDX-License-Identifier: BSD-2-clause
 
 # Changed to Google Maps API v3, requires no API key, and shorter code

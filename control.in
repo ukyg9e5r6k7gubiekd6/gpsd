@@ -1,5 +1,6 @@
 # This is not a real Debian control file
 # It's project metadata for the shipper tool
+# @GENERATED@
 
 Package: gpsd
 

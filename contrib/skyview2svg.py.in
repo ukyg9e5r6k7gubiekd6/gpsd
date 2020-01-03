@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# @GENERATED@
 """
 skyview2svg -- Create an SVG image of GPS satellites sky view.
 
@@ -13,7 +14,7 @@ For GPSD JSON format see: https://gpsd.gitlab.io/gpsd/gpsd_json.html
 # This code runs compatibly under Python 2 and 3.x for x >= 2.
 # Preserve this property!
 #
-# This file is Copyright (c) 2010-2018 by the GPSD project
+# This file is Copyright (c) 2010-2020
 # SPDX-License-Identifier: BSD-2-clause
 from __future__ import absolute_import, print_function, division
 

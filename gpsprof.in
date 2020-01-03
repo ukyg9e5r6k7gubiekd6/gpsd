@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 #
+# @GENERATED@
 '''
 Collect and plot latency-profiling data from a running gpsd.
 Requires gnuplot, but gnuplot can be on another host.
 '''
 
-# This file is Copyright (c) 2010 by the GPSD project
+# This file is Copyright (c) 2010-2020 by the GPSD project
 # SPDX-License-Identifier: BSD-2-clause
 #
 # Updated to conform with RCC-219-00, RCC/IRIG Standard 261-00

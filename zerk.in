@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8
+# @GENERATED@
 '''
 zerk -- GREIS configurator and packet decoder
 
@@ -12,7 +13,7 @@ usage: zerk [OPTIONS] [server[:port[:device]]]
 #
 # Hereafter referred to as "the specification"
 #
-# This file is Copyright (c) 2018 by the GPSD project
+# This file is Copyright (c) 2018-2020 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
 # This code runs compatibly under Python 2 and 3.x for x >= 2.

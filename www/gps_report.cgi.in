@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 #
 # @MASTER@
+# @GENERATED@
 #
 # This is the CGI that processes the form return from GPS information form.
 #

@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8
+# @GENERATED@
 '''
 ubxtool -- u-blox configurator and packet decoder
 
 usage: ubxtool [OPTIONS] [server[:port[:device]]]
 '''
 
-# This file is Copyright (c) 2018 by the GPSD project
+# This file is Copyright (c) 2018-2020 by the GPSD project
 # BSD terms apply: see the file COPYING in the distribution root for details.
 #
 # This code runs compatibly under Python 2 and 3.x for x >= 2.
