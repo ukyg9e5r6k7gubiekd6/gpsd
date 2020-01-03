@@ -31,6 +31,7 @@
 from __future__ import print_function
 
 import ast
+import atexit      # for atexit.register()
 import functools
 import glob
 import imp         # for imp.find_module('gps'), imp deprecated in 3.4
@@ -2779,7 +2780,7 @@ env.Clean(clean_misc, ['.sconf_temp', '.scons-option-cache', 'config.log'])
 
 if cleaning:
     env.Default(build_all, audit, clean_misc)
-    announce("You must manually remove {}".format(sconsign_file))
+    atexit.register(lambda: os.system("rm -rf .sconsign*.dblite"))
 else:
     env.Default(build)
 
