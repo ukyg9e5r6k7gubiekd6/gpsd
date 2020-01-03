@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!@PYSHEBANG@
 #
 # @GENERATED@
 "Display GPS output.  Hexify it if necessary."

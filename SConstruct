@@ -1924,6 +1924,8 @@ def substituter(target, source, env):
         ('@MASTER@',     'DO NOT HAND_HACK! THIS FILE IS GENERATED'),
         ('@prefix@',     env['prefix']),
         ('@PROJECTPAGE@', projectpage),
+        # PEP 394 and 394 python shebang
+        ('@PYSHEBANG@', '/usr/bin/env python'),
         ('@QTVERSIONED@', env['qt_versioned']),
         ('@SCPUPLOAD@',  scpupload),
         ('@SITENAME@',   sitename),
