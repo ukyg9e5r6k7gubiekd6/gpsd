@@ -191,8 +191,7 @@ def filtered_spawn(sh, escape, cmd, args, env):
 #
 
 
-# without this, scons will not rebuild an existing target when the
-# source changes.
+# Have scons rebuild an existing target when the source timestamp changes.
 Decider('timestamp-match')
 
 # support building with various Python versions.
