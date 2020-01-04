@@ -637,42 +637,6 @@ def CheckHeaderDefines(context, file, define):
     return ret
 
 
-def CheckSizeOf(context, type):
-    """Check sizeof 'type'"""
-    context.Message('Checking size of ' + type + '... ')
-
-    program = """
-#include <stdlib.h>
-#include <stdio.h>
-
-/*
- * The CheckSizeOf function does not have a way for the caller to
- * specify header files to be included to provide the type being
- * checked.  As a workaround until that is remedied, include the
- * header required for time_t, which is the sole current use of this
- * function.
- */
-#include <time.h>
-
-int main() {
-    printf("%d", (int)sizeof(""" + type + """));
-    return 0;
-}
-"""
-
-    # compile it
-    ret = context.TryCompile(program, '.c')
-    if 0 == ret:
-        announce('ERROR: TryCompile failed\n')
-        # fall back to sizeof(time_t) is 8
-        return '8'
-
-    # run it
-    ret = context.TryRun(program, '.c')
-    context.Result(ret[0])
-    return ret[1]
-
-
 def CheckCompilerDefines(context, define):
     context.Message('Checking if compiler supplies %s... ' % (define,))
     ret = context.TryLink("""
@@ -748,7 +712,6 @@ config = Configure(env, custom_tests={
     'CheckCompilerOption': CheckCompilerOption,
     'CheckHeaderDefines': CheckHeaderDefines,
     'CheckPKG': CheckPKG,
-    'CheckSizeOf': CheckSizeOf,
     'CheckXsltproc': CheckXsltproc,
     'GetPythonValue': GetPythonValue,
     })
@@ -1084,7 +1047,8 @@ else:
             confdefs.append("/* #undef HAVE_%s_H */\n"
                             % hdr.replace("/", "_").upper())
 
-    sizeof_time_t = config.CheckSizeOf("time_t")
+    sizeof_time_t = config.CheckTypeSize('time_t',
+                                         includes='#include <time.h>\n')
     confdefs.append("#define SIZEOF_TIME_T %s\n" % sizeof_time_t)
     announce("sizeof(time_t) is %s" % sizeof_time_t)
     if 4 >= int(sizeof_time_t):
