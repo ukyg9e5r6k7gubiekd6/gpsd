@@ -55,6 +55,7 @@ def GetMtime(file):
     except OSError:
         return 0
 
+
 def FileList(patterns, exclusions=None):
     """Get list of files based on patterns, minus excluded files."""
     files = functools.reduce(operator.add, map(glob.glob, patterns), [])
@@ -65,6 +66,7 @@ def FileList(patterns, exclusions=None):
             pass
     return files
 
+
 def _getstatusoutput(cmd, nput=None, shell=True, cwd=None, env=None):
     pipe = subprocess.Popen(cmd, shell=shell, cwd=cwd, env=env,
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -73,6 +75,11 @@ def _getstatusoutput(cmd, nput=None, shell=True, cwd=None, env=None):
     return (status, output)
 
 
+if [] == COMMAND_LINE_TARGETS:
+    # 'build' is default target
+    Default('build')
+
+# TODO: this list is missing stuff.
 generated_sources = ['packet_names.h', "ais_json.i",
                      'gps_maskdump.c', 'gpsd.php', 'gpsd_config.h']
 
@@ -1713,7 +1720,8 @@ else:
         announce("WARNING: xgps and xgpsspeed will not be installed")
 
     # Glob() has to be run after all buildable objects defined
-    python_modules = Glob('gps/*.py', strings=True)
+    python_modules = Glob('gps/*.py', strings=True) + ['gps/__init__.py',
+                                                       'gps/gps.py']
 
     # Remove the aiogps module if not configured
     # Don't use Glob's exclude option, since it may not be available
@@ -1829,7 +1837,7 @@ Platform: UNKNOWN
                                           source=python_egg_info_source)
     python_built_extensions = list(python_compiled_libs.values())
     python_targets = (python_built_extensions + [python_egg_info] +
-                      python_progs)
+                      python_progs + python_modules)
 
 
 env.Command(target="packet_names.h", source="packet_states.h",
@@ -1926,9 +1934,9 @@ for fn in templated:
     builder = env.Command(source=fn, target=fn[:-3], action=substituter)
     env.Default(builder)
     env.AddPostAction(builder, 'chmod -w $TARGET')
-    if (fn.endswith(".py.in") or
-        fn[:-3] in python_progs or
-        fn[:-3] in ['contrib/ntpshmviz', 'contrib/webgps']):
+    if ((fn.endswith(".py.in") or
+         fn[:-3] in python_progs or
+         fn[:-3] in ['contrib/ntpshmviz', 'contrib/webgps'])):
         env.AddPostAction(builder, 'chmod +x $TARGET')
 
 # Documentation
