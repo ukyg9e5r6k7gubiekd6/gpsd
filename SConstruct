@@ -88,10 +88,6 @@ generated_sources = ['packet_names.h', "ais_json.i",
 # whether - separates components of the package name, separates the
 # name from the version, or separates version componnents.
 #
-# Keep in sync with gps/__init__.py
-# There are about 16 files with copies of the version number; make
-# sure to update all of them.
-#
 # package version
 gpsd_version = "3.20.1~dev"
 if 'dev' in gpsd_version:
