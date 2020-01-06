@@ -1222,15 +1222,13 @@ def polystr(o):
 
 
 if helping:
-
     # If helping just get usable config info from the local Python
     target_python_path = ''
     py_config_text = str(eval(PYTHON_CONFIG_CALL))
     python_libdir = str(eval(PYTHON_LIBDIR_CALL))
 
-else:
-
-    if config.env['python'] and config.env['target_python']:
+elif config.env['python']:
+    if config.env['target_python']:
         try:
             config.CheckProg
         except AttributeError:  # Older scons versions don't have CheckProg
@@ -1240,6 +1238,7 @@ else:
         if not target_python_path:
             announce("Target Python doesn't exist - disabling Python.")
             config.env['python'] = False
+
     if config.env['python']:
         # Maximize consistency by using the reported sys.executable
         target_python_path = config.GetPythonValue('exe path',
@@ -1278,41 +1277,36 @@ else:
             imp.find_module('serial')
             announce("Python module serial (pyserial) found.")
         except ImportError:
-            # no pycairo, don't build xgps, xgpsspeed
+            # no pyserial, used by ubxtool and zerk
             announce("WARNING: Python module serial (pyserial) not found.")
-            config.env['xgps'] = False
 
-        if config.env['xgps']:
-            # check for pycairo
-            try:
-                imp.find_module('cairo')
-                announce("Python module cairo (pycairo) found.")
-            except ImportError:
-                # no pycairo, don't build xgps, xgpsspeed
-                announce("WARNING: Python module cairo (pycairo) not found.")
-                config.env['xgps'] = False
+        # check for pycairo
+        try:
+            imp.find_module('cairo')
+            announce("Python module cairo (pycairo) found.")
+        except ImportError:
+            # no pycairo, used by xgps, xgpsspeed
+            announce("WARNING: Python module cairo (pycairo) not found.")
 
-            # check for pygobject
-            try:
-                imp.find_module('gi')
-                announce("Python module gi (pygobject) found.")
-            except ImportError:
-                # no pygobject, don't build xgps, xgpsspeed
-                announce("WARNING: Python module gi (pygobject) not found.")
-                config.env['xgps'] = False
+        # check for pygobject
+        try:
+            imp.find_module('gi')
+            announce("Python module gi (pygobject) found.")
+        except ImportError:
+            # no pycairo, used by xgps, xgpsspeed
+            announce("WARNING: Python module gi (pygobject) not found.")
 
-            if not config.CheckPKG('gtk+-3.0'):
-                config.env['xgps'] = False
+        # gtk+ needed by pygobject
+        config.CheckPKG('gtk+-3.0')
 
-
-if config.env['python']:  # May have been turned off by error
-    config.env['PYTHON'] = polystr(target_python_path)
-    # For regress-driver
-    config.env['ENV']['PYTHON'] = polystr(target_python_path)
-    py_config_vars = ast.literal_eval(py_config_text.decode())
-    py_config_vars = [[] if x is None else x for x in py_config_vars]
-    python_config = dict(zip(PYTHON_CONFIG_NAMES, py_config_vars))
-    announce(python_config)
+        config.env['PYTHON'] = polystr(target_python_path)
+        # For regress-driver
+        config.env['ENV']['PYTHON'] = polystr(target_python_path)
+        py_config_vars = ast.literal_eval(py_config_text.decode())
+        py_config_vars = [[] if x is None else x for x in py_config_vars]
+        python_config = dict(zip(PYTHON_CONFIG_NAMES, py_config_vars))
+        # debug
+        # announce(python_config)
 
 
 env = config.Finish()
@@ -1707,15 +1701,13 @@ else:
         "man/gpsfake.1": "man/gpsfake.xml",
         "man/gpsprof.1": "man/gpsprof.xml",
         "man/ubxtool.1": "man/ubxtool.xml",
+        "man/xgps.1": "man/gps.xml",
+        "man/xgpsspeed.1": "man/gps.xml",
         "man/zerk.1": "man/zerk.xml",
     }
 
     if env['xgps']:
         python_progs.extend(["xgps", "xgpsspeed"])
-        python_manpages.update({
-            "man/xgps.1": "man/gps.xml",
-            "man/xgpsspeed.1": "man/gps.xml",
-        })
     else:
         announce("WARNING: xgps and xgpsspeed will not be installed")
 
@@ -1973,11 +1965,6 @@ if tiocmiwait:
     })
 
 all_manpages = list(base_manpages.keys())
-other_manpages = [
-                  "man/gegps.1",
-                  "man/xgps.1",
-                  "man/xgpsspeed.1",
-                  ]
 
 if python_manpages:
     all_manpages += list(python_manpages.keys())
@@ -2719,7 +2706,7 @@ env.Clean(clean_misc, ["gegps", "gpscat", "gpsfake", "gpsprof", "ubxtool",
                        "xgps", "xgpsspeed", "zerk"])
 
 # Since manpage targets are disabled in clean mode, we cover them here
-env.Clean(clean_misc, all_manpages + other_manpages)
+env.Clean(clean_misc, all_manpages)
 # Clean compiled Python
 env.Clean(clean_misc,
           glob.glob('*.pyc') + glob.glob('gps/*.pyc') +
