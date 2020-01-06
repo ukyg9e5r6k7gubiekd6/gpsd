@@ -29,7 +29,9 @@ int json_device_read(const char *buf,
 		     struct devconfig_t *dev,
 		     const char **endptr)
 {
-    double d_cycle, d_mincycle;
+    // initialized to shut up clang
+    double d_cycle = 0.0, d_mincycle = 0.0;
+
     /* *INDENT-OFF* */
     const struct json_attr_t json_attrs_device[] = {
 	{"class",      t_check,      .dflt.check = "DEVICE"},

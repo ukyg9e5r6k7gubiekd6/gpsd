@@ -178,7 +178,8 @@ static int json_raw_read(const char *buf, struct gps_data_t *gpsdata,
                          const char **endptr)
 {
     int measurements;
-    double mtime_s, mtime_ns;
+    // initialized to shut up clang
+    double mtime_s = 0.0, mtime_ns = 0.0;
 
     const struct json_attr_t json_attrs_meas[] = {
         /* *INDENT-OFF* */

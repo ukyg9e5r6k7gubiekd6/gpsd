@@ -61,7 +61,8 @@ void configuration_packets_generic(struct gps_device_t *session);
 static unsigned char tsip_gnssid(unsigned svtype, short prn,
                                  unsigned char *svid)
 {
-    unsigned char gnssid;
+    // initialized to shut up clang
+    unsigned char gnssid = 0;
 
     *svid = 0;
 

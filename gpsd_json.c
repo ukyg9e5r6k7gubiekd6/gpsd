@@ -888,6 +888,7 @@ void json_raw_dump(const struct gps_data_t *gpsdata,
 		    (void)strlcat(reply, ",", replylen);
 		str_appendf(reply, replylen, "\"l2c\":%f",
 			    gpsdata->raw.meas[i].l2c);
+                // this annoys clang, keep it for future use
 		comma = true;
 	    }
         }
@@ -908,6 +909,11 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 {
     char buf1[JSON_VAL_MAX * 2 + 1];
     unsigned int n;
+
+    if (NULL == rtcm) {
+        // shut up clang about possible NULL pointer
+        return;
+    }
 
     (void)snprintf(buf, buflen, "{\"class\":\"RTCM2\",");
     if (device != NULL && device[0] != '\0')

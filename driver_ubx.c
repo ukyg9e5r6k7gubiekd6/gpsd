@@ -1444,16 +1444,16 @@ static gps_mask_t ubx_rxm_rawx(struct gps_device_t *session,
              * so must be L1C/A */
             svId -= 100;            /* adjust for RINEX 3 svid */
 
+            obs_code = "L1C";       /* u-blox calls this L1C/A */
             /* SBAS can do L5I, but the code? */
             switch (sigId) {
             default:
                 /* let PPP figure it out */
-                /* FALLTHROUGH */
+                break;
             case 0:       /* L1C/A */
                 obs_code = "L1C";
                 break;
             }
-            obs_code = "L1C";       /* u-blox calls this L1C/A */
             break;
         case 2:       /* GALILEO */
             switch (sigId) {

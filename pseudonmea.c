@@ -385,7 +385,8 @@ static void gpsd_binary_time_dump(struct gps_device_t *session,
 
     if (MODE_NO_FIX < session->newdata.mode &&
         0 <= session->gpsdata.fix.time.tv_sec) {
-        struct tm tm;
+        // shut up clang about uninitialized
+        struct tm tm = {0};
         char time_str[TIMESTR_SZ];
 
         utc_to_hhmmss(session->gpsdata.fix.time, time_str, sizeof(time_str),
