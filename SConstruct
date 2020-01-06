@@ -1267,8 +1267,11 @@ elif config.env['python']:
         # FIXME check target_python, not current python
         if sys.version_info < (3, 6):
             config.env['aiogps'] = False
-            announce("WARNING: Python too old: "
-                     "gps/aiogps.py will not be installed\n")
+            msg = ("WARNING: Python%u.%u too old (need 3.6): "
+                   "gps/aiogps.py will not be installed\n" %
+                   sys.version_info)
+            announce(msg)
+            atexit.register(msg)
         else:
             config.env['aiogps'] = True
 
