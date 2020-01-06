@@ -1279,6 +1279,8 @@ elif config.env['python']:
         except ImportError:
             # no pyserial, used by ubxtool and zerk
             announce("WARNING: Python module serial (pyserial) not found.")
+            atexit.register("WARNING: ubxtool and zerk are missing "
+                            "optional runtime module serial")
 
         config.env['xgps_deps'] = True
         # check for pycairo
@@ -1303,6 +1305,10 @@ elif config.env['python']:
         if not config.CheckPKG('gtk+-3.0'):
             config.env['xgps_deps'] = False
             announce("WARNING: gtk+-3.0 not found.")
+
+        if not config.env['xgps_deps']:
+            atexit.register("WARNING: xgps and xgpsspeed are missing runtime "
+                            "dependencies")
 
         if not env['xgps']:
             # xgps* turned off by option
