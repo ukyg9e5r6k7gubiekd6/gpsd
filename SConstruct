@@ -75,10 +75,6 @@ def _getstatusoutput(cmd, nput=None, shell=True, cwd=None, env=None):
     return (status, output)
 
 
-if [] == COMMAND_LINE_TARGETS:
-    # 'build' is default target
-    Default('build')
-
 # TODO: this list is missing stuff.
 generated_sources = ['packet_names.h', "ais_json.i",
                      'gps_maskdump.c', 'gpsd.php', 'gpsd_config.h']
@@ -1221,11 +1217,15 @@ def polystr(o):
     raise ValueError
 
 
+# flag that we have xgps* dependencies, so xgps* should run OK
+config.env['xgps_deps'] = False
+
 if helping:
     # If helping just get usable config info from the local Python
     target_python_path = ''
     py_config_text = str(eval(PYTHON_CONFIG_CALL))
     python_libdir = str(eval(PYTHON_LIBDIR_CALL))
+    config.env['xgps_deps'] = False
 
 elif config.env['python']:
     if config.env['target_python']:
@@ -1280,12 +1280,14 @@ elif config.env['python']:
             # no pyserial, used by ubxtool and zerk
             announce("WARNING: Python module serial (pyserial) not found.")
 
+        config.env['xgps_deps'] = True
         # check for pycairo
         try:
             imp.find_module('cairo')
             announce("Python module cairo (pycairo) found.")
         except ImportError:
             # no pycairo, used by xgps, xgpsspeed
+            config.env['xgps_deps'] = False
             announce("WARNING: Python module cairo (pycairo) not found.")
 
         # check for pygobject
@@ -1294,10 +1296,17 @@ elif config.env['python']:
             announce("Python module gi (pygobject) found.")
         except ImportError:
             # no pycairo, used by xgps, xgpsspeed
+            config.env['xgps_deps'] = False
             announce("WARNING: Python module gi (pygobject) not found.")
 
         # gtk+ needed by pygobject
-        config.CheckPKG('gtk+-3.0')
+        if not config.CheckPKG('gtk+-3.0'):
+            config.env['xgps_deps'] = False
+            announce("WARNING: gtk+-3.0 nnot found.")
+
+        if not env['xgps']:
+            # xgps* turned off by option
+            config.env['xgps_deps'] = False
 
         config.env['PYTHON'] = polystr(target_python_path)
         # For regress-driver
@@ -1677,7 +1686,14 @@ if not env['python']:
     python_targets = []
 else:
     # installed python programs
-    python_progs = ["gegps", "gpscat", "gpsfake", "gpsprof", "ubxtool", "zerk"]
+    python_progs = ["gegps",
+                    "gpscat",
+                    "gpsfake",
+                    "gpsprof",
+                    "ubxtool",
+                    "xgps",
+                    "xgpsspeed",
+                    "zerk"]
     python_deps = {'gpscat': 'packet'}
 
     # python misc helpers and stuff
@@ -1705,11 +1721,6 @@ else:
         "man/xgpsspeed.1": "man/gps.xml",
         "man/zerk.1": "man/zerk.xml",
     }
-
-    if env['xgps']:
-        python_progs.extend(["xgps", "xgpsspeed"])
-    else:
-        announce("WARNING: xgps and xgpsspeed will not be installed")
 
     # Glob() has to be run after all buildable objects defined
     python_modules = Glob('gps/*.py', strings=True) + ['gps/__init__.py',
@@ -1987,6 +1998,10 @@ build = env.Alias('build',
                   [libraries, sbin_binaries, bin_binaries, python_targets,
                    "gpsd.php", manpage_targets,
                    "libgps.pc", "gpsd.rules"])
+
+if [] == COMMAND_LINE_TARGETS:
+    # 'build' is default target
+    Default('build')
 
 if qt_env:
     # duplicate above?
@@ -2422,13 +2437,13 @@ method_regress = UtilityWithHerald(
         '$SRCDIR/tests/test_packet -c >/dev/null', ])
 
 # Test the xgps/xgpsspeed dependencies
-if not env['python'] or not env['xgps']:
-    test_xgps_deps = None
-else:
+if env['xgps_deps']:
     test_xgps_deps = UtilityWithHerald(
         'Testing xgps/xgpsspeed dependencies (since xgps=yes)...',
         'test-xgps-deps', [], [
             '$PYTHON $SRCDIR/test_xgps_deps.py'])
+else:
+    test_xgps_deps = None
 
 # Run a valgrind audit on the daemon  - not in normal tests
 valgrind_audit = Utility('valgrind-audit', [
