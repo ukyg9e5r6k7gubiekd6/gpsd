@@ -1302,7 +1302,7 @@ elif config.env['python']:
         # gtk+ needed by pygobject
         if not config.CheckPKG('gtk+-3.0'):
             config.env['xgps_deps'] = False
-            announce("WARNING: gtk+-3.0 nnot found.")
+            announce("WARNING: gtk+-3.0 not found.")
 
         if not env['xgps']:
             # xgps* turned off by option
