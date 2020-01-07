@@ -1272,7 +1272,7 @@ elif config.env['python']:
                    "gps/aiogps.py will not be installed\n" %
                    (python_version[0], python_version[1]))
             announce(msg)
-            atexit.register(msg)
+            atexit.register(lambda: print(msg))
         else:
             config.env['aiogps'] = True
 
@@ -1283,8 +1283,8 @@ elif config.env['python']:
         except ImportError:
             # no pyserial, used by ubxtool and zerk
             announce("WARNING: Python module serial (pyserial) not found.")
-            atexit.register("WARNING: ubxtool and zerk are missing "
-                            "optional runtime module serial")
+            atexit.register(lambda: print("WARNING: ubxtool and zerk are missing "
+                            "optional runtime module serial"))
 
         config.env['xgps_deps'] = True
         # check for pycairo
@@ -1311,8 +1311,8 @@ elif config.env['python']:
             announce("WARNING: gtk+-3.0 not found.")
 
         if not config.env['xgps_deps']:
-            atexit.register("WARNING: xgps and xgpsspeed are missing runtime "
-                            "dependencies")
+            atexit.register(lambda: print("WARNING: xgps and xgpsspeed are missing runtime "
+                            "dependencies"))
 
         if not env['xgps']:
             # xgps* turned off by option
