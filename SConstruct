@@ -1282,9 +1282,11 @@ elif config.env['python']:
             announce("Python module serial (pyserial) found.")
         except ImportError:
             # no pyserial, used by ubxtool and zerk
-            announce("WARNING: Python module serial (pyserial) not found.")
-            atexit.register(lambda: print("WARNING: ubxtool and zerk are missing "
-                            "optional runtime module serial"))
+            msg = ("WARNING: Python module serial (pyserial) not found.\n"
+                   "WARNING: ubxtool and zerk are missing optional "
+                   "runtime module serial")
+            announce(msg)
+            atexit.register(lambda: print(msg))
 
         config.env['xgps_deps'] = True
         # check for pycairo
@@ -1311,8 +1313,10 @@ elif config.env['python']:
             announce("WARNING: gtk+-3.0 not found.")
 
         if not config.env['xgps_deps']:
-            atexit.register(lambda: print("WARNING: xgps and xgpsspeed are missing runtime "
-                            "dependencies"))
+            msg = ("WARNING: xgps and xgpsspeed are missing runtime "
+                   " dependencies")
+            announce(msg)
+            atexit.register(lambda: print(msg))
 
         if not env['xgps']:
             # xgps* turned off by option
@@ -2128,7 +2132,7 @@ if env['python']:
         if not env['xgps_deps']:
             if p in ['xgps', 'xgpsspeed']:
                 # do not have xgps* dependencies, don't test
-                continue;
+                continue
         pp.append("$PYTHON $SRCDIR/%s -V" % p)
     python_versions = Utility('python-versions', python_progs, pp, ENV=verenv)
 
@@ -2552,10 +2556,13 @@ if env.WhereIs('asciidoctor'):
     for stem, leaf in adocfiles:
         asciidocs.append('www/%s.html' % leaf)
         env.Command('www/%s.html' % leaf, '%s.adoc' % stem,
-                    ['asciidoctor -a compat -b html5 -a toc -o www/%s.html %s.adoc'
-                     % (leaf, stem)])
+                    ['asciidoctor -a compat -b html5 -a toc -o www/%s.html '
+                     '%s.adoc' % (leaf, stem)])
 else:
-    announce("INSTALL, README and part of the website build requires asciidoctor, not installed.")
+    msg = ("WARNING: asciidoctor not found.\n"
+           "WARNING: Some documentation and html will not be built.")
+    announce(msg)
+    atexit.register(lambda: print(msg))
 
 # Non-asciidoc webpages only
 htmlpages = Split('''
