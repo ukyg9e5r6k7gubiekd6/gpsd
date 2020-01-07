@@ -334,7 +334,7 @@ If you wish to build the documentation, be warned it pull in a
 lot of packages.  To build the doc install:
 
 --------------------------------------------------------------
-apt-get install xsltproc docbook-xsl xmlto asciidoc
+apt-get install xsltproc docbook-xsl xmlto asciidoctor
 --------------------------------------------------------------
 
 The rest of the installation is just as for any other source based
@@ -437,7 +437,7 @@ If you wish to build the documentation, be warned it pull in a
 lot of packages.  To build the doc install:
 
 --------------------------------------------------------------
-apt install xsltproc docbook-xsl xmlto asciidoc
+apt install xsltproc docbook-xsl xmlto asciidoctor
 --------------------------------------------------------------
 
 The rest of the installation is just as for any other source based

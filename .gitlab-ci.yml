@@ -26,7 +26,7 @@ debian-stable:
   stage: build
   variables:
     SCONSOPTS: 'qt=yes xgps=yes'
-    PACKAGES: 'build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial'
+    PACKAGES: 'build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoctor libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd'
   <<: *debian_build
 
 debian-unstable:gcc:
@@ -34,7 +34,7 @@ debian-unstable:gcc:
   stage: advanced_build
   variables:
     SCONSOPTS: 'qt=yes xgps=yes'
-    PACKAGES: 'build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial'
+    PACKAGES: 'build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoctor libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd'
   <<: *debian_build
 
 debian-unstable:clang:
@@ -44,7 +44,7 @@ debian-unstable:clang:
     SCONSOPTS: 'qt=yes xgps=yes'
     CC: 'clang'
     CXX: 'clang++'
-    PACKAGES: 'clang build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial'
+    PACKAGES: 'clang build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoctor libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd'
   <<: *debian_build
 
 debian-unstable:minimal:
@@ -63,7 +63,7 @@ ubuntu-latest:gcc:
   stage: advanced_build
   variables:
     SCONSOPTS: 'qt=yes xgps=yes'
-    PACKAGES: 'build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial'
+    PACKAGES: 'build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoctor libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd'
   before_script:
   - apt update && apt -y install scons
   - sed -i "s/os.environ.has_key('DH_INTERNAL_OPTIONS')/'DH_INTERNAL_OPTIONS' in os.environ/" /usr/lib/scons/SCons/Script/Main.py
@@ -76,7 +76,7 @@ ubuntu-rolling:gcc:
   stage: advanced_build
   variables:
     SCONSOPTS: 'qt=yes xgps=yes'
-    PACKAGES: 'build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial'
+    PACKAGES: 'build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoctor libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd'
   <<: *debian_build
 
 
@@ -86,7 +86,7 @@ ubuntu-devel:gcc:
   stage: advanced_build
   variables:
     SCONSOPTS: 'qt=yes xgps=yes'
-    PACKAGES: 'build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial'
+    PACKAGES: 'build-essential ccache debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoctor libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd'
   <<: *debian_build
 
 fedora-latest:
@@ -117,7 +117,7 @@ scan-build:
   variables:
     SCONSOPTS: 'qt=yes xgps=yes'
     SCAN_BUILD: 'scan-build -o scan_build'
-    PACKAGES: 'clang clang-tools build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial'
+    PACKAGES: 'clang clang-tools build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoctor libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd'
   artifacts:
     paths:
     - scan_build
@@ -135,7 +135,7 @@ scan-build:
 #    DEBIAN_FRONTEND: 'noninteractive'
 #  when: manual
 #  script:
-#  - apt update && apt -y install build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoc libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd python-serial
+#  - apt update && apt -y install build-essential debhelper po-debconf python3-all-dev python3-all-dbg python-all-dev python-all-dbg xsltproc docbook-xsl docbook-xml asciidoctor libncurses-dev libusb-1.0-0-dev libdbus-1-dev libglib2.0-dev makedev libbluetooth-dev libqt4-dev lsb-release bc dpkg-dev scons chrpath dh-buildinfo pps-tools dh-systemd
 #  - .ci-build/test_options.sh
 #
 
@@ -155,7 +155,7 @@ pages:
   image: alpine:latest
   stage: build
   script:
-  - apk update && apk add python xmlto asciidoc scons rsync musl-dev gcc
+  - apk update && apk add python xmlto asciidoctor scons rsync musl-dev gcc
   - mkdir .pages; WEBSITE=.public scons website=.pages website; mv .public public
   - find public -type f -regex '.*\.\(htm\|html\|txt\|text\|js\|css\)$' -exec gzip -f -k {} \;
   - ls -lR public

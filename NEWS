@@ -4,6 +4,7 @@
   Create python programs from .in files to allow macro substitution.
   Finally clean .sconsign*.dblite with "scons -c"
   Remove revision.h.  Move REVISION into gpsd_config.h
+  Change asciidoc to asciidoctor, and revise documents to match.
 
 3.20: 2019-12-31
   Change README into an asciidoc file and publish HTML from it

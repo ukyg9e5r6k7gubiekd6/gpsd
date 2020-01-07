@@ -238,16 +238,14 @@ process:
 |libxslt            | xsltproc is used to build man pages from xml
 |docbook-xsl        | style file for xml to man translation
 |xmlto              | DocBook formatter program
-|asciidoc           | DocBook front end with lighter markup
+|asciidoctor        | Documentation front end with light markup
 |============================================================================
 
 On Gentoo systems those packages are named:
 
 |============================================================================
 |app-text/xmlto                       | DocBook formatter program
-|app-text/asciidoc                    | DocBook front end with lighter markup
-|dev-libs/libxslt                     | pulled in by asciidoc
-|app-text/docbook-xsl-stylesheets     | pulled in by asciidoc
+|app-text/asciidoctor                 | Documentation front end with light markup
 |============================================================================
 
 The build degrades gracefully in the absence of any of these. You should

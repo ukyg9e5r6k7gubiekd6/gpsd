@@ -2536,31 +2536,26 @@ Utility('shmclean', [], ["ipcrm  -M 0x4e545030;"
 # release tarballs.
 
 # asciidoc documents
-if env.WhereIs('asciidoc'):
-    adocfiles = ['AIVDM',
-                 'client-howto',
-                 'gpsd-time-service-howto',
-                 'NMEA',
-                 'ppp-howto',
-                 'protocol-evolution',
-                 'protocol-transition',
-                 'time-service-intro',
-                 ]
-    asciidocs = ["www/" + stem + ".html" for stem in adocfiles] \
-        + ["www/installation.html"] + ["www/README.html"]
-    for stem in adocfiles:
-        env.Command('www/%s.html' % stem, 'www/%s.adoc' % stem,
-                    ['asciidoc -b html5 -a toc -o www/%s.html www/%s.adoc'
-                     % (stem, stem)])
-    env.Command("www/installation.html",
-                "INSTALL.adoc",
-                ["asciidoc -o www/installation.html INSTALL.adoc"])
-    env.Command("www/README.html",
-                "README.adoc",
-                ["asciidoc -o www/README.html README.adoc"])
+asciidocs = []
+if env.WhereIs('asciidoctor'):
+    adocfiles = (('INSTALL', 'installation'),
+                 ('README', 'README'),
+                 ('www/AIVDM', 'AIVDM'),
+                 ('www/client-howto', 'client-howto'),
+                 ('www/gpsd-time-service-howto', 'gpsd-time-service-howto'),
+                 ('www/NMEA', 'NMEA'),
+                 ('www/ppp-howto', 'ppp-howto'),
+                 ('www/protocol-evolution', 'protocol-evolution'),
+                 ('www/protocol-transition', 'protocol-transition'),
+                 ('www/time-service-intro', 'time-service-intro'),
+                 )
+    for stem, leaf in adocfiles:
+        asciidocs.append('www/%s.html' % leaf)
+        env.Command('www/%s.html' % leaf, '%s.adoc' % stem,
+                    ['asciidoctor -a compat -b html5 -a toc -o www/%s.html %s.adoc'
+                     % (leaf, stem)])
 else:
-    announce("Part of the website build requires asciidoc, not installed.")
-    asciidocs = []
+    announce("INSTALL, README and part of the website build requires asciidoctor, not installed.")
 
 # Non-asciidoc webpages only
 htmlpages = Split('''

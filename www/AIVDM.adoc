@@ -252,7 +252,7 @@ for a mobile AIS station.  Other possible values are as listed:
 
 .AIS talker IDs
 [width="25%",frame="topbot"]
-|================================================
+|======
 | !AB | NMEA 4.0 Base AIS station
 | !AD | NMEA 4.0 Dependent AIS Base Station
 | !AI | Mobile AIS station
@@ -263,7 +263,7 @@ for a mobile AIS station.  Other possible values are as listed:
 | !AX | NMEA 4.0 Repeater AIS station
 | !BS | Base AIS station (deprecated in NMEA 4.0)
 | !SA | NMEA 4.0 Physical Shore AIS Station
-|================================================
+|======
 
 == AIVDM/AIVDO Payload Armoring ==
 
@@ -276,7 +276,7 @@ intermediate range "X" (88) to "\_" (95) is not used.
 
 .ASCII payload armoring
 [width="25%",frame="topbot",options="header"]
-|======================================
+|======
 | Char    |ASCII   |Decimal   |Bits
 |"0"      | 48     | 0        |000000
 |"1"      | 49     | 1        |000001
@@ -342,7 +342,7 @@ intermediate range "X" (88) to "\_" (95) is not used.
 |"u"      |117     |61        |111101
 |"v"      |118     |62        |111110
 |"w"      |119     |63        |111111
-|======================================
+|======
 
 Concatenate all six-bit quantities found in the payload, MSB first.
 This is the binary payload of the sentence.
@@ -396,7 +396,7 @@ and DEL cannot be encoded.
 
 .Sixbit ASCII
 [width="25%",frame="topbot"]
-|==========================================================================================
+|======
 |000000 | 0  |"@"    |010000 |16  |"P"            |100000 |32  |" "     |110000 |48  |"0"
 |000001 | 1  |"A"    |010001 |17  |"Q"            |100001 |33  |"!"     |110001 |49  |"1"
 |000010 | 2  |"B"    |010010 |18  |"R"            |100010 |34  |"""     |110010 |50  |"2"
@@ -413,7 +413,7 @@ and DEL cannot be encoded.
 |001101 |13  |"M"    |011101 |29  |"]"            |101101 |45  |"-"     |111101 |61  |"="
 |001110 |14  |"N"    |011110 |30  |"\^"           |101110 |46  |"."     |111110 |62  |">"
 |001111 |15  |"O"    |011111 |31  |"\_"           |101111 |47  |"/"     |111111 |63  |"?"
-|==========================================================================================
+|======
 
 According to the standard, trailing unused characters in six-bit
 fields will be represented by "@" (six-bit zero); however, real-world
@@ -444,7 +444,7 @@ types are as follows:
 
 .Message types
 [width="50%",frame="topbot"]
-|======================================================
+|======
 |01 |Position Report Class A
 |02 |Position Report Class A (Assigned schedule)
 |03 |Position Report Class A (Response to interrogation)
@@ -472,7 +472,7 @@ types are as follows:
 |25 |Single Slot Binary Message,
 |26 |Multiple Slot Binary Message With Communications State
 |27 |Position Report For Long-Range Applications
-|======================================================
+|======
 
 In normal operation, an AIS transceiver will broadcast a position report
 (type 1, 2, or 3) every 2 to 10 seconds depending on the vessel's
@@ -515,7 +515,7 @@ for a list of MIDs.
 
 .MID formats
 [frame="topbot"]
-|==============================================================================
+|======
 |8MIDXXXXX  | Diver's radio (not used in the U.S. in 2013)
 |MIDXXXXXX  | Ship
 |0MIDXXXXX  | Group of ships; the U.S. Coast Guard, for example, is 03699999
@@ -526,7 +526,7 @@ for a list of MIDs.
 |970MIDXXX  | AIS SART (Search and Rescue Transmitter)
 |972XXXXXX  | MOB (Man Overboard) device
 |974XXXXXX  | EPIRB (Emergency Position Indicating Radio Beacon) AIS
-|==============================================================================
+|======
 
 Detailed descriptions of message types 1-24 follow. Message types 1-22
 are derived from <<IALA>>. Message type 23 was described to me by Mike
@@ -549,7 +549,7 @@ for generating bitfield-extraction code directly from the message
 type descriptions.
 
 [frame="topbot"]
-|==============================================================================
+|======
 |u|   Unsigned integer
 |U|   Unsigned integer with scale - renders as float, suffix is decimal places
 |i|   Signed integer
@@ -562,7 +562,7 @@ type descriptions.
 |a|   Array boundary, numeric suffix is maximum array size.
       ^ before suffix means preceding fields is the length.
       Following fields are repeated to end of message
-|==============================================================================
+|======
 
 The field breakdowns in this document have been checked against live
 decoded data rendered by known-good implementations for message types
@@ -586,7 +586,7 @@ decoding software. Total of 168 bits, occupying one AIVDM sentence.
 //: Type CNB
 .Common Navigation Block
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description             |Member    |T|Units
 |0-5     | 6  |Message Type            |type      |u|Constant: 1-3
 |6-7     | 2  |Repeat Indicator        |repeat    |u|Message repeat count
@@ -606,7 +606,7 @@ decoding software. Total of 168 bits, occupying one AIVDM sentence.
 |145-147 | 3  |Spare                   |          |x|Not used
 |148-148 | 1  |RAIM flag               |raim      |b|See below
 |149-167 |19  |Radio status            |radio     |u|See below
-|==============================================================================
+|======
 
 The Repeat Indicator is a directive to an AIS transceiver that this
 message should be rebroadcast.  This was intended as a way of getting
@@ -617,7 +617,7 @@ maximum of three hops. A value of 3 indicates "Do not repeat".
 
 .Navigation Status
 [width="50%",frame="topbot"]
-|=================================================================
+|======
 |0 | Under way using engine
 |1 | At anchor
 |2 | Not under command
@@ -634,7 +634,7 @@ maximum of three hops. A value of 3 indicates "Do not repeat".
 |13| Reserved for future use
 |14| AIS-SART is active
 |15| Not defined (default)
-|=================================================================
+|======
 
 Note, the AIS-SART value was added after <<IALA>> and designates an
 AIS transmitter in an survival craft such as a lifeboat.  See
@@ -692,11 +692,11 @@ The Maneuver Indicator (143-144) may have these values:
 
 .Maneuver Indicator
 [width="50%",frame="topbot"]
-|===========================================================
+|======
 |0 | Not available (default)
 |1 | No special maneuver
 |2 | Special maneuver (such as regional passing arrangement)
-|===========================================================
+|======
 
 Riverine and inland navigation systems conforming to <<INLAND>>
 designate this field "Blue Sign" with the following enumerated
@@ -704,22 +704,22 @@ values:
 
 .Blue Sign
 [width="50%",frame="topbot"]
-|===========================================================
+|======
 |0 | Not available (default)
 |1 | No
 |2 | Yes
-|===========================================================
+|======
 
 The interpretation of bits 143-147 has been a bit unstable. In
 <<IALA>> and therefore in the original <<ITU1371>>, they were
 described like this:
 
 [width="50%",frame="topbot",options="header"]
-|=================================
+|======
 |Field   |Len |Description
 |143-145 | 3  |Regional Reserved
 |146-147 | 2  |Spare
-|=================================
+|======
 
 The interpretation of 143-144 as a special maneuver field is new in
 revision 3 of <<ITU1371>>.
@@ -742,7 +742,7 @@ The standard uses "EPFD" to designate any Electronic Position Fixing Device.
 
 //: Type 4
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len  |Description      |Member   |T|Units
 |0-5     |  6  |Message Type     |type     |u|Constant: 4
 |6-7     |  2  |Repeat Indicator |repeat   |u|As in Common Navigation Block
@@ -760,11 +760,11 @@ The standard uses "EPFD" to designate any Electronic Position Fixing Device.
 |138-147 | 10  |Spare            |         |x|Not used
 |148-148 |  1  |RAIM flag        |raim     |b|As for common navigation block
 |149-167 | 19  |SOTDMA state     |radio    |u|As in same bits for Type 1
-|==============================================================================
+|======
 
 .EPFD Fix Types
 [width="50%",frame="topbot",options="header"]
-|===================================
+|======
 |Code |Position Fix Type
 |0    |Undefined (default)
 |1    |GPS
@@ -775,7 +775,7 @@ The standard uses "EPFD" to designate any Electronic Position Fixing Device.
 |6    |Integrated navigation system
 |7    |Surveyed
 |8    |Galileo
-|===================================
+|======
 
 Note: though values 9-15 are marked "not used" in <<IALA>>, the EPFD
 type value 15 (all field bits 1) is not uncommon in the wild; it
@@ -797,7 +797,7 @@ destination field.
 
 //: Type 5
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description            |Member/Type  |T|Encoding
 |0-5     |  6 |Message Type           |type         |u|Constant: 5
 |6-7     |  2 |Repeat Indicator       |repeat       |u|Message repeat count
@@ -822,7 +822,7 @@ destination field.
 |422-422 |  1 |DTE                    |dte          |b|0=Data terminal ready,
                                                        1=Not ready (default).
 |423-423 |  1 |Spare                  |             |x|Not used
-|==============================================================================
+|======
 
 <<INLAND>> specifies the following:
 
@@ -839,7 +839,7 @@ the dimensions to port and starboard, the special value 63 indicates
 
 .Codes for Ship Type
 [width="50%",frame="topbot",options="header"]
-|==============================================================
+|======
 |Code   |Ship & Cargo Classification
 |0      |Not available (default)
 |1-19   |Reserved for future use
@@ -923,7 +923,7 @@ the dimensions to port and starboard, the special value 63 indicates
 |97     |Other Type, Reserved for future use
 |98     |Other Type, Reserved for future use
 |99     |Other Type, no additional information
-|==============================================================
+|======
 
 Note that garbage values greater than 99 are supposed to be unused,
 but are not uncommon in the wild; AIS transmitters seem prone to put
@@ -943,7 +943,7 @@ to a maximum of 1008 bits (up to 5 AIVDM sentence payloads).
 
 //: Type 6
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member    |T|Units
 |0-5     |  6 |Message Type         |type      |u|Constant: 6
 |6-7     |  2 |Repeat Indicator     |repeat    |u|As in Common Navigation Block
@@ -957,7 +957,7 @@ to a maximum of 1008 bits (up to 5 AIVDM sentence payloads).
 |82-87   |  6 |Functional ID        |fid       |u|Unsigned integer
 |88      |920 |Data                 |data      |d|Binary data
                                                   May be shorter than 920 bits.
-|==============================================================================
+|======
 
 Interpretation of the binary payload is controlled by:
 
@@ -972,7 +972,7 @@ The following is a non-exhaustive list of standardized DAC-FID pairs
 in use for type 6. For an up-to-date list of registered application-specific messages,
 see <<IALA-ASM>>.
 
-|==============================================================================
+|======
 | DAC |FID | Source        | Status           | Description
 |   1 | 12 | <<IMO236>>    | Deprecated       | Dangerous cargo indication
 |   1 | 14 | <<IMO236>>    | Deprecated       | Tidal window
@@ -990,7 +990,7 @@ see <<IALA-ASM>>.
 | 200 | 55 | <<INLAND>>    | Standard         | Number of persons on board
 | 235 | 10 | <<IALA-A126>> | In use           | AtoN monitoring data (UK)
 | 250 | 10 | <<IALA-A126>> | In use           | AtoN monitoring data (ROI)
-|==============================================================================
+|======
 
 DAC/FID pairs are assigned separately per message type.
 
@@ -1016,7 +1016,7 @@ This is the <<IMO236>> version, now deprecated; there is a later
 
 //: Type 6(1/12)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member    |T|Units
 |0-5     |  6 |Message Type         |type      |u|Constant: 6
 |6-7     |  2 |Repeat Indicator     |repeat    |u|As in Common Navigation Block
@@ -1044,17 +1044,17 @@ This is the <<IMO236>> version, now deprecated; there is a later
 |345-354 | 10 |Amount of Cargo      |amount    |u|Unsigned integer
 |355-356 |  2 |Unit of Quantity     |unit      |e|See "Cargo Unit Codes"
 |357-359 |  3 |Spare                |          |x|Not used
-|==============================================================================
+|======
 
 .Cargo Unit Codes
 [width="50%",frame="topbot",options="header"]
-|===================================
+|======
 |Code |Unit
 |0    |Not available (default)
 |1    |kg
 |2    |metric tons
 |3    |metric kilotons
-|===================================
+|======
 
 ==== IMO236 Tidal Window ====
 
@@ -1070,7 +1070,7 @@ different widths for the latitude, longitude, and current-speed fields
 
 //: Type 6(1/14)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description            |Member    |T|Units
 |0-5     |  6 |Message Type           |type      |u|Constant: 6
 |6-7     |  2 |Repeat Indicator       |repeat    |u|See Common Navigation Block
@@ -1098,7 +1098,7 @@ different widths for the latitude, longitude, and current-speed fields
 |77-85   |  9 |Current Dir. Predicted |cdir      |u|0-359 deg, 360-N/A (default)
 |86-92   |  7 |Current Speed Predicted|cspeed    |U1|0-126, units of 0.1 knots,
                                                    127 = N/A (default).
-|=============================================================================
+|======
 
 The group of fields from longitude on may repeat twice more to convey up to
 three points of tidal information.
@@ -1114,7 +1114,7 @@ A message 6 subtype. DAC = 001 FID = 16.
 <<IMO236>> describes a fixed-length, 72-bit message with this layout:
 
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member   |T|Units
 |0-5     |  6 |Message Type         |type     |u|Constant: 6
 |6-7     |  2 |Repeat Indicator     |repeat   |u|As in Common Navigation Block
@@ -1126,7 +1126,7 @@ A message 6 subtype. DAC = 001 FID = 16.
                                                  0 = N/A (default)
                                                  8191 = >= 8191 persons.
 |69-71   |  3 |Spare                |         |x|Not used
-|==============================================================================
+|======
 
 OPEN-QUESTION: Note that though this is a message 6 subtype and
 described in <<IMO236>> with the attribute "addressed", there is no
@@ -1139,7 +1139,7 @@ them.
 
 //: Type 6(1/16)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member    |T|Units
 |0-5     |  6 |Message Type         |type      |u|Constant: 6
 |6-7     |  2 |Repeat Indicator     |repeat    |u|As in Common Navigation Block
@@ -1155,7 +1155,7 @@ them.
                                                   0 = N/A (default),
                                                   8191 = >= 8191 persons.
 |101-135 | 35 |Spare                |          |x|Not used
-|==============================================================================
+|======
 
 ==== IMO289 Clearance Time To Enter Port ====
 
@@ -1167,7 +1167,7 @@ A message 6 subtype. DAC = 001 FID = 18. Fixed length: 360 bits.
 
 //: Type 6(1/18)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member     |T|Units
 |0-5     |  6 |Message Type         |type       |u|Constant: 6
 |6-7     |  2 |Repeat Indicator     |repeat     |u|As in Common Navigation Block
@@ -1191,7 +1191,7 @@ A message 6 subtype. DAC = 001 FID = 18. Fixed length: 360 bits.
 |293-316 | 24 |Latitude             |lat        |I3|Unit = minutes * 0.001,
                                                    91000 = N/A (default).
 |317-359 | 43 |Spare                |           |x|Not used
-|==============================================================================
+|======
 
 ==== IMO 289 Berthing Data (addressed) ====
 
@@ -1207,7 +1207,7 @@ bit is on.
 
 //: Type 6(1/20)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member/Type |T|Units
 |0-5     |  6 |Message Type       |type        |u|Constant: 6
 |6-7     |  2 |Repeat Indicator   |repeat      |u|As in Common Navigation Block
@@ -1264,7 +1264,7 @@ bit is on.
                                                   181000 = N/A (default)
 |336-359 | 24 |Latitude           |berth_lat   |I3|Minutes * 0.001,
                                                   91000 = N/A (default)
-|==============================================================================
+|======
 
 The UTC timestamp refers to the time requested or granted for berthing.
 
@@ -1272,7 +1272,7 @@ The longitude and latitude refer to the center of the berth.
 
 .Mooring Position
 [width="50%",frame="topbot",options="header"]
-|===================================
+|======
 |Code |Position
 |0    |Not available (default)
 |1    |Port-side to
@@ -1281,17 +1281,17 @@ The longitude and latitude refer to the center of the berth.
 |4    |Mooring buoy
 |5    |Anchorage
 |6-7  |Reserved for future use
-|===================================
+|======
 
 .Service Status
 [width="50%",frame="topbot",options="header"]
-|=============================================================================
+|======
 |Code |Meaning
 |0    |Not available or requested (default)
 |1    |Service available
 |2    |No data or unknown
 |3    |Not to be used
-|=============================================================================
+|======
 
 ==== IMO289 Area Notice (addressed) ====
 
@@ -1309,7 +1309,7 @@ is the message header format:
 //: Type 6(1/23)
 .Area Notice (addressed) message header
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member     |T|Units
 |0-5     |  6 |Message Type         |type       |u|Constant: 6
 |6-7     |  2 |Repeat Indicator     |repeat     |u|As in Common Navigation Block
@@ -1350,7 +1350,7 @@ is the message header format:
 |842-925 | 84 |Subarea payload #9   |shape data |array|See "Subarea Payloads"
 |926-928 |  3 |Subarea shape #10    |subarea type |u|0-5 (see "Subarea Types")
 |929-1012| 84 |Subarea payload #10  |shape data |array|See "Subarea Payloads"
-|==============================================================================
+|======
 
 The Message Linkage field is, as usual, for linking to a textual explanatory
 message sent with the same linkage ID. The standard says that in this context
@@ -1360,7 +1360,7 @@ Notice description types are as follows:
 
 .Area Notice Description
 [frame="topbot"]
-|==============================================================================
+|======
 |  0| Caution Area: Marine mammals habitat
 |  1| Caution Area: Marine mammals in area - reduce speed
 |  2| Caution Area: Marine mammals in area - stay clear
@@ -1489,12 +1489,12 @@ Notice description types are as follows:
 |125| Other – Define in associated text field
 |126| Cancellation – cancel area as identified by Message Linkage ID
 |127| Undefined (default)
-|==============================================================================
+|======
 
 Subarea types are as follows:
 
 [frame="topbot"]
-|==============================================================================
+|======
 |  0  | Circle or point
 |  1  | Rectangle
 |  2  | Sector
@@ -1502,13 +1502,13 @@ Subarea types are as follows:
 |  4  | Polygon
 |  5  | Associated text
 | 6-7 | Reserved
-|==============================================================================
+|======
 
 Subarea payload layouts are as follows:
 
 .Circle or Point
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member/Type |T|Units
 |0-2     | 3  |Shape of area      |shape       |e|Constant: 0
 |3-4     | 2  |Scale factor       |scale       |u|Power of 10 for area dimensions;
@@ -1525,11 +1525,11 @@ Subarea payload layouts are as follows:
                                                   0 = point (default),
                                                   else 1-4095 * 10^scale m
 |69-86   | 18 |Spare              |            |x|Not used
-|==============================================================================
+|======
 
 .Rectangle
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member/Type |T|Units
 |0-2     | 3  |Shape of area      |shape       |e|Constant: 1
 |3-4     | 2  |Scale factor       |scale       |u|Power of 10 for area dimensions;
@@ -1553,11 +1553,11 @@ Subarea payload layouts are as follows:
                                                   else 1-359,
                                                   360-511 reserved.
 |82-86   |  5 |Spare              |            |x|Not used
-|==============================================================================
+|======
 
 .Sector
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member/Type |T|Units
 |0-2     | 3  |Shape of area      |shape       |e|Constant: 2
 |3-4     | 2  |Scale factor       |scale       |u|Power of 10 for area dimensions;
@@ -1581,11 +1581,11 @@ Subarea payload layouts are as follows:
                                                   0 = no rotation (default),
                                                   else 1-359,
                                                   360-511 reserved.
-|==============================================================================
+|======
 
 .Polyline
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member/Type |T|Units
 |0-2     | 3  |Shape of area      |shape       |e|Constant: 3
 |3-4     | 2  |Scale factor       |scale       |u|Power of 10 for area dimensions;
@@ -1597,7 +1597,7 @@ Subarea payload layouts are as follows:
 |10-19   |10  |Distance           |distance    |u|Distance from prev. waypoint,
                                                   0 = no point (default),
                                                   else 1-1023 * 10^scale m
-|==============================================================================
+|======
 
 The last two fields are repeated 4 times; the final 2 bits of 87 are
 unused.  A polyline must be preceded by either (a) a circle, in which
@@ -1606,7 +1606,7 @@ case the first bearing is from the implied last point.
 
 .Polygon
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member/Type |T|Units
 |0-2     | 3  |Shape of area      |shape       |e|Constant: 4
 |3-4     | 2  |Scale factor       |scale       |u|Power of 10 for area dimensions;
@@ -1616,7 +1616,7 @@ case the first bearing is from the implied last point.
                                                   steps from previous vertex;
                                                   720 = N/A (default).
 |10-19   |10  |Distance           |distance    |u|Distance from prev. vertex,
-|==============================================================================
+|======
 
 The last two fields are repeated 4 times; the final 2 bits of 87 are
 unused.  A polygon must be preceded by a circle; the first bearing is
@@ -1625,11 +1625,11 @@ an implied boundary from the last polygon vertex to the zero vertex.
 
 .Associated text
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member/Type |T|Units
 |0-2     | 3  |Shape of area      |shape       |e|Constant: 5
 |3-86    |84  |Text               |text        |t|14 chars of packed 6-bit.
-|==============================================================================
+|======
 
 ==== IMO289 Dangerous Cargo Indication ====
 
@@ -1641,7 +1641,7 @@ with a different layout, deprecated in <<IMO289>>.
 
 //: Type 6(1/25)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member    |T|Units
 |0-5     |  6 |Message Type         |type      |u|Constant: 6
 |6-7     |  2 |Repeat Indicator     |repeat    |u|As in Common Navigation Block
@@ -1661,7 +1661,7 @@ with a different layout, deprecated in <<IMO289>>.
 |0-3     |  4 |Cargo code           |code      |e|See "Cargo Codes"
 |4-16    | 13 |Cargo subtype        |subtype   |u|Unsigned integer
                                                   0 = N/A (default)
-|==============================================================================
+|======
 
 The last two fields may repeat to describe up to 28 subcargos. The count
 of repetitions must be computed from the message payload length.
@@ -1671,7 +1671,7 @@ this message.
 
 .Cargo Codes
 [width="50%",frame="topbot",options="header"]
-|===================================
+|======
 |Code |Code under which cargo is carried
 |0    |Not available (default)
 |1    |IMDG Code (in packed form)
@@ -1681,7 +1681,7 @@ this message.
 |5    |MARPOL Annex II IBC Code
 |6    |Regional use
 |7-15 |Reserved for future use
-|===================================
+|======
 
 The subtype field may be interpreted as an IMDG class or division code
 (if the cargotype is 1 = IMDG code) or as a UN number (if the
@@ -1692,7 +1692,7 @@ the cargotype is 5 = MARPOL Annex II).
 
 .Dangerous Cargo Indication: MARPOL Annex I list of oils
 [width="50%",frame="topbot"]
-|===================================
+|======
 |0    | N/A (default)
 |1    | asphalt solutions
 |2    | oils
@@ -1703,18 +1703,18 @@ the cargotype is 5 = MARPOL Annex II).
 |7    | jet fuels
 |8    | naphtha
 |9-15 | reserved for future use
-|===================================
+|======
 
 .Dangerous Cargo Indication: MARPOL Annex II list of oils
 [width="50%",frame="topbot"]
-|===================================
+|======
 |0    | N/A (default)
 |1    | Category X
 |2    | Category Y
 |3    | Category Z
 |4    | Other substances
 |5-7  | reserved for future use
-|===================================
+|======
 
 ==== IMO289 Route Information (addressed) ====
 
@@ -1725,7 +1725,7 @@ A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
 
 //: Type 6(1/28)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description       |Member    |T|Units
 |0-5     |  6 |Message Type      |type      |u|Constant: 6
 |6-7     |  2 |Repeat Indicator  |repeat    |u|As in Common Navigation Block
@@ -1758,14 +1758,14 @@ A message 6 subtype. DAC = 001 FID = 28. Variable length: 204-1029 bits.
 |28-54   | 27 |Latitude          |lat       |I4|Minutes * 0.0001,
                                                91000 = N/A (default),
                                                N positive, S negative.
-|==============================================================================
+|======
 
 The final pair of fields in the table above is a waypoint.  The message may
 end with 1 to 16 waypoints.
 
 .Route Type Codes
 [width="50%",frame="topbot"]
-|===================================
+|======
 |0    |Undefined (default)
 |1    |Mandatory
 |2    |Recommended
@@ -1774,7 +1774,7 @@ end with 1 to 16 waypoints.
 |5    |Ship route plan
 |6-30 |Reserved for future usage
 |31   |Cancel route identified by message linkage
-|===================================
+|======
 
 ==== IMO289 Text description (addressed) ====
 
@@ -1789,7 +1789,7 @@ via the Message Linkage ID field.
 
 //: Type 6(1/30)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len    |Description       |Member     |T|Units
 |0-5     |  6    |Message Type      |type       |u|Constant: 6
 |6-7     |  2    |Repeat Indicator  |repeat     |u|As in Common Navigation Block
@@ -1803,7 +1803,7 @@ via the Message Linkage ID field.
 |82-87   |  6    |FID               |fid        |u|FID = 30
 |88-97   | 10    |Message Linkage ID|linkage    |u|Unsigned integer
 |98-?    | 6-930 |Description       |description|t|String
-|==============================================================================
+|======
 
 There is an equivalent subtype of message 8 that is a broadcast description.
 
@@ -1817,7 +1817,7 @@ different bit widths for the latitude and longitude fields.
 
 //: Type 6(1/32)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description            |Member    |T|Units
 |0-5     |  6 |Message Type           |type      |u|Constant: 6
 |6-7     |  2 |Repeat Indicator       |repeat    |u|As in Common Navigation Block
@@ -1847,7 +1847,7 @@ different bit widths for the latitude and longitude fields.
 |80-87   |  8 |Current Speed Predicted|cspeed    |U1|0-250, units of 0.1 knots,
                                                     251 = speed >= 25.1 knots,
                                                     255 = N/A (default).
-|=============================================================================
+|======
 
 The group of fields from longitude on may repeat twice more to convey up to
 three points of tidal information.
@@ -1866,7 +1866,7 @@ once.
 
 //: Type 6(200/21)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member    |T|Units
 |0-5     |  6 |Message Type       |type      |u|Constant: 6
 |6-7     |  2 |Repeat Indicator   |repeat    |u|As in Common Navigation Block
@@ -1891,7 +1891,7 @@ once.
 |231-242 | 12 |Air Draught        |airdraught|u|0-4000 * 0.01m,
                                                 0 = Unknown (default)
 |243-247 |  5 |Spare              |          |x|Not used
-|==============================================================================
+|======
 
 <<INLAND>> says of the Destination MMSI field "a virtual MMSI number
 should be used for each country, each national AIS network should
@@ -1910,7 +1910,7 @@ a lock, bridge or terminal to a certain vessel in response to the
 preceding ETA request.
 
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member    |T|Units
 |0-5     |  6 |Message Type       |type      |u|Constant: 6
 |6-7     |  2 |Repeat Indicator   |repeat    |u|As in Common Navigation Block
@@ -1933,7 +1933,7 @@ preceding ETA request.
 |222-227 |  6 |RTA minute         |minute    |u|0-59, 60=N/A (default)
 |228-229 |  2 |Status             |status    |e|See "Status Codes" below
 |230-231 |  2 |Spare              |          |x|Not used
-|==============================================================================
+|======
 
 OPEN-QUESTION: <<INLAND>> does not specify whether ETA time is UTC
 or local.
@@ -1942,12 +1942,12 @@ OPEN-QUESTION: No default is specified for the Status field.
 
 .Lock/Bridge/Terminal status codes
 [frame="topbot"]
-|==============================================================================
+|======
 | 0 | Operational
 | 1 | Limited operation
 | 2 | Out of order
 | 3 | N/A
-|==============================================================================
+|======
 
 ==== Number of persons on board (Inland AIS) ====
 
@@ -1959,7 +1959,7 @@ A message 6 subtype. DAC = 200 FID = 55.  Fixed length, 168 bits.
 
 //: Type 6(200/55)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member    |T|Units
 |0-5     |  6 |Message Type         |type      |u|Constant: 6
 |6-7     |  2 |Repeat Indicator     |repeat    |u|As in Common Navigation Block
@@ -1981,7 +1981,7 @@ A message 6 subtype. DAC = 200 FID = 55.  Fixed length, 168 bits.
                                                   0-254,
                                                   255 = Unknown (default)
 |117-167 | 51 |Spare                |          |x|Not used
-|==============================================================================
+|======
 
 ==== AtoN monitoring data (GLA) ====
 
@@ -2008,7 +2008,7 @@ process this variant.
 
 //: Type 6(235-250:10)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description       |Member     |T|Units
 |0-5     |  6 |Message Type      |type       |u|Constant: 6
 |6-7     |  2 |Repeat Indicator  |repeat     |u|As in Common Navigation Block
@@ -2042,7 +2042,7 @@ process this variant.
                                                 0  Digital Input 0=Off, 1=On
 |131-131 |  1 |Position status   |off_pos    |b|0=On position, 1=Off position
 |132-135 |  4 |Spare             |           |x|Not used
-|==============================================================================
+|======
 
 === Type 7: Binary Acknowledge ===
 
@@ -2053,7 +2053,7 @@ MMSIs included.
 
 //: Type 7
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description         |Member   |T|Units
 |0-5     |  6 |Message Type        |type     |u|Constant: 7
 |6-7     |  2 |Repeat Indicator    |repeat   |u|As in Common Navigation Block
@@ -2067,7 +2067,7 @@ MMSIs included.
 |134-135 |  2 |Sequence for MMSI 3 |mmsiseq3 |u|Not used
 |136-165 | 30 |MMSI number 4       |mmsi4    |u|9 decimal digits
 |166-167 |  2 |Sequence for MMSI 4 |mmsiseq4 |u|Not used
-|==============================================================================
+|======
 
 Use of the MMSI sequence fields was introduced in ITU-1371-5 to
 indicate the sequence number of the Type 6 to which this responds.
@@ -2084,7 +2084,7 @@ to a maximum of 1008 bits (up to 5 AIVDM sentence payloads).
 
 //: Type 8
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member    |T|Units
 |0-5     |  6 |Message Type         |type      |u|Constant: 8
 |6-7     |  2 |Repeat Indicator     |repeat    |u|As in Common Navigation Block
@@ -2094,7 +2094,7 @@ to a maximum of 1008 bits (up to 5 AIVDM sentence payloads).
 |50-55   |  6 |Functional ID        |fid       |u|Unsigned integer
 |56      |952 |Data                 |data      |d|Binary data,
                                                   May be shorter than 952 bits.
-|==============================================================================
+|======
 
 Interpretation of the binary payload is controlled by DAC/FID as in
 message type 6. The following is a non-exhaustive list of standardized
@@ -2102,7 +2102,7 @@ DAC-FID pairs in use for type 8; for an up-to-date list of registered applicatio
 messages, see <<IALA-ASM>>:
 
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 | DAC     |FID | Sub | Source     | Status     | Description
 |   1     | 11 |     | <<IMO236>> | Deprecated/In Use | Meteorological/Hydrological Data
 |   1     | 13 |     | <<IMO236>> | Deprecated | Fairway closed
@@ -2130,7 +2130,7 @@ messages, see <<IALA-ASM>>:
 | 366     |  1 |   4 | <<SEAWAY>> | In use     | PAWS Hydro / Current
 | 366     |  1 |   6 | <<SEAWAY>> | In use     | PAWS Hydro / Salinity Temp
 | 366     |  1 |   3 | <<SEAWAY>> | In use     | PAWS Vessel Procession Order
-|==============================================================================
+|======
 
 DAC/FID pairs are assigned separately per message type.  For St. Lawrence
 Seaway messages, the DAC may be 316 (Canada) or 366 (U.S.) depending
@@ -2162,7 +2162,7 @@ broadcast of this message of 12 minutes.
 
 //: Type 8(1/11)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member      |T|Units
 |0-5     |  6 |Message Type       |type        |u|Constant: 8
 |6-7     |  2 |Repeat Indicator   |repeat      |u|As in Common Navigation Block
@@ -2246,7 +2246,7 @@ broadcast of this message of 12 minutes.
                                                     2 = (reserved for future use)
                                                     3 = not available = default
 |346-351 |  6 |Spare                |           |x|Not used
-|==============================================================================
+|======
 
 <<IMO236>> says "If there is no data available, default value to be
 transmitted is the highest available binary value for that particular
@@ -2272,7 +2272,7 @@ WMO 306 Code table 4.201 specifies the following precipitation type values:
 
 .Precipitation Types
 [width="50%",frame="topbot",options="header"]
-|===================================
+|======
 |Code |Precipitation Type
 |0    |Reserved
 |1    |Rain
@@ -2282,11 +2282,11 @@ WMO 306 Code table 4.201 specifies the following precipitation type values:
 |5    |Snow
 |6    |Reserved
 |7    |N/A (default)
-|===================================
+|======
 
 .Beaufort Scale
 [width="50%",frame="topbot",options="header"]
-|===========================================================================
+|======
 |Scale|Description    | Sea Conditions
 |0    |Calm           |Flat.
 |1    |Light air      |Ripples without crests.
@@ -2310,7 +2310,7 @@ WMO 306 Code table 4.201 specifies the following precipitation type values:
                        greatly reduced.
 |13   |               |N/A (default)
 |14-15|               |Reserved
-|===========================================================================
+|======
 
 ==== Fairway Closed ====
 
@@ -2323,7 +2323,7 @@ Described in <<IMO236>> but deprecated by <<IMO289>>.
 
 //: Type 8(1/13)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description             |Member   |T|Units
 |0-5     |  6 |Message Type            |type     |u|Constant: 8
 |6-7     |  2 |Repeat Indicator        |repeat   |u|As in Common Navigation Block
@@ -2345,7 +2345,7 @@ Described in <<IMO236>> but deprecated by <<IMO289>>.
 |457-461 |  5 |To hour (UTC)           |thour    |u|0-23, 24=N/A (default)
 |462-467 |  6 |To minute (UTC)         |tminute  |u|0-59, 60=N/A (default)
 |468-471 |  4 |Spare                   |         |x|Not used
-|==============================================================================
+|======
 
 No default is specified for the radius field in the standard.
 
@@ -2358,7 +2358,7 @@ Deprecated in <<IMO289>>.
 
 //: Type 8(1/15)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member    |T|Units
 |0-5     |  6 |Message Type         |type      |u|Constant: 8
 |6-7     |  2 |Repeat Indicator     |repeat    |u|As in Common Navigation Block
@@ -2370,7 +2370,7 @@ Deprecated in <<IMO289>>.
                                                   0 = N/A (default),
                                                   2047 = >= 2047 m,
 |67-71   |  5 |Spare                |          |x|Not used
-|==============================================================================
+|======
 
 ==== VTS-Generated/Synthetic targets ====
 
@@ -2380,7 +2380,7 @@ bits.  This message is laid out identically in <<IMO236>> and
 
 //: Type 8(1/17)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member     |T|Units
 |0-5     |  6 |Message Type       |type       |u|Constant: 8
 |6-7     |  2 |Repeat Indicator   |repeat     |u|As in Common Navigation Block
@@ -2405,7 +2405,7 @@ bits.  This message is laid out identically in <<IMO236>> and
                                                  360 = N/A (default).
 |106-111 |  6 |Time Stamp         |second     |u|Second of UTC timestamp.
 |112-121 | 10 |Speed Over Ground  |speed      |u|0-254 in knots, 255 = N/A.
-|==============================================================================
+|======
 
 The interpretation of the target identifier field depends on the
 preceding type key.  For 0 and 1 it is a big-endian unsigned binary
@@ -2433,7 +2433,7 @@ length: 360 bits.
 
 //: Type 8(1/19)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len  |Description           |Member  |T|Units
 |0-5     |   6 |Message Type          |type    |u|Constant: 8
 |6-7     |   2 |Repeat Indicator      |repeat  |u|As in Common Navigation Block
@@ -2458,11 +2458,11 @@ length: 360 bits.
 |247-252 |   6 |UTC minute            |minute  |u|0-59, 60=N/A (default)
 |253-257 |   5 |Expected Next Signal  |nextsignal|e|See "Marine Traffic Signals"
 |258-359 | 102 |Spare                 |        |x|Not used
-|==============================================================================
+|======
 
 .Marine Traffic Signals
 [width="50%",frame="topbot",options="header"]
-|===========================================================================
+|======
 |Code |Position Fix Type
 |  0  |N/A (default)
 |  1  |IALA port traffic signal 1: Serious emergency – all vessels to stop
@@ -2486,7 +2486,7 @@ length: 360 bits.
 | 13  |Japan Traffic Signal - X = Vessels shall not proceed, except a vessel
        which receives the direction from the competent authority.
 |14-31|Reserved
-|===========================================================================
+|======
 
 ==== IMO289 Weather observation report from ship ====
 
@@ -2499,7 +2499,7 @@ length: 360 bits.
 //: Type 8(1/21)
 .Weather observation report from ship: Non-WMO variant
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len  |Description        |Member      |T|Units
 |0-5     |   6 |Message Type       |type        |u|Constant: 8
 |6-7     |   2 |Repeat Indicator   |repeat      |u|As in Common Navigation Block
@@ -2552,7 +2552,7 @@ length: 360 bits.
 |351-356 |  6  |Swell period       |swellperiod |u|Seconds: 0-60,
                                                    63 = N/A (default).
 |357-359 |  3  |Spare              |            |x|Not used
-|==============================================================================
+|======
 
 The vislimit bit, when on, indicates that the maximum range of the
 visibility equipment was reached and the visibility reading shall be
@@ -2563,7 +2563,7 @@ The following table applies:
 
 .Weather observation report from ship: WMO Code 45501
 [width="50%",frame="topbot",options="header"]
-|===========================================================================
+|======
 |Code |Precipitation Type
 |  0  |Clear (no clouds at any level)
 |  1  |Cloudy
@@ -2575,11 +2575,11 @@ The following table applies:
 |  7  |Thunderstorm
 |  8  |N/A (default)
 | 9-15|Reserved for future use
-|===========================================================================
+|======
 
 .Weather observation report from ship: WMO variant
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len  |Description            |Member  |T|Units
 |0-5     |   6 |Message Type           |type    |u|Constant: 8
 |6-7     |   2 |Repeat Indicator       |repeat  |u|As in Common Navigation Block
@@ -2722,7 +2722,7 @@ The following table applies:
 |356-359 |   4 |Bearing of Ice Edge    |icebearing|u|Bearing: 45-360 deg,
                                                      dir = (value*45) for 1-8,
                                                      15 = N/A (default).
-|==============================================================================
+|======
 
 The "minute" entry actually only identifies the end of a 10-minute interval.
 
@@ -2747,7 +2747,7 @@ is the message header format:
 //: Type 8(1/22)
 .Area Notice (addressed) message header
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member     |T|Units
 |0-5     |  6 |Message Type         |type       |u|Constant: 6
 |6-7     |  2 |Repeat Indicator     |repeat     |u|As in Common Navigation Block
@@ -2784,7 +2784,7 @@ is the message header format:
 |810-893 | 84 |Subarea payload #9   |shape data |array|See "Subarea Payloads"
 |894-896 |  3 |Subarea shape #10    |subarea type |u|0-5 (see "Subarea Types")
 |897-980 | 84 |Subarea payload #10  |shape data |array|See "Subarea Payloads"
-|==============================================================================
+|======
 
 The sub-area indications are as described under the addressed form,
 message type 6 with DAC = 1 and FID = 23.
@@ -2798,7 +2798,7 @@ Replaces a deprecated trial message from <<IMO236>>.
 
 //: Type 8(1/24)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description            |Member        |T|Units
 |0-5     |  6 |Message Type           |type          |u|Constant: 8
 |6-7     |  2 |Repeat Indicator       |repeat        |u|As in CNB
@@ -2873,7 +2873,7 @@ Replaces a deprecated trial message from <<IMO236>>.
                                                         1-8190,
                                                         8191 = >= 8191.
 |350-359 | 10 |Spare                  |              |x|Not used
-|==============================================================================
+|======
 
 The special value of 81.91 for air draught is probably a drafting
 error in <<IMO289>>, as the scaled field does not have the precision
@@ -2887,17 +2887,17 @@ interpreted according to the following table:
 
 .SOLAS Status
 [width="50%",frame="topbot",options="header"]
-|=============================================================================
+|======
 |Code |Meaning
 |0    |Not available or requested (default)
 |1    |Equipment operational
 |2    |Equipment not operational
 |3    |No data (equipment may or may not be on board/or its status is unknown)
-|=============================================================================
+|======
 
 .Ice Class
 [width="50%",frame="topbot",options="header"]
-|=============================================================================
+|======
 |Code |Meaning
 |0    |Not classified
 |1    |IACS PC 1
@@ -2912,7 +2912,7 @@ interpreted according to the following table:
 |10   |RS Ice1
 |11-14|Reserved for future use
 |15   |Not available = default
-|=============================================================================
+|======
 
 ACS = International Association of Classification Societies
 
@@ -2943,7 +2943,7 @@ A message 8 subtype. DAC = 001 FID = 26. Variable length: 168-1008 bits.
 //: Type 8(1/26)
 .Environmental message header
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member     |T|Units
 |0-5     |  6 |Message Type         |type       |u|Constant: 6
 |6-7     |  2 |Repeat Indicator     |repeat     |u|As in Common Navigation Block
@@ -2958,7 +2958,7 @@ A message 8 subtype. DAC = 001 FID = 26. Variable length: 168-1008 bits.
 |14-19   |  6 |Minute (UTC)         |minute     |u|0-59; 60 = N/A (default)
 |20-26   |  7 |Site ID              |site       |u|Binary ID of sensor site
 |27-111  | 85 |Sensor payload       |payload    |d|Sensor payload data
-|==============================================================================
+|======
 
 The fixed header is followed by 1-5 sensor records, each 112 bits
 long.  The Sensor Report Type is interpreted as follows, and controls
@@ -2966,7 +2966,7 @@ the interpretation of the sensor payload data.
 
 .Sensor report types
 [frame="topbot"]
-|==============================================================================
+|======
 | 0 | Site location
 | 1 | Station ID
 | 2 | Wind
@@ -2979,13 +2979,13 @@ the interpretation of the sensor payload data.
 | 9 | Weather
 | 10| Air gap/Air draft
 | 11| (reserved for future use)
-|==============================================================================
+|======
 
 Here are the payload types for each variant:
 
 .Site location payload
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description      |Member   |T|Units
 |0-27    | 28 |Longitude        |lon      |I4|As in Common Navigation Block
 |28-54   | 27 |Latitude         |lat      |I4|As in Common Navigation Block
@@ -2997,11 +2997,11 @@ Here are the payload types for each variant:
 |66-69   |  4 |Sensor owner     |owner    |e|See "Sensor Owner Codes"
 |70-72   |  3 |Data timeout     |timeout  |e|See "Data Timeout Codes"
 |73-84   | 12 |Spare            |         |x|Not used
-|==============================================================================
+|======
 
 .Sensor Owner Codes
 [frame="topbot"]
-|==============================================================================
+|======
 |   0  | Unknown (default)
 |   1  | Hydrographic office
 |   2  | Inland waterway authority
@@ -3011,11 +3011,11 @@ Here are the payload types for each variant:
 |   6  | Coast guard
 | 7-13 | (reserved for future use)
 |  14  | (reserved for regional use)
-|==============================================================================
+|======
 
 .Data Timeout Codes
 [frame="topbot"]
-|==============================================================================
+|======
 |   0  | No time period (default)
 |   1  | 10 minutes
 |   2  | 1 hour
@@ -3023,19 +3023,19 @@ Here are the payload types for each variant:
 |   4  | 12 hours
 |   5  | 24 hours
 |  6-7 | (reserved for future use)
-|==============================================================================
+|======
 
 .Station ID payload
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member     |T|Units
 |  0     | 84 |Name                 |name       |t|14 chars of six-bit ASCII.
 |  84    |  1 |Spare                |           |x|Not used
-|==============================================================================
+|======
 
 .Wind report payload
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member      |T|Units
 |0-6     |  7 |Average Wind Speed |wspeed      |u|10-min avg wind speed,
                                                   0-120 in 1-knot units,
@@ -3071,13 +3071,13 @@ Here are the payload types for each variant:
                                                   255 = N/A (default),
                                                   0 = cancel forecast.
 |82-84  |  3 |Spare                |          |x|Not used
-|==============================================================================
+|======
 
 The timestamp group is intended as a valid time of forecast.
 
 .Sensor Types
 [frame="topbot"]
-|==============================================================================
+|======
 |   0  | No data (default)
 |   1  | Raw real time
 |   2  | Real time with quality control
@@ -3086,11 +3086,11 @@ The timestamp group is intended as a valid time of forecast.
 |   5  | Nowcast (a continuous forecast)
 |   6  | (reserved for future use)
 |   7  | Sensor not available
-|==============================================================================
+|======
 
 .Water level report payload
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description              |Member     |T|Units
 |0-0     | 1  |Water Level Type         |absolute   |b|False if relative to
                                                        reference datum.
@@ -3119,7 +3119,7 @@ The timestamp group is intended as a valid time of forecast.
                                                        255 = N/A (default),
                                                        0 = cancel forecast.
 |68-84  | 17 |Spare                |                |x|Not used
-|==============================================================================
+|======
 
 IMO289 says water level is in 0.1m steps, but this is incompatible with the
 two digits of precision in the range.
@@ -3128,7 +3128,7 @@ The timestamp group is intended as a valid time of forecast.
 
 .Vertical Reference Datum
 [frame="topbot"]
-|==============================================================================
+|======
 |   0  | Mean Lower Low Water (MLLW)
 |   1  | International Great Lakes Datum (IGLD-85)
 |   2  | Local river datum
@@ -3145,11 +3145,11 @@ The timestamp group is intended as a valid time of forecast.
 |   13 | gauge
 |   14 | Unknown/not available (default)
 | 15-30| Reserved for future use
-|==============================================================================
+|======
 
 .Current flow (2D) report payload
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member    |T|Units
 |0-7     |  8 |Current Speed #1     |cspeed1   |U1|0.0-24.5 knots:
                                                    units 0.1 knots,
@@ -3186,11 +3186,11 @@ The timestamp group is intended as a valid time of forecast.
                                                   363-511 (reserved).
 |78-80   | 3  |Sensor Description   |sensortype|e|See "Sensor Types"
 |81-84   | 4  |Spare                |          |x|Not used
-|==============================================================================
+|======
 
 .Current flow (3D) payload
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description                          |Member  |T|Units
 |0-7     |  8 |Current Vector component North (u) #1|cnorth1 |U1|0.0-24.5 knots:
                                                    units 0.1 knots,
@@ -3234,11 +3234,11 @@ The timestamp group is intended as a valid time of forecast.
                                                    363-511 (reserved).
 |66-68   | 3  |Sensor Description   |sensortype|e|See "Sensor Types"
 |69-84   | 16 |Spare                |          |x|Not used
-|==============================================================================
+|======
 
 .Horizontal current report payload
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member     |T|Units
 |0-8     |  9 |Current Bearing #1   |bearing1   |u|0-359: deg from true north,
                                                   >=360 = N/A (default).
@@ -3275,11 +3275,11 @@ The timestamp group is intended as a valid time of forecast.
                                                    362 = N/A (default),
                                                    363-511 (reserved).
 |84-84   |  1 |Spare                |          |x|Not used
-|==============================================================================
+|======
 
 .Sea state report payload
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description                |Member     |T|Units
 |0-7     |  8 |Swell Height               |swheight   |U1|Units 0.1m: 0.0-24.5m,
                                                          246 = height >= 24,6m,
@@ -3326,13 +3326,13 @@ The timestamp group is intended as a valid time of forecast.
                                                          502 = data N/A (default)
                                                          503 - sensor N/A,
                                                          504-511 reserved.
-|==============================================================================
+|======
 
 The standard does not fix the meaning of a water temperature depth of 127.
 
 .Salinity report payload
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member       |T|Units
 |0-9     | 10 |Water Temperature  |watertemp    |U1|-10.0 to 50.0:
                                                     units 0.1 C,
@@ -3363,13 +3363,13 @@ The standard does not fix the meaning of a water temperature depth of 127.
                                                   3 = reserved.
 |47-49   |  3 |Sensor Description |sensortype  |e|See "Sensor Types"
 |50-84   | 35 |Spare              |            |x|Not used
-|==============================================================================
+|======
 
 No default is specified for salinity type.
 
 .Weather report payload
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description          |Member     |T|Units
 |0-10    | 11 |Air Temperature      |temperature|i|Dry bulb temp: 0.1 deg C
                                                     -60.0 to +60.0,
@@ -3411,14 +3411,14 @@ No default is specified for salinity type.
                                                      503 - sensor N/A,
                                                      504-511 reserved.
 |60-84   | 25 |Spare                |           |x|Not used
-|==============================================================================
+|======
 
 The standard does not specify how to code 'Precipitation Type' when
 there is none.
 
 .Air Gap/Air Draft report payload
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description         |Member     |T|Units
 |0-12    | 13 |Air Draught         |airdraught |U1|1-81.9m in 0.1m steps,
                                                    8191 = distance >= 81.91m,
@@ -3437,7 +3437,7 @@ there is none.
 |46-50  |  5 |Hour (UTC)           |hour            |u|0-23; 24 = N/A (default)
 |51-56  |  6 |Minute (UTC)         |minute          |u|0-59; 60 = N/A (default)
 |57-84  | 28 |Spare                |                |x|Not used
-|==============================================================================
+|======
 
 Air draught is the vertical distance measured from the ship's
 waterline to the highest point on the ship. Air gap is the vertical
@@ -3454,7 +3454,7 @@ A message 8 subtype. DAC = 001 FID = 27. Variable length: 172-997 bits.
 
 //: Type 8(1/27)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description       |Member   |T|Units
 |0-5     |  6 |Message Type      |type     |u|Constant: 8
 |6-7     |  2 |Repeat Indicator  |repeat   |u|As in Common Navigation Block
@@ -3481,7 +3481,7 @@ A message 8 subtype. DAC = 001 FID = 27. Variable length: 172-997 bits.
 |28-54   | 27 |Latitude          |lat      |I4|Unit = minutes * 0.001,
                                               91000 = N/A (default),
                                               N positive, S negative.
-|==============================================================================
+|======
 
 The final pair of fields in the table above is a waypoint.  The message may
 end with 1 to 16 waypoints.
@@ -3498,7 +3498,7 @@ via the Message Linkage ID field.
 
 //: Type 8(1/29)
 [frame="topbot",options="header"]
-|=============================================================================
+|======
 |Field   |Len    |Description       |Member     |T|Units
 |0-5     |  6    |Message Type      |type       |u|Constant: 8
 |6-7     |  2    |Repeat Indicator  |repeat     |u|As in Common Navigation Block
@@ -3508,7 +3508,7 @@ via the Message Linkage ID field.
 |50-55   |  6    |FID               |fid        |u|FID = 29
 |56-65   | 10    |Message Linkage ID|linkage    |u|Unsigned integer
 |66-?    | 6-966 |Description       |description|t|String
-|==============================================================================
+|======
 
 There is an equivalent subtype of message 6 that is an addressed description.
 
@@ -3523,7 +3523,7 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
 
 //: Type 8(1/31)
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member      |T|Units
 |0-5     |  6 |Message Type       |type        |u|Constant: 8
 |6-7     |  2 |Repeat Indicator   |repeat      |u|As in Common Navigation Block
@@ -3624,7 +3624,7 @@ decimeters), and (c) end padding changes from 6 to 10 bits.
                                                     2 = (reserved for future use)
                                                     3 = not available = default
 |350-359 | 10 |Spare                |           |x|Not used
-|==============================================================================
+|======
 
 Precipitation types and Beaufort scale are as for the <<IMO236>> version.
 
@@ -3639,7 +3639,7 @@ message 5.
 
 //: Type 8(200/10)
 [frame="topbot",options="header"]
-|===============================================================================
+|======
 |Field   |Len |Description            |Member   |T|Units
 |0-5     |  6 |Message Type           |type     |u|Constant: 8
 |6-7     |  2 |Repeat Indicator       |repeat   |u|As in Common Navigation Block
@@ -3661,7 +3661,7 @@ message 5.
 |159-159 |  1 |Heading inf. quality   |heading_q|b|0 = low/GNSS (default)
                                                    1 = high
 |160-167 |  8 |Spare                  |         |x|Not used
-|==============================================================================
+|======
 
 OPEN-QUESTION: <<INLAND>> is not explicit whether the
 "Ship/combination type" field is to contain full ERI codes with range
@@ -3670,7 +3670,7 @@ expand both.  Full ERI codes have been observed in the wild.
 
 .ERI Classification
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Code | SOLAS | Description
 |8000 |  99   | Vessel, type unknown
 |8010 |  79   | Motor freighter
@@ -3713,44 +3713,44 @@ expand both.  Full ERI codes have been observed in the wild.
 |8350 |  80   | Pushtow, five barges at least one tanker or gas barge
 |8360 |  80   | Pushtow, six barges at least one tanker or gas barge
 |8370 |  80   | Pushtow, seven barges at least one tanker or gas barge
-|=============================================================================
+|======
 
 .SOLAS ship type, first digit
 [frame="topbot"]
-|=============================================================================
+|======
 | 3 | Vessel
 | 7 | Cargo ship
 | 8 | Tanker
 | 9 | Other types of ship
-|=============================================================================
+|======
 
 .SOLAS ship type, second digit
 [frame="topbot"]
-|=============================================================================
+|======
 | 0 | All ships of this type
 | 1 | Towing
 | 8 | Tanker
 | 9 | No additional information
-|=============================================================================
+|======
 
 .Hazard code
 [frame="topbot"]
-|==============================================================================
+|======
 | 0 | 0 blue cones/lights
 | 1 | 1 blue cone/light
 | 2 | 2 blue cones/lights
 | 3 | 3 blue cones/lights
 | 4 | 4 B-Flag
 | 5 | Unknown (default)
-|==============================================================================
+|======
 
 .Load status
 [frame="topbot"]
-|==============================================================================
+|======
 | 0 | N/A (default)
 | 1 | Unloaded
 | 2 | Loaded
-|==============================================================================
+|======
 
 ==== EMMA Warning Report (Inland AIS) ====
 
@@ -3763,7 +3763,7 @@ replace the Notices to Skippers warnings.
 
 //: Type 8(200/23)
 [frame="topbot",options="header"]
-|===============================================================================
+|======
 |Field   |Len |Description         |Member      |T|Units
 |0-5     |  6 |Message Type        |type        |u|Constant: 8
 |6-7     |  2 |Repeat Indicator    |repeat      |u|As in Common Navigation Block
@@ -3795,7 +3795,7 @@ replace the Notices to Skippers warnings.
                                                    3 = Strong
 |246-249 |  4 |Wind Direction      |wind        |e|See "EMMA Winds" below
 |250-255 |  6 |Spare               |            |x|Not used
-|===============================================================================
+|======
 
 OPEN-QUESTION: <<INLAND>> is not explicit about the interpretation of
 the longitude and latitude fields; these semantics are assumed here
@@ -3815,7 +3815,7 @@ are UTC or local.
 
 .EMMA Type Codes
 [frame="topbot"]
-|==============================
+|======
 |  0 | NA | Not Available
 |  1 | WI | Wind
 |  2 | RA | Rain
@@ -3826,11 +3826,11 @@ are UTC or local.
 |  7 | HT | High temperature
 |  8 | FL | Flood
 |  9 | FI | Forest Fire
-|==============================
+|======
 
 .EMMA Winds
 [frame="topbot"]
-|==============================
+|======
 |  1 | N  | North
 |  2 | NE | North East
 |  3 | E  | East
@@ -3839,7 +3839,7 @@ are UTC or local.
 |  6 | SW | South West
 |  7 | W  | West
 |  8 | NW | North West
-|==============================
+|======
 
 ==== Water Levels (Inland AIS) ====
 
@@ -3853,7 +3853,7 @@ messages.
 
 //: Type 8(200/24)
 [frame="topbot",options="header"]
-|===============================================================================
+|======
 |Field   |Len |Description         |Member     |T|Units
 |0-5     |  6 |Message Type        |type       |u|Constant: 6
 |6-7     |  2 |Repeat Indicator    |repeat     |u|As in Common Navigation Block
@@ -3865,7 +3865,7 @@ messages.
 |68      |    |                    |gauges     |a4|Gauge measurement array
 |0-10    | 11 |Gauge ID            |id         |u|0=unknown (default)
 |11-24   | 14 |Water Level         |level      |i|cm, 0=unknown (default)
-|===============================================================================
+|======
 
 Water levels are relative to the local standard, e.g. GIW in Germany
 and RNW on the Danube.
@@ -3882,7 +3882,7 @@ message 8 at regular intervals.
 
 //: Type 8(200/40)
 [frame="topbot",options="header"]
-|===============================================================================
+|======
 |Field   |Len |Description         |Member     |T|Units
 |0-5     |  6 |Message Type        |type       |u|Constant: 8
 |6-7     |  2 |Repeat Indicator    |repeat     |u|As in Common Navigation Block
@@ -3897,7 +3897,7 @@ message 8 at regular intervals.
 |124-126 |  3 |Direction of impact |direction  |e|See "Signal Impact" below
 |127-156 | 30 |Light Status        |status     |e|See "Signal Status" below
 |157-167 | 11 |Spare               |           |x|Not used
-|===============================================================================
+|======
 
 OPEN-QUESTION: <<INLAND>> is not explicit about the interpretation of
 the longitude and latitude fields; these semantics are assumed here
@@ -3910,13 +3910,13 @@ unspecified.
 //: direction vocabulary
 .Direction of Signal Impact
 [frame="topbot"]
-|===============================================================================
+|======
 | 0 | Unknown (default)
 | 1 | Upstream
 | 2 | Downstream
 | 3 | To left bank
 | 4 | To right bank
-|===============================================================================
+|======
 
 The Signal Status field is interpreted as 9 decimal digits describing
 the lights as numbered in their Signal Form diagram  - typically left
@@ -3926,7 +3926,7 @@ following way:
 //: status vocabulary
 .Signal Status
 [frame="topbot"]
-|===============================================================================
+|======
 | 0 | Unknown (default)
 | 1 | No light
 | 2 | White
@@ -3935,7 +3935,7 @@ following way:
 | 5 | Red
 | 6 | White flashing
 | 7 | Yellow flashing.
-|===============================================================================
+|======
 
 === Type 9: Standard SAR Aircraft Position Report ===
 
@@ -3944,7 +3944,7 @@ bits is 168.
 
 //: Type 9
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member     |T|Encoding
 |0-5     | 6  |Message Type       |type       |u|Constant: 9
 |6-7     | 2  |Repeat Indicator   |repeat     |u|As in Common Navigation Block
@@ -3963,7 +3963,7 @@ bits is 168.
 |146-146 | 1  |Assigned           |assigned   |b|Assigned-mode flag
 |147-147 | 1  |RAIM flag          |raim       |b|As for common navigation block
 |148-167 |20  |Radio status       |radio      |u|See <<IALA>> for details.
-|==============================================================================
+|======
 
 Altitude is in meters.  The special value 4095 indicates altitude is
 not available; 4094 indicates 4094 meters or higher.
@@ -3984,7 +3984,7 @@ number of bits is 72.
 
 //: Type 10
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member     |T|Encoding
 |0-5     | 6  |Message Type       |type       |u|Constant: 10
 |6-7     | 2  |Repeat Indicator   |repeat     |u|As in Common Navigation Block
@@ -3992,7 +3992,7 @@ number of bits is 72.
 |38-39   | 2  |Spare              |           |x|Not used
 |40-69   |30  |Destination MMSI   |dest_mmsi  |u|9 decimal digits
 |70-71   | 2  |Spare              |           |x|Not used
-|==============================================================================
+|======
 
 === Type 11: UTC/Date Response ===
 
@@ -4006,7 +4006,7 @@ six-bit text.  This message is variable in length up to a maximum of
 
 //: Type 12
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member      |T|Units
 |0-5     |  6 |Message Type       |type        |u|Constant: 12
 |6-7     |  2 |Repeat Indicator   |repeat      |u|As in Common Navigation Block
@@ -4018,7 +4018,7 @@ six-bit text.  This message is variable in length up to a maximum of
 |71      |  1 |Spare              |            |x|Not used
 |72      |936 |Text               |text        |t|1-156 chars of six-bit text.
                                                   May be shorter than 936 bits.
-|==============================================================================
+|======
 
 Pragmatic note: On <<<AISHUB>>> the actual content of these messages is
 highly variable, ranging from fairly plain English ("PLEASE REPORT TO
@@ -4045,7 +4045,7 @@ six-bit text.  This message is variable in length up to a maximum of
 
 //: Type 14
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member    |T|Units
 |0-5     |  6 |Message Type       |type      |u|Constant: 14
 |6-7     |  2 |Repeat Indicator   |repeat    |u|As in Common Navigation Block
@@ -4053,7 +4053,7 @@ six-bit text.  This message is variable in length up to a maximum of
 |38-39   |  2 |Spare              |          |x|Not used
 |40      |968 |Text               |text      |t|1-161 chars of six-bit text.
                                                 May be shorter than 968 bits.
-|==============================================================================
+|======
 
 Note: 161 * 6 = 966. <<IALA>> specifies 968 because over-the-air
 messages are required to be padded to an 8-bit byte boundary by
@@ -4075,7 +4075,7 @@ a particular time division in the TDMA packet layer.
 
 //: Type 15
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description         |Member    |T|Units
 |0-5     |  6 |Message Type        |type      |u|Constant: 15
 |6-7     |  2 |Repeat Indicator    |repeat    |u|As in Common Navigation Block
@@ -4092,7 +4092,7 @@ a particular time division in the TDMA packet layer.
 |140-145 |  6 |First message type  |type2_1   |u|Unsigned integer
 |146-157 | 12 |First slot offset   |offset2_1 |u|Unsigned integer
 |158-159 |  2 |Spare               |          |x|Not used
-|==============================================================================
+|======
 
 There are four use cases for this message.  A decoder must dispatch on
 the length of the data packet to determine which it is seeing:
@@ -4125,7 +4125,7 @@ Length may be 96 or 144 bits.
 
 //: Type 16
 [frame="topbot",options="header"]
-|============================================================================
+|======
 |Field   |Len |Description         |Member     |T|Units
 |0-5     |  6 |Message Type        |type       |u|Constant: 16
 |6-7     |  2 |Repeat Indicator    |repeat     |u|As in Common Navigation Block
@@ -4137,7 +4137,7 @@ Length may be 96 or 144 bits.
 |92-121  | 30 |Destination B MMSI  |mmsi2      |u|9 decimal digits
 |122-133 | 12 |Offset B            |offset2    |u|See <<IALA>>
 |134-143 | 10 |Increment B         |increment2 |u|See <<IALA>>
-|=============================================================================
+|======
 
 If the message is 96 bits long, it should be interpreted as an
 assignment for a single station (92 bits) followed by 4 bits of
@@ -4164,7 +4164,7 @@ depending on payload size.
 
 //: Type 17
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description         |Member     |T|Units
 |0-5     |  6 |Message Type        |type       |u|Constant: 17
 |6-7     |  2 |Repeat Indicator    |repeat     |u|As in Common Navigation Block
@@ -4174,7 +4174,7 @@ depending on payload size.
 |58-74   | 17 |Latitude            |lat        |I1|Signed: minutes/10
 |75-79   |  5 |Spare               |           |x|Not used - reserved
 |80-815  |736 |Payload             |data       |d|DGNSS correction data
-|==============================================================================
+|======
 
 Note that latitude and longitude are in units of a tenth of a minute;
 sign interpretation and out-of-band values are as in the Common
@@ -4199,7 +4199,7 @@ understand these fields."
 
 //: Type 18
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description        |Member   |T|Units
 |0-5     | 6  |Message Type       |type     |u|Constant: 18
 |6-7     | 2  |Repeat Indicator   |repeat   |u|As in Common Navigation Block
@@ -4231,7 +4231,7 @@ understand these fields."
                                                1 = assigned mode.
 |147-147 | 1  |RAIM flag          |raim     |b|As for common navigation block
 |148-167 |20  |Radio status       |radio    |u|See <<IALA>> for details.
-|==============================================================================
+|======
 
 The radio status is 20 bits rather than 19 because an extra first bit
 selects whether it should be interpreted as a SOTDMA or ITDMA state.
@@ -4250,7 +4250,7 @@ gathered automatically from sensors.
 
 //: Type 19
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field    |Len |Description            |Member       |T|Units
 |0-5      |  6 |Message Type           |type         |u|Constant: 19
 |6-7      |  2 |Repeat Indicator       |repeat       |u|As in CNN
@@ -4278,7 +4278,7 @@ gathered automatically from sensors.
                                                        1=Not ready (default).
 |307-307  |  1 |Assigned mode flag     |assigned     |u|See <<IALA>> for details
 |308-311  |  4 |Spare                  |             |x|Unused, should be zero
-|==============================================================================
+|======
 
 === Type 20 Data Link Management Message ===
 
@@ -4290,7 +4290,7 @@ the number of slot reservations (1 to 4) in the message.
 
 //: Type 20
 [frame="topbot",options="header"]
-|===============================================================================
+|======
 |Field    |Len |Description       |Member      |T|Units
 |0-5      | 6  |Message Type      |type        |u|Constant: 20
 |6-7      | 2  |Repeat Indicator  |repeat      |u|As in CNB
@@ -4312,7 +4312,7 @@ the number of slot reservations (1 to 4) in the message.
 |142-145  | 4  |Reserved slots    |number4     |u|Consecutive slots
 |146-148  | 3  |Time-out          |timeout4    |u|Allocation timeout in minutes
 |149-159  |11  |Increment         |increment4  |u|Repeat increment
-|===============================================================================
+|======
 
 See <<IALA>> for details on the meaning of these fields.
 
@@ -4327,7 +4327,7 @@ and 360 bits.
 
 //: Type 21
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field    |Len |Description            |Member      |T|Units
 |0-5      | 6  |Message Type           |type        |u|Constant: 21
 |6-7      | 2  |Repeat Indicator       |repeat      |u|As in CNB
@@ -4350,14 +4350,14 @@ and 360 bits.
 |270-270  | 1  |Assigned-mode flag     |assigned    |b|See <<IALA>> for details
 |271-271  | 1  |Spare                  |            |x|Not used
 |272-360  |88  |Name Extension         |            |t|See Below
-|==============================================================================
+|======
 
 According to <<IALA>>, the aid type field has values 1-15 for fixed
 and 16-31 for floating aids to navigation.  The detailed list is as follows:
 
 .Navaid Types
 [frame="topbot",options="header"]
-|====================================================================
+|======
 |Code |Definition
 |0    |Default, Type of Aid to Navigation not specified
 |1    |Reference point
@@ -4393,7 +4393,7 @@ and 16-31 for floating aids to navigation.  The detailed list is as follows:
 |29   |Safe Water
 |30   |Special Mark
 |31   |Light Vessel / LANBY / Rigs
-|====================================================================
+|======
 
 The name field is up to 20 characters of 6-bit ASCII.  If this field
 is full (has no trailing @ characters) the decoder should interpret
@@ -4432,7 +4432,7 @@ network.
 
 //: Type 22
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field    |Len |Description      |Member    |T|Units
 |0-5      | 6  |Message Type     |type      |u|Constant: 22
 |6-7      | 2  |Repeat Indicator |repeat    |u|As in Common Navigation Block
@@ -4453,7 +4453,7 @@ network.
 |141-141  | 1  |Channel B Band   |band_b    |b|0=Default, 1=12.5kHz
 |142-144  | 3  |Zone size        |zonesize  |u|Size of transitional zone
 |145-167  |23  |Spare            |          |x|Reserved for future use
-|==============================================================================
+|======
 
 The values of the channel_a and channel_b fields are ITU frequency
 designators for channels A and B. Normally these will be 2087 and
@@ -4498,7 +4498,7 @@ station network.
 
 //: Type 23
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field    |Len |Description      |Member       |T|Units
 |0-5      | 6  |Message Type     |type         |u|Unsigned Integer: 23
 |6-7      | 2  |Repeat Indicator |repeat       |u|As in Common Navigation Block
@@ -4515,7 +4515,7 @@ station network.
 |146-149  | 4  |Report Interval  |interval     |e|See "Station Intervals"
 |150-153  | 4  |Quiet Time       |quiet        |u|0 = none, 1-15 quiet time in minutes
 |154-159  | 6  |Spare            |             |x|Not used
-|==============================================================================
+|======
 
 The target set of mobile stations is specified by the station-type and
 ship-type fields. An addressed (non-broadcast) message 22 overrides a
@@ -4531,16 +4531,16 @@ VHF channels as in Message Type 22. The field is interpreted as follows:
 
 .Transmit Modes
 [width="25%",frame="topbot"]
-|===================================
+|======
 |0 |TxA/TxB, RxA/RxB (default)
 |1 |TxA, RxA/RxB
 |2 |TxB, RxA/RxB
 |3 |Reserved for Future Use
-|===================================
+|======
 
 .Station Types
 [width="50%",frame="topbot"]
-|======================================================
+|======
 |0     |All types of mobiles (default)
 |1     |Reserved for future use
 |2     |All types of Class B mobile stations
@@ -4549,7 +4549,7 @@ VHF channels as in Message Type 22. The field is interpreted as follows:
 |5     |Class B shipborne mobile station (IEC62287 only)
 |6-9   |Regional use and inland waterways
 |10-15 |Reserved for future use
-|======================================================
+|======
 
 <<INLAND>> specifies 6 (only) as the station type value for inland
 waterways, reserving 7-9 for (other) regional uses.
@@ -4561,7 +4561,7 @@ interval is twice the interval given in the table.
 
 .Station Intervals
 [width="50%",frame="topbot"]
-|======================================================
+|======
 |0     |As given by the autonomous mode
 |1     |10 Minutes
 |2     |6 Minutes
@@ -4574,7 +4574,7 @@ interval is twice the interval given in the table.
 |9     |Next Shorter Reporting Interval
 |10    |Next Longer Reporting Interval
 |11-15 |Reserved for future use
-|======================================================
+|======
 
 Quiet Time is a 4 bit unsigned integer specifying how many minutes
 affected stations are to remain silent. If a class B station receives
@@ -4606,7 +4606,7 @@ is thanks to Kurt Schwehr.
 
 //: Type 24
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len |Description            | Member         |T|Units
 |0-5     |  6 | Message Type          | type           |u|Constant: 24
 |6-7     |  2 | Repeat Indicator      | repeat         |u|As in CNB
@@ -4625,7 +4625,7 @@ is thanks to Kurt Schwehr.
 |156-161 |  6 | Dimension to Starboard| to_starboard   |u|(Part B) Meters
 |132-161 | 30 | Mothership MMSI       | mothership_mmsi|u|(Part B) See below
 |162-167 |  6 | Spare                 |                |x|(Part B) Not used
-|===============================================================================
+|======
 
 If the Part Number field is 0, the rest of the message is interpreted
 as a Part A; if it is 1, the rest of the message is interpreted
@@ -4661,7 +4661,7 @@ Indicator; they always occur in the same order but some may be omitted.
 
 //: Type 25
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len   |Description            | Member      |T|Units
 |0-5     |  6   | Message Type          | type        |u|Constant: 25
 |6-7     |  2   | Repeat Indicator      | repeat      |u|As in CNB
@@ -4672,7 +4672,7 @@ Indicator; they always occur in the same order but some may be omitted.
 |40      |0/30  | Destination MMSI      | dest_mmsi   |u|Message destination
 |?       |0/16  | Application ID        | app_id      |u|Unsigned integer
 |?       |0-128 | Data                  | data        |d|Binary data
-|===============================================================================
+|======
 
 If the 'addressed' flag is on, 30 bits of data at offset 40 are
 interpreted as a destination MMSI.  Otherwise that field span becomes
@@ -4696,7 +4696,7 @@ Takes up 60-1064 bits (up to 5 slots).
 
 //: Type 26
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len   |Description           | Member     |T|Units
 |0-5     |  6   | Message Type         | type       |u|Constant: 26
 |6-7     |  2   | Repeat Indicator     | repeat     |u|As in CNB
@@ -4708,7 +4708,7 @@ Takes up 60-1064 bits (up to 5 slots).
 |?       |0/16  | Application ID       | app_id     |u|Unsigned integer
 |?       |0-1004| Data                 | data       |d|Binary data
 |?       |20    | Radio status         | radio      |u|See <<IALA>> for details.
-|===============================================================================
+|======
 
 The data field may span up to 5 256-bit slots in addition to the tail
 end of the base slot.  The application_ID field, if present, is to be
@@ -4738,7 +4738,7 @@ should warn when this occurs but decode the first 96 bits.
 
 //: Type 27
 [frame="topbot",options="header"]
-|==============================================================================
+|======
 |Field   |Len   |Description         |Member   |T|Units
 |0-5     |  6   |Message Type        |type     |u|Constant: 27
 |6-7     |  2   |Repeat Indicator    |repeat   |u|As in CNB
@@ -4759,7 +4759,7 @@ should warn when this occurs but decode the first 96 bits.
 |94-94   | 1    |GNSS Position status|gnss     |u|0 = current GNSS position
                                                   1 = not GNSS position (default)
 |95-95   | 1    |Spare               |         |x|Not used
-|==============================================================================
+|======
 
 == Local extensions ==
 
@@ -4871,7 +4871,7 @@ different (overlapping) set of field keys
 
 .NMEA 4.00 Field Types
 [frame="topbot",options="header"]
-|===========================================================================
+|======
 | IEC   | NMEA	| Type           | Description
 |  c    | c	| int>0          | UNIX time in seconds or milliseconds
 |  d    | d	| string         | Destination (at most 15 chars)
@@ -4880,7 +4880,7 @@ different (overlapping) set of field keys
 |       | r	| int>0          | relative time
 |  s    | s	| string         | Source / station
 |  i    | t	| string         | Text string (at most 15 chars)
-|===========================================================================
+|======
 
 The IEC 62320-1 and NMEA 4.10 c field is an emission time for the
 sentence it precedes. We're not yet sure what the time unit is.
@@ -5054,7 +5054,7 @@ ISO8601 format.
 
 .Timestamp fields
 [frame="topbot",options="header"]
-|===========================================================================
+|======
 |Message| ITU/IMO fields                   | JSON ISO8601 | Format
 |   4   | year,month,day,hour,minute,second| timestamp    | %4u-%02u-%02uT%02u:%02u:%02uZ
 |   5   | month,day,hour,minute            | eta          | %02u-%02uT%02u:%02uZ
@@ -5072,7 +5072,7 @@ ISO8601 format.
 |8(1/27)| month,day,hour,minute            | start        | %02u-%02uT%02u:%02uZ
 |8(200/23)| year,month,day,hour,minute     | start        |%4u-%02u-%02uT%02u:%02u
 |8(200/23)| year,month,day,hour,minute     | end          |%4u-%02u-%02uT%02u:%02u
-|===========================================================================
+|======
 
 . There are two variants of the encoding, one scaled and one
 unscaled, which differ in the treatment of float and
@@ -5096,7 +5096,7 @@ made integer or string display dependent on the "scaled" flag.)
 
 .Special fields
 [frame="topbot",options="header"]
-|===========================================================================
+|======
 |Message | Float Fields                         | Controlled Vocabularies
 | 1-3    | turn, speed, lon, lat                | status
 | 4, 11  | lon, lat                             | epfd
@@ -5138,7 +5138,7 @@ made integer or string display dependent on the "scaled" flag.)
 | 22-23  | ne_lon,ne_lat, sw_lon, sw_lat        | shiptype,stationtype
 | 24     | -                                    | shiptype
 | 27     | lon, lat                             | -
-|===========================================================================
+|======
 
 This table does not include fields that are scaled by multipliers to integers.
 These are reported in the multiplied form in both scaled and unscaled modes.
@@ -5151,7 +5151,7 @@ should do so rather than expanding to its controlled vocabulary.
 
 .String special values in scaled mode
 [frame="topbot",options="header"]
-|===========================================================================
+|======
 |Message | Fieldname | Special values
 | 1-3    | turn      |
 "nan" = not available, "fastright" = fast right turn (above 5deg/30sec degrees),
@@ -5159,7 +5159,7 @@ should do so rather than expanding to its controlled vocabulary.
 | 1-3    | speed     | "nan" = not available, "fast" = speed >= 102.2 knots
 |  9     | alt       | "nan" = not available, "high" = alt >= 4094 meters
 |  9     | speed     | "nan" = not available, "fast" = speed >= 1023.0 knots
-|===========================================================================
+|======
 
 . Trailing arrays are dumped as JSON subobject arrays.  The name of the
 array item is the name given in the 'a' table entry.  Explicit array count
