@@ -494,8 +494,15 @@ for i in ["AR", "CC", "CXX", "LD",
         if i == "LD":
             i = "SHLINK"
         env[i] = os.getenv(j)
-for i in ["ARFLAGS", "CFLAGS", "CXXFLAGS", "LDFLAGS", "SHLINKFLAGS",
-          "CPPFLAGS", "CCFLAGS", "LINKFLAGS"]:
+for i in ["ARFLAGS",
+          "CCFLAGS",
+          "CFLAGS",
+          "CPPFLAGS",
+          "CXXFLAGS",
+          "LDFLAGS",
+          "LINKFLAGS",
+          "SHLINKFLAGS",
+         ]:
     if i in os.environ:
         env.MergeFlags(Split(os.getenv(i)))
 
@@ -576,14 +583,14 @@ else:
 devenv = (("ADDR2LINE", "addr2line"),
           ("AR", "ar"),
           ("AS", "as"),
+          ("CC", "gcc"),
+          ("CPP", "cpp"),
           ("CXX", "c++"),
           ("CXXFILT", "c++filt"),
-          ("CPP", "cpp"),
-          ("GXX", "g++"),
-          ("CC", "gcc"),
           ("GCCBUG", "gccbug"),
           ("GCOV", "gcov"),
           ("GPROF", "gprof"),
+          ("GXX", "g++"),
           ("LD", "ld"),
           ("NM", "nm"),
           ("OBJCOPY", "objcopy"),
@@ -592,7 +599,8 @@ devenv = (("ADDR2LINE", "addr2line"),
           ("READELF", "readelf"),
           ("SIZE", "size"),
           ("STRINGS", "strings"),
-          ("STRIP", "strip"))
+          ("STRIP", "strip"),
+         )
 
 if env['target']:
     for (name, toolname) in devenv:
@@ -2740,7 +2748,8 @@ env.Clean(clean_misc, all_manpages.keys())
 # Clean compiled Python
 env.Clean(clean_misc,
           glob.glob('*.pyc') + glob.glob('gps/*.pyc') +
-          glob.glob('gps/*.so') + ['gps/__pycache__'])
+          glob.glob('gps/*.so') + glob.glob('*/__pycache__') +
+          ['__pycache__'])
 # Clean coverage and profiling files
 env.Clean(clean_misc, glob.glob('*.gcno') + glob.glob('*.gcda'))
 # Clean Python coverage files
