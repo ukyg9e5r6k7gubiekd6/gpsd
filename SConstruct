@@ -719,22 +719,6 @@ def CheckCompilerOption(context, option):
     return ret
 
 
-def CheckHeaderDefines(context, file, define):
-    context.Message('Checking if %s supplies %s... ' % (file, define))
-    ret = context.TryLink("""
-        #include <%s>
-        #ifndef %s
-        #error %s is not defined
-        #endif
-        int main(int argc, char **argv) {
-            (void) argc; (void) argv;
-            return 0;
-        }
-    """ % (file, define, define), '.c')
-    context.Result(ret)
-    return ret
-
-
 def CheckCompilerDefines(context, define):
     context.Message('Checking if compiler supplies %s... ' % (define,))
     ret = context.TryLink("""
@@ -808,7 +792,6 @@ config = Configure(env, custom_tests={
     'CheckC11': CheckC11,
     'CheckCompilerDefines': CheckCompilerDefines,
     'CheckCompilerOption': CheckCompilerOption,
-    'CheckHeaderDefines': CheckHeaderDefines,
     'CheckPKG': CheckPKG,
     'CheckXsltproc': CheckXsltproc,
     'GetPythonValue': GetPythonValue,
@@ -1179,7 +1162,7 @@ else:
         if config.env["magic_hat"]:
             announce("Forcing magic_hat=no since RFC2783 API is unavailable")
             config.env["magic_hat"] = False
-    tiocmiwait = config.CheckHeaderDefines("sys/ioctl.h", "TIOCMIWAIT")
+    tiocmiwait = config.CheckDeclaration("TIOCMIWAIT", "#include <sys/ioctl.h>")
     if not tiocmiwait and not kpps:
         announce("WARNING: Neither TIOCMIWAIT (PPS) nor RFC2783 API (KPPS) "
                  "is available.", end=True)
