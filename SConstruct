@@ -79,6 +79,39 @@ def _getstatusoutput(cmd, nput=None, shell=True, cwd=None, env=None):
 generated_sources = ['packet_names.h', "ais_json.i",
                      'gps_maskdump.c', 'gpsd.php', 'gpsd_config.h']
 
+# All man pages.  Always build them all.
+# Need the full list to complately clean them out.
+all_manpages = {
+    "man/cgps.1": "man/gps.xml",
+    "man/gegps.1": "man/gps.xml",
+    "man/gps.1": "man/gps.xml",
+    "man/gps2udp.1": "man/gps2udp.xml",
+    "man/gpscat.1": "man/gpscat.xml",
+    "man/gpsctl.1": "man/gpsctl.xml",
+    "man/gpsd.8": "man/gpsd.xml",
+    "man/gpsdctl.8": "man/gpsdctl.xml",
+    "man/gpsdecode.1": "man/gpsdecode.xml",
+    "man/gpsd_json.5": "man/gpsd_json.xml",
+    "man/gpsfake.1": "man/gpsfake.xml",
+    "man/gpsinit.8": "man/gpsinit.xml",
+    "man/gpsmon.1": "man/gpsmon.xml",
+    "man/gpspipe.1": "man/gpspipe.xml",
+    "man/gpsprof.1": "man/gpsprof.xml",
+    "man/gpsrinex.1": "man/gpsrinex.xml",
+    "man/gpxlogger.1": "man/gpxlogger.xml",
+    "man/lcdgps.1": "man/gps.xml",
+    "man/libgps.3": "man/libgps.xml",
+    "man/libgpsmm.3": "man/libgpsmm.xml",
+    "man/libQgpsmm.3": "man/libgpsmm.xml",
+    "man/ntpshmmon.1": "man/ntpshmmon.xml",
+    "man/ppscheck.8": "man/ppscheck.xml",
+    "man/srec.5": "man/srec.xml",
+    "man/ubxtool.1": "man/ubxtool.xml",
+    "man/xgps.1": "man/gps.xml",
+    "man/xgpsspeed.1": "man/gps.xml",
+    "man/zerk.1": "man/zerk.xml",
+}
+
 # Release identification begins here.
 #
 # Actual releases follow the normal X.Y or X.Y.Z scheme.  The version
@@ -1694,7 +1727,6 @@ if env["libgpsmm"]:
 # Python programs
 if not env['python']:
     python_built_extensions = []
-    python_manpages = []
     python_misc = []
     python_progs = []
     python_targets = []
@@ -1724,17 +1756,6 @@ else:
 
     if not helping and env['aiogps']:
         python_misc.extend(["example_aiogps.py", "example_aiogps_run"])
-
-    python_manpages = {
-        "man/gegps.1": "man/gps.xml",
-        "man/gpscat.1": "man/gpscat.xml",
-        "man/gpsfake.1": "man/gpsfake.xml",
-        "man/gpsprof.1": "man/gpsprof.xml",
-        "man/ubxtool.1": "man/ubxtool.xml",
-        "man/xgps.1": "man/gps.xml",
-        "man/xgpsspeed.1": "man/gps.xml",
-        "man/zerk.1": "man/zerk.xml",
-    }
 
     # Glob() has to be run after all buildable objects defined
     python_modules = Glob('gps/*.py', strings=True) + ['gps/__init__.py',
@@ -1958,52 +1979,12 @@ for fn in templated:
 
 # Documentation
 
-base_manpages = {
-    "man/cgps.1": "man/gps.xml",
-    "man/gps.1": "man/gps.xml",
-    "man/gps2udp.1": "man/gps2udp.xml",
-    "man/gpsctl.1": "man/gpsctl.xml",
-    "man/gpsd.8": "man/gpsd.xml",
-    "man/gpsdctl.8": "man/gpsdctl.xml",
-    "man/gpsdecode.1": "man/gpsdecode.xml",
-    "man/gpsd_json.5": "man/gpsd_json.xml",
-    "man/gpsinit.8": "man/gpsinit.xml",
-    "man/gpsmon.1": "man/gpsmon.xml",
-    "man/gpspipe.1": "man/gpspipe.xml",
-    "man/gpsrinex.1": "man/gpsrinex.xml",
-    "man/gpxlogger.1": "man/gpxlogger.xml",
-    "man/lcdgps.1": "man/gps.xml",
-    "man/libgps.3": "man/libgps.xml",
-    "man/libgpsmm.3": "man/libgpsmm.xml",
-    "man/libQgpsmm.3": "man/libgpsmm.xml",
-    "man/srec.5": "man/srec.xml",
-}
-
-if env["timeservice"] or env["gpsdclients"]:
-    base_manpages.update({
-        "man/ntpshmmon.1": "man/ntpshmmon.xml",
-    })
-
-if tiocmiwait:
-    base_manpages.update({
-        "man/ppscheck.8": "man/ppscheck.xml",
-    })
-
-all_manpages = list(base_manpages.keys())
-
-if python_manpages:
-    all_manpages += list(python_manpages.keys())
-
 man_env = env.Clone()
 if man_env.GetOption('silent'):
     man_env['SPAWN'] = filtered_spawn  # Suppress stderr chatter
 manpage_targets = []
 if manbuilder:
-    items = list(base_manpages.items())
-    if python_manpages:
-        items += list(python_manpages.items())
-
-    for (man, xml) in items:
+    for (man, xml) in all_manpages.items():
         manpage_targets.append(man_env.Man(source=xml, target=man))
 
 # Where it all comes together
@@ -2148,7 +2129,7 @@ if qt_env:
 
 
 maninstall = []
-for manpage in all_manpages:
+for manpage in all_manpages.keys():
     if not manbuilder and not os.path.exists(manpage):
         continue
     section = manpage.split(".")[1]
@@ -2737,7 +2718,7 @@ env.Clean(clean_misc, ["gegps", "gpscat", "gpsfake", "gpsprof", "ubxtool",
                        "xgps", "xgpsspeed", "zerk"])
 
 # Since manpage targets are disabled in clean mode, we cover them here
-env.Clean(clean_misc, all_manpages)
+env.Clean(clean_misc, all_manpages.keys())
 # Clean compiled Python
 env.Clean(clean_misc,
           glob.glob('*.pyc') + glob.glob('gps/*.pyc') +
@@ -2796,7 +2777,7 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
     if ".gitignore" in distfiles:
         distfiles.remove(".gitignore")
     distfiles += generated_sources
-    distfiles += all_manpages
+    distfiles += all_manpages.keys()
     if "packaging/rpm/gpsd.spec" not in distfiles:
         distfiles.append("packaging/rpm/gpsd.spec")
 
