@@ -719,23 +719,7 @@ def CheckCompilerOption(context, option):
     return ret
 
 
-def CheckCompilerDefines(context, define):
-    context.Message('Checking if compiler supplies %s... ' % (define,))
-    ret = context.TryLink("""
-        #ifndef %s
-        #error %s is not defined
-        #endif
-        int main(int argc, char **argv) {
-            (void) argc; (void) argv;
-            return 0;
-        }
-    """ % (define, define), '.c')
-    context.Result(ret)
-    return ret
-
 # Check if this compiler is C11 or better
-
-
 def CheckC11(context):
     context.Message('Checking if compiler is C11... ')
     ret = context.TryLink("""
@@ -790,7 +774,6 @@ env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
 # CheckXsltproc works, but result is incorrectly saved as "no"
 config = Configure(env, custom_tests={
     'CheckC11': CheckC11,
-    'CheckCompilerDefines': CheckCompilerDefines,
     'CheckCompilerOption': CheckCompilerOption,
     'CheckPKG': CheckPKG,
     'CheckXsltproc': CheckXsltproc,
@@ -1067,7 +1050,7 @@ else:
     # check for C11 or better, and __STDC__NO_ATOMICS__ is not defined
     # before looking for stdatomic.h
     if ((config.CheckC11() and
-         not config.CheckCompilerDefines("__STDC_NO_ATOMICS__") and
+         not config.CheckDeclaration("__STDC_NO_ATOMICS__") and
          config.CheckHeader("stdatomic.h"))):
         confdefs.append("#define HAVE_STDATOMIC_H 1\n")
     else:
@@ -1081,9 +1064,9 @@ else:
 
     # endian.h is required for rtcm104v2 unless the compiler defines
     # __ORDER_BIG_ENDIAN__, __ORDER_LITTLE_ENDIAN__ and __BYTE_ORDER__
-    if config.CheckCompilerDefines("__ORDER_BIG_ENDIAN__") \
-       and config.CheckCompilerDefines("__ORDER_LITTLE_ENDIAN__") \
-       and config.CheckCompilerDefines("__BYTE_ORDER__"):
+    if ((config.CheckDeclaration("__ORDER_BIG_ENDIAN__") and
+         config.CheckDeclaration("__ORDER_LITTLE_ENDIAN__") and
+         config.CheckDeclaration("__BYTE_ORDER__"))):
         confdefs.append("#define HAVE_BUILTIN_ENDIANNESS 1\n")
         confdefs.append("/* #undef HAVE_ENDIAN_H */\n")
         confdefs.append("/* #undef HAVE_SYS_ENDIAN_H */\n")
