@@ -200,7 +200,7 @@ api_version_major = 3
 api_version_minor = 14
 
 # client library version
-libgps_version_current = 26
+libgps_version_current = 27
 libgps_version_revision = 0
 libgps_version_age = 0
 libgps_version = "%d.%d.%d" % (libgps_version_current, libgps_version_age,
