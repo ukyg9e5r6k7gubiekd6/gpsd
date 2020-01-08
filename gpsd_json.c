@@ -113,7 +113,7 @@ void json_version_dump( char *reply, size_t replylen)
 		   "{\"class\":\"VERSION\",\"release\":\"%s\",\"rev\":\"%s\","
                    "\"proto_major\":%d,\"proto_minor\":%d}\r\n",
 		   VERSION, REVISION,
-		   GPSD_PROTO_MAJOR_VERSION, GPSD_PROTO_MINOR_VERSION);
+		   GPSD_PROTO_VERSION_MAJOR, GPSD_PROTO_VERSION_MINOR);
 }
 
 void json_tpv_dump(const struct gps_device_t *session,

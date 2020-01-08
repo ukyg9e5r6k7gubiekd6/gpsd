@@ -6,6 +6,12 @@
  * SPDX-License-Identifier: BSD-2-clause
  */
 
+// Keep next 4 in sync with SConstruct
+#define VERSION "3.20.1~dev"
+#define REVISION VERSION
+#define GPSD_PROTO_VERSION_MAJOR 3
+#define GPSD_PROTO_VERSION_MINOR 15
+
 #define GPSD_URL "https://gpsd.gitlab.io/gpsd"
 #define HAVE_LIBRT 1
 #define HAVE_LINUX_CAN_H 1

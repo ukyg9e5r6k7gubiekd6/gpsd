@@ -79,11 +79,9 @@ extern "C" {
  *      Add tsip  .machine_id, .hardware_code, .last_tow, last_chan_seen
  *      Split gps_device_t.subtype into subtype and subtype1
  * 3.20.1
+ *      GPSD_PROTO_*_VERSION moved to gpsd_config.h
  *
  */
-/* Keep in sync with api_major_version and api_minor gps/__init__.py */
-#define GPSD_PROTO_MAJOR_VERSION	3   /* bump on incompatible changes */
-#define GPSD_PROTO_MINOR_VERSION	14  /* bump on compatible changes */
 
 #define JSON_DATE_MAX	24	/* ISO8601 timestamp with 2 decimal places */
 
