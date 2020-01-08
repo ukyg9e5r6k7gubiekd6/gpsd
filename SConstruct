@@ -1678,10 +1678,12 @@ if env["timeservice"] or env["gpsdclients"]:
     if tiocmiwait:
         bin_binaries += [ppscheck]
 
-if env["ncurses"] and (env["timeservice"] or env["gpsdclients"]):
-    bin_binaries += [cgps, gpsmon]
-else:
-    announce("WARNING: not building cgps or gpsmon")
+    if env["ncurses"]:
+        bin_binaries += [cgps, gpsmon]
+    else:
+        msg = "WARNING: ncurses not found, not building cgps or gpsmon."
+        announce(msg)
+        atexit.register(lambda: print(msg))
 
 # Test programs - always link locally and statically
 test_bits = env.Program('tests/test_bits', ['tests/test_bits.c'],
