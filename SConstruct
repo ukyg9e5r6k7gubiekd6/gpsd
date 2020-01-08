@@ -1253,12 +1253,13 @@ def polystr(o):
 # flag that we have xgps* dependencies, so xgps* should run OK
 config.env['xgps_deps'] = False
 
-if helping:
+if cleaning or helping:
     # If helping just get usable config info from the local Python
     target_python_path = ''
     py_config_text = str(eval(PYTHON_CONFIG_CALL))
     python_libdir = str(eval(PYTHON_LIBDIR_CALL))
     config.env['xgps_deps'] = False
+    python_config = []
 
 elif config.env['python']:
     if config.env['target_python']:
@@ -1725,7 +1726,7 @@ if env["libgpsmm"]:
     testprogs.append(test_gpsmm)
 
 # Python programs
-if not env['python']:
+if not env['python'] or cleaning or helping:
     python_built_extensions = []
     python_misc = []
     python_progs = []
@@ -2008,7 +2009,7 @@ if qt_env:
     qt_env.Default(*build_qt)
     testprogs.append(test_qgpsmm)
 
-if env['python']:
+if env['python'] and not cleaning and not helping:
     build_python = python_env.Alias('build', python_targets)
     python_env.Default(*build_python)
 
@@ -2037,7 +2038,7 @@ if ((not env['debug'] and not env['profiling'] and not env['nostrip'] and
      not sys.platform.startswith('darwin'))):
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
-if env['python']:
+if env['python'] and not cleaning and not helping:
     python_module_dir = str(python_libdir) + os.sep + 'gps'
     python_extensions_install = python_env.Install(DESTDIR + python_module_dir,
                                                    python_built_extensions)
@@ -2384,7 +2385,7 @@ time_regress = Utility('time-regress', [test_mktime], [
     '$SRCDIR/tests/test_mktime'
 ])
 
-if not env['python']:
+if not env['python'] or cleaning or helping:
     unpack_regress = None
     misc_regress = None
 else:
