@@ -1126,7 +1126,10 @@ else:
             config.env["magic_hat"] = False
     tiocmiwait = config.CheckHeaderDefines("sys/ioctl.h", "TIOCMIWAIT")
     if not tiocmiwait and not kpps:
-        announce("Neither TIOCMIWAIT nor RFC2783 API is available)")
+        msg = ("WARNING: Neither TIOCMIWAIT (PPS) nor RFC2783 API (KPPS) "
+               "is available.")
+        announce(msg)
+        atexit.register(lambda: print(msg))
         if config.env["timeservice"]:
             announce("ERROR: timeservice specified, but no PPS available")
             Exit(1)
