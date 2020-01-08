@@ -79,6 +79,20 @@ def _getstatusoutput(cmd, nput=None, shell=True, cwd=None, env=None):
 generated_sources = ['packet_names.h', "ais_json.i",
                      'gps_maskdump.c', 'gpsd.php', 'gpsd_config.h']
 
+# All installed python programs
+# All are templated
+# Need the full list to complately clean them out.
+python_progs = [
+    "gegps",
+    "gpscat",
+    "gpsfake",
+    "gpsprof",
+    "ubxtool",
+    "xgps",
+    "xgpsspeed",
+    "zerk",
+]
+
 # All man pages.  Always build them all.
 # Need the full list to complately clean them out.
 all_manpages = {
@@ -1729,18 +1743,8 @@ if env["libgpsmm"]:
 if not env['python'] or cleaning or helping:
     python_built_extensions = []
     python_misc = []
-    python_progs = []
     python_targets = []
 else:
-    # installed python programs
-    python_progs = ["gegps",
-                    "gpscat",
-                    "gpsfake",
-                    "gpsprof",
-                    "ubxtool",
-                    "xgps",
-                    "xgpsspeed",
-                    "zerk"]
     python_deps = {'gpscat': 'packet'}
 
     # python misc helpers and stuff
@@ -2713,10 +2717,8 @@ Utility('udev-test', '', ['$SRCDIR/gpsd -N -n -F /var/run/gpsd.sock -D 5', ])
 # Dummy target for cleaning misc files
 clean_misc = env.Alias('clean-misc')
 
-# clean generated python, need a new list here because python_progs
-# may be empty because env["python"] is empty
-env.Clean(clean_misc, ["gegps", "gpscat", "gpsfake", "gpsprof", "ubxtool",
-                       "xgps", "xgpsspeed", "zerk"])
+# clean generated python programs
+env.Clean(clean_misc, python_progs)
 
 # Since manpage targets are disabled in clean mode, we cover them here
 env.Clean(clean_misc, all_manpages.keys())
