@@ -58,6 +58,7 @@ def polystr(o):
         return str(o)
     raise ValueError
 
+
 # Helper functions for revision hackery
 def GetMtime(file):
     """Get mtime of given file, or 0."""
@@ -1272,7 +1273,6 @@ PYTHON_CONFIG_NAMES = ['CC', 'CXX', 'OPT', 'CFLAGS',
 PYTHON_CONFIG_QUOTED = ["'%s'" % s for s in PYTHON_CONFIG_NAMES]
 PYTHON_CONFIG_CALL = ('sysconfig.get_config_vars(%s)'
                       % ', '.join(PYTHON_CONFIG_QUOTED))
-
 
 
 # flag that we have xgps* dependencies, so xgps* should run OK
