@@ -662,7 +662,7 @@ values can be listed with 'scons -h'.
 def CheckPKG(context, name):
     context.Message('Checking pkg-config for %s... ' % name)
     ret = context.TryAction('%s --exists \'%s\''
-                            % (env['PKG_CONFIG'], name))[0]
+                            % (context.env['PKG_CONFIG'], name))[0]
     context.Result(ret)
     return ret
 
@@ -737,8 +737,11 @@ def CheckC11(context):
 
 def GetPythonValue(context, name, imp, expr, brief=False):
     context.Message('Obtaining Python %s... ' % name)
+
+    # what is this about?
     context.sconf.cached = 0  # Avoid bogus "(cached)"
-    if not env['target_python']:
+
+    if not context.env['target_python']:
         status, value = 0, str(eval(expr))
     else:
         command = [target_python_path, '-c', '%s; print(%s)' % (imp, expr)]
@@ -753,7 +756,7 @@ def GetPythonValue(context, name, imp, expr, brief=False):
             announce('Python command "%s" failed - disabling Python.\n'
                      'Python components will NOT be installed' %
                      command[2])
-            env['python'] = False
+            context.env['python'] = False
     context.Result('failed' if status else 'ok' if brief else value)
     return value
 
