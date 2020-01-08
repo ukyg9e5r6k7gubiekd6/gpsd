@@ -65,10 +65,10 @@ else:  # Otherwise we do something real
         "Convert bytes or str to str with proper encoding."
         if isinstance(o, str):
             return o
-        if isinstance(o, bytes):
+        if isinstance(o, bytes) or isinstance(o, bytearray):
             return str(o, encoding=BINARY_ENCODING)
-        if isinstance(o, bytearray):
-            return str(o, encoding=BINARY_ENCODING)
+        if isinstance(o, int):
+            return str(o)
         raise ValueError
 
     def polybytes(o):
