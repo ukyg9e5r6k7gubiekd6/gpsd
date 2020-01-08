@@ -1,4 +1,4 @@
-# SCons build recipe for the GPSD project
+#see library directories " SCons build recipe for the GPSD project
 
 # Important targets:
 #
@@ -375,7 +375,7 @@ boolopts = (
 for (name, default, helpd) in boolopts:
     opts.Add(BoolVariable(name, helpd, default))
 
-# Gentoo, Fedora, opensuse systems use uucp for ttyS* and ttyUSB*
+# Gentoo, Fedora, openSUSE systems use uucp for ttyS* and ttyUSB*
 if os.path.exists("/etc/gentoo-release"):
     def_group = "uucp"
 else:
@@ -1350,6 +1350,7 @@ elif config.env['python']:
             python_libdir = polystr(python_libdir)
             python_libdir = python_libdir.replace("/usr/lib",
                                                   "/usr/local/lib")
+        python_module_dir = str(python_libdir) + os.sep + 'gps'
 
         py_config_text = config.GetPythonValue('config vars',
                                                PYTHON_SYSCONFIG_IMPORT,
@@ -1443,11 +1444,8 @@ if not (cleaning or helping):
     if not changelatch:
         announce("All configuration flags are defaulted.")
 
-    # Gentoo systems can have a problem with the Python path
-    if os.path.exists("/etc/gentoo-release"):
-        announce("This is a Gentoo system.")
-        announce("Adjust your PYTHONPATH to see library directories "
-                 "under /usr/local/lib")
+    # Many systems can have a problem with the Python path
+    announce("Ensure your PYTHONPATH includes %s" % python_module_dir)
 
 # Should we build the Qt binding?
 if env["qt"] and env["shared"]:
@@ -2092,7 +2090,6 @@ if ((not env['debug'] and not env['profiling'] and not env['nostrip'] and
     env.AddPostAction(binaryinstall, '$STRIP $TARGET')
 
 if env['python'] and not cleaning and not helping:
-    python_module_dir = str(python_libdir) + os.sep + 'gps'
     python_extensions_install = python_env.Install(DESTDIR + python_module_dir,
                                                    python_built_extensions)
     if ((not env['debug'] and not env['profiling'] and
