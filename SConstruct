@@ -88,8 +88,34 @@ def _getstatusoutput(cmd, nput=None, shell=True, cwd=None, env=None):
 
 
 # TODO: this list is missing stuff.
-generated_sources = ['packet_names.h', "ais_json.i",
-                     'gps_maskdump.c', 'gpsd.php', 'gpsd_config.h']
+generated_sources = [
+    'ais_json.i',
+    'android/gpsd_config',
+    'contrib/ntpshmviz',
+    'contrib/skyview2svg.py',
+    'contrib/webgps',
+    'control',
+    'gegps',
+    'gpscat',
+    'gpsd_config.h',
+    'gpsd_maskdump.c',
+    'gpsd.php',
+    'gpsd.spec',
+    'gpsfake',
+    'gps/gps.py',
+    'gps/__init__.py',
+    'gps_maskdump.c',
+    'gpsprof',
+    'jsongen',
+    'libQgpsmm.prl',
+    'maskaudit.py',
+    'packet_names.h',
+    'ubxtool',
+    'valgrind-audit.py',
+    'xgps',
+    'xgpsspeed',
+    'zerk',
+   ]
 
 # All installed python programs
 # All are templated
@@ -502,7 +528,7 @@ for i in ["ARFLAGS",
           "LDFLAGS",
           "LINKFLAGS",
           "SHLINKFLAGS",
-         ]:
+          ]:
     if i in os.environ:
         env.MergeFlags(Split(os.getenv(i)))
 
@@ -600,7 +626,7 @@ devenv = (("ADDR2LINE", "addr2line"),
           ("SIZE", "size"),
           ("STRINGS", "strings"),
           ("STRIP", "strip"),
-         )
+          )
 
 if env['target']:
     for (name, toolname) in devenv:
@@ -2718,14 +2744,13 @@ udev_install = Utility('udev-install', 'install', [
 
 if env['systemd']:
     env.Requires(udev_install, systemd_install)
-
-if env['systemd'] and not env["sysroot"]:
-    systemctl_daemon_reload = Utility('systemctl-daemon-reload', '',
-                                      ['systemctl daemon-reload || true'])
-    env.AlwaysBuild(systemctl_daemon_reload)
-    env.Precious(systemctl_daemon_reload)
-    env.Requires(systemctl_daemon_reload, systemd_install)
-    env.Requires(udev_install, systemctl_daemon_reload)
+    if not env["sysroot"]:
+        systemctl_daemon_reload = Utility('systemctl-daemon-reload', '',
+                                          ['systemctl daemon-reload || true'])
+        env.AlwaysBuild(systemctl_daemon_reload)
+        env.Precious(systemctl_daemon_reload)
+        env.Requires(systemctl_daemon_reload, systemd_install)
+        env.Requires(udev_install, systemctl_daemon_reload)
 
 
 Utility('udev-uninstall', '', [

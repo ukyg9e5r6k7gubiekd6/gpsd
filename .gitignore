@@ -32,8 +32,6 @@ gpsprof
 jsongen
 maskaudit.py
 ubxtool
-ubxtool
-upload
 valgrind-audit.py
 xgps
 xgpsspeed
@@ -93,27 +91,24 @@ srec.html
 *.egg-info
 *.gcno
 # Built sources
-gps_maskdump.c
-gpsd_maskdump.c
-gpsd_config.h.in
-gpsd_config.h
-packet_names.h
-revision.h
-timebase.h
-gpsd.spec
-MANIFEST
-.kdbgrc.*
-.project
 .cproject
+gpsd_config.h
+gpsd_maskdump.c
+gpsd.spec
+gps_maskdump.c
+.kdbgrc.*
+MANIFEST
+packet_names.h
+.project
 tags
 # Python files
 build
+devtools/ppstest
 gpscatc
 gpsfakec
 gpsprofc
 xgpsc
 xgpsspeedc
-devtools/ppstest
 # Developer sandbox directory for patches that haven't been applied yet
 patches
 # build/test logs from devtools/do-build
@@ -127,8 +122,8 @@ config.log
 .scons-option-cache
 stamp-python
 # Documentation/Web
-.public
 doc/explanation.html
+.public
 www/AIVDM.html
 www/client-howto.html
 www/faq.html
