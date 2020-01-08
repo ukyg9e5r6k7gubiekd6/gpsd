@@ -1,4 +1,4 @@
-#see library directories " SCons build recipe for the GPSD project
+# see library directories " SCons build recipe for the GPSD project
 
 # Important targets:
 #
@@ -554,9 +554,12 @@ if env.GetOption("silent"):
     env['REGRESSOPTS'] += " -Q"
 
 
-def announce(msg):
+def announce(msg, end=False):
     if not env.GetOption("silent"):
         print(msg)
+    if end:
+        # duplicate message at eexit
+        atexit.register(lambda: print(msg))
 
 
 # DESTDIR environment variable means user prefix the installation root.
@@ -1178,10 +1181,8 @@ else:
             config.env["magic_hat"] = False
     tiocmiwait = config.CheckHeaderDefines("sys/ioctl.h", "TIOCMIWAIT")
     if not tiocmiwait and not kpps:
-        msg = ("WARNING: Neither TIOCMIWAIT (PPS) nor RFC2783 API (KPPS) "
-               "is available.")
-        announce(msg)
-        atexit.register(lambda: print(msg))
+        announce("WARNING: Neither TIOCMIWAIT (PPS) nor RFC2783 API (KPPS) "
+                 "is available.", end=True)
         if config.env["timeservice"]:
             announce("ERROR: timeservice specified, but no PPS available")
             Exit(1)
@@ -1362,11 +1363,9 @@ elif config.env['python']:
         python_version = sys.version_info
         if sys.version_info < (3, 6):
             config.env['aiogps'] = False
-            msg = ("WARNING: Python%u.%u too old (need 3.6): "
-                   "gps/aiogps.py will not be installed\n" %
-                   (python_version[0], python_version[1]))
-            announce(msg)
-            atexit.register(lambda: print(msg))
+            announce("WARNING: Python%u.%u too old (need 3.6): "
+                     "gps/aiogps.py will not be installed\n" %
+                     (python_version[0], python_version[1]), end=True)
         else:
             config.env['aiogps'] = True
 
@@ -1376,11 +1375,9 @@ elif config.env['python']:
             announce("Python module serial (pyserial) found.")
         except ImportError:
             # no pyserial, used by ubxtool and zerk
-            msg = ("WARNING: Python module serial (pyserial) not found.\n"
-                   "WARNING: ubxtool and zerk are missing optional "
-                   "runtime module serial")
-            announce(msg)
-            atexit.register(lambda: print(msg))
+            announce("WARNING: Python module serial (pyserial) not found.\n"
+                     "WARNING: ubxtool and zerk are missing optional "
+                     "runtime module serial", end=True)
 
         config.env['xgps_deps'] = True
         # check for pycairo
@@ -1407,10 +1404,8 @@ elif config.env['python']:
             announce("WARNING: gtk+-3.0 not found.")
 
         if not config.env['xgps_deps']:
-            msg = ("WARNING: xgps and xgpsspeed are missing runtime "
-                   " dependencies")
-            announce(msg)
-            atexit.register(lambda: print(msg))
+            announce("WARNING: xgps and xgpsspeed are missing runtime "
+                     " dependencies", end=True)
 
         if not env['xgps']:
             # xgps* turned off by option
@@ -1724,9 +1719,8 @@ if env["timeservice"] or env["gpsdclients"]:
     if env["ncurses"]:
         bin_binaries += [cgps, gpsmon]
     else:
-        msg = "WARNING: ncurses not found, not building cgps or gpsmon."
-        announce(msg)
-        atexit.register(lambda: print(msg))
+        announce("WARNING: ncurses not found, not building cgps or gpsmon.",
+                 end=True)
 
 # Test programs - always link locally and statically
 test_bits = env.Program('tests/test_bits', ['tests/test_bits.c'],
@@ -2591,10 +2585,9 @@ if env.WhereIs('asciidoctor'):
                     ['asciidoctor -a compat -b html5 -a toc -o www/%s.html '
                      '%s.adoc' % (leaf, stem)])
 else:
-    msg = ("WARNING: asciidoctor not found.\n"
-           "WARNING: Some documentation and html will not be built.")
-    announce(msg)
-    atexit.register(lambda: print(msg))
+    announce("WARNING: asciidoctor not found.\n"
+             "WARNING: Some documentation and html will not be built.",
+             end=True)
 
 # Non-asciidoc webpages only
 htmlpages = Split('''
