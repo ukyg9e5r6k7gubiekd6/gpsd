@@ -692,13 +692,15 @@ def CheckXsltproc(context):
     ofp.close()
     probe = ("xsltproc --encoding UTF-8 --output man/foo.1 --nonet "
              "--noout '%s' man/xmltest.xml" % (docbook_man_uri,))
-    ret = context.TryAction(probe)[0]
+    (ret, out) = context.TryAction(probe)
+    # out should be empty, don't bother to test.
     os.remove("man/xmltest.xml")
     if os.path.exists("man/foo.1"):
         os.remove("man/foo.1")
-    else:
-        # failed to create output
-        ret = False
+
+    # don't fail due to missing output file
+    # scons may return cached result, instead of running the probe
+
     context.Result(ret)
     return ret
 
@@ -774,7 +776,6 @@ env.Prepend(LIBPATH=[os.path.realpath(os.curdir)])
 # from scons 3.0.5, any changes to env after this, until after
 # config.Finish(), will be lost.  Use config.env until then.
 
-# CheckXsltproc works, but result is incorrectly saved as "no"
 config = Configure(env, custom_tests={
     'CheckC11': CheckC11,
     'CheckCompilerOption': CheckCompilerOption,
