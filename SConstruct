@@ -1336,13 +1336,14 @@ elif config.env['python']:
                                                brief=True)
 
         # aiogps is only available on Python >= 3.6
-        # FIXME check target_python, not current python
-        python_version = sys.version_info
-        if sys.version_info < (3, 6):
+        sysver = config.GetPythonValue('version',
+                                       'import sys',
+                                       '"%d.%d" % sys.version_info[0:2]')
+        if 3 > int(sysver[0]) or 6 > int(sysver[2]):
             config.env['aiogps'] = False
-            announce("WARNING: Python%u.%u too old (need 3.6): "
+            announce("WARNING: Python%s too old (need 3.6): "
                      "gps/aiogps.py will not be installed\n" %
-                     (python_version[0], python_version[1]), end=True)
+                     (sysver), end=True)
         else:
             config.env['aiogps'] = True
 
