@@ -744,7 +744,8 @@ def GetPythonValue(context, name, imp, expr, brief=False):
     context.sconf.cached = 0  # Avoid bogus "(cached)"
 
     if not context.env['target_python']:
-        status, value = 0, str(eval(expr))
+        status = 0
+        value = str(eval(expr))
     else:
         command = [target_python_path, '-c', '%s; print(%s)' % (imp, expr)]
         try:
@@ -759,7 +760,14 @@ def GetPythonValue(context, name, imp, expr, brief=False):
                      'Python components will NOT be installed' %
                      command[2])
             context.env['python'] = False
-    context.Result('failed' if status else 'ok' if brief else value)
+    if 0 != status:
+        result = 'failed'
+    elif brief:
+        result = 'ok'
+    else:
+        # context.Result() confused by bytes
+        result = polystr(value)
+    context.Result(result)
     return value
 
 
@@ -1307,15 +1315,14 @@ elif config.env['python']:
         # Maximize consistency by using the reported sys.executable
         target_python_path = config.GetPythonValue('exe path',
                                                    'import sys',
-                                                   'sys.executable',
-                                                   brief=cleaning)
+                                                   'sys.executable')
+        # python module directory
         if config.env['python_libdir']:
             python_libdir = config.env['python_libdir']
         else:
             python_libdir = config.GetPythonValue('lib dir',
                                                   PYTHON_SYSCONFIG_IMPORT,
-                                                  PYTHON_LIBDIR_CALL,
-                                                  brief=cleaning)
+                                                  PYTHON_LIBDIR_CALL)
             # follow FHS, put in /usr/local/libXX, not /usr/libXX
             # may be lib, lib32 or lib64
             python_libdir = polystr(python_libdir)
