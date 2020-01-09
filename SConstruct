@@ -1329,6 +1329,8 @@ elif config.env['python']:
             python_libdir = python_libdir.replace("/usr/lib",
                                                   "/usr/local/lib")
         python_module_dir = str(python_libdir) + os.sep + 'gps'
+        # Many systems can have a problem with the Python path
+        announce("Ensure your PYTHONPATH includes %s" % python_module_dir)
 
         py_config_text = config.GetPythonValue('config vars',
                                                PYTHON_SYSCONFIG_IMPORT,
@@ -1410,9 +1412,6 @@ if not (cleaning or helping):
                      % (name, env[name], env.subst(default), helpd))
     if not changelatch:
         announce("All configuration flags are defaulted.")
-
-    # Many systems can have a problem with the Python path
-    announce("Ensure your PYTHONPATH includes %s" % python_module_dir)
 
 # Should we build the Qt binding?
 if env["qt"] and env["shared"]:
