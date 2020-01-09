@@ -1328,9 +1328,10 @@ elif config.env['python']:
             python_libdir = polystr(python_libdir)
             python_libdir = python_libdir.replace("/usr/lib",
                                                   "/usr/local/lib")
-        python_module_dir = str(python_libdir) + os.sep + 'gps'
+        python_module_dir = str(python_libdir) + os.sep
         # Many systems can have a problem with the Python path
         announce("Ensure your PYTHONPATH includes %s" % python_module_dir)
+        python_module_dir += 'gps'
 
         py_config_text = config.GetPythonValue('config vars',
                                                PYTHON_SYSCONFIG_IMPORT,
