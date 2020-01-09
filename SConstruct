@@ -34,7 +34,6 @@ import ast
 import atexit      # for atexit.register()
 import functools
 import glob
-import imp         # for imp.find_module('gps'), imp deprecated in 3.4
 import operator
 import os
 import pickle
@@ -738,12 +737,14 @@ def CheckC11(context):
 
 
 def GetPythonValue(context, name, imp, expr, brief=False):
-    context.Message('Obtaining Python %s... ' % name)
+    """Get a value from the target python, not the running one."""
+    context.Message('Checking Python %s... ' % name)
 
     # what is this about?
     context.sconf.cached = 0  # Avoid bogus "(cached)"
 
     if not context.env['target_python']:
+        # FIXME: this ignores imp
         status = 0
         value = str(eval(expr))
     else:
@@ -756,10 +757,8 @@ def GetPythonValue(context, name, imp, expr, brief=False):
             value = value.strip()
         else:
             value = ''
-            announce('Python command "%s" failed - disabling Python.\n'
-                     'Python components will NOT be installed' %
-                     command[2])
-            context.env['python'] = False
+            # do not disable python because this failed
+            # maybe testing for newer python feature
     if 0 != status:
         result = 'failed'
     elif brief:
@@ -1157,7 +1156,8 @@ else:
         if config.env["magic_hat"]:
             announce("Forcing magic_hat=no since RFC2783 API is unavailable")
             config.env["magic_hat"] = False
-    tiocmiwait = config.CheckDeclaration("TIOCMIWAIT", "#include <sys/ioctl.h>")
+    tiocmiwait = config.CheckDeclaration("TIOCMIWAIT",
+                                         "#include <sys/ioctl.h>")
     if not tiocmiwait and not kpps:
         announce("WARNING: Neither TIOCMIWAIT (PPS) nor RFC2783 API (KPPS) "
                  "is available.", end=True)
@@ -1347,30 +1347,24 @@ elif config.env['python']:
             config.env['aiogps'] = True
 
         # check for pyserial
-        try:
-            imp.find_module('serial')
-            announce("Python module serial (pyserial) found.")
-        except ImportError:
+        if not config.GetPythonValue('module serial (pyserial)',
+                                     'import serial', '"found"'):
             # no pyserial, used by ubxtool and zerk
-            announce("WARNING: Python module serial (pyserial) not found.\n"
-                     "WARNING: ubxtool and zerk are missing optional "
+            announce("WARNING: ubxtool and zerk are missing optional "
                      "runtime module serial", end=True)
 
         config.env['xgps_deps'] = True
+
         # check for pycairo
-        try:
-            imp.find_module('cairo')
-            announce("Python module cairo (pycairo) found.")
-        except ImportError:
+        if not config.GetPythonValue('module cairo (pycairo)',
+                                     'import cairo', '"found"'):
             # no pycairo, used by xgps, xgpsspeed
             config.env['xgps_deps'] = False
             announce("WARNING: Python module cairo (pycairo) not found.")
 
-        # check for pygobject
-        try:
-            imp.find_module('gi')
-            announce("Python module gi (pygobject) found.")
-        except ImportError:
+        # check for pycairo
+        if not config.GetPythonValue('module gi (pygobject)',
+                                     'import gi', '"found"'):
             # no pycairo, used by xgps, xgpsspeed
             config.env['xgps_deps'] = False
             announce("WARNING: Python module gi (pygobject) not found.")
