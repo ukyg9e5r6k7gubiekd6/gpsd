@@ -2084,7 +2084,8 @@ if env['python'] and not cleaning and not helping:
         # split in two lines for readability
         check_compile.append('cp %s tmp.py; %s -tt -m py_compile tmp.py;' %
                              (p, sys.executable))
-        check_compile.append('rm tmp.py*')
+        # tmp.py may have inherited non-writable permissions
+        check_compile.append('rm -f tmp.py*')
 
     python_compilation_regress = Utility('python-compilation-regress',
                                          python_all, check_compile)
