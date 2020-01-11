@@ -624,22 +624,13 @@ want to access the development source.
 
 == Special Notes for Windows ==
 
-=== Other than Windows Subsystem for Linux 1 ===
-
-Due to the lack of critical packages building on MinGW is not
-supported at this time.
-
-Due to a namespace conflict building on CyGWin is not supported
-at this time.
-
-WSL 2 claims not to support USB or serial at this time.
-
-No build files are available for Visual Studio at this time.
+Only Windows Subsystem for Linux 1 does not blow diseased goats at
+this time.
 
 === About WSL 1 ===
 
 WSL 1 is  a component of Microsoft
-Windows that implements an alternate kernel. That Linux
+Windows that implements an alternate kernel. Linux
 distributions notably Alpine, Debian, Kali, OpenSUSE, and
 Ubuntu may run on top of it.
 
@@ -647,8 +638,10 @@ There are some issues known which affect gpsd.
 
 * /dev/ttyS* nodes have a 1 indexed number, like in MS Windows.
 * Windows 10 may attempt to use your GPS itself.
+* Older pl2303 (knockoff) serial chipsets are no longer supported \
+  in Winodws 10
 
-=== Installing a Linux distribution on WSL ===
+=== Installing a Linux distribution on WSL 1 or WSL 2 ===
 
 1. Install a Linux distribution by clicking on the `Microsoft Store` \
 Icon in the taskbar.
@@ -663,34 +656,25 @@ installing your Linux distribution.
 
 === Reccomended packages ===
 
-Due to WSL1 limitations, it is recommended at this time that you
-only install the following packages or $distro equivalent.
+Due to currnt WSL limitations, it is recommended at this time that you
+only install the $distro equivalent of the following packages.
 
 ----
 Python
 SCons (preferably 3.0+)
-ncurses-dev (for build cgps and gpsmon)
+ncurses-dev (to build/run cgps and gpsmon)
 asciidoctor and xmlto (to build the documentation)
 ----
 
 Optionally, the following packages might also be installed
 ----
 pyserial (for fine control of UBlox GPS and GREIS devices)
-gnuplot (to graph gpsprof data)
-libusb-dev (for old Garmin GPS receivers)
-git (if building from the git repository)
+gnuplot (to generate graphs of gpsprof data)
+libusb-dev (to possibly use crusty old Garmin GPS receivers)
+git (if building from the developmebt sources)
 ----
 
-=== Building on WSL ===
+=== Building on WSL 1 or WSL 2 ===
 
 1. Get the list of packages from the appropriate section above.
-2. If somehow you have acquired these instructions without the accompanying source code acquire it from one of the following locations.
-  *  link:https://download-mirror.savannah.gnu.org/releases/gpsd/[gpsd \
-release tarballs] (recommended)
-  *  link:https://gitlab.com/gpsd/gpsd[development site]
-3. Unpack (or clone) the source into an empty directory
-  * gpg --verify gpsd-X.Y.tar.xz.sig gpsd-X.Y.tar.xz && tar -Jxpvf gpsd-X.Y.tar.xz
-  * gpg --verify gpsd-X.Y.tar.gz.sig gpsd-X.Y.tar.gz && tar -Jxpvf gpsd-X.Y.tar.gz
-  * git clone https://gitlab.com/gpsd/gpsd.git
-4. cd gpsd
-5. scons --config=force && scons install
+2. Follow instructions in the distro specific section above.
