@@ -458,7 +458,7 @@ int main(int argc, char **argv)
 		    }
 
 		    for(i=0 ; i < (int)strlen((char *)info[5]); i++)  {
-			if (i > (int) sizeof (bitstrings)) break;
+			if (i >= (int) sizeof (bitstrings)) break;
 			bitstrings[i] = AISto6bit(info[5][i]);
 		    }
 
