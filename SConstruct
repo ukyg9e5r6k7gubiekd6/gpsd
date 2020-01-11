@@ -2760,6 +2760,11 @@ env.Clean(clean_misc, glob.glob('gps-*.egg-info') + ['revision.h'])
 # Clean scons state files
 env.Clean(clean_misc, ['.sconf_temp', '.scons-option-cache', 'config.log'])
 
+# distribution files
+env.Clean(clean_misc, ["packaging/rpm/gpsd.spec"])
+# old, and current, versions
+env.Clean(clean_misc, glob.glob('gpsd-*.zip') + glob.glob('gpsd-*tar.?z'))
+
 # Default targets
 
 if cleaning:
@@ -2808,7 +2813,6 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         '@zip -ry gpsd-${VERSION}.zip $SOURCES -x contrib/ais-samples/\\*',
         '@ls -l gpsd-${VERSION}.zip',
     ])
-    env.Clean(dozip, ["gpsd-${VERSION}.zip", "packaging/rpm/gpsd.spec"])
 
     # How to build a tarball.
     # The command assume the non-portable GNU tar extension
@@ -2824,7 +2828,6 @@ if os.path.exists("gpsd.c") and os.path.exists(".gitignore"):
         ' -cJf gpsd-${VERSION}.tar.xz --exclude contrib/ais-samples $SOURCES',
         '@ls -l gpsd-${VERSION}.tar.gz',
     ])
-    env.Clean(dist, ["gpsd-${VERSION}.tar.gz", "packaging/rpm/gpsd.spec"])
 
     # Make RPM from the specfile in packaging
     Utility('dist-rpm', dist, 'rpmbuild -ta gpsd-${VERSION}.tar.gz')
