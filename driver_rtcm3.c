@@ -79,7 +79,8 @@ void rtcm3_unpack(const struct gps_context_t *context,
     int bitcount = 0;
     unsigned int i;
     signed long temp;
-    bool unknown = true;;
+    bool unknown = true;              // we don't know how to decode
+    const char *unknown_name = NULL;  // no decode, but maybe we know the name
 
 #define ugrab(width)    (bitcount += width, ubits((unsigned char *)buf, \
                          bitcount-width, width, false))
@@ -115,6 +116,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * BDS/BeiDou Ephemeris
          * length 64
          */
+        unknown_name = "BD Ephemeris";
         break;
 
     case 1001:
@@ -456,6 +458,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * length 19
          */
         /* TODO: rtklib has C code for this one.  */
+        unknown_name = "GPS Ephemeris";
         break;
 
     case 1020:
@@ -464,6 +467,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * length 45
          */
         /* TODO: rtklib has C code for this one.  */
+        unknown_name = "GLO Ephemeris";
         break;
 
     case 1021:
@@ -494,24 +498,28 @@ void rtcm3_unpack(const struct gps_context_t *context,
         /* RTCM 3.1
          * Projection parameters, types other than LCC2SP, OM
          */
+        unknown_name = "Projection Parameters (other)";
         break;
 
     case 1026:
         /* RTCM 3.1
          * Projection parameters, type LCC2SP (Lambert Conic Conformal)
          */
+        unknown_name = "Projection Parameters (LCC2SP)";
         break;
 
     case 1027:
         /* RTCM 3.1
          * Projection parameters, type OM (Oblique Mercator)
          */
+        unknown_name = "Projection Parameters (OM)";
         break;
 
     case 1028:
         /* RTCM 3.1
          * Reserved for global to plate fixed transformation
          */
+        unknown_name = "Global to Plate Transformation";
         break;
 
     case 1029:
@@ -532,18 +540,21 @@ void rtcm3_unpack(const struct gps_context_t *context,
         /* RTCM 3.1
          * GPS network-RTK residuals message
          */
+        unknown_name = "GPS RTK Residuals";
         break;
 
     case 1031:
         /* RTCM 3.1
          * GLONASS network-RTK residuals message
          */
+        unknown_name = "GLO RTK Residuals";
         break;
 
     case 1032:
         /* RTCM 3.1
          * Physical reference station position message
          */
+        unknown_name = "Reference Station Position";
         break;
 
     case 1033:                  /* see note in header */
@@ -580,6 +591,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * SBAS Ephemeris
          * length 29
          */
+        unknown_name = "SBAS Ephemeris";
         break;
 
     case 1044:
@@ -588,6 +600,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * length 61
          */
         /* TODO: rtklib has C code for this one.  */
+        unknown_name = "QZSS Ephemeris";
         break;
 
     case 1045:
@@ -596,6 +609,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * length 62
          */
         /* TODO: rtklib has C code for this one.  */
+        unknown_name = "GAL FNAV";
         break;
 
     case 1046:
@@ -604,18 +618,21 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * length 63
          */
         /* TODO: rtklib has C code for this one.  */
+        unknown_name = "GAL INAV";
         break;
 
     case 1074:
         /* RTCM 3.x
          * GPS Multi Signal Message 4
          */
+        unknown_name = "GPS MSM4";
         break;
 
     case 1075:
         /* RTCM 3.x
          * GPS Multi Signal Message 5
          */
+        unknown_name = "GPS MSM5";
         break;
 
     case 1077:
@@ -626,18 +643,21 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * length 438
          */
         /* TODO: rtklib has C code for this one.  */
+        unknown_name = "GPS MSM7";
         break;
 
     case 1084:
         /* RTCM 3.x
          * GLONASS  Multi Signal Message 4
          */
+        unknown_name = "GLO MSM4";
         break;
 
     case 1085:
         /* RTCM 3.x
          * GLONASS Multi Signal Message 5
          */
+        unknown_name = "GLO MSM5";
         break;
 
     case 1087:
@@ -648,18 +668,21 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * length 417 or 427
          */
         /* TODO: rtklib has C code for this one.  */
+        unknown_name = "GLO MSM&";
         break;
 
     case 1094:
         /* RTCM 3.x
          * Galileo Multi Signal Message 4
          */
+        unknown_name = "GAL MSM4";
         break;
 
     case 1095:
         /* RTCM 3.x
          * Galileo Multi Signal Message 5
          */
+        unknown_name = "GAL MSM5";
         break;
 
     case 1097:
@@ -670,6 +693,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * length 96
          */
         /* TODO: rtklib has C code for this one.  */
+        unknown_name = "GAL MSM&";
         break;
 
     case 1107:
@@ -680,30 +704,35 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * length 96
          */
         /* TODO: rtklib has C code for this one.  */
+        unknown_name = "SBAS MSM";
         break;
 
     case 1114:
         /* RTCM 3.x
          * QZSS Multi Signal Message
          */
+        unknown_name = "QZ MSM";
         break;
 
     case 1124:
         /* RTCM 3.x
          * BeiDou Multi Signal Message 4
          */
+        unknown_name = "BD MSM4";
         break;
 
     case 1125:
         /* RTCM 3.x
          * BeiDou Multi Signal Message 5
          */
+        unknown_name = "BD MSM5";
         break;
 
     case 1127:
         /* RTCM 3.x
          * BeiDou Multi Signal Message 7
          */
+        unknown_name = "BD MSM7";
         break;
 
     case 1230:
@@ -732,9 +761,15 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * The first 12 bits of the copied payload will be the type field.
          */
         memcpy(rtcm->rtcmtypes.data, buf+3, rtcm->length);
-        GPSD_LOG(LOG_PROG, &context->errout,
-                 "RTCM3: unknown type %d, length %d\n",
-                 rtcm->type, rtcm->length);
+        if (NULL == unknown_name) {
+	    GPSD_LOG(LOG_PROG, &context->errout,
+		     "RTCM3: unknown type %d, length %d\n",
+		     rtcm->type, rtcm->length);
+        } else {
+	    GPSD_LOG(LOG_PROG, &context->errout,
+		     "RTCM3: %s (type %d), length %d\n",
+                     unknown_name, rtcm->type, rtcm->length);
+        }
     }
 
 }
