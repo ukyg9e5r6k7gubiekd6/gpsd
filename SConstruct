@@ -49,13 +49,16 @@ import SCons
 # ugly hack from http://www.catb.org/esr/faqs/practical-python-porting/
 # handle python2/3 strings
 def polystr(o):
-    if isinstance(o, str):
-        return o
-    if isinstance(o, bytes) or isinstance(o, bytearray):
-        return str(o, encoding='latin1')
-    if isinstance(o, int):
+    if bytes is str:  # Python 2
         return str(o)
-    raise ValueError
+    else:             # python 3.
+        if isinstance(o, str):
+            return o
+        if isinstance(o, bytes) or isinstance(o, bytearray):
+            return str(o, encoding='latin1')
+        if isinstance(o, int):
+            return str(o)
+        raise ValueError
 
 
 # Helper functions for revision hackery
