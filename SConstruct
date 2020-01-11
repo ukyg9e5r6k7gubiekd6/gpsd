@@ -22,12 +22,12 @@
 # * Out-of-directory builds: see http://www.scons.org/wiki/UsingBuildDir
 # * Coveraging mode: gcc "-coverage" flag requires a hack
 #   for building the python bindings
-# * Python 3 compatibility in this recipe
-
-# Since SCons 3.0.0 forces print_function on us, it needs to be unconditional.
-# This is recognized to be a bug in SCons, but we need to live with it for now,
-# and we'll need this for eventual Python 3 compatibility, anyway.
-# Python requires this to precede any non-comment code.
+#
+# This file is Copyright (c) 2010-2020 by the GPSD project
+# SPDX-License-Identifier: BSD-2-clause
+#
+# This code runs compatibly under Python 2 and 3.x for x >= 2.
+# Preserve this property!
 from __future__ import print_function
 
 import ast
@@ -740,33 +740,29 @@ def GetPythonValue(context, name, imp, expr, brief=False):
     """Get a value from the target python, not the running one."""
     context.Message('Checking Python %s... ' % name)
 
-    # what is this about?
-    context.sconf.cached = 0  # Avoid bogus "(cached)"
-
     if not context.env['target_python']:
         # FIXME: this ignores imp
-        status = 0
+        status = 1
         value = str(eval(expr))
     else:
-        command = [target_python_path, '-c', '%s; print(%s)' % (imp, expr)]
-        try:
-            status, value = _getstatusoutput(command, shell=False)
-        except OSError:
-            status = -1
-        if status == 0:
-            value = value.strip()
-        else:
-            value = ''
-            # do not disable python because this failed
-            # maybe testing for newer python feature
-    if 0 != status:
-        result = 'failed'
-    elif brief:
-        result = 'ok'
-    else:
-        # context.Result() confused by bytes
-        result = polystr(value)
-    context.Result(result)
+        command = (context.env['target_python'] + " $SOURCE > $TARGET")
+        text = "%s; print(%s)" % (imp, expr)
+
+        # TryAction returns (1, outputStr), or (0, '') on fail
+        (status, value) = context.TryAction(command, text, '.py')
+
+        # do not disable python because this failed
+        # maybe testing for newer python feature
+
+    if 1 == status:
+        # we could convert to str(), but caching turns it into bytes anyway
+        value = value.strip()
+        if brief is True:
+            context.did_show_result = 1
+            print("ok")
+
+    context.Result(value)
+    # return value
     return value
 
 
@@ -1300,10 +1296,13 @@ if cleaning or helping:
     python_config = []
 
 elif config.env['python']:
+    target_python_path = None
     if config.env['target_python']:
         try:
             config.CheckProg
-        except AttributeError:  # Older scons versions don't have CheckProg
+        except AttributeError:
+            # scons versions before Sep 2015 (2.4.0) don't have CheckProg
+            # gpsd only asks for 2.3.0 or higher
             target_python_path = config.env['target_python']
         else:
             target_python_path = config.CheckProg(config.env['target_python'])
@@ -1312,10 +1311,13 @@ elif config.env['python']:
             config.env['python'] = False
 
     if config.env['python']:
-        # Maximize consistency by using the reported sys.executable
-        target_python_path = config.GetPythonValue('exe path',
-                                                   'import sys',
-                                                   'sys.executable')
+        if not target_python_path:
+            # Avoid double testing for target_python_path
+            # Maximize consistency by using the reported sys.executable
+            target_python_path = config.GetPythonValue('exe path',
+                                                       'import sys',
+                                                       'sys.executable')
+        target_python_path = polystr(target_python_path)
         # python module directory
         if config.env['python_libdir']:
             python_libdir = config.env['python_libdir']
@@ -1337,11 +1339,18 @@ elif config.env['python']:
                                                PYTHON_SYSCONFIG_IMPORT,
                                                PYTHON_CONFIG_CALL,
                                                brief=True)
+        py_config_text = polystr(py_config_text)
+        py_config_vars = ast.literal_eval(py_config_text)
+        py_config_vars = [[] if x is None else x for x in py_config_vars]
+        python_config = dict(zip(PYTHON_CONFIG_NAMES, py_config_vars))
+        # debug
+        # announce(python_config)
 
         # aiogps is only available on Python >= 3.6
         sysver = config.GetPythonValue('version',
                                        'import sys',
                                        '"%d.%d" % sys.version_info[0:2]')
+
         if 3 > int(sysver[0]) or 6 > int(sysver[2]):
             config.env['aiogps'] = False
             announce("WARNING: Python%s too old (need 3.6): "
@@ -1380,20 +1389,15 @@ elif config.env['python']:
 
         if not config.env['xgps_deps']:
             announce("WARNING: xgps and xgpsspeed are missing runtime "
-                     " dependencies", end=True)
+                     "dependencies", end=True)
 
         if not env['xgps']:
             # xgps* turned off by option
             config.env['xgps_deps'] = False
 
-        config.env['PYTHON'] = polystr(target_python_path)
+        config.env['PYTHON'] = target_python_path
         # For regress-driver
-        config.env['ENV']['PYTHON'] = polystr(target_python_path)
-        py_config_vars = ast.literal_eval(py_config_text.decode())
-        py_config_vars = [[] if x is None else x for x in py_config_vars]
-        python_config = dict(zip(PYTHON_CONFIG_NAMES, py_config_vars))
-        # debug
-        # announce(python_config)
+        config.env['ENV']['PYTHON'] = target_python_path
 
 
 env = config.Finish()
@@ -1922,7 +1926,7 @@ else:
 
 
 # Instantiate some file templates.  We'd like to use the Substfile builtin
-# but it doesn't seem to work in scons 1.20
+# Substfile in scons 1.3.0+, since 2010
 def substituter(target, source, env):
     substmap = (
         ('@ANNOUNCE@',   annmail),
@@ -2414,8 +2418,8 @@ else:
             ' $SRCDIR/test/clientlib/*.log', ])
     # Unit-test the bitfield extractor
     misc_regress = Utility('misc-regress', [], [
-        '{} $SRCDIR/test_clienthelpers.py'.format(target_python_path.decode()),
-        '{} $SRCDIR/test_misc.py'.format(target_python_path.decode())
+        '{} $SRCDIR/test_clienthelpers.py'.format(target_python_path),
+        '{} $SRCDIR/test_misc.py'.format(target_python_path)
     ])
 
 
