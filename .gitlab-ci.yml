@@ -152,7 +152,7 @@ coverity:
     --form description="`git describe --tags` / $CI_COMMIT_TITLE / $CI_COMMIT_REF_NAME:$CI_PIPELINE_ID "
   <<: *debian_build
 
-  
+
 # as long as sconstruct has so many options, this does not make sense
 # needs a better / faster way to test
 #
