@@ -75,6 +75,7 @@ extern "C" {
  *       Move gps_fix_t.qErr to gps_data_t.
  *       Split devconfig_t.subtype into subtype and subtype1
  * 9.1   Add leap_seconds to gps_data_t
+ *       Fix rtcm3_1029_t.text length
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	1	/* bump on compatible changes */
@@ -597,8 +598,8 @@ struct rtcm3_t {
 	    unsigned short mjd;		/* Modified Julian Day (MJD) Number */
 	    unsigned int sod;		/* Seconds of Day (UTC) */
 	    size_t len;			/* # chars to follow */
-	    size_t unicode_units;	/* # Unicode units in text */
-	    unsigned char text[128];
+	    size_t unicode_units;	/* # Unicode units (bytes) in text */
+	    unsigned char text[255];
 	} rtcm3_1029;
 	struct rtcm3_1033_t {
 	    unsigned int station_id;			// Reference Station ID
