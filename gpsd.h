@@ -97,7 +97,15 @@ extern "C" {
 #if !defined(AIVDM_ENABLE) && defined(NMEA2000_ENABLE)
 #define AIVDM_ENABLE
 #endif
-#if !defined(NMEA0183_ENABLE) && (defined(ASHTECH_ENABLE) || defined(FV18_ENABLE) || defined(MTK3301_ENABLE) || defined(TNT_ENABLE) || defined(OCEANSERVER_ENABLE) || defined(GPSCLOCK_ENABLE) || defined(FURY_ENABLE) || defined(SKYTRAQ_ENABLE)   || defined(TRIPMATE_ENABLE))
+#if !defined(NMEA0183_ENABLE) && (defined(ASHTECH_ENABLE) || \
+                                  defined(FV18_ENABLE) ||  \
+                                  defined(MTK3301_ENABLE) ||  \
+                                  defined(OCEANSERVER_ENABLE) ||  \
+                                  defined(GPSCLOCK_ENABLE) ||  \
+                                  defined(FURY_ENABLE) || \
+                                  defined(SKYTRAQ_ENABLE) || \
+                                  defined(TRIPMATE_ENABLE) || \
+                                  defined(TNT_ENABLE))
 #define NMEA0183_ENABLE
 #endif
 #ifdef EARTHMATE_ENABLE
@@ -294,7 +302,7 @@ struct gps_context_t {
 #define LEAP_SECOND_VALID	0x01	/* we have or don't need correction */
 #define GPS_TIME_VALID  	0x02	/* GPS week/tow is valid */
 #define CENTURY_VALID		0x04	/* have received ZDA or 4-digit year */
-    struct gpsd_errout_t errout;		/* debug verbosity level and hook */
+    struct gpsd_errout_t errout;	/* debug verbosity level and hook */
     bool readonly;			/* if true, never write to device */
     speed_t fixed_port_speed;           // Fixed port speed, if non-zero
     char fixed_port_framing[4];         // Fixed port framing, if non-blank
@@ -302,7 +310,7 @@ struct gps_context_t {
     int fixcnt;				/* count of good fixes seen */
     /* timekeeping */
     time_t start_time;			/* local time of daemon startup */
-    int leap_seconds;			/* Unix seconds to UTC (GPS-UTC offset) */
+    int leap_seconds;			/* Unix secs to UTC (GPS-UTC offset) */
     unsigned short gps_week;            /* GPS week, usually 10 bits */
     timespec_t gps_tow;                 /* GPS time of week */
     int century;			/* for NMEA-only devices without ZDA */
@@ -341,7 +349,7 @@ struct ais_type24_queue_t {
 /* state for resolving AIVDM decodes */
 struct aivdm_context_t {
     /* hold context for decoding AIDVM packet sequences */
-    int decoded_frags;		/* for tracking AIDVM parts in a multipart sequence */
+    int decoded_frags;     /* for tracking AIDVM parts in a multipart sequence */
     unsigned char bits[2048];
     size_t bitlen; /* how many valid bits */
     struct ais_type24_queue_t type24_queue;
@@ -373,7 +381,7 @@ typedef enum {
 #define PERR_IS 	INTERNAL_SET(8) 	/* PDOP set */
 #define PASSTHROUGH_IS 	INTERNAL_SET(9) 	/* passthrough mode */
 #define EOF_IS		INTERNAL_SET(10)	/* synthetic EOF */
-#define GOODTIME_IS	INTERNAL_SET(11) 	/* time good even if no pos fix */
+#define GOODTIME_IS	INTERNAL_SET(11)      /* time good even if no pos fix */
 #define DATA_IS	~(ONLINE_SET|PACKET_SET|CLEAR_IS|REPORT_IS)
 
 typedef unsigned int driver_mask_t;
@@ -391,7 +399,7 @@ typedef unsigned int driver_mask_t;
 /*
  * True if a driver selection of it should be sticky.
  */
-#define STICKY(dp)		((dp) != NULL && ((dp)->flags & DRIVER_STICKY) != 0)
+#define STICKY(dp)	((dp) != NULL && ((dp)->flags & DRIVER_STICKY) != 0)
 
 struct gps_type_t {
 /* GPS method table, describes how to talk to a particular GPS type */
@@ -403,7 +411,8 @@ struct gps_type_t {
     bool (*probe_detect)(struct gps_device_t *session);
     ssize_t (*get_packet)(struct gps_device_t *session);
     gps_mask_t (*parse_packet)(struct gps_device_t *session);
-    ssize_t (*rtcm_writer)(struct gps_device_t *session, const char *rtcmbuf, size_t rtcmbytes);
+    ssize_t (*rtcm_writer)(struct gps_device_t *session,
+                           const char *rtcmbuf, size_t rtcmbytes);
     void (*init_query)(struct gps_device_t *session);
     void (*event_hook)(struct gps_device_t *session, event_t event);
 #ifdef RECONFIGURE_ENABLE
@@ -414,7 +423,8 @@ struct gps_type_t {
     timespec_t min_cycle;
 #endif /* RECONFIGURE_ENABLE */
 #ifdef CONTROLSEND_ENABLE
-    ssize_t (*control_send)(struct gps_device_t *session, char *buf, size_t buflen);
+    ssize_t (*control_send)(struct gps_device_t *session,
+                            char *buf, size_t buflen);
 #endif /* CONTROLSEND_ENABLE */
     double (*time_offset)(struct gps_device_t *session);
 };
@@ -605,7 +615,7 @@ struct gps_device_t {
 #endif /* GEOSTAR_ENABLE */
 #ifdef GREIS_ENABLE
 	struct {
-	    uint32_t rt_tod;		/* RT message time of day (modulo 1 day) */
+	    uint32_t rt_tod;	        // RT message time of day (modulo 1 day)
 	    bool seen_rt;		/* true if seen RT message */
 	    bool seen_uo;		/* true if seen UO message */
 	    bool seen_si;		/* true if seen SI message */
@@ -639,11 +649,11 @@ struct gps_device_t {
 	    unsigned char track_smooth_mode;
 	    /* fields from DGPS Status */
 	    unsigned int dgps_source;
-#define SIRF_DGPS_SOURCE_NONE		0 /* No DGPS correction type have been selected */
+#define SIRF_DGPS_SOURCE_NONE		0 /* No DGPS correction type selected */
 #define SIRF_DGPS_SOURCE_SBAS		1 /* SBAS */
 #define SIRF_DGPS_SOURCE_SERIAL		2 /* RTCM corrections */
 #define SIRF_DGPS_SOURCE_BEACON		3 /* Beacon corrections */
-#define SIRF_DGPS_SOURCE_SOFTWARE	4 /*  Software API corrections */
+#define SIRF_DGPS_SOURCE_SOFTWARE	4 /* Software API corrections */
 	} sirf;
 #endif /* SIRF_ENABLE */
 #ifdef SUPERSTAR2_ENABLE
@@ -783,7 +793,7 @@ struct gps_device_t {
 	    ntrip_conn_established,
 	    ntrip_conn_err
 	} conn_state; 	/* connection state for multi stage connect */
-	bool works;		/* marks a working connection, so we try to reconnect once */
+	bool works; /* marks a working connection, so we try to reconnect once */
 	bool sourcetable_parse;	/* have we read the sourcetable header? */
     } ntrip;
     /* State of a DGPSIP connection */
@@ -913,7 +923,8 @@ extern ssize_t hex_escapes(char *, const char *);
 extern void gpsd_position_fix_dump(struct gps_device_t *,
 				   char[], size_t);
 extern void gpsd_clear_data(struct gps_device_t *);
-extern socket_t netlib_connectsock(int, const char *, const char *, const char *);
+extern socket_t netlib_connectsock(int, const char *, const char *,
+                                   const char *);
 extern socket_t netlib_localsocket(const char *, int);
 extern const char *netlib_errstr(const int);
 extern char *netlib_sock2ip(socket_t);
@@ -922,12 +933,14 @@ extern void nmea_tpv_dump(struct gps_device_t *, char[], size_t);
 extern void nmea_sky_dump(struct gps_device_t *, char[], size_t);
 extern void nmea_subframe_dump(struct gps_device_t *, char[], size_t);
 extern void nmea_ais_dump(struct gps_device_t *, char[], size_t);
-extern unsigned int ais_binary_encode(struct ais_t *ais, unsigned char *bits, int flag);
+extern unsigned int ais_binary_encode(struct ais_t *ais, unsigned char *bits,
+                                      int flag);
 
 extern void ntp_latch(struct gps_device_t *device,  struct timedelta_t *td);
 extern void ntpshm_context_init(struct gps_context_t *);
 extern void ntpshm_session_init(struct gps_device_t *);
-extern int ntpshm_put(struct gps_device_t *, volatile struct shmTime *, struct timedelta_t *);
+extern int ntpshm_put(struct gps_device_t *, volatile struct shmTime *,
+                      struct timedelta_t *);
 extern void ntpshm_link_deactivate(struct gps_device_t *);
 extern void ntpshm_link_activate(struct gps_device_t *);
 
@@ -962,7 +975,8 @@ void send_dbus_fix (struct gps_device_t* channel);
 /* srecord.c */
 extern void hexdump(size_t, unsigned char *, unsigned char *);
 extern unsigned char sr_sum(unsigned int, unsigned int, unsigned char *);
-extern int bin2srec(unsigned int, unsigned int, unsigned int, unsigned char *, unsigned char *);
+extern int bin2srec(unsigned int, unsigned int, unsigned int,
+                    unsigned char *, unsigned char *);
 extern int srec_hdr(unsigned int, unsigned char *, unsigned char *);
 extern int srec_fin(unsigned int, unsigned char *);
 extern unsigned char hc(unsigned char);
@@ -1069,3 +1083,4 @@ void cfmakeraw(struct termios *);
 // Local variables:
 // mode: c
 // end:
+// vim: set expandtab shiftwidth=4
