@@ -278,8 +278,10 @@ def filtered_spawn(sh, escape, cmd, args, env):
 #
 
 
-# Have scons rebuild an existing target when the source timestamp changes.
-Decider('timestamp-match')
+# Have scons rebuild an existing target when the source timestamp changes
+# and the MD5 changes.  To prevent rebuidling when gpsd_config.h rebuilt,
+# with no  changes.
+Decider('MD5-timestamp')
 
 # support building with various Python versions.
 sconsign_file = '.sconsign.{}.dblite'.format(pickle.HIGHEST_PROTOCOL)
