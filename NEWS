@@ -6,6 +6,7 @@
   Remove revision.h.  Move REVISION into gpsd_config.h
   Change asciidoc to asciidoctor, and revise documents to match.
   library version bumped to 26
+  Add leap_seconds to gps_data_t
 
 3.20: 2019-12-31
   Change README into an asciidoc file and publish HTML from it

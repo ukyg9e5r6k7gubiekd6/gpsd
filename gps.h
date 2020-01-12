@@ -74,9 +74,10 @@ extern "C" {
  *       Move toff and pps out of gps_data_t.union.
  *       Move gps_fix_t.qErr to gps_data_t.
  *       Split devconfig_t.subtype into subtype and subtype1
+ * 9.1   Add leap_seconds to gps_data_t
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
-#define GPSD_API_MINOR_VERSION	0	/* bump on compatible changes */
+#define GPSD_API_MINOR_VERSION	1	/* bump on compatible changes */
 
 #define MAXCHANNELS	140	/* u-blox 9 tracks 140 signals */
 #define MAXUSERDEVS	4	/* max devices per user */
@@ -446,12 +447,12 @@ struct rtcm3_t {
 	    double height;			/* Antenna height */
 	} rtcm3_1006;
 	struct {
-	    unsigned int station_id;			/* Reference Station ID */
+	    unsigned int station_id;			// Reference Station ID
 	    char descriptor[RTCM3_MAX_DESCRIPTOR+1];	/* Description string */
 	    unsigned int setup_id;
 	} rtcm3_1007;
 	struct {
-	    unsigned int station_id;			/* Reference Station ID */
+	    unsigned int station_id;			// Reference Station ID
 	    char descriptor[RTCM3_MAX_DESCRIPTOR+1];	/* Description string */
 	    unsigned int setup_id;
 	    char serial[RTCM3_MAX_DESCRIPTOR+1];	/* Serial # string */
@@ -600,7 +601,7 @@ struct rtcm3_t {
 	    unsigned char text[128];
 	} rtcm3_1029;
 	struct rtcm3_1033_t {
-	    unsigned int station_id;			/* Reference Station ID */
+	    unsigned int station_id;			// Reference Station ID
 	    char descriptor[RTCM3_MAX_DESCRIPTOR+1];	/* Description string */
 	    unsigned int setup_id;
 	    char serial[RTCM3_MAX_DESCRIPTOR+1];	/* Serial # string */
@@ -2247,6 +2248,7 @@ struct gps_data_t {
  * PPS is the encrypted military P(Y)-code */
 #define STATUS_PPS_FIX	9
 
+    int leap_seconds;           /* Unix secs to UTC (GPS-UTC offset) */
     /* precision of fix -- valid if satellites_used > 0 */
     int satellites_used;	/* Number of satellites used in solution */
     struct dop_t dop;
@@ -2409,3 +2411,4 @@ extern void datum_code_string(int code, char *buffer, size_t len);
 
 #endif /* _GPSD_GPS_H_ */
 /* gps.h ends here */
+// vim: set expandtab shiftwidth=4
