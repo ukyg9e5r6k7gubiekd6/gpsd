@@ -201,7 +201,8 @@ static void get_sysfs_var(const char *path, char *buf, size_t bufsize)
 /* Check to see whether the named PPS source is the fake one */
 int pps_check_fake(const char *name) {
     char path[PATH_MAX] = "";
-    char buf[32] = "";
+    char buf[32];
+    memset(buf, 0, sizeof(buf));
     snprintf(path, sizeof(path), "/sys/devices/virtual/pps/%s/name", name);
     get_sysfs_var(path, buf, sizeof(buf));
     return strcmp(buf, FAKE_PPS_NAME) == 0;
