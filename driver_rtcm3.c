@@ -110,15 +110,8 @@ void rtcm3_unpack(const struct gps_context_t *context,
     GPSD_LOG(LOG_RAW, &context->errout, "RTCM3: type %d payload length %d\n",
              rtcm->type, rtcm->length);
 
+    // RTCM3 message type numbers start at 1001
     switch (rtcm->type) {
-    case 63:
-        /* RTCM - 63
-         * BDS/BeiDou Ephemeris
-         * length 64
-         */
-        unknown_name = "BD Ephemeris";
-        break;
-
     case 1001:
         /* GPS Basic RTK, L1 Only */
         rtcm->rtcmtypes.rtcm3_1001.header.station_id = (unsigned int)ugrab(12);
@@ -218,7 +211,8 @@ void rtcm3_unpack(const struct gps_context_t *context,
         break;
 
     case 1005:
-        /* Stationary Antenna Reference Point, No Height Information */
+        /* Stationary Antenna Reference Point, No Height Information
+         * 19 bytes */
 #define R1005 rtcm->rtcmtypes.rtcm3_1005
         R1005.station_id = (unsigned short)ugrab(12);
         ugrab(6);               /* reserved */
@@ -235,7 +229,8 @@ void rtcm3_unpack(const struct gps_context_t *context,
         break;
 
     case 1006:
-        /* Stationary Antenna Reference Point, with Height Information */
+        /* Stationary Antenna Reference Point, with Height Information
+         * 21 bytes */
 #define R1006 rtcm->rtcmtypes.rtcm3_1006
         R1006.station_id = (unsigned short)ugrab(12);
         (void)ugrab(6);         /* reserved */
@@ -253,7 +248,8 @@ void rtcm3_unpack(const struct gps_context_t *context,
         break;
 
     case 1007:
-        /* Antenna Descriptor */
+        /* Antenna Description
+         * 5 to 36 bytes */
         rtcm->rtcmtypes.rtcm3_1007.station_id = (unsigned short)ugrab(12);
         n = (unsigned long)ugrab(8);
         (void)memcpy(rtcm->rtcmtypes.rtcm3_1007.descriptor, buf + 7, n);
@@ -264,7 +260,8 @@ void rtcm3_unpack(const struct gps_context_t *context,
         break;
 
     case 1008:
-        /* Antenna Descriptor & Serial Number */
+        /* Antenna Description & Serial Number
+         * 6 to 68 bytes */
         rtcm->rtcmtypes.rtcm3_1008.station_id = (unsigned short)ugrab(12);
         n = (unsigned long)ugrab(8);
         (void)memcpy(rtcm->rtcmtypes.rtcm3_1008.descriptor, buf + 7, n);
@@ -428,6 +425,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
         /* RTCM 3.1
          * GPS Ionospheric Correction Differences for all satellites
          * between the master station and one auxiliary station
+         * 9 bytes minimum
          */
         unknown_name = "GPS Ionospheric Correction Differences";
         break;
@@ -436,6 +434,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
         /* RTCM 3.1
          * GPS Geometric Correction Differences for all satellites between
          * the master station and one auxiliary station.
+         * 9 bytes minimum
          */
         unknown_name = "GPS Geometric Correction Differences";
         break;
@@ -445,6 +444,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
          * GPS Combined Geometric and Ionospheric Correction Differences
          * for all satellites between one Aux station and the master station
          * (same content as both types 1015 and 1016 together, but less size)
+         * 9 bytes minimum
          */
         unknown_name = "GPS Combined Geometric and Ionospheric "
                        "Correction Differences";
@@ -461,7 +461,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
     case 1019:
         /* RTCM 3.1 - 1020
          * GPS Ephemeris
-         * length 19
+         * 62 bytes
          */
         /* TODO: rtklib has C code for this one.  */
         unknown_name = "GPS Ephemeris";
@@ -470,7 +470,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
     case 1020:
         /* RTCM 3.1 - 1020
          * GLONASS Ephemeris
-         * length 45
+         * 45 bytes
          */
         /* TODO: rtklib has C code for this one.  */
         unknown_name = "GLO Ephemeris";
@@ -537,7 +537,8 @@ void rtcm3_unpack(const struct gps_context_t *context,
 
     case 1029:
         /* Text in UTF8 format
-         *(max. 127 multibyte characters and max. 255 bytes)
+         * 9 bytes minimum
+         * (max. 127 multibyte characters and max. 255 bytes)
          */
         rtcm->rtcmtypes.rtcm3_1029.station_id = (unsigned short)ugrab(12);
         rtcm->rtcmtypes.rtcm3_1029.mjd = (unsigned short)ugrab(16);
@@ -1329,9 +1330,9 @@ void rtcm3_unpack(const struct gps_context_t *context,
 
     case 4095:
         /* RTCM 3.x
-         * Ashtech Proprietary
+         * Ashtech/Magellan Proprietary
          */
-        unknown_name = "Ashtech Proprietary";
+        unknown_name = "Ashtech/Magellan Proprietary";
         break;
 
     default:
