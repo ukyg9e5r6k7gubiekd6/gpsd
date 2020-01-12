@@ -600,6 +600,42 @@ void rtcm3_unpack(const struct gps_context_t *context,
         unknown = false;
         break;
 
+    case 1034:
+        /* RTCM 3.2
+         * GPS Network FKP Gradient Message
+         */
+        unknown_name = "GPS Network FKP Gradient";
+        break;
+
+    case 1035:
+        /* RTCM 3.2
+         * GLONASS Network FKP Gradient Message
+         */
+        unknown_name = "GLO Network FKP Gradient";
+        break;
+
+    case 1037:
+        /* RTCM 3.2
+         * GLONASS Ionospheric Correction Differences
+         */
+        unknown_name = "GLO Ionospheric Correction Differences";
+        break;
+
+    case 1038:
+        /* RTCM 3.2
+         * GLONASS Geometric Correction Differences
+         */
+        unknown_name = "GLO Geometric Correction Differences";
+        break;
+
+    case 1039:
+        /* RTCM 3.2
+         * GLONASS Combined Geometric and Ionospheric Correction Differences
+         */
+        unknown_name = "GLONASS Combined Geometric and Ionospheric "
+                       "Correction Differences";
+        break;
+
     case 1042:
         /* RTCM 3.x - 1043
          * BeiDou Ephemeris
@@ -626,9 +662,9 @@ void rtcm3_unpack(const struct gps_context_t *context,
         break;
 
     case 1045:
-        /* RTCM 3.x - 1045
+        /* RTCM 3.2 - 1045
          * Galileo F/NAV Ephemeris Data
-         * length 62
+         * 64 bytes
          */
         /* TODO: rtklib has C code for this one.  */
         unknown_name = "GAL F/NAV Ephemeris Data";
@@ -644,84 +680,84 @@ void rtcm3_unpack(const struct gps_context_t *context,
         break;
 
     case 1057:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * SSR GPS Orbit Correction
          */
         unknown_name = "SSR GPS Orbit Correction";
         break;
 
     case 1058:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * SSR GPS Clock Correction
          */
         unknown_name = "SSR GPS Clock Correction";
         break;
 
     case 1059:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * SSR GPS Code Bias
          */
         unknown_name = "SSR GPS Code Bias";
         break;
 
     case 1060:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * SSR GPS Combined Orbit and Clock Correction
          */
         unknown_name = "SSR GPS Combined Orbit and Clock Correction";
         break;
 
     case 1061:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * SSR GPS URA
          */
         unknown_name = "SSR GPS URA";
         break;
 
     case 1062:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * SSR GPS High Rate Clock Correction
          */
         unknown_name = "SSR GPS High Rate Clock Correction";
         break;
 
     case 1063:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * SSR GLO Orbit Correction
          */
         unknown_name = "SSR GLO Orbit Correction";
         break;
 
     case 1064:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * SSR GLO Clock Correction
          */
         unknown_name = "SSR GLO Clock Correction";
         break;
 
     case 1065:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * SSR GLO Code Correction
          */
         unknown_name = "SSR GLO ode Correction";
         break;
 
     case 1066:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * SSR GLO Combined Orbit and Clock Correction
          */
         unknown_name = "SSR GLO Combined Orbit and Clock Correction";
         break;
 
     case 1067:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * SSR GLO URA
          */
         unknown_name = "SSR GLO URA";
         break;
 
     case 1068:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * SSR GPS High Rate Clock Correction
          */
         unknown_name = "SSR GLO High Rate Clock Correction";
@@ -735,49 +771,49 @@ void rtcm3_unpack(const struct gps_context_t *context,
         break;
 
     case 1071:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * GPS Multi Signal Message 1
          */
         unknown_name = "GPS Multi Signal Message 1";
         break;
 
     case 1072:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * GPS Multi Signal Message 2
          */
         unknown_name = "GPS Multi Signal Message 2";
         break;
 
     case 1073:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * GPS Multi Signal Message 3
          */
         unknown_name = "GPS Multi Signal Message 3";
         break;
 
     case 1074:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * GPS Multi Signal Message 4
          */
         unknown_name = "GPS Multi Signal Message 4";
         break;
 
     case 1075:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * GPS Multi Signal Message 5
          */
         unknown_name = "GPS Multi Signal Message 5";
         break;
 
     case 1076:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * GPS Multi Signal Message 6
          */
         unknown_name = "GPS Multi Signal Message 6";
         break;
 
     case 1077:
-        /* RTCM 3.x - 1077
+        /* RTCM 3.2 - 1077
          * GPS Multi Signal Message 7
          * Full GPS pseudo-ranges, carrier phases, Doppler and
          * signal strength (high resolution)
@@ -809,49 +845,49 @@ void rtcm3_unpack(const struct gps_context_t *context,
         break;
 
     case 1081:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * GLONASS Multi Signal Message 1
          */
         unknown_name = "GLO Multi Signal Message 1";
         break;
 
     case 1082:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * GLONASS Multi Signal Message 2
          */
         unknown_name = "GLO Multi Signal Message 2";
         break;
 
     case 1083:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * GLONASS Multi Signal Message 4
          */
         unknown_name = "GLO Multi Signal Message 3";
         break;
 
     case 1084:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * GLONASS Multi Signal Message 4
          */
         unknown_name = "GLO Multi Signal Message 4";
         break;
 
     case 1085:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * GLONASS Multi Signal Message 5
          */
         unknown_name = "GLO Multi Signal Message 5";
         break;
 
     case 1086:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * GLONASS Multi Signal Message 6
          */
         unknown_name = "GLO Multi Signal Message 6";
         break;
 
     case 1087:
-        /* RTCM 3.x - 1087
+        /* RTCM 3.2 - 1087
          * GLONASS Multi Signal Message 7
          * Full GLONASS pseudo-ranges, carrier phases, Doppler and
          * signal strength (high resolution)
@@ -883,49 +919,49 @@ void rtcm3_unpack(const struct gps_context_t *context,
         break;
 
     case 1091:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * Galileo Multi Signal Message 1
          */
         unknown_name = "GAL Multi Signal Message 1";
         break;
 
     case 1092:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * Galileo Multi Signal Message 2
          */
         unknown_name = "GAL Multi Signal Message 2";
         break;
 
     case 1093:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * Galileo Multi Signal Message 3
          */
         unknown_name = "GAL Multi Signal Message 3";
         break;
 
     case 1094:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * Galileo Multi Signal Message 4
          */
         unknown_name = "GAL Multi Signal Message 4";
         break;
 
     case 1095:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * Galileo Multi Signal Message 5
          */
         unknown_name = "GAL Multi Signal Message 5";
         break;
 
     case 1096:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * Galileo Multi Signal Message 6
          */
         unknown_name = "GAL Multi Signal Message 6";
         break;
 
     case 1097:
-        /* RTCM 3.x - 1097
+        /* RTCM 3.2 - 1097
          * Galileo Multi Signal Message 7
          * Full Galileo pseudo-ranges, carrier phases, Doppler and
          * signal strength (high resolution)
@@ -957,49 +993,49 @@ void rtcm3_unpack(const struct gps_context_t *context,
         break;
 
     case 1101:
-        /* RTCM 3.x
+        /* RTCM 3.3
          * SBAS Multi Signal Message 1
          */
         unknown_name = "SBAS Multi Signal Message 1";
         break;
 
     case 1102:
-        /* RTCM 3.x
+        /* RTCM 3.3
          * SBAS Multi Signal Message 2
          */
         unknown_name = "SBAS Multi Signal Message 2";
         break;
 
     case 1103:
-        /* RTCM 3.x
+        /* RTCM 3.3
          * SBAS Multi Signal Message 3
          */
         unknown_name = "SBAS Multi Signal Message 3";
         break;
 
     case 1104:
-        /* RTCM 3.x
+        /* RTCM 3.3
          * SBAS Multi Signal Message 4
          */
         unknown_name = "SBAS Multi Signal Message 4";
         break;
 
     case 1105:
-        /* RTCM 3.x
+        /* RTCM 3.3
          * SBAS Multi Signal Message 5
          */
         unknown_name = "SBAS Multi Signal Message 5";
         break;
 
     case 1106:
-        /* RTCM 3.x
+        /* RTCM 3.3
          * SBAS Multi Signal Message 6
          */
         unknown_name = "SBAS Multi Signal Message 6";
         break;
 
     case 1107:
-        /* RTCM 3.x - 1107
+        /* RTCM 3.3 - 1107
          * 'Multiple Signal Message
          * Full SBAS pseudo-ranges, carrier phases, Doppler and
          * signal strength (high resolution)
@@ -1031,49 +1067,49 @@ void rtcm3_unpack(const struct gps_context_t *context,
         break;
 
     case 1111:
-        /* RTCM 3.x
+        /* RTCM 3.3
          * QZSS Multi Signal Message 1
          */
         unknown_name = "QZSS Multi Signal Message 1";
         break;
 
     case 1112:
-        /* RTCM 3.x
+        /* RTCM 3.3
          * QZSS Multi Signal Message 2
          */
         unknown_name = "QZSS Multi Signal Message 2";
         break;
 
     case 1113:
-        /* RTCM 3.x
+        /* RTCM 3.3
          * QZSS Multi Signal Message 3
          */
         unknown_name = "QZSS Multi Signal Message 3";
         break;
 
     case 1114:
-        /* RTCM 3.x
+        /* RTCM 3.3
          * QZSS Multi Signal Message 4
          */
         unknown_name = "QZSS Multi Signal Message 4";
         break;
 
     case 1115:
-        /* RTCM 3.x
+        /* RTCM 3.3
          * QZSS Multi Signal Message 5
          */
         unknown_name = "QZSS Multi Signal Message 5";
         break;
 
     case 1116:
-        /* RTCM 3.x
+        /* RTCM 3.3
          * QZSS Multi Signal Message 6
          */
         unknown_name = "QZSS Multi Signal Message 6";
         break;
 
     case 1117:
-        /* RTCM 3.x
+        /* RTCM 3.3
          * QZSS Multi Signal Message 7
          */
         unknown_name = "QZSS Multi Signal Message 7";
@@ -1101,49 +1137,49 @@ void rtcm3_unpack(const struct gps_context_t *context,
         break;
 
     case 1121:
-        /* RTCM 3.x
-         * QZSS Multi Signal Message 1
+        /* RTCM 3.2 A.1
+         * BD Multi Signal Message 1
          */
         unknown_name = "BD Multi Signal Message 1";
         break;
 
     case 1122:
-        /* RTCM 3.x
-         * QZSS Multi Signal Message 2
+        /* RTCM 3.2 A.1
+         * BD Multi Signal Message 2
          */
         unknown_name = "BD Multi Signal Message 2";
         break;
 
     case 1123:
-        /* RTCM 3.x
-         * QZSS Multi Signal Message 3
+        /* RTCM 3.2 A.1
+         * BD Multi Signal Message 3
          */
         unknown_name = "BD Multi Signal Message 3";
         break;
 
     case 1124:
-        /* RTCM 3.x
-         * BeiDou Multi Signal Message 4
+        /* RTCM 3.2 A.1
+         * BD Multi Signal Message 4
          */
         unknown_name = "BD Multi Signal Message 4";
         break;
 
     case 1125:
-        /* RTCM 3.x
+        /* RTCM 3.2 A.1
          * BeiDou Multi Signal Message 5
          */
         unknown_name = "BD Multi Signal Message 5";
         break;
 
     case 1126:
-        /* RTCM 3.x
+        /* RTCM 3.2 A.1
          * BeiDou Multi Signal Message 6
          */
         unknown_name = "BD Multi Signal Message 6";
         break;
 
     case 1127:
-        /* RTCM 3.x
+        /* RTCM 3.2 A.1
          * BeiDou Multi Signal Message 7
          */
         unknown_name = "BD Multi Signal Message 7";
@@ -1164,7 +1200,7 @@ void rtcm3_unpack(const struct gps_context_t *context,
         break;
 
     case 1230:
-        /* RTCM 3.x
+        /* RTCM 3.2
          * GLONASS L1 and L2 Code-Phase Biases.
          */
         unknown_name = "GLO L1 and L2 Code-Phase Biases";
@@ -1224,9 +1260,9 @@ void rtcm3_unpack(const struct gps_context_t *context,
 
     case 4080:
         /* RTCM 3.x
-         * Seoul National Universtiry GNSS Lab Proprietary
+         * NavCom Technology, Inc.
          */
-        unknown_name = "Seoul National Universtiry GNSS Lab Proprietary";
+        unknown_name = "NavCom Technology, Inc.";
         break;
 
     case 4081:
