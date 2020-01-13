@@ -99,7 +99,15 @@ fedora-latest:
   - .ci-build/build.sh
 
 
+
+# to avoid falied builds on MRs/forks where no builder with the
+# tag `freebsd` is available, run this job only if
+# $HAVE_FREEBSD == "true"
+# set this in your CI environment settings in gitlab.
 freebsd:
+  only:
+    variables:
+      $HAVE_FREEBSD == "true"
   stage: advanced_build
   variables:
     WRITE_PAD: '0.01250'
