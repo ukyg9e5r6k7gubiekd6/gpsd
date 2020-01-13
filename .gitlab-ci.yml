@@ -107,7 +107,7 @@ fedora-latest:
 freebsd:
   only:
     variables:
-      $HAVE_FREEBSD == "true"
+    - $HAVE_FREEBSD == "true"
   stage: advanced_build
   variables:
     WRITE_PAD: '0.01250'
