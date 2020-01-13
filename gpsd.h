@@ -837,7 +837,7 @@ extern void isgps_output_magnavox(const isgps30bits_t *, unsigned int, FILE *);
 extern enum isgpsstat_t rtcm2_decode(struct gps_lexer_t *, unsigned int);
 extern void json_rtcm2_dump(const struct rtcm2_t *,
 			    const char *, char[], size_t);
-extern void rtcm2_unpack(struct rtcm2_t *, char *);
+extern void rtcm2_unpack(struct gps_device_t *, struct rtcm2_t *, char *);
 extern void json_rtcm3_dump(const struct rtcm3_t *,
 			    const char *, char[], size_t);
 extern void rtcm3_unpack(const struct gps_context_t *,

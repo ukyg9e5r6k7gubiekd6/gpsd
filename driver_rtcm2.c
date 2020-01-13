@@ -116,7 +116,8 @@ SPDX-License-Identifier: BSD-2-clause
 #define __LITTLE_ENDIAN _LITTLE_ENDIAN
 #endif
 
-#if !defined(__BYTE_ORDER) || !defined(__BIG_ENDIAN) || !defined(__LITTLE_ENDIAN)
+#if !defined(__BYTE_ORDER) || !defined(__BIG_ENDIAN) || \
+    !defined(__LITTLE_ENDIAN)
 #error endianness macros are not defined
 #endif
 
@@ -851,12 +852,14 @@ static unsigned int tx_speed[] = { 25, 50, 100, 110, 150, 200, 250, 300 };
 
 #define DIMENSION(a) (unsigned)(sizeof(a)/sizeof(a[0]))
 
-void rtcm2_unpack(struct rtcm2_t *tp, char *buf)
 /* break out the raw bits into the content fields */
+void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
 {
     int len;
     unsigned int n, w;
     struct rtcm2_msg_t *msg = (struct rtcm2_msg_t *)buf;
+    bool unknown = true;              // we don't know how to decode
+    const char *msg_name = NULL;  // no decode, but maybe we know the name
 
     tp->type = msg->w1.msgtype;
     tp->length = msg->w2.frmlen;
@@ -869,9 +872,12 @@ void rtcm2_unpack(struct rtcm2_t *tp, char *buf)
     n = 0;
     switch (tp->type) {
     case 1:
+        // FALLTHROUGH
     case 9:
     {
         struct gps_correction_t *m = &msg->msg_type.type1.corrections[0];
+        msg_name = "Differential GPS Corrections";
+        unknown = false;
 
         while (len >= 0) {
             if (len >= 2) {
@@ -911,9 +917,17 @@ void rtcm2_unpack(struct rtcm2_t *tp, char *buf)
         tp->gps_ranges.nentries = n;
     }
         break;
+
+    case 2:
+        msg_name = "Delta Differential GPS Corrections";
+        unknown = false;
+        break;
+
     case 3:
     {
         struct rtcm2_msg3 *m = &msg->msg_type.type3;
+        msg_name = "Reference Station Parameters (GPS)";
+        unknown = false;
 
         if ((tp->ecef.valid = len >= 4)) {
             tp->ecef.x = ((m->w3.x_h << 8) | (m->w4.x_l)) * XYZ_SCALE;
@@ -922,7 +936,10 @@ void rtcm2_unpack(struct rtcm2_t *tp, char *buf)
         }
     }
         break;
+
     case 4:
+        msg_name = "Reference Station Datum";
+        unknown = false;
         if ((tp->reference.valid = len >= 2)) {
             struct rtcm2_msg4 *m = &msg->msg_type.type4;
 
@@ -957,7 +974,10 @@ void rtcm2_unpack(struct rtcm2_t *tp, char *buf)
                 tp->reference.sense = SENSE_INVALID;
         }
         break;
+
     case 5:
+        msg_name = "Constellation health (GPS)";
+        unknown = false;
         for (n = 0; n < (unsigned)len; n++) {
             struct consat_t *csp = &tp->conhealth.sat[n];
             struct b_health_t *m = &msg->msg_type.type5.health[n];
@@ -973,7 +993,15 @@ void rtcm2_unpack(struct rtcm2_t *tp, char *buf)
         }
         tp->conhealth.nentries = n;
         break;
+
+    case 6:
+        msg_name = "Null frame (GPS)";
+        unknown = false;
+        break;
+
     case 7:
+        msg_name = "Beacon Almanac (GPS)";
+        unknown = false;
         for (w = 0; w < (unsigned)len; w++) {
             struct station_t *np = &tp->almanac.station[n];
             struct b_station_t *mp = &msg->msg_type.type7.almanac[w];
@@ -991,7 +1019,32 @@ void rtcm2_unpack(struct rtcm2_t *tp, char *buf)
         }
         tp->almanac.nentries = (unsigned)(len / 3);
         break;
+
+    case 8:
+        msg_name = "Pseudolite Almanac";
+        unknown = false;
+        break;
+
+    // case 9 is handled above with case 1
+
+    case 10:
+        msg_name = "P-Code Differential Corrections";
+        unknown = false;
+        break;
+
+    case 11:
+        msg_name = "C/A Code L2 Corrections";
+        unknown = false;
+        break;
+
+    case 12:
+        msg_name = "Pseudolite Station Parameters";
+        unknown = false;
+        break;
+
     case 13:
+        msg_name = "";
+        unknown = false;
         tp->xmitter.status = (bool)msg->msg_type.type13.w1.status;
         tp->xmitter.rangeflag = (bool)msg->msg_type.type13.w1.rangeflag;
         tp->xmitter.lat = msg->msg_type.type13.w1.lat * LATLON_SCALE;
@@ -1000,12 +1053,23 @@ void rtcm2_unpack(struct rtcm2_t *tp, char *buf)
         if (tp->xmitter.range == 0)
             tp->xmitter.range = 1024;
         break;
+
     case 14:
+        msg_name = "GPS Time Of Week";
+        unknown = false;
         tp->gpstime.week = msg->msg_type.type14.w1.week;
         tp->gpstime.hour = msg->msg_type.type14.w1.hour;
         tp->gpstime.leapsecs = msg->msg_type.type14.w1.leapsecs;
         break;
+
+    case 15:
+        msg_name = "Ionospheric Delay Message";
+        unknown = false;
+        break;
+
     case 16:
+        msg_name = "Special Message (GPS)";
+        unknown = false;
         for (w = 0; w < (unsigned)len; w++) {
             if (!msg->msg_type.type16.txt[w].byte1) {
                 break;
@@ -1023,9 +1087,75 @@ void rtcm2_unpack(struct rtcm2_t *tp, char *buf)
         tp->message[n] = '\0';
         break;
 
+    case 17:
+        msg_name = "GPS Ephemeris";
+        unknown = false;
+        break;
+
+    case 18:
+        msg_name = "RTK Uncorrected Carrier-phase";
+        unknown = false;
+        break;
+
+    case 19:
+        msg_name = "RTK Corrected Pseudorange";
+        unknown = false;
+        break;
+
+    case 20:
+        msg_name = "RTK Carrier Phase Corrections";
+        unknown = false;
+        break;
+
+    case 21:
+        msg_name = "High-Accuracy Pseudorange Corrections";
+        unknown = false;
+        break;
+
+    case 22:
+        msg_name = "Extended Reference Station Parameters";
+        unknown = false;
+        break;
+
+    case 23:
+        msg_name = "Antenna Type Definition";
+        unknown = false;
+        break;
+
+    case 24:
+        msg_name = "Antenna Reference Point (arp)";
+        unknown = false;
+        break;
+
+    case 25:
+        // FALLTHROUGH
+    case 26:
+        msg_name = "Undefined";
+        unknown = false;
+        break;
+
+    case 27:
+        msg_name = "Radio Beacon Almanac";
+        unknown = false;
+        break;
+
+    case 28:
+        // FALLTHROUGH
+    case 29:
+        // FALLTHROUGH
+    case 30:
+        msg_name = "Undefined";
+        unknown = false;
+        break;
+
     case 31:
+        // FALLTHROUGH
+    case 34:
     {
+        // 32 and 34 are the same, except 31 is all sats, 34 is some sats
         struct glonass_correction_t *m = &msg->msg_type.type31.corrections[0];
+        msg_name = "Differential GLONASS corrections";
+        unknown = false;
 
         while (len >= 0) {
             if (len >= 2) {
@@ -1069,11 +1199,70 @@ void rtcm2_unpack(struct rtcm2_t *tp, char *buf)
     }
         break;
 
+    case 32:
+        msg_name = "Reference Station Parameters (GLONASS)";
+        unknown = false;
+        break;
+
+    case 33:
+        msg_name = "Constellation health (GLONASS)";
+        unknown = false;
+        break;
+
+    // case 34 is above with 31
+
+    case 35:
+        msg_name = "Beacon Almanac (GLONASS)";
+        unknown = false;
+        break;
+
+    case 36:
+        msg_name = "Special Message (GLONASS)";
+        unknown = false;
+        break;
+
+    case 37:
+        msg_name = "GNSS System Time Offset";
+        unknown = false;
+        break;
+
+    case 59:
+        msg_name = "Proprietary Message";
+        unknown = false;
+        break;
+
     default:
-        memcpy(tp->words, msg->msg_type.rtcm2_msgunk,
-               (RTCM2_WORDS_MAX - 2) * sizeof(isgps30bits_t));
+        unknown = true;
         break;
     }
+
+    if (unknown) {
+        memcpy(tp->words, msg->msg_type.rtcm2_msgunk,
+               (RTCM2_WORDS_MAX - 2) * sizeof(isgps30bits_t));
+        if (NULL == msg_name) {
+	    GPSD_LOG(LOG_PROG, &session->context->errout,
+		     "RTCM2: unknown type %d, length %d\n",
+		     tp->type, len);
+        } else {
+	    GPSD_LOG(LOG_PROG, &session->context->errout,
+		     "RTCM2: %s (type %d), length %d\n",
+                     msg_name, tp->type, len);
+        }
+    } else {
+        GPSD_LOG(LOG_PROG, &session->context->errout,
+                 "RTCM2: type %d, length %d\n",
+                 tp->type, len);
+    }
+    GPSD_LOG(LOG_RAW, &session->context->errout,
+             "RTCM 2.x packet type 0x%02x length %d words "
+             "from %zd bytes: %s\n",
+             session->gpsdata.rtcm2.type,
+             session->gpsdata.rtcm2.length + 2,
+             session->lexer.isgps.buflen,
+             gpsd_hexdump(session->msgbuf, sizeof(session->msgbuf),
+                             (char *)session->lexer.isgps.buf,
+                             (session->gpsdata.rtcm2.length +
+                              2) * sizeof(isgps30bits_t)));
 }
 
 static bool preamble_match(isgps30bits_t * w)
