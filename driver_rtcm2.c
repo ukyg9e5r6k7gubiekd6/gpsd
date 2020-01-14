@@ -1241,23 +1241,23 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
                (RTCM2_WORDS_MAX - 2) * sizeof(isgps30bits_t));
         if (NULL == msg_name) {
 	    GPSD_LOG(LOG_PROG, &session->context->errout,
-		     "RTCM2: unknown type %d, length %d\n",
+		     "RTCM2: type %d (unknown), length %d\n",
 		     tp->type, tp->length + 2);
         } else {
 	    GPSD_LOG(LOG_PROG, &session->context->errout,
-		     "RTCM2: %s (type %d), length %d\n",
-                     msg_name, tp->type, tp->length + 2);
+		     "RTCM2: type %d (%s), length %d\n",
+                     tp->type, msg_name,tp->length + 2);
         }
     } else {
         GPSD_LOG(LOG_PROG, &session->context->errout,
-                 "RTCM2: %s (type %d), length %d\n",
-                  msg_name, tp->type, tp->length + 2);
+                 "RTCM2: type %d (%s), length %d\n",
+                 tp->type, msg_name, tp->length + 2);
     }
     GPSD_LOG(LOG_RAW, &session->context->errout,
-             "RTCM 2.x %s (type %d) length %d words "
+             "RTCM 2: type %d (%s) length %d words "
              "from %zd bytes: %s\n",
-             msg_name,
              tp->type,
+             msg_name,
              tp->length + 2,
              session->lexer.isgps.buflen,
              gpsd_hexdump(session->msgbuf, sizeof(session->msgbuf),
