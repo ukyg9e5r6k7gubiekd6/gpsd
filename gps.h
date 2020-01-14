@@ -76,6 +76,7 @@ extern "C" {
  *       Split devconfig_t.subtype into subtype and subtype1
  * 9.1   Add leap_seconds to gps_data_t
  *       Fix rtcm3_1029_t.text length
+ *       Add many rtcm2 structs
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	1	/* bump on compatible changes */
@@ -318,6 +319,36 @@ struct rtcm2_t {
 	    unsigned int hour;			/* Hour in week (0-167) */
 	    unsigned int leapsecs;		/* Leap seconds (0-63) */
 	} gpstime;
+        struct {                        // RTCM2 type 18
+            int tom;                    // time of measurement
+            // FIXME: add in sat words
+        } rtcm2_18;
+        struct {                        // RTCM2 type 19
+            int tom;                    // time of measurement
+            // FIXME: add in sat words
+        } rtcm2_19;
+        struct {                        // RTCM2 type 20
+            int tom;                    // time of measurement
+            // FIXME: add in sat words
+        } rtcm2_20;
+        struct {                        // RTCM2 type 21
+            int tom;                    // time of measurement
+            // FIXME: add in sat words
+        } rtcm2_21;
+        struct {                        // RTCM2 type 22
+            unsigned char ecef_dx;      // ECEF delta-x
+            unsigned char ecef_dy;      // ECEF delta-y
+            unsigned char ecef_dz;      // ECEF delta-z
+            unsigned char gs;           // 0 is GPS, 1 is GLONASS
+        } rtcm2_22;
+        struct {                        // RTCM2 type 24
+            int64_t ecef_x;             // ECEF X (m * 10e-4)
+            int64_t ecef_y;             // ECEF Y (m * 10e-4)
+            int64_t ecef_z;             // ECEF Z (m * 10e-4)
+            unsigned char gs;           // 0 is GPS, 1 is GLONASS
+            unsigned char ah_flag;      // 1 if ah is valid
+            int ah;                     // Ant Height (m * 10e-4)
+        } rtcm2_24;
 	struct {
 	    unsigned int nentries;
 	    struct glonass_rangesat_t {		/* data from message type 31 */
