@@ -861,11 +861,11 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
     bool unknown = true;              // we don't know how to decode
     const char *msg_name = NULL;  // no decode, but maybe we know the name
 
-    tp->type = msg->w1.msgtype;
-    tp->length = msg->w2.frmlen;
-    tp->zcount = msg->w2.zcnt * ZCOUNT_SCALE;
-    tp->refstaid = msg->w1.refstaid;
-    tp->seqnum = msg->w2.sqnum;
+    tp->type = msg->w1.msgtype;         // 1 to 64.  Zero means 64
+    tp->refstaid = msg->w1.refstaid;    // 0 to 1023
+    tp->length = msg->w2.frmlen;        // 0 to 31
+    tp->zcount = msg->w2.zcnt * ZCOUNT_SCALE;  // 0 to 3599.4 sec
+    tp->seqnum = msg->w2.sqnum;         // 0 to 7
     tp->stathlth = msg->w2.stathlth;
 
     len = (int)tp->length;
@@ -1242,27 +1242,27 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
         if (NULL == msg_name) {
 	    GPSD_LOG(LOG_PROG, &session->context->errout,
 		     "RTCM2: unknown type %d, length %d\n",
-		     tp->type, len);
+		     tp->type, tp->length + 2);
         } else {
 	    GPSD_LOG(LOG_PROG, &session->context->errout,
 		     "RTCM2: %s (type %d), length %d\n",
-                     msg_name, tp->type, len);
+                     msg_name, tp->type, tp->length + 2);
         }
     } else {
         GPSD_LOG(LOG_PROG, &session->context->errout,
-                 "RTCM2: type %d, length %d\n",
-                 tp->type, len);
+                 "RTCM2: %s (type %d), length %d\n",
+                  msg_name, tp->type, tp->length + 2);
     }
     GPSD_LOG(LOG_RAW, &session->context->errout,
-             "RTCM 2.x packet type 0x%02x length %d words "
+             "RTCM 2.x %s (type %d) length %d words "
              "from %zd bytes: %s\n",
-             session->gpsdata.rtcm2.type,
-             session->gpsdata.rtcm2.length + 2,
+             msg_name,
+             tp->type,
+             tp->length + 2,
              session->lexer.isgps.buflen,
              gpsd_hexdump(session->msgbuf, sizeof(session->msgbuf),
                              (char *)session->lexer.isgps.buf,
-                             (session->gpsdata.rtcm2.length +
-                              2) * sizeof(isgps30bits_t)));
+                             (tp->length + 2) * sizeof(isgps30bits_t)));
 }
 
 static bool preamble_match(isgps30bits_t * w)
