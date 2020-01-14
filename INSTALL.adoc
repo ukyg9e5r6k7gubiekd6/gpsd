@@ -624,8 +624,8 @@ want to access the development source.
 
 == Special Notes for Windows ==
 
-Only Windows Subsystem for Linux 1 does not blow diseased goats at
-this time.
+Only Windows Subsystem for Linux 1 provides a reasonable means
+of running gpsd at this time.
 
 === About WSL 1 ===
 
