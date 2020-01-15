@@ -530,10 +530,10 @@ struct rtcm2_msg_t {
         /* msg 59 -  Proprietary messages, for transmission of any
          * required data */
 
-        // msg 60-63 - Multipurpsoe usage
+        // msg 60-63 - Multipurpose usage
 
         /* unknown message */
-        isgps30bits_t   rtcm2_msgunk[RTCM2_WORDS_MAX-2];
+        isgps30bits_t   rtcm2_msgunk[RTCM2_WORDS_MAX - 2];
     } msg_type;
 } __attribute__((__packed__));
 
@@ -922,6 +922,8 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
     tp->ref_sta.dy = NAN;
     tp->ref_sta.dz = NAN;
 
+    /* FIXME: test tp->length + 2, against session->lexer.isgps.buflen, */
+
     len = (int)tp->length;
     n = 0;
     switch (tp->type) {
@@ -974,7 +976,6 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
 
     case 2:
         msg_name = "Delta Differential GPS Corrections";
-        unknown = false;
         break;
 
     case 3:
@@ -1076,28 +1077,24 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
 
     case 8:
         msg_name = "Pseudolite Almanac";
-        unknown = false;
         break;
 
     // case 9 is handled above with case 1
 
     case 10:
         msg_name = "P-Code Differential Corrections";
-        unknown = false;
         break;
 
     case 11:
         msg_name = "C/A Code L2 Corrections";
-        unknown = false;
         break;
 
     case 12:
         msg_name = "Pseudolite Station Parameters";
-        unknown = false;
         break;
 
     case 13:
-        msg_name = "";
+        msg_name = "Ground Transmitter Parameters";
         unknown = false;
         tp->xmitter.status = (bool)msg->msg_type.type13.w1.status;
         tp->xmitter.rangeflag = (bool)msg->msg_type.type13.w1.rangeflag;
@@ -1118,7 +1115,6 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
 
     case 15:
         msg_name = "Ionospheric Delay Message";
-        unknown = false;
         break;
 
     case 16:
@@ -1143,31 +1139,28 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
 
     case 17:
         msg_name = "GPS Ephemeris";
-        unknown = false;
         break;
 
     case 18:
         msg_name = "RTK Uncorrected Carrier-phase";
-        unknown = false;
         break;
 
     case 19:
         msg_name = "RTK Corrected Pseudorange";
-        unknown = false;
         break;
 
     case 20:
         msg_name = "RTK Carrier Phase Corrections";
-        unknown = false;
         break;
 
     case 21:
         msg_name = "High-Accuracy Pseudorange Corrections";
-        unknown = false;
         break;
 
     case 22:
         // Extends types 3 and 34
+        msg_name = "Extended Reference Station Parameters";
+        unknown = false;
         // WIP: partial decode
         if (3 < len) {
             // too short
@@ -1176,8 +1169,6 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
         // May be length 3, 4 or 5!
         {
             struct rtcm2_msg22 *m = &msg->msg_type.type22;
-            msg_name = "Extended Reference Station Parameters";
-            unknown = false;
 
             tp->ref_sta.dx = m->ecef_dx * EDXYZ_SCALE;
             tp->ref_sta.dy = m->ecef_dy * EDXYZ_SCALE;
@@ -1187,24 +1178,20 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
 
     case 23:
         msg_name = "Antenna Type Definition";
-        unknown = false;
         break;
 
     case 24:
         msg_name = "Antenna Reference Point (arp)";
-        unknown = false;
         break;
 
     case 25:
         // FALLTHROUGH
     case 26:
         msg_name = "Undefined";
-        unknown = false;
         break;
 
     case 27:
         msg_name = "Radio Beacon Almanac";
-        unknown = false;
         break;
 
     case 28:
@@ -1213,7 +1200,6 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
         // FALLTHROUGH
     case 30:
         msg_name = "Undefined";
-        unknown = false;
         break;
 
     case 31:
@@ -1269,44 +1255,38 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
 
     case 32:
         msg_name = "Reference Station Parameters (GLONASS)";
-        unknown = false;
         break;
 
     case 33:
         msg_name = "Constellation health (GLONASS)";
-        unknown = false;
         break;
 
     // case 34 is above with 31
 
     case 35:
         msg_name = "Beacon Almanac (GLONASS)";
-        unknown = false;
         break;
 
     case 36:
         msg_name = "Special Message (GLONASS)";
-        unknown = false;
         break;
 
     case 37:
         msg_name = "GNSS System Time Offset";
-        unknown = false;
         break;
 
     case 59:
         msg_name = "Proprietary Message";
-        unknown = false;
         break;
 
     default:
-        unknown = true;
+        msg_name = "Huh?";
         break;
     }
 
     if (unknown) {
         memcpy(tp->words, msg->msg_type.rtcm2_msgunk,
-               (RTCM2_WORDS_MAX - 2) * sizeof(isgps30bits_t));
+               tp->length * sizeof(isgps30bits_t));
         if (NULL == msg_name) {
 	    GPSD_LOG(LOG_PROG, &session->context->errout,
 		     "RTCM2: type %d (unknown), length %d\n",
