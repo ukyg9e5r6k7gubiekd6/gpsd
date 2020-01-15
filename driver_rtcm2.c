@@ -914,13 +914,18 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
     tp->seqnum = msg->w2.sqnum;         // 0 to 7
     tp->stathlth = msg->w2.stathlth;
 
-    tp->ref_sta.valid = false;
+    // clear ref_sta struct
+    memset(&tp->ref_sta, 0, sizeof(tp->ref_sta));
     tp->ref_sta.x = NAN;
     tp->ref_sta.y = NAN;
     tp->ref_sta.z = NAN;
     tp->ref_sta.dx = NAN;
     tp->ref_sta.dy = NAN;
     tp->ref_sta.dz = NAN;
+    tp->ref_sta.ah = NAN;
+    tp->ref_sta.dx2 = NAN;
+    tp->ref_sta.dy2 = NAN;
+    tp->ref_sta.dz2 = NAN;
 
     /* FIXME: test tp->length + 2, against session->lexer.isgps.buflen, */
 

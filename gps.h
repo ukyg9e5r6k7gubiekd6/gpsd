@@ -255,11 +255,16 @@ struct rtcm2_t {
 
     /* message data in decoded form */
 
-    /* Reference Station data for type 3/4/22/24/32 messages */
+    /* Reference Station data for type 3/4/22/23/24/32 messages */
     struct {
-        bool valid;            /* is message well-formed? */
+        bool valid;            // is message well-formed?
         double x, y, z;        // reference station position ECEF, meters
         double dx, dy, dz;     // delta reference station position ECEF, meters
+        double ah;             // antenna height (above RP) meters
+        double dx2, dy2, dz2;  // L2 delta ref station position ECEF, meters
+        unsigned char gs;      // 0 == GPS, 1 == GLONASS
+        char ant_desc[9];      // antenna description
+        char ant_serial[6];    // antenna serial number
     } ref_sta;
 
     union {
