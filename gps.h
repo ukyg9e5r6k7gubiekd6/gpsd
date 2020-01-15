@@ -247,7 +247,7 @@ typedef uint32_t isgps30bits_t;
 struct rtcm2_t {
     /* header contents */
     unsigned type;	/* RTCM message type */
-    unsigned length;	/* length (words) */
+    unsigned length;	// payload length (words) not including 2 word header
     double   zcount;	/* time within hour: GPS time, no leap secs */
     unsigned refstaid;	/* reference station ID */
     unsigned seqnum;	/* message sequence number (modulo 8) */
@@ -370,9 +370,9 @@ struct rtcm2_t {
 	    } sat[MAXCORRECTIONS];
 	} glonass_ranges;
 	/* data from type 16 messages */
-	char message[(RTCM2_WORDS_MAX-2) * sizeof(isgps30bits_t)];
-	/* data from messages of unknown type */
-	isgps30bits_t	words[RTCM2_WORDS_MAX-2];
+	char message[(RTCM2_WORDS_MAX - 2) * sizeof(isgps30bits_t)];
+	/* data from messages of unknown type, not including header */
+	isgps30bits_t	words[RTCM2_WORDS_MAX - 2];
     };
 };
 
