@@ -76,7 +76,7 @@ extern "C" {
  *       Split devconfig_t.subtype into subtype and subtype1
  * 9.1   Add leap_seconds to gps_data_t
  *       Fix rtcm3_1029_t.text length
- *       Add many rtcm2 structs
+ *       Add/change many rtcm2 structs
  */
 #define GPSD_API_MAJOR_VERSION	9	/* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION	1	/* bump on compatible changes */
@@ -254,6 +254,14 @@ struct rtcm2_t {
     unsigned stathlth;	/* station health */
 
     /* message data in decoded form */
+
+    /* Reference Station data for type 3/4/22/24/32 messages */
+    struct {
+        bool valid;            /* is message well-formed? */
+        double x, y, z;        // reference station position ECEF, meters
+        double dx, dy, dz;     // delta reference station position ECEF, meters
+    } ref_sta;
+
     union {
 	struct {
 	    unsigned int nentries;
@@ -265,10 +273,6 @@ struct rtcm2_t {
 		double rrc;		/* range error rate */
 	    } sat[MAXCORRECTIONS];
 	} gps_ranges;
-	struct {		/* data for type 3 messages */
-	    bool valid;		/* is message well-formed? */
-	    double x, y, z;
-	} ecef;
 	struct {		/* data from type 4 messages */
 	    bool valid;		/* is message well-formed? */
 	    int system;
@@ -336,10 +340,15 @@ struct rtcm2_t {
             // FIXME: add in sat words
         } rtcm2_21;
         struct {                        // RTCM2 type 22
-            unsigned char ecef_dx;      // ECEF delta-x
-            unsigned char ecef_dy;      // ECEF delta-y
-            unsigned char ecef_dz;      // ECEF delta-z
+            unsigned char ecef_dx;      // L1 ECEF delta-x
+            unsigned char ecef_dy;      // L1 ECEF delta-y
+            unsigned char ecef_dz;      // L1 ECEF delta-z
             unsigned char gs;           // 0 is GPS, 1 is GLONASS
+            unsigned char ah_flag;      // 1 if ah is valid
+            int ah;                     // Ant Height meters
+            unsigned char l2ecef_dx;    // L2 ECEF delta-x
+            unsigned char l2ecef_dy;    // L2 ECEF delta-y
+            unsigned char l2ecef_dz;    // L2 ECEF delta-z
         } rtcm2_22;
         struct {                        // RTCM2 type 24
             int64_t ecef_x;             // ECEF X (m * 10e-4)
@@ -347,7 +356,7 @@ struct rtcm2_t {
             int64_t ecef_z;             // ECEF Z (m * 10e-4)
             unsigned char gs;           // 0 is GPS, 1 is GLONASS
             unsigned char ah_flag;      // 1 if ah is valid
-            int ah;                     // Ant Height (m * 10e-4)
+            int ah;                     // Ant Height meters
         } rtcm2_24;
 	struct {
 	    unsigned int nentries;

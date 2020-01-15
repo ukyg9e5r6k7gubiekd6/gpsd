@@ -162,6 +162,8 @@ SPDX-License-Identifier: BSD-2-clause
 
 #define XYZ_SCALE       0.01    /* meters */
 #define DXYZ_SCALE      0.1     /* meters */
+// extended ECEF delta scale: 1/256 cm
+#define EDXYZ_SCALE     (1.0/256.0)     // centimeter
 #define LA_SCALE        (90.0/32767.0)  /* degrees */
 #define LO_SCALE        (180.0/32767.0) /* degrees */
 #define FREQ_SCALE      0.1     /* kHz */
@@ -431,6 +433,28 @@ struct rtcm2_msg_t {
         // msg 21 - RTK/high accuracy psuedorange corrections.  RTCM 2.1
 
         // msg 22 - Extended reference station parameters
+        struct rtcm2_msg22 {
+            unsigned int        parity:6;
+            int                 ecef_dz:8;
+            int                 ecef_dy:8;
+            int                 ecef_dx:8;
+            unsigned int        _pad:2;
+            // word 4
+            unsigned int        parity1:6;
+            unsigned int        ah:18;
+            unsigned int        nh:1;
+            unsigned int        ap:1;
+            unsigned int        at:1;
+            unsigned int        gs:1;
+            unsigned int        res:2;
+            unsigned int        _pad1:2;
+            // word 5
+            unsigned int        parity2:6;
+            int                 l2ecef_dz:8;
+            int                 l2ecef_dy:8;
+            int                 l2ecef_dx:8;
+            unsigned int        _pad2:2;
+        } type22;
 
         // msg 23 - Type of Antenna.  RTCM 2.3
 
@@ -761,6 +785,28 @@ struct rtcm2_msg_t {
         // msg 21 - RTK/high accuracy psuedorange corrections.  RTCM 2.1
 
         // msg 22 - Extended reference station parameters
+        struct rtcm2_msg22 {
+            unsigned int        _pad:2;
+            int                 ecef_dx:8;
+            int                 ecef_dy:8;
+            int                 ecef_dz:8;
+            unsigned int        parity:6;
+            // word 4
+            unsigned int        _pad1:2;
+            unsigned int        res:2;
+            unsigned int        gs:1;
+            unsigned int        at:1;
+            unsigned int        ap:1;
+            unsigned int        nh:1;
+            unsigned int        ah:18;
+            unsigned int        parity1:6;
+            // word 5
+            unsigned int        _pad2:2;
+            int                 l2ecef_dx:8;
+            int                 l2ecef_dy:8;
+            int                 l2ecef_dz:8;
+            unsigned int        parity2:6;
+        } type22;
 
         // msg 23 - Type of Antenna.  RTCM 2.3
 
@@ -868,6 +914,14 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
     tp->seqnum = msg->w2.sqnum;         // 0 to 7
     tp->stathlth = msg->w2.stathlth;
 
+    tp->ref_sta.valid = false;
+    tp->ref_sta.x = NAN;
+    tp->ref_sta.y = NAN;
+    tp->ref_sta.z = NAN;
+    tp->ref_sta.dx = NAN;
+    tp->ref_sta.dy = NAN;
+    tp->ref_sta.dz = NAN;
+
     len = (int)tp->length;
     n = 0;
     switch (tp->type) {
@@ -924,17 +978,17 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
         break;
 
     case 3:
-    {
-        struct rtcm2_msg3 *m = &msg->msg_type.type3;
-        msg_name = "Reference Station Parameters (GPS)";
-        unknown = false;
+        {
+            struct rtcm2_msg3 *m = &msg->msg_type.type3;
+            msg_name = "Reference Station Parameters (GPS)";
+            unknown = false;
 
-        if ((tp->ecef.valid = len >= 4)) {
-            tp->ecef.x = ((m->w3.x_h << 8) | (m->w4.x_l)) * XYZ_SCALE;
-            tp->ecef.y = ((m->w4.y_h << 16) | (m->w5.y_l)) * XYZ_SCALE;
-            tp->ecef.z = ((m->w5.z_h << 24) | (m->w6.z_l)) * XYZ_SCALE;
+            if ((tp->ref_sta.valid = len >= 4)) {
+                tp->ref_sta.x = ((m->w3.x_h << 8) | (m->w4.x_l)) * XYZ_SCALE;
+                tp->ref_sta.y = ((m->w4.y_h << 16) | (m->w5.y_l)) * XYZ_SCALE;
+                tp->ref_sta.z = ((m->w5.z_h << 24) | (m->w6.z_l)) * XYZ_SCALE;
+            }
         }
-    }
         break;
 
     case 4:
@@ -1113,8 +1167,22 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
         break;
 
     case 22:
-        msg_name = "Extended Reference Station Parameters";
-        unknown = false;
+        // Extends types 3 and 34
+        // WIP: partial decode
+        if (3 < len) {
+            // too short
+            break;
+        }
+        // May be length 3, 4 or 5!
+        {
+            struct rtcm2_msg22 *m = &msg->msg_type.type22;
+            msg_name = "Extended Reference Station Parameters";
+            unknown = false;
+
+            tp->ref_sta.dx = m->ecef_dx * EDXYZ_SCALE;
+            tp->ref_sta.dy = m->ecef_dy * EDXYZ_SCALE;
+            tp->ref_sta.dz = m->ecef_dz * EDXYZ_SCALE;
+        }
         break;
 
     case 23:

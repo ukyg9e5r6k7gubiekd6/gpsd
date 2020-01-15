@@ -942,10 +942,10 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 	break;
 
     case 3:
-	if (rtcm->ecef.valid)
+	if (rtcm->ref_sta.valid)
 	    str_appendf(buf, buflen,
 			   "\"x\":%.2f,\"y\":%.2f,\"z\":%.2f,",
-			   rtcm->ecef.x, rtcm->ecef.y, rtcm->ecef.z);
+			   rtcm->ref_sta.x, rtcm->ref_sta.y, rtcm->ref_sta.z);
 	break;
 
     case 4:

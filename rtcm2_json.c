@@ -68,11 +68,11 @@ int json_rtcm2_read(const char *buf,
 
     const struct json_attr_t json_rtcm3[] = {
         RTCM2_HEADER
-        {"x",              t_real,    .addr.real = &rtcm2->ecef.x,
+        {"x",              t_real,    .addr.real = &rtcm2->ref_sta.x,
                                          .dflt.real = NAN},
-        {"y",              t_real,    .addr.real = &rtcm2->ecef.y,
+        {"y",              t_real,    .addr.real = &rtcm2->ref_sta.y,
                                          .dflt.real = NAN},
-        {"z",              t_real,    .addr.real = &rtcm2->ecef.z,
+        {"z",              t_real,    .addr.real = &rtcm2->ref_sta.z,
                                          .dflt.real = NAN},
         {NULL},
     };
@@ -217,9 +217,9 @@ int json_rtcm2_read(const char *buf,
     } else if (strstr(buf, "\"type\":3,") != NULL) {
         status = json_read_object(buf, json_rtcm3, endptr);
         if (status == 0) {
-            rtcm2->ecef.valid = (isfinite(rtcm2->ecef.x) != 0)
-                && (isfinite(rtcm2->ecef.y) != 0)
-                && (isfinite(rtcm2->ecef.z) != 0);
+            rtcm2->ref_sta.valid = (isfinite(rtcm2->ref_sta.x) != 0)
+                && (isfinite(rtcm2->ref_sta.y) != 0)
+                && (isfinite(rtcm2->ref_sta.z) != 0);
         }
     } else if (strstr(buf, "\"type\":4,") != NULL) {
         status = json_read_object(buf, json_rtcm4, endptr);
