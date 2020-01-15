@@ -954,7 +954,7 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 	     * Beware! Needs to stay synchronized with a JSON
 	     * enumeration map in the parser. This interpretation of
 	     * NAVSYSTEM_GALILEO is assumed from RTCM3, it's not
-	     * actually documented in RTCM 2.1.
+	     * actually documented in RTCM 2.1 or 2.2.
 	     */
 	    static char *navsysnames[] = { "GPS", "GLONASS", "GALILEO" };
 	    str_appendf(buf, buflen,
@@ -1036,6 +1036,33 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 		       "\"message\":\"%s\"", json_stringify(buf1,
 							    sizeof(buf1),
 							    rtcm->message));
+	break;
+
+    case 22:
+        str_appendf(buf, buflen, "\"gs\":%d,", rtcm->ref_sta.gs);
+
+        if (0 != isfinite(rtcm->ref_sta.dx) &&
+            0 != isfinite(rtcm->ref_sta.dy) &&
+            0 != isfinite(rtcm->ref_sta.dz)) {
+            // L1 ECEF deltas
+	    str_appendf(buf, buflen,
+			   "\"dx\":%.6f,\"dy\":%.6f,\"dz\":%.6f,",
+			   rtcm->ref_sta.dx, rtcm->ref_sta.dy,
+                           rtcm->ref_sta.dz);
+        }
+        if (0 != isfinite(rtcm->ref_sta.ah)) {
+            // Antenna Height above reference point, cm
+            str_appendf(buf, buflen, "\"ah\":%.6f,", rtcm->ref_sta.ah);
+        }
+        if (0 != isfinite(rtcm->ref_sta.dx2) &&
+            0 != isfinite(rtcm->ref_sta.dy2) &&
+            0 != isfinite(rtcm->ref_sta.dz2)) {
+            // L2 ECEF deltas
+	    str_appendf(buf, buflen,
+			   "\"dx2\":%.6f,\"dy2\":%.6f,\"dz2\":%.6f,",
+			   rtcm->ref_sta.dx, rtcm->ref_sta.dy2,
+                           rtcm->ref_sta.dz);
+        }
 	break;
 
     case 31:

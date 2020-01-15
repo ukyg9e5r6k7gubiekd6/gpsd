@@ -804,9 +804,9 @@ struct rtcm2_msg_t {
             unsigned int        parity1:6;
             // word 5
             unsigned int        _pad2:2;
-            int                 l2ecef_dx:8;
-            int                 l2ecef_dy:8;
-            int                 l2ecef_dz:8;
+            int                 ecef_dx2:8;
+            int                 ecef_dy2:8;
+            int                 ecef_dz2:8;
             unsigned int        parity2:6;
         } type22;
 
