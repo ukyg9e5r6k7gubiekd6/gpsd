@@ -263,8 +263,8 @@ struct rtcm2_t {
         double ah;             // antenna height (above RP) meters
         double dx2, dy2, dz2;  // L2 delta ref station position ECEF, meters
         unsigned char gs;      // 0 == GPS, 1 == GLONASS
-        char ant_desc[9];      // antenna description
-        char ant_serial[6];    // antenna serial number
+        char ant_desc[33];     // antenna descriptor
+        char ant_serial[33];   // antenna serial number
     } ref_sta;
 
     union {

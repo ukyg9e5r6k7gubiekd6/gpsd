@@ -459,6 +459,16 @@ struct rtcm2_msg_t {
         } type22;
 
         // msg 23 - Type of Antenna.  RTCM 2.3
+        struct rtcm2_msg23 {
+            unsigned int        parity:6;
+            char                unk:8;       // what goes here varies
+            char                unk1:8;      // what goes here varies
+            unsigned int        nad:5;
+            unsigned int        sf:1;
+            unsigned int        ar:1;
+            unsigned int        res:1;
+            unsigned int        _pad:2;
+        } type23;
 
         // msg 24 - Reference station ARP..  RTCM 2.3
 
@@ -811,6 +821,16 @@ struct rtcm2_msg_t {
         } type22;
 
         // msg 23 - Type of Antenna.  RTCM 2.3
+        struct rtcm2_msg23 {
+            unsigned int        _pad:2;
+            unsigned int        res:1;
+            unsigned int        ar:1;
+            unsigned int        sf:1;
+            unsigned int        nad:5;
+            char                unk1:8;      // what goes here varies
+            char                unk:8;       // what goes here varies
+            unsigned int        parity:6;
+        } type23;
 
         // msg 24 - Reference station ARP..  RTCM 2.3
 
@@ -1198,6 +1218,17 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
 
     case 23:
         msg_name = "Antenna Type Definition";
+        // WIP
+        // unknown = false;
+        {
+            struct rtcm2_msg23 *m = &msg->msg_type.type23;
+            int i = 0;
+            // crazy packing...
+            // nad is 0 to 31
+            if (i < m->nad) {
+                tp->ref_sta.ant_desc[i] = m->unk;
+            }
+        }
         break;
 
     case 24:
