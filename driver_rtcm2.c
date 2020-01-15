@@ -164,6 +164,8 @@ SPDX-License-Identifier: BSD-2-clause
 #define DXYZ_SCALE      0.1     /* meters */
 // extended ECEF delta scale: 1/256 cm
 #define EDXYZ_SCALE     (1.0/256.0)     // centimeter
+// L2 extended ECEF delta scale: 1/16 cm
+#define EDXYZ2_SCALE     (1.0/16.0)     // centimeter
 #define LA_SCALE        (90.0/32767.0)  /* degrees */
 #define LO_SCALE        (180.0/32767.0) /* degrees */
 #define FREQ_SCALE      0.1     /* kHz */
@@ -450,9 +452,9 @@ struct rtcm2_msg_t {
             unsigned int        _pad1:2;
             // word 5
             unsigned int        parity2:6;
-            int                 l2ecef_dz:8;
-            int                 l2ecef_dy:8;
-            int                 l2ecef_dx:8;
+            int                 ecef_dz2:8;
+            int                 ecef_dy2:8;
+            int                 ecef_dx2:8;
             unsigned int        _pad2:2;
         } type22;
 
@@ -1178,6 +1180,19 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
             tp->ref_sta.dx = m->ecef_dx * EDXYZ_SCALE;
             tp->ref_sta.dy = m->ecef_dy * EDXYZ_SCALE;
             tp->ref_sta.dz = m->ecef_dz * EDXYZ_SCALE;
+            if (3 > len) {
+                // word 4 present
+                tp->ref_sta.gs = m->gs;
+                if (0 == m->nh) {
+                    tp->ref_sta.ah = m->ah * EDXYZ_SCALE;
+                }
+            }
+            if (4 > len) {
+                // word 5 present
+                tp->ref_sta.dx2 = m->ecef_dx2 * EDXYZ2_SCALE;
+                tp->ref_sta.dy2 = m->ecef_dy2 * EDXYZ2_SCALE;
+                tp->ref_sta.dz2 = m->ecef_dz2 * EDXYZ2_SCALE;
+            }
         }
         break;
 
