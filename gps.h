@@ -273,6 +273,8 @@ struct rtcm2_t {
         unsigned tom;          // GNSS Time of Measurement, 0-5999999 micro sec
         unsigned char f;       // 00 = L1, 10 = L2, 01 and 11 reserved
         unsigned char sm;      // smoothing interval
+        int carrier_phase;     // signed 32 bits, 1/256 cycle
+        int pseudorange;       // signed 32 bits, 0.02 m
     } rtk;
 
     union {

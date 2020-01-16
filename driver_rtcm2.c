@@ -431,6 +431,20 @@ struct rtcm2_msg_t {
             unsigned int        r:2;
             unsigned int        f:2;
             unsigned int        _pad:2;
+            struct {
+                unsigned int        parity:6;
+                unsigned int        cp_h:8;
+                unsigned int        clc:5;
+                unsigned int        dq:3;
+                unsigned int        sid:5;
+                unsigned int        g:1;
+                unsigned int        pc:1;
+                unsigned int        m:1;
+                unsigned int        _pad:2;
+                unsigned int        parity1:6;
+                unsigned int        cp_l:24;
+                unsigned int        _pad1:2;
+            } sat[RTCM2_WORDS_MAX / 2];
         } type18;
 
         // msg 19 - RTK uncorrected psuedoranges.  RTCM 2.1
@@ -449,6 +463,20 @@ struct rtcm2_msg_t {
             unsigned int        r:2;
             unsigned int        f:2;
             unsigned int        _pad:2;
+            struct {
+                unsigned int        parity:6;
+                unsigned int        iod:8;
+                unsigned int        clc:5;
+                unsigned int        dq:3;
+                unsigned int        sid:5;
+                unsigned int        g:1;
+                unsigned int        pc:1;
+                unsigned int        m:1;
+                unsigned int        _pad:2;
+                unsigned int        parity1:6;
+                unsigned int        cpc:24;
+                unsigned int        _pad1:2;
+            } sat[RTCM2_WORDS_MAX / 2];
         } type20;
 
         // msg 21 - RTK/high accuracy psuedorange corrections.  RTCM 2.1
@@ -858,6 +886,20 @@ struct rtcm2_msg_t {
             unsigned int        r:2;
             unsigned int        tom:20;
             unsigned int        parity:6;
+            struct {
+                unsigned int        _pad:2;
+                unsigned int        m:1;
+                unsigned int        pc:1;
+                unsigned int        g:1;
+                unsigned int        dq:3;
+                unsigned int        sid:5;
+                unsigned int        clc:5;
+                unsigned int        cp_h:8;
+                unsigned int        parity:6;
+                unsigned int        _pad:2;
+                unsigned int        cp_l:24;
+                unsigned int        parity:6;
+            } sat[RTCM2_WORDS_MAX / 2];
         } type18;
 
         // msg 19 - RTK uncorrected psuedoranges.  RTCM 2.1
@@ -876,6 +918,20 @@ struct rtcm2_msg_t {
             unsigned int        r:2;
             unsigned int        tom:20;
             unsigned int        parity:6;
+            struct {
+                unsigned int        _pad:2;
+                unsigned int        m:1;
+                unsigned int        pc:1;
+                unsigned int        g:1;
+                unsigned int        dq:3;
+                unsigned int        sid:5;
+                unsigned int        clc:5;
+                unsigned int        iod:8;
+                unsigned int        parity:6;
+                unsigned int        _pad:2;
+                unsigned int        cpc:24;
+                unsigned int        parity:6;
+            } sat[RTCM2_WORDS_MAX / 2];
         } type20;
 
         // msg 21 - RTK/high accuracy psuedorange corrections.  RTCM 2.1
@@ -1432,8 +1488,8 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
                 // nas is 0 to 31. just after last ant desc byte
                 nas = tbuf[nad + 2] & 0x1f;
                 memcpy(tp->ref_sta.ant_serial, &tbuf[nad + 3], nas);
-                tp->ref_sta.ant_serial[nas] = '\0';
             }
+            tp->ref_sta.ant_serial[nas] = '\0';
         }
         break;
 
