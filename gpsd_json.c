@@ -1086,6 +1086,8 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 	break;
 
     case 23:
+        str_appendf(buf, buflen, "\"ar\":\"%d\",",
+                    rtcm->ref_sta.ar);
         if ('\0' != rtcm->ref_sta.ant_desc[0]) {
             str_appendf(buf, buflen, "\"ad\":\"%.32s\",",
                         rtcm->ref_sta.ant_desc);
@@ -1099,10 +1101,9 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
     case 24:
         str_appendf(buf, buflen, "\"gs\":%u,", rtcm->ref_sta.gs);
 
-        if (1) {
-//        if (0 != isfinite(rtcm->ref_sta.x) &&
-//            0 != isfinite(rtcm->ref_sta.y) &&
-//            0 != isfinite(rtcm->ref_sta.z)) {
+        if (0 != isfinite(rtcm->ref_sta.x) &&
+            0 != isfinite(rtcm->ref_sta.y) &&
+            0 != isfinite(rtcm->ref_sta.z)) {
             // L1 ECEF
 	    str_appendf(buf, buflen,
                         "\"x\":%.4f,\"y\":%.4f,\"z\":%.4f,",

@@ -265,6 +265,7 @@ struct rtcm2_t {
         unsigned char gs;      // 0 == GPS, 1 == GLONASS
         char ant_desc[33];     // antenna descriptor
         char ant_serial[33];   // antenna serial number
+        char ar;               // 1 == ARP (Type 24) will follow
     } ref_sta;
 
     // RTK corrections, type 18/19/20/21

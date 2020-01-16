@@ -185,7 +185,7 @@ SPDX-License-Identifier: BSD-2-clause
  * Reminder: Emacs reverse-region is useful...
  */
 
-#ifndef WORDS_BIGENDIAN /* little-endian, like x86 */
+#ifndef WORDS_BIGENDIAN /* little-endian, like x86, amd64 */
 
 struct rtcm2_msg_t {
     struct rtcm2_msghw1 {                       /* header word 1 */
@@ -427,7 +427,7 @@ struct rtcm2_msg_t {
         // msg 18 - RTK uncorrected carrier phases.  RTCM 2.1
         struct rtcm2_msg18 {
             unsigned int        parity:6;
-            unsigned int        tom:8;
+            unsigned int        tom:20;
             unsigned int        r:2;
             unsigned int        f:2;
             unsigned int        _pad:2;
@@ -436,7 +436,7 @@ struct rtcm2_msg_t {
         // msg 19 - RTK uncorrected psuedoranges.  RTCM 2.1
         struct rtcm2_msg19 {
             unsigned int        parity:6;
-            unsigned int        tom:8;
+            unsigned int        tom:20;
             unsigned int        sm:2;
             unsigned int        f:2;
             unsigned int        _pad:2;
@@ -445,7 +445,7 @@ struct rtcm2_msg_t {
         // msg 20 - RTK carrier phase corrections.  RTCM 2.1
         struct rtcm2_msg20 {
             unsigned int        parity:6;
-            unsigned int        tom:8;
+            unsigned int        tom:20;
             unsigned int        r:2;
             unsigned int        f:2;
             unsigned int        _pad:2;
@@ -454,7 +454,7 @@ struct rtcm2_msg_t {
         // msg 21 - RTK/high accuracy psuedorange corrections.  RTCM 2.1
         struct rtcm2_msg21 {
             unsigned int        parity:6;
-            unsigned int        tom:8;
+            unsigned int        tom:20;
             unsigned int        sm:2;
             unsigned int        f:2;
             unsigned int        _pad:2;
@@ -486,14 +486,13 @@ struct rtcm2_msg_t {
 
         // msg 23 - Type of Antenna.  RTCM 2.3
         struct rtcm2_msg23 {
-            unsigned int        parity:6;
-            char                unk:8;       // what goes here varies
-            char                unk1:8;      // what goes here varies
-            unsigned int        nad:5;
-            unsigned int        sf:1;
-            unsigned int        ar:1;
-            unsigned int        res:1;
-            unsigned int        _pad:2;
+            struct {
+                unsigned int        parity:6;
+                unsigned char       byte2:8;
+                unsigned char       byte1:8;
+                unsigned char       byte0:8;
+                unsigned int        _pad:2;
+            } words[RTCM2_WORDS_MAX - 2];
         } type23;
 
         // msg 24 - Reference station ARP..  RTCM 2.3
@@ -857,7 +856,7 @@ struct rtcm2_msg_t {
             unsigned int        _pad:2;
             unsigned int        f:2;
             unsigned int        r:2;
-            unsigned int        tom:8;
+            unsigned int        tom:20;
             unsigned int        parity:6;
         } type18;
 
@@ -866,7 +865,7 @@ struct rtcm2_msg_t {
             unsigned int        _pad:2;
             unsigned int        f:2;
             unsigned int        sm:2;
-            unsigned int        tom:8;
+            unsigned int        tom:20;
             unsigned int        parity:6;
         } type19;
 
@@ -875,7 +874,7 @@ struct rtcm2_msg_t {
             unsigned int        _pad:2;
             unsigned int        f:2;
             unsigned int        r:2;
-            unsigned int        tom:8;
+            unsigned int        tom:20;
             unsigned int        parity:6;
         } type20;
 
@@ -884,7 +883,7 @@ struct rtcm2_msg_t {
             unsigned int        _pad:2;
             unsigned int        f:2;
             unsigned int        sm:2;
-            unsigned int        tom:8;
+            unsigned int        tom:20;
             unsigned int        parity:6;
         } type21;
 
@@ -914,14 +913,13 @@ struct rtcm2_msg_t {
 
         // msg 23 - Type of Antenna.  RTCM 2.3
         struct rtcm2_msg23 {
-            unsigned int        _pad:2;
-            unsigned int        res:1;
-            unsigned int        ar:1;
-            unsigned int        sf:1;
-            unsigned int        nad:5;
-            char                unk1:8;      // what goes here varies
-            char                unk:8;       // what goes here varies
-            unsigned int        parity:6;
+            struct {
+                unsigned int        _pad:2;
+                unsigned char       byte0:8;
+                unsigned char       byte1:8;
+                unsigned char       byte2:8;
+                unsigned int        parity:6;
+            } words[RTCM2_WORDS_MAX - 2];
         } type23;
 
         // msg 24 - Reference station ARP..  RTCM 2.3
@@ -1303,7 +1301,7 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
         msg_name = "RTK Uncorrected Carrier-phase";
         unknown = false;
         // WIP: partial decode
-        if (3 < len) {
+        if (3 > len) {
             // too short
             break;
         }
@@ -1317,7 +1315,7 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
     case 19:
         msg_name = "RTK Corrected Pseudorange";
         // WIP: partial decode
-        if (3 < len) {
+        if (3 > len) {
             // too short
             break;
         }
@@ -1332,7 +1330,7 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
     case 20:
         msg_name = "RTK Carrier Phase Corrections";
         // WIP: partial decode
-        if (3 < len) {
+        if (3 > len) {
             // too short
             break;
         }
@@ -1346,7 +1344,7 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
     case 21:
         msg_name = "High-Accuracy Pseudorange Corrections";
         // WIP: partial decode
-        if (3 < len) {
+        if (3 > len) {
             // too short
             break;
         }
@@ -1363,7 +1361,7 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
         msg_name = "Extended Reference Station Parameters";
         unknown = false;
         // WIP: partial decode
-        if (3 < len) {
+        if (3 > len) {
             // too short
             break;
         }
@@ -1394,13 +1392,47 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
         msg_name = "Antenna Type Definition";
         // WIP
         unknown = false;
+        if (3 > len) {
+            // too short
+            break;
+        }
         {
+            unsigned sf;
+            unsigned nad = 0, nas = 0;
+            unsigned char tbuf[RTCM2_WORDS_MAX * 3];
             struct rtcm2_msg23 *m = &msg->msg_type.type23;
-            int i = 0;
-            // crazy packing...
+            int i = 0, j = 0;
+
+            tp->ref_sta.ar = (m->words[0].byte0 >> 6) & 1;
+            sf = (m->words[0].byte0 >> 5) & 1;
             // nad is 0 to 31
-            if (i < m->nad) {
-                tp->ref_sta.ant_desc[i] = m->unk;
+            nad = m->words[0].byte0 & 0x1f;
+
+            // crazy packing...  move to simple array first
+            for (i = 0; i < (len - 2); i++) {
+                tbuf[j++] = m->words[i].byte0;
+                tbuf[j++] = m->words[i].byte1;
+                tbuf[j++] = m->words[i].byte2;
+            }
+#if __UNUSED__
+            // debug code
+            {
+                char tmpbuf[100];
+                GPSD_LOG(LOG_SHOUT, &session->context->errout,
+                         "RTCM2: tbuf %s\n",
+                         gpsd_hexdump(tmpbuf, sizeof(tmpbuf),
+                                      (char *)tbuf, (len - 2) * 3));
+            }
+#endif // __UNUSED__
+            // skip first byte (AR, SF, NAD)
+            memcpy(tp->ref_sta.ant_desc, &tbuf[1], nad);
+            tp->ref_sta.ant_desc[nad] = '\0';
+            // get serial number
+            if (1 == sf) {
+                // nas is 0 to 31. just after last ant desc byte
+                nas = tbuf[nad + 2] & 0x1f;
+                memcpy(tp->ref_sta.ant_serial, &tbuf[nad + 3], nas);
+                tp->ref_sta.ant_serial[nas] = '\0';
             }
         }
         break;
