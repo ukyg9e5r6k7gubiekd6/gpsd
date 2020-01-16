@@ -427,6 +427,13 @@ struct rtcm2_msg_t {
         // msg 17 - GPS ephmerides.  RTCM 2.1
 
         // msg 18 - RTK uncorrected carrier phases.  RTCM 2.1
+        struct rtcm2_msg18 {
+            unsigned int        parity:6;
+            unsigned int        tom:8;
+            unsigned int        r:2;
+            unsigned int        f:2;
+            unsigned int        _pad:2;
+        } type18;
 
         // msg 19 - RTK uncorrected psuedoranges.  RTCM 2.1
 
@@ -789,6 +796,13 @@ struct rtcm2_msg_t {
         // msg 17 - GPS ephmerides.  RTCM 2.1
 
         // msg 18 - RTK uncorrected carrier phases.  RTCM 2.1
+        struct rtcm2_msg18 {
+            unsigned int        _pad:2;
+            unsigned int        f:2;
+            unsigned int        r:2;
+            unsigned int        tom:8;
+            unsigned int        parity:6;
+        } type 18;
 
         // msg 19 - RTK uncorrected psuedoranges.  RTCM 2.1
 
@@ -1170,6 +1184,17 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
 
     case 18:
         msg_name = "RTK Uncorrected Carrier-phase";
+        unknown = false;
+        // WIP: partial decode
+        if (3 < len) {
+            // too short
+            break;
+        }
+        {
+            struct rtcm2_msg18 *m = &msg->msg_type.type18;
+            tp->rtk.tom = m->tom;
+            tp->rtk.f = m->f;
+        }
         break;
 
     case 19:

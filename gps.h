@@ -255,7 +255,7 @@ struct rtcm2_t {
 
     /* message data in decoded form */
 
-    /* Reference Station data for type 3/4/22/23/24/32 messages */
+    // Reference Station data for type 3/4/22/23/24/32 messages
     struct {
         bool valid;            // is message well-formed?
         double x, y, z;        // reference station position ECEF, meters
@@ -266,6 +266,12 @@ struct rtcm2_t {
         char ant_desc[33];     // antenna descriptor
         char ant_serial[33];   // antenna serial number
     } ref_sta;
+
+    // RTK corrections, type 18/19/20/21
+    struct {
+        unsigned tom;          // GNSS Time of Measurement, 0-5999999 micro sec
+        unsigned char f;       // 00 = L1, 10 = L2, 01 and 11 reserved
+    } rtk;
 
     union {
 	struct {

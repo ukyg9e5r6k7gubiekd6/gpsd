@@ -1038,17 +1038,22 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 							    rtcm->message));
 	break;
 
+    case 18:
+        str_appendf(buf, buflen, "\"tom\":%u,\"f\":%u,",
+                    rtcm->rtk.tom, rtcm->rtk.f);
+        break;
+
     case 22:
-        str_appendf(buf, buflen, "\"gs\":%d,", rtcm->ref_sta.gs);
+        str_appendf(buf, buflen, "\"gs\":%u,", rtcm->ref_sta.gs);
 
         if (0 != isfinite(rtcm->ref_sta.dx) &&
             0 != isfinite(rtcm->ref_sta.dy) &&
             0 != isfinite(rtcm->ref_sta.dz)) {
             // L1 ECEF deltas
 	    str_appendf(buf, buflen,
-			   "\"dx\":%.6f,\"dy\":%.6f,\"dz\":%.6f,",
-			   rtcm->ref_sta.dx, rtcm->ref_sta.dy,
-                           rtcm->ref_sta.dz);
+                        "\"dx\":%.6f,\"dy\":%.6f,\"dz\":%.6f,",
+                        rtcm->ref_sta.dx, rtcm->ref_sta.dy,
+                        rtcm->ref_sta.dz);
         }
         if (0 != isfinite(rtcm->ref_sta.ah)) {
             // Antenna Height above reference point, cm
