@@ -1043,6 +1043,21 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
                     rtcm->rtk.tom, rtcm->rtk.f);
         break;
 
+    case 19:
+        str_appendf(buf, buflen, "\"tom\":%u,\"f\":%u,\"sm\":%u,",
+                    rtcm->rtk.tom, rtcm->rtk.f, rtcm->rtk.sm);
+        break;
+
+    case 20:
+        str_appendf(buf, buflen, "\"tom\":%u,\"f\":%u,",
+                    rtcm->rtk.tom, rtcm->rtk.f);
+        break;
+
+    case 21:
+        str_appendf(buf, buflen, "\"tom\":%u,\"f\":%u,\"sm\":%u,",
+                    rtcm->rtk.tom, rtcm->rtk.f, rtcm->rtk.sm);
+        break;
+
     case 22:
         str_appendf(buf, buflen, "\"gs\":%u,", rtcm->ref_sta.gs);
 

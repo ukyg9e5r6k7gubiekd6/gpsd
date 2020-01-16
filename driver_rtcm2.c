@@ -436,10 +436,31 @@ struct rtcm2_msg_t {
         } type18;
 
         // msg 19 - RTK uncorrected psuedoranges.  RTCM 2.1
+        struct rtcm2_msg19 {
+            unsigned int        parity:6;
+            unsigned int        tom:8;
+            unsigned int        sm:2;
+            unsigned int        f:2;
+            unsigned int        _pad:2;
+        } type19;
 
         // msg 20 - RTK carrier phase corrections.  RTCM 2.1
+        struct rtcm2_msg20 {
+            unsigned int        parity:6;
+            unsigned int        tom:8;
+            unsigned int        r:2;
+            unsigned int        f:2;
+            unsigned int        _pad:2;
+        } type20;
 
         // msg 21 - RTK/high accuracy psuedorange corrections.  RTCM 2.1
+        struct rtcm2_msg21 {
+            unsigned int        parity:6;
+            unsigned int        tom:8;
+            unsigned int        sm:2;
+            unsigned int        f:2;
+            unsigned int        _pad:2;
+        } type21;
 
         // msg 22 - Extended reference station parameters
         struct rtcm2_msg22 {
@@ -802,13 +823,35 @@ struct rtcm2_msg_t {
             unsigned int        r:2;
             unsigned int        tom:8;
             unsigned int        parity:6;
-        } type 18;
+        } type18;
 
         // msg 19 - RTK uncorrected psuedoranges.  RTCM 2.1
+        struct rtcm2_msg19 {
+            unsigned int        _pad:2;
+            unsigned int        f:2;
+            unsigned int        sm:2;
+            unsigned int        tom:8;
+            unsigned int        parity:6;
+        } type19;
 
         // msg 20 - RTK carrier phase corrections.  RTCM 2.1
+        struct rtcm2_msg20 {
+            unsigned int        _pad:2;
+            unsigned int        f:2;
+            unsigned int        r:2;
+            unsigned int        tom:8;
+            unsigned int        parity:6;
+        } type20;
 
         // msg 21 - RTK/high accuracy psuedorange corrections.  RTCM 2.1
+        struct rtcm2_msg21 {
+            unsigned int        _pad:2;
+            unsigned int        f:2;
+            unsigned int        sm:2;
+            unsigned int        tom:8;
+            unsigned int        parity:6;
+        } type21;
+
 
         // msg 22 - Extended reference station parameters
         struct rtcm2_msg22 {
@@ -1199,14 +1242,46 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
 
     case 19:
         msg_name = "RTK Corrected Pseudorange";
+        // WIP: partial decode
+        if (3 < len) {
+            // too short
+            break;
+        }
+        {
+            struct rtcm2_msg19 *m = &msg->msg_type.type19;
+            tp->rtk.tom = m->tom;
+            tp->rtk.f = m->f;
+            tp->rtk.sm = m->sm;
+        }
         break;
 
     case 20:
         msg_name = "RTK Carrier Phase Corrections";
+        // WIP: partial decode
+        if (3 < len) {
+            // too short
+            break;
+        }
+        {
+            struct rtcm2_msg20 *m = &msg->msg_type.type20;
+            tp->rtk.tom = m->tom;
+            tp->rtk.f = m->f;
+        }
         break;
 
     case 21:
         msg_name = "High-Accuracy Pseudorange Corrections";
+        // WIP: partial decode
+        if (3 < len) {
+            // too short
+            break;
+        }
+        {
+            struct rtcm2_msg21 *m = &msg->msg_type.type21;
+            tp->rtk.tom = m->tom;
+            tp->rtk.f = m->f;
+            tp->rtk.sm = m->sm;
+        }
         break;
 
     case 22:
