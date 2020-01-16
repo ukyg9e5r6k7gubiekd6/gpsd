@@ -1122,12 +1122,20 @@ else:
             confdefs.append("/* #undef HAVE_%s_H */\n"
                             % hdr.replace("/", "_").upper())
 
-    sizeof_time_t = config.CheckTypeSize('time_t',
-                                         includes='#include <time.h>\n')
+    if not env['target']:
+        sizeof_time_t = config.CheckTypeSize('time_t',
+                                             includes='#include <time.h>\n')
+        if 0 < sizeof_time_t:
+            announce("sizeof(time_t) is %s" % sizeof_time_t)
+            if 4 >= sizeof_time_t:
+                announce("WARNING: time_t is too small.  It will fail in 2038")
+        else:
+            announce("WARNING: could not get sizeof(time_t)")
+            sizeof_time_t = 8
+    else:
+        announce("Not checking sizeof(time_t) when cross-compiling")
+        sizeof_time_t = 8
     confdefs.append("#define SIZEOF_TIME_T %s\n" % sizeof_time_t)
-    announce("sizeof(time_t) is %s" % sizeof_time_t)
-    if 4 >= int(sizeof_time_t):
-        announce("WARNING: time_t is too small.  It will fail in 2038")
 
     # check function after libraries, because some function require libraries
     # for example clock_gettime() require librt on Linux glibc < 2.17
