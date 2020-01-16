@@ -161,6 +161,9 @@ SPDX-License-Identifier: BSD-2-clause
 #define MAXRRSMALL     (0x7F   * RRSMALL)  /*  8-bits signed */
 
 #define XYZ_SCALE       0.01    /* meters */
+// extended ECEF scale
+#define EXYZ_SCALE      0.0001          // meters
+// ECEF delta scale
 #define DXYZ_SCALE      0.1     /* meters */
 // extended ECEF delta scale: 1/256 cm
 #define EDXYZ_SCALE     (1.0/256.0)     // centimeter
@@ -214,7 +217,6 @@ struct rtcm2_msg_t {
                     unsigned int    scale1:1;
                     unsigned int    _pad:2;
                 } w3;
-
                 struct {                        /* msg 1 word 4 */
                     unsigned int    parity:6;
                     unsigned int    satident2:5;        /* satellite ID */
@@ -224,14 +226,12 @@ struct rtcm2_msg_t {
                     int             rrc1:8;
                     unsigned int    _pad:2;
                 } w4;
-
                 struct {                        /* msg 1 word 5 */
                     unsigned int    parity:6;
                     int             rrc2:8;
                     int             prc2:16;
                     unsigned int    _pad:2;
                 } w5;
-
                 struct {                        /* msg 1 word 6 */
                     unsigned int    parity:6;
                     int             prc3_h:8;
@@ -241,7 +241,6 @@ struct rtcm2_msg_t {
                     unsigned int    iod2:8;
                     unsigned int    _pad:2;
                 } w6;
-
                 struct {                        /* msg 1 word 7 */
                     unsigned int    parity:6;
                     unsigned int    iod3:8;
@@ -275,7 +274,6 @@ struct rtcm2_msg_t {
                 unsigned int        y_l:16;
                 unsigned int        _pad:2;
             } w5;
-
             struct {
                 unsigned int        parity:6;
                 unsigned int        z_l:24;
@@ -499,6 +497,45 @@ struct rtcm2_msg_t {
         } type23;
 
         // msg 24 - Reference station ARP..  RTCM 2.3
+        struct rtcm2_msg24 {
+            struct {
+                unsigned int        parity:6;
+                unsigned int        x_h:24;
+                unsigned int        _pad:2;
+            } w3;
+            struct {
+                unsigned int        parity:6;
+                unsigned int        y_h:8;
+                unsigned int        r:2;
+                unsigned int        x_l:14;
+                unsigned int        _pad:2;
+            } w4;
+            struct {
+                unsigned int        parity:6;
+                unsigned int        y_m:24;
+                unsigned int        _pad:2;
+            } w5;
+            struct {
+                unsigned int        parity:6;
+                unsigned int        z_h:16;
+                unsigned int        r:2;
+                unsigned int        y_l:6;
+                unsigned int        _pad:2;
+            } w6;
+            struct {
+                unsigned int        parity:6;
+                unsigned int        ah:1;
+                unsigned int        gs:1;
+                unsigned int        z_l:22;
+                unsigned int        _pad:2;
+            } w7;
+            struct {
+                unsigned int        parity:6;
+                unsigned int        res:6;
+                unsigned int        ah:18;
+                unsigned int        _pad:2;
+            } w8;
+        } type24;
 
         // msg 27 -  Extended almanac of DGPS.
 
@@ -671,7 +708,6 @@ struct rtcm2_msg_t {
                 unsigned int        z_h:8;
                 unsigned int        parity:6;
             } w5;
-
             struct {
                 unsigned int        _pad:2;
                 unsigned int        z_l:24;
@@ -852,7 +888,6 @@ struct rtcm2_msg_t {
             unsigned int        parity:6;
         } type21;
 
-
         // msg 22 - Extended reference station parameters
         struct rtcm2_msg22 {
             unsigned int        _pad:2;
@@ -890,6 +925,45 @@ struct rtcm2_msg_t {
         } type23;
 
         // msg 24 - Reference station ARP..  RTCM 2.3
+        struct rtcm2_msg24 {
+            struct {
+                unsigned int        _pad:2;
+                unsigned int        x_h:24;
+                unsigned int        parity:6;
+            } w3;
+            struct {
+                unsigned int        _pad:2;
+                unsigned int        x_l:14;
+                unsigned int        r:2;
+                unsigned int        y_h:8;
+                unsigned int        parity:6;
+            } w4;
+            struct {
+                unsigned int        _pad:2;
+                unsigned int        y_m:24;
+                unsigned int        parity:6;
+            } w5;
+            struct {
+                unsigned int        _pad:2;
+                unsigned int        y_l:6;
+                unsigned int        r:2;
+                unsigned int        z_h:16;
+                unsigned int        parity:6;
+            } w6;
+            struct {
+                unsigned int        _pad:2;
+                unsigned int        z_l:22;
+                unsigned int        gs:1;
+                unsigned int        ah:1;
+                unsigned int        parity:6;
+            } w7;
+            struct {
+                unsigned int        _pad:2;
+                unsigned int        y_m:18;
+                unsigned int        res:6;
+                unsigned int        parity:6;
+            } w8;
+        } type24;
 
         // msg 27 -  Extended almanac of DGPS.
 
@@ -1319,7 +1393,7 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
     case 23:
         msg_name = "Antenna Type Definition";
         // WIP
-        // unknown = false;
+        unknown = false;
         {
             struct rtcm2_msg23 *m = &msg->msg_type.type23;
             int i = 0;
@@ -1333,6 +1407,25 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
 
     case 24:
         msg_name = "Antenna Reference Point (arp)";
+        // WIP
+        unknown = false;
+        {
+            struct rtcm2_msg24 *m = &msg->msg_type.type24;
+            // try to prevent int overflow
+            long long temp;
+
+            temp = ((long long)m->w3.x_h << 8) | (m->w4.x_l);
+            tp->ref_sta.x = temp * EXYZ_SCALE;
+            temp = ((long long)m->w4.y_h << 32) |
+                    (m->w5.y_m << 6) |
+                    (m->w6.y_l);
+            tp->ref_sta.y = temp * EXYZ_SCALE;
+            temp = ((long long)m->w6.z_h << 22) | (m->w7.z_l);
+            tp->ref_sta.z = temp * EXYZ_SCALE;
+            if (0 == m->w7.ah) {
+                tp->ref_sta.ah = m->w8.ah * EDXYZ_SCALE;
+            }
+        }
         break;
 
     case 25:

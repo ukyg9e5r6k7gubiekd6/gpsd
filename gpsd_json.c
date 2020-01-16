@@ -1085,6 +1085,35 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
         }
 	break;
 
+    case 23:
+        if ('\0' != rtcm->ref_sta.ant_desc[0]) {
+            str_appendf(buf, buflen, "\"ad\":\"%.32s\",",
+                        rtcm->ref_sta.ant_desc);
+        }
+        if ('\0' != rtcm->ref_sta.ant_serial[0]) {
+            str_appendf(buf, buflen, "\"as\":\"%.32s\",",
+                        rtcm->ref_sta.ant_serial);
+        }
+        break;
+
+    case 24:
+        str_appendf(buf, buflen, "\"gs\":%u,", rtcm->ref_sta.gs);
+
+        if (1) {
+//        if (0 != isfinite(rtcm->ref_sta.x) &&
+//            0 != isfinite(rtcm->ref_sta.y) &&
+//            0 != isfinite(rtcm->ref_sta.z)) {
+            // L1 ECEF
+	    str_appendf(buf, buflen,
+                        "\"x\":%.4f,\"y\":%.4f,\"z\":%.4f,",
+                        rtcm->ref_sta.x, rtcm->ref_sta.y, rtcm->ref_sta.z);
+        }
+        if (0 != isfinite(rtcm->ref_sta.ah)) {
+            // Antenna Height above reference point, cm
+            str_appendf(buf, buflen, "\"ah\":%.4f,", rtcm->ref_sta.ah);
+        }
+        break;
+
     case 31:
 	(void)strlcat(buf, "\"satellites\":[", buflen);
 	for (n = 0; n < rtcm->glonass_ranges.nentries; n++) {
