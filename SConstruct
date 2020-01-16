@@ -1122,7 +1122,10 @@ else:
             confdefs.append("/* #undef HAVE_%s_H */\n"
                             % hdr.replace("/", "_").upper())
 
-    if not env['target']:
+    if env['target']:
+        announce("Not checking sizeof(time_t) when cross-compiling")
+        sizeof_time_t = 8
+    else:
         sizeof_time_t = config.CheckTypeSize('time_t',
                                              includes='#include <time.h>\n')
         if 0 < sizeof_time_t:
@@ -1132,9 +1135,7 @@ else:
         else:
             announce("WARNING: could not get sizeof(time_t)")
             sizeof_time_t = 8
-    else:
-        announce("Not checking sizeof(time_t) when cross-compiling")
-        sizeof_time_t = 8
+
     confdefs.append("#define SIZEOF_TIME_T %s\n" % sizeof_time_t)
 
     # check function after libraries, because some function require libraries
