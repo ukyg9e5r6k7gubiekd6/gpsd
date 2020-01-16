@@ -23,7 +23,7 @@
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2979.6,"seqnum":0,"length":17,"station_health":0,"tom":400000,"f":2}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2979.6,"seqnum":1,"length":17,"station_health":0,"tom":400000,"f":0,"sm":0}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2979.6,"seqnum":2,"length":17,"station_health":0,"tom":400000,"f":2,"sm":0}
-{"class":"RTCM2","type":22,"station_id":205,"zcount":2979.6,"seqnum":3,"length":3,"station_health":0,"gs":0,"dx":0.386719,"dy":-0.007812,"dz":0.218750,"dx2":0.386719,"dy2":0.000000,"dz2":0.218750}
+{"class":"RTCM2","type":22,"station_id":205,"zcount":2979.6,"seqnum":3,"length":3,"station_health":0,"gs":0,"dx":0.386719,"dy":-0.007812,"dz":0.218750}
 {"class":"RTCM2","type":3,"station_id":205,"zcount":2979.6,"seqnum":4,"length":4,"station_health":0,"x":-2386592.78,"y":-3922915.35,"z":4413419.98}
 {"class":"RTCM2","type":1,"station_id":205,"zcount":2980.8,"seqnum":5,"length":0,"station_health":0,"satellites":[]}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2980.8,"seqnum":6,"length":17,"station_health":0,"tom":200000,"f":0}
@@ -52,7 +52,7 @@
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2985.0,"seqnum":5,"length":17,"station_health":0,"tom":0,"f":2}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2985.0,"seqnum":6,"length":17,"station_health":0,"tom":0,"f":0,"sm":0}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2985.0,"seqnum":7,"length":17,"station_health":0,"tom":0,"f":2,"sm":0}
-{"class":"RTCM2","type":22,"station_id":205,"zcount":2985.0,"seqnum":0,"length":3,"station_health":0,"gs":0,"dx":0.386719,"dy":-0.007812,"dz":0.218750,"dx2":0.386719,"dy2":0.000000,"dz2":0.218750}
+{"class":"RTCM2","type":22,"station_id":205,"zcount":2985.0,"seqnum":0,"length":3,"station_health":0,"gs":0,"dx":0.386719,"dy":-0.007812,"dz":0.218750}
 {"class":"RTCM2","type":3,"station_id":205,"zcount":2985.0,"seqnum":1,"length":4,"station_health":0,"x":-2386592.78,"y":-3922915.35,"z":4413419.98}
 {"class":"RTCM2","type":1,"station_id":205,"zcount":2985.6,"seqnum":2,"length":14,"station_health":0,"satellites":[{"ident":6,"udre":0,"iod":34,"prc":-4.340,"rrc":0.000},{"ident":2,"udre":0,"iod":32,"prc":-8.580,"rrc":0.002},{"ident":17,"udre":0,"iod":78,"prc":-1.620,"rrc":0.000},{"ident":15,"udre":0,"iod":108,"prc":-10.040,"rrc":-0.006},{"ident":28,"udre":0,"iod":74,"prc":-6.880,"rrc":0.000},{"ident":12,"udre":0,"iod":48,"prc":-4.920,"rrc":-0.002},{"ident":19,"udre":0,"iod":78,"prc":-2.500,"rrc":0.000},{"ident":24,"udre":0,"iod":41,"prc":-3.920,"rrc":0.002}]}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2985.6,"seqnum":3,"length":17,"station_health":0,"tom":400000,"f":0}
@@ -81,7 +81,7 @@
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2989.8,"seqnum":2,"length":17,"station_health":0,"tom":200000,"f":2}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2989.8,"seqnum":3,"length":17,"station_health":0,"tom":200000,"f":0,"sm":0}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2989.8,"seqnum":4,"length":17,"station_health":0,"tom":200000,"f":2,"sm":0}
-{"class":"RTCM2","type":22,"station_id":205,"zcount":2989.8,"seqnum":5,"length":3,"station_health":0,"gs":0,"dx":0.386719,"dy":-0.007812,"dz":0.218750,"dx2":0.386719,"dy2":0.000000,"dz2":0.218750}
+{"class":"RTCM2","type":22,"station_id":205,"zcount":2989.8,"seqnum":5,"length":3,"station_health":0,"gs":0,"dx":0.386719,"dy":-0.007812,"dz":0.218750}
 {"class":"RTCM2","type":3,"station_id":205,"zcount":2989.8,"seqnum":6,"length":4,"station_health":0,"x":-2386592.78,"y":-3922915.35,"z":4413419.98}
 {"class":"RTCM2","type":1,"station_id":205,"zcount":2991.0,"seqnum":7,"length":14,"station_health":0,"satellites":[{"ident":6,"udre":0,"iod":34,"prc":-4.340,"rrc":0.000},{"ident":2,"udre":0,"iod":32,"prc":-8.560,"rrc":0.002},{"ident":17,"udre":0,"iod":78,"prc":-1.620,"rrc":0.000},{"ident":15,"udre":0,"iod":108,"prc":-10.080,"rrc":-0.004},{"ident":28,"udre":0,"iod":74,"prc":-6.880,"rrc":-0.002},{"ident":12,"udre":0,"iod":48,"prc":-4.920,"rrc":0.000},{"ident":19,"udre":0,"iod":78,"prc":-2.500,"rrc":0.000},{"ident":24,"udre":0,"iod":41,"prc":-3.920,"rrc":0.000}]}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2991.0,"seqnum":0,"length":17,"station_health":0,"tom":0,"f":0}
@@ -110,7 +110,7 @@
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2994.6,"seqnum":7,"length":17,"station_health":0,"tom":400000,"f":2}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2994.6,"seqnum":0,"length":17,"station_health":0,"tom":400000,"f":0,"sm":0}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2994.6,"seqnum":1,"length":17,"station_health":0,"tom":400000,"f":2,"sm":0}
-{"class":"RTCM2","type":22,"station_id":205,"zcount":2994.6,"seqnum":2,"length":3,"station_health":0,"gs":0,"dx":0.386719,"dy":-0.007812,"dz":0.218750,"dx2":0.386719,"dy2":0.000000,"dz2":0.218750}
+{"class":"RTCM2","type":22,"station_id":205,"zcount":2994.6,"seqnum":2,"length":3,"station_health":0,"gs":0,"dx":0.386719,"dy":-0.007812,"dz":0.218750}
 {"class":"RTCM2","type":3,"station_id":205,"zcount":2994.6,"seqnum":3,"length":4,"station_health":0,"x":-2386592.78,"y":-3922915.35,"z":4413419.98}
 {"class":"RTCM2","type":1,"station_id":205,"zcount":2995.8,"seqnum":4,"length":14,"station_health":0,"satellites":[{"ident":6,"udre":0,"iod":34,"prc":-4.320,"rrc":0.004},{"ident":2,"udre":0,"iod":32,"prc":-8.540,"rrc":0.006},{"ident":17,"udre":0,"iod":78,"prc":-1.600,"rrc":0.004},{"ident":15,"udre":0,"iod":108,"prc":-10.100,"rrc":-0.002},{"ident":28,"udre":0,"iod":74,"prc":-6.880,"rrc":0.002},{"ident":12,"udre":0,"iod":48,"prc":-4.900,"rrc":0.004},{"ident":19,"udre":0,"iod":78,"prc":-2.520,"rrc":-0.006},{"ident":24,"udre":0,"iod":41,"prc":-3.880,"rrc":0.008}]}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2995.8,"seqnum":5,"length":17,"station_health":0,"tom":200000,"f":0}
@@ -139,7 +139,7 @@
 {"class":"RTCM2","type":18,"station_id":205,"zcount":3000.0,"seqnum":4,"length":17,"station_health":0,"tom":0,"f":2}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":3000.0,"seqnum":5,"length":17,"station_health":0,"tom":0,"f":0,"sm":0}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":3000.0,"seqnum":6,"length":17,"station_health":0,"tom":0,"f":2,"sm":0}
-{"class":"RTCM2","type":22,"station_id":205,"zcount":3000.0,"seqnum":7,"length":3,"station_health":0,"gs":0,"dx":0.386719,"dy":-0.007812,"dz":0.218750,"dx2":0.386719,"dy2":0.000000,"dz2":0.218750}
+{"class":"RTCM2","type":22,"station_id":205,"zcount":3000.0,"seqnum":7,"length":3,"station_health":0,"gs":0,"dx":0.386719,"dy":-0.007812,"dz":0.218750}
 {"class":"RTCM2","type":3,"station_id":205,"zcount":3000.0,"seqnum":0,"length":4,"station_health":0,"x":-2386592.78,"y":-3922915.35,"z":4413419.98}
 {"class":"RTCM2","type":1,"station_id":205,"zcount":3000.6,"seqnum":1,"length":14,"station_health":0,"satellites":[{"ident":6,"udre":0,"iod":34,"prc":-4.300,"rrc":0.000},{"ident":2,"udre":0,"iod":32,"prc":-8.520,"rrc":0.006},{"ident":17,"udre":0,"iod":78,"prc":-1.560,"rrc":0.002},{"ident":15,"udre":0,"iod":108,"prc":-10.120,"rrc":-0.008},{"ident":28,"udre":0,"iod":74,"prc":-6.880,"rrc":0.000},{"ident":12,"udre":0,"iod":48,"prc":-4.880,"rrc":0.002},{"ident":19,"udre":0,"iod":78,"prc":-2.540,"rrc":-0.004},{"ident":24,"udre":0,"iod":41,"prc":-3.860,"rrc":0.006}]}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":3000.6,"seqnum":2,"length":17,"station_health":0,"tom":400000,"f":0}

@@ -1428,14 +1428,14 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
             tp->ref_sta.dx = m->ecef_dx * EDXYZ_SCALE;
             tp->ref_sta.dy = m->ecef_dy * EDXYZ_SCALE;
             tp->ref_sta.dz = m->ecef_dz * EDXYZ_SCALE;
-            if (3 > len) {
+            if (3 < len) {
                 // word 4 present
                 tp->ref_sta.gs = m->gs;
                 if (0 == m->nh) {
                     tp->ref_sta.ah = m->ah * EDXYZ_SCALE;
                 }
             }
-            if (4 > len) {
+            if (4 < len) {
                 // word 5 present
                 tp->ref_sta.dx2 = m->ecef_dx2 * EDXYZ2_SCALE;
                 tp->ref_sta.dy2 = m->ecef_dy2 * EDXYZ2_SCALE;
