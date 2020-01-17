@@ -266,6 +266,7 @@ struct rtcm2_t {
         char ant_desc[33];     // antenna descriptor
         char ant_serial[33];   // antenna serial number
         char ar;               // 1 == ARP (Type 24) will follow
+        unsigned char setup_id;  // 0 == use standard IGS model
     } ref_sta;
 
     // RTK corrections, type 18/19/20/21

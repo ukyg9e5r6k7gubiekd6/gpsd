@@ -1086,8 +1086,9 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 	break;
 
     case 23:
-        str_appendf(buf, buflen, "\"ar\":\"%d\",",
-                    rtcm->ref_sta.ar);
+        str_appendf(buf, buflen, "\"ar\":\"%d\",\"sid\":\"%u\",",
+                    rtcm->ref_sta.ar,
+                    rtcm->ref_sta.setup_id);
         if ('\0' != rtcm->ref_sta.ant_desc[0]) {
             str_appendf(buf, buflen, "\"ad\":\"%.32s\",",
                         rtcm->ref_sta.ant_desc);

@@ -1485,6 +1485,9 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
             // skip first byte (AR, SF, NAD)
             memcpy(tp->ref_sta.ant_desc, &tbuf[1], nad);
             tp->ref_sta.ant_desc[nad] = '\0';
+
+            tp->ref_sta.setup_id = tbuf[nad + 1];
+
             // get serial number
             if (1 == sf) {
                 // nas is 0 to 31. just after last ant desc byte
