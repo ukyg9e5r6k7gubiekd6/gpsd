@@ -1136,6 +1136,7 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
 
     /* FIXME: test tp->length + 2, against session->lexer.isgps.buflen, */
 
+    // len does not include 2 byte header
     len = (int)tp->length;
     n = 0;
     switch (tp->type) {
@@ -1448,7 +1449,7 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
         msg_name = "Antenna Type Definition";
         // WIP
         unknown = false;
-        if (3 > len) {
+        if (1 > len) {
             // too short
             break;
         }
@@ -1465,7 +1466,7 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
             nad = m->words[0].byte0 & 0x1f;
 
             // crazy packing...  move to simple array first
-            for (i = 0; i < (len - 2); i++) {
+            for (i = 0; i < len; i++) {
                 tbuf[j++] = m->words[i].byte0;
                 tbuf[j++] = m->words[i].byte1;
                 tbuf[j++] = m->words[i].byte2;
@@ -1475,9 +1476,10 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
             {
                 char tmpbuf[100];
                 GPSD_LOG(LOG_SHOUT, &session->context->errout,
-                         "RTCM2: tbuf %s\n",
+                         "RTCM2: len %d nad %d tbuf %s\n",
+                         len, nad,
                          gpsd_hexdump(tmpbuf, sizeof(tmpbuf),
-                                      (char *)tbuf, (len - 2) * 3));
+                                      (char *)tbuf, len * 3));
             }
 #endif // __UNUSED__
             // skip first byte (AR, SF, NAD)

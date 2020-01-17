@@ -6,7 +6,7 @@
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2976.6,"seqnum":7,"length":17,"station_health":0,"tom":400000,"f":2}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2976.6,"seqnum":0,"length":17,"station_health":0,"tom":400000,"f":0,"sm":0}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2976.6,"seqnum":1,"length":17,"station_health":0,"tom":400000,"f":2,"sm":0}
-{"class":"RTCM2","type":23,"station_id":205,"zcount":2976.6,"seqnum":2,"length":6,"station_health":0,"ar":"1","ad":"GPPNULLANTE"}
+{"class":"RTCM2","type":23,"station_id":205,"zcount":2976.6,"seqnum":2,"length":6,"station_health":0,"ar":"1","ad":"GPPNULLANTENNA"}
 {"class":"RTCM2","type":1,"station_id":205,"zcount":2977.8,"seqnum":3,"length":0,"station_health":0,"satellites":[]}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2977.8,"seqnum":4,"length":17,"station_health":0,"tom":200000,"f":0}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2977.8,"seqnum":5,"length":17,"station_health":0,"tom":200000,"f":2}
@@ -35,7 +35,7 @@
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2982.0,"seqnum":4,"length":17,"station_health":0,"tom":0,"f":2}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2982.0,"seqnum":5,"length":17,"station_health":0,"tom":0,"f":0,"sm":0}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2982.0,"seqnum":6,"length":17,"station_health":0,"tom":0,"f":2,"sm":0}
-{"class":"RTCM2","type":23,"station_id":205,"zcount":2982.0,"seqnum":7,"length":6,"station_health":0,"ar":"1","ad":"GPPNULLANTE"}
+{"class":"RTCM2","type":23,"station_id":205,"zcount":2982.0,"seqnum":7,"length":6,"station_health":0,"ar":"1","ad":"GPPNULLANTENNA"}
 {"class":"RTCM2","type":1,"station_id":205,"zcount":2982.6,"seqnum":0,"length":14,"station_health":0,"satellites":[{"ident":6,"udre":0,"iod":34,"prc":-4.340,"rrc":-0.002},{"ident":2,"udre":0,"iod":32,"prc":-8.580,"rrc":0.000},{"ident":17,"udre":0,"iod":78,"prc":-1.620,"rrc":0.000},{"ident":15,"udre":0,"iod":108,"prc":-10.020,"rrc":-0.010},{"ident":28,"udre":0,"iod":74,"prc":-6.860,"rrc":-0.002},{"ident":12,"udre":0,"iod":48,"prc":-4.920,"rrc":0.000},{"ident":19,"udre":0,"iod":78,"prc":-2.500,"rrc":0.000},{"ident":24,"udre":0,"iod":41,"prc":-3.920,"rrc":0.000}]}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2982.6,"seqnum":1,"length":17,"station_health":0,"tom":400000,"f":0}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2982.6,"seqnum":2,"length":17,"station_health":0,"tom":400000,"f":2}
@@ -64,7 +64,7 @@
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2986.8,"seqnum":1,"length":17,"station_health":0,"tom":200000,"f":2}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2986.8,"seqnum":2,"length":17,"station_health":0,"tom":200000,"f":0,"sm":0}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2986.8,"seqnum":3,"length":17,"station_health":0,"tom":200000,"f":2,"sm":0}
-{"class":"RTCM2","type":23,"station_id":205,"zcount":2986.8,"seqnum":4,"length":6,"station_health":0,"ar":"1","ad":"GPPNULLANTE"}
+{"class":"RTCM2","type":23,"station_id":205,"zcount":2986.8,"seqnum":4,"length":6,"station_health":0,"ar":"1","ad":"GPPNULLANTENNA"}
 {"class":"RTCM2","type":1,"station_id":205,"zcount":2988.0,"seqnum":5,"length":14,"station_health":0,"satellites":[{"ident":6,"udre":0,"iod":34,"prc":-4.340,"rrc":0.000},{"ident":2,"udre":0,"iod":32,"prc":-8.580,"rrc":0.002},{"ident":17,"udre":0,"iod":78,"prc":-1.620,"rrc":0.000},{"ident":15,"udre":0,"iod":108,"prc":-10.060,"rrc":-0.006},{"ident":28,"udre":0,"iod":74,"prc":-6.880,"rrc":-0.002},{"ident":12,"udre":0,"iod":48,"prc":-4.920,"rrc":0.000},{"ident":19,"udre":0,"iod":78,"prc":-2.500,"rrc":0.000},{"ident":24,"udre":0,"iod":41,"prc":-3.920,"rrc":0.000}]}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2988.0,"seqnum":6,"length":17,"station_health":0,"tom":0,"f":0}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2988.0,"seqnum":7,"length":17,"station_health":0,"tom":0,"f":2}
@@ -93,7 +93,7 @@
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2991.6,"seqnum":6,"length":17,"station_health":0,"tom":400000,"f":2}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2991.6,"seqnum":7,"length":17,"station_health":0,"tom":400000,"f":0,"sm":0}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2991.6,"seqnum":0,"length":17,"station_health":0,"tom":400000,"f":2,"sm":0}
-{"class":"RTCM2","type":23,"station_id":205,"zcount":2991.6,"seqnum":1,"length":6,"station_health":0,"ar":"1","ad":"GPPNULLANTE"}
+{"class":"RTCM2","type":23,"station_id":205,"zcount":2991.6,"seqnum":1,"length":6,"station_health":0,"ar":"1","ad":"GPPNULLANTENNA"}
 {"class":"RTCM2","type":1,"station_id":205,"zcount":2992.8,"seqnum":2,"length":14,"station_health":0,"satellites":[{"ident":6,"udre":0,"iod":34,"prc":-4.340,"rrc":0.004},{"ident":2,"udre":0,"iod":32,"prc":-8.560,"rrc":0.006},{"ident":17,"udre":0,"iod":78,"prc":-1.600,"rrc":0.004},{"ident":15,"udre":0,"iod":108,"prc":-10.080,"rrc":-0.004},{"ident":28,"udre":0,"iod":74,"prc":-6.880,"rrc":0.000},{"ident":12,"udre":0,"iod":48,"prc":-4.900,"rrc":0.002},{"ident":19,"udre":0,"iod":78,"prc":-2.500,"rrc":-0.004},{"ident":24,"udre":0,"iod":41,"prc":-3.900,"rrc":0.004}]}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2992.8,"seqnum":3,"length":17,"station_health":0,"tom":200000,"f":0}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2992.8,"seqnum":4,"length":17,"station_health":0,"tom":200000,"f":2}
@@ -122,7 +122,7 @@
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2997.0,"seqnum":3,"length":17,"station_health":0,"tom":0,"f":2}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2997.0,"seqnum":4,"length":17,"station_health":0,"tom":0,"f":0,"sm":0}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":2997.0,"seqnum":5,"length":17,"station_health":0,"tom":0,"f":2,"sm":0}
-{"class":"RTCM2","type":23,"station_id":205,"zcount":2997.0,"seqnum":6,"length":6,"station_health":0,"ar":"1","ad":"GPPNULLANTE"}
+{"class":"RTCM2","type":23,"station_id":205,"zcount":2997.0,"seqnum":6,"length":6,"station_health":0,"ar":"1","ad":"GPPNULLANTENNA"}
 {"class":"RTCM2","type":1,"station_id":205,"zcount":2997.6,"seqnum":7,"length":14,"station_health":0,"satellites":[{"ident":6,"udre":0,"iod":34,"prc":-4.320,"rrc":0.002},{"ident":2,"udre":0,"iod":32,"prc":-8.540,"rrc":0.006},{"ident":17,"udre":0,"iod":78,"prc":-1.580,"rrc":0.004},{"ident":15,"udre":0,"iod":108,"prc":-10.100,"rrc":0.000},{"ident":28,"udre":0,"iod":74,"prc":-6.880,"rrc":0.000},{"ident":12,"udre":0,"iod":48,"prc":-4.880,"rrc":0.006},{"ident":19,"udre":0,"iod":78,"prc":-2.520,"rrc":-0.006},{"ident":24,"udre":0,"iod":41,"prc":-3.880,"rrc":0.006}]}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2997.6,"seqnum":0,"length":17,"station_health":0,"tom":400000,"f":0}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":2997.6,"seqnum":1,"length":17,"station_health":0,"tom":400000,"f":2}
@@ -151,7 +151,7 @@
 {"class":"RTCM2","type":18,"station_id":205,"zcount":3001.8,"seqnum":0,"length":17,"station_health":0,"tom":200000,"f":2}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":3001.8,"seqnum":1,"length":17,"station_health":0,"tom":200000,"f":0,"sm":0}
 {"class":"RTCM2","type":19,"station_id":205,"zcount":3001.8,"seqnum":2,"length":17,"station_health":0,"tom":200000,"f":2,"sm":0}
-{"class":"RTCM2","type":23,"station_id":205,"zcount":3001.8,"seqnum":3,"length":6,"station_health":0,"ar":"1","ad":"GPPNULLANTE"}
+{"class":"RTCM2","type":23,"station_id":205,"zcount":3001.8,"seqnum":3,"length":6,"station_health":0,"ar":"1","ad":"GPPNULLANTENNA"}
 {"class":"RTCM2","type":1,"station_id":205,"zcount":3003.0,"seqnum":4,"length":14,"station_health":0,"satellites":[{"ident":6,"udre":0,"iod":34,"prc":-4.300,"rrc":0.004},{"ident":2,"udre":0,"iod":32,"prc":-8.500,"rrc":0.006},{"ident":17,"udre":0,"iod":78,"prc":-1.560,"rrc":0.002},{"ident":15,"udre":0,"iod":108,"prc":-10.120,"rrc":0.000},{"ident":28,"udre":0,"iod":74,"prc":-6.880,"rrc":0.000},{"ident":12,"udre":0,"iod":48,"prc":-4.880,"rrc":0.002},{"ident":19,"udre":0,"iod":78,"prc":-2.540,"rrc":-0.004},{"ident":24,"udre":0,"iod":41,"prc":-3.840,"rrc":0.004}]}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":3003.0,"seqnum":5,"length":17,"station_health":0,"tom":0,"f":0}
 {"class":"RTCM2","type":18,"station_id":205,"zcount":3003.0,"seqnum":6,"length":17,"station_health":0,"tom":0,"f":2}
