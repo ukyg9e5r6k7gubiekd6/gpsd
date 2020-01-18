@@ -20,6 +20,7 @@ PERMISSIONS
 #include <ctype.h>
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>       // for qsort()
 #include <string.h>       /* for strcat(), strlcpy() */
 
 #include "gpsd.h"
@@ -902,6 +903,15 @@ void json_raw_dump(const struct gps_data_t *gpsdata,
 }
 
 #if defined(RTCM104V2_ENABLE)
+
+/* compare two struct rtk_sat_t */
+static int rtk_sat_cmp(const void *a, const void *b)
+{
+    const struct rtk_sat_t *A = (const struct rtk_sat_t*)a;
+    const struct rtk_sat_t *B = (const struct rtk_sat_t*)b;
+    return A->ident - B->ident;
+}
+
 void json_rtcm2_dump(const struct rtcm2_t *rtcm,
 		     const char *device,
 		     char buf[], size_t buflen)
@@ -1041,6 +1051,24 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
     case 18:
         str_appendf(buf, buflen, "\"tom\":%u,\"f\":%u,",
                     rtcm->rtk.tom, rtcm->rtk.f);
+	(void)strlcat(buf, "\"satellites\":[", buflen);
+        // sorted lists are nicer
+        qsort((void *)rtcm->rtk.sat, rtcm->rtk.nentries,
+              sizeof(rtcm->rtk.sat[0]), rtk_sat_cmp);
+	for (n = 0; n < rtcm->rtk.nentries; n++) {
+	    str_appendf(buf, buflen,
+			"{\"ident\":%u,\"m\":%u,\"pc\":%u,\"g\":%u,\"dq\":%u,"
+                        "\"clc\":%u,\"carrierphase\":%u},",
+	                   rtcm->rtk.sat[n].ident,
+	                   rtcm->rtk.sat[n].m,
+	                   rtcm->rtk.sat[n].pc,
+	                   rtcm->rtk.sat[n].g,
+	                   rtcm->rtk.sat[n].dq,
+	                   rtcm->rtk.sat[n].clc,
+	                   rtcm->rtk.sat[n].carrier_phase);
+	}
+	str_rstrip_char(buf, ',');
+	(void)strlcat(buf, "]", buflen);
         break;
 
     case 19:

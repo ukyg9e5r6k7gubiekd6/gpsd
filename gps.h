@@ -274,12 +274,13 @@ struct rtcm2_t {
         unsigned tom;          // GNSS Time of Measurement, 0-5999999 micro sec
         unsigned char f;       // 00 = L1, 10 = L2, 01 and 11 reserved
         unsigned char sm;      // smoothing interval
-        struct {
+        unsigned int nentries;
+        struct rtk_sat_t {
             unsigned char m;       // multiple message indicator
             unsigned char pc;      // 0 == C/A code, 1 == P-Code
             unsigned char g;       // 0 == GPS, 1 == GLONASS
             // satellite id (1 - 32), GPS PRN, or GLONASS clot number
-            unsigned char sid;
+            unsigned char ident;
             unsigned char dq;      // data qaulity
             unsigned char clc;     // cumulative loss of continuity
             unsigned char iod;     // Issue of Data (GPS)/Time of Day (GLO)

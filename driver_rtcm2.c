@@ -436,7 +436,7 @@ struct rtcm2_msg_t {
                 unsigned int        cp_h:8;
                 unsigned int        clc:5;
                 unsigned int        dq:3;
-                unsigned int        sid:5;
+                unsigned int        ident:5;
                 unsigned int        g:1;
                 unsigned int        pc:1;
                 unsigned int        m:1;
@@ -444,7 +444,7 @@ struct rtcm2_msg_t {
                 unsigned int        parity1:6;
                 unsigned int        cp_l:24;
                 unsigned int        _pad1:2;
-            } sat[RTCM2_WORDS_MAX / 2];
+            } sat[15];
         } type18;
 
         // msg 19 - RTK uncorrected psuedoranges.  RTCM 2.1
@@ -468,7 +468,7 @@ struct rtcm2_msg_t {
                 unsigned int        iod:8;
                 unsigned int        clc:5;
                 unsigned int        dq:3;
-                unsigned int        sid:5;
+                unsigned int        ident:5;
                 unsigned int        g:1;
                 unsigned int        pc:1;
                 unsigned int        m:1;
@@ -892,14 +892,14 @@ struct rtcm2_msg_t {
                 unsigned int        pc:1;
                 unsigned int        g:1;
                 unsigned int        dq:3;
-                unsigned int        sid:5;
+                unsigned int        ident:5;
                 unsigned int        clc:5;
                 unsigned int        cp_h:8;
                 unsigned int        parity:6;
                 unsigned int        _pad:2;
                 unsigned int        cp_l:24;
                 unsigned int        parity:6;
-            } sat[RTCM2_WORDS_MAX / 2];
+            } sat[15];
         } type18;
 
         // msg 19 - RTK uncorrected psuedoranges.  RTCM 2.1
@@ -924,7 +924,7 @@ struct rtcm2_msg_t {
                 unsigned int        pc:1;
                 unsigned int        g:1;
                 unsigned int        dq:3;
-                unsigned int        sid:5;
+                unsigned int        ident:5;
                 unsigned int        clc:5;
                 unsigned int        iod:8;
                 unsigned int        parity:6;
@@ -1120,6 +1120,9 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
     tp->zcount = msg->w2.zcnt * ZCOUNT_SCALE;  // 0 to 3599.4 sec
     tp->seqnum = msg->w2.sqnum;         // 0 to 7
     tp->stathlth = msg->w2.stathlth;
+
+    // clear rtk struct
+    memset(&tp->rtk, 0, sizeof(tp->rtk));
 
     // clear ref_sta struct
     memset(&tp->ref_sta, 0, sizeof(tp->ref_sta));
@@ -1358,14 +1361,26 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
         msg_name = "RTK Uncorrected Carrier-phase";
         unknown = false;
         // WIP: partial decode
-        if (3 > len) {
+        if (1 > len) {
             // too short
             break;
         }
         {
             struct rtcm2_msg18 *m = &msg->msg_type.type18;
+            tp->rtk.nentries = (len - 1) / 2;
+            unsigned i;
+
             tp->rtk.tom = m->tom;
             tp->rtk.f = m->f;
+            for (i = 0; i < tp->rtk.nentries; i++) {
+                tp->rtk.sat[i].m = m->sat[i].m;
+                tp->rtk.sat[i].pc = m->sat[i].pc;
+                tp->rtk.sat[i].g = m->sat[i].g;
+                tp->rtk.sat[i].ident = m->sat[i].ident;
+                tp->rtk.sat[i].carrier_phase = m->sat[i].cp_l;
+                tp->rtk.sat[i].carrier_phase |= m->sat[i].cp_h << 24;
+                tp->rtk.sat[i].clc = m->sat[i].clc;
+            }
         }
         break;
 
