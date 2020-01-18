@@ -454,6 +454,21 @@ struct rtcm2_msg_t {
             unsigned int        sm:2;
             unsigned int        f:2;
             unsigned int        _pad:2;
+            struct {
+                unsigned int        parity:6;
+                unsigned int        pr_h:8;
+                unsigned int        me:4;
+                unsigned int        dq:4;
+                unsigned int        ident:5;
+                unsigned int        g:1;
+                unsigned int        pc:1;
+                unsigned int        m:1;
+                unsigned int        _pad:2;
+                unsigned int        parity1:6;
+
+                unsigned int        pr_l:24;
+                unsigned int        _pad1:2;
+            } sat[15];
         } type19;
 
         // msg 20 - RTK carrier phase corrections.  RTCM 2.1
@@ -909,6 +924,21 @@ struct rtcm2_msg_t {
             unsigned int        sm:2;
             unsigned int        tom:20;
             unsigned int        parity:6;
+            struct {
+                unsigned int        _pad:2;
+                unsigned int        m:1;
+                unsigned int        pc:1;
+                unsigned int        g:1;
+                unsigned int        ident:5;
+                unsigned int        dq:4;
+                unsigned int        me:4;
+                unsigned int        pr_h:8;
+                unsigned int        parity:6;
+
+                unsigned int        _pad1:2;
+                unsigned int        pr_l:24;
+                unsigned int        parity1:6;
+            } sat[15];
         } type19;
 
         // msg 20 - RTK carrier phase corrections.  RTCM 2.1
@@ -1377,6 +1407,7 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
                 tp->rtk.sat[i].pc = m->sat[i].pc;
                 tp->rtk.sat[i].g = m->sat[i].g;
                 tp->rtk.sat[i].ident = m->sat[i].ident;
+                tp->rtk.sat[i].dq = m->sat[i].dq;
                 tp->rtk.sat[i].carrier_phase = m->sat[i].cp_l;
                 tp->rtk.sat[i].carrier_phase |= m->sat[i].cp_h << 24;
                 tp->rtk.sat[i].clc = m->sat[i].clc;
@@ -1387,15 +1418,27 @@ void rtcm2_unpack(struct gps_device_t *session, struct rtcm2_t *tp, char *buf)
     case 19:
         msg_name = "RTK Corrected Pseudorange";
         // WIP: partial decode
-        if (3 > len) {
+        if (1 > len) {
             // too short
             break;
         }
         {
             struct rtcm2_msg19 *m = &msg->msg_type.type19;
+            unsigned i;
             tp->rtk.tom = m->tom;
             tp->rtk.f = m->f;
             tp->rtk.sm = m->sm;
+            tp->rtk.nentries = (len - 1) / 2;
+
+            for (i = 0; i < tp->rtk.nentries; i++) {
+                tp->rtk.sat[i].m = m->sat[i].m;
+                tp->rtk.sat[i].pc = m->sat[i].pc;
+                tp->rtk.sat[i].g = m->sat[i].g;
+                tp->rtk.sat[i].ident = m->sat[i].ident;
+                tp->rtk.sat[i].dq = m->sat[i].dq;
+                tp->rtk.sat[i].pseudorange = m->sat[i].pr_l;
+                tp->rtk.sat[i].pseudorange |= m->sat[i].pr_h << 24;
+            }
         }
         break;
 

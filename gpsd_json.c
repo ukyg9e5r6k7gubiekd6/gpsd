@@ -1074,6 +1074,24 @@ void json_rtcm2_dump(const struct rtcm2_t *rtcm,
     case 19:
         str_appendf(buf, buflen, "\"tom\":%u,\"f\":%u,\"sm\":%u,",
                     rtcm->rtk.tom, rtcm->rtk.f, rtcm->rtk.sm);
+	(void)strlcat(buf, "\"satellites\":[", buflen);
+        // sorted lists are nicer
+        qsort((void *)rtcm->rtk.sat, rtcm->rtk.nentries,
+              sizeof(rtcm->rtk.sat[0]), rtk_sat_cmp);
+	for (n = 0; n < rtcm->rtk.nentries; n++) {
+	    str_appendf(buf, buflen,
+			"{\"ident\":%u,\"m\":%u,\"pc\":%u,\"g\":%u,\"dq\":%u,"
+                        "\"me\":%u,\"pseudorange\":%u},",
+	                   rtcm->rtk.sat[n].ident,
+	                   rtcm->rtk.sat[n].m,
+	                   rtcm->rtk.sat[n].pc,
+	                   rtcm->rtk.sat[n].g,
+	                   rtcm->rtk.sat[n].dq,
+	                   rtcm->rtk.sat[n].me,
+	                   rtcm->rtk.sat[n].pseudorange);
+	}
+	str_rstrip_char(buf, ',');
+	(void)strlcat(buf, "]", buflen);
         break;
 
     case 20:
