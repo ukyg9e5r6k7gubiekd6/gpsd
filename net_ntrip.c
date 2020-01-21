@@ -513,6 +513,11 @@ int ntrip_open(struct gps_device_t *device, char *caster)
                 port = colon + 1;
                 *colon = '\0';
             }
+
+            if (NULL == url) {
+                // there was no @ in caster
+                url = caster;
+            }
             if (!port) {
                 port = "rtcm-sc104";
                 if (!getservbyname(port, "tcp"))
