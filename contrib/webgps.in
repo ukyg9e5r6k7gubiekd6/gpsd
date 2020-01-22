@@ -159,7 +159,7 @@ class SatTracks(gps):
                 self.fix.altitude or 'N/A')
             row('Speed', isfinite(self.fix.speed) and "%f m/s" %
                 self.fix.speed or 'N/A')
-            row('Course', isfinite(self.fix.track) and "%f°" %
+            row('Course', isfinite(self.fix.track) and "%f&deg;" %
                 self.fix.track or 'N/A')
         else:
             row('Latitude', 'N/A')
