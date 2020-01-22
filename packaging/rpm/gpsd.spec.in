@@ -281,7 +281,7 @@ fi
 %attr(0755,root,root) %{_var}/www/html/gpsd/pgps.cgi
 
 %changelog
-* Mon Mar 23 00:11:00 EDT 2015Eric S. Raymond <esr@thyrsus.com> 3.15-1
+* Mon Mar 23 00:11:00 EDT 2015 Eric S. Raymond <esr@thyrsus.com> 3.15-1
 - We no longer export libgpsd.
 
 * Sun Jul 31 2011 Michael R. Davis <mrdvt@cpan.org> 3.0-2
