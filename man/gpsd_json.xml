@@ -58,7 +58,7 @@ and "ERROR") which are not direct responses to commands.</para>
 significant, and you may specify attributes in commands in any
 order. Responses never contain the special JSON value null; instead,
 attributes with empty or undefined values are omitted. The length
-limit for responses and reports is 1536 characters, including trailing
+limit for responses and reports is 1536 characters, including a trailing
 newline; longer responses will be truncated, so client code must be
 prepared for the possibility of invalid JSON fragments.</para>
 
@@ -120,7 +120,7 @@ try to compute the value from the skyview.</para>
 	<entry>device</entry>
 	<entry>No</entry>
 	<entry>string</entry>
-        <entry>Name of originating device.</entry>
+        <entry>Name of the originating device.</entry>
 </row>
 <row>
 	<entry>status</entry>
@@ -139,7 +139,7 @@ try to compute the value from the skyview.</para>
 	<entry>No</entry>
 	<entry>string</entry>
         <entry>Time/date stamp in ISO8601 format, UTC. May have a
-	fractional part of up to .001sec precision. May be absent if mode
+	fractional part of up to .001sec precision. May be absent if the mode
         is not 2 or 3.</entry>
 </row>
 <row>
@@ -147,7 +147,7 @@ try to compute the value from the skyview.</para>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Altitude, height above allipsoid, in meters.  Probably
-WGS84. Present if mode is 3.
+WGS84. Present if the mode is 3.
 </entry>
 </row>
 <row>
@@ -215,7 +215,7 @@ and is often inacurate.  See the comments below on geoidSep.  Present if
 	<entry>numeric</entry>
         <entry>Estimated horizontal Position (2D) Error in meters.
         Also known as Estimated Position Error (epe). Present
-        if mode is 2D or 3D and DOPs can be calculated from the satellite
+        if the mode is 2D or 3D and DOPs can be calculated from the satellite
         view.</entry>
 </row>
 <row>
@@ -237,7 +237,7 @@ and is often inacurate.  See the comments below on geoidSep.  Present if
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Longitude error estimate in meters. Present
-        if mode is 2D or 3D and DOPs can be calculated from the satellite
+        if the mode is 2D or 3D and DOPs can be calculated from the satellite
         view.</entry>
 </row>
 <row>
@@ -245,7 +245,7 @@ and is often inacurate.  See the comments below on geoidSep.  Present if
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Latitude error estimate in meters. Present
-        if mode is 2 or 3 and DOPs can be calculated from the satellite
+        if the mode is 2 or 3 and DOPs can be calculated from the satellite
         view.</entry>
 </row>
 <row>
@@ -253,7 +253,7 @@ and is often inacurate.  See the comments below on geoidSep.  Present if
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Estimated vertical error in meters. Present
-        if mode is 3 and DOPs can be calculated from the satellite
+        if the mode is 3 and DOPs can be calculated from the satellite
         view.</entry>
 </row>
 <row>
@@ -261,7 +261,7 @@ and is often inacurate.  See the comments below on geoidSep.  Present if
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Latitude in degrees: +/- signifies North/South.  Present
-        when mode is 2 or 3.</entry>
+        when the mode is 2 or 3.</entry>
 </row>
 <row>
 	<entry>leapseconds</entry>
@@ -356,7 +356,7 @@ Positive is West variation.  Negative is East variation.</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Estimated Spherical (3D) Position Error in meters.
-         Present if mode is 3D and DOPs can be calculated from the satellite
+         Present if the mode is 3D and DOPs can be calculated from the satellite
         view. Assumed to be 95% confidence, but many GPS do not specify.
         </entry>
 </row>
@@ -931,7 +931,7 @@ field points downward (into the Earth).</entry>
 	<entry>temp</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Temperature at sensor, degrees centigrade.</entry>
+        <entry>Temperature at the sensor, degrees centigrade.</entry>
 </row>
 
 
@@ -1368,7 +1368,7 @@ into this response.</para>
 <listitem>
 
 <para>This message is emitted on each cycle and reports the offset
-between the host's clock time and the GPS time at top of second
+between the host's clock time and the GPS time at top of the second
 (actually, when the first data for the reporting cycle is received).</para>
 
 <para>This message exactly mirrors the PPS message except for two
@@ -1404,7 +1404,7 @@ from the GPS PPS pulse.</para>
 	<entry>device</entry>
 	<entry>Yes</entry>
 	<entry>string</entry>
-        <entry>Name of originating device</entry>
+        <entry>Name of the originating device</entry>
 </row>
 <row>
 	<entry>real_sec</entry>
@@ -1478,7 +1478,7 @@ from the GPS PPS pulse.</para>
 
 <para>There are various sources of error in the reported clock times.
 The speed of the serial connection between the GPS and the system adds
-a delay to start of cycle detection.  An even bigger error is added
+a delay to the start of cycle detection.  An even bigger error is added
 by the variable computation time inside the GPS.  Taken together the
 time derived from the start of the GPS cycle can have offsets of
 10 millisecond to 700 milliseconds and combined jjitter and wander of
@@ -1507,7 +1507,7 @@ time derived from the start of the GPS cycle can have offsets of
 	<entry>device</entry>
 	<entry>Yes</entry>
 	<entry>string</entry>
-        <entry>Name of originating device</entry>
+        <entry>Name of the originating device</entry>
 </row>
 <row>
 	<entry>real_sec</entry>
@@ -1612,13 +1612,13 @@ short-term stability (such as a rubidium atomic clock).</para>
 	<entry>device</entry>
 	<entry>Yes</entry>
 	<entry>string</entry>
-        <entry>Name of originating device.</entry>
+        <entry>Name of the originating device.</entry>
 </row>
 <row>
 	<entry>running</entry>
 	<entry>Yes</entry>
 	<entry>boolean</entry>
-        <entry>If true, the oscillator is currently running.  Oscillators may require warm-up time at start of day.</entry>
+        <entry>If true, the oscillator is currently running.  Oscillators may require warm-up time at the start of the day.</entry>
 </row>
 <row>
 	<entry>reference</entry>
@@ -1953,7 +1953,7 @@ transmitter.</para>
 
 <para>The LF transmitter broadcasts the approximately 300khz radio
 signal that differential-GPS radio receivers pick up.  Transmitters
-that are meant to have a higher range will need to transmit at the
+that are meant to have a higher range will need to transmit at a
 slower rate.  The higher the data rate the harder it will be for the
 remote radio receiver to receive with a good signal-to-noise ration.
 (Higher data rate signals can't be averaged over as long a time frame,
@@ -1967,7 +1967,7 @@ words. The 24 most significant bits of each word are data and the six
 least significant bits are parity. The parity algorithm used is the
 same ISGPS-2000 as that used on GPS satellite downlinks.  Each RTCM
 2.x message consists of two header words followed by zero or more data
-words, depending upon message type.</para>
+words, depending upon the message type.</para>
 
 <para>An RTCM 3.x message begins with a fixed leader byte 0xD3.  That
 is followed by six bits of version information and 10 bits of payload
