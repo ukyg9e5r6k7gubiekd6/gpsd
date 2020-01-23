@@ -182,6 +182,7 @@ coverity:
     - 'www/*'
     - 'www/*/*'
     - '*.adoc'
+    - 'man/*.xml'
 
 .should_build_pages: &should_build_pages
   only:
