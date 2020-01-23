@@ -416,7 +416,7 @@ within one meter of the "true" value, but can be off as much as 12 meters.
 
 <para>When the C client library parses a response of this kind, it
 will assert validity bits in the top-level set member for each
-field actually received; see gps.h for bitmask names and values.</para>
+field received; see gps.h for bitmask names and values.</para>
 
 <para>Invalid or known floating point values will be set to NAN.
 </para>
@@ -541,7 +541,7 @@ yet, only the "class" field will reliably be present.</para>
 <para>Many devices compute dilution of precision factors but do not
 include them in their reports.  Many that do report DOPs report only
 HDOP, two-dimensional circular error. <application>gpsd</application>
-always passes through whatever the device actually reports, then
+always passes through whatever the device reports, then
 attempts to fill in other DOPs by calculating the appropriate
 determinants in a covariance matrix based on the satellite view. DOPs
 may be missing if some of these determinants are singular. It can even
@@ -1945,7 +1945,7 @@ Services</ulink> under "Publications".</para>
 <para>Differential-GPS correction stations consist of a GPS reference
 receiver coupled to a low frequency (LF) transmitter.  The GPS
 reference receiver is a survey-grade GPS that does GPS carrier
-tracking and can work out its own position to a few millimeters.  It
+tracking and can work out its position to a few millimeters.  It
 generates range and range-rate corrections and encodes them into
 RTCM104. It ships the RTCM104 to the LF transmitter over serial rs-232
 signal at 100 baud or 200 baud depending on the requirements of the
@@ -2241,7 +2241,7 @@ Parameters) message:</para>
 decimal places, in Earth Centred Earth Fixed coordinates.
 These are usually referred to the WGS84 reference frame, but may
 be referred to NAD83 in the US (essentially identical to WGS84 for
-all except geodesists), or to some other reference frame in other
+all except geodesists), or some other reference frame in other
 parts of the world.</para>
 
 <para>An invalid reference message is represented by a type 3 header
