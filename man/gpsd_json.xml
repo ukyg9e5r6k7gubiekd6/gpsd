@@ -155,7 +155,7 @@ WGS84. Present if the mode is 3.
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>MSL Altitude in meters.  The geoid used is rarely specified
-and is often inacurate.  See the comments below on geoidSep.  Present if
+and is often inaccurate.  See the comments below on geoidSep.  Present if
  mode is 3.  altMSL is altHAE - geoidSep.</entry>
 </row>
 <row>
@@ -181,7 +181,7 @@ and is often inacurate.  See the comments below on geoidSep.  Present if
 	<entry>depth</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Depth in meters.  Probably depth below the keel..</entry>
+        <entry>Depth in meters.  Probably depth below the keel...</entry>
 </row>
 <row>
 	<entry>dgpsAge</entry>
@@ -401,7 +401,7 @@ Positive is West variation.  Negative is East variation.</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Geoid separation is the difference between the WGS84
-reference elipsoid and the geoid (Mean Sea Level) in meters.  Almost no
+reference ellipsoid and the geoid (Mean Sea Level) in meters.  Almost no
 GNSS receiver specifies how they compute their geoid. gpsd interpolates the
 geoid from a 5x5 degree table of EGM2008 values when the receiver does
 not supply a geoid separation.  The gpsd computed geoidSep is usually
@@ -1435,7 +1435,7 @@ from the GPS PPS pulse.</para>
 </table>
 
 <para>This message is emitted once per second to watchers of a device
-and is intended to report the time stamps of the in-band report of the
+and is intended to report the timestamps of the in-band report of the
 GPS and seconds as reported by the system clock (which may be
 NTP-corrected) when the first valid timestamp of the reporting cycle
 was seen.</para>
@@ -1481,8 +1481,8 @@ The speed of the serial connection between the GPS and the system adds
 a delay to the start of cycle detection.  An even bigger error is added
 by the variable computation time inside the GPS.  Taken together the
 time derived from the start of the GPS cycle can have offsets of
-10 millisecond to 700 milliseconds and combined jjitter and wander of
-100 to 300 millisecond.</para>
+10 milliseconds to 700 milliseconds and combined jitter and wander of
+100 to 300 milliseconds.</para>
 
 <para>A PPS object has the following elements:</para>
 
@@ -1543,7 +1543,7 @@ time derived from the start of the GPS cycle can have offsets of
 	<entry>qErr</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Quantization error of the PPS, in pico seconds.  Sometimes
+        <entry>Quantization error of the PPS, in picoseconds.  Sometimes
 called the "sawtooth" error.</entry>
 </row>
 </tbody>
@@ -2431,7 +2431,7 @@ should be ignored.</para>
 
 <para>Here is the format:</para>
 
-<table frame="all" pgwide="0"><title>Contellation health</title>
+<table frame="all" pgwide="0"><title>Constellation health</title>
 <tgroup cols="3" align="left" colsep="1" rowsep="1">
 <thead>
 <row>
@@ -2524,7 +2524,7 @@ but this cannot be true unless the field is 3 bits wide.
 <para>Here are the payload members of a type 13 (Groumf Tramitter Parameters)
 message:</para>
 
-<table frame="all" pgwide="0"><title>Grund Transmitter Parameters</title>
+<table frame="all" pgwide="0"><title>Ground Transmitter Parameters</title>
 <tgroup cols="3" align="left" colsep="1" rowsep="1">
 <thead>
 <row>
