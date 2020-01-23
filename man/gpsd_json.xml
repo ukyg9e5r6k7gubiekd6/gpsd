@@ -265,6 +265,7 @@ and is often inacurate.  See the comments below on geoidSep.  Present if
 </row>
 <row>
 	<entry>leapseconds</entry>
+	<entry>No</entry>
 	<entry>integer</entry>
         <entry><para>Current leap seconds.</para></entry>
 </row>
@@ -603,21 +604,21 @@ error modeling than the covariance calculation.</para>
 </row>
 <row>
 	<entry>svid</entry>
-	<entry>no</entry>
+	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>The satellite ID within its constellation.  As defined
         by u-blox, not NMEA).</entry>
 </row>
 <row>
 	<entry>sigid</entry>
-	<entry>no</entry>
+	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>The signal ID of this signal.  As defined by u-blox, not
         NMEA. See u-blox doc for details.</entry>
 </row>
 <row>
 	<entry>freqid</entry>
-	<entry>no</entry>
+	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>For GLONASS satellites only: the frequency ID of the signal.
 As defined by u-blox, range 0 to 13.  The freqid is the frequency slot
@@ -625,7 +626,7 @@ plus 7.</entry>
 </row>
 <row>
 	<entry>health</entry>
-	<entry>no</entry>
+	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>The health of this satellite.  0 is unknown, 1 is
 OK, and 2 is unhealthy.</entry>
