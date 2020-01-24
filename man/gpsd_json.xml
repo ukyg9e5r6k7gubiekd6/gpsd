@@ -132,7 +132,8 @@ try to compute the value from the skyview.</para>
 	<entry>mode</entry>
 	<entry>Yes</entry>
 	<entry>numeric</entry>
-        <entry>NMEA mode: %d, 0=no mode value yet seen, 1=no fix, 2=2D, 3=3D.</entry>
+        <entry>NMEA mode: %d, 0=no mode value yet seen, 1=no fix, 2=2D,
+ 3=3D.</entry>
 </row>
 <row>
 	<entry>time</entry>
@@ -356,8 +357,9 @@ Positive is West variation.  Negative is East variation.</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
         <entry>Estimated Spherical (3D) Position Error in meters.
-         Present if the mode is 3D and DOPs can be calculated from the satellite
-        view. Assumed to be 95% confidence, but many GPS do not specify.
+        Present if the mode is 3D and DOPs can be calculated from the
+        satellite view. Assumed to be 95% confidence, but many GPS do not
+        specify.
         </entry>
 </row>
 <row>
@@ -418,7 +420,7 @@ within one meter of the "true" value, but can be off as much as 12 meters.
 will assert validity bits in the top-level set member for each
 field received; see gps.h for bitmask names and values.</para>
 
-<para>Invalid or known floating point values will be set to NAN.
+<para>Invalid or unknown floating point values will be set to NAN.
 </para>
 
 <para>Here's an example:</para>
@@ -710,21 +712,24 @@ corrections).</entry>
 	<entry>major</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Standard deviation of semi-major axis of error ellipse, in meters.</entry>
+        <entry>Standard deviation of semi-major axis of error ellipse,
+        in meters.</entry>
 </row>
 
 <row>
 	<entry>minor</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Standard deviation of semi-minor axis of error ellipse, in meters.</entry>
+        <entry>Standard deviation of semi-minor axis of error ellipse,
+        in meters.</entry>
 </row>
 
 <row>
 	<entry>orient</entry>
 	<entry>No</entry>
 	<entry>numeric</entry>
-        <entry>Orientation of semi-major axis of error ellipse, in degrees from true north.</entry>
+        <entry>Orientation of semi-major axis of error ellipse, in degrees
+        from true north.</entry>
 </row>
 
 <row>
@@ -1618,7 +1623,8 @@ short-term stability (such as a rubidium atomic clock).</para>
 	<entry>running</entry>
 	<entry>Yes</entry>
 	<entry>boolean</entry>
-        <entry>If true, the oscillator is currently running.  Oscillators may require warm-up time at the start of the day.</entry>
+        <entry>If true, the oscillator is currently running.  Oscillators may
+        require warm-up time at the start of the day.</entry>
 </row>
 <row>
 	<entry>reference</entry>
@@ -1630,13 +1636,16 @@ short-term stability (such as a rubidium atomic clock).</para>
 	<entry>disciplined</entry>
 	<entry>Yes</entry>
 	<entry>boolean</entry>
-        <entry>If true, the GPS PPS signal is sufficiently stable and is being used to discipline the local oscillator.</entry>
+        <entry>If true, the GPS PPS signal is sufficiently stable and is being
+        used to discipline the local oscillator.</entry>
 </row>
 <row>
 	<entry>delta</entry>
 	<entry>Yes</entry>
 	<entry>numeric</entry>
-        <entry>The time difference (in nanoseconds) between the GPS-disciplined oscillator PPS output pulse and the most recent GPS PPS input pulse.</entry>
+        <entry>The time difference (in nanoseconds) between the GPS-disciplined
+        oscillator PPS output pulse and the most recent GPS PPS input
+        pulse.</entry>
 </row>
 </tbody>
 </tgroup>
@@ -1843,7 +1852,8 @@ through.  Here are the maxima to use for computation:</para>
 <row><entry>VTG       </entry><entry>46</entry></row>
 <row><entry>RMC       </entry><entry>77</entry></row>
 <row><entry>GSA       </entry><entry>67</entry></row>
-<row><entry>GSV       </entry><entry>60 (per line, thus 180 for a set of 3)</entry> </row>
+<row><entry>GSV       </entry><entry>60 (per line, thus 180 for a set
+                                     of 3)</entry> </row>
 </tbody>
 </tgroup>
 </table>
@@ -1925,9 +1935,10 @@ will assert the ERR_SET bit in the top-level set member.</para>
 
 <refsect1 id='rtcm2'><title>RTCM2</title>
 
-<para>RTCM-104 is a family of serial protocols used for broadcasting pseudorange
-corrections from differential-GPS reference stations. Many GPS receivers can
-accept these corrections to improve their reporting accuracy.</para>
+<para>RTCM-104 is a family of serial protocols used for broadcasting
+pseudorange corrections from differential-GPS reference stations. Many
+GPS receivers can accept these corrections to improve their reporting
+accuracy.</para>
 
 <para>RTCM-104 comes in two major and incompatible flavors, 2.x and
 3.x.  Each major flavor has minor (compatible) revisions.</para>
@@ -2028,7 +2039,8 @@ attributes are emitted before others.</para>
 <row>
 	<entry>seqnum</entry>
 	<entry>integer</entry>
-        <entry><para>Sequence number. Only 3 bits wide, wraps after 7.</para></entry>
+        <entry><para>Sequence number. Only 3 bits wide, wraps after 7.</para>
+        </entry>
 </row>
 <row>
 	<entry>length</entry>
@@ -2084,7 +2096,8 @@ satellites the beacon can see.</para></listitem>
 
 <varlistentry>
 <term>7</term>
-<listitem><para>radio beacon almanac &mdash; information about this or other beacons.</para></listitem>
+<listitem><para>radio beacon almanac &mdash; information about this or other
+beacons.</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -2781,8 +2794,10 @@ the members of the corresponding JSON object type.</para>
 
 <refsect1 id='see_also'><title>SEE ALSO</title>
 <para>
-<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum></citerefentry>,
-<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum></citerefentry>,
+<citerefentry><refentrytitle>gpsd</refentrytitle><manvolnum>8</manvolnum>
+</citerefentry>,
+<citerefentry><refentrytitle>libgps</refentrytitle><manvolnum>3</manvolnum>
+</citerefentry>,
 </para>
 </refsect1>
 
