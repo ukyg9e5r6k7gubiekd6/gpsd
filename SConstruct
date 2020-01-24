@@ -90,6 +90,7 @@ def _getstatusoutput(cmd, nput=None, shell=True, cwd=None, env=None):
 
 
 # TODO: this list is missing stuff.
+# built man pages found in all_manpages
 generated_sources = [
     'ais_json.i',
     'android/gpsd_config',
@@ -101,16 +102,23 @@ generated_sources = [
     'gpscat',
     'gpsd_config.h',
     'gpsd.php',
+    'gpsd.rules',
     'gpsfake',
     'gps/gps.py',
     'gps/__init__.py',
     'gps_maskdump.c',
     'gpsprof',
+    'libgps.pc',
     'libQgpsmm.prl',
-    'maskaudit.py',
+    'packaging/rpm/gpsd.spec',
     'packet_names.h',
+    'Qgpsmm.pc',
     'ubxtool',
-    'valgrind-audit.py',
+    'www/faq.html',
+    'www/gps_report.cgi',
+    'www/hacking.html',
+    'www/hardware-head.html',
+    'www/index.html',
     'xgps',
     'xgpsspeed',
     'zerk',
@@ -118,7 +126,6 @@ generated_sources = [
 
 # All installed python programs
 # All are templated
-# Need the full list to complately clean them out.
 python_progs = [
     "gegps",
     "gpscat",
@@ -180,7 +187,7 @@ gpsd_version = "3.20.1~dev"
 if 'dev' in gpsd_version:
     (st, gpsd_revision) = _getstatusoutput('git describe --tags')
     if st != 0:
-        # Use timestamp from latest relevant file
+        # Use timestamp from latest relevant file, ignoring generated files
         files = FileList(['*.c', '*.cpp', '*.h', '*.in', 'SConstruct'],
                          generated_sources)
         timestamps = map(GetMtime, files)
@@ -2731,22 +2738,25 @@ Utility('udev-test', '', ['$SRCDIR/gpsd -N -n -F /var/run/gpsd.sock -D 5', ])
 # Dummy target for cleaning misc files
 clean_misc = env.Alias('clean-misc')
 
-# clean generated python programs
-env.Clean(clean_misc, python_progs)
+# clean generated sources, which includes:
+#  all generated python
+#  Qt stuff libQgpsmm.prl, Qgpsmm.pc
+#  packaging/rpm/gpsd.spec
+env.Clean(clean_misc, generated_sources)
 
 # Since manpage targets are disabled in clean mode, we cover them here
 env.Clean(clean_misc, all_manpages.keys())
+
 # Clean compiled Python
 env.Clean(clean_misc,
           glob.glob('*.pyc') + glob.glob('gps/*.pyc') +
           glob.glob('gps/*.so') + glob.glob('*/__pycache__') +
           ['__pycache__'])
+
 # Clean coverage and profiling files
 env.Clean(clean_misc, glob.glob('*.gcno') + glob.glob('*.gcda'))
 # Clean Python coverage files
 env.Clean(clean_misc, glob.glob('.coverage*') + ['htmlcov/'])
-# Clean Qt stuff
-env.Clean(clean_misc, ['libQgpsmm.prl', 'Qgpsmm.pc'])
 # Clean shared library files
 env.Clean(clean_misc, glob.glob('*.so') + glob.glob('*.so.*'))
 # Clean old location man page files
@@ -2759,8 +2769,6 @@ env.Clean(clean_misc, glob.glob('gps-*.egg-info') + ['revision.h'])
 # Clean scons state files
 env.Clean(clean_misc, ['.sconf_temp', '.scons-option-cache', 'config.log'])
 
-# distribution files
-env.Clean(clean_misc, ["packaging/rpm/gpsd.spec"])
 # old, and current, versions
 env.Clean(clean_misc, glob.glob('gpsd-*.zip') + glob.glob('gpsd-*tar.?z'))
 
