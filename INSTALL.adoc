@@ -625,7 +625,8 @@ want to access the development source.
 == Special Notes for Windows ==
 
 Only Windows Subsystem for Linux 1 provides a reasonable means
-of running gpsd at this time.
+of running gpsd at this time. WSL2 lacks a GUI, USB and serial
+support making it unsuitable at this time.
 
 === About WSL 1 ===
 
@@ -639,13 +640,13 @@ There are some issues known which affect gpsd.
 * /dev/ttyS* nodes have a 1 indexed number, like in MS Windows.
 * Windows 10 may attempt to use your GPS itself.
 * Older pl2303 (knockoff) serial chipsets are no longer supported \
-  in Winodws 10
+  in Windows 10
 
 === Installing a Linux distribution on WSL 1 or WSL 2 ===
 
 1. Install a Linux distribution by clicking on the `Microsoft Store` \
 Icon in the taskbar.
-2. Click on the search icon (it is a spyglass).
+2. Click on the search icon (it is a magnifying glass).
 3. Type in 'Linux' or the name of a supported distribution. (see list)
 4. Click on the icon of your chosen Linux Distribution
 5. Click 'Get' then click 'Install' and busy-wait.
@@ -656,25 +657,26 @@ installing your Linux distribution.
 
 === Reccomended packages ===
 
-Due to currnt WSL limitations, it is recommended at this time that you
-only install the $distro equivalent of the following packages.
+Due to current WSL limitations, it is recommended at this time that you
+only install the equivalent of the following packages on your distribution.
 
 ----
 Python
 SCons (preferably 3.0+)
 ncurses-dev (to build/run cgps and gpsmon)
-asciidoctor and xmlto (to build the documentation)
+asciidoctor (to build the documentation)
+xmlto (to build the man pages)
 ----
 
 Optionally, the following packages might also be installed
 ----
-pyserial (for fine control of UBlox GPS and GREIS devices)
+pyserial (for direct control of UBlox GPS and GREIS devices)
 gnuplot (to generate graphs of gpsprof data)
 libusb-dev (to possibly use crusty old Garmin GPS receivers)
-git (if building from the developmebt sources)
+git (if building from the development sources)
 ----
 
 === Building on WSL 1 or WSL 2 ===
 
 1. Get the list of packages from the appropriate section above.
-2. Follow instructions in the distro specific section above.
+2. Follow instructions in the distro-specific section above.
