@@ -1,8 +1,8 @@
 # @GENERATED@
-prefix=@prefix@
+prefix=@PREFIX@
 exec_prefix=${prefix}
-libdir=@libdir@
-includedir=@includedir@
+libdir=@LIBDIR@
+includedir=@INCLUDEDIR@
 
 Name: GPSD
 Description: GPS Daemon communication library

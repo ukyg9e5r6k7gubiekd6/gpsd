@@ -1,8 +1,8 @@
 # @GENERATED@
-prefix=@prefix@
+prefix=@PREFIX@
 exec_prefix=${prefix}
-libdir=@libdir@
-includedir=@includedir@
+libdir=@LIBDIR@
+includedir=@INCLUDEDIR@
 qt_config=lex yacc warn_on uic resources qt release incremental link_prl def_files_disabled exceptions no_mocdepend stl qt_no_framework create_pc create_prl moc thread dll
 
 Name: Qgpsmm
