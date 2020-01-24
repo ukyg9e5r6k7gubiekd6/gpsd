@@ -829,12 +829,12 @@ class Main(object):
                              "expected %s\n" %
                              (sys.argv[0], ver.release, gps_version))
 
-        if ((ver.proto_major != gps.api_major_version or
-             ver.proto_minor != gps.api_minor_version)):
+        if ((ver.proto_major != gps.api_version_major or
+             ver.proto_minor != gps.api_version_minor)):
             sys.stderr.write("%s: WARNING API version %s.%s different than "
                              "expected %s.%s\n" %
                              (sys.argv[0], ver.proto_major, ver.proto_minor,
-                              gps.api_major_version, gps.api_minor_version))
+                              gps.api_version_major, gps.api_version_minor))
 
     def destroy(self, _unused, _empty=None):
         Gtk.main_quit()
