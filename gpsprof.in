@@ -446,29 +446,50 @@ class spaceplot(plotter):
         stat_lon_r.moments(self.recentered, 1)
 
         # CEP(50) calculated per RCC 261-00, Section 3.1.1
+        # Note that this is not the distance such that 50% of the
+        # points are within that distance; it is a distance calculated
+        # from the standard deviation as specified by a standard, and
+        # is likely a true CEP(50) if the distribution meets
+        # expectations, such as normality.  However, it seems in
+        # general to be close to the actual population CEP(50).
         calc_cep = 0.5887 * (stat_lat_r.sigma + stat_lon_r.sigma)
 
         # 2DRMS calculated per RCC 261-00, Section 3.1.4
         calc_2drms = 2 * math.sqrt(stat_lat_r.sigma ** 2 +
                                    stat_lon_r.sigma ** 2)
 
-        # Compute measured CEP(50%)
-        # same as median distance from centroid, 50% closer, 50% farther
+        # Note that the fencepost error situation in the following is
+        # not entirely clear.  Issues include CEP(50) = x being
+        # defined as 50% of the points being < x distance vs <= x
+        # distance, and the interaction of truncation of len*0.5 vs
+        # zero-based arrays.  (If you care about this because you are
+        # concerned about your results, then you almost certainly are
+        # not using enough samples.)
+
+        # Compute actual CEP(50%) for our input set.  This makes no
+        # assumptions about the distribution being normal, etc. -- it
+        # is literally finding the distance such that 50% of our
+        # samples are within that distance.  We simply find the
+        # distance of the point whose index is half the number of
+        # points, after having sorted the points by distance.
         cep_meters = gps.misc.EarthDistance(
             self.centroid[:2], self.fixes[int(len(self.fixes) * 0.50)][:2])
 
-        # Compute measured CEP(95%)
-        # distance from centroid, 95% closer, 5% farther
+        # Compute actual CEP(95%) for our input set.  As above, but
+        # index at 0.95 in the sorted points, so that 95% of points
+        # are closer, 5% farther.
         cep95_meters = gps.misc.EarthDistance(
             self.centroid[:2], self.fixes[int(len(self.fixes) * 0.95)][:2])
 
-        # Compute measured CEP(99%)
-        # distance from centroid, 99% closer, 1% farther
+        # Compute actual CEP(99%) for our input set.  As above, but
+        # index at 0.99 in the sorted points, so that 99% of points
+        # are closer, 1% farther.
         cep99_meters = gps.misc.EarthDistance(
             self.centroid[:2], self.fixes[int(len(self.fixes) * 0.99)][:2])
 
-        # Compute CEP(100%)
-        # max distance from centroid, 100% closer, 0% farther
+        # Compute actual CEP(100%) for our input set.  This is the
+        # maximum distance from the centroid for any point in the
+        # input set, and hence the distance of last point in sorted order.
         cep100_meters = gps.misc.EarthDistance(
             self.centroid[:2], self.fixes[len(self.fixes) - 1][:2])
 
