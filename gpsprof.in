@@ -453,22 +453,22 @@ class spaceplot(plotter):
                                    stat_lon_r.sigma ** 2)
 
         # Compute measured CEP(50%)
-        # same as median distance from centroid, 50% closer, 50% further
+        # same as median distance from centroid, 50% closer, 50% farther
         cep_meters = gps.misc.EarthDistance(
             self.centroid[:2], self.fixes[int(len(self.fixes) * 0.50)][:2])
 
         # Compute measured CEP(95%)
-        # distance from centroid, 95% closer, 5% further
+        # distance from centroid, 95% closer, 5% farther
         cep95_meters = gps.misc.EarthDistance(
             self.centroid[:2], self.fixes[int(len(self.fixes) * 0.95)][:2])
 
         # Compute measured CEP(99%)
-        # distance from centroid, 99% closer, 1% further
+        # distance from centroid, 99% closer, 1% farther
         cep99_meters = gps.misc.EarthDistance(
             self.centroid[:2], self.fixes[int(len(self.fixes) * 0.99)][:2])
 
         # Compute CEP(100%)
-        # max distance from centroid, 100% closer, 0% further
+        # max distance from centroid, 100% closer, 0% farther
         cep100_meters = gps.misc.EarthDistance(
             self.centroid[:2], self.fixes[len(self.fixes) - 1][:2])
 
