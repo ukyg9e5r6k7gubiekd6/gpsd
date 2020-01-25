@@ -2094,7 +2094,7 @@ if env['python'] and not cleaning and not helping:
     for p in python_all:
         # split in two lines for readability
         check_compile.append('cp %s tmp.py; %s -tt -m py_compile tmp.py;' %
-                             (p, sys.executable))
+                             (p, target_python_path))
         # tmp.py may have inherited non-writable permissions
         check_compile.append('rm -f tmp.py*')
 
