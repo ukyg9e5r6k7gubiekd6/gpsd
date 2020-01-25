@@ -1225,8 +1225,8 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1001.header.satcount; i++) {
 #define R1001 rtcm->rtcmtypes.rtcm3_1001.rtk_data[i]
 	    str_appendf(buf, buflen,
-			   "{\"ident\":%u,\"ind\":%u,\"prange\":%8.2f,"
-			   "\"delta\":%6.4f,\"lockt\":%u},",
+			   "{\"ident\":%u,\"ind\":%u,\"prange\":%.2f,"
+			   "\"delta\":%.4f,\"lockt\":%u},",
 			   R1001.ident,
 			   CODE(R1001.L1.indicator),
 			   R1001.L1.pseudorange,
@@ -1251,8 +1251,8 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	for (i = 0; i < rtcm->rtcmtypes.rtcm3_1002.header.satcount; i++) {
 #define R1002 rtcm->rtcmtypes.rtcm3_1002.rtk_data[i]
 	    str_appendf(buf, buflen,
-			   "{\"ident\":%u,\"ind\":%u,\"prange\":%8.2f,"
-			   "\"delta\":%6.4f,\"lockt\":%u,\"amb\":%u,"
+			   "{\"ident\":%u,\"ind\":%u,\"prange\":%.2f,"
+			   "\"delta\":%.4f,\"lockt\":%u,\"amb\":%u,"
 			   "\"CNR\":%.2f},",
 			   R1002.ident,
 			   CODE(R1002.L1.indicator),
@@ -1281,10 +1281,10 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 #define R1003 rtcm->rtcmtypes.rtcm3_1003.rtk_data[i]
 	    str_appendf(buf, buflen,
 			   "{\"ident\":%u,"
-			   "\"L1\":{\"ind\":%u,\"prange\":%8.2f,"
-			   "\"delta\":%6.4f,\"lockt\":%u},"
-			   "\"L2\":{\"ind\":%u,\"prange\":%8.2f,"
-			   "\"delta\":%6.4f,\"lockt\":%u},"
+			   "\"L1\":{\"ind\":%u,\"prange\":%.2f,"
+			   "\"delta\":%.4f,\"lockt\":%u},"
+			   "\"L2\":{\"ind\":%u,\"prange\":%.2f,"
+			   "\"delta\":%.4f,\"lockt\":%u},"
 			   "},",
 			   R1003.ident,
 			   CODE(R1003.L1.indicator),
@@ -1315,11 +1315,11 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 #define R1004 rtcm->rtcmtypes.rtcm3_1004.rtk_data[i]
 	    str_appendf(buf, buflen,
 			   "{\"ident\":%u,"
-			   "\"L1\":{\"ind\":%u,\"prange\":%8.2f,"
-			   "\"delta\":%6.4f,\"lockt\":%u,"
+			   "\"L1\":{\"ind\":%u,\"prange\":%.2f,"
+			   "\"delta\":%.4f,\"lockt\":%u,"
 			   "\"amb\":%u,\"CNR\":%.2f},"
-			   "\"L2\":{\"ind\":%u,\"prange\":%8.2f,"
-			   "\"delta\":%6.4f,\"lockt\":%u,"
+			   "\"L2\":{\"ind\":%u,\"prange\":%.2f,"
+			   "\"delta\":%.4f,\"lockt\":%u,"
 			   "\"CNR\":%.2f}"
 			   "},",
 			   R1004.ident,
@@ -1419,7 +1419,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 #define R1009 rtcm->rtcmtypes.rtcm3_1009.rtk_data[i]
 	    str_appendf(buf, buflen,
 			   "{\"ident\":%u,\"ind\":%u,\"channel\":%u,"
-			   "\"prange\":%8.2f,\"delta\":%6.4f,\"lockt\":%u},",
+			   "\"prange\":%.2f,\"delta\":%.4f,\"lockt\":%u},",
 			   R1009.ident,
 			   CODE(R1009.L1.indicator),
 			   R1009.L1.channel,
@@ -1446,7 +1446,7 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 #define R1010 rtcm->rtcmtypes.rtcm3_1010.rtk_data[i]
 	    str_appendf(buf, buflen,
 			   "{\"ident\":%u,\"ind\":%u,\"channel\":%u,"
-			   "\"prange\":%8.2f,\"delta\":%6.4f,\"lockt\":%u,"
+			   "\"prange\":%.2f,\"delta\":%.4f,\"lockt\":%u,"
 			   "\"amb\":%u,\"CNR\":%.2f},",
 			   R1010.ident,
 			   CODE(R1010.L1.indicator),
@@ -1477,9 +1477,9 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 	    str_appendf(buf, buflen,
 			   "{\"ident\":%u,\"channel\":%u,"
 			   "\"L1\":{\"ind\":%u,"
-			   "\"prange\":%8.2f,\"delta\":%6.4f,\"lockt\":%u},"
-			   "\"L2:{\"ind\":%u,\"prange\":%8.2f,"
-			   "\"delta\":%6.4f,\"lockt\":%u}"
+			   "\"prange\":%.2f,\"delta\":%.4f,\"lockt\":%u},"
+			   "\"L2:{\"ind\":%u,\"prange\":%.2f,"
+			   "\"delta\":%.4f,\"lockt\":%u}"
 			   "}",
 			   R1011.ident,R1011.L1.channel,
 			   CODE(R1011.L1.indicator),
@@ -1510,12 +1510,12 @@ void json_rtcm3_dump(const struct rtcm3_t *rtcm,
 #define R1012 rtcm->rtcmtypes.rtcm3_1012.rtk_data[i]
 	    str_appendf(buf, buflen,
 			   "{\"ident\":%u,\"channel\":%u,"
-			   "\"L1\":{\"ind\":%u,\"prange\":%8.2f,"
-			   "\"delta\":%6.4f,\"lockt\":%u,\"amb\":%u,"
+			   "\"L1\":{\"ind\":%u,\"prange\":%.2f,"
+			   "\"delta\":%.4f,\"lockt\":%u,\"amb\":%u,"
 			   "\"CNR\":%.2f},"
-			   "\"L2\":{\"ind\":%u,\"prange\":%8.2f,"
-			   "\"delta\":%6.4f,\"lockt\":%u,"
-			   "\"CNR\":%.2f},"
+			   "\"L2\":{\"ind\":%u,\"prange\":%.2f,"
+			   "\"delta\":%.4f,\"lockt\":%u,"
+			   "\"CNR\":%.2f}"
 			   "},",
 			   R1012.ident,
 			   R1012.L1.channel,
