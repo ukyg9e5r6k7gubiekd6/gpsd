@@ -77,6 +77,7 @@ extern "C" {
  * 9.1   Add leap_seconds to gps_data_t
  *       Fix rtcm3_1029_t.text length
  *       Add/change many rtcm2 structs
+ *       Add/change many rtcm3 structs
  */
 #define GPSD_API_MAJOR_VERSION  9       /* bump on incompatible changes */
 #define GPSD_API_MINOR_VERSION  1       /* bump on compatible changes */
@@ -678,6 +679,15 @@ struct rtcm3_t {
             char receiver[RTCM3_MAX_DESCRIPTOR+1];      /* Receiver string */
             char firmware[RTCM3_MAX_DESCRIPTOR+1];      /* Firmware string */
         } rtcm3_1033;
+        struct {
+            unsigned int station_id;                    // Reference Station ID
+            unsigned char bias_indicator;
+            unsigned char signals_mask;
+            int l1_ca_bias;         // GLONASS L1 C/A Code-Phase Bias
+            int l1_p_bias;          // GLONASS L1 P Code-Phase Bias
+            int l2_ca_bias;         // GLONASS L2 C/A Code-Phase Bias
+            int l2_p_bias;          // GLONASS L2 P Code-Phase Bias
+        } rtcm3_1230;
         unsigned char data[1024];       /* Max RTCM3 msg length is 1023 bytes */
     } rtcmtypes;
 };

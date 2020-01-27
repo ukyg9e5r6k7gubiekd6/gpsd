@@ -1201,9 +1201,27 @@ void rtcm3_unpack(const struct gps_context_t *context,
 
     case 1230:
         /* RTCM 3.2
-         * GLONASS L1 and L2 Code-Phase Biases.
+         * GLONASS L1 and L2, C/A and P, Code-Phase Biases.
          */
         unknown_name = "GLO L1 and L2 Code-Phase Biases";
+        unknown = false;
+        rtcm->rtcmtypes.rtcm3_1230.station_id = (unsigned short)ugrab(12);
+        rtcm->rtcmtypes.rtcm3_1230.bias_indicator = (unsigned char)ugrab(1);
+        (void)ugrab(1);         /* reserved */
+        rtcm->rtcmtypes.rtcm3_1230.signals_mask = (unsigned char)ugrab(3);
+        // actual mask order is undocumented...
+        if (1 & rtcm->rtcmtypes.rtcm3_1230.signals_mask) {
+            rtcm->rtcmtypes.rtcm3_1230.l1_ca_bias = ugrab(16);
+        }
+        if (2 & rtcm->rtcmtypes.rtcm3_1230.signals_mask) {
+            rtcm->rtcmtypes.rtcm3_1230.l1_p_bias = ugrab(16);
+        }
+        if (4 & rtcm->rtcmtypes.rtcm3_1230.signals_mask) {
+            rtcm->rtcmtypes.rtcm3_1230.l2_ca_bias = ugrab(16);
+        }
+        if (8 & rtcm->rtcmtypes.rtcm3_1230.signals_mask) {
+            rtcm->rtcmtypes.rtcm3_1230.l2_p_bias = ugrab(16);
+        }
         break;
 
     case 4072:

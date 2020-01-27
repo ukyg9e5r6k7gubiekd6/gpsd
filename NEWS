@@ -7,6 +7,8 @@
   Change asciidoc to asciidoctor, and revise documents to match.
   library version bumped to 26
   Add leap_seconds to gps_data_t
+  Add/change many rtcm2 structs in gps.h
+  Add/change many rtcm3 structs in gps.h
 
 3.20: 2019-12-31
   Change README into an asciidoc file and publish HTML from it
