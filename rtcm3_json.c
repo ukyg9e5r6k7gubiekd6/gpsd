@@ -15,10 +15,10 @@ PERMISSIONS
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <stdio.h>
 #include <math.h>
-#include <string.h>
 #include <stddef.h>
+#include <stdio.h>
+#include <string.h>
 
 #include "gpsd.h"
 
@@ -198,6 +198,24 @@ int json_rtcm3_read(const char *buf,
     };
 #undef R1033
 
+#define R1230	rtcm3->rtcmtypes.rtcm3_1230
+    const struct json_attr_t json_rtcm1230[] = {
+	RTCM3_HEADER
+	{"station_id", t_uinteger, .addr.uinteger = &R1230.station_id},
+	{"bi",         t_ubyte,    .addr.ubyte = &R1230.bias_indicator},
+	{"sm",         t_ubyte,    .addr.ubyte = &R1230.signals_mask},
+	{"l1ca",       t_integer,  .addr.integer = &R1230.l1_ca_bias,
+                                   .dflt.integer = 0},
+	{"l1p",        t_integer,  .addr.integer = &R1230.l1_p_bias,
+                                   .dflt.integer = 0},
+	{"l2ca",       t_integer,  .addr.integer = &R1230.l2_ca_bias,
+                                   .dflt.integer = 0},
+	{"l2p",        t_integer,  .addr.integer = &R1230.l2_p_bias,
+                                   .dflt.integer = 0},
+	{NULL},
+    };
+#undef R1033
+
     const struct json_attr_t json_rtcm3_fallback[] = {
 	RTCM3_HEADER
 	{"data",     t_array, .addr.array.element_type = t_string,
@@ -234,6 +252,8 @@ int json_rtcm3_read(const char *buf,
 	status = json_read_object(buf, json_rtcm1014, endptr);
     } else if (strstr(buf, "\"type\":1033,") != NULL) {
 	status = json_read_object(buf, json_rtcm1033, endptr);
+    } else if (strstr(buf, "\"type\":1230,") != NULL) {
+	status = json_read_object(buf, json_rtcm1230, endptr);
     } else {
 	int n;
 	status = json_read_object(buf, json_rtcm3_fallback, endptr);
