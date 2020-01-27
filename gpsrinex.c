@@ -63,16 +63,16 @@
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <math.h>
-#include <time.h>
+#include <assert.h>
 #include <errno.h>
 #include <libgen.h>
+#include <math.h>
 #include <signal.h>
-#include <assert.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "gps.h"
@@ -338,7 +338,7 @@ static void print_rinex_header(void)
     if (0 < prn_count[GNSSID_GPS]) {
         /* GPS, code G */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(GNSSID_GPS), 5, "C1C", "L1C", "D1C", "C2C", "L2C",
+             gnssid2rinex(GNSSID_GPS), 6, "C1C", "L1C", "D1C", "C2C", "L2C",
              "D2C", "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[GNSSID_SBAS]) {
@@ -350,25 +350,25 @@ static void print_rinex_header(void)
     if (0 < prn_count[GNSSID_GAL]) {
         /* Galileo, E1, E5 aand E6 only, code E  */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(GNSSID_GAL), 3, "C1C", "L1C", "D1C", "C7Q",
+             gnssid2rinex(GNSSID_GAL), 6, "C1C", "L1C", "D1C", "C7Q",
              "L7Q", "D7Q", "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[GNSSID_BD]) {
         /* BeiDou, BDS, code C */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(GNSSID_BD), 5, "C1C", "L1C", "D1C", "C7I", "L7I",
+             gnssid2rinex(GNSSID_BD), 6, "C1C", "L1C", "D1C", "C7I", "L7I",
              "D7I", "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[GNSSID_QZSS]) {
         /* QZSS, code J */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(GNSSID_QZSS), 5, "C1C", "L1C", "D1C", "C2L",
+             gnssid2rinex(GNSSID_QZSS), 6, "C1C", "L1C", "D1C", "C2L",
              "L2L", "D2L", "", "", "", "SYS / # / OBS TYPES");
     }
     if (0 < prn_count[GNSSID_GLO]) {
         /* GLONASS, R */
         (void)fprintf(log_file, "%c%5d%4s%4s%4s%4s%4s%4s%4s%4s%22s%-20s\n",
-             gnssid2rinex(GNSSID_GLO), 5, "C1C", "L1C", "D1C", "C2C", "L2C",
+             gnssid2rinex(GNSSID_GLO), 6, "C1C", "L1C", "D1C", "C2C", "L2C",
              "D2C", "", "", "", "SYS / # / OBS TYPES");
     }
 
