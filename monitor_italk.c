@@ -163,8 +163,8 @@ static void display_itk_navfix(unsigned char *buf, size_t len)
 	uint64_t i;         // uint64_t just in case ints are 32-bit
 	satlist[0] = '\0';
 	for (i = 0; i < 32; i++) {
-	    if (svlist & (1 << i)) {
-		(void)snprintf(prn, 4, "%lu ", i + 1);
+	    if (svlist & (1ULL << i)) {
+		(void)snprintf(prn, 4, "%llu ", (unsigned long long)i + 1);
 		(void)strlcat(satlist, prn, sizeof(satlist));
 	    }
 	}
