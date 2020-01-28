@@ -285,6 +285,7 @@ static void print_rinex_header(void)
     struct tm *report_time;
     struct tm *first_time;
     struct tm *last_time;
+    struct tm tm_buf;            // temp buffer for gmtime_r()
     int cnt;                     /* number of obs for one sat */
     int prn_count[GNSSID_CNT] = {0};   /* count of PRN per gnssid */
 
@@ -292,7 +293,7 @@ static void print_rinex_header(void)
         (void)fprintf(stderr, "doing header\n");
     }
 
-    report_time = gmtime(&(start_time.tv_sec));
+    report_time = gmtime_r(&(start_time.tv_sec), &tm_buf);
     (void)strftime(tmstr, sizeof(tmstr), "%Y%m%d %H%M%S UTC", report_time);
 
     (void)fprintf(log_file,
@@ -480,7 +481,7 @@ static void print_rinex_header(void)
                   (double)sample_interval, "", "INTERVAL");
 
     /* GPS time not UTC */
-    first_time = gmtime(&(first_mtime.tv_sec));
+    first_time = gmtime_r(&(first_mtime.tv_sec), &tm_buf);
     (void)fprintf(log_file, "%6d%6d%6d%6d%6d%5d.%07ld%8s%9s%-20s\n",
          first_time->tm_year + 1900,
          first_time->tm_mon + 1,
@@ -493,7 +494,7 @@ static void print_rinex_header(void)
          "TIME OF FIRST OBS");
 
     /* GPS time not UTC */
-    last_time = gmtime(&(last_mtime.tv_sec));
+    last_time = gmtime_r(&(last_mtime.tv_sec), &tm_buf);
     (void)fprintf(log_file, "%6d%6d%6d%6d%6d%5d.%07ld%8s%9s%-20s\n",
          last_time->tm_year + 1900,
          last_time->tm_mon + 1,
@@ -759,7 +760,8 @@ static void one_sig(struct meas_t *meas)
  */
 static void print_raw(struct gps_data_t *gpsdata)
 {
-    struct tm *tmp_now;
+    struct tm *now_time;
+    struct tm tm_buf;            // temp buffer for gmtime_r()
     unsigned nrec = 0;
     unsigned nsat = 0;
     unsigned i;
@@ -838,14 +840,14 @@ static void print_raw(struct gps_data_t *gpsdata)
     }
 
     /* print epoch header line */
-    tmp_now = gmtime(&(last_mtime.tv_sec));
+    now_time = gmtime_r(&(last_mtime.tv_sec), &tm_buf);
     (void)fprintf(tmp_file,"> %4d %02d %02d %02d %02d %02d.%07ld  0%3u\n",
-         tmp_now->tm_year + 1900,
-         tmp_now->tm_mon + 1,
-         tmp_now->tm_mday,
-         tmp_now->tm_hour,
-         tmp_now->tm_min,
-         tmp_now->tm_sec,
+         now_time->tm_year + 1900,
+         now_time->tm_mon + 1,
+         now_time->tm_mday,
+         now_time->tm_hour,
+         now_time->tm_min,
+         now_time->tm_sec,
          (long)(last_mtime.tv_nsec / 100), nsat);
 
     last_gnssid = 0;
@@ -1031,6 +1033,7 @@ int main(int argc, char **argv)
 {
     char tmstr[40];            /* time: YYYYDDDMMHH */
     struct tm *report_time;
+    struct tm tm_buf;            // temp buffer for gmtime_r()
     int ch;
     unsigned int flags = WATCH_ENABLE;
     char   *fname = NULL;
@@ -1085,7 +1088,7 @@ int main(int argc, char **argv)
 
     /* save start time of report */
     (void)clock_gettime(CLOCK_REALTIME, &start_time);
-    report_time = gmtime(&(start_time.tv_sec));
+    report_time = gmtime_r(&(start_time.tv_sec), &tm_buf);
 
     /* open the output file */
     if (NULL == fname) {
