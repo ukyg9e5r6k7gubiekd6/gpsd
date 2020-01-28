@@ -297,7 +297,7 @@ char *maidenhead(double lat, double lon)
     }
 
     lon += 180.0;
-    // divide into 18 zones each 20 degrees lon
+    // divide into 18 zones (fields) each 20 degrees lon
     t1 = (int)(lon / 20);
     buf[0] = (char)t1 + 'A';
     if ('R' < buf[0]) {
@@ -306,17 +306,17 @@ char *maidenhead(double lat, double lon)
     }
     lon -= (float)t1 * 20.0;
 
-    // divide into 10 zones each 2 degrees lon
+    // divide into 10 zones (squares) each 2 degrees lon
     t1 = (int)lon / 2;
     buf[2] = (char)t1 + '0';
     lon -= (float)t1 * 2;
 
-    // divide into 24 zones each 5 minute (0.083333 deg, 5/60 deg) lon
+    // divide into 24 zones (subsquares) each 5 minute (5/60 deg) lon
     t1 = (int)((lon * 60) / 5);
     buf[4] = (char) ((char)t1 + 'a');
     lon -= (float)((t1 * 5) / 60.0);
 
-    // divide into 10 zones each 30 seconds (0.0083333 deg, 5/600 deg) lon
+    // divide into 10 zones (extended squares) each 30 seconds (5/600 deg) lon
     t1 = (int)((lon * 600) / 5);
     if (9 < t1) {
         // ugh, floating point gunk.
@@ -334,7 +334,7 @@ char *maidenhead(double lat, double lon)
     }
 
     lat += 90.0;
-    // divide into 18 zones each 10 degrees lat
+    // divide into 18 zones (fields) each 10 degrees lat
     t1 = (int)(lat / 10.0);
     buf[1] = (char)t1 + 'A';
     if ('R' < buf[1]) {
@@ -343,16 +343,16 @@ char *maidenhead(double lat, double lon)
     }
     lat -= (float)t1 * 10.0;
 
-    // divide into 10 zones each 1 degrees lat
+    // divide into 10 zones (squares) each 1 degrees lat
     buf[3] = (char)lat + '0';
     lat -= (int)lat;
 
-    // divide into 24 zones each 2.5 minute (0.041665 deg, 5/120 deg) lat
+    // divide into 24 zones (subsquares) each 2.5 minute (5/120 deg) lat
     t1 = (int)((lat * 120) / 5);
     buf[5] = (char)((char)t1 + 'a');
     lat -= (float)((t1 * 5) / 120.0);
 
-    // divide into 10 zones each 15 seconds (0.0041665 deg, 5/1200 deg) lat
+    // divide into 10 zones (extended squares) each 15 seconds (5/1200 deg) lat
     t1 = (int)((lat * 1200) / 5);
     if (9 < t1) {
         // ugh, floating point gunk.
