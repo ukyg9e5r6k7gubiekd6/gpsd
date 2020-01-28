@@ -174,12 +174,12 @@ struct test2 {
 struct test2 tests2[] = {
     /* maidenhead
      * keep in sync with test_clienthelpers.py */
-    {48.86471, 2.37305, "JN18eu", "Paris"},
-    {41.93498, 12.43652, "JN61fw", "Rome"},
-    {39.9771, -75.1685, "FM29jx", "Philadelphia"},
-    {-23.4028, -50.9766, "GG46mo", "Sao Paulo"},
-    {90, 180, "RR99xx", "North Pole"},
-    {-90, -180, "AA00aa", "South Pole"},
+    {48.86471, 2.37305, "JN18eu47", "Paris"},
+    {41.93498, 12.43652, "JN61fw24", "Rome"},
+    {39.9771, -75.1685, "FM29jx94", "Philadelphia"},
+    {-23.4028, -50.9766, "GG46mo23", "Sao Paulo"},
+    {90, 180, "RR99xx99", "North Pole"},
+    {-90, -180, "AA00aa00", "South Pole"},
 };
 
 

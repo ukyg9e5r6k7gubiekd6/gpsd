@@ -307,7 +307,15 @@ char *maidenhead(double lat, double lon)
     t1 = (int)lon / 2;
     buf[2] = (char)t1 + '0';
     lon -= (float)t1 * 2;
-    buf[4] = (char) ((int)(lon * 12.0)) + 'a';
+    t1 = (int)(lon / 0.083333);
+    buf[4] = (char) ((char)t1 + 'a');
+    lon -= (float)t1 * 0.083333;
+    t1 = (int)(lon / 0.0083333);
+    if (9 < t1) {
+        // ugh, floating point gunk.
+        t1 = 9;
+    }
+    buf[6] = (char) ((char)t1 + '0');
 
     /* latitude */
     if (89.99999 < lat) {
@@ -327,10 +335,19 @@ char *maidenhead(double lat, double lon)
     lat -= (float)t1 * 10.0;
     buf[3] = (char)lat + '0';
     lat -= (int)lat;
-    lat *= 24; // convert to 24 division
-    buf[5] = (char)((int)lat) + 'a';
+    // (24) 2.5 minute (0.0416665 degrees) zones
+    t1 = (int)(lat / 0.0416665);
+    buf[5] = (char)((char)t1 + 'a');
+    lat -= (float)t1 * 0.0416665;
+    // (10) 15 seconds (0.004166) latitudinal zones
+    t1 = (int)(lat / 0.004166);
+    if (9 < t1) {
+        // ugh, floating point gunk.
+        t1 = 9;
+    }
+    buf[7] = (char) ((char)t1 + '0');
 
-    buf[6] = '\0';
+    buf[8] = '\0';
 
     return buf;
 }
