@@ -559,6 +559,7 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 {
     int newstate;
     char scr[80];
+    char buf1[20], buf2[20];
 
     /* This is for the satellite status display.  Originally lifted from
      * xgps.c.  Note that the satellite list may be truncated based on
@@ -691,12 +692,14 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
     /* turn off cursor */
     curs_set(0);
 
-    /* Print time/date. */
+    /* Print time/date. with (leap_second) */
     if (0 < gpsdata->fix.time.tv_sec) {
         (void)timespec_to_iso8601(gpsdata->fix.time, scr, sizeof(scr));
     } else
         (void)strlcpy(scr, "  n/a", sizeof(scr));
-    (void)mvwprintw(datawin, 1, DATAWIN_VALUE_OFFSET, "%-*s", 26, scr);
+    (void)snprintf(buf1, sizeof(buf1), " (%u)", gpsdata->leap_seconds);
+    (void)strlcat(scr, buf1, sizeof(scr));
+    (void)mvwprintw(datawin, 1, DATAWIN_VALUE_OFFSET - 2, "%-*s", 26, scr);
 
 
     /* Fill in the latitude. */
@@ -717,7 +720,6 @@ static void update_gps_panel(struct gps_data_t *gpsdata, char *message)
 
     /* Fill in the altitudes. */
     if (gpsdata->fix.mode >= MODE_3D) {
-        char buf1[20], buf2[20];
         if (0 != isfinite(gpsdata->fix.altHAE))
             (void)snprintf(buf1, sizeof(buf1), "%11.3f,",
                            gpsdata->fix.altHAE * altfactor);
