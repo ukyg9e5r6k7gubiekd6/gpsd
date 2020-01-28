@@ -1104,9 +1104,14 @@ frame * {
         "Update time"
         if hasattr(data, "time"):
             # str() just in case we get an old-style float.
-            return str(data.time)
+            ret = str(data.time)
+        else:
+            ret = "n/a"
 
-        return "n/a"
+        if hasattr(data, "leapseconds"):
+            ret += " (%u)" % data.leapseconds
+
+        return ret
 
     def update_latitude(self, data):
         "Update latitude"
