@@ -176,8 +176,10 @@ struct test2 tests2[] = {
      * keep in sync with test_clienthelpers.py */
     {48.86471, 2.37305, "JN18eu47", "Paris"},
     {41.93498, 12.43652, "JN61fw24", "Rome"},
-    {39.9771, -75.1685, "FM29jx94", "Philadelphia"},
+    {39.9771, -75.1685, "FM29jx94", "Philadelphia, PA USA"},
+    {44.06878, -121.31424, "CN94ib26", "Bend, OR USA"},
     {-23.4028, -50.9766, "GG46mo23", "Sao Paulo"},
+    {-33.86881, 151.20929 , "QF56od51", "Sydney, NSW AU"},
     {90, 180, "RR99xx99", "North Pole"},
     {-90, -180, "AA00aa00", "South Pole"},
 };
