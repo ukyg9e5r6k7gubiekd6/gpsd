@@ -474,6 +474,8 @@ static void print_rinex_header(void)
         }
     }
 
+    (void)fprintf(log_file, "%-10s%50s%-20s\n",
+                  "DBHZ", "", "SIGNAL STRENGTH UNIT");
     (void)fprintf(log_file, "%10.3f%50s%-20s\n",
                   (double)sample_interval, "", "INTERVAL");
 
@@ -744,8 +746,10 @@ static void one_sig(struct meas_t *meas)
 	obs_cnt_inc(gnssid, svid, dxx);
     }
 
-    (void)fputs(fmt_obs(meas->pseudorange, 0, snr), tmp_file);
-    (void)fputs(fmt_obs(meas->carrierphase, meas->lli, 0), tmp_file);
+    (void)fputs(fmt_obs(meas->pseudorange, 0, 0), tmp_file);
+    // putting snr here, with phase, is deprecated.
+    // it shoule be an S observation.
+    (void)fputs(fmt_obs(meas->carrierphase, meas->lli, snr), tmp_file);
     (void)fputs(fmt_obs(meas->doppler, 0, 0), tmp_file);
 }
 
