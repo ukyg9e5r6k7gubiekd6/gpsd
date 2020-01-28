@@ -39,12 +39,15 @@ test1 = [(0, 0, "  0.00000000"),          # deg_dd
 
 # maidenhead
 # keep in sync with tests/test_gpsdclient.c
-test2 = [(48.86471, 2.37305, "JN18eu", "Paris"),
-         (41.93498, 12.43652, "JN61fw", "Rome"),
-         (39.9771, -75.1685, "FM29jx", "Philadelphia"),
-         (-23.4028, -50.9766, "GG46mo", "Sao Paulo"),
-         (90, 180, "RR99xx", "North Pole"),
-         (-90, -180, "AA00aa", "South Pole"),
+test2 = [
+         (48.86471, 2.37305, "JN18eu47", "Paris"),
+         (41.93498, 12.43652, "JN61fw24", "Rome"),
+         (39.9771, -75.1685, "FM29jx94", "Philadelphia, PA USA"),
+         (44.06878, -121.31424, "CN94ib26", "Bend, OR USA"),
+         (-23.4028, -50.9766, "GG46mo23", "Sao Paulo"),
+         (-33.86881, 151.20929 , "QF56od51", "Sydney, NSW AU"),
+         (90, 180, "RR99xx99", "North Pole"),
+         (-90, -180, "AA00aa00", "South Pole"),
          ]
 
 test3 = [
@@ -210,8 +213,8 @@ for (lat, lon, maidenhead, location) in test2:
     converted = gps.clienthelpers.maidenhead(lat, lon)
     if converted != maidenhead:
         sys.stderr.write(
-            "fail: maidenhead test%s, %s (%s)) expected %s got %s\n" %
-            (lat, lon, maidenhead, location, converted))
+            "fail: maidenhead test %s, %s (%s)) expected %s got %s\n" %
+            (lat, lon, location, maidenhead, converted))
         errors += 1
 
 # check wgs84_separation()

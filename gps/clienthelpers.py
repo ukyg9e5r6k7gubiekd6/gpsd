@@ -828,21 +828,34 @@ def maidenhead(dec_lat, dec_lon):
     adj_lat = dec_lat + 90.0
     adj_lon = dec_lon + 180.0
 
+    # divide into 18 zones (fields) each 20 degrees lon, 10 degrees lat
     grid_lat_sq = chr(int(adj_lat / 10) + 65)
     grid_lon_sq = chr(int(adj_lon / 20) + 65)
 
+    # divide into 10 zones (squares) each 2 degrees lon, 1 degrees lat
     grid_lat_field = str(int(adj_lat % 10))
     grid_lon_field = str(int((adj_lon / 2) % 10))
 
+    # remainder in minutes
     adj_lat_remainder = (adj_lat - int(adj_lat)) * 60
     adj_lon_remainder = ((adj_lon) - int(adj_lon / 2) * 2) * 60
 
+    # divide into 24 zones (subsquares) each 5 degrees lon, 2.5 degrees lat
     grid_lat_subsq = chr(97 + int(adj_lat_remainder / 2.5))
     grid_lon_subsq = chr(97 + int(adj_lon_remainder / 5))
 
-    return (grid_lon_sq + grid_lat_sq + grid_lon_field +
-            grid_lat_field + grid_lon_subsq + grid_lat_subsq)
+    # remainder in seconds
+    adj_lat_remainder = (adj_lat_remainder % 2.5) * 60
+    adj_lon_remainder = (adj_lon_remainder % 5.0) * 60
 
+    # divide into 10 zones (extended squares) each 30 secs lon, 15 secs lat
+    grid_lat_extsq = chr(48 + int(adj_lat_remainder / 15))
+    grid_lon_extsq = chr(48 + int(adj_lon_remainder / 30))
+
+    return (grid_lon_sq + grid_lat_sq +
+            grid_lon_field + grid_lat_field +
+            grid_lon_subsq + grid_lat_subsq +
+            grid_lon_extsq + grid_lat_extsq)
 
 def __bilinear(lat, lon, table):
     """Return bilinear interpolated data from table"""
