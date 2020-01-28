@@ -297,6 +297,7 @@ char *maidenhead(double lat, double lon)
     }
 
     lon += 180.0;
+    // divide into 18 zones each 20 degrees lon
     t1 = (int)(lon / 20);
     buf[0] = (char)t1 + 'A';
     if ('R' < buf[0]) {
@@ -304,18 +305,26 @@ char *maidenhead(double lat, double lon)
         buf[0] = 'R';
     }
     lon -= (float)t1 * 20.0;
+
+    // divide into 10 zones each 2 degrees lon
     t1 = (int)lon / 2;
     buf[2] = (char)t1 + '0';
     lon -= (float)t1 * 2;
-    t1 = (int)(lon / 0.083333);
+
+    // divide into 24 zones each 5 minute (0.083333 deg, 5/60 deg) lon
+    t1 = (int)((lon * 60) / 5);
     buf[4] = (char) ((char)t1 + 'a');
-    lon -= (float)t1 * 0.083333;
-    t1 = (int)(lon / 0.0083333);
+    lon -= (float)((t1 * 5) / 60.0);
+
+    // divide into 10 zones each 30 seconds (0.0083333 deg, 5/600 deg) lon
+    t1 = (int)((lon * 600) / 5);
     if (9 < t1) {
         // ugh, floating point gunk.
         t1 = 9;
     }
     buf[6] = (char) ((char)t1 + '0');
+    // no fifth pair, yet.  Just in case
+    lon -= (float)((t1 * 5) / 600.0);
 
     /* latitude */
     if (89.99999 < lat) {
@@ -325,27 +334,33 @@ char *maidenhead(double lat, double lon)
     }
 
     lat += 90.0;
+    // divide into 18 zones each 10 degrees lat
     t1 = (int)(lat / 10.0);
     buf[1] = (char)t1 + 'A';
     if ('R' < buf[1]) {
         /* A to R, North Pole is R */
         buf[1] = 'R';
     }
-
     lat -= (float)t1 * 10.0;
+
+    // divide into 10 zones each 1 degrees lat
     buf[3] = (char)lat + '0';
     lat -= (int)lat;
-    // (24) 2.5 minute (0.0416665 degrees) zones
-    t1 = (int)(lat / 0.0416665);
+
+    // divide into 24 zones each 2.5 minute (0.041665 deg, 5/120 deg) lat
+    t1 = (int)((lat * 120) / 5);
     buf[5] = (char)((char)t1 + 'a');
-    lat -= (float)t1 * 0.0416665;
-    // (10) 15 seconds (0.004166) latitudinal zones
-    t1 = (int)(lat / 0.004166);
+    lat -= (float)((t1 * 5) / 120.0);
+
+    // divide into 10 zones each 15 seconds (0.0041665 deg, 5/1200 deg) lat
+    t1 = (int)((lat * 1200) / 5);
     if (9 < t1) {
         // ugh, floating point gunk.
         t1 = 9;
     }
     buf[7] = (char) ((char)t1 + '0');
+    // no fifth pair, yet.  Just in case
+    lat -= (float)((t1 * 5) / 1200.0);
 
     buf[8] = '\0';
 
