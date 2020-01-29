@@ -30,14 +30,15 @@ PERMISSIONS
 
 #include "gpsd_config.h"  /* must be before all includes */
 
-#include <sys/types.h>
-#include <stdio.h>
-#include <stdbool.h>
+#include <arpa/inet.h>		/* for htons() */
 #include <ctype.h>
-#include <string.h>
 #include <errno.h>
 #include <netinet/in.h>
-#include <arpa/inet.h>		/* for htons() */
+#include <stdbool.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/time.h>           // for struct timeval
+#include <sys/types.h>
 #include <unistd.h>
 
 #include "bits.h"
