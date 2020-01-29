@@ -2554,6 +2554,7 @@ asciidocs = []
 if env.WhereIs('asciidoctor'):
     adocfiles = (('INSTALL', 'installation'),
                  ('README', 'README'),
+                 ('SUPPORT', 'SUPPORT'),
                  ('www/AIVDM', 'AIVDM'),
                  ('www/client-howto', 'client-howto'),
                  ('www/gpsd-time-service-howto', 'gpsd-time-service-howto'),
