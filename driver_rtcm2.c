@@ -911,9 +911,9 @@ struct rtcm2_msg_t {
                 unsigned int        clc:5;
                 unsigned int        cp_h:8;
                 unsigned int        parity:6;
-                unsigned int        _pad:2;
+                unsigned int        _pad1:2;
                 unsigned int        cp_l:24;
-                unsigned int        parity:6;
+                unsigned int        parity1:6;
             } sat[15];
         } type18;
 
@@ -1043,7 +1043,7 @@ struct rtcm2_msg_t {
             } w7;
             struct {
                 unsigned int        _pad:2;
-                unsigned int        y_m:18;
+                unsigned int        ah:18;
                 unsigned int        res:6;
                 unsigned int        parity:6;
             } w8;
