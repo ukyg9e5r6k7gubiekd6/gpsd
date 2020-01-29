@@ -958,9 +958,9 @@ struct rtcm2_msg_t {
                 unsigned int        clc:5;
                 unsigned int        iod:8;
                 unsigned int        parity:6;
-                unsigned int        _pad:2;
+                unsigned int        _pad1:2;
                 unsigned int        cpc:24;
-                unsigned int        parity:6;
+                unsigned int        parity1:6;
             } sat[RTCM2_WORDS_MAX / 2];
         } type20;
 
