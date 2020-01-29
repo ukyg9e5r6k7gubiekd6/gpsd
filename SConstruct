@@ -966,9 +966,9 @@ else:
             ncurseslibs = ['!ncursesw5-config --libs --cflags']
         elif sys.platform.startswith('freebsd'):
             ncurseslibs = ['-lncurses']
-        elif sys.platform.startswith('openbsd'):
-            ncurseslibs = ['-lcurses']
-        elif sys.platform.startswith('darwin'):
+        elif (sys.platform.startswith('darwin') or
+              sys.platform.startswith('openbsd') or
+              sys.platform.startswith('sunos5')):
             ncurseslibs = ['-lcurses']
         else:
             announce('Turning off ncurses support, library not found.')
