@@ -1,0 +1,131 @@
+gpsd SUPPORT information
+------------------------
+
+GENERAL
+~~~~~~~
+
+gpsd is developed and maintained by the open source community, and the
+project does not formally offer support.  Many people are usually
+extremely helpful, particularly towards those people who have taken
+the time to try to understand things and appear likely to contribute
+to the community.  This file explains how to ask for help.
+
+(For those used to interacting with and contributing to open source
+projects, note that this file is not attempting to say anything
+radical or unusual.)
+
+There is much documentation online at
+  https://gpsd.io/
+and that documentation should be consulted before asking for help.
+
+Details of gpsd support is described at
+  https://gpsd.io/faq.html#bug-reporting
+
+
+The following link is very useful to give a sense of how to ask
+questions:
+
+  http://www.catb.org/esr/faqs/smart-questions.html
+
+gpsd has not adopted the policy implicit in the following link, but it
+is an interesting discussion which may provide some insight into the
+response to requests for help:
+
+  https://berthub.eu/articles/posts/anonymous-help/
+
+
+ISSUE TRACKER
+~~~~~~~~~~~~~
+
+The gpsd source control website is at
+  https://gitlab.com/gpsd/gpsd/
+and contains an issue tracker.
+
+Issues may be created when you believe that something is wrong in the
+gpsd code, documentation, or website and can articulate why you
+believe that.  This is not meant to be a particularly high bar, but
+asking questions in issues is not acceptable and "gpsd doesn't work"
+is not acceptable.  Feature requests are sometimes acceptable,
+particularly when the feature is well thought out, appears
+implementable, is likely to be of broad interest, and the request is
+filed by someone with a history of participation in the community.
+
+Issues may be created for the most recent formal release of gpsd, or
+the current version of gpsd, the website or other project content.
+(Quality bug reports with specific references to problem code still
+present in the latest release are OK too.)
+
+Issues that are not valid issues (not a bug, or lack of a reasonable
+attempt to provide enough information) may be summarily closed.
+
+
+USER MAILINGLIST
+~~~~~~~~~~~~~~~~
+
+The user mailinglist at
+  https://lists.gnu.org/mailman/listinfo/gpsd-users
+is appropriate for questions about gpsd, after a reasonable attempt
+has been made to answer the question by reading the documentation.
+
+When posting to the user list, make sure to describe your question and
+situation well (see the links above).  Please realize that you are
+asking for free help from strangers, rather than addressing your paid
+consultant.
+
+Generally, please update to at least the latest formal release before
+asking for help, particularly if you are trying to do anything that is
+not already known to work for everyone else.  Almost no one on the
+mailinglist has shown an interest in addressing issues in old
+versions.
+
+
+DEVELOPMENT MAILINGLIST
+~~~~~~~~~~~~~~~~~~~~~~~
+
+The development mailinglist at
+  https://lists.gnu.org/mailman/listinfo/gpsd-dev
+is appropriate for technical discussion about what changes should be
+made to gpsd.  Questions about how to do things with gpsd are
+inappropriate on this list.  (If you aren't reading the code, this
+list is likely not for you.)
+
+
+PRIVATE MAIL TO MAINTAINERS
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A quick perusal of the lists will make it clear who is maintaining
+gpsd and contributing changes.  Do not send private mail to these
+individuals asking for help.  Ask your questions in public, and expect
+the conversation will remain public, so that others can help you, and
+that the conversation will be of benefit to the whole community.
+
+If you need technical help in private, then you need a consultant, not
+free help from the project.
+
+It is acceptable to send private email when disclosing a security
+issue.
+
+
+LONG TERM STABLE PACKAGING
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Note that there are a variety of distributions and packaging systems
+that contain gpsd.  Some of these are kept relatively up to date, and
+some intentionally snapshot software at some point in time and then
+only apply security patches, sometimes for five years.  These are
+typically called "long term stable" or "LTS", and are aimed at users
+who wish to avoid ABI or feature changes and only get bug reports.
+
+Occasionally, a user has appeared on the mailinglist expecting support
+for an old version because it is contained in some LTS operating
+system they have chosen to run.  The gpsd project lacks the resources
+to provide help about old versions, and support requests for old gpsd
+versions in LTS operating systems should be directed at the LTS OS
+supplier (or your paid consultant or support service).
+
+A related issue is obtaining a modified version of gpsd from a GPS
+chip vendor, leading to using old gpsd versions.  The project
+encourages improvements to gpsd to be contributed back for the benefit
+of the greater gpsd community, and also to remove reasons for people
+to use old versions.  People using an old version from a vendor should
+seek support from their vendor.
