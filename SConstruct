@@ -924,6 +924,11 @@ else:
         confdefs.append('#if !defined(_NETBSD_SOURCE)')
         confdefs.append("#define _NETBSD_SOURCE 1\n")
         confdefs.append('#endif\n')
+    elif sys.platform.startswith('sunos5'):
+        # required to get isascii(), and more, from ctype.h
+        confdefs.append('#if !defined(__XPG4_CHAR_CLASS__)')
+        confdefs.append("#define __XPG4_CHAR_CLASS__ 1\n")
+        confdefs.append('#endif\n')
 
     cxx = config.CheckCXX()
     if not cxx:
