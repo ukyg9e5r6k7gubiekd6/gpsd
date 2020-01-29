@@ -285,7 +285,7 @@ char *maidenhead(double lat, double lon)
      *    round down from the cast). If I'm reading the spec right it
      *    is not correct to do this.
      */
-    static char buf[7];
+    static char buf[9];
 
     int t1;
 
