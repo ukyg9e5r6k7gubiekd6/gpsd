@@ -26,29 +26,83 @@ PERMISSIONS
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/time.h>
+#include <assert.h>
 
 #include "gpsd.h"
 #include "libgps.h" /* for SHM_PSEUDO_FD */
 
 
+/**
+ * If there's an existing segment with the given key and of at least the given
+ * size, return its associated ID.
+ * If there's an existing segment with the given key, but with size less than
+ * the given size, and there are no processes attached to the existing segment,
+ * then delete the segment, create a new segment of the given size, then
+ * return the new segment's associated ID.
+ * Otherwise, return -1, with errno set meaningfully.
+ */
+static int recreate_segment(key_t shmkey, struct gps_context_t *context, size_t desired_size, int mode)
+{
+    struct shmid_ds segment;
+    int shmid;
+    int saved_errno;
+
+    assert(NULL == context->shmexport);
+    shmid = shmget(shmkey, desired_size, mode | IPC_CREAT);
+    if (shmid != -1) {
+	return shmid; /* Segment successfully created/retrieved */
+    }
+    /* shmget failed to create/retrieve segment of given size */
+    saved_errno = errno;
+    shmid = shmget(shmkey, 0, 0);
+    if (-1 == shmid) {
+	errno = saved_errno;
+	return -1; /* No existing segment. Unhandled error. */
+    }
+    if (-1 == shmctl(shmid, IPC_STAT, &segment)) {
+	/* Failed to stat segment. Unhandled error. */
+	errno = saved_errno;
+	return -1;
+    }
+    if (segment.shm_segsz >= desired_size) {
+	/* Segment is already big enough. Unhandled error */
+	return -1;
+    }
+    /* shmget likely failed because the existing segment is too small */
+    if (segment.shm_nattch > 0) {
+	/* Other process(es) attached. Cannot resize. */
+	return -1;
+    }
+    /* No processes attached to segment. Ok to delete and recreate */
+    if (-1 == shmctl(shmid, IPC_RMID, NULL)) {
+	/* Cannot delete existing segment */
+	errno = saved_errno;
+	return -1;
+    }
+    shmid = shmget(shmkey, desired_size, mode | IPC_CREAT);
+    return shmid;
+}
+
 bool shm_acquire(struct gps_context_t *context)
 /* initialize the shared-memory segment to be used for export */
 {
     long shmkey = getenv("GPSD_SHM_KEY") ? strtol(getenv("GPSD_SHM_KEY"), NULL, 0) : GPSD_SHM_KEY;
+    int mode = 0666;
+    size_t segment_size = sizeof(struct shmexport_t);
 
-    int shmid = shmget((key_t)shmkey, sizeof(struct shmexport_t), (int)(IPC_CREAT|0666));
+    int shmid = recreate_segment((key_t)shmkey, context, segment_size, mode);
     if (shmid == -1) {
 	GPSD_LOG(LOG_ERROR, &context->errout,
 		 "shmget(0x%lx, %zd, 0666) for SHM export failed: %s\n",
 		 shmkey,
-		 sizeof(struct shmexport_t),
+		 segment_size,
 		 strerror(errno));
 	return false;
     } else
 	GPSD_LOG(LOG_PROG, &context->errout,
 		 "shmget(0x%lx, %zd, 0666) for SHM export succeeded\n",
 		 shmkey,
-		 sizeof(struct shmexport_t));
+		 segment_size);
 
     context->shmexport = (void *)shmat(shmid, 0, 0);
     if ((int)(long)context->shmexport == -1) {
