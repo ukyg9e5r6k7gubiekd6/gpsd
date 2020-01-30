@@ -26,7 +26,6 @@ PERMISSIONS
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/time.h>
-#include <assert.h>
 
 #include "gpsd.h"
 #include "libgps.h" /* for SHM_PSEUDO_FD */
@@ -47,7 +46,6 @@ static int recreate_segment(key_t shmkey, struct gps_context_t *context, size_t 
     int shmid;
     int saved_errno;
 
-    assert(NULL == context->shmexport);
     shmid = shmget(shmkey, desired_size, mode | IPC_CREAT);
     if (shmid != -1) {
 	return shmid; /* Segment successfully created/retrieved */
